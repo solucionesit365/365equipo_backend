@@ -1,0 +1,26 @@
+import { Controller, Get, Headers } from "@nestjs/common";
+import { verifyToken } from "../firebase/auth";
+import { TokenService } from "../get-token/get-token.service";
+import { tiendaInstance } from "./tiendas.class";
+
+@Controller("tiendas")
+export class TiendasController {
+  constructor(private readonly tokenService: TokenService) {}
+
+  @Get()
+  async getTiendas(@Headers("authorization") authHeader: string) {
+    try {
+      const token = this.tokenService.extract(authHeader);
+      await verifyToken(token);
+      const arrayTiendas = await tiendaInstance.getTiendas();
+
+      return {
+        ok: true,
+        data: arrayTiendas,
+      };
+    } catch (err) {
+      console.log(err);
+      return { ok: false, message: err.message };
+    }
+  }
+}

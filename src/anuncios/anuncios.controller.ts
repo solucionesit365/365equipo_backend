@@ -1,62 +1,62 @@
-import { Controller, Get, Query } from "@nestjs/common";
-import { db } from "../firebase/firestore";
-import { getUserWithToken } from "../firebase/auth";
+import { Controller, Post, Body, Headers, UsePipes } from "@nestjs/common";
+import { TokenService } from "../get-token/get-token.service";
+import { verifyToken } from "../firebase/auth";
+import { ValidationPipe } from "../validation/validation.pipe";
+import { AddAnuncioDto, anunciosInstance } from "./anuncios.class";
 
 @Controller("anuncios")
 export class AnunciosController {
-  @Get("anuncios")
-  async getAnuncios(@Query() { idTienda, token }) {
+  constructor(private readonly tokenService: TokenService) {}
+
+  @Post()
+  async getAnuncios(
+    @Body() { arrayTiendas },
+    @Headers("authorization") authHeader: string,
+  ) {
     try {
-      if (idTienda && token) {
-        const usuario = await getUserWithToken(token);
-        const usersColection = db
-          .collection("usuarios")
-          .where("uid", "==", usuario.uid);
-        const resultados = await usersColection.get();
-        const userData = resultados.docs[0].data();
+      const token = this.tokenService.extract(authHeader);
+      await verifyToken(token);
 
-        if (userData.tiendas.includes(usuario.idTienda)) {
-          const resultadosAnuncios = await db
-            .collection("anuncios")
-            .where("tienda", "==", "Todas")
-            .get();
-          const resultadosAnuncios2 = await db
-            .collection("anuncios")
-            .where("tienda", "array-contains", usuario.idTienda)
-            .get();
-          let devolver: any = [];
-          const aux1: any = [];
-          const aux2: any = [];
+      if (arrayTiendas && arrayTiendas.length > 0 && token)
+        return {
+          ok: true,
+          data: await anunciosInstance.getAnuncios(arrayTiendas),
+        };
 
-          resultadosAnuncios.forEach((item) => {
-            aux1.push({ id: item.id, ...item.data() });
-          });
-
-          resultadosAnuncios2.forEach((item) => {
-            aux2.push({ id: item.id, ...item.data() });
-          });
-
-          devolver = aux1.concat(aux2);
-
-          return devolver;
-        } else {
-          const resultadosAnuncios = await db
-            .collection("anuncios")
-            .where("tienda", "==", "Todas")
-            .get();
-          const devolver: any = [];
-
-          resultadosAnuncios.forEach((item) => {
-            devolver.push({ id: item.id, ...item.data() });
-          });
-
-          return devolver;
-        }
-      }
       throw Error("Faltan parámetros");
     } catch (err) {
       console.log(err);
-      return { error: true, message: err.message };
+      return { ok: false, message: err.message };
+    }
+  }
+
+  @Post("addAnuncio")
+  @UsePipes(ValidationPipe)
+  async addAnuncio(
+    @Body() addAnuncioDto: AddAnuncioDto,
+    @Headers("authorization") authHeader: string,
+  ) {
+    console.log("estoy entrando aquí");
+    const { anuncio } = addAnuncioDto;
+    try {
+      if (!anuncio) throw Error("Falta, datos");
+
+      const token = this.tokenService.extract(authHeader);
+      await verifyToken(token);
+
+      // Falta comprobación de quién puede enviar un anuncio, ahora
+      // mismo cualquiera lo puede hacer.
+
+      if (anuncio)
+        return {
+          ok: true,
+          data: await anunciosInstance.addAnuncio(anuncio),
+        };
+
+      throw Error("Faltan parámetros");
+    } catch (err) {
+      console.log(err);
+      return { ok: false, message: err.message };
     }
   }
 }

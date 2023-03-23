@@ -5,6 +5,10 @@ import { app } from "./app";
 
 export const auth = getAuth(app);
 
+export async function verifyToken(token: string) {
+  await auth.verifyIdToken(token, true);
+}
+
 export async function getUserWithToken(
   token: string,
 ): Promise<TrabajadorCompleto> {

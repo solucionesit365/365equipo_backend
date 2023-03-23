@@ -1,4 +1,4 @@
-import sql from "mssql";
+import * as sql from "mssql";
 import * as secrets from "../../secrets";
 
 export async function recHit(database: string, consultaSQL: string) {
@@ -25,17 +25,11 @@ export async function recHit(database: string, consultaSQL: string) {
   return result;
 }
 
-/**
- *
- * @param {string} database
- * @param {string} consultaSQL
- * @returns
- */
 export async function recSoluciones(database: string, consultaSQL: string) {
   const config = {
-    user: secrets.MSSQL_USER_SOLUCIONES,
-    password: secrets.MSSQL_PASS_SOLUCIONES,
-    server: secrets.MSSQL_HOST_SOLUCIONES,
+    user: process.env.MSSQL_USER_SOLUCIONES,
+    password: process.env.MSSQL_PASS_SOLUCIONES,
+    server: process.env.MSSQL_HOST_SOLUCIONES,
     database: database,
     options: {
       encrypt: false,
