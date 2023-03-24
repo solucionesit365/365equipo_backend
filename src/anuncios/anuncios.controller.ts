@@ -1,8 +1,8 @@
-import { Controller, Post, Body, Headers, UsePipes } from "@nestjs/common";
+import { Controller, Post, Body, Headers } from "@nestjs/common";
 import { TokenService } from "../get-token/get-token.service";
 import { verifyToken } from "../firebase/auth";
-import { ValidationPipe } from "../validation/validation.pipe";
-import { AddAnuncioDto, anunciosInstance } from "./anuncios.class";
+import { anunciosInstance } from "./anuncios.class";
+import { AddAnuncioDto } from "./anuncios.dto";
 
 @Controller("anuncios")
 export class AnunciosController {
@@ -31,29 +31,23 @@ export class AnunciosController {
   }
 
   @Post("addAnuncio")
-  @UsePipes(ValidationPipe)
   async addAnuncio(
     @Body() addAnuncioDto: AddAnuncioDto,
     @Headers("authorization") authHeader: string,
   ) {
-    console.log("estoy entrando aquí");
     const { anuncio } = addAnuncioDto;
     try {
-      if (!anuncio) throw Error("Falta, datos");
-
       const token = this.tokenService.extract(authHeader);
       await verifyToken(token);
 
       // Falta comprobación de quién puede enviar un anuncio, ahora
       // mismo cualquiera lo puede hacer.
-
-      if (anuncio)
+      if (await anunciosInstance.addAnuncio(anuncio))
         return {
           ok: true,
-          data: await anunciosInstance.addAnuncio(anuncio),
+          data: "Anuncio insertado",
         };
-
-      throw Error("Faltan parámetros");
+      throw Error("No se ha podido insertar el anuncio");
     } catch (err) {
       console.log(err);
       return { ok: false, message: err.message };

@@ -1,5 +1,5 @@
 import { conexion } from "../bbdd/mongodb";
-import { AnuncioDto } from "./anuncios.class";
+import { AnuncioDto } from "./anuncios.dto";
 
 export async function getAnuncios(tiendas: number[]) {
   const db = (await conexion).db("soluciones");

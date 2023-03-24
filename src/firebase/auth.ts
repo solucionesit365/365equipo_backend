@@ -19,7 +19,8 @@ export async function getUserWithToken(
     const resUser = await recSoluciones(
       "soluciones",
       `
-      SELECT * FROM trabajadores WHERE idApp = '${user.uid}'`,
+      SELECT * FROM trabajadores WHERE idApp = @param0`,
+      user.uid,
     );
 
     if (resUser.recordset?.length > 0) {

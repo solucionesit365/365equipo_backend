@@ -1,5 +1,5 @@
 import { Module, ValidationPipe } from "@nestjs/common";
-import { APP_PIPE } from "@nestjs/core";
+// import { APP_PIPE } from "@nestjs/core";
 import { AppController } from "./app.controller";
 import { ConfigModule } from "@nestjs/config";
 import { AppService } from "./app.service";
@@ -16,13 +16,6 @@ import { TiendasController } from "./tiendas/tiendas.controller";
     TrabajadoresController,
     TiendasController,
   ],
-  providers: [
-    AppService,
-    {
-      provide: APP_PIPE,
-      useClass: ValidationPipe,
-    },
-    TokenService,
-  ],
+  providers: [AppService, TokenService],
 })
 export class AppModule {}
