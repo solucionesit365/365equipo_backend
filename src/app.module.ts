@@ -7,6 +7,7 @@ import { AnunciosController } from "./anuncios/anuncios.controller";
 import { TrabajadoresController } from "./trabajadores/trabajadores.controller";
 import { TokenService } from "./get-token/get-token.service";
 import { TiendasController } from "./tiendas/tiendas.controller";
+import { VacacionesController } from './vacaciones/vacaciones.controller';
 
 @Module({
   imports: [ConfigModule.forRoot()],
@@ -15,6 +16,7 @@ import { TiendasController } from "./tiendas/tiendas.controller";
     AnunciosController,
     TrabajadoresController,
     TiendasController,
+    VacacionesController,
   ],
   providers: [AppService, TokenService],
 })

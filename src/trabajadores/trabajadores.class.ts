@@ -13,6 +13,14 @@ class Trabajador {
     if (arrayTrabajadores) return arrayTrabajadores;
     return [];
   }
+
+  async getSubordinadosConTienda(idAppResponsable: string) {
+    return await schTrabajadores.getSubordinadosConTienda(idAppResponsable);
+  }
+
+  async esCoordinadora(uid: string) {
+    return await schTrabajadores.esCoordinadora(uid);
+  }
 }
 
 export const trabajadorInstance = new Trabajador();
