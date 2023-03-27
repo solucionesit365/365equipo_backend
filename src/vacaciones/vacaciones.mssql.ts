@@ -86,6 +86,50 @@ export async function borrarSolicitud(idSolicitud: number): Promise<boolean> {
   return true;
 }
 
+export async function getSolicitudes(): Promise<
+  {
+    idBeneficiario: number;
+    dias: number;
+    fechaInicio: string;
+    fechaFinal: string;
+    fechaIncorporacion: string;
+    fechaCreacion: string;
+    estado: string;
+    observaciones: string;
+    idSolicitud: number;
+    idResponsable: number;
+    idTienda: number;
+    nombreApellidos: string;
+    nombreTienda: string;
+    nombreResponsable: string;
+    llevaEquipo: number;
+  }[]
+> {
+  const sql = `
+  SELECT 
+    so.idBeneficiario,
+    so.dias, 
+    CONVERT(nvarchar, so.fechaInicio, 103) as fechaInicio,
+    CONVERT(nvarchar, so.fechaFinal, 103) as fechaFinal,
+    CONVERT(nvarchar, so.fechaIncorporacion, 103) as fechaIncorporacion,
+    CONVERT(nvarchar, so.fechaCreacion, 103) as fechaCreacion,
+    so.estado,
+    so.observaciones,
+    so.idSolicitud,
+    (select idResponsable from trabajadores where id = so.idBeneficiario) as idResponsable,
+    (select idTienda from trabajadores where id = so.idBeneficiario) as idTienda,
+    (select nombreApellidos from trabajadores where id = so.idBeneficiario) as nombreApellidos,
+    (select nombre from tiendas where id = (select idTienda from trabajadores where id = so.idBeneficiario)) as nombreTienda,
+    (select nombreApellidos from trabajadores where id = (select idResponsable from trabajadores where id = so.idBeneficiario)) as nombreResponsable,
+    (select count(*) from trabajadores where idResponsable = so.idBeneficiario) as llevaEquipo
+  FROM solicitudVacaciones so
+`;
+  const resSolicitudes = await recSoluciones("soluciones", sql);
+
+  if (resSolicitudes.recordset.length > 0) return resSolicitudes.recordset;
+  return [];
+}
+
 export async function getSolicitudesSubordinados(idApp: string): Promise<
   {
     idBeneficiario: number;
@@ -107,7 +151,6 @@ export async function getSolicitudesSubordinados(idApp: string): Promise<
     validador: string;
   }[]
 > {
-  console.log("eee", idApp);
   const sql = `
   SELECT 
     so.idBeneficiario,
@@ -137,4 +180,31 @@ export async function getSolicitudesSubordinados(idApp: string): Promise<
 
   if (resSolicitudes.recordset.length > 0) return resSolicitudes.recordset;
   return [];
+}
+
+export async function setEstadoSolicitud(
+  estado: string,
+  idSolicitud: number,
+  respuesta: string,
+) {
+  let retSetEstado = null;
+
+  if (estado === "RECHAZADA") {
+    const sql =
+      "UPDATE solicitudVacaciones SET estado = @param0, respuestaSolicitud = @param1 WHERE idSolicitud = @param2;";
+    retSetEstado = await recSoluciones(
+      "soluciones",
+      sql,
+      estado,
+      respuesta,
+      idSolicitud,
+    );
+  } else {
+    const sql =
+      "UPDATE solicitudVacaciones SET estado = @param0 WHERE idSolicitud = @param1;";
+    retSetEstado = await recSoluciones("soluciones", sql, estado, idSolicitud);
+  }
+
+  if (retSetEstado.rowsAffected[0] > 0) return true;
+  return false;
 }

@@ -39,4 +39,38 @@ export class TrabajadoresController {
       return { ok: false, message: err.message };
     }
   }
+
+  @Get("getSubordinados")
+  async getSubordinados(
+    @Headers("authorization") authHeader: string,
+    @Query() { uid },
+  ) {
+    try {
+      const token = this.tokenService.extract(authHeader);
+      await verifyToken(token);
+
+      const resUser = await trabajadorInstance.getSubordinados(uid);
+
+      return { ok: true, data: resUser };
+    } catch (err) {
+      console.log(err);
+      return { ok: false, message: err.message };
+    }
+  }
+
+  @Get("actualizarTrabajadores")
+  async actualizarTrabajadores(@Headers("authorization") authHeader: string) {
+    try {
+      const token = this.tokenService.extract(authHeader);
+      await verifyToken(token);
+
+      return {
+        ok: true,
+        data: await trabajadorInstance.descargarTrabajadoresHit(),
+      };
+    } catch (err) {
+      console.log(err);
+      return { ok: false, message: err.message };
+    }
+  }
 }

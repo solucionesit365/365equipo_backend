@@ -21,6 +21,14 @@ class Trabajador {
   async esCoordinadora(uid: string) {
     return await schTrabajadores.esCoordinadora(uid);
   }
+
+  async getSubordinados(uid: string) {
+    return await schTrabajadores.getSubordinados(uid);
+  }
+
+  async descargarTrabajadoresHit() {
+    return await schTrabajadores.getTrabajadoresSage();
+  }
 }
 
 export const trabajadorInstance = new Trabajador();

@@ -12,11 +12,26 @@ export class TiendasController {
     try {
       const token = this.tokenService.extract(authHeader);
       await verifyToken(token);
-      const arrayTiendas = await tiendaInstance.getTiendas();
 
       return {
         ok: true,
-        data: arrayTiendas,
+        data: await tiendaInstance.getTiendas(),
+      };
+    } catch (err) {
+      console.log(err);
+      return { ok: false, message: err.message };
+    }
+  }
+
+  @Get("actualizarTiendas")
+  async actualizarTiendas(@Headers("authorization") authHeader: string) {
+    try {
+      const token = this.tokenService.extract(authHeader);
+      await verifyToken(token);
+
+      return {
+        ok: true,
+        data: await tiendaInstance.actualizarTiendas(),
       };
     } catch (err) {
       console.log(err);

@@ -10,3 +10,11 @@ export class TiendaDto {
   @IsString()
   direccion: string;
 }
+
+export interface Tienda {
+  id: number;
+  nombre: string;
+  direccion: string;
+  idExterno: number;
+}
+[];

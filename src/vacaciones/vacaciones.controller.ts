@@ -8,6 +8,21 @@ import { vacacionesInstance } from "./vacaciones.class";
 export class VacacionesController {
   constructor(private readonly tokenService: TokenService) {}
 
+  @Get()
+  async getSolicitudes(@Headers("authorization") authHeader: string) {
+    try {
+      const token = this.tokenService.extract(authHeader);
+      await verifyToken(token);
+      return {
+        ok: true,
+        data: await vacacionesInstance.getSolicitudes(),
+      };
+    } catch (err) {
+      console.log(err);
+      return { ok: false, message: err.message };
+    }
+  }
+
   @Get("solicitudesTrabajador")
   async getSolicitudesTrabajador(
     @Headers("authorization") authHeader: string,
@@ -105,6 +120,32 @@ export class VacacionesController {
       } else if (addArray.length > 0) {
         return { ok: true, data: addArray };
       } else return { ok: true, data: [] };
+    } catch (err) {
+      console.log(err);
+      return { ok: false, message: err.message };
+    }
+  }
+
+  @Post("setEstadoSolicitud")
+  async setEstadoSolicitud(
+    @Headers("authorization") authHeader: string,
+    @Body() { estado, idSolicitud, respuesta },
+  ) {
+    try {
+      if (!estado || !idSolicitud) throw Error("Faltan datos");
+      if (!(estado === "APROBADA" || estado === "RECHAZADA"))
+        throw Error("Estado de solicitud incorrecto");
+      const token = this.tokenService.extract(authHeader);
+      await verifyToken(token);
+
+      return {
+        ok: true,
+        data: await vacacionesInstance.setEstadoSolicitud(
+          estado,
+          idSolicitud,
+          respuesta,
+        ),
+      };
     } catch (err) {
       console.log(err);
       return { ok: false, message: err.message };
