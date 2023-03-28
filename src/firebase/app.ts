@@ -1,3 +1,5 @@
-import { initializeApp } from "firebase-admin/app";
+import { initializeApp, applicationDefault } from "firebase-admin/app";
 
-export const app = initializeApp();
+export const app = initializeApp({
+  credential: applicationDefault(),
+});
