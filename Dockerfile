@@ -9,7 +9,7 @@ COPY package*.json ./
 
 # Instala las dependencias del proyecto
 RUN npm ci
-
+RUN npm run build
 # Copia el resto de los archivos del proyecto al directorio de trabajo
 COPY . .
 
