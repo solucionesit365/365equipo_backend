@@ -2,8 +2,12 @@ import { trabajadorInstance } from "src/trabajadores/trabajadores.class";
 import * as schVacaciones from "./vacaciones.mssql";
 
 class Vacaciones {
-  async getSolicitudesTrabajador(uid: string) {
-    return await schVacaciones.getSolicitudesTrabajador(uid);
+  async getSolicitudesTrabajadorUid(uid: string) {
+    return await schVacaciones.getSolicitudesTrabajadorUid(uid);
+  }
+
+  async getSolicitudesTrabajadorSqlId(id: number) {
+    return await schVacaciones.getSolicitudesTrabajadorSqlId(id);
   }
 
   async borrarSolicitud(idSolicitud: number) {

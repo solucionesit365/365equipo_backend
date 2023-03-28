@@ -40,9 +40,10 @@ import { recSoluciones } from "../bbdd/mssql";
 // }
 
 /* Individual x uid */
-export async function getSolicitudesTrabajador(uid: string): Promise<
+export async function getSolicitudesTrabajadorUid(uid: string): Promise<
   {
     idSolicitud: number;
+    idBeneficiario: number;
     dias: number;
     fechaInicio: string;
     fechaFinal: string;
@@ -55,6 +56,7 @@ export async function getSolicitudesTrabajador(uid: string): Promise<
   const sql = `
   SELECT
     idSolicitud,
+    idBeneficiario,
     dias, 
     CONVERT(nvarchar, fechaInicio, 103) as fechaInicio, 
     CONVERT(nvarchar, fechaFinal, 103) as fechaFinal, 
@@ -69,6 +71,45 @@ export async function getSolicitudesTrabajador(uid: string): Promise<
     "soluciones",
     sql,
     uid,
+    new Date().getFullYear(),
+  );
+
+  if (resUser.recordset.length > 0) return resUser.recordset;
+  return [];
+}
+
+/* Individual x sqlId. la cosulta debe ser igual a getSolicitudesTrabajadorUid con el cambio obvio*/
+export async function getSolicitudesTrabajadorSqlId(id: number): Promise<
+  {
+    idSolicitud: number;
+    idBeneficiario: number;
+    dias: number;
+    fechaInicio: string;
+    fechaFinal: string;
+    observaciones: string;
+    respuestaSolicitud: string;
+    fechaCreacion: string;
+    estado: "PENDIENTE" | "APROBADA" | "RECHAZADA";
+  }[]
+> {
+  const sql = `
+  SELECT
+    idSolicitud,
+    idBeneficiario,
+    dias, 
+    CONVERT(nvarchar, fechaInicio, 103) as fechaInicio, 
+    CONVERT(nvarchar, fechaFinal, 103) as fechaFinal, 
+    CONVERT(nvarchar, fechaIncorporacion, 103) as fechaIncorporacion,
+    observaciones,
+    respuestaSolicitud,
+    CONVERT(nvarchar, fechaCreacion, 103) as fechaCreacion,
+    estado
+  FROM solicitudVacaciones where idBeneficiario = @param0 AND year(fechaInicio) = @param1
+`;
+  const resUser = await recSoluciones(
+    "soluciones",
+    sql,
+    id,
     new Date().getFullYear(),
   );
 

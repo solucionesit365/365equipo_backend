@@ -40,6 +40,24 @@ export class TrabajadoresController {
     }
   }
 
+  @Get("getTrabajadorBySqlId")
+  async getTrabajadorBySqlId(
+    @Headers("authorization") authHeader: string,
+    @Query() { id },
+  ) {
+    try {
+      const token = this.tokenService.extract(authHeader);
+      await verifyToken(token);
+
+      const resUser = await trabajadorInstance.getTrabajadorBySqlId(id);
+
+      return { ok: true, data: resUser };
+    } catch (err) {
+      console.log(err);
+      return { ok: false, message: err.message };
+    }
+  }
+
   @Get("getSubordinados")
   async getSubordinados(
     @Headers("authorization") authHeader: string,

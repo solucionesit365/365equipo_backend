@@ -7,6 +7,12 @@ class Trabajador {
     throw Error("No se ha podido obtener la información del usuario");
   }
 
+  async getTrabajadorBySqlId(id: number) {
+    const resUser = await schTrabajadores.getTrabajadorBySqlId(id);
+    if (resUser) return resUser;
+    throw Error("No se ha podido obtener la información del usuario");
+  }
+
   async getTrabajadores() {
     const arrayTrabajadores = await schTrabajadores.getTrabajadores();
 

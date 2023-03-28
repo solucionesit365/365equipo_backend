@@ -80,6 +80,46 @@ export async function getTrabajadorByAppId(uid: string) {
   return null;
 }
 
+/* Individual x sqlId, la consulta debe ser igual a getTrabajadorByAppId pero con el id*/
+export async function getTrabajadorBySqlId(id: number) {
+  const sql = `
+
+  SELECT 
+    tr.id,
+    tr.idApp,
+    tr.nombreApellidos,
+    tr.displayName,
+    tr.emails,
+    tr.dni,
+    tr.direccion,
+    tr.ciudad,
+    tr.telefonos,
+    FORMAT(tr.fechaNacimiento, 'dd/MM/yyyy') as fechaNacimiento,
+    tr.nacionalidad,
+    tr.nSeguridadSocial,
+    tr.codigoPostal,
+    tr.cuentaCorriente,
+    tr.tipoTrabajador,
+    FORMAT(tr.inicioContrato, 'dd/MM/yyyy') as inicioContrato,
+    FORMAT(tr.finalContrato, 'dd/MM/yyyy') as finalContrato,
+    tr.idResponsable,
+    tr.idTienda,
+    (SELECT COUNT(*) FROM trabajadores WHERE idResponsable = tr.id) as coordinadora,
+    tr1.nombreApellidos as nombreResponsable,
+    ti.nombre as nombreTienda,
+    FORMAT(tr.antiguedad, 'dd/MM/yyyy') as antiguedad
+  FROM trabajadores tr
+  LEFT JOIN trabajadores tr1 ON tr.idResponsable = tr1.id
+  LEFT JOIN tiendas ti ON tr.idTienda = ti.id
+  WHERE tr.id = @param0 AND tr.inicioContrato IS NOT NULL AND tr.finalContrato IS NULL ORDER BY nombreApellidos
+`;
+  const resUser = await recSoluciones("soluciones", sql, id);
+
+  if (resUser.recordset.length > 0)
+    return resUser.recordset[0] as TrabajadorDto;
+  return null;
+}
+
 export async function getSubordinadosConTienda(
   idAppResponsable: string,
 ): Promise<any[]> {

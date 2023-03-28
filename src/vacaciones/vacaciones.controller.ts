@@ -26,16 +26,23 @@ export class VacacionesController {
   @Get("solicitudesTrabajador")
   async getSolicitudesTrabajador(
     @Headers("authorization") authHeader: string,
-    @Query() { uid },
+    @Query() { uid, id },
   ) {
     try {
       const token = this.tokenService.extract(authHeader);
       await verifyToken(token);
 
-      return {
-        ok: true,
-        data: await vacacionesInstance.getSolicitudesTrabajador(uid),
-      };
+      if (uid) {
+        return {
+          ok: true,
+          data: await vacacionesInstance.getSolicitudesTrabajadorUid(uid),
+        };
+      } else if (id) {
+        return {
+          ok: true,
+          data: await vacacionesInstance.getSolicitudesTrabajadorSqlId(id),
+        };
+      } else throw Error("Faltan datos. uid o id");
     } catch (err) {
       console.log(err);
       return { ok: false, message: err.message };
