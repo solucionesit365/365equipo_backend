@@ -34,7 +34,7 @@ export class VacacionesController {
 
       return {
         ok: true,
-        data: vacacionesInstance.getSolicitudesTrabajador(uid),
+        data: await vacacionesInstance.getSolicitudesTrabajador(uid),
       };
     } catch (err) {
       console.log(err);
