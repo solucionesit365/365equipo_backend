@@ -11,6 +11,7 @@ export class TestController {
   @Get("ip")
   async getIp(): Promise<string> {
     try {
+      console.log("modificación para slack");
       const response = await axios.get("https://api.ipify.org?format=json");
       return response.data.ip;
     } catch (error) {
