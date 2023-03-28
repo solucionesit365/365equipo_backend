@@ -1,11 +1,10 @@
 import * as sql from "mssql";
-import * as secrets from "../secrets";
 
 export async function recHit(database: string, consultaSQL: string) {
   const config = {
-    user: secrets.MSSQL_USER_HIT,
-    password: secrets.MSSQL_PASS_HIT,
-    server: secrets.MSSQL_HOST_HIT,
+    user: process.env.MSSQL_USER_HIT,
+    password: process.env.MSSQL_PASS_HIT,
+    server: process.env.MSSQL_HOST_HIT,
     database: database,
     options: {
       encrypt: false,
