@@ -1,5 +1,5 @@
 import * as sql from "mssql";
-import * as secrets from "../../secrets";
+import * as secrets from "../secrets";
 
 export async function recHit(database: string, consultaSQL: string) {
   const config = {
