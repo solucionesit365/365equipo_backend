@@ -1,21 +1,27 @@
-// import { conexion } from "../bbdd/mongodb";
-// import { AnuncioDto } from "./anuncios.dto";
+import { Injectable } from "@nestjs/common";
+import { MongoDbService } from "../bbdd/mongodb";
+import { AnuncioDto } from "./anuncios.dto";
 
-// export async function getAnuncios(tiendas: number[]) {
-//   const db = (await conexion).db("soluciones");
-//   const anuncios = db.collection<AnuncioDto>("anuncios");
-//   if (tiendas.includes(-1)) {
-//     return await anuncios.find().toArray();
-//   }
-//   return await anuncios.find({ tiendas: { $all: tiendas } }).toArray();
-// }
+@Injectable()
+export class AnunciosService {
+  constructor(private readonly mongoDbService: MongoDbService) {}
 
-// export async function addAnuncio(anuncio: AnuncioDto) {
-//   const db = (await conexion).db("soluciones");
-//   const anuncios = db.collection<AnuncioDto>("anuncios");
+  async getAnuncios(tiendas: number[]) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const anuncios = db.collection<AnuncioDto>("anuncios");
+    if (tiendas.includes(-1)) {
+      return await anuncios.find().toArray();
+    }
+    return await anuncios.find({ tiendas: { $all: tiendas } }).toArray();
+  }
 
-//   const resInsert = await anuncios.insertOne(anuncio);
+  async addAnuncio(anuncio: AnuncioDto) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const anuncios = db.collection<AnuncioDto>("anuncios");
 
-//   if (resInsert.acknowledged) return resInsert.insertedId;
-//   return null;
-// }
+    const resInsert = await anuncios.insertOne(anuncio);
+
+    if (resInsert.acknowledged) return resInsert.insertedId;
+    return null;
+  }
+}

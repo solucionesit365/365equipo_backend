@@ -1,12 +1,15 @@
 import { Controller, Post, Body, Headers } from "@nestjs/common";
 import { TokenService } from "../get-token/get-token.service";
 import { verifyToken } from "../firebase/auth";
-import { anunciosInstance } from "./anuncios.class";
+import { AnunciosClass } from "./anuncios.class";
 import { AddAnuncioDto } from "./anuncios.dto";
 
 @Controller("anuncios")
 export class AnunciosController {
-  constructor(private readonly tokenService: TokenService) {}
+  constructor(
+    private readonly tokenService: TokenService,
+    private readonly anunciosInstance: AnunciosClass,
+  ) {}
 
   @Post()
   async getAnuncios(
@@ -20,7 +23,7 @@ export class AnunciosController {
       if (arrayTiendas && arrayTiendas.length > 0 && token)
         return {
           ok: true,
-          data: await anunciosInstance.getAnuncios(arrayTiendas),
+          data: await this.anunciosInstance.getAnuncios(arrayTiendas),
         };
 
       throw Error("Faltan parámetros");
@@ -42,7 +45,7 @@ export class AnunciosController {
 
       // Falta comprobación de quién puede enviar un anuncio, ahora
       // mismo cualquiera lo puede hacer.
-      if (await anunciosInstance.addAnuncio(anuncio))
+      if (await this.anunciosInstance.addAnuncio(anuncio))
         return {
           ok: true,
           data: "Anuncio insertado",

@@ -7,11 +7,18 @@ import { AnunciosController } from "./anuncios/anuncios.controller";
 import { TrabajadoresController } from "./trabajadores/trabajadores.controller";
 import { TokenService } from "./get-token/get-token.service";
 import { TiendasController } from "./tiendas/tiendas.controller";
-import { VacacionesController } from './vacaciones/vacaciones.controller';
-import { TestController } from './test/test.controller';
+import { VacacionesController } from "./vacaciones/vacaciones.controller";
+import { TestController } from "./test/test.controller";
+import { AnunciosService } from "./anuncios/anuncios.mongodb";
+import { AnunciosClass } from "./anuncios/anuncios.class";
+import { MongoDbService } from "./bbdd/mongodb";
 
 @Module({
-  imports: [ConfigModule.forRoot()],
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+  ],
   controllers: [
     AppController,
     AnunciosController,
@@ -20,6 +27,12 @@ import { TestController } from './test/test.controller';
     VacacionesController,
     TestController,
   ],
-  providers: [AppService, TokenService],
+  providers: [
+    AppService,
+    TokenService,
+    AnunciosService,
+    AnunciosClass,
+    MongoDbService,
+  ],
 })
 export class AppModule {}
