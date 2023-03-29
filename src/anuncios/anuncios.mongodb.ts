@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import moment from "moment";
+import * as moment from "moment";
 import { ObjectId } from "mongodb";
 import { MongoDbService } from "../bbdd/mongodb";
 import { AnuncioDto, UpdateAnuncioDto } from "./anuncios.dto";
@@ -60,6 +60,6 @@ export class AnunciosService {
       _id: new ObjectId(_id),
     });
 
-    return resDelete.acknowledged;
+    return resDelete.acknowledged && resDelete.deletedCount > 0;
   }
 }
