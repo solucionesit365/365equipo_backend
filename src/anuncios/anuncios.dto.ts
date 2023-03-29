@@ -1,18 +1,11 @@
-import {
-  IsString,
-  IsArray,
-  IsNumber,
-  IsOptional,
-  ValidateNested,
-} from "class-validator";
-import { Type } from "class-transformer";
-
+import { IsString, IsArray, IsNumber, IsOptional } from "class-validator";
+import { IsStringOrDate } from "../validation/customValidators";
 export class AnuncioDto {
   @IsArray()
   tiendas: number[];
 
-  @IsString()
-  caducidad: string;
+  @IsStringOrDate()
+  caducidad: string | Date;
 
   @IsString()
   categoria: string;
@@ -37,8 +30,28 @@ export class AnuncioDto {
   visto: number;
 }
 
-export class AddAnuncioDto {
-  @ValidateNested()
-  @Type(() => AnuncioDto)
-  anuncio: AnuncioDto;
+export class UpdateAnuncioDto {
+  @IsString()
+  _id: string;
+
+  @IsStringOrDate()
+  caducidad: string | Date;
+
+  @IsString()
+  categoria: string;
+
+  @IsString()
+  descripcion: string;
+
+  @IsString()
+  fotoPath: string;
+
+  @IsString()
+  titulo: string;
 }
+
+// export class AddAnuncioDto {
+//   @ValidateNested()
+//   @Type(() => AnuncioDto)
+//   anuncio: AnuncioDto;
+// }

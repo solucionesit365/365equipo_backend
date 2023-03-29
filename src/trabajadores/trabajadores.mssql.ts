@@ -1,5 +1,5 @@
 import { recHit, recSoluciones } from "../bbdd/mssql";
-import { TrabajadorDto } from "./trabajadores.dto";
+import { TrabajadorSql } from "./trabajadores.interface";
 
 /* Todos */
 export async function getTrabajadores() {
@@ -36,7 +36,7 @@ export async function getTrabajadores() {
   const resUsuarios = await recSoluciones("soluciones", sql);
 
   if (resUsuarios.recordset.length > 0)
-    return resUsuarios.recordset as TrabajadorDto[];
+    return resUsuarios.recordset as TrabajadorSql[];
   return null;
 }
 
@@ -76,7 +76,7 @@ export async function getTrabajadorByAppId(uid: string) {
   const resUser = await recSoluciones("soluciones", sql, uid);
 
   if (resUser.recordset.length > 0)
-    return resUser.recordset[0] as TrabajadorDto;
+    return resUser.recordset[0] as TrabajadorSql;
   return null;
 }
 
@@ -116,7 +116,7 @@ export async function getTrabajadorBySqlId(id: number) {
   const resUser = await recSoluciones("soluciones", sql, id);
 
   if (resUser.recordset.length > 0)
-    return resUser.recordset[0] as TrabajadorDto;
+    return resUser.recordset[0] as TrabajadorSql;
   return null;
 }
 

@@ -1,8 +1,8 @@
-import { Controller, Post, Body, Headers } from "@nestjs/common";
+import { Controller, Post, Get, Body, Headers } from "@nestjs/common";
 import { TokenService } from "../get-token/get-token.service";
-import { verifyToken } from "../firebase/auth";
+import { getUserWithToken, verifyToken } from "../firebase/auth";
 import { AnunciosClass } from "./anuncios.class";
-import { AddAnuncioDto } from "./anuncios.dto";
+import { AnuncioDto, UpdateAnuncioDto } from "./anuncios.dto";
 
 @Controller("anuncios")
 export class AnunciosController {
@@ -11,22 +11,29 @@ export class AnunciosController {
     private readonly anunciosInstance: AnunciosClass,
   ) {}
 
-  @Post()
-  async getAnuncios(
-    @Body() { arrayTiendas },
-    @Headers("authorization") authHeader: string,
-  ) {
+  @Get()
+  async getAnuncios(@Headers("authorization") authHeader: string) {
     try {
       const token = this.tokenService.extract(authHeader);
       await verifyToken(token);
 
-      if (arrayTiendas && arrayTiendas.length > 0 && token)
+      const usuario = await getUserWithToken(token);
+
+      if (usuario.coordinadora && !usuario.idTienda) {
         return {
           ok: true,
-          data: await this.anunciosInstance.getAnuncios(arrayTiendas),
+          data: await this.anunciosInstance.getAnuncios(),
         };
-
-      throw Error("Faltan parámetros");
+      } else if (usuario.idTienda) {
+        return {
+          ok: true,
+          data: await this.anunciosInstance.getAnuncios(usuario.idTienda),
+        };
+      } else
+        return {
+          ok: true,
+          data: [],
+        };
     } catch (err) {
       console.log(err);
       return { ok: false, message: err.message };
@@ -35,10 +42,9 @@ export class AnunciosController {
 
   @Post("addAnuncio")
   async addAnuncio(
-    @Body() addAnuncioDto: AddAnuncioDto,
+    @Body() anuncio: AnuncioDto,
     @Headers("authorization") authHeader: string,
   ) {
-    const { anuncio } = addAnuncioDto;
     try {
       const token = this.tokenService.extract(authHeader);
       await verifyToken(token);
@@ -48,9 +54,52 @@ export class AnunciosController {
       if (await this.anunciosInstance.addAnuncio(anuncio))
         return {
           ok: true,
-          data: "Anuncio insertado",
         };
       throw Error("No se ha podido insertar el anuncio");
+    } catch (err) {
+      console.log(err);
+      return { ok: false, message: err.message };
+    }
+  }
+
+  @Post("updateAnuncio")
+  async updateAnuncio(
+    @Body() anuncioModificado: UpdateAnuncioDto,
+    @Headers("authorization") authHeader: string,
+  ) {
+    try {
+      const token = this.tokenService.extract(authHeader);
+      await verifyToken(token);
+
+      // Falta comprobación de quién puede enviar un anuncio, ahora
+      // mismo cualquiera lo puede hacer.
+      if (await this.anunciosInstance.updateAnuncio(anuncioModificado))
+        return {
+          ok: true,
+        };
+      throw Error("No se ha podido modificar el anuncio");
+    } catch (err) {
+      console.log(err);
+      return { ok: false, message: err.message };
+    }
+  }
+
+  @Post("deleteAnuncio")
+  async deleteAnuncio(
+    @Body() { _id }: { _id: string },
+    @Headers("authorization") authHeader: string,
+  ) {
+    try {
+      const token = this.tokenService.extract(authHeader);
+      await verifyToken(token);
+
+      // Falta comprobación de quién puede enviar un anuncio, ahora
+      // mismo cualquiera lo puede hacer.
+      if (await this.anunciosInstance.deleteAnuncio(_id))
+        return {
+          ok: true,
+        };
+      throw Error("No se ha podido borrar el anuncio");
     } catch (err) {
       console.log(err);
       return { ok: false, message: err.message };

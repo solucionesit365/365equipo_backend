@@ -1,10 +1,10 @@
-import { MultiFactorSettings, UserRecord } from "firebase-admin/auth";
+import { UserRecord } from "firebase-admin/auth";
 
 export interface TrabajadorSql {
   id: number;
   idApp: string;
   nombreApellidos: string;
-  displayName?: string;
+  displayName: string;
   emails: string;
   dni: string;
   direccion: string;
@@ -20,11 +20,22 @@ export interface TrabajadorSql {
   finalContrato: string;
   idResponsable: number;
   idTienda: number;
-  coordinadora: boolean;
+  coordinadora: number;
   supervisora: boolean;
+  nombreResponsable: string;
+  nombreTienda: string;
   antiguedad: string;
 }
 
-export interface TrabajadorCompleto extends TrabajadorSql, UserRecord {
+// export interface TrabajadorCompleto extends TrabajadorSql, UserRecord {
+//   displayName: string;
+//   toJSON: any;
+// }
+
+type UserRecordWithoutToJSON = Omit<UserRecord, "toJSON">;
+
+export interface TrabajadorCompleto
+  extends TrabajadorSql,
+    UserRecordWithoutToJSON {
   displayName: string;
 }
