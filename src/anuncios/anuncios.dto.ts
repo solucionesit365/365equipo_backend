@@ -13,6 +13,7 @@ export class AnuncioDto {
   @IsString()
   descripcion: string;
 
+  @IsOptional()
   @IsString()
   fotoPath: string;
 

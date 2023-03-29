@@ -13,7 +13,9 @@ export class AnunciosService {
     const anuncios = db.collection<AnuncioDto>("anuncios");
 
     if (idTienda) {
-      return await anuncios.find({ tiendas: { $in: [idTienda] } }).toArray();
+      return await anuncios
+        .find({ tiendas: { $in: [idTienda, -1] } })
+        .toArray();
     }
     return await anuncios.find({}).toArray();
   }
