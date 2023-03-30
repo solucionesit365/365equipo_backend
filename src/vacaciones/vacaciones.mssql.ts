@@ -170,6 +170,41 @@ export async function getSolicitudes(): Promise<
   if (resSolicitudes.recordset.length > 0) return resSolicitudes.recordset;
   return [];
 }
+export async function getSolicitudesParaEnviar(): Promise<
+  {
+    idBeneficiario: number;
+    dias: number;
+    fechaInicio: string;
+    fechaFinal: string;
+    fechaIncorporacion: string;
+    observaciones: string;
+    respuestaSolicitud: string;
+    fechaCreacion: string;
+    estado: string;
+    idSolicitud: number;
+    enviado: boolean;
+  }[]
+> {
+  const sql = `
+  SELECT 
+    so.idBeneficiario,
+    so.dias, 
+    CONVERT(nvarchar, so.fechaInicio, 103) as fechaInicio,
+    CONVERT(nvarchar, so.fechaFinal, 103) as fechaFinal,
+    CONVERT(nvarchar, so.fechaIncorporacion, 103) as fechaIncorporacion,
+    so.observaciones,
+    so.respuestaSolicitud,
+    CONVERT(nvarchar, so.fechaCreacion, 103) as fechaCreacion,
+    so.estado,
+    so.idSolicitud,
+    so.enviado
+  FROM solicitudVacaciones so WHERE so.estado = 'APROBADA' AND (so.enviado <> 1 OR so.enviado IS NULL) ORDER BY idSolicitud;
+`;
+  const resSolicitudes = await recSoluciones("soluciones", sql);
+
+  if (resSolicitudes.recordset.length > 0) return resSolicitudes.recordset;
+  return [];
+}
 
 export async function getSolicitudesSubordinados(idApp: string): Promise<
   {

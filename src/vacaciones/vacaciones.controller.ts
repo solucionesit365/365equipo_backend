@@ -23,6 +23,24 @@ export class VacacionesController {
     }
   }
 
+  @Get("sendToHit")
+  async pendientesEnvio(@Headers("authorization") authHeader: string) {
+    try {
+      const token = this.tokenService.extract(authHeader);
+
+      if (token === process.env.SINCRO_TOKEN) {
+        return {
+          ok: true,
+          data: await vacacionesInstance.sendToHit(),
+        };
+      }
+      throw Error("No tienes permiso para completar esta acción");
+    } catch (err) {
+      console.log(err);
+      return { ok: false, message: err.message };
+    }
+  }
+
   @Get("solicitudesTrabajador")
   async getSolicitudesTrabajador(
     @Headers("authorization") authHeader: string,
