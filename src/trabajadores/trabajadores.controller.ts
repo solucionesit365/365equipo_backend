@@ -1,4 +1,5 @@
-import { Controller, Get, Headers, Query } from "@nestjs/common";
+import { Controller, Get, Headers, Query, UseGuards } from "@nestjs/common";
+import { AuthGuard } from "src/scheduler/scheduler.guard";
 import { verifyToken } from "../firebase/auth";
 import { TokenService } from "../get-token/get-token.service";
 import { trabajadorInstance } from "./trabajadores.class";
@@ -93,6 +94,7 @@ export class TrabajadoresController {
   }
 
   @Get("sincronizarConHit")
+  @UseGuards(AuthGuard)
   async sincronizarConHit(@Headers("authorization") authHeader: string) {
     try {
       const token = this.tokenService.extract(authHeader);
