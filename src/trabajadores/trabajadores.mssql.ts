@@ -1,8 +1,9 @@
-import { recHit, recSoluciones } from "../bbdd/mssql";
+import { recHit, recSoluciones, recSolucionesClassic } from "../bbdd/mssql";
 import { TrabajadorSql } from "./trabajadores.interface";
+import * as moment from "moment";
 
 /* Todos */
-export async function getTrabajadores() {
+export async function getTrabajadores(todos = false) {
   const sql = `
     SELECT 
         tr.id,
@@ -31,7 +32,11 @@ export async function getTrabajadores() {
     FROM trabajadores tr
     LEFT JOIN trabajadores tr1 ON tr.idResponsable = tr1.id
     LEFT JOIN tiendas ti ON tr.idTienda = ti.id
-    WHERE tr.inicioContrato IS NOT NULL AND tr.finalContrato IS NULL ORDER BY nombreApellidos
+    ${
+      !todos
+        ? "WHERE tr.inicioContrato IS NOT NULL AND tr.finalContrato IS NULL"
+        : ""
+    } ORDER BY nombreApellidos
     `;
   const resUsuarios = await recSoluciones("soluciones", sql);
 
@@ -185,8 +190,28 @@ export async function getSubordinados(uid: string): Promise<
 }
 
 /* ¡¡ A HIT !! */
-export async function getTrabajadoresSage(): Promise<any[]> {
-  const sqlQuery = `        
+export async function getTrabajadoresSage(): Promise<
+  {
+    id: number;
+    nombreApellidos: string;
+    displayName: string;
+    emails: string;
+    dni: string;
+    direccion: string;
+    ciudad: string;
+    telefonos: string;
+    fechaNacimiento: string;
+    nacionalidad: string;
+    nSeguridadSocial: string;
+    codigoPostal: string;
+    cuentaCorriente: string;
+    tipoTrabajador: string;
+    inicioContrato: string;
+    finalContrato: string;
+    antiguedad: string;
+  }[]
+> {
+  const sqlQuery = ` 
   SELECT 
     de.codi as id,
     de.nom as nombreApellidos,
@@ -202,9 +227,9 @@ export async function getTrabajadoresSage(): Promise<any[]> {
     ex8.valor as codigoPostal,
     ex9.valor as cuentaCorriente,
     ex10.valor as tipoTrabajador,
-    (SELECT top 1 FORMAT(FechaAlta, 'MM/dd/yyyy') FROM silema_ts.sage.dbo.EmpleadoNomina where dni = ex1.valor COLLATE SQL_Latin1_General_CP1_CI_AS order by FechaAlta desc) as inicioContrato,
-    (SELECT top 1 FORMAT(FechaBaja, 'MM/dd/yyyy') FROM silema_ts.sage.dbo.EmpleadoNomina where dni = ex1.valor COLLATE SQL_Latin1_General_CP1_CI_AS order by FechaAlta desc) as finalContrato,
-    (SELECT top 1 FORMAT(FechaAntiguedad, 'MM/dd/yyyy') FROM silema_ts.sage.dbo.EmpleadoNomina where dni = ex1.valor COLLATE SQL_Latin1_General_CP1_CI_AS order by FechaAlta desc) as antiguedad
+    (SELECT top 1 CONVERT(nvarchar, FechaAlta, 103) FROM silema_ts.sage.dbo.EmpleadoNomina where dni = ex1.valor COLLATE SQL_Latin1_General_CP1_CI_AS order by FechaAlta desc) as inicioContrato,
+    (SELECT top 1 CONVERT(nvarchar, FechaBaja, 103) FROM silema_ts.sage.dbo.EmpleadoNomina where dni = ex1.valor COLLATE SQL_Latin1_General_CP1_CI_AS order by FechaAlta desc) as finalContrato,
+    (SELECT top 1 CONVERT(nvarchar, FechaAntiguedad, 103) FROM silema_ts.sage.dbo.EmpleadoNomina where dni = ex1.valor COLLATE SQL_Latin1_General_CP1_CI_AS order by FechaAlta desc) as antiguedad
   FROM Dependentes de
   LEFT JOIN dependentesExtes ex0 ON ex0.id = de.codi AND ex0.nom = 'EMAIL'
   LEFT JOIN dependentesExtes ex1 ON ex1.id = de.codi AND ex1.nom = 'DNI'
@@ -221,4 +246,119 @@ export async function getTrabajadoresSage(): Promise<any[]> {
   const resTrabajadores = await recHit("Fac_Tena", sqlQuery);
   if (resTrabajadores.recordset.length > 0) return resTrabajadores.recordset;
   else throw Error("Error, no hay trabajadores");
+}
+
+function convertOrNULL(value) {
+  if (value === null || value === undefined) {
+    return "NULL";
+  }
+  return `CONVERT(datetime, '${value}', 103)`;
+}
+
+function isValidDate(value) {
+  return moment(value, "DD/MM/YYYY").isValid();
+}
+
+export async function actualizarUsuarios(
+  database: string,
+  usuariosNuevos,
+  modificarEnApp,
+) {
+  try {
+    const usuariosNoActualizadosNuevos = [];
+    const usuariosNoActualizadosApp = [];
+
+    // INSERT
+    const usuariosNuevosValidos = usuariosNuevos.filter((usuario) => {
+      const isValid =
+        isValidDate(usuario.fechaNacimiento) &&
+        isValidDate(usuario.inicioContrato) &&
+        isValidDate(usuario.antiguedad) &&
+        usuario.dni &&
+        usuario.dni != "" &&
+        usuario.telefonos &&
+        usuario.telefonos != "" &&
+        !usuario.finalContrato;
+
+      if (!isValid) {
+        usuariosNoActualizadosNuevos.push(usuario);
+      }
+      return isValid;
+    });
+
+    // UPDATE
+    const modificarEnAppValidos = modificarEnApp.filter((usuario) => {
+      const isValid =
+        isValidDate(usuario.fechaNacimiento) &&
+        isValidDate(usuario.inicioContrato) &&
+        isValidDate(usuario.antiguedad);
+
+      if (!isValid) {
+        usuariosNoActualizadosApp.push(usuario);
+      }
+      return isValid;
+    });
+
+    const batchSize = 100; // Ajusta este valor según las necesidades de rendimiento
+
+    for (let i = 0; i < usuariosNuevosValidos.length; i += batchSize) {
+      const batch = usuariosNuevosValidos.slice(i, i + batchSize);
+      const query = batch
+        .map((usuario) => {
+          return `
+  INSERT INTO dbo.trabajadores (
+    id, idApp, nombreApellidos, displayName, emails, dni, direccion, ciudad,
+    telefonos, fechaNacimiento, nacionalidad, nSeguridadSocial, codigoPostal,
+    cuentaCorriente, tipoTrabajador, inicioContrato, finalContrato, antiguedad
+  ) VALUES (
+    ${usuario.id},
+    '${usuario.idApp}',
+    '${usuario.nombreApellidos}',
+    '${usuario.displayName}',
+    '${usuario.emails}',
+    '${usuario.dni}',
+    '${usuario.direccion}',
+    '${usuario.ciudad}',
+    '${usuario.telefonos}',
+    ${convertOrNULL(usuario.fechaNacimiento)},
+    '${usuario.nacionalidad}',
+    '${usuario.nSeguridadSocial}',
+    '${usuario.codigoPostal}',
+    '${usuario.cuentaCorriente}',
+    '${usuario.tipoTrabajador}',
+    ${convertOrNULL(usuario.inicioContrato)},
+    ${convertOrNULL(usuario.finalContrato)},
+    ${convertOrNULL(usuario.antiguedad)}
+  )`;
+        })
+        .join(";");
+
+      await recSolucionesClassic(database, query);
+    }
+
+    for (let i = 0; i < modificarEnAppValidos.length; i += batchSize) {
+      const batch = modificarEnAppValidos.slice(i, i + batchSize);
+      const query = batch
+        .map((usuario) => {
+          return `
+      UPDATE dbo.trabajadores
+      SET
+        dni = '${usuario.dni}',
+        inicioContrato = ${convertOrNULL(usuario.inicioContrato)},
+        finalContrato = ${convertOrNULL(usuario.finalContrato)},
+        antiguedad = ${convertOrNULL(usuario.antiguedad)}
+      WHERE id = ${usuario.id}`;
+        })
+        .join(";");
+
+      await recSolucionesClassic(database, query);
+    }
+
+    return {
+      usuariosNoActualizadosNuevos,
+      usuariosNoActualizadosApp,
+    };
+  } catch (error) {
+    console.error("Error al actualizar usuarios:", error);
+  }
 }

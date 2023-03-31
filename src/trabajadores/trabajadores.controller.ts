@@ -91,4 +91,22 @@ export class TrabajadoresController {
       return { ok: false, message: err.message };
     }
   }
+
+  @Get("sincronizarConHit")
+  async sincronizarConHit(@Headers("authorization") authHeader: string) {
+    try {
+      const token = this.tokenService.extract(authHeader);
+
+      if (token === process.env.SINCRO_TOKEN) {
+        return {
+          ok: true,
+          data: await trabajadorInstance.sincronizarConHit(),
+        };
+      }
+      throw Error("No tienes permiso para completar esta acción");
+    } catch (err) {
+      console.log(err);
+      return { ok: false, message: err.message };
+    }
+  }
 }
