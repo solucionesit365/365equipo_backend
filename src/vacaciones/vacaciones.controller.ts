@@ -1,4 +1,13 @@
-import { Controller, Get, Query, Headers, Post, Body } from "@nestjs/common";
+import {
+  Controller,
+  Get,
+  Query,
+  Headers,
+  Post,
+  Body,
+  UseGuards,
+} from "@nestjs/common";
+import { SchedulerGuard } from "../scheduler/scheduler.guard";
 import { verifyToken } from "../firebase/auth";
 import { TokenService } from "../get-token/get-token.service";
 import { trabajadorInstance } from "../trabajadores/trabajadores.class";
@@ -24,17 +33,13 @@ export class VacacionesController {
   }
 
   @Get("sendToHit")
-  async pendientesEnvio(@Headers("authorization") authHeader: string) {
+  @UseGuards(SchedulerGuard)
+  async pendientesEnvio() {
     try {
-      const token = this.tokenService.extract(authHeader);
-
-      if (token === process.env.SINCRO_TOKEN) {
-        return {
-          ok: true,
-          data: await vacacionesInstance.sendToHit(),
-        };
-      }
-      throw Error("No tienes permiso para completar esta acción");
+      return {
+        ok: true,
+        data: await vacacionesInstance.sendToHit(),
+      };
     } catch (err) {
       console.log(err);
       return { ok: false, message: err.message };

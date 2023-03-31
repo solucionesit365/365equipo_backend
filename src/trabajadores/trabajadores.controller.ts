@@ -1,5 +1,5 @@
 import { Controller, Get, Headers, Query, UseGuards } from "@nestjs/common";
-import { AuthGuard } from "src/scheduler/scheduler.guard";
+import { SchedulerGuard } from "../scheduler/scheduler.guard";
 import { verifyToken } from "../firebase/auth";
 import { TokenService } from "../get-token/get-token.service";
 import { trabajadorInstance } from "./trabajadores.class";
@@ -94,18 +94,13 @@ export class TrabajadoresController {
   }
 
   @Get("sincronizarConHit")
-  @UseGuards(AuthGuard)
-  async sincronizarConHit(@Headers("authorization") authHeader: string) {
+  @UseGuards(SchedulerGuard)
+  async sincronizarConHit() {
     try {
-      const token = this.tokenService.extract(authHeader);
-
-      if (token === process.env.SINCRO_TOKEN) {
-        return {
-          ok: true,
-          data: await trabajadorInstance.sincronizarConHit(),
-        };
-      }
-      throw Error("No tienes permiso para completar esta acción");
+      return {
+        ok: true,
+        data: await trabajadorInstance.sincronizarConHit(),
+      };
     } catch (err) {
       console.log(err);
       return { ok: false, message: err.message };
