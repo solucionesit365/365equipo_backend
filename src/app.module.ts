@@ -12,6 +12,7 @@ import { TestController } from "./test/test.controller";
 import { AnunciosService } from "./anuncios/anuncios.mongodb";
 import { AnunciosClass } from "./anuncios/anuncios.class";
 import { MongoDbService } from "./bbdd/mongodb";
+import { CuadrantesController } from './cuadrantes/cuadrantes.controller';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { MongoDbService } from "./bbdd/mongodb";
     TiendasController,
     VacacionesController,
     TestController,
+    CuadrantesController,
   ],
   providers: [
     AppService,

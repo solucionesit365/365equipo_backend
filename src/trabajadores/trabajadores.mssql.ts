@@ -209,39 +209,58 @@ export async function getTrabajadoresSage(): Promise<
     inicioContrato: string;
     finalContrato: string;
     antiguedad: string;
+    idEmpresa: number;
   }[]
 > {
   const sqlQuery = ` 
-  SELECT 
-    de.codi as id,
-    de.nom as nombreApellidos,
-    de.memo as displayName,
-    ex0.valor as emails,
-    ex1.valor as dni,
-    ex2.valor as direccion,
-    ex3.valor as ciudad,
-    ex4.valor as telefonos,
-    ex5.valor as fechaNacimiento,
-    ex6.valor as nacionalidad,
-    ex7.valor as nSeguridadSocial,
-    ex8.valor as codigoPostal,
-    ex9.valor as cuentaCorriente,
-    ex10.valor as tipoTrabajador,
-    (SELECT top 1 CONVERT(nvarchar, FechaAlta, 103) FROM silema_ts.sage.dbo.EmpleadoNomina where dni = ex1.valor COLLATE SQL_Latin1_General_CP1_CI_AS order by FechaAlta desc) as inicioContrato,
-    (SELECT top 1 CONVERT(nvarchar, FechaBaja, 103) FROM silema_ts.sage.dbo.EmpleadoNomina where dni = ex1.valor COLLATE SQL_Latin1_General_CP1_CI_AS order by FechaAlta desc) as finalContrato,
-    (SELECT top 1 CONVERT(nvarchar, FechaAntiguedad, 103) FROM silema_ts.sage.dbo.EmpleadoNomina where dni = ex1.valor COLLATE SQL_Latin1_General_CP1_CI_AS order by FechaAlta desc) as antiguedad
-  FROM Dependentes de
-  LEFT JOIN dependentesExtes ex0 ON ex0.id = de.codi AND ex0.nom = 'EMAIL'
-  LEFT JOIN dependentesExtes ex1 ON ex1.id = de.codi AND ex1.nom = 'DNI'
-  LEFT JOIN dependentesExtes ex2 ON ex2.id = de.codi AND ex2.nom = 'ADRESA'
-  LEFT JOIN dependentesExtes ex3 ON ex3.id = de.codi AND ex3.nom = 'CIUTAT'
-  LEFT JOIN dependentesExtes ex4 ON ex4.id = de.codi AND ex4.nom = 'TLF_MOBIL'
-  LEFT JOIN dependentesExtes ex5 ON ex5.id = de.codi AND ex5.nom = 'DATA_NAIXEMENT'
-  LEFT JOIN dependentesExtes ex6 ON ex6.id = de.codi AND ex6.nom = 'NACIONALITAT'
-  LEFT JOIN dependentesExtes ex7 ON ex7.id = de.codi AND ex7.nom = 'numSS'
-  LEFT JOIN dependentesExtes ex8 ON ex8.id = de.codi AND ex8.nom = 'CODIGO POSTAL'
-  LEFT JOIN dependentesExtes ex9 ON ex9.id = de.codi AND ex9.nom = 'CC'
-  LEFT JOIN dependentesExtes ex10 ON ex10.id = de.codi AND ex10.nom = 'TIPUSTREBALLADOR'
+	WITH CTE_Resultado AS (
+    SELECT
+      de.CODI as id,
+      de.NOM as nombreApellidos,
+      de.MEMO as displayName,
+    de2.valor as emails,
+      pe.Dni as dni,
+    de3.valor as direccion,
+    de4.valor as ciudad,
+    de5.valor as telefonos,
+    de6.valor as fechaNacimiento,
+    de7.valor as nacionalidad,
+      pe.ProvNumSoe as nSeguridadSocial,
+    de8.valor as codigoPostal,
+      ec.IBANReceptor as cuentaCorriente,
+    de9.valor as tipoTrabajador,
+      CONVERT(nvarchar, en.FechaAlta, 103) as inicioContrato,
+      CONVERT(nvarchar, en.FechaBaja, 103) as finalContrato,
+      CONVERT(nvarchar, en.FechaAntiguedad, 103) as antiguedad,
+      en.CodigoEmpresa as idEmpresa,
+      ROW_NUMBER() OVER (PARTITION BY pe.Dni ORDER BY (SELECT NULL)) AS RowNumber
+    FROM silema_ts.sage.dbo.Personas pe
+    LEFT JOIN silema_ts.sage.dbo.EmpleadoCobro ec ON pe.dni = ec.IDBeneficiario
+    LEFT JOIN silema_ts.sage.dbo.EmpleadoNomina en ON pe.dni = en.Dni
+    LEFT JOIN silema_ts.sage.dbo.Empresas em ON em.CodigoEmpresa = en.CodigoEmpresa
+    LEFT JOIN dependentesExtes de1 ON de1.nom = 'DNI' AND de1.valor COLLATE SQL_Latin1_General_CP1_CI_AS = pe.Dni
+    LEFT JOIN dependentesExtes de2 ON de1.id = de2.id AND de2.nom = 'EMAIL'
+    LEFT JOIN dependentesExtes de3 ON de1.id = de3.id AND de3.nom = 'ADRESA'
+    LEFT JOIN dependentesExtes de4 ON de1.id = de4.id AND de4.nom = 'CIUTAT'
+    LEFT JOIN dependentesExtes de5 ON de1.id = de5.id AND de5.nom = 'TLF_MOBIL'
+    LEFT JOIN dependentesExtes de6 ON de1.id = de6.id AND de6.nom = 'DATA_NAIXEMENT'
+    LEFT JOIN dependentesExtes de7 ON de1.id = de7.id AND de7.nom = 'NACIONALITAT'
+    LEFT JOIN dependentesExtes de8 ON de1.id = de8.id AND de8.nom = 'CODIGO POSTAL'
+    LEFT JOIN dependentesExtes de9 ON de1.id = de9.id AND de9.nom = 'TIPUSTREBALLADOR'
+    LEFT JOIN dependentes de ON de.CODI = de1.id
+    
+  
+    WHERE 
+    pe.PersonaFisicaJuridica = 'F' AND
+    en.FechaAlta IS NOT NULL AND en.FechaBaja IS NULL
+    AND en.CodigoEmpresa IN (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 14, 15) 
+    AND de.CODI IS NOT NULL 
+  )
+  SELECT *
+  FROM CTE_Resultado
+  WHERE RowNumber = 1
+  ORDER BY nombreApellidos;
+  
 `;
   const resTrabajadores = await recHit("Fac_Tena", sqlQuery);
   if (resTrabajadores.recordset.length > 0) return resTrabajadores.recordset;
