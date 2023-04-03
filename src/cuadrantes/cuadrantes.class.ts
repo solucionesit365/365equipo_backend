@@ -14,6 +14,12 @@ export class Cuadrantes {
 
   async addCuadrante(cuadrante: ObjCuadrante, trabajador: TrabajadorCompleto) {
     const semanaActual = moment().startOf("week");
-    
+    const medioDia = moment({ hour: 12, minute: 59 });
+    const mediaNoche = moment({ hour: 0 });
+    const arrayIdentificadores: {
+        id: string;
+        indexDia: number;
+      }[] = [];
+      
   }
 }
