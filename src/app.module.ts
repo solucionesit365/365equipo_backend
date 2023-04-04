@@ -12,7 +12,8 @@ import { TestController } from "./test/test.controller";
 import { AnunciosService } from "./anuncios/anuncios.mongodb";
 import { AnunciosClass } from "./anuncios/anuncios.class";
 import { MongoDbService } from "./bbdd/mongodb";
-import { CuadrantesController } from './cuadrantes/cuadrantes.controller';
+import { CuadrantesController } from "./cuadrantes/cuadrantes.controller";
+import { Cuadrantes } from "./cuadrantes/cuadrantes.class";
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { CuadrantesController } from './cuadrantes/cuadrantes.controller';
     AnunciosService,
     AnunciosClass,
     MongoDbService,
+    Cuadrantes,
   ],
 })
 export class AppModule {}

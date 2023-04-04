@@ -28,7 +28,8 @@ export async function getTrabajadores(todos = false) {
         (SELECT COUNT(*) FROM trabajadores WHERE idResponsable = tr.id) as coordinadora,
         tr1.nombreApellidos as nombreResponsable,
         ti.nombre as nombreTienda,
-        FORMAT(tr.antiguedad, 'dd/MM/yyyy') as antiguedad
+        FORMAT(tr.antiguedad, 'dd/MM/yyyy') as antiguedad,
+        tr.idEmpresa
     FROM trabajadores tr
     LEFT JOIN trabajadores tr1 ON tr.idResponsable = tr1.id
     LEFT JOIN tiendas ti ON tr.idTienda = ti.id
@@ -72,7 +73,8 @@ export async function getTrabajadorByAppId(uid: string) {
     (SELECT COUNT(*) FROM trabajadores WHERE idResponsable = tr.id) as coordinadora,
     tr1.nombreApellidos as nombreResponsable,
     ti.nombre as nombreTienda,
-    FORMAT(tr.antiguedad, 'dd/MM/yyyy') as antiguedad
+    FORMAT(tr.antiguedad, 'dd/MM/yyyy') as antiguedad,
+    tr.idEmpresa
   FROM trabajadores tr
   LEFT JOIN trabajadores tr1 ON tr.idResponsable = tr1.id
   LEFT JOIN tiendas ti ON tr.idTienda = ti.id
@@ -112,7 +114,8 @@ export async function getTrabajadorBySqlId(id: number) {
     (SELECT COUNT(*) FROM trabajadores WHERE idResponsable = tr.id) as coordinadora,
     tr1.nombreApellidos as nombreResponsable,
     ti.nombre as nombreTienda,
-    FORMAT(tr.antiguedad, 'dd/MM/yyyy') as antiguedad
+    FORMAT(tr.antiguedad, 'dd/MM/yyyy') as antiguedad,
+    tr.idEmpresa
   FROM trabajadores tr
   LEFT JOIN trabajadores tr1 ON tr.idResponsable = tr1.id
   LEFT JOIN tiendas ti ON tr.idTienda = ti.id
@@ -251,7 +254,6 @@ export async function getTrabajadoresSage(): Promise<
     
   
     WHERE 
-    pe.PersonaFisicaJuridica = 'F' AND
     en.FechaAlta IS NOT NULL AND en.FechaBaja IS NULL
     AND en.CodigoEmpresa IN (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 14, 15) 
     AND de.CODI IS NOT NULL 
@@ -278,6 +280,128 @@ function isValidDate(value) {
   return moment(value, "DD/MM/YYYY").isValid();
 }
 
+// export async function actualizarUsuarios(
+//   database: string,
+//   usuariosNuevos,
+//   modificarEnApp,
+// ) {
+//   try {
+//     const usuariosNoActualizadosNuevos = [];
+//     const usuariosNoActualizadosApp = [];
+
+//     // INSERT
+//     const usuariosNuevosValidos = usuariosNuevos.filter((usuario) => {
+//       const isValid =
+//         isValidDate(usuario.fechaNacimiento) &&
+//         isValidDate(usuario.inicioContrato) &&
+//         isValidDate(usuario.antiguedad) &&
+//         usuario.dni &&
+//         usuario.dni != "" &&
+//         usuario.telefonos &&
+//         usuario.telefonos != "" &&
+//         !usuario.finalContrato;
+
+//       if (!isValid) {
+//         usuariosNoActualizadosNuevos.push(usuario);
+//       }
+//       return isValid;
+//     });
+
+//     // UPDATE
+//     const modificarEnAppValidos = modificarEnApp.filter((usuario) => {
+//       const isValid =
+//         isValidDate(usuario.fechaNacimiento) &&
+//         isValidDate(usuario.inicioContrato) &&
+//         isValidDate(usuario.antiguedad);
+
+//       if (!isValid) {
+//         usuariosNoActualizadosApp.push(usuario);
+//       }
+//       return isValid;
+//     });
+
+//     const batchSize = 100; // Ajusta este valor según las necesidades de rendimiento
+
+//     for (let i = 0; i < usuariosNuevosValidos.length; i += batchSize) {
+//       const batch = usuariosNuevosValidos.slice(i, i + batchSize);
+//       const query = batch
+//         .map((usuario) => {
+//           return `
+//   INSERT INTO dbo.trabajadores (
+//     id, idApp, nombreApellidos, displayName, emails, dni, direccion, ciudad,
+//     telefonos, fechaNacimiento, nacionalidad, nSeguridadSocial, codigoPostal,
+//     cuentaCorriente, tipoTrabajador, inicioContrato, finalContrato, antiguedad, idEmpresa
+//   ) VALUES (
+//     ${usuario.id},
+//     '${usuario.idApp}',
+//     '${usuario.nombreApellidos}',
+//     '${usuario.displayName}',
+//     '${usuario.emails}',
+//     '${usuario.dni}',
+//     '${usuario.direccion}',
+//     '${usuario.ciudad}',
+//     '${usuario.telefonos}',
+//     ${convertOrNULL(usuario.fechaNacimiento)},
+//     '${usuario.nacionalidad}',
+//     '${usuario.nSeguridadSocial}',
+//     '${usuario.codigoPostal}',
+//     '${usuario.cuentaCorriente}',
+//     '${usuario.tipoTrabajador}',
+//     ${convertOrNULL(usuario.inicioContrato)},
+//     ${convertOrNULL(usuario.finalContrato)},
+//     ${convertOrNULL(usuario.antiguedad)},
+//     ${usuario.idEmpresa}
+//   )`;
+//         })
+//         .join(";");
+
+//       await recSolucionesClassic(database, query);
+//     }
+
+//     for (let i = 0; i < modificarEnAppValidos.length; i += batchSize) {
+//       const batch = modificarEnAppValidos.slice(i, i + batchSize);
+//       const query = batch
+//         .map((usuario) => {
+//           return `
+//       UPDATE dbo.trabajadores
+//       SET
+//         dni = '${usuario.dni}',
+//         inicioContrato = ${convertOrNULL(usuario.inicioContrato)},
+//         finalContrato = ${convertOrNULL(usuario.finalContrato)},
+//         antiguedad = ${convertOrNULL(usuario.antiguedad)},
+//         idEmpresa = ${usuario.idEmpresa}
+//       WHERE id = ${usuario.id}`;
+//         })
+//         .join(";");
+
+//       await recSolucionesClassic(database, query);
+//     }
+
+//     return {
+//       usuariosNoActualizadosNuevos,
+//       usuariosNoActualizadosApp,
+//     };
+//   } catch (error) {
+//     console.error("Error al actualizar usuarios:", error);
+//   }
+// }
+
+function isValidUsuario(usuario) {
+  return (
+    isValidDate(usuario.inicioContrato) &&
+    isValidDate(usuario.antiguedad) &&
+    usuario.dni &&
+    usuario.dni !== "" &&
+    usuario.telefonos &&
+    usuario.telefonos !== ""
+  );
+}
+
+async function executeBatch(database: string, batch, queryBuilder) {
+  const query = batch.map(queryBuilder).join(";");
+  await recSolucionesClassic(database, query);
+}
+
 export async function actualizarUsuarios(
   database: string,
   usuariosNuevos,
@@ -289,89 +413,70 @@ export async function actualizarUsuarios(
 
     // INSERT
     const usuariosNuevosValidos = usuariosNuevos.filter((usuario) => {
-      const isValid =
-        isValidDate(usuario.fechaNacimiento) &&
-        isValidDate(usuario.inicioContrato) &&
-        isValidDate(usuario.antiguedad) &&
-        usuario.dni &&
-        usuario.dni != "" &&
-        usuario.telefonos &&
-        usuario.telefonos != "" &&
-        !usuario.finalContrato;
-
-      if (!isValid) {
-        usuariosNoActualizadosNuevos.push(usuario);
-      }
+      const isValid = isValidUsuario(usuario) && !usuario.finalContrato;
+      if (!isValid) usuariosNoActualizadosNuevos.push(usuario);
       return isValid;
     });
 
     // UPDATE
     const modificarEnAppValidos = modificarEnApp.filter((usuario) => {
-      const isValid =
-        isValidDate(usuario.fechaNacimiento) &&
-        isValidDate(usuario.inicioContrato) &&
-        isValidDate(usuario.antiguedad);
-
-      if (!isValid) {
-        usuariosNoActualizadosApp.push(usuario);
-      }
+      const isValid = isValidUsuario(usuario);
+      if (!isValid) usuariosNoActualizadosApp.push(usuario);
       return isValid;
     });
 
     const batchSize = 100; // Ajusta este valor según las necesidades de rendimiento
 
-    for (let i = 0; i < usuariosNuevosValidos.length; i += batchSize) {
-      const batch = usuariosNuevosValidos.slice(i, i + batchSize);
-      const query = batch
-        .map((usuario) => {
-          return `
-  INSERT INTO dbo.trabajadores (
-    id, idApp, nombreApellidos, displayName, emails, dni, direccion, ciudad,
-    telefonos, fechaNacimiento, nacionalidad, nSeguridadSocial, codigoPostal,
-    cuentaCorriente, tipoTrabajador, inicioContrato, finalContrato, antiguedad
-  ) VALUES (
-    ${usuario.id},
-    '${usuario.idApp}',
-    '${usuario.nombreApellidos}',
-    '${usuario.displayName}',
-    '${usuario.emails}',
-    '${usuario.dni}',
-    '${usuario.direccion}',
-    '${usuario.ciudad}',
-    '${usuario.telefonos}',
-    ${convertOrNULL(usuario.fechaNacimiento)},
-    '${usuario.nacionalidad}',
-    '${usuario.nSeguridadSocial}',
-    '${usuario.codigoPostal}',
-    '${usuario.cuentaCorriente}',
-    '${usuario.tipoTrabajador}',
-    ${convertOrNULL(usuario.inicioContrato)},
-    ${convertOrNULL(usuario.finalContrato)},
-    ${convertOrNULL(usuario.antiguedad)}
-  )`;
-        })
-        .join(";");
+    const insertQueryBuilder = (usuario) => `
+      INSERT INTO dbo.trabajadores (
+        id, idApp, nombreApellidos, displayName, emails, dni, direccion, ciudad,
+        telefonos, fechaNacimiento, nacionalidad, nSeguridadSocial, codigoPostal,
+        cuentaCorriente, tipoTrabajador, inicioContrato, finalContrato, antiguedad, idEmpresa
+      ) VALUES (
+        ${usuario.id},
+        '${usuario.idApp}',
+        '${usuario.nombreApellidos}',
+        '${usuario.displayName}',
+        '${usuario.emails}',
+        '${usuario.dni}',
+        '${usuario.direccion}',
+        '${usuario.ciudad}',
+        '${usuario.telefonos}',
+        ${convertOrNULL(usuario.fechaNacimiento)},
+        '${usuario.nacionalidad}',
+        '${usuario.nSeguridadSocial}',
+        '${usuario.codigoPostal}',
+        '${usuario.cuentaCorriente}',
+        '${usuario.tipoTrabajador}',
+        ${convertOrNULL(usuario.inicioContrato)},
+        ${convertOrNULL(usuario.finalContrato)},
+        ${convertOrNULL(usuario.antiguedad)},
+        ${usuario.idEmpresa}
+      )`;
 
-      await recSolucionesClassic(database, query);
-    }
-
-    for (let i = 0; i < modificarEnAppValidos.length; i += batchSize) {
-      const batch = modificarEnAppValidos.slice(i, i + batchSize);
-      const query = batch
-        .map((usuario) => {
-          return `
+    const updateQueryBuilder = (usuario) => `
       UPDATE dbo.trabajadores
       SET
         dni = '${usuario.dni}',
         inicioContrato = ${convertOrNULL(usuario.inicioContrato)},
         finalContrato = ${convertOrNULL(usuario.finalContrato)},
-        antiguedad = ${convertOrNULL(usuario.antiguedad)}
+        antiguedad = ${convertOrNULL(usuario.antiguedad)},
+        idEmpresa = ${usuario.idEmpresa}
       WHERE id = ${usuario.id}`;
-        })
-        .join(";");
 
-      await recSolucionesClassic(database, query);
+    const promises = [];
+
+    for (let i = 0; i < usuariosNuevosValidos.length; i += batchSize) {
+      const batch = usuariosNuevosValidos.slice(i, i + batchSize);
+      promises.push(executeBatch(database, batch, insertQueryBuilder));
     }
+
+    for (let i = 0; i < modificarEnAppValidos.length; i += batchSize) {
+      const batch = modificarEnAppValidos.slice(i, i + batchSize);
+      promises.push(executeBatch(database, batch, updateQueryBuilder));
+    }
+
+    await Promise.all(promises);
 
     return {
       usuariosNoActualizadosNuevos,
@@ -380,4 +485,15 @@ export async function actualizarUsuarios(
   } catch (error) {
     console.error("Error al actualizar usuarios:", error);
   }
+}
+
+export async function eliminarUsuarios(arrayUsuarios) {
+  let sql = "";
+
+  for (let i = 0; i < arrayUsuarios.length; i += 1) {
+    if (arrayUsuarios[i].id)
+      sql += `DELETE FROM trabajadores WHERE id = ${arrayUsuarios[i].id};`;
+  }
+
+  await recSolucionesClassic("soluciones", sql);
 }

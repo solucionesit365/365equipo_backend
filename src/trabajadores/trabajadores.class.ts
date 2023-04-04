@@ -36,6 +36,81 @@ class Trabajador {
     return await schTrabajadores.getTrabajadoresSage();
   }
 
+  // async sincronizarConHit() {
+  //   const usuariosApp = await this.getTrabajadores(true);
+  //   const usuariosHit = await this.descargarTrabajadoresHit();
+
+  //   const modificarEnApp = [];
+  //   const modificarEnHit = [];
+  //   const usuariosNuevos = [];
+  //   const arrayEliminar = [];
+
+  //   usuariosHit.forEach((usuarioHit) => {
+  //     const usuarioApp = usuariosApp.find(
+  //       (usuario) => usuario.id === usuarioHit.id,
+  //     );
+
+  //     if (usuarioApp) {
+  //       const camposApp = [
+  //         "nombreApellidos",
+  //         "displayName",
+  //         "direccion",
+  //         "ciudad",
+  //         "fechaNacimiento",
+  //         "nSeguridadSocial",
+  //         "codigoPostal",
+  //         "cuentaCorriente",
+  //       ];
+  //       const camposHit = [
+  //         "dni",
+  //         "inicioContrato",
+  //         "finalContrato",
+  //         "antiguedad",
+  //       ];
+
+  //       let cambiosApp = false;
+  //       let cambiosHit = false;
+
+  //       camposApp.forEach((campo) => {
+  //         if (usuarioApp[campo] !== usuarioHit[campo]) {
+  //           cambiosApp = true;
+  //           return;
+  //         }
+  //       });
+
+  //       camposHit.forEach((campo) => {
+  //         if (usuarioApp[campo] !== usuarioHit[campo]) {
+  //           cambiosHit = true;
+  //           return;
+  //         }
+  //       });
+
+  //       if (cambiosApp) {
+  //         modificarEnHit.push(usuarioApp);
+  //       }
+
+  //       if (cambiosHit) {
+  //         modificarEnApp.push(usuarioHit);
+  //       }
+  //     } else {
+  //       usuariosNuevos.push(usuarioHit);
+  //     }
+  //   });
+
+  //   const totales = await schTrabajadores.actualizarUsuarios(
+  //     "soluciones",
+  //     usuariosNuevos,
+  //     modificarEnApp,
+  //   );
+
+  //   return {
+  //     totalModificarApp: modificarEnApp.length,
+  //     totalModificarHit: modificarEnHit.length,
+  //     totalNuevos: usuariosNuevos.length,
+  //     usuariosNoActualizadosNuevos: totales.usuariosNoActualizadosNuevos,
+  //     usuariosNoActualizadosApp: totales.usuariosNoActualizadosApp,
+  //   };
+  // }
   async sincronizarConHit() {
     const usuariosApp = await this.getTrabajadores(true);
     const usuariosHit = await this.descargarTrabajadoresHit();
@@ -43,6 +118,7 @@ class Trabajador {
     const modificarEnApp = [];
     const modificarEnHit = [];
     const usuariosNuevos = [];
+    const arrayEliminar = [];
 
     usuariosHit.forEach((usuarioHit) => {
       const usuarioApp = usuariosApp.find(
@@ -65,6 +141,7 @@ class Trabajador {
           "inicioContrato",
           "finalContrato",
           "antiguedad",
+          "idEmpresa",
         ];
 
         let cambiosApp = false;
@@ -96,18 +173,32 @@ class Trabajador {
       }
     });
 
+    usuariosApp.forEach((usuarioApp) => {
+      const usuarioHit = usuariosHit.find(
+        (usuario) => usuario.id === usuarioApp.id,
+      );
+
+      if (!usuarioHit) {
+        arrayEliminar.push(usuarioApp);
+      }
+    });
+
     const totales = await schTrabajadores.actualizarUsuarios(
       "soluciones",
       usuariosNuevos,
       modificarEnApp,
     );
 
+    await schTrabajadores.eliminarUsuarios(arrayEliminar);
+
     return {
       totalModificarApp: modificarEnApp.length,
-      totalModificarHit: modificarEnHit.length,
-      totalNuevos: usuariosNuevos.length,
-      usuariosNoActualizadosNuevos: totales.usuariosNoActualizadosNuevos,
-      usuariosNoActualizadosApp: totales.usuariosNoActualizadosApp,
+      modificarEnApp,
+      // totalModificarHit: modificarEnHit.length,
+      // totalNuevos: usuariosNuevos.length,
+      // totalEliminar: arrayEliminar.length,
+      // usuariosNoActualizadosNuevos: totales.usuariosNoActualizadosNuevos,
+      // usuariosNoActualizadosApp: totales.usuariosNoActualizadosApp,
     };
   }
 }

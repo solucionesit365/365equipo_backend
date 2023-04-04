@@ -38,11 +38,11 @@ export async function recSolucionesClassic(
       trustServerCertificate: true,
     },
     pool: {
-      max: 10,
+      max: 50,
       min: 0,
-      idleTimeoutMillis: 10000,
+      idleTimeoutMillis: 30000,
     },
-    requestTimeout: 10000,
+    requestTimeout: 30000,
   };
 
   // console.log(consultaSQL);
