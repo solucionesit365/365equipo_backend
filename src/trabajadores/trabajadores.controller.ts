@@ -68,6 +68,8 @@ export class TrabajadoresController {
       const token = this.tokenService.extract(authHeader);
       await verifyToken(token);
 
+      if (!uid) throw Error("Faltan datos");
+
       const resUser = await trabajadorInstance.getSubordinados(uid);
 
       return { ok: true, data: resUser };

@@ -14,7 +14,7 @@ import { AnunciosClass } from "./anuncios/anuncios.class";
 import { MongoDbService } from "./bbdd/mongodb";
 import { CuadrantesController } from "./cuadrantes/cuadrantes.controller";
 import { Cuadrantes } from "./cuadrantes/cuadrantes.class";
-
+import { CuadrantesDatabase } from "./cuadrantes/cuadrantes.mongodb";
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -37,6 +37,7 @@ import { Cuadrantes } from "./cuadrantes/cuadrantes.class";
     AnunciosClass,
     MongoDbService,
     Cuadrantes,
+    CuadrantesDatabase,
   ],
 })
 export class AppModule {}

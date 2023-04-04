@@ -38,11 +38,11 @@ export async function recSolucionesClassic(
       trustServerCertificate: true,
     },
     pool: {
-      max: 50,
+      max: 10,
       min: 0,
-      idleTimeoutMillis: 30000,
+      idleTimeoutMillis: 20000,
     },
-    requestTimeout: 30000,
+    requestTimeout: 20000,
   };
 
   // console.log(consultaSQL);
@@ -69,9 +69,9 @@ export async function recSoluciones(
     pool: {
       max: 10,
       min: 0,
-      idleTimeoutMillis: 10000,
+      idleTimeoutMillis: 20000,
     },
-    requestTimeout: 10000,
+    requestTimeout: 20000,
   };
 
   const connectionPool = new sql.ConnectionPool(config);

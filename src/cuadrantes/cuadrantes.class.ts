@@ -1,6 +1,8 @@
 import { Injectable } from "@nestjs/common";
 import * as moment from "moment";
-import { TrabajadorCompleto } from "../trabajadores/trabajadores.interface";
+import { CuadrantesDatabase } from "./cuadrantes.mongodb";
+import { ObjectId } from "mongodb";
+import { TCuadrante } from "./cuadrantes.interface";
 
 moment.locale("custom", {
   week: {
@@ -10,16 +12,26 @@ moment.locale("custom", {
 
 @Injectable()
 export class Cuadrantes {
-  constructor() {}
+  constructor(private readonly schCuadrantes: CuadrantesDatabase) {}
 
-  async addCuadrante(cuadrante: ObjCuadrante, trabajador: TrabajadorCompleto) {
-    const semanaActual = moment().startOf("week");
-    const medioDia = moment({ hour: 12, minute: 59 });
-    const mediaNoche = moment({ hour: 0 });
-    const arrayIdentificadores: {
-        id: string;
-        indexDia: number;
-      }[] = [];
-      
+  async getCuadrantes(idTienda: number, idTrabajador: number, semana: number) {
+    return await this.schCuadrantes.getCuadrantes(
+      idTienda,
+      idTrabajador,
+      semana,
+    );
+  }
+
+  async addCuadrante(cuadrante: TCuadrante) {
+    cuadrante.arraySemanalHoras = cuadrante.arraySemanalHoras.map((itemDia) => {
+      if (itemDia && !itemDia.idPlan) itemDia.idPlan = new ObjectId();
+
+      return itemDia;
+    });
+
+    const idCuadrante = await this.schCuadrantes.addCuadrante(cuadrante);
+
+    if (idCuadrante) return true;
+    throw Error("No se ha podido insertar el cuadrante");
   }
 }

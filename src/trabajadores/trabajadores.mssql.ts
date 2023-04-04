@@ -15,20 +15,20 @@ export async function getTrabajadores(todos = false) {
         tr.direccion,
         tr.ciudad,
         tr.telefonos,
-        FORMAT(tr.fechaNacimiento, 'dd/MM/yyyy') as fechaNacimiento,
+        CONVERT(nvarchar, tr.fechaNacimiento, 103) as fechaNacimiento,
         tr.nacionalidad,
         tr.nSeguridadSocial,
         tr.codigoPostal,
         tr.cuentaCorriente,
         tr.tipoTrabajador,
-        FORMAT(tr.inicioContrato, 'dd/MM/yyyy') as inicioContrato,
-        FORMAT(tr.finalContrato, 'dd/MM/yyyy') as finalContrato,
+        CONVERT(nvarchar, tr.inicioContrato, 103) as inicioContrato,
+        CONVERT(nvarchar, tr.finalContrato, 103) as finalContrato,
         tr.idResponsable,
         tr.idTienda,
         (SELECT COUNT(*) FROM trabajadores WHERE idResponsable = tr.id) as coordinadora,
         tr1.nombreApellidos as nombreResponsable,
         ti.nombre as nombreTienda,
-        FORMAT(tr.antiguedad, 'dd/MM/yyyy') as antiguedad,
+        CONVERT(nvarchar, tr.antiguedad, 103) as antiguedad,
         tr.idEmpresa
     FROM trabajadores tr
     LEFT JOIN trabajadores tr1 ON tr.idResponsable = tr1.id
@@ -60,20 +60,20 @@ export async function getTrabajadorByAppId(uid: string) {
     tr.direccion,
     tr.ciudad,
     tr.telefonos,
-    FORMAT(tr.fechaNacimiento, 'dd/MM/yyyy') as fechaNacimiento,
+    CONVERT(nvarchar, tr.fechaNacimiento, 103) as fechaNacimiento,
     tr.nacionalidad,
     tr.nSeguridadSocial,
     tr.codigoPostal,
     tr.cuentaCorriente,
     tr.tipoTrabajador,
-    FORMAT(tr.inicioContrato, 'dd/MM/yyyy') as inicioContrato,
-    FORMAT(tr.finalContrato, 'dd/MM/yyyy') as finalContrato,
+    CONVERT(nvarchar, tr.inicioContrato, 103) as inicioContrato,
+    CONVERT(nvarchar, tr.finalContrato, 103) as finalContrato,
     tr.idResponsable,
     tr.idTienda,
     (SELECT COUNT(*) FROM trabajadores WHERE idResponsable = tr.id) as coordinadora,
     tr1.nombreApellidos as nombreResponsable,
     ti.nombre as nombreTienda,
-    FORMAT(tr.antiguedad, 'dd/MM/yyyy') as antiguedad,
+    CONVERT(nvarchar, tr.antiguedad, 103) as antiguedad,
     tr.idEmpresa
   FROM trabajadores tr
   LEFT JOIN trabajadores tr1 ON tr.idResponsable = tr1.id
@@ -101,20 +101,20 @@ export async function getTrabajadorBySqlId(id: number) {
     tr.direccion,
     tr.ciudad,
     tr.telefonos,
-    FORMAT(tr.fechaNacimiento, 'dd/MM/yyyy') as fechaNacimiento,
+    CONVERT(nvarchar, tr.fechaNacimiento, 103) as fechaNacimiento,
     tr.nacionalidad,
     tr.nSeguridadSocial,
     tr.codigoPostal,
     tr.cuentaCorriente,
     tr.tipoTrabajador,
-    FORMAT(tr.inicioContrato, 'dd/MM/yyyy') as inicioContrato,
-    FORMAT(tr.finalContrato, 'dd/MM/yyyy') as finalContrato,
+    CONVERT(nvarchar, tr.inicioContrato, 103) as inicioContrato,
+    CONVERT(nvarchar, tr.finalContrato, 103) as finalContrato,
     tr.idResponsable,
     tr.idTienda,
     (SELECT COUNT(*) FROM trabajadores WHERE idResponsable = tr.id) as coordinadora,
     tr1.nombreApellidos as nombreResponsable,
     ti.nombre as nombreTienda,
-    FORMAT(tr.antiguedad, 'dd/MM/yyyy') as antiguedad,
+    CONVERT(nvarchar, tr.antiguedad, 103) as antiguedad,
     tr.idEmpresa
   FROM trabajadores tr
   LEFT JOIN trabajadores tr1 ON tr.idResponsable = tr1.id
@@ -187,7 +187,7 @@ export async function getSubordinados(uid: string): Promise<
     where idResponsable = (select id from trabajadores where idApp = @param0)
   `;
   const resSubordinados = await recSoluciones("soluciones", sql, uid);
-
+  console.log(resSubordinados.recordset, uid);
   if (resSubordinados.recordset.length > 0) return resSubordinados.recordset;
   return [];
 }
