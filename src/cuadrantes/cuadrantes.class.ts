@@ -14,12 +14,24 @@ moment.locale("custom", {
 export class Cuadrantes {
   constructor(private readonly schCuadrantes: CuadrantesDatabase) {}
 
-  async getCuadrantes(idTienda: number, idTrabajador: number, semana: number) {
-    return await this.schCuadrantes.getCuadrantes(
+  async getCuadrantesIndividual(
+    idTienda: number,
+    idTrabajador: number,
+    semana: number,
+  ) {
+    return await this.schCuadrantes.getCuadrantesIndividual(
       idTienda,
       idTrabajador,
       semana,
     );
+  }
+
+  async getCuadrantes(idTienda: number, semana: number) {
+    return await this.schCuadrantes.getCuadrantes(idTienda, semana);
+  }
+
+  async getTodo() {
+    return await this.schCuadrantes.getTodo();
   }
 
   async saveCuadrante(cuadrante: TCuadrante, oldCuadrante: TCuadrante) {

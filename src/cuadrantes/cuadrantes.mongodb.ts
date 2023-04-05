@@ -34,7 +34,11 @@ export class CuadrantesDatabase {
     );
   }
 
-  async getCuadrantes(idTienda: number, idTrabajador: number, semana: number) {
+  async getCuadrantesIndividual(
+    idTienda: number,
+    idTrabajador: number,
+    semana: number,
+  ) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes");
     const resCuadrantes = await cuadrantesCollection.findOne({
@@ -43,5 +47,26 @@ export class CuadrantesDatabase {
       idTrabajador,
     });
     return resCuadrantes;
+  }
+
+  async getCuadrantes(idTienda: number, semana: number) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes");
+    const resCuadrantes = await cuadrantesCollection
+      .find({
+        idTienda,
+        semana,
+      })
+      .toArray();
+
+    return resCuadrantes?.length > 0 ? resCuadrantes : [];
+  }
+
+  async getTodo() {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes");
+    const resCuadrantes = await cuadrantesCollection.find({}).toArray();
+
+    return resCuadrantes?.length > 0 ? resCuadrantes : [];
   }
 }
