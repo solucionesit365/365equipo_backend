@@ -1,6 +1,14 @@
 import { Injectable } from "@nestjs/common";
 import { MongoDbService } from "../bbdd/mongodb";
 import { TCuadrante } from "./cuadrantes.interface";
+import * as moment from "moment";
+import { recSolucionesClassic } from "src/bbdd/mssql";
+
+moment.locale("es", {
+  week: {
+    dow: 1, // Lunes es el primer día de la semana
+  },
+});
 
 @Injectable()
 export class CuadrantesDatabase {
@@ -68,5 +76,42 @@ export class CuadrantesDatabase {
     const resCuadrantes = await cuadrantesCollection.find({}).toArray();
 
     return resCuadrantes?.length > 0 ? resCuadrantes : [];
+  }
+
+  async getPendientesEnvio() {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes");
+    const resCuadrantes = await cuadrantesCollection
+      .find({ enviado: false })
+      .toArray();
+
+    return resCuadrantes?.length > 0 ? resCuadrantes : [];
+  }
+
+  public getMondayMoment(weekNumber: number) {
+    const year = moment().year();
+    const startOfWeek = moment().year(year).week(weekNumber).startOf("week");
+
+    return startOfWeek;
+  }
+
+  public nombreTablaSqlHit(weekNumber: number) {
+    const lunes = this.getMondayMoment(weekNumber);
+    return `cdpPlanificacion_${lunes.format("YYYY_MM_DD")}`;
+  }
+
+  async borrarHistorial(cuadrantes: TCuadrante[]) {
+    let sqlBorrar = "";
+
+    for (let i = 0; i < cuadrantes.length; i += 1) {
+      for (let j = 0; j < cuadrantes[i].historialPlanes.length; j += 1) {
+        if (cuadrantes[i].historialPlanes[j])
+          sqlBorrar += `DELETE FROM ${this.nombreTablaSqlHit(
+            cuadrantes[i].semana,
+          )} WHERE idPlan = '${cuadrantes[i].historialPlanes[j]}';`;
+      }
+    }
+
+    await recSolucionesClassic("soluciones", sqlBorrar);
   }
 }

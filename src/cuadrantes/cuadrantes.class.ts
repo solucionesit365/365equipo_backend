@@ -3,6 +3,7 @@ import * as moment from "moment";
 import { CuadrantesDatabase } from "./cuadrantes.mongodb";
 import { ObjectId } from "mongodb";
 import { TCuadrante } from "./cuadrantes.interface";
+import { Tienda } from "../tiendas/tiendas.class";
 
 moment.locale("custom", {
   week: {
@@ -12,7 +13,7 @@ moment.locale("custom", {
 
 @Injectable()
 export class Cuadrantes {
-  constructor(private readonly schCuadrantes: CuadrantesDatabase) {}
+  constructor(private readonly schCuadrantes: CuadrantesDatabase, private readonly tiendasInstance: Tienda) {}
 
   async getCuadrantesIndividual(
     idTienda: number,
@@ -32,6 +33,66 @@ export class Cuadrantes {
 
   async getTodo() {
     return await this.schCuadrantes.getTodo();
+  }
+
+  private async getPendientesEnvio() {
+    return await this.schCuadrantes.getPendientesEnvio();
+  }
+
+  public async sincronizarConHit() {
+    const cuadrantes = await this.getPendientesEnvio();
+    await this.schCuadrantes.borrarHistorial(cuadrantes);
+    let query = `DECLARE @idTurno VARCHAR(255) = NULL`
+    let subQuery = "";
+    const tiendas = await this.tiendasInstance.getTiendas();
+    const medioDia = moment({ hour: 12, minute: 59 });
+    const mediaNoche = moment({ hour: 0 });
+
+    for (let i = 0; i < cuadrantes.length; i += 1) {
+      const nombreTablaPlanificacion = this.schCuadrantes.nombreTablaSqlHit(cuadrantes[i].semana);
+      const lunes = this.schCuadrantes.getMondayMoment(cuadrantes[i].semana);
+
+      for (let j = 0; j < cuadrantes[i].arraySemanalHoras.length; j += 1) {
+        if (cuadrantes[i].arraySemanalHoras[j]) {
+
+          const entrada = moment(cuadrantes[i].arraySemanalHoras[j].horaEntrada);
+          // const salida = moment(cuadrantes[i].arraySemanalHoras[j].horaSalida);
+          const tipoTurno = entrada.isBetween(mediaNoche, medioDia)
+              ? "M"
+              : "T";
+          subQuery += `
+            SELECT TOP 1 @idTurno = idTurno from cdpTurnos WHERE horaInicio = '${cuadrantes[i].arraySemanalHoras[j].horaEntrada}' AND horaFin = '${cuadrantes[i].arraySemanalHoras[j].horaSalida}';
+
+            IF @idTurno IS NOT NULL
+              BEGIN
+              
+                INSERT INTO ${nombreTablaPlanificacion} (
+                  idPlan, 
+                  fecha, 
+                  botiga, 
+                  periode, 
+                  idTurno, 
+                  usuarioModif, 
+                  fechaModif, 
+                  activo
+                ) 
+                VALUES (
+                  '${cuadrantes[i].arraySemanalHoras[j].idPlan}', 
+                  CONVERT(datetime, '${moment().week(cuadrantes[i].semana).weekday(j).format("DD/MM/YYYY")}', 103),
+                  ${this.tiendasInstance.convertirTiendaToExterno(cuadrantes[i].idTienda, tiendas)}, 
+                  '${tipoTurno}', 
+                  @idTurno, 
+                  '365EquipoDeTrabajo', 
+                  GETDATE(), 
+                  1
+                );
+          
+              END 
+        `;
+        }
+
+      }
+    }
   }
 
   async saveCuadrante(cuadrante: TCuadrante, oldCuadrante: TCuadrante) {

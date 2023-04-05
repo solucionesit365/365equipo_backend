@@ -1,6 +1,9 @@
+import { Injectable } from "@nestjs/common";
 import * as schTiendas from "./tiendas.mssql";
+import * as DtoTienda from "./tiendas.dto";
 
-class Tienda {
+@Injectable()
+export class Tienda {
   async getTiendas() {
     const arrayTiendas = await schTiendas.getTiendas();
 
@@ -23,6 +26,13 @@ class Tienda {
       (tiendaExterno) => !tiendasExistentesIds.includes(tiendaExterno.id),
     );
     return schTiendas.addTiendasNuevas(tiendasNuevas);
+  }
+
+  convertirTiendaToExterno(idInterno: number, tiendas: any[]) {
+    for (let i = 0; i < tiendas.length; i += 1) {
+      if (tiendas[i].id === idInterno) return tiendas[i].idExterno;
+    }
+    return null;
   }
 }
 
