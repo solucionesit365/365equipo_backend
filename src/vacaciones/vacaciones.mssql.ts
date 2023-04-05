@@ -118,7 +118,6 @@ export async function getSolicitudesTrabajadorSqlId(id: number): Promise<
 }
 
 export async function borrarSolicitud(idSolicitud: number): Promise<boolean> {
-  console.log("el id es", idSolicitud);
   const sql = `
     DELETE FROM solicitudVacaciones WHERE idSolicitud = @param0;
 `;

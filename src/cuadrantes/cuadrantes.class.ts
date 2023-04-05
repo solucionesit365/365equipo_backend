@@ -22,16 +22,46 @@ export class Cuadrantes {
     );
   }
 
-  async addCuadrante(cuadrante: TCuadrante) {
-    cuadrante.arraySemanalHoras = cuadrante.arraySemanalHoras.map((itemDia) => {
-      if (itemDia && !itemDia.idPlan) itemDia.idPlan = new ObjectId();
+  async saveCuadrante(cuadrante: TCuadrante, oldCuadrante: TCuadrante) {
+    if (oldCuadrante) {
+      cuadrante.historialPlanes = oldCuadrante.historialPlanes;
+      cuadrante._id = oldCuadrante._id;
+      cuadrante.enviado = false;
+    }
 
-      return itemDia;
-    });
+    for (let i = 0; i < cuadrante.arraySemanalHoras.length; i += 1) {
+      let update = false;
+      if (cuadrante.arraySemanalHoras[i].idPlan) {
+        update = true;
+        if (
+          !cuadrante.historialPlanes.includes(
+            cuadrante.arraySemanalHoras[i].idPlan,
+          )
+        )
+          cuadrante.historialPlanes.push(cuadrante.arraySemanalHoras[i].idPlan);
+      }
 
-    const idCuadrante = await this.schCuadrantes.addCuadrante(cuadrante);
+      if (
+        cuadrante.arraySemanalHoras[i].horaEntrada &&
+        cuadrante.arraySemanalHoras[i].horaSalida
+      ) {
+        if (!update) {
+          cuadrante.arraySemanalHoras[i].idPlan = new ObjectId().toString();
+        }
+      } else {
+        cuadrante.arraySemanalHoras[i] = null;
+        continue;
+      }
+    }
 
-    if (idCuadrante) return true;
-    throw Error("No se ha podido insertar el cuadrante");
+    if (oldCuadrante) {
+      if (await this.schCuadrantes.updateCuadrante(cuadrante)) return true;
+      throw Error("No se ha podido actualizar el cuadrante");
+    } else {
+      cuadrante.historialPlanes = [];
+      const idCuadrante = await this.schCuadrantes.insertCuadrante(cuadrante);
+      if (idCuadrante) return true;
+      throw Error("No se ha podido insertar el cuadrante");
+    }
   }
 }

@@ -1,6 +1,7 @@
 import { ObjectId } from "mongodb";
 
 export interface TCuadrante {
+  _id: ObjectId;
   idTrabajador: number;
   nombre: string;
   idTienda: number;
@@ -8,8 +9,9 @@ export interface TCuadrante {
   arraySemanalHoras: {
     horaEntrada: string;
     horaSalida: string;
-    idPlan: ObjectId;
+    idPlan: string;
   }[];
   totalHoras: number;
   enviado: boolean;
+  historialPlanes: string[];
 }

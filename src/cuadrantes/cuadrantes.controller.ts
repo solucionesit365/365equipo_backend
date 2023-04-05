@@ -5,6 +5,7 @@ import {
   Post,
   UseGuards,
   Headers,
+  Query,
 } from "@nestjs/common";
 import { AuthGuard } from "../auth/auth.guard";
 import { getUserWithToken } from "../firebase/auth";
@@ -22,7 +23,7 @@ export class CuadrantesController {
   @Get()
   @UseGuards(AuthGuard)
   async getCuadrantes(
-    @Body() { semana, idTrabajador }: { semana: number; idTrabajador: number },
+    @Query() { semana, idTrabajador }: { semana: string; idTrabajador: string },
     @Headers("authorization") authHeader: string,
   ) {
     try {
@@ -36,8 +37,8 @@ export class CuadrantesController {
           ok: true,
           data: await this.cuadrantesInstance.getCuadrantes(
             usuario.idTienda,
-            idTrabajador,
-            semana,
+            Number(idTrabajador),
+            Number(semana),
           ),
         };
       }
@@ -48,9 +49,9 @@ export class CuadrantesController {
     }
   }
 
-  @Post("addCuadrante")
+  @Post("saveCuadrante")
   @UseGuards(AuthGuard)
-  async addCuadrante(
+  async saveCuadrante(
     @Body() cuadrante: TCuadrante,
     @Headers("authorization") authHeader: string,
   ) {
@@ -60,9 +61,15 @@ export class CuadrantesController {
       const usuario = await getUserWithToken(token);
 
       if (usuario.coordinadora && usuario.idTienda) {
+        // cuadrante.idTienda = usuario.idTienda;
+        // cuadrante.enviado = false;
+        const oldCuadrante = await this.cuadrantesInstance.getCuadrantes(
+          usuario.idTienda,
+          cuadrante.idTrabajador,
+          cuadrante.semana,
+        );
         cuadrante.idTienda = usuario.idTienda;
-        cuadrante.enviado = false;
-        await this.cuadrantesInstance.addCuadrante(cuadrante);
+        await this.cuadrantesInstance.saveCuadrante(cuadrante, oldCuadrante);
         return { ok: true };
       }
       throw Error("No llevas equipo o tienda para realizar esta acción");
