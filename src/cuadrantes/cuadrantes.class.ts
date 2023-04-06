@@ -47,34 +47,34 @@ export class Cuadrantes {
     const cuadrantes = await this.getPendientesEnvio();
     const tiendas = await this.tiendasInstance.getTiendas();
 
-    for (let i = 0; i < cuadrantes.length; i += 1) {
+    // Crear una función asíncrona para manejar la sincronización de cada cuadrante
+    const sincronizarCuadrante = async (cuadrante) => {
       let query = "DECLARE @idTurno VARCHAR(255) = NULL";
       let subQuery = "";
 
-      const sqlBorrar = this.schCuadrantes.borrarHistorial(cuadrantes[i]);
+      const sqlBorrar = this.schCuadrantes.borrarHistorial(cuadrante);
       const nombreTablaPlanificacion = this.schCuadrantes.nombreTablaSqlHit(
-        cuadrantes[i].semana,
+        cuadrante.semana,
       );
 
-      for (let j = 0; j < cuadrantes[i].arraySemanalHoras.length; j += 1) {
-        if (cuadrantes[i].arraySemanalHoras[j]) {
+      for (let j = 0; j < cuadrante.arraySemanalHoras.length; j += 1) {
+        if (cuadrante.arraySemanalHoras[j]) {
           const entrada = moment(
-            cuadrantes[i].arraySemanalHoras[j].horaEntrada,
+            cuadrante.arraySemanalHoras[j].horaEntrada,
             "HH:mm",
           );
           const salida = moment(
-            cuadrantes[i].arraySemanalHoras[j].horaSalida,
+            cuadrante.arraySemanalHoras[j].horaSalida,
             "HH:mm",
           );
           const tipoTurno = entrada.format("A") === "AM" ? "M" : "T";
 
           subQuery += `
-
             SELECT @idTurno = NULL;
             SELECT TOP 1 @idTurno = idTurno from cdpTurnos WHERE horaInicio = '${
-              cuadrantes[i].arraySemanalHoras[j].horaEntrada
-            }' AND horaFin = '${cuadrantes[i].arraySemanalHoras[j].horaSalida}';
-
+              cuadrante.arraySemanalHoras[j].horaEntrada
+            }' AND horaFin = '${cuadrante.arraySemanalHoras[j].horaSalida}';
+  
             IF @idTurno IS NOT NULL
               BEGIN
                 INSERT INTO ${nombreTablaPlanificacion} (
@@ -88,13 +88,13 @@ export class Cuadrantes {
                   activo
                 ) 
                 VALUES (
-                  '${cuadrantes[i].arraySemanalHoras[j].idPlan}', 
+                  '${cuadrante.arraySemanalHoras[j].idPlan}', 
                   CONVERT(datetime, '${moment()
-                    .week(cuadrantes[i].semana)
+                    .week(cuadrante.semana)
                     .weekday(j)
                     .format("DD/MM/YYYY")}', 103),
                   ${this.tiendasInstance.convertirTiendaToExterno(
-                    cuadrantes[i].idTienda,
+                    cuadrante.idTienda,
                     tiendas,
                   )}, 
                   '${tipoTurno}', 
@@ -105,40 +105,142 @@ export class Cuadrantes {
                 );
               END
             ELSE
-                BEGIN
-                  SELECT @idTurno = NEWID()
-                  INSERT INTO cdpTurnos (
-                    nombre, 
-                    horaInicio, 
-                    horaFin, 
-                    idTurno, 
-                    color, 
-                    tipoEmpleado
-                  ) 
-                  VALUES (
-                    'De ${entrada.format("HH:mm")} a ${salida.format(
-            "HH:mm",
-          )}', 
-                    '${entrada.format("HH:mm")}', 
-                    '${salida.format("HH:mm")}', 
-                    @idTurno, 
-                    '#DDDDDD', 
-                    'RESPONSABLE/DEPENDENTA
+              BEGIN
+                SELECT @idTurno = NEWID()
+                INSERT INTO cdpTurnos (
+                  nombre, 
+                  horaInicio, 
+                  horaFin, 
+                  idTurno, 
+                  color, 
+                  tipoEmpleado
+                ) 
+                VALUES (
+                  'De ${entrada.format("HH:mm")} a ${salida.format("HH:mm")}', 
+                  '${entrada.format("HH:mm")}', 
+                  '${salida.format("HH:mm")}', 
+                  @idTurno, 
+                  '#DDDDDD', 
+                  'RESPONSABLE/DEPENDENTA
                   ')
-                END
-
-        `;
+              END
+          `;
         }
       }
 
       const resPlanes = await recHit("Fac_Tena", sqlBorrar + query + subQuery);
       if (resPlanes.rowsAffected.includes(1)) {
-        await this.schCuadrantes.setCuadranteEnviado(cuadrantes[i]._id);
-      } else throw Error("Fallo en la consulta");
+        await this.schCuadrantes.setCuadranteEnviado(cuadrante._id);
+      } else {
+        throw Error("Fallo en la consulta");
+      }
+    };
+    // Dividir los cuadrantes en lotes y procesarlos en paralelo con Promise.all
+    const batchSize = 20; // Ajusta este valor según sea necesario
+    for (let i = 0; i < cuadrantes.length; i += batchSize) {
+      const batch = cuadrantes.slice(i, i + batchSize);
+      await Promise.all(batch.map(sincronizarCuadrante));
     }
 
     return true;
   }
+
+  // public async sincronizarConHit() {
+  //   const cuadrantes = await this.getPendientesEnvio();
+  //   const tiendas = await this.tiendasInstance.getTiendas();
+
+  //   for (let i = 0; i < cuadrantes.length; i += 1) {
+  //     let query = "DECLARE @idTurno VARCHAR(255) = NULL";
+  //     let subQuery = "";
+
+  //     const sqlBorrar = this.schCuadrantes.borrarHistorial(cuadrantes[i]);
+  //     const nombreTablaPlanificacion = this.schCuadrantes.nombreTablaSqlHit(
+  //       cuadrantes[i].semana,
+  //     );
+
+  //     for (let j = 0; j < cuadrantes[i].arraySemanalHoras.length; j += 1) {
+  //       if (cuadrantes[i].arraySemanalHoras[j]) {
+  //         const entrada = moment(
+  //           cuadrantes[i].arraySemanalHoras[j].horaEntrada,
+  //           "HH:mm",
+  //         );
+  //         const salida = moment(
+  //           cuadrantes[i].arraySemanalHoras[j].horaSalida,
+  //           "HH:mm",
+  //         );
+  //         const tipoTurno = entrada.format("A") === "AM" ? "M" : "T";
+
+  //         subQuery += `
+
+  //           SELECT @idTurno = NULL;
+  //           SELECT TOP 1 @idTurno = idTurno from cdpTurnos WHERE horaInicio = '${
+  //             cuadrantes[i].arraySemanalHoras[j].horaEntrada
+  //           }' AND horaFin = '${cuadrantes[i].arraySemanalHoras[j].horaSalida}';
+
+  //           IF @idTurno IS NOT NULL
+  //             BEGIN
+  //               INSERT INTO ${nombreTablaPlanificacion} (
+  //                 idPlan,
+  //                 fecha,
+  //                 botiga,
+  //                 periode,
+  //                 idTurno,
+  //                 usuarioModif,
+  //                 fechaModif,
+  //                 activo
+  //               )
+  //               VALUES (
+  //                 '${cuadrantes[i].arraySemanalHoras[j].idPlan}',
+  //                 CONVERT(datetime, '${moment()
+  //                   .week(cuadrantes[i].semana)
+  //                   .weekday(j)
+  //                   .format("DD/MM/YYYY")}', 103),
+  //                 ${this.tiendasInstance.convertirTiendaToExterno(
+  //                   cuadrantes[i].idTienda,
+  //                   tiendas,
+  //                 )},
+  //                 '${tipoTurno}',
+  //                 @idTurno,
+  //                 '365EquipoDeTrabajo',
+  //                 GETDATE(),
+  //                 1
+  //               );
+  //             END
+  //           ELSE
+  //               BEGIN
+  //                 SELECT @idTurno = NEWID()
+  //                 INSERT INTO cdpTurnos (
+  //                   nombre,
+  //                   horaInicio,
+  //                   horaFin,
+  //                   idTurno,
+  //                   color,
+  //                   tipoEmpleado
+  //                 )
+  //                 VALUES (
+  //                   'De ${entrada.format("HH:mm")} a ${salida.format(
+  //           "HH:mm",
+  //         )}',
+  //                   '${entrada.format("HH:mm")}',
+  //                   '${salida.format("HH:mm")}',
+  //                   @idTurno,
+  //                   '#DDDDDD',
+  //                   'RESPONSABLE/DEPENDENTA
+  //                 ')
+  //               END
+
+  //       `;
+  //       }
+  //     }
+
+  //     const resPlanes = await recHit("Fac_Tena", sqlBorrar + query + subQuery);
+  //     if (resPlanes.rowsAffected.includes(1)) {
+  //       await this.schCuadrantes.setCuadranteEnviado(cuadrantes[i]._id);
+  //     } else throw Error("Fallo en la consulta");
+  //   }
+
+  //   return true;
+  // }
 
   async saveCuadrante(cuadrante: TCuadrante, oldCuadrante: TCuadrante) {
     if (oldCuadrante) {
