@@ -4,7 +4,7 @@ import { CuadrantesDatabase } from "./cuadrantes.mongodb";
 import { ObjectId } from "mongodb";
 import { TCuadrante } from "./cuadrantes.interface";
 import { Tienda } from "../tiendas/tiendas.class";
-import { recHit } from "../bbdd/mssql";
+import { FacTenaMssql } from "../bbdd/mssql.class";
 
 moment.locale("custom", {
   week: {
@@ -17,6 +17,7 @@ export class Cuadrantes {
   constructor(
     private readonly schCuadrantes: CuadrantesDatabase,
     private readonly tiendasInstance: Tienda,
+    private readonly hitInstance: FacTenaMssql,
   ) {}
 
   async getCuadrantesIndividual(
@@ -128,7 +129,10 @@ export class Cuadrantes {
         }
       }
 
-      const resPlanes = await recHit("Fac_Tena", sqlBorrar + query + subQuery);
+      const resPlanes = await this.hitInstance.recHit(
+        sqlBorrar + query + subQuery,
+      );
+
       if (resPlanes.rowsAffected.includes(1)) {
         await this.schCuadrantes.setCuadranteEnviado(cuadrante._id);
       } else {
@@ -136,7 +140,7 @@ export class Cuadrantes {
       }
     };
     // Dividir los cuadrantes en lotes y procesarlos en paralelo con Promise.all
-    const batchSize = 100; // Ajusta este valor según sea necesario
+    const batchSize = 60; // Ajusta este valor según sea necesario
     for (let i = 0; i < cuadrantes.length; i += batchSize) {
       const batch = cuadrantes.slice(i, i + batchSize);
       await Promise.all(batch.map(sincronizarCuadrante));

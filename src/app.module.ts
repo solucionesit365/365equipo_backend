@@ -16,6 +16,7 @@ import { CuadrantesController } from "./cuadrantes/cuadrantes.controller";
 import { Cuadrantes } from "./cuadrantes/cuadrantes.class";
 import { CuadrantesDatabase } from "./cuadrantes/cuadrantes.mongodb";
 import { Tienda } from "./tiendas/tiendas.class";
+import { FacTenaMssql } from "./bbdd/mssql.class";
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { Tienda } from "./tiendas/tiendas.class";
     Cuadrantes,
     CuadrantesDatabase,
     Tienda,
+    FacTenaMssql,
   ],
 })
 export class AppModule {}

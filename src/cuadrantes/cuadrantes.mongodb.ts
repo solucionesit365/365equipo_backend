@@ -2,7 +2,6 @@ import { Injectable } from "@nestjs/common";
 import { MongoDbService } from "../bbdd/mongodb";
 import { TCuadrante } from "./cuadrantes.interface";
 import * as moment from "moment";
-import { recHit } from "src/bbdd/mssql";
 import { ObjectId } from "mongodb";
 
 moment.locale("es", {
