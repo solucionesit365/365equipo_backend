@@ -145,9 +145,8 @@ export class Cuadrantes {
     if (oldCuadrante) {
       cuadrante.historialPlanes = oldCuadrante.historialPlanes;
       cuadrante._id = oldCuadrante._id;
-      cuadrante.enviado = false;
     }
-
+    cuadrante.enviado = false;
     for (let i = 0; i < cuadrante.arraySemanalHoras.length; i += 1) {
       let update = false;
       if (cuadrante.arraySemanalHoras[i].idPlan) {
