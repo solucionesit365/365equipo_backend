@@ -117,19 +117,18 @@ export class CuadrantesDatabase {
     return `cdpPlanificacion_${lunes.format("YYYY_MM_DD")}`;
   }
 
-  async borrarHistorial(cuadrantes: TCuadrante[]) {
+  borrarHistorial(cuadrante: TCuadrante) {
     let sqlBorrar = "";
 
-    for (let i = 0; i < cuadrantes.length; i += 1) {
-      for (let j = 0; j < cuadrantes[i].historialPlanes.length; j += 1) {
-        if (cuadrantes[i].historialPlanes[j])
-          sqlBorrar += `
+    for (let j = 0; j < cuadrante.historialPlanes.length; j += 1) {
+      if (cuadrante.historialPlanes[j])
+        sqlBorrar += `
           DELETE FROM ${this.nombreTablaSqlHit(
-            cuadrantes[i].semana,
-          )} WHERE idPlan = '${cuadrantes[i].historialPlanes[j]}';
+            cuadrante.semana,
+          )} WHERE idPlan = '${cuadrante.historialPlanes[j]}';
           `;
-      }
     }
+
     return sqlBorrar;
     // console.log("sqlBorrar", sqlBorrar);
     // await recHit("Fac_Tena", sqlBorrar);

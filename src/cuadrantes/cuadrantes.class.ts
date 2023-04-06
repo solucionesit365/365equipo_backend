@@ -45,14 +45,13 @@ export class Cuadrantes {
 
   public async sincronizarConHit() {
     const cuadrantes = await this.getPendientesEnvio();
-    const sqlBorrar = await this.schCuadrantes.borrarHistorial(cuadrantes);
-
     const tiendas = await this.tiendasInstance.getTiendas();
 
     for (let i = 0; i < cuadrantes.length; i += 1) {
       let query = "DECLARE @idTurno VARCHAR(255) = NULL";
       let subQuery = "";
 
+      const sqlBorrar = this.schCuadrantes.borrarHistorial(cuadrantes[i]);
       const nombreTablaPlanificacion = this.schCuadrantes.nombreTablaSqlHit(
         cuadrantes[i].semana,
       );
