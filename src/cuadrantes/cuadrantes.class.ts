@@ -134,7 +134,7 @@ export class Cuadrantes {
       const resPlanes = await recHit("Fac_Tena", sqlBorrar + query + subQuery);
       if (resPlanes.rowsAffected.includes(1)) {
         await this.schCuadrantes.setCuadranteEnviado(cuadrantes[i]._id);
-      }
+      } else throw Error("Fallo en la consulta");
     }
 
     return true;
