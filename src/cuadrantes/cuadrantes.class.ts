@@ -53,7 +53,7 @@ export class Cuadrantes {
       let query = "DECLARE @idTurno VARCHAR(255) = NULL";
       let subQuery = "";
 
-      // const sqlBorrar = this.schCuadrantes.borrarHistorial(cuadrante);
+      const sqlBorrar = this.schCuadrantes.borrarHistorial(cuadrante);
       const nombreTablaPlanificacion = this.schCuadrantes.nombreTablaSqlHit(
         cuadrante.semana,
       );
@@ -78,9 +78,7 @@ export class Cuadrantes {
   
             IF @idTurno IS NOT NULL
               BEGIN
-                DELETE FROM ${nombreTablaPlanificacion} WHERE idPlan = '${
-            cuadrante.arraySemanalHoras[j].idPlan
-          }';
+                DELETE FROM ${nombreTablaPlanificacion} WHERE idPlan = '${cuadrante.arraySemanalHoras[j].idPlan}';
                 INSERT INTO ${nombreTablaPlanificacion} (
                   idPlan, 
                   fecha, 
@@ -127,9 +125,7 @@ export class Cuadrantes {
                   '#DDDDDD', 
                   'RESPONSABLE/DEPENDENTA
                   ');
-                  DELETE FROM ${nombreTablaPlanificacion} WHERE idPlan = '${
-            cuadrante.arraySemanalHoras[j].idPlan
-          }';
+                  DELETE FROM ${nombreTablaPlanificacion} WHERE idPlan = '${cuadrante.arraySemanalHoras[j].idPlan}';
                   INSERT INTO ${nombreTablaPlanificacion} (
                     idPlan, 
                     fecha, 
@@ -161,7 +157,9 @@ export class Cuadrantes {
         }
       }
 
-      const resPlanes = await this.hitInstance.recHit(query + subQuery);
+      const resPlanes = await this.hitInstance.recHit(
+        sqlBorrar + query + subQuery,
+      );
 
       if (resPlanes.rowsAffected.includes(1)) {
         await this.schCuadrantes.setCuadranteEnviado(cuadrante._id);
