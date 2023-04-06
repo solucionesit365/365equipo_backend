@@ -136,7 +136,7 @@ export class Cuadrantes {
       }
     };
     // Dividir los cuadrantes en lotes y procesarlos en paralelo con Promise.all
-    const batchSize = 20; // Ajusta este valor según sea necesario
+    const batchSize = 100; // Ajusta este valor según sea necesario
     for (let i = 0; i < cuadrantes.length; i += batchSize) {
       const batch = cuadrantes.slice(i, i + batchSize);
       await Promise.all(batch.map(sincronizarCuadrante));
