@@ -4,6 +4,7 @@ import { CuadrantesDatabase } from "./cuadrantes.mongodb";
 import { ObjectId } from "mongodb";
 import { TCuadrante } from "./cuadrantes.interface";
 import { Tienda } from "../tiendas/tiendas.class";
+import { recHit } from "../bbdd/mssql";
 
 moment.locale("custom", {
   week: {
@@ -13,7 +14,10 @@ moment.locale("custom", {
 
 @Injectable()
 export class Cuadrantes {
-  constructor(private readonly schCuadrantes: CuadrantesDatabase, private readonly tiendasInstance: Tienda) {}
+  constructor(
+    private readonly schCuadrantes: CuadrantesDatabase,
+    private readonly tiendasInstance: Tienda,
+  ) {}
 
   async getCuadrantesIndividual(
     idTienda: number,
@@ -41,31 +45,39 @@ export class Cuadrantes {
 
   public async sincronizarConHit() {
     const cuadrantes = await this.getPendientesEnvio();
-    await this.schCuadrantes.borrarHistorial(cuadrantes);
-    let query = `DECLARE @idTurno VARCHAR(255) = NULL`
-    let subQuery = "";
+    const sqlBorrar = await this.schCuadrantes.borrarHistorial(cuadrantes);
+
     const tiendas = await this.tiendasInstance.getTiendas();
-    const medioDia = moment({ hour: 12, minute: 59 });
-    const mediaNoche = moment({ hour: 0 });
 
     for (let i = 0; i < cuadrantes.length; i += 1) {
-      const nombreTablaPlanificacion = this.schCuadrantes.nombreTablaSqlHit(cuadrantes[i].semana);
-      const lunes = this.schCuadrantes.getMondayMoment(cuadrantes[i].semana);
+      let query = "DECLARE @idTurno VARCHAR(255) = NULL";
+      let subQuery = "";
+
+      const nombreTablaPlanificacion = this.schCuadrantes.nombreTablaSqlHit(
+        cuadrantes[i].semana,
+      );
 
       for (let j = 0; j < cuadrantes[i].arraySemanalHoras.length; j += 1) {
         if (cuadrantes[i].arraySemanalHoras[j]) {
+          const entrada = moment(
+            cuadrantes[i].arraySemanalHoras[j].horaEntrada,
+            "HH:mm",
+          );
+          const salida = moment(
+            cuadrantes[i].arraySemanalHoras[j].horaSalida,
+            "HH:mm",
+          );
+          const tipoTurno = entrada.format("A") === "AM" ? "M" : "T";
 
-          const entrada = moment(cuadrantes[i].arraySemanalHoras[j].horaEntrada);
-          // const salida = moment(cuadrantes[i].arraySemanalHoras[j].horaSalida);
-          const tipoTurno = entrada.isBetween(mediaNoche, medioDia)
-              ? "M"
-              : "T";
           subQuery += `
-            SELECT TOP 1 @idTurno = idTurno from cdpTurnos WHERE horaInicio = '${cuadrantes[i].arraySemanalHoras[j].horaEntrada}' AND horaFin = '${cuadrantes[i].arraySemanalHoras[j].horaSalida}';
+
+            SELECT @idTurno = NULL;
+            SELECT TOP 1 @idTurno = idTurno from cdpTurnos WHERE horaInicio = '${
+              cuadrantes[i].arraySemanalHoras[j].horaEntrada
+            }' AND horaFin = '${cuadrantes[i].arraySemanalHoras[j].horaSalida}';
 
             IF @idTurno IS NOT NULL
               BEGIN
-              
                 INSERT INTO ${nombreTablaPlanificacion} (
                   idPlan, 
                   fecha, 
@@ -78,21 +90,55 @@ export class Cuadrantes {
                 ) 
                 VALUES (
                   '${cuadrantes[i].arraySemanalHoras[j].idPlan}', 
-                  CONVERT(datetime, '${moment().week(cuadrantes[i].semana).weekday(j).format("DD/MM/YYYY")}', 103),
-                  ${this.tiendasInstance.convertirTiendaToExterno(cuadrantes[i].idTienda, tiendas)}, 
+                  CONVERT(datetime, '${moment()
+                    .week(cuadrantes[i].semana)
+                    .weekday(j)
+                    .format("DD/MM/YYYY")}', 103),
+                  ${this.tiendasInstance.convertirTiendaToExterno(
+                    cuadrantes[i].idTienda,
+                    tiendas,
+                  )}, 
                   '${tipoTurno}', 
                   @idTurno, 
                   '365EquipoDeTrabajo', 
                   GETDATE(), 
                   1
                 );
-          
-              END 
+              END
+            ELSE
+                BEGIN
+                  SELECT @idTurno = NEWID()
+                  INSERT INTO cdpTurnos (
+                    nombre, 
+                    horaInicio, 
+                    horaFin, 
+                    idTurno, 
+                    color, 
+                    tipoEmpleado
+                  ) 
+                  VALUES (
+                    'De ${entrada.format("HH:mm")} a ${salida.format(
+            "HH:mm",
+          )}', 
+                    '${entrada.format("HH:mm")}', 
+                    '${salida.format("HH:mm")}', 
+                    @idTurno, 
+                    '#DDDDDD', 
+                    'RESPONSABLE/DEPENDENTA
+                  ')
+                END
+
         `;
         }
+      }
 
+      const resPlanes = await recHit("Fac_Tena", sqlBorrar + query + subQuery);
+      if (resPlanes.rowsAffected.includes(1)) {
+        await this.schCuadrantes.setCuadranteEnviado(cuadrantes[i]._id);
       }
     }
+
+    return true;
   }
 
   async saveCuadrante(cuadrante: TCuadrante, oldCuadrante: TCuadrante) {

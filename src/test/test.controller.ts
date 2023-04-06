@@ -1,11 +1,13 @@
 import { Controller, Get } from "@nestjs/common";
 import axios from "axios";
+import * as moment from "moment";
 
 @Controller("test")
 export class TestController {
   @Get()
   test() {
-    return "este es el primer test";
+    const prueba = moment().week(14).weekday(6).format("DD/MM/YYYY");
+    return prueba;
   }
 
   @Get("ip")

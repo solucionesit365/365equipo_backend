@@ -2,7 +2,8 @@ import { Injectable } from "@nestjs/common";
 import { MongoDbService } from "../bbdd/mongodb";
 import { TCuadrante } from "./cuadrantes.interface";
 import * as moment from "moment";
-import { recSolucionesClassic } from "src/bbdd/mssql";
+import { recHit } from "src/bbdd/mssql";
+import { ObjectId } from "mongodb";
 
 moment.locale("es", {
   week: {
@@ -15,8 +16,9 @@ export class CuadrantesDatabase {
   constructor(private readonly mongoDbService: MongoDbService) {}
 
   async insertCuadrante(cuadrante: TCuadrante) {
+    cuadrante._id = new ObjectId().toString();
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
-    const cuadrantesCollection = db.collection("cuadrantes");
+    const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes");
     const resInsert = await cuadrantesCollection.insertOne(cuadrante);
     if (resInsert.acknowledged) return resInsert.insertedId;
     return null;
@@ -24,7 +26,7 @@ export class CuadrantesDatabase {
 
   async updateCuadrante(cuadrante: TCuadrante) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
-    const cuadrantesCollection = db.collection("cuadrantes");
+    const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes");
     const resInsert = await cuadrantesCollection.updateOne(
       { _id: cuadrante._id },
       {
@@ -55,6 +57,21 @@ export class CuadrantesDatabase {
       idTrabajador,
     });
     return resCuadrantes;
+  }
+
+  async setCuadranteEnviado(idCuadrante: string) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes");
+    const resEnviado = await cuadrantesCollection.updateOne(
+      { _id: idCuadrante },
+      {
+        $set: {
+          enviado: true,
+        },
+      },
+    );
+
+    return resEnviado.acknowledged;
   }
 
   async getCuadrantes(idTienda: number, semana: number) {
@@ -106,12 +123,15 @@ export class CuadrantesDatabase {
     for (let i = 0; i < cuadrantes.length; i += 1) {
       for (let j = 0; j < cuadrantes[i].historialPlanes.length; j += 1) {
         if (cuadrantes[i].historialPlanes[j])
-          sqlBorrar += `DELETE FROM ${this.nombreTablaSqlHit(
+          sqlBorrar += `
+          DELETE FROM ${this.nombreTablaSqlHit(
             cuadrantes[i].semana,
-          )} WHERE idPlan = '${cuadrantes[i].historialPlanes[j]}';`;
+          )} WHERE idPlan = '${cuadrantes[i].historialPlanes[j]}';
+          `;
       }
     }
-
-    await recSolucionesClassic("soluciones", sqlBorrar);
+    return sqlBorrar;
+    // console.log("sqlBorrar", sqlBorrar);
+    // await recHit("Fac_Tena", sqlBorrar);
   }
 }

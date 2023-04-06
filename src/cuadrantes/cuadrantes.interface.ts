@@ -1,7 +1,5 @@
-import { ObjectId } from "mongodb";
-
 export interface TCuadrante {
-  _id: ObjectId;
+  _id: string;
   idTrabajador: number;
   nombre: string;
   idTienda: number;

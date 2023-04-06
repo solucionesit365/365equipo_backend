@@ -17,7 +17,7 @@ export async function recHit(database: string, consultaSQL: string) {
     },
     requestTimeout: 10000,
   };
-
+  
   const pool = await new sql.ConnectionPool(config).connect();
   const result = await pool.request().query(consultaSQL);
   pool.close();

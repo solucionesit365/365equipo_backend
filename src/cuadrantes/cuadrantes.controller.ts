@@ -12,14 +12,7 @@ import { getUserWithToken } from "../firebase/auth";
 import { TokenService } from "../get-token/get-token.service";
 import { Cuadrantes } from "./cuadrantes.class";
 import { TCuadrante } from "./cuadrantes.interface";
-
-// /*Borrar de uso temporal */
-// import { app } from "../firebase/app";
-// import { db } from "../firebase/firestore";
-// import { ObjectId } from "mongodb";
-// import { recSoluciones } from "src/bbdd/mssql";
-
-// /* final borrar */
+import { SchedulerGuard } from "../scheduler/scheduler.guard";
 
 @Controller("cuadrantes")
 export class CuadrantesController {
@@ -116,6 +109,19 @@ export class CuadrantesController {
     }
   }
 
+  @Post("sincronizarConHit")
+  @UseGuards(SchedulerGuard)
+  async sincronizarConHit() {
+    try {
+      return {
+        ok: true,
+        data: await this.cuadrantesInstance.sincronizarConHit(),
+      };
+    } catch (err) {
+      console.log(err);
+      return { ok: false, message: err.message };
+    }
+  }
   // @Post("traspasoBorrar")
   // async traspasoBorrar() {
   //   try {
