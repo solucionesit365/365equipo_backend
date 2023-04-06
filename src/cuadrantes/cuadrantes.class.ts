@@ -53,7 +53,7 @@ export class Cuadrantes {
       let query = "DECLARE @idTurno VARCHAR(255) = NULL";
       let subQuery = "";
 
-      const sqlBorrar = this.schCuadrantes.borrarHistorial(cuadrante);
+      // const sqlBorrar = this.schCuadrantes.borrarHistorial(cuadrante);
       const nombreTablaPlanificacion = this.schCuadrantes.nombreTablaSqlHit(
         cuadrante.semana,
       );
@@ -78,6 +78,9 @@ export class Cuadrantes {
   
             IF @idTurno IS NOT NULL
               BEGIN
+                DELETE FROM ${nombreTablaPlanificacion} WHERE idPlan = '${
+            cuadrante.arraySemanalHoras[j].idPlan
+          }';
                 INSERT INTO ${nombreTablaPlanificacion} (
                   idPlan, 
                   fecha, 
@@ -123,15 +126,42 @@ export class Cuadrantes {
                   @idTurno, 
                   '#DDDDDD', 
                   'RESPONSABLE/DEPENDENTA
-                  ')
+                  ');
+                  DELETE FROM ${nombreTablaPlanificacion} WHERE idPlan = '${
+            cuadrante.arraySemanalHoras[j].idPlan
+          }';
+                  INSERT INTO ${nombreTablaPlanificacion} (
+                    idPlan, 
+                    fecha, 
+                    botiga, 
+                    periode, 
+                    idTurno, 
+                    usuarioModif, 
+                    fechaModif, 
+                    activo
+                  ) 
+                  VALUES (
+                    '${cuadrante.arraySemanalHoras[j].idPlan}', 
+                    CONVERT(datetime, '${moment()
+                      .week(cuadrante.semana)
+                      .weekday(j)
+                      .format("DD/MM/YYYY")}', 103),
+                    ${this.tiendasInstance.convertirTiendaToExterno(
+                      cuadrante.idTienda,
+                      tiendas,
+                    )}, 
+                    '${tipoTurno}', 
+                    @idTurno, 
+                    '365EquipoDeTrabajo', 
+                    GETDATE(), 
+                    1
+                  );
               END
           `;
         }
       }
 
-      const resPlanes = await this.hitInstance.recHit(
-        sqlBorrar + query + subQuery,
-      );
+      const resPlanes = await this.hitInstance.recHit(query + subQuery);
 
       if (resPlanes.rowsAffected.includes(1)) {
         await this.schCuadrantes.setCuadranteEnviado(cuadrante._id);
