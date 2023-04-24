@@ -80,6 +80,42 @@ export class CuadrantesController {
     }
   }
 
+  @Get("getTodos")
+  @UseGuards(AuthGuard)
+  async getAllCuadrantes(
+    @Headers("authorization") authHeader: string,
+  ){
+    try {
+      return {
+        ok: true,
+        data: await this.cuadrantesInstance.getTodo()
+      }
+    } catch (err) {
+      console.log(err);
+      return { ok: false, message: "peta por todas partes" };
+    }
+  }
+
+  //Todas las tiendas 1 semana
+  @Get("getTiendasUnaSemana")
+  @UseGuards(AuthGuard)
+  async getTiendas1Semana(
+    @Query() { semana }: { semana: number},
+    @Headers("authorization") authHeader: string,
+  ){
+    try {
+      
+      if (!semana ) throw Error("Faltan datos");
+      return {
+        ok: true,
+        data: await this.cuadrantesInstance.getTiendas1Semana(Number(semana))
+      }
+    } catch (err) {
+      console.log(err);
+      return { ok: false, message: "peta por todas partes" };
+    }
+  }
+
   @Post("saveCuadrante")
   @UseGuards(AuthGuard)
   async saveCuadrante(

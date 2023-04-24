@@ -25,6 +25,7 @@ export interface TrabajadorSql {
   nombreResponsable: string;
   nombreTienda: string;
   antiguedad: string;
+  tokenQR: string;
 }
 
 // export interface TrabajadorCompleto extends TrabajadorSql, UserRecord {

@@ -29,7 +29,8 @@ export async function getTrabajadores(todos = false) {
         tr1.nombreApellidos as nombreResponsable,
         ti.nombre as nombreTienda,
         CONVERT(nvarchar, tr.antiguedad, 103) as antiguedad,
-        tr.idEmpresa
+        tr.idEmpresa,
+        tr.tokenQR
     FROM trabajadores tr
     LEFT JOIN trabajadores tr1 ON tr.idResponsable = tr1.id
     LEFT JOIN tiendas ti ON tr.idTienda = ti.id
