@@ -39,6 +39,13 @@ export class Cuadrantes {
   async getTodo() {
     return await this.schCuadrantes.getTodo();
   }
+  async getTiendas1Semana(semana: number) {
+    return await this.schCuadrantes.getTiendas1Semana(semana);
+  }
+
+  async getSemanas1Tienda(idTienda: number){
+    return await this.schCuadrantes.getSemanas1Tienda(idTienda)
+  }
 
   private async getPendientesEnvio() {
     return await this.schCuadrantes.getPendientesEnvio();
