@@ -22,4 +22,16 @@ export class Fichajes {
 
     throw Error("No se ha podido registrar la salida");
   }
+
+  async getEstado(uid: string, dia: Date) {
+    const fichajes = await this.schFichajes.getFichajesDia(uid, dia);
+
+    let entrada = false;
+    
+    for (let i = 0; i < fichajes.length; i += 1) {
+        if ()
+    }
+    // buscar en mongodb los del usuario en este día
+    // pensar si no ha fichado, fichado, fichado y desfichado.
+  }
 }
