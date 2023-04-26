@@ -92,7 +92,7 @@ export class CuadrantesController {
       }
     } catch (err) {
       console.log(err);
-      return { ok: false, message: "peta por todas partes" };
+      return {ok: false, message: err.message}
     }
   }
 
@@ -112,7 +112,7 @@ export class CuadrantesController {
       }
     } catch (err) {
       console.log(err);
-      return { ok: false, message: "peta por todas partes" };
+      return {ok: false, message: err.message}
     }
   }
 
@@ -132,7 +132,7 @@ export class CuadrantesController {
       }
     } catch (error) {
     console.log(error);
-    return { ok: false, message: "Peta por todas partes"}
+    return {ok: false, message: error.message}
     
   }
 }
@@ -157,7 +157,7 @@ export class CuadrantesController {
       }
     } catch (error) {
       console.log(error);
-      return {ok: false, message: "Peta por todas partes"}
+      return {ok: false, message: error.message}
       
     }
   }
