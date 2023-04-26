@@ -17,6 +17,9 @@ import { Cuadrantes } from "./cuadrantes/cuadrantes.class";
 import { CuadrantesDatabase } from "./cuadrantes/cuadrantes.mongodb";
 import { Tienda } from "./tiendas/tiendas.class";
 import { FacTenaMssql } from "./bbdd/mssql.class";
+import { FichajesController } from "./fichajes/fichajes.controller";
+import { FichajesDatabase } from "./fichajes/fichajes.mongodb";
+import { Fichajes } from "./fichajes/fichajes.class";
 
 @Module({
   imports: [
@@ -32,6 +35,7 @@ import { FacTenaMssql } from "./bbdd/mssql.class";
     VacacionesController,
     TestController,
     CuadrantesController,
+    FichajesController,
   ],
   providers: [
     AppService,
@@ -43,6 +47,8 @@ import { FacTenaMssql } from "./bbdd/mssql.class";
     CuadrantesDatabase,
     Tienda,
     FacTenaMssql,
+    FichajesDatabase,
+    Fichajes,
   ],
 })
 export class AppModule {}
