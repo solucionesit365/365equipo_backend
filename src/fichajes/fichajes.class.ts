@@ -23,15 +23,19 @@ export class Fichajes {
     throw Error("No se ha podido registrar la salida");
   }
 
-  async getEstado(uid: string, dia: Date) {
-    const fichajes = await this.schFichajes.getFichajesDia(uid, dia);
+  async getEstado(uid: string, fecha: Date) {
+    const fichajes = await this.schFichajes.getFichajesDia(uid, fecha);
+    const primerFichaje = fichajes[0];
+    const ultimoFichaje = fichajes[fichajes.length - 1];
 
-    let entrada = false;
-    
-    for (let i = 0; i < fichajes.length; i += 1) {
-        if ()
-    }
-    // buscar en mongodb los del usuario en este día
-    // pensar si no ha fichado, fichado, fichado y desfichado.
+    if (!ultimoFichaje) {
+      return "SIN_ENTRADA";
+    } else if (primerFichaje.tipo === "SALIDA") {
+      return "ERROR";
+    } else if (ultimoFichaje.tipo === "ENTRADA") {
+      return "TRABAJANDO";
+    } else if (ultimoFichaje.tipo === "SALIDA") {
+      return "HA_SALIDO";
+    } else return "ERROR";
   }
 }

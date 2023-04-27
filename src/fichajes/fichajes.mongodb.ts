@@ -53,6 +53,7 @@ export class FichajesDatabase {
           $lt: endOfDay,
         },
       })
+      .sort({ fecha: 1 })
       .toArray();
   }
 }

@@ -1,4 +1,11 @@
-import { Controller, Post, UseGuards, Headers, Get, Query } from "@nestjs/common";
+import {
+  Controller,
+  Post,
+  UseGuards,
+  Headers,
+  Get,
+  Query,
+} from "@nestjs/common";
 import { AuthGuard } from "../auth/auth.guard";
 import { TokenService } from "../get-token/get-token.service";
 import { getUserWithToken } from "../firebase/auth";
@@ -46,16 +53,22 @@ export class FichajesController {
   }
 
   @Get("estado")
-  async getEstado(@Headers("authorization") authHeader: string, @Query('date') dateString: string) {
+  async getEstado(
+    @Headers("authorization") authHeader: string,
+    @Query("date") dateString: string,
+  ) {
     try {
-        const date = new Date(dateString);
-        const token = this.tokenService.extract(authHeader);
-        const usuario = await getUserWithToken(token);
-        
+      const date = new Date(dateString);
+      const token = this.tokenService.extract(authHeader);
+      const usuario = await getUserWithToken(token);
 
+      return {
+        ok: true,
+        data: await this.fichajesInstance.getEstado(usuario.uid, date),
+      };
     } catch (err) {
-        console.log(err);
-        return { ok: false, message: err.message };
+      console.log(err);
+      return { ok: false, message: err.message };
     }
   }
 }
