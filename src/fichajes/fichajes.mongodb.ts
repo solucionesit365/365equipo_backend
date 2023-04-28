@@ -44,7 +44,6 @@ export class FichajesDatabase {
   async getFichajesDia(uid: string, fecha: Date) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const fichajesCollection = db.collection<FichajeDto>("fichajes");
-
     const startOfDay = new Date(fecha);
     startOfDay.setHours(0, 0, 0, 0);
 
@@ -55,12 +54,12 @@ export class FichajesDatabase {
     return await fichajesCollection
       .find({
         uid,
-        fecha: {
+        hora: {
           $gte: startOfDay,
           $lt: endOfDay,
         },
       })
-      .sort({ fecha: 1 })
+      .sort({ hora: 1 })
       .toArray();
   }
 
