@@ -20,6 +20,7 @@ import { FacTenaMssql } from "./bbdd/mssql.class";
 import { FichajesController } from "./fichajes/fichajes.controller";
 import { FichajesDatabase } from "./fichajes/fichajes.mongodb";
 import { Fichajes } from "./fichajes/fichajes.class";
+import { Trabajador } from "./trabajadores/trabajadores.class";
 
 @Module({
   imports: [
@@ -49,6 +50,7 @@ import { Fichajes } from "./fichajes/fichajes.class";
     FacTenaMssql,
     FichajesDatabase,
     Fichajes,
+    Trabajador,
   ],
 })
 export class AppModule {}

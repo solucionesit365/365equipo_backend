@@ -6,4 +6,5 @@ export interface FichajeDto {
   uid: string;
   tipo: "ENTRADA" | "SALIDA";
   enviado: boolean;
+  idExterno: number;
 }

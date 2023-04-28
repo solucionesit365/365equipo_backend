@@ -10,6 +10,7 @@ import { AuthGuard } from "../auth/auth.guard";
 import { TokenService } from "../get-token/get-token.service";
 import { getUserWithToken } from "../firebase/auth";
 import { Fichajes } from "./fichajes.class";
+import { SchedulerGuard } from "../scheduler/scheduler.guard";
 
 @Controller("fichajes")
 export class FichajesController {
@@ -53,6 +54,7 @@ export class FichajesController {
   }
 
   @Get("estado")
+  @UseGuards(AuthGuard)
   async getEstado(
     @Headers("authorization") authHeader: string,
     @Query("date") dateString: string,
@@ -66,6 +68,18 @@ export class FichajesController {
         ok: true,
         data: await this.fichajesInstance.getEstado(usuario.uid, date),
       };
+    } catch (err) {
+      console.log(err);
+      return { ok: false, message: err.message };
+    }
+  }
+
+  @Post("sincroFichajes")
+  @UseGuards(SchedulerGuard)
+  async sincroFichajes() {
+    try {
+      await this.fichajesInstance.sincroFichajes();
+      return { ok: true };
     } catch (err) {
       console.log(err);
       return { ok: false, message: err.message };

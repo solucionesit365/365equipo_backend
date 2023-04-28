@@ -1,13 +1,23 @@
 import { Injectable } from "@nestjs/common";
 import { FichajesDatabase } from "./fichajes.mongodb";
+import { Trabajador } from "../trabajadores/trabajadores.class";
 
 @Injectable()
 export class Fichajes {
-  constructor(private readonly schFichajes: FichajesDatabase) {}
+  constructor(
+    private readonly schFichajes: FichajesDatabase,
+    private readonly trabajadoresInstance: Trabajador,
+  ) {}
 
   async nuevaEntrada(uid: string) {
     const hora = new Date();
-    const insert = await this.schFichajes.nuevaEntrada(uid, hora);
+    const trabajadorCompleto =
+      await this.trabajadoresInstance.getTrabajadorByAppId(uid);
+    const insert = await this.schFichajes.nuevaEntrada(
+      uid,
+      hora,
+      trabajadorCompleto.id,
+    );
 
     if (insert) return true;
 
@@ -16,7 +26,13 @@ export class Fichajes {
 
   async nuevaSalida(uid: string) {
     const hora = new Date();
-    const insert = await this.schFichajes.nuevaSalida(uid, hora);
+    const trabajadorCompleto =
+      await this.trabajadoresInstance.getTrabajadorByAppId(uid);
+    const insert = await this.schFichajes.nuevaSalida(
+      uid,
+      hora,
+      trabajadorCompleto.id,
+    );
 
     if (insert) return true;
 
@@ -37,5 +53,10 @@ export class Fichajes {
     } else if (ultimoFichaje.tipo === "SALIDA") {
       return "HA_SALIDO";
     } else return "ERROR";
+  }
+
+  async sincroFichajes() {
+    const fichajesPendientes = await this.schFichajes.getFichajesSincro();
+    await this.schFichajes.enviarHit(fichajesPendientes);
   }
 }

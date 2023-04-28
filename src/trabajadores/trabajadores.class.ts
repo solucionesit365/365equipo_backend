@@ -1,6 +1,8 @@
+import { Injectable } from "@nestjs/common";
 import * as schTrabajadores from "./trabajadores.mssql";
 
-class Trabajador {
+@Injectable()
+export class Trabajador {
   async getTrabajadorByAppId(uid: string) {
     const resUser = await schTrabajadores.getTrabajadorByAppId(uid);
     if (resUser) return resUser;
