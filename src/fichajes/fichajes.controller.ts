@@ -60,7 +60,6 @@ export class FichajesController {
     @Query("date") dateString: string,
   ) {
     try {
-      console.log(dateString);
       const date = new Date(dateString);
       const token = this.tokenService.extract(authHeader);
       const usuario = await getUserWithToken(token);
