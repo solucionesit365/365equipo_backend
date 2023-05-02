@@ -85,4 +85,18 @@ export class FichajesController {
       return { ok: false, message: err.message };
     }
   }
+
+  @Post("getFichajesHit")
+  @UseGuards(SchedulerGuard)
+  async getFichajesHit() {
+    try {
+      return {
+        ok: true,
+        data: await this.fichajesInstance.fusionarFichajesHit(),
+      };
+    } catch (err) {
+      console.log(err);
+      return { ok: false, message: err.message };
+    }
+  }
 }

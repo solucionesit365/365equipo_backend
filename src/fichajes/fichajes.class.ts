@@ -1,6 +1,9 @@
 import { Injectable } from "@nestjs/common";
 import { FichajesDatabase } from "./fichajes.mongodb";
 import { Trabajador } from "../trabajadores/trabajadores.class";
+import { TrabajadorSql } from "../trabajadores/trabajadores.interface";
+import * as moment from "moment";
+import { ObjectId } from "mongodb";
 
 @Injectable()
 export class Fichajes {
@@ -58,5 +61,52 @@ export class Fichajes {
   async sincroFichajes() {
     const fichajesPendientes = await this.schFichajes.getFichajesSincro();
     await this.schFichajes.enviarHit(fichajesPendientes);
+  }
+
+  filtrarUidFichajeTrabajador(fichajeHit: any, trabajadores: TrabajadorSql[]) {
+    for (let i = 0; i < trabajadores.length; i += 1) {
+      if (trabajadores[i].id === Number(fichajeHit.usuari))
+        return trabajadores[i].idApp ? trabajadores[i].idApp : "NO_TIENE_APP";
+    }
+
+    return "NO_TIENE_APP";
+  }
+
+  async fusionarFichajesHit() {
+    const fichajesHit = await this.schFichajes.getFichajesHit();
+    const trabajadores = await this.trabajadoresInstance.getTrabajadores();
+    const fichajesPretty = [];
+
+    for (let i = 0; i < fichajesHit.length; i += 1) {
+      const idApp = this.filtrarUidFichajeTrabajador(
+        fichajesHit[i],
+        trabajadores,
+      );
+      if (idApp === "NO_TIENE_APP") continue;
+
+      if (fichajesHit[i].accio === 1) {
+        fichajesPretty.push({
+          _id: fichajesHit[i].idr,
+          hora: moment(fichajesHit[i].tmst, "DD/MM/YYYY").toDate(),
+          uid: idApp,
+          tipo: "ENTRADA",
+          enviado: true,
+          idExterno: Number(fichajesHit[i].usuari),
+        });
+      } else if (fichajesHit[i].accio === 2) {
+        fichajesPretty.push({
+          _id: fichajesHit[i].idr,
+          hora: moment(fichajesHit[i].tmst, "DD/MM/YYYY").toDate(),
+          uid: idApp,
+          tipo: "SALIDA",
+          enviado: true,
+          idExterno: Number(fichajesHit[i].usuari),
+        });
+      }
+    }
+
+    await this.schFichajes.insertarFichajesHit(fichajesPretty);
+
+    return true;
   }
 }

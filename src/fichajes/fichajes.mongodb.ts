@@ -116,4 +116,40 @@ export class FichajesDatabase {
     );
     await Promise.all(updatePromises);
   }
+
+  async getFichajesHit() {
+    const fechaActual = new Date();
+
+    const day = fechaActual.getDate();
+    const month = fechaActual.getMonth() + 1;
+    const year = fechaActual.getFullYear();
+
+    const sql = `SELECT accio, usuari, idr, CONVERT(nvarchar, tmst, 103) as tmst FROM cdpDadesFichador WHERE day(tmst) = ${day} AND month(tmst) = ${month} AND year(tmst) = ${year} AND comentari <> '365EquipoDeTrabajo'`;
+
+    const resFichajes = await this.hitInstance.recHit(sql);
+
+    return resFichajes.recordset;
+  }
+
+  async insertarFichajesHit(fichajes: FichajeDto[]) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const fichajesCollection = db.collection<FichajeDto>("fichajes");
+
+    try {
+      await fichajesCollection.insertMany(fichajes, {
+        ordered: false,
+      });
+    } catch (error) {
+      if (
+        error.code === 11000 ||
+        (error.writeErrors && error.writeErrors.some((e) => e.code === 11000))
+      ) {
+        console.log(
+          "Se ignoraron los documentos duplicados y se insertaron los nuevos",
+        );
+      } else {
+        throw Error(error);
+      }
+    }
+  }
 }
