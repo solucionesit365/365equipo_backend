@@ -1,10 +1,12 @@
-import { Body, Controller, Post } from "@nestjs/common";
+import { Body, Controller, Post, UseGuards } from "@nestjs/common";
 import { Ausencias } from "./ausencias.class";
+import { AuthGuard } from "../auth/auth.guard";
 
 @Controller("ausencias")
 export class AusenciasController {
   constructor(private readonly ausenciasInstance: Ausencias) {}
   @Post("nueva")
+  @UseGuards(AuthGuard)
   async addAusencia(
     @Body() { idUsuario, fechaInicio, fechaFinal, tipo, comentario },
   ) {
@@ -38,6 +40,7 @@ export class AusenciasController {
   }
 
   @Post("borrar")
+  @UseGuards(AuthGuard)
   async borrarAusencia(@Body() { idAusencia }) {
     try {
       if (typeof idAusencia === "string") {
