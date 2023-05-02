@@ -24,6 +24,8 @@ import { Trabajador } from "./trabajadores/trabajadores.class";
 import { AusenciasController } from "./ausencias/ausencias.controller";
 import { Ausencias } from "./ausencias/ausencias.class";
 import { AusenciasDatabase } from "./ausencias/ausencias.mongodb";
+import { AdminController } from "./admin/admin.controller";
+import { Admin } from "./admin/admin.class";
 
 @Module({
   imports: [
@@ -41,6 +43,7 @@ import { AusenciasDatabase } from "./ausencias/ausencias.mongodb";
     CuadrantesController,
     FichajesController,
     AusenciasController,
+    AdminController,
   ],
   providers: [
     AppService,
@@ -57,6 +60,7 @@ import { AusenciasDatabase } from "./ausencias/ausencias.mongodb";
     Trabajador,
     Ausencias,
     AusenciasDatabase,
+    Admin,
   ],
 })
 export class AppModule {}
