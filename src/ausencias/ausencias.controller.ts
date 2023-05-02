@@ -47,6 +47,7 @@ export class AusenciasController {
         else throw Error("No se ha podido borrar esta ausencia");
       } else throw Error("Parámetros incorrectos");
     } catch (err) {
+        // Cambio mínimo para notificación de slack
       console.log(err);
       return { ok: false, message: err.message };
     }
