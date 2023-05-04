@@ -29,6 +29,8 @@ import { Admin } from "./admin/admin.class";
 import { NominasController } from "./nominas/nominas.controller";
 import { Nominas } from "./nominas/nominas.class";
 import { NominasDatabase } from "./nominas/nominas.database";
+import { NotificacionesController } from './notificaciones/notificaciones.controller';
+import { FirebaseMessagingService } from './firebase/firebase-messaging.service';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -47,6 +49,7 @@ import { NominasDatabase } from "./nominas/nominas.database";
     AusenciasController,
     AdminController,
     NominasController,
+    NotificacionesController,
   ],
   providers: [
     AppService,
@@ -66,6 +69,7 @@ import { NominasDatabase } from "./nominas/nominas.database";
     Admin,
     Nominas,
     NominasDatabase,
+    FirebaseMessagingService,
   ],
 })
 export class AppModule {}
