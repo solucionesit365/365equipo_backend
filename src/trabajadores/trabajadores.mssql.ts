@@ -47,6 +47,23 @@ export async function getTrabajadores(todos = false) {
   return null;
 }
 
+
+// Identificar usuario QR
+
+export async function getTrabajadorTokenQR(idTrabajador: number, tokenQR: string){
+  const sql = `
+  SELECT 
+  tr.nombreApellidos,
+  tr.tipoTrabajador
+  FROM trabajadores tr
+  WHERE tr.id = @param0 AND tr.tokenQR = @param1
+  `
+  const resTrabajador = await recSoluciones("soluciones", sql, idTrabajador, tokenQR);
+  if (resTrabajador.recordset.length > 0) 
+    return resTrabajador.recordset[0] as TrabajadorSql;
+  return null;
+}
+
 /* Individual x uid */
 export async function getTrabajadorByAppId(uid: string) {
   const sql = `
