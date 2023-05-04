@@ -60,7 +60,6 @@ export class FichajesController {
     @Query("date") dateString: string,
   ) {
     try {
-      console.log(dateString);
       const date = new Date(dateString);
       const token = this.tokenService.extract(authHeader);
       const usuario = await getUserWithToken(token);
@@ -81,6 +80,20 @@ export class FichajesController {
     try {
       await this.fichajesInstance.sincroFichajes();
       return { ok: true };
+    } catch (err) {
+      console.log(err);
+      return { ok: false, message: err.message };
+    }
+  }
+
+  @Post("getFichajesHit")
+  @UseGuards(SchedulerGuard)
+  async getFichajesHit() {
+    try {
+      return {
+        ok: true,
+        data: await this.fichajesInstance.fusionarFichajesHit(),
+      };
     } catch (err) {
       console.log(err);
       return { ok: false, message: err.message };

@@ -21,7 +21,14 @@ import { FichajesController } from "./fichajes/fichajes.controller";
 import { FichajesDatabase } from "./fichajes/fichajes.mongodb";
 import { Fichajes } from "./fichajes/fichajes.class";
 import { Trabajador } from "./trabajadores/trabajadores.class";
-
+import { AusenciasController } from "./ausencias/ausencias.controller";
+import { Ausencias } from "./ausencias/ausencias.class";
+import { AusenciasDatabase } from "./ausencias/ausencias.mongodb";
+import { AdminController } from "./admin/admin.controller";
+import { Admin } from "./admin/admin.class";
+import { NominasController } from "./nominas/nominas.controller";
+import { Nominas } from "./nominas/nominas.class";
+import { NominasDatabase } from "./nominas/nominas.database";
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -37,6 +44,9 @@ import { Trabajador } from "./trabajadores/trabajadores.class";
     TestController,
     CuadrantesController,
     FichajesController,
+    AusenciasController,
+    AdminController,
+    NominasController,
   ],
   providers: [
     AppService,
@@ -51,6 +61,11 @@ import { Trabajador } from "./trabajadores/trabajadores.class";
     FichajesDatabase,
     Fichajes,
     Trabajador,
+    Ausencias,
+    AusenciasDatabase,
+    Admin,
+    Nominas,
+    NominasDatabase,
   ],
 })
 export class AppModule {}

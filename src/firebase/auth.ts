@@ -10,6 +10,24 @@ export async function verifyToken(token: string) {
   await auth.verifyIdToken(token, true);
 }
 
+export async function getUidByEmail(email: string) {
+  try {
+    const userRecord = await auth.getUserByEmail(email);
+    return userRecord.uid;
+  } catch (error) {
+    console.error("Error fetching user by email:", error);
+  }
+}
+
+export async function generateCustomToken(uid) {
+  try {
+    const customToken = await auth.createCustomToken(uid);
+    return customToken;
+  } catch (error) {
+    console.error("Error generating custom token:", error);
+  }
+}
+
 export async function getUserWithToken(
   token: string,
 ): Promise<TrabajadorCompleto> {
