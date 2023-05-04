@@ -12,16 +12,29 @@ export class FirebaseMessagingService {
 
   async sendNotification(token: string): Promise<void> {
     // Define las opciones de la notificación
-    const notification = {
-      title: "Título de la notificación",
-      body: "Cuerpo de la notificación",
-      icon: "https://silema.web.app/favicon.png",
-    };
+    // const notification = {
+    //   title: "Título de la notificación",
+    //   body: "Cuerpo de la notificación",
+    //   icon: "https://silema.web.app/favicon.png",
+    // };
 
-    // Define el mensaje
-    const message: Message = {
-      notification,
-      token,
+    // // Define el mensaje
+    // const message: Message = {
+    //   notification,
+    //   token,
+    // };
+
+    const message = {
+      token: token, // El token del dispositivo al que deseas enviar la notificación
+      notification: {
+        title: "Título de la notificación",
+        body: "Cuerpo de la notificación",
+      },
+      webpush: {
+        notification: {
+          icon: "https://silema.web.app/favicon.png", // La URL del ícono que deseas mostrar en la notificación
+        },
+      },
     };
 
     try {
