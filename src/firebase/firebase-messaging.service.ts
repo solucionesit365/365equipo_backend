@@ -15,7 +15,7 @@ export class FirebaseMessagingService {
     const notification = {
       title: "Título de la notificación",
       body: "Cuerpo de la notificación",
-      icon: "URL del icono (opcional)",
+      icon: "https://silema.web.app/favicon.png",
     };
 
     // Define el mensaje
