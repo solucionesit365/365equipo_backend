@@ -5,6 +5,12 @@ import { ObjectId } from "mongodb";
 import { TCuadrante } from "./cuadrantes.interface";
 import { Tienda } from "../tiendas/tiendas.class";
 import { FacTenaMssql } from "../bbdd/mssql.class";
+import {
+  AusenciaInterface,
+  TiposAusencia,
+} from "../ausencias/ausencias.interface";
+import { Trabajador } from "../trabajadores/trabajadores.class";
+import { TrabajadorSql } from "../trabajadores/trabajadores.interface";
 
 moment.locale("custom", {
   week: {
@@ -18,17 +24,20 @@ export class Cuadrantes {
     private readonly schCuadrantes: CuadrantesDatabase,
     private readonly tiendasInstance: Tienda,
     private readonly hitInstance: FacTenaMssql,
+    private readonly trabajadoresInstance: Trabajador,
   ) {}
 
   async getCuadrantesIndividual(
     idTienda: number,
     idTrabajador: number,
     semana: number,
+    year: number,
   ) {
     return await this.schCuadrantes.getCuadrantesIndividual(
       idTienda,
       idTrabajador,
       semana,
+      year,
     );
   }
 
@@ -43,8 +52,8 @@ export class Cuadrantes {
     return await this.schCuadrantes.getTiendas1Semana(semana);
   }
 
-  async getSemanas1Tienda(idTienda: number){
-    return await this.schCuadrantes.getSemanas1Tienda(idTienda)
+  async getSemanas1Tienda(idTienda: number) {
+    return await this.schCuadrantes.getSemanas1Tienda(idTienda);
   }
 
   private async getPendientesEnvio() {
@@ -85,7 +94,9 @@ export class Cuadrantes {
   
             IF @idTurno IS NOT NULL
               BEGIN
-                DELETE FROM ${nombreTablaPlanificacion} WHERE idPlan = '${cuadrante.arraySemanalHoras[j].idPlan}';
+                DELETE FROM ${nombreTablaPlanificacion} WHERE idPlan = '${
+            cuadrante.arraySemanalHoras[j].idPlan
+          }';
                 INSERT INTO ${nombreTablaPlanificacion} (
                   idPlan, 
                   fecha, 
@@ -132,7 +143,9 @@ export class Cuadrantes {
                   '#DDDDDD', 
                   'RESPONSABLE/DEPENDENTA
                   ');
-                  DELETE FROM ${nombreTablaPlanificacion} WHERE idPlan = '${cuadrante.arraySemanalHoras[j].idPlan}';
+                  DELETE FROM ${nombreTablaPlanificacion} WHERE idPlan = '${
+            cuadrante.arraySemanalHoras[j].idPlan
+          }';
                   INSERT INTO ${nombreTablaPlanificacion} (
                     idPlan, 
                     fecha, 
@@ -320,6 +333,198 @@ export class Cuadrantes {
       const idCuadrante = await this.schCuadrantes.insertCuadrante(cuadrante);
       if (idCuadrante) return true;
       throw Error("No se ha podido insertar el cuadrante");
+    }
+  }
+
+  semanasEnRango(ausencia: AusenciaInterface) {
+    const semanas: { year: number; week: number }[] = [];
+    const inicio = moment(ausencia.fechaInicio);
+    const final = moment(ausencia.fechaFinal);
+
+    for (
+      let currentDate = inicio;
+      currentDate.isSameOrBefore(final);
+      currentDate.add(1, "days")
+    ) {
+      const year = currentDate.year();
+      const week = currentDate.isoWeek();
+
+      if (!semanas.some((sw) => sw.year === year && sw.week === week)) {
+        semanas.push({ year, week });
+      }
+    }
+
+    return semanas;
+  }
+
+  private estaEnRango(
+    fecha: moment.Moment,
+    fechaInicio: moment.Moment,
+    fechaFinal: moment.Moment,
+  ): boolean {
+    // Agrega un día a la fecha final para incluirlo en el rango
+    fechaFinal.add(1, "days");
+    return fecha.isSameOrAfter(fechaInicio) && fecha.isBefore(fechaFinal);
+  }
+
+  private crearAusencia(
+    parcial: { dia: Date; horas: number },
+    tipo: TiposAusencia,
+  ): {
+    tipo: TiposAusencia;
+    parcial: boolean;
+    horasParcial?: number;
+  } {
+    if (parcial) {
+      return {
+        tipo: tipo,
+        parcial: true,
+        horasParcial: parcial.horas,
+      };
+    }
+    return {
+      tipo: tipo,
+      parcial: false,
+    };
+  }
+
+  private actualizarCuadranteConAusencia(
+    cuadrante: TCuadrante,
+    ausencia: AusenciaInterface,
+  ): void {
+    cuadrante.arraySemanalHoras = cuadrante.arraySemanalHoras.map(
+      (horas, index) => {
+        const fecha = moment()
+          .year(cuadrante.year)
+          .isoWeek(cuadrante.semana)
+          .day(index + 1);
+        if (
+          this.estaEnRango(
+            fecha,
+            moment(ausencia.fechaInicio),
+            moment(ausencia.fechaFinal),
+          )
+        ) {
+          const parcial = ausencia.arrayParciales.find((p) =>
+            moment(p.dia).isSame(fecha, "day"),
+          );
+          return {
+            horaEntrada: horas ? horas.horaEntrada : "",
+            horaSalida: horas ? horas.horaSalida : "",
+            idPlan: horas ? horas.idPlan : "",
+            ausencia: this.crearAusencia(parcial, ausencia.tipo),
+          };
+        }
+        return horas;
+      },
+    );
+  }
+
+  private crearNuevoCuadrante(
+    trabajador: TrabajadorSql,
+    semana: { week: number; year: number },
+    ausencia: AusenciaInterface,
+  ): TCuadrante {
+    return {
+      idTrabajador: ausencia.idUsuario,
+      nombre: trabajador.nombreApellidos,
+      idTienda: trabajador.idTienda,
+      enviado: false,
+      historialPlanes: [],
+      totalHoras: null,
+      semana: semana.week,
+      year: semana.year,
+      arraySemanalHoras: Array.from({ length: 7 }, (_, index) => {
+        const fecha = moment()
+          .year(semana.year)
+          .isoWeek(semana.week)
+          .day(index + 1);
+
+        if (
+          this.estaEnRango(
+            fecha,
+            moment(ausencia.fechaInicio),
+            moment(ausencia.fechaFinal),
+          )
+        ) {
+          const parcial = ausencia.arrayParciales.find((p) =>
+            moment(p.dia).isSame(fecha, "day"),
+          );
+          return {
+            horaEntrada: "",
+            horaSalida: "",
+            idPlan: "",
+            ausencia: this.crearAusencia(parcial, ausencia.tipo),
+          };
+        }
+        return null;
+      }),
+    };
+  }
+
+  async agregarAusencia(ausencia: AusenciaInterface): Promise<void> {
+    const semanas = this.semanasEnRango(ausencia);
+    const cuadrantes =
+      semanas.length > 0
+        ? await this.schCuadrantes.cuadrantesPorAusencia(ausencia, semanas)
+        : [];
+    const trabajador = await this.trabajadoresInstance.getTrabajadorBySqlId(
+      ausencia.idUsuario,
+    );
+
+    const cuadrantesPorSemana = new Map(
+      semanas.map((semana) => [
+        `${semana.year}-${semana.week}`,
+        cuadrantes.find(
+          (cuadrante) =>
+            cuadrante.year === semana.year && cuadrante.semana === semana.week,
+        ),
+      ]),
+    );
+
+    for (const semana of semanas) {
+      const cuadrante = cuadrantesPorSemana.get(
+        `${semana.year}-${semana.week}`,
+      );
+
+      if (cuadrante) {
+        this.actualizarCuadranteConAusencia(cuadrante, ausencia);
+        await this.schCuadrantes.actualizarCuadranteAusencia(cuadrante);
+      } else {
+        const nuevoCuadrante = this.crearNuevoCuadrante(
+          trabajador,
+          semana,
+          ausencia,
+        );
+        await this.schCuadrantes.crearCuadranteAusencia(nuevoCuadrante);
+      }
+    }
+
+    if (cuadrantes.length === 0) {
+      const fechaInicio = moment(ausencia.fechaInicio);
+      const fechaFinal = moment(ausencia.fechaFinal);
+
+      while (fechaInicio.isSameOrBefore(fechaFinal, "day")) {
+        const semana = {
+          year: fechaInicio.year(),
+          week: fechaInicio.isoWeek(),
+        };
+
+        if (!cuadrantesPorSemana.has(`${semana.year}-${semana.week}`)) {
+          const nuevoCuadrante = this.crearNuevoCuadrante(
+            trabajador,
+            semana,
+            ausencia,
+          );
+          await this.schCuadrantes.crearCuadranteAusencia(nuevoCuadrante);
+          cuadrantesPorSemana.set(
+            `${semana.year}-${semana.week}`,
+            nuevoCuadrante,
+          );
+        }
+
+        fechaInicio.add(1, "days");
+      }
     }
   }
 }

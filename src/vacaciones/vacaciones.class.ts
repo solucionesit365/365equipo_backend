@@ -2,8 +2,13 @@ import * as moment from "moment";
 import { trabajadorInstance } from "src/trabajadores/trabajadores.class";
 import { recHit, recSoluciones } from "../bbdd/mssql";
 import * as schVacaciones from "./vacaciones.mssql";
+import { Injectable } from "@nestjs/common";
+import { Cuadrantes } from "../cuadrantes/cuadrantes.class";
 
-class Vacaciones {
+@Injectable()
+export class Vacaciones {
+  constructor(private readonly cuadrantesInstance: Cuadrantes) {}
+
   async getSolicitudesTrabajadorUid(uid: string) {
     return await schVacaciones.getSolicitudesTrabajadorUid(uid);
   }
@@ -39,8 +44,21 @@ class Vacaciones {
       respuesta,
     );
 
-    if (resSeter) return true;
-    else throw Error("No ha sido posible modificar el estado de la solicitud");
+    if (resSeter) {
+      if (estado === "APROBADA") {
+        const vacaciones = await schVacaciones.getSolicitudById(idSolicitud);
+        await this.cuadrantesInstance.agregarAusencia({
+          arrayParciales: [],
+          comentario: "Vacaciones",
+          fechaInicio: moment(vacaciones.fechaInicio, "DD/MM/YYYY").toDate(),
+          fechaFinal: moment(vacaciones.fechaFinal, "DD/MM/YYYY").toDate(),
+          idUsuario: vacaciones.idBeneficiario,
+          tipo: "VACACIONES",
+        });
+      }
+      return true;
+    } else
+      throw Error("No ha sido posible modificar el estado de la solicitud");
   }
 
   async guardarEnHit(vacaciones: {
@@ -127,5 +145,3 @@ class Vacaciones {
     return true;
   }
 }
-
-export const vacacionesInstance = new Vacaciones();

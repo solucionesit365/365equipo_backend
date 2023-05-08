@@ -11,11 +11,14 @@ import { SchedulerGuard } from "../scheduler/scheduler.guard";
 import { verifyToken } from "../firebase/auth";
 import { TokenService } from "../get-token/get-token.service";
 import { trabajadorInstance } from "../trabajadores/trabajadores.class";
-import { vacacionesInstance } from "./vacaciones.class";
+import { Vacaciones } from "./vacaciones.class";
 
 @Controller("vacaciones")
 export class VacacionesController {
-  constructor(private readonly tokenService: TokenService) {}
+  constructor(
+    private readonly tokenService: TokenService,
+    private readonly vacacionesInstance: Vacaciones,
+  ) {}
 
   @Get()
   async getSolicitudes(@Headers("authorization") authHeader: string) {
@@ -24,7 +27,7 @@ export class VacacionesController {
       await verifyToken(token);
       return {
         ok: true,
-        data: await vacacionesInstance.getSolicitudes(),
+        data: await this.vacacionesInstance.getSolicitudes(),
       };
     } catch (err) {
       console.log(err);
@@ -38,7 +41,7 @@ export class VacacionesController {
     try {
       return {
         ok: true,
-        data: await vacacionesInstance.sendToHit(),
+        data: await this.vacacionesInstance.sendToHit(),
       };
     } catch (err) {
       console.log(err);
@@ -58,12 +61,12 @@ export class VacacionesController {
       if (uid) {
         return {
           ok: true,
-          data: await vacacionesInstance.getSolicitudesTrabajadorUid(uid),
+          data: await this.vacacionesInstance.getSolicitudesTrabajadorUid(uid),
         };
       } else if (id) {
         return {
           ok: true,
-          data: await vacacionesInstance.getSolicitudesTrabajadorSqlId(id),
+          data: await this.vacacionesInstance.getSolicitudesTrabajadorSqlId(id),
         };
       } else throw Error("Faltan datos. uid o id");
     } catch (err) {
@@ -83,7 +86,7 @@ export class VacacionesController {
 
       return {
         ok: true,
-        data: vacacionesInstance.borrarSolicitud(idSolicitud),
+        data: this.vacacionesInstance.borrarSolicitud(idSolicitud),
       };
     } catch (err) {
       console.log(err);
@@ -102,7 +105,9 @@ export class VacacionesController {
       await verifyToken(token);
 
       const solicitudesEmpleadosDirectos =
-        await vacacionesInstance.getSolicitudesSubordinados(idAppResponsable);
+        await this.vacacionesInstance.getSolicitudesSubordinados(
+          idAppResponsable,
+        );
       const empleadosTipoCoordi =
         await trabajadorInstance.getSubordinadosConTienda(idAppResponsable);
       const soyCoordinadora: boolean = await trabajadorInstance.esCoordinadora(
@@ -115,7 +120,7 @@ export class VacacionesController {
           if (empleadosTipoCoordi[i].llevaEquipo > 0) {
             // Caso coordinadora
             const solicitudesSubordinadosCoordinadora =
-              await vacacionesInstance.getSolicitudesSubordinados(
+              await this.vacacionesInstance.getSolicitudesSubordinados(
                 empleadosTipoCoordi[i].idApp,
               );
 
@@ -170,7 +175,7 @@ export class VacacionesController {
 
       return {
         ok: true,
-        data: await vacacionesInstance.setEstadoSolicitud(
+        data: await this.vacacionesInstance.setEstadoSolicitud(
           estado,
           idSolicitud,
           respuesta,

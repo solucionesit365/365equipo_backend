@@ -117,6 +117,14 @@ export async function getSolicitudesTrabajadorSqlId(id: number): Promise<
   return [];
 }
 
+export async function getSolicitudById(idSolicitud: number) {
+  const sql = "SELECT * FROM solicitudVacaciones WHERE idSolicitud = @param0;";
+
+  const resSoli = await recSoluciones("soluciones", sql, idSolicitud);
+
+  return resSoli.recordset[0];
+}
+
 export async function borrarSolicitud(idSolicitud: number): Promise<boolean> {
   const sql = `
     DELETE FROM solicitudVacaciones WHERE idSolicitud = @param0;

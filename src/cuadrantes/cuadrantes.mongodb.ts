@@ -3,6 +3,7 @@ import { MongoDbService } from "../bbdd/mongodb";
 import { TCuadrante } from "./cuadrantes.interface";
 import * as moment from "moment";
 import { ObjectId } from "mongodb";
+import { AusenciaInterface } from "../ausencias/ausencias.interface";
 
 moment.locale("es", {
   week: {
@@ -47,6 +48,7 @@ export class CuadrantesDatabase {
     idTienda: number,
     idTrabajador: number,
     semana: number,
+    year: number,
   ) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes");
@@ -54,6 +56,7 @@ export class CuadrantesDatabase {
       idTienda,
       semana,
       idTrabajador,
+      year,
     });
     return resCuadrantes;
   }
@@ -96,14 +99,18 @@ export class CuadrantesDatabase {
   async getTiendas1Semana(semana: number) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes");
-    const resCuadrantes = await cuadrantesCollection.find({semana: semana}).toArray();
+    const resCuadrantes = await cuadrantesCollection
+      .find({ semana: semana })
+      .toArray();
 
     return resCuadrantes?.length > 0 ? resCuadrantes : [];
   }
   async getSemanas1Tienda(idTienda: number) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes");
-    const resCuadrantes = await cuadrantesCollection.find({idTienda: idTienda}).toArray();
+    const resCuadrantes = await cuadrantesCollection
+      .find({ idTienda: idTienda })
+      .toArray();
 
     return resCuadrantes?.length > 0 ? resCuadrantes : [];
   }
@@ -145,5 +152,39 @@ export class CuadrantesDatabase {
     return sqlBorrar;
     // console.log("sqlBorrar", sqlBorrar);
     // await recHit("Fac_Tena", sqlBorrar);
+  }
+
+  async cuadrantesPorAusencia(
+    ausencia: AusenciaInterface,
+    semanas: { year: number; week: number }[],
+  ): Promise<TCuadrante[]> {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes");
+
+    const cuadrantes = await cuadrantesCollection
+      .find({
+        idTrabajador: ausencia.idUsuario,
+        $or: semanas.map(({ year, week }) => ({ year, semana: week })),
+      })
+      .toArray();
+
+    return cuadrantes;
+  }
+
+  async actualizarCuadranteAusencia(cuadrante: TCuadrante): Promise<void> {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes");
+
+    await cuadrantesCollection.updateOne(
+      { _id: cuadrante._id },
+      { $set: cuadrante },
+    );
+  }
+
+  async crearCuadranteAusencia(cuadrante: TCuadrante): Promise<void> {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes");
+
+    await cuadrantesCollection.insertOne(cuadrante);
   }
 }
