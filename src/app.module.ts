@@ -8,6 +8,7 @@ import { TrabajadoresController } from "./trabajadores/trabajadores.controller";
 import { TokenService } from "./get-token/get-token.service";
 import { TiendasController } from "./tiendas/tiendas.controller";
 import { VacacionesController } from "./vacaciones/vacaciones.controller";
+import { Vacaciones } from "./vacaciones/vacaciones.class";
 import { TestController } from "./test/test.controller";
 import { AnunciosService } from "./anuncios/anuncios.mongodb";
 import { AnunciosClass } from "./anuncios/anuncios.class";
@@ -57,6 +58,7 @@ import { AusenciasDatabase } from "./ausencias/ausencias.mongodb";
     Trabajador,
     Ausencias,
     AusenciasDatabase,
+    Vacaciones,
   ],
 })
 export class AppModule {}

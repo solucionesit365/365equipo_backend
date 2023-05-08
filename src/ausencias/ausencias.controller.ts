@@ -1,12 +1,16 @@
-import { Body, Controller, Post } from "@nestjs/common";
+import { Body, Controller, Post, UseGuards } from "@nestjs/common";
 import { Ausencias } from "./ausencias.class";
+import { AuthGuard } from "../auth/auth.guard";
 
 @Controller("ausencias")
 export class AusenciasController {
   constructor(private readonly ausenciasInstance: Ausencias) {}
+
   @Post("nueva")
+  // @UseGuards(AuthGuard)
   async addAusencia(
-    @Body() { idUsuario, fechaInicio, fechaFinal, tipo, comentario },
+    @Body()
+    { idUsuario, fechaInicio, fechaFinal, tipo, comentario, arrayParciales },
   ) {
     try {
       if (
@@ -19,7 +23,7 @@ export class AusenciasController {
       ) {
         const inicio = new Date(fechaInicio);
         const final = new Date(fechaFinal);
-
+        arrayParciales.map((fechaIso: string) => new Date(fechaIso));
         return {
           ok: true,
           data: await this.ausenciasInstance.nuevaAusencia(
@@ -28,6 +32,7 @@ export class AusenciasController {
             inicio,
             final,
             comentario,
+            arrayParciales,
           ),
         };
       } else throw Error("Parámetros incorrectos");
