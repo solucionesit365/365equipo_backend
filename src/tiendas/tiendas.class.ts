@@ -1,9 +1,12 @@
 import { Injectable } from "@nestjs/common";
 import * as schTiendas from "./tiendas.mssql";
-import * as DtoTienda from "./tiendas.dto";
+import { Trabajador } from "../trabajadores/trabajadores.class";
+import { TrabajadorSql } from "../trabajadores/trabajadores.interface";
 
 @Injectable()
 export class Tienda {
+  constructor(private readonly trabajadoresInstance: Trabajador) {}
+
   async getTiendas() {
     const arrayTiendas = await schTiendas.getTiendas();
 
@@ -28,6 +31,37 @@ export class Tienda {
     return schTiendas.addTiendasNuevas(tiendasNuevas);
   }
 
+  private checkExists(arrayTiendas: any[], buscar: any) {
+    for (let i = 0; i < arrayTiendas.length; i += 1) {
+      if (arrayTiendas[i].idTienda === buscar.idTienda) return true;
+    }
+    return false;
+  }
+
+  async getTiendasResponsable(trabajador: TrabajadorSql) {
+    const arrayTrabajadores =
+      await this.trabajadoresInstance.getSubordinadosConTienda(
+        trabajador.idApp,
+      );
+    const arrayTiendas = [];
+
+    for (let i = 0; i < arrayTrabajadores.length; i += 1) {
+      if (
+        !this.checkExists(arrayTiendas, {
+          idTienda: arrayTrabajadores[i].idTienda,
+          nombreTienda: arrayTrabajadores[i].nombreTienda,
+        })
+      ) {
+        arrayTiendas.push({
+          idTienda: arrayTrabajadores[i].idTienda,
+          nombreTienda: arrayTrabajadores[i].nombreTienda,
+        });
+      }
+    }
+
+    return arrayTiendas;
+  }
+
   convertirTiendaToExterno(idInterno: number, tiendas: any[]) {
     for (let i = 0; i < tiendas.length; i += 1) {
       if (tiendas[i].id === idInterno) return tiendas[i].idExterno;
@@ -35,5 +69,3 @@ export class Tienda {
     return null;
   }
 }
-
-export const tiendaInstance = new Tienda();
