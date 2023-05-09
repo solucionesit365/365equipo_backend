@@ -56,8 +56,9 @@ export class CuadrantesDatabase {
       idTienda,
       semana,
       idTrabajador,
-      year,
+      year: Number(year),
     });
+
     return resCuadrantes;
   }
 
