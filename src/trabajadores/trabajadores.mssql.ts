@@ -153,7 +153,8 @@ export async function getSubordinadosConTienda(
   SELECT 
     tr.*, 
     (select count(*) from trabajadores where idResponsable = tr.id) as llevaEquipo,
-    (select idApp from trabajadores where id = tr.idResponsable) as validador
+    (select idApp from trabajadores where id = tr.idResponsable) as validador,
+    (select nombre from tiendas where id = tr.idTienda) as nombreTienda
   FROM trabajadores tr
   WHERE 
     tr.idResponsable = (select id from trabajadores where idApp = @param0) 

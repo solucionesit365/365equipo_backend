@@ -92,6 +92,7 @@ export class Fichajes {
           tipo: "ENTRADA",
           enviado: true,
           idExterno: Number(fichajesHit[i].usuari),
+          comentario: fichajesHit[i].comentario,
         });
       } else if (fichajesHit[i].accio === 2) {
         fichajesPretty.push({
@@ -101,6 +102,7 @@ export class Fichajes {
           tipo: "SALIDA",
           enviado: true,
           idExterno: Number(fichajesHit[i].usuari),
+          comentario: fichajesHit[i].comentario,
         });
       }
     }
@@ -108,5 +110,9 @@ export class Fichajes {
     await this.schFichajes.insertarFichajesHit(fichajesPretty);
 
     return true;
+  }
+
+  async getFichajesByIdSql(idSql: number) {
+    return this.schFichajes.getFichajesByIdSql(idSql);
   }
 }

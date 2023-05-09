@@ -8,7 +8,7 @@ import {
 } from "@nestjs/common";
 import { AuthGuard } from "../auth/auth.guard";
 import { TokenService } from "../get-token/get-token.service";
-import { getUserWithToken } from "../firebase/auth";
+import { getUserWithToken, verifyToken } from "../firebase/auth";
 import { Fichajes } from "./fichajes.class";
 import { SchedulerGuard } from "../scheduler/scheduler.guard";
 
@@ -93,6 +93,28 @@ export class FichajesController {
       return {
         ok: true,
         data: await this.fichajesInstance.fusionarFichajesHit(),
+      };
+    } catch (err) {
+      console.log(err);
+      return { ok: false, message: err.message };
+    }
+  }
+
+  @Get("fichajesByIdSql")
+  @UseGuards(AuthGuard)
+  async getFichajesByIdSql(
+    @Headers("authorization") authHeader: string,
+    @Query() { idSql }: { idSql: number },
+  ) {
+    try {
+      if (!idSql) throw Error("Faltan parámetros");
+
+      const token = this.tokenService.extract(authHeader);
+      await verifyToken(token);
+
+      return {
+        ok: true,
+        data: await this.fichajesInstance.getFichajesByIdSql(idSql),
       };
     } catch (err) {
       console.log(err);

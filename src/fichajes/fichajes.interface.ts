@@ -7,4 +7,5 @@ export interface FichajeDto {
   tipo: "ENTRADA" | "SALIDA";
   enviado: boolean;
   idExterno: number;
+  comentario?: string;
 }

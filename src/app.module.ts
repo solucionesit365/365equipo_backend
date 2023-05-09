@@ -8,6 +8,7 @@ import { TrabajadoresController } from "./trabajadores/trabajadores.controller";
 import { TokenService } from "./get-token/get-token.service";
 import { TiendasController } from "./tiendas/tiendas.controller";
 import { VacacionesController } from "./vacaciones/vacaciones.controller";
+import { Vacaciones } from "./vacaciones/vacaciones.class";
 import { TestController } from "./test/test.controller";
 import { AnunciosService } from "./anuncios/anuncios.mongodb";
 import { AnunciosClass } from "./anuncios/anuncios.class";
@@ -24,11 +25,7 @@ import { Trabajador } from "./trabajadores/trabajadores.class";
 import { AusenciasController } from "./ausencias/ausencias.controller";
 import { Ausencias } from "./ausencias/ausencias.class";
 import { AusenciasDatabase } from "./ausencias/ausencias.mongodb";
-import { AdminController } from "./admin/admin.controller";
-import { Admin } from "./admin/admin.class";
-import { NominasController } from "./nominas/nominas.controller";
-import { Nominas } from "./nominas/nominas.class";
-import { NominasDatabase } from "./nominas/nominas.database";
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -45,8 +42,6 @@ import { NominasDatabase } from "./nominas/nominas.database";
     CuadrantesController,
     FichajesController,
     AusenciasController,
-    AdminController,
-    NominasController,
   ],
   providers: [
     AppService,
@@ -63,9 +58,7 @@ import { NominasDatabase } from "./nominas/nominas.database";
     Trabajador,
     Ausencias,
     AusenciasDatabase,
-    Admin,
-    Nominas,
-    NominasDatabase,
+    Vacaciones,
   ],
 })
 export class AppModule {}

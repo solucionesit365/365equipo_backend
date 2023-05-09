@@ -124,7 +124,7 @@ export class FichajesDatabase {
     const month = fechaActual.getMonth() + 1;
     const year = fechaActual.getFullYear();
 
-    const sql = `SELECT accio, usuari, idr, CONVERT(nvarchar, tmst, 103) as tmst FROM cdpDadesFichador WHERE day(tmst) = ${day} AND month(tmst) = ${month} AND year(tmst) = ${year} AND comentari <> '365EquipoDeTrabajo'`;
+    const sql = `SELECT accio, usuari, idr, CONVERT(nvarchar, tmst, 103) as tmst, comentari as comentario FROM cdpDadesFichador WHERE day(tmst) = ${day} AND month(tmst) = ${month} AND year(tmst) = ${year} AND comentari <> '365EquipoDeTrabajo'`;
 
     const resFichajes = await this.hitInstance.recHit(sql);
 
@@ -151,5 +151,12 @@ export class FichajesDatabase {
         throw Error(error);
       }
     }
+  }
+
+  async getFichajesByIdSql(idSql: number) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const fichajesCollection = db.collection<FichajeDto>("fichajes");
+
+    return await fichajesCollection.find({ idExterno: idSql }).toArray();
   }
 }
