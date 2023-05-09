@@ -116,6 +116,16 @@ export class CuadrantesDatabase {
     return resCuadrantes?.length > 0 ? resCuadrantes : [];
   }
 
+  async getCuadranteSemanaTrabajador(semana: number, idTrabajador: number)
+{
+  const db = (await this.mongoDbService.getConexion()).db("soluciones");
+  const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes");
+  const resCuadrantes = await cuadrantesCollection
+  .find({semana: semana, idTrabajador: idTrabajador})
+  .toArray();
+
+  return resCuadrantes?.length > 0 ? resCuadrantes : [];
+}
   async getPendientesEnvio() {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes");

@@ -104,17 +104,18 @@ export class FichajesController {
   @UseGuards(AuthGuard)
   async getFichajesByIdSql(
     @Headers("authorization") authHeader: string,
-    @Query() { idSql }: { idSql: number },
+    @Query() { idSql, ayer }: { idSql: number, ayer: string },
   ) {
     try {
       if (!idSql) throw Error("Faltan parámetros");
-
+      console.log(idSql);
+      
       const token = this.tokenService.extract(authHeader);
       await verifyToken(token);
 
       return {
         ok: true,
-        data: await this.fichajesInstance.getFichajesByIdSql(idSql),
+        data: await this.fichajesInstance.getFichajesByIdSql(Number(idSql), ayer),
       };
     } catch (err) {
       console.log(err);

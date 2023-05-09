@@ -59,7 +59,9 @@ export class Cuadrantes {
   private async getPendientesEnvio() {
     return await this.schCuadrantes.getPendientesEnvio();
   }
-
+private async getCuadranteSemanaTrabajador(semana: number, idTrabajador: number){
+  return await this.schCuadrantes.getCuadranteSemanaTrabajador(semana, idTrabajador)
+}
   public async sincronizarConHit() {
     const cuadrantes = await this.getPendientesEnvio();
     const tiendas = await this.tiendasInstance.getTiendas();

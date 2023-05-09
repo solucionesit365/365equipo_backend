@@ -169,6 +169,37 @@ export class CuadrantesController {
       return { ok: false, message: error.message };
     }
   }
+  //obtener cuadrantes por semana y trabajador:
+
+  @Get("cuadranteSemanaTrabajador")
+  @UseGuards(AuthGuard)
+  async getCuadranteSemanaTrabajador(
+    @Query()
+    {
+      idTrabajador,
+      semana,
+    }: {
+      idTrabajador: number;
+      semana: number;
+    },
+    @Headers("authorization") authHeader: string,
+  ) {
+    try {
+      console.log(idTrabajador + semana);
+
+      if (!idTrabajador && !semana) throw Error("Faltan datos");
+      return {
+        ok: true,
+        data: await this.cuadrantesInstance.getCuadrantes(
+          Number(idTrabajador),
+          Number(semana),
+        ),
+      };
+    } catch (error) {
+      console.log(error);
+      return { ok: false, message: error.message };
+    }
+  }
 
   @Post("saveCuadrante")
   @UseGuards(AuthGuard)
