@@ -152,4 +152,11 @@ export class FichajesDatabase {
       }
     }
   }
+
+  async getFichajesByIdSql(idSql: number) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const fichajesCollection = db.collection<FichajeDto>("fichajes");
+
+    return await fichajesCollection.find({ idExterno: idSql }).toArray();
+  }
 }

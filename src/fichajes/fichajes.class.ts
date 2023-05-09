@@ -111,4 +111,8 @@ export class Fichajes {
 
     return true;
   }
+
+  async getFichajesByIdSql(idSql: number) {
+    return this.schFichajes.getFichajesByIdSql(idSql);
+  }
 }
