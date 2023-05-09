@@ -1,12 +1,24 @@
-import { Controller, Get, Headers, Query, UseGuards } from "@nestjs/common";
+import {
+  Controller,
+  Get,
+  Headers,
+  Query,
+  UseGuards,
+  Post,
+  Body,
+} from "@nestjs/common";
 import { SchedulerGuard } from "../scheduler/scheduler.guard";
 import { verifyToken } from "../firebase/auth";
 import { TokenService } from "../get-token/get-token.service";
 import { trabajadorInstance } from "./trabajadores.class";
+import { FirebaseMessagingService } from "../firebase/firebase-messaging.service";
 
 @Controller("trabajadores")
 export class TrabajadoresController {
-  constructor(private readonly tokenService: TokenService) {}
+  constructor(
+    private readonly tokenService: TokenService,
+    private readonly messagingService: FirebaseMessagingService,
+  ) {}
 
   @Get()
   async getTrabajadores(@Headers("authorization") authHeader: string) {
@@ -102,6 +114,20 @@ export class TrabajadoresController {
       return {
         ok: true,
         data: await trabajadorInstance.sincronizarConHit(),
+      };
+    } catch (err) {
+      console.log(err);
+      return { ok: false, message: err.message };
+    }
+  }
+
+  @Post("suscribirseMessaging")
+  async suscribirseMessaging(@Body() { token }) {
+    try {
+      if (!token) throw Error("Faltan parámetros");
+      return {
+        ok: true,
+        data: await this.messagingService.subscribeToTopic(token),
       };
     } catch (err) {
       console.log(err);
