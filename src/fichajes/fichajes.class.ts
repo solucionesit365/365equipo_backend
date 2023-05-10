@@ -93,6 +93,7 @@ export class Fichajes {
           enviado: true,
           idExterno: Number(fichajesHit[i].usuari),
           comentario: fichajesHit[i].comentario,
+          validado: false,
         });
       } else if (fichajesHit[i].accio === 2) {
         fichajesPretty.push({
@@ -103,6 +104,7 @@ export class Fichajes {
           enviado: true,
           idExterno: Number(fichajesHit[i].usuari),
           comentario: fichajesHit[i].comentario,
+          validado: false,
         });
       }
     }

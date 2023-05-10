@@ -8,4 +8,5 @@ export interface FichajeDto {
   enviado: boolean;
   idExterno: number;
   comentario?: string;
+  validado: boolean;
 }

@@ -20,6 +20,7 @@ export class FichajesDatabase {
       tipo: "ENTRADA",
       uid,
       idExterno,
+      validado: false,
     });
 
     if (resInsert.acknowledged) return resInsert.insertedId;
@@ -35,6 +36,7 @@ export class FichajesDatabase {
       tipo: "SALIDA",
       uid,
       idExterno,
+      validado: false,
     });
 
     if (resInsert.acknowledged) return resInsert.insertedId;
