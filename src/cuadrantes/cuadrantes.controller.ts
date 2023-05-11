@@ -22,7 +22,7 @@ export class CuadrantesController {
   constructor(
     private readonly tokenService: TokenService,
     private readonly cuadrantesInstance: Cuadrantes,
-  ) {}
+  ) { }
 
   @Get()
   @UseGuards(AuthGuard)
@@ -185,12 +185,10 @@ export class CuadrantesController {
     @Headers("authorization") authHeader: string,
   ) {
     try {
-      console.log(idTrabajador + semana);
-
       if (!idTrabajador && !semana) throw Error("Faltan datos");
       return {
         ok: true,
-        data: await this.cuadrantesInstance.getCuadrantes(
+        data: await this.cuadrantesInstance.getCuadranteSemanaTrabajador(
           Number(idTrabajador),
           Number(semana),
         ),

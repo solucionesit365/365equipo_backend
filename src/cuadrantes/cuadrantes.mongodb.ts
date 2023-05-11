@@ -13,7 +13,7 @@ moment.locale("es", {
 
 @Injectable()
 export class CuadrantesDatabase {
-  constructor(private readonly mongoDbService: MongoDbService) {}
+  constructor(private readonly mongoDbService: MongoDbService) { }
 
   async insertCuadrante(cuadrante: TCuadrante) {
     cuadrante._id = new ObjectId().toString();
@@ -116,16 +116,17 @@ export class CuadrantesDatabase {
     return resCuadrantes?.length > 0 ? resCuadrantes : [];
   }
 
-  async getCuadranteSemanaTrabajador(semana: number, idTrabajador: number)
-{
-  const db = (await this.mongoDbService.getConexion()).db("soluciones");
-  const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes");
-  const resCuadrantes = await cuadrantesCollection
-  .find({semana: semana, idTrabajador: idTrabajador})
-  .toArray();
+  async getCuadranteSemanaTrabajador(idTrabajador: number, semana: number) {
+    console.log("mondodb: " + idTrabajador + " - " + semana);
 
-  return resCuadrantes?.length > 0 ? resCuadrantes : [];
-}
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes");
+    const resCuadrantes = await cuadrantesCollection
+      .find({ idTrabajador: idTrabajador, semana: semana })
+      .toArray();
+
+    return resCuadrantes?.length > 0 ? resCuadrantes : [];
+  }
   async getPendientesEnvio() {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes");
@@ -155,8 +156,8 @@ export class CuadrantesDatabase {
       if (cuadrante.historialPlanes[j])
         sqlBorrar += `
           DELETE FROM ${this.nombreTablaSqlHit(
-            cuadrante.semana,
-          )} WHERE idPlan = '${cuadrante.historialPlanes[j]}';
+          cuadrante.semana,
+        )} WHERE idPlan = '${cuadrante.historialPlanes[j]}';
           `;
     }
 

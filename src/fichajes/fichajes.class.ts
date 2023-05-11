@@ -112,7 +112,7 @@ export class Fichajes {
     return true;
   }
 
-  async getFichajesByIdSql(idSql: number, ayer: string) {
-    return this.schFichajes.getFichajesByIdSql(idSql, ayer);
+  async getFichajesByIdSql(idSql: number, validado: boolean) {
+    return this.schFichajes.getFichajesByIdSql(idSql, validado);
   }
 }

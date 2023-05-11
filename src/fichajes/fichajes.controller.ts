@@ -11,13 +11,15 @@ import { TokenService } from "../get-token/get-token.service";
 import { getUserWithToken, verifyToken } from "../firebase/auth";
 import { Fichajes } from "./fichajes.class";
 import { SchedulerGuard } from "../scheduler/scheduler.guard";
+import * as moment from 'moment';
+
 
 @Controller("fichajes")
 export class FichajesController {
   constructor(
     private readonly tokenService: TokenService,
     private readonly fichajesInstance: Fichajes,
-  ) {}
+  ) { }
 
   @Post("entrada")
   @UseGuards(AuthGuard)
@@ -104,18 +106,20 @@ export class FichajesController {
   @UseGuards(AuthGuard)
   async getFichajesByIdSql(
     @Headers("authorization") authHeader: string,
-    @Query() { idSql, ayer }: { idSql: number, ayer: string },
+    @Query() { idSql, validado }: { idSql: number, validado: string },
   ) {
     try {
-      if (!idSql) throw Error("Faltan parámetros");
-      console.log(idSql);
-      
+      if (!idSql && !validado) throw Error("Faltan parámetros");
+
       const token = this.tokenService.extract(authHeader);
       await verifyToken(token);
+      const validadoBoolean = validado == 'true' ? true : false;
 
+      let fichajes = await this.fichajesInstance.getFichajesByIdSql(Number(idSql), validadoBoolean);
+  
       return {
         ok: true,
-        data: await this.fichajesInstance.getFichajesByIdSql(Number(idSql), ayer),
+        data: fichajes,
       };
     } catch (err) {
       console.log(err);

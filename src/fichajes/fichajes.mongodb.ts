@@ -152,10 +152,10 @@ export class FichajesDatabase {
     }
   }
 
-  async getFichajesByIdSql(idSql: number, ayer: string) {
+  async getFichajesByIdSql(idSql: number, validado: boolean) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const fichajesCollection = db.collection<FichajeDto>("fichajes");
 
-    return await fichajesCollection.find({ idExterno: idSql, hora: { $gte: new Date(ayer), $lt: new Date(moment(ayer).add(1, 'days').toISOString()) } }).toArray();
+    return await fichajesCollection.find({ idExterno: idSql, validado: validado}).toArray();
   }
 }
