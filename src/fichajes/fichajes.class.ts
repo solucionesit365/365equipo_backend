@@ -87,7 +87,7 @@ export class Fichajes {
       if (fichajesHit[i].accio === 1) {
         fichajesPretty.push({
           _id: fichajesHit[i].idr,
-          hora: moment(fichajesHit[i].tmst, "DD/MM/YYYY").toDate(),
+          hora: moment(fichajesHit[i].tmst).toDate(),
           uid: idApp,
           tipo: "ENTRADA",
           enviado: true,
@@ -98,7 +98,7 @@ export class Fichajes {
       } else if (fichajesHit[i].accio === 2) {
         fichajesPretty.push({
           _id: fichajesHit[i].idr,
-          hora: moment(fichajesHit[i].tmst, "DD/MM/YYYY").toDate(),
+          hora: moment(fichajesHit[i].tmst).toDate(),
           uid: idApp,
           tipo: "SALIDA",
           enviado: true,
