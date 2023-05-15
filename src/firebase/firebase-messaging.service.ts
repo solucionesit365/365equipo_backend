@@ -45,4 +45,15 @@ export class FirebaseMessagingService {
       console.error("Error al enviar la notificación:", error);
     }
   }
+
+  async subscribeToTopic(token: string) {
+    try {
+      await this.messaging.subscribeToTopic(token, "all_users");
+      console.log(`Token ${token} subscribed to topic all_users`);
+      return true;
+    } catch (err) {
+      console.error("Error subscribing to topic:", err);
+      throw Error(err.message);
+    }
+  }
 }

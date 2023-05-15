@@ -25,7 +25,7 @@ import { Trabajador } from "./trabajadores/trabajadores.class";
 import { AusenciasController } from "./ausencias/ausencias.controller";
 import { Ausencias } from "./ausencias/ausencias.class";
 import { AusenciasDatabase } from "./ausencias/ausencias.mongodb";
-
+import { FirebaseMessagingService } from "./firebase/firebase-messaging.service";
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -59,6 +59,7 @@ import { AusenciasDatabase } from "./ausencias/ausencias.mongodb";
     Ausencias,
     AusenciasDatabase,
     Vacaciones,
+    FirebaseMessagingService,
   ],
 })
 export class AppModule {}

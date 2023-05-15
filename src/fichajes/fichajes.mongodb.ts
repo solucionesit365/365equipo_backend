@@ -20,6 +20,7 @@ export class FichajesDatabase {
       tipo: "ENTRADA",
       uid,
       idExterno,
+      validado: false,
     });
 
     if (resInsert.acknowledged) return resInsert.insertedId;
@@ -35,6 +36,7 @@ export class FichajesDatabase {
       tipo: "SALIDA",
       uid,
       idExterno,
+      validado: false,
     });
 
     if (resInsert.acknowledged) return resInsert.insertedId;
@@ -123,7 +125,7 @@ export class FichajesDatabase {
     const month = fechaActual.getMonth() + 1;
     const year = fechaActual.getFullYear();
 
-    const sql = `SELECT accio, usuari, idr, CONVERT(nvarchar, tmst, 103) as tmst, comentari as comentario FROM cdpDadesFichador WHERE day(tmst) = ${day} AND month(tmst) = ${month} AND year(tmst) = ${year} AND comentari <> '365EquipoDeTrabajo'`;
+    const sql = `SELECT accio, usuari, idr, CONVERT(nvarchar, tmst, 126) as tmst, comentari as comentario FROM cdpDadesFichador WHERE day(tmst) = ${day} AND month(tmst) = ${month} AND year(tmst) = ${year} AND comentari <> '365EquipoDeTrabajo'`;
 
     const resFichajes = await this.hitInstance.recHit(sql);
 
