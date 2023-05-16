@@ -26,9 +26,17 @@ import { AusenciasController } from "./ausencias/ausencias.controller";
 import { Ausencias } from "./ausencias/ausencias.class";
 import { AusenciasDatabase } from "./ausencias/ausencias.mongodb";
 import { FirebaseMessagingService } from "./firebase/firebase-messaging.service";
-import { FichajesValidadosController } from './fichajes-validados/fichajes-validados/fichajes-validados.controller';
-import { FichajesValidados } from './fichajes-validados/fichajes-validados/fichajes-validados.class';
-import { FichajesValidadosDatabase } from './fichajes-validados/fichajes-validados/fichajes-validados.mongodb'
+import { NotificacionesController } from "./notificaciones/notificaciones.controller";
+import { Notificaciones } from "./notificaciones/notificaciones.class";
+import { NotificacionsBbdd } from "./notificaciones/notificaciones.mongodb";
+import { NominasController } from "./nominas/nominas.controller";
+import { Nominas } from "./nominas/nominas.class";
+import { NominasDatabase } from "./nominas/nominas.database";
+import { AdminController } from "./admin/admin.controller";
+import { Admin } from "./admin/admin.class";
+import { FichajesValidadosController } from "./fichajes-validados/fichajes-validados.controller";
+import { FichajesValidados } from "./fichajes-validados/fichajes-validados.class";
+import { FichajesValidadosDatabase } from "./fichajes-validados/fichajes-validados.mongodb";
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -45,6 +53,9 @@ import { FichajesValidadosDatabase } from './fichajes-validados/fichajes-validad
     CuadrantesController,
     FichajesController,
     AusenciasController,
+    NominasController,
+    AdminController,
+    NotificacionesController,
     FichajesValidadosController,
   ],
   providers: [
@@ -64,7 +75,12 @@ import { FichajesValidadosDatabase } from './fichajes-validados/fichajes-validad
     AusenciasDatabase,
     Vacaciones,
     FirebaseMessagingService,
+    Notificaciones,
+    NotificacionsBbdd,
+    Nominas,
+    NominasDatabase,
     FichajesValidados,
+    Admin,
     FichajesValidadosDatabase,
   ],
 })
