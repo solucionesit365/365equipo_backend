@@ -71,6 +71,26 @@ export class TrabajadoresController {
     }
   }
 
+  @Get("validarQR")
+  async validarQRTrabajador(
+    @Headers("authorization") authHeader: string,
+    @Query() { idTrabajador, tokenQR },
+  ){
+    try {
+
+      const token = this.tokenService.extract(authHeader);
+      await verifyToken(token);
+
+      if (!idTrabajador && !tokenQR) throw Error("Faltan datos");
+      const resUser = await trabajadorInstance.getTrabajadorTokenQR(Number(idTrabajador), tokenQR)
+
+      return { ok: true, data: resUser}
+    } catch (err) {
+      console.log(err);
+      return { ok: false, message: err.message };
+    }
+  }
+
   @Get("getSubordinados")
   async getSubordinados(
     @Headers("authorization") authHeader: string,

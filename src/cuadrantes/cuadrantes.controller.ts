@@ -22,7 +22,7 @@ export class CuadrantesController {
   constructor(
     private readonly tokenService: TokenService,
     private readonly cuadrantesInstance: Cuadrantes,
-  ) {}
+  ) { }
 
   @Get()
   @UseGuards(AuthGuard)
@@ -161,6 +161,35 @@ export class CuadrantesController {
         ok: true,
         data: await this.cuadrantesInstance.getCuadrantes(
           Number(idTienda),
+          Number(semana),
+        ),
+      };
+    } catch (error) {
+      console.log(error);
+      return { ok: false, message: error.message };
+    }
+  }
+  //obtener cuadrantes por semana y trabajador:
+
+  @Get("cuadranteSemanaTrabajador")
+  @UseGuards(AuthGuard)
+  async getCuadranteSemanaTrabajador(
+    @Query()
+    {
+      idTrabajador,
+      semana,
+    }: {
+      idTrabajador: number;
+      semana: number;
+    },
+    @Headers("authorization") authHeader: string,
+  ) {
+    try {
+      if (!idTrabajador && !semana) throw Error("Faltan datos");
+      return {
+        ok: true,
+        data: await this.cuadrantesInstance.getCuadranteSemanaTrabajador(
+          Number(idTrabajador),
           Number(semana),
         ),
       };

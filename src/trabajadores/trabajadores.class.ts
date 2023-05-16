@@ -38,6 +38,12 @@ export class Trabajador {
     return await schTrabajadores.getTrabajadoresSage();
   }
 
+  async getTrabajadorTokenQR(idTrabajador: number, tokenQR: string) {
+    const resUser = await schTrabajadores.getTrabajadorTokenQR(idTrabajador, tokenQR);
+
+    if (resUser) return resUser;
+    throw Error("No se ha podido obtener la información del usuario");
+  }
   // async sincronizarConHit() {
   //   const usuariosApp = await this.getTrabajadores(true);
   //   const usuariosHit = await this.descargarTrabajadoresHit();
