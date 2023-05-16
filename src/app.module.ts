@@ -32,7 +32,8 @@ import { NotificacionsBbdd } from "./notificaciones/notificaciones.mongodb";
 import { NominasController } from "./nominas/nominas.controller";
 import { Nominas } from "./nominas/nominas.class";
 import { NominasDatabase } from "./nominas/nominas.database";
-
+import { AdminController } from "./admin/admin.controller";
+import { Admin } from "./admin/admin.class";
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -50,6 +51,7 @@ import { NominasDatabase } from "./nominas/nominas.database";
     FichajesController,
     AusenciasController,
     NominasController,
+    AdminController,
     NotificacionesController,
   ],
   providers: [
@@ -73,6 +75,7 @@ import { NominasDatabase } from "./nominas/nominas.database";
     NotificacionsBbdd,
     Nominas,
     NominasDatabase,
+    Admin,
   ],
 })
 export class AppModule {}
