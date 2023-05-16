@@ -117,8 +117,6 @@ export class CuadrantesDatabase {
   }
 
   async getCuadranteSemanaTrabajador(idTrabajador: number, semana: number) {
-    console.log("mondodb: " + idTrabajador + " - " + semana);
-
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes");
     const resCuadrantes = await cuadrantesCollection

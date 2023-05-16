@@ -26,6 +26,9 @@ import { AusenciasController } from "./ausencias/ausencias.controller";
 import { Ausencias } from "./ausencias/ausencias.class";
 import { AusenciasDatabase } from "./ausencias/ausencias.mongodb";
 import { FirebaseMessagingService } from "./firebase/firebase-messaging.service";
+import { FichajesValidadosController } from './fichajes-validados/fichajes-validados/fichajes-validados.controller';
+import { FichajesValidados } from './fichajes-validados/fichajes-validados/fichajes-validados.class';
+import { FichajesValidadosDatabase } from './fichajes-validados/fichajes-validados/fichajes-validados.mongodb'
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -42,6 +45,7 @@ import { FirebaseMessagingService } from "./firebase/firebase-messaging.service"
     CuadrantesController,
     FichajesController,
     AusenciasController,
+    FichajesValidadosController,
   ],
   providers: [
     AppService,
@@ -60,6 +64,8 @@ import { FirebaseMessagingService } from "./firebase/firebase-messaging.service"
     AusenciasDatabase,
     Vacaciones,
     FirebaseMessagingService,
+    FichajesValidados,
+    FichajesValidadosDatabase,
   ],
 })
 export class AppModule {}
