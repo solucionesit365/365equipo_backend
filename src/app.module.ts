@@ -29,6 +29,9 @@ import { FirebaseMessagingService } from "./firebase/firebase-messaging.service"
 import { NotificacionesController } from "./notificaciones/notificaciones.controller";
 import { Notificaciones } from "./notificaciones/notificaciones.class";
 import { NotificacionsBbdd } from "./notificaciones/notificaciones.mongodb";
+import { NominasController } from "./nominas/nominas.controller";
+import { Nominas } from "./nominas/nominas.class";
+import { NominasDatabase } from "./nominas/nominas.database";
 
 @Module({
   imports: [
@@ -46,6 +49,7 @@ import { NotificacionsBbdd } from "./notificaciones/notificaciones.mongodb";
     CuadrantesController,
     FichajesController,
     AusenciasController,
+    NominasController,
     NotificacionesController,
   ],
   providers: [
@@ -67,6 +71,8 @@ import { NotificacionsBbdd } from "./notificaciones/notificaciones.mongodb";
     FirebaseMessagingService,
     Notificaciones,
     NotificacionsBbdd,
+    Nominas,
+    NominasDatabase,
   ],
 })
 export class AppModule {}
