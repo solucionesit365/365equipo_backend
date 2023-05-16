@@ -26,6 +26,10 @@ import { AusenciasController } from "./ausencias/ausencias.controller";
 import { Ausencias } from "./ausencias/ausencias.class";
 import { AusenciasDatabase } from "./ausencias/ausencias.mongodb";
 import { FirebaseMessagingService } from "./firebase/firebase-messaging.service";
+import { NotificacionesController } from "./notificaciones/notificaciones.controller";
+import { Notificaciones } from "./notificaciones/notificaciones.class";
+import { NotificacionsBbdd } from "./notificaciones/notificaciones.mongodb";
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -42,6 +46,7 @@ import { FirebaseMessagingService } from "./firebase/firebase-messaging.service"
     CuadrantesController,
     FichajesController,
     AusenciasController,
+    NotificacionesController,
   ],
   providers: [
     AppService,
@@ -60,6 +65,8 @@ import { FirebaseMessagingService } from "./firebase/firebase-messaging.service"
     AusenciasDatabase,
     Vacaciones,
     FirebaseMessagingService,
+    Notificaciones,
+    NotificacionsBbdd,
   ],
 })
 export class AppModule {}
