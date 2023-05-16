@@ -10,13 +10,14 @@ export class NotificacionsBbdd {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const notificaciones = db.collection<NotificacionDto>("notificaciones");
 
-    const resSave = await notificaciones.insertOne({
-      uid,
-      token,
-    });
+    const updateResult = await notificaciones.updateOne(
+      { uid }, // Filtra por el uid
+      { $set: { token } }, // Actualiza el token
+      { upsert: true }, // Si el uid no existe, inserta un nuevo documento
+    );
 
-    if (resSave.acknowledged) return resSave.insertedId;
+    if (updateResult.acknowledged) return true;
 
-    throw Error("No se ha podido guardar el token FCM");
+    throw Error("No se ha podido guardar o actualizar el token FCM");
   }
 }
