@@ -34,6 +34,9 @@ import { Nominas } from "./nominas/nominas.class";
 import { NominasDatabase } from "./nominas/nominas.database";
 import { AdminController } from "./admin/admin.controller";
 import { Admin } from "./admin/admin.class";
+import { FichajesValidadosController } from "./fichajes-validados/fichajes-validados.controller";
+import { FichajesValidados } from "./fichajes-validados/fichajes-validados.class";
+import { FichajesValidadosDatabase } from "./fichajes-validados/fichajes-validados.mongodb";
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -53,6 +56,7 @@ import { Admin } from "./admin/admin.class";
     NominasController,
     AdminController,
     NotificacionesController,
+    FichajesValidadosController,
   ],
   providers: [
     AppService,
@@ -75,7 +79,9 @@ import { Admin } from "./admin/admin.class";
     NotificacionsBbdd,
     Nominas,
     NominasDatabase,
+    FichajesValidados,
     Admin,
+    FichajesValidadosDatabase,
   ],
 })
 export class AppModule {}
