@@ -1,13 +1,18 @@
 import { Controller, Get } from "@nestjs/common";
 import axios from "axios";
-import * as moment from "moment";
+import { EmailClass } from "../email/email.class";
 
 @Controller("test")
 export class TestController {
+  constructor(private readonly emailInstance: EmailClass) {}
   @Get()
   test() {
-    const prueba = moment().week(14).weekday(6).format("DD/MM/YYYY");
-    return prueba;
+    this.emailInstance.enviarEmail(
+      "ezequiel@solucionesit365.com",
+      "Mensaje aquí",
+      "Asunto super importante",
+    );
+    return true;
   }
 
   @Get("ip")

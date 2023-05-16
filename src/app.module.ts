@@ -37,6 +37,8 @@ import { Admin } from "./admin/admin.class";
 import { FichajesValidadosController } from "./fichajes-validados/fichajes-validados.controller";
 import { FichajesValidados } from "./fichajes-validados/fichajes-validados.class";
 import { FichajesValidadosDatabase } from "./fichajes-validados/fichajes-validados.mongodb";
+import { EmailClass } from "./email/email.class";
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -82,6 +84,7 @@ import { FichajesValidadosDatabase } from "./fichajes-validados/fichajes-validad
     FichajesValidados,
     Admin,
     FichajesValidadosDatabase,
+    EmailClass,
   ],
 })
 export class AppModule {}
