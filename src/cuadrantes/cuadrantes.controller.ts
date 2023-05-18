@@ -10,19 +10,20 @@ import {
   HttpStatus,
 } from "@nestjs/common";
 import { AuthGuard } from "../auth/auth.guard";
-import { getUserWithToken } from "../firebase/auth";
 import { TokenService } from "../get-token/get-token.service";
 import { Cuadrantes } from "./cuadrantes.class";
 import { TCuadrante } from "./cuadrantes.interface";
 import { SchedulerGuard } from "../scheduler/scheduler.guard";
 import * as moment from "moment";
+import { AuthService } from "../firebase/auth";
 
 @Controller("cuadrantes")
 export class CuadrantesController {
   constructor(
+    private readonly authInstance: AuthService,
     private readonly tokenService: TokenService,
     private readonly cuadrantesInstance: Cuadrantes,
-  ) { }
+  ) {}
 
   @Get()
   @UseGuards(AuthGuard)
@@ -32,7 +33,7 @@ export class CuadrantesController {
   ) {
     try {
       const token = this.tokenService.extract(authHeader);
-      const usuario = await getUserWithToken(token);
+      const usuario = await this.authInstance.getUserWithToken(token);
 
       if (!semana) throw Error("Faltan datos");
 
@@ -65,7 +66,7 @@ export class CuadrantesController {
   ) {
     try {
       const token = this.tokenService.extract(authHeader);
-      const usuario = await getUserWithToken(token);
+      const usuario = await this.authInstance.getUserWithToken(token);
 
       if (!semana || !idTrabajador) throw Error("Faltan datos");
 
@@ -208,7 +209,7 @@ export class CuadrantesController {
     try {
       if (!cuadrante) throw Error("Faltan datos");
       const token = this.tokenService.extract(authHeader);
-      const usuario = await getUserWithToken(token);
+      const usuario = await this.authInstance.getUserWithToken(token);
 
       if (usuario.coordinadora && usuario.idTienda) {
         // cuadrante.idTienda = usuario.idTienda;

@@ -1,5 +1,4 @@
 import * as moment from "moment";
-import { trabajadorInstance } from "src/trabajadores/trabajadores.class";
 import { recHit, recSoluciones } from "../bbdd/mssql";
 import * as schVacaciones from "./vacaciones.mssql";
 import { Injectable } from "@nestjs/common";

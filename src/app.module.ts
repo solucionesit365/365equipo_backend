@@ -38,6 +38,8 @@ import { FichajesValidadosController } from "./fichajes-validados/fichajes-valid
 import { FichajesValidados } from "./fichajes-validados/fichajes-validados.class";
 import { FichajesValidadosDatabase } from "./fichajes-validados/fichajes-validados.mongodb";
 import { EmailClass } from "./email/email.class";
+import { AuthService } from "./firebase/auth";
+import { PermisosController } from './permisos/permisos.controller';
 
 @Module({
   imports: [
@@ -59,6 +61,7 @@ import { EmailClass } from "./email/email.class";
     AdminController,
     NotificacionesController,
     FichajesValidadosController,
+    PermisosController,
   ],
   providers: [
     AppService,
@@ -72,6 +75,7 @@ import { EmailClass } from "./email/email.class";
     FacTenaMssql,
     FichajesDatabase,
     Fichajes,
+    EmailClass,
     Trabajador,
     Ausencias,
     AusenciasDatabase,
@@ -84,7 +88,7 @@ import { EmailClass } from "./email/email.class";
     FichajesValidados,
     Admin,
     FichajesValidadosDatabase,
-    EmailClass,
+    AuthService,
   ],
 })
 export class AppModule {}

@@ -8,25 +8,25 @@ import {
 } from "@nestjs/common";
 import { AuthGuard } from "../auth/auth.guard";
 import { TokenService } from "../get-token/get-token.service";
-import { getUserWithToken, verifyToken } from "../firebase/auth";
 import { Fichajes } from "./fichajes.class";
 import { SchedulerGuard } from "../scheduler/scheduler.guard";
-import * as moment from 'moment';
-
+import * as moment from "moment";
+import { AuthService } from "../firebase/auth";
 
 @Controller("fichajes")
 export class FichajesController {
   constructor(
+    private readonly authInstance: AuthService,
     private readonly tokenService: TokenService,
     private readonly fichajesInstance: Fichajes,
-  ) { }
+  ) {}
 
   @Post("entrada")
   @UseGuards(AuthGuard)
   async entrada(@Headers("authorization") authHeader: string) {
     try {
       const token = this.tokenService.extract(authHeader);
-      const usuario = await getUserWithToken(token);
+      const usuario = await this.authInstance.getUserWithToken(token);
 
       return {
         ok: true,
@@ -43,7 +43,7 @@ export class FichajesController {
   async salida(@Headers("authorization") authHeader: string) {
     try {
       const token = this.tokenService.extract(authHeader);
-      const usuario = await getUserWithToken(token);
+      const usuario = await this.authInstance.getUserWithToken(token);
 
       return {
         ok: true,
@@ -64,7 +64,7 @@ export class FichajesController {
     try {
       const date = new Date(dateString);
       const token = this.tokenService.extract(authHeader);
-      const usuario = await getUserWithToken(token);
+      const usuario = await this.authInstance.getUserWithToken(token);
 
       return {
         ok: true,
@@ -106,17 +106,20 @@ export class FichajesController {
   @UseGuards(AuthGuard)
   async getFichajesByIdSql(
     @Headers("authorization") authHeader: string,
-    @Query() { idSql, validado }: { idSql: number, validado: string },
+    @Query() { idSql, validado }: { idSql: number; validado: string },
   ) {
     try {
       if (!idSql && !validado) throw Error("Faltan parámetros");
 
       const token = this.tokenService.extract(authHeader);
-      await verifyToken(token);
-      const validadoBoolean = validado == 'true' ? true : false;
+      await this.authInstance.verifyToken(token);
+      const validadoBoolean = validado == "true" ? true : false;
 
-      let fichajes = await this.fichajesInstance.getFichajesByIdSql(Number(idSql), validadoBoolean);
-  
+      let fichajes = await this.fichajesInstance.getFichajesByIdSql(
+        Number(idSql),
+        validadoBoolean,
+      );
+
       return {
         ok: true,
         data: fichajes,

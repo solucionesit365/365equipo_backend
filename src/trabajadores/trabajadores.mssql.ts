@@ -2,35 +2,39 @@ import { recHit, recSoluciones, recSolucionesClassic } from "../bbdd/mssql";
 import { TrabajadorSql } from "./trabajadores.interface";
 import * as moment from "moment";
 
+const GET_DATOS_TRABAJADOR = `
+tr.id,
+tr.idApp,
+tr.nombreApellidos,
+tr.displayName,
+tr.emails,
+tr.dni,
+tr.direccion,
+tr.ciudad,
+tr.telefonos,
+CONVERT(nvarchar, tr.fechaNacimiento, 103) as fechaNacimiento,
+tr.nacionalidad,
+tr.nSeguridadSocial,
+tr.codigoPostal,
+tr.cuentaCorriente,
+tr.tipoTrabajador,
+CONVERT(nvarchar, tr.inicioContrato, 103) as inicioContrato,
+CONVERT(nvarchar, tr.finalContrato, 103) as finalContrato,
+tr.idResponsable,
+tr.idTienda,
+(SELECT COUNT(*) FROM trabajadores WHERE idResponsable = tr.id) as coordinadora,
+tr1.nombreApellidos as nombreResponsable,
+ti.nombre as nombreTienda,
+CONVERT(nvarchar, tr.antiguedad, 103) as antiguedad,
+tr.idEmpresa,
+tr.tokenQR
+`;
+
 /* Todos */
 export async function getTrabajadores(todos = false) {
   const sql = `
     SELECT 
-        tr.id,
-        tr.idApp,
-        tr.nombreApellidos,
-        tr.displayName,
-        tr.emails,
-        tr.dni,
-        tr.direccion,
-        tr.ciudad,
-        tr.telefonos,
-        CONVERT(nvarchar, tr.fechaNacimiento, 103) as fechaNacimiento,
-        tr.nacionalidad,
-        tr.nSeguridadSocial,
-        tr.codigoPostal,
-        tr.cuentaCorriente,
-        tr.tipoTrabajador,
-        CONVERT(nvarchar, tr.inicioContrato, 103) as inicioContrato,
-        CONVERT(nvarchar, tr.finalContrato, 103) as finalContrato,
-        tr.idResponsable,
-        tr.idTienda,
-        (SELECT COUNT(*) FROM trabajadores WHERE idResponsable = tr.id) as coordinadora,
-        tr1.nombreApellidos as nombreResponsable,
-        ti.nombre as nombreTienda,
-        CONVERT(nvarchar, tr.antiguedad, 103) as antiguedad,
-        tr.idEmpresa,
-        tr.tokenQR
+        ${GET_DATOS_TRABAJADOR}
     FROM trabajadores tr
     LEFT JOIN trabajadores tr1 ON tr.idResponsable = tr1.id
     LEFT JOIN tiendas ti ON tr.idTienda = ti.id
@@ -47,19 +51,26 @@ export async function getTrabajadores(todos = false) {
   return null;
 }
 
-
 // Identificar usuario QR
 
-export async function getTrabajadorTokenQR(idTrabajador: number, tokenQR: string){
+export async function getTrabajadorTokenQR(
+  idTrabajador: number,
+  tokenQR: string,
+) {
   const sql = `
   SELECT 
   tr.nombreApellidos,
   tr.tipoTrabajador
   FROM trabajadores tr
   WHERE tr.id = @param0 AND tr.tokenQR = @param1
-  `
-  const resTrabajador = await recSoluciones("soluciones", sql, idTrabajador, tokenQR);
-  if (resTrabajador.recordset.length > 0) 
+  `;
+  const resTrabajador = await recSoluciones(
+    "soluciones",
+    sql,
+    idTrabajador,
+    tokenQR,
+  );
+  if (resTrabajador.recordset.length > 0)
     return resTrabajador.recordset[0] as TrabajadorSql;
   return null;
 }
@@ -69,30 +80,7 @@ export async function getTrabajadorByAppId(uid: string) {
   const sql = `
 
   SELECT 
-    tr.id,
-    tr.idApp,
-    tr.nombreApellidos,
-    tr.displayName,
-    tr.emails,
-    tr.dni,
-    tr.direccion,
-    tr.ciudad,
-    tr.telefonos,
-    CONVERT(nvarchar, tr.fechaNacimiento, 103) as fechaNacimiento,
-    tr.nacionalidad,
-    tr.nSeguridadSocial,
-    tr.codigoPostal,
-    tr.cuentaCorriente,
-    tr.tipoTrabajador,
-    CONVERT(nvarchar, tr.inicioContrato, 103) as inicioContrato,
-    CONVERT(nvarchar, tr.finalContrato, 103) as finalContrato,
-    tr.idResponsable,
-    tr.idTienda,
-    (SELECT COUNT(*) FROM trabajadores WHERE idResponsable = tr.id) as coordinadora,
-    tr1.nombreApellidos as nombreResponsable,
-    ti.nombre as nombreTienda,
-    CONVERT(nvarchar, tr.antiguedad, 103) as antiguedad,
-    tr.idEmpresa
+    ${GET_DATOS_TRABAJADOR}
   FROM trabajadores tr
   LEFT JOIN trabajadores tr1 ON tr.idResponsable = tr1.id
   LEFT JOIN tiendas ti ON tr.idTienda = ti.id
@@ -110,36 +98,31 @@ export async function getTrabajadorBySqlId(id: number) {
   const sql = `
 
   SELECT 
-    tr.id,
-    tr.idApp,
-    tr.nombreApellidos,
-    tr.displayName,
-    tr.emails,
-    tr.dni,
-    tr.direccion,
-    tr.ciudad,
-    tr.telefonos,
-    CONVERT(nvarchar, tr.fechaNacimiento, 103) as fechaNacimiento,
-    tr.nacionalidad,
-    tr.nSeguridadSocial,
-    tr.codigoPostal,
-    tr.cuentaCorriente,
-    tr.tipoTrabajador,
-    CONVERT(nvarchar, tr.inicioContrato, 103) as inicioContrato,
-    CONVERT(nvarchar, tr.finalContrato, 103) as finalContrato,
-    tr.idResponsable,
-    tr.idTienda,
-    (SELECT COUNT(*) FROM trabajadores WHERE idResponsable = tr.id) as coordinadora,
-    tr1.nombreApellidos as nombreResponsable,
-    ti.nombre as nombreTienda,
-    CONVERT(nvarchar, tr.antiguedad, 103) as antiguedad,
-    tr.idEmpresa
+    ${GET_DATOS_TRABAJADOR}
   FROM trabajadores tr
   LEFT JOIN trabajadores tr1 ON tr.idResponsable = tr1.id
   LEFT JOIN tiendas ti ON tr.idTienda = ti.id
   WHERE tr.id = @param0 AND tr.inicioContrato IS NOT NULL AND tr.finalContrato IS NULL ORDER BY nombreApellidos
 `;
   const resUser = await recSoluciones("soluciones", sql, id);
+
+  if (resUser.recordset.length > 0)
+    return resUser.recordset[0] as TrabajadorSql;
+  return null;
+}
+
+export async function getTrabajadorByDni(dni: string) {
+  const sql = `
+
+  SELECT 
+    ${GET_DATOS_TRABAJADOR}
+  FROM trabajadores tr
+  LEFT JOIN trabajadores tr1 ON tr.idResponsable = tr1.id
+  LEFT JOIN tiendas ti ON tr.idTienda = ti.id
+  WHERE tr.dni = @param0 AND tr.inicioContrato IS NOT NULL AND tr.finalContrato IS NULL 
+  ORDER BY nombreApellidos
+`;
+  const resUser = await recSoluciones("soluciones", sql, dni);
 
   if (resUser.recordset.length > 0)
     return resUser.recordset[0] as TrabajadorSql;
@@ -285,6 +268,11 @@ export async function getTrabajadoresSage(): Promise<
   const resTrabajadores = await recHit("Fac_Tena", sqlQuery);
   if (resTrabajadores.recordset.length > 0) return resTrabajadores.recordset;
   else throw Error("Error, no hay trabajadores");
+}
+
+export async function setIdApp(idSql: number, uid: string) {
+  const sql = "UPDATE trabajadores SET idApp = @param0 WHERE id = @param1";
+  await recSoluciones("soluciones", sql, uid, idSql);
 }
 
 function convertOrNULL(value) {

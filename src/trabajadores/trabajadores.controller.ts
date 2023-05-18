@@ -8,14 +8,16 @@ import {
   Body,
 } from "@nestjs/common";
 import { SchedulerGuard } from "../scheduler/scheduler.guard";
-import { verifyToken } from "../firebase/auth";
 import { TokenService } from "../get-token/get-token.service";
-import { trabajadorInstance } from "./trabajadores.class";
 import { FirebaseMessagingService } from "../firebase/firebase-messaging.service";
+import { Trabajador } from "./trabajadores.class";
+import { AuthService } from "../firebase/auth";
 
 @Controller("trabajadores")
 export class TrabajadoresController {
   constructor(
+    private readonly authInstance: AuthService,
+    private readonly trabajadorInstance: Trabajador,
     private readonly tokenService: TokenService,
     private readonly messagingService: FirebaseMessagingService,
   ) {}
@@ -24,9 +26,9 @@ export class TrabajadoresController {
   async getTrabajadores(@Headers("authorization") authHeader: string) {
     try {
       const token = this.tokenService.extract(authHeader);
-      await verifyToken(token);
+      await this.authInstance.verifyToken(token);
 
-      const arrayTrabajadores = await trabajadorInstance.getTrabajadores();
+      const arrayTrabajadores = await this.trabajadorInstance.getTrabajadores();
 
       return { ok: true, data: arrayTrabajadores };
     } catch (err) {
@@ -42,9 +44,9 @@ export class TrabajadoresController {
   ) {
     try {
       const token = this.tokenService.extract(authHeader);
-      await verifyToken(token);
+      await this.authInstance.verifyToken(token);
 
-      const resUser = await trabajadorInstance.getTrabajadorByAppId(uid);
+      const resUser = await this.trabajadorInstance.getTrabajadorByAppId(uid);
       console.log(resUser);
       return { ok: true, data: resUser };
     } catch (err) {
@@ -60,9 +62,9 @@ export class TrabajadoresController {
   ) {
     try {
       const token = this.tokenService.extract(authHeader);
-      await verifyToken(token);
+      await this.authInstance.verifyToken(token);
 
-      const resUser = await trabajadorInstance.getTrabajadorBySqlId(id);
+      const resUser = await this.trabajadorInstance.getTrabajadorBySqlId(id);
 
       return { ok: true, data: resUser };
     } catch (err) {
@@ -75,16 +77,18 @@ export class TrabajadoresController {
   async validarQRTrabajador(
     @Headers("authorization") authHeader: string,
     @Query() { idTrabajador, tokenQR },
-  ){
+  ) {
     try {
-
       const token = this.tokenService.extract(authHeader);
-      await verifyToken(token);
+      await this.authInstance.verifyToken(token);
 
       if (!idTrabajador && !tokenQR) throw Error("Faltan datos");
-      const resUser = await trabajadorInstance.getTrabajadorTokenQR(Number(idTrabajador), tokenQR)
+      const resUser = await this.trabajadorInstance.getTrabajadorTokenQR(
+        Number(idTrabajador),
+        tokenQR,
+      );
 
-      return { ok: true, data: resUser}
+      return { ok: true, data: resUser };
     } catch (err) {
       console.log(err);
       return { ok: false, message: err.message };
@@ -98,11 +102,11 @@ export class TrabajadoresController {
   ) {
     try {
       const token = this.tokenService.extract(authHeader);
-      await verifyToken(token);
+      await this.authInstance.verifyToken(token);
 
       if (!uid) throw Error("Faltan datos");
 
-      const resUser = await trabajadorInstance.getSubordinados(uid);
+      const resUser = await this.trabajadorInstance.getSubordinados(uid);
 
       return { ok: true, data: resUser };
     } catch (err) {
@@ -115,11 +119,11 @@ export class TrabajadoresController {
   async actualizarTrabajadores(@Headers("authorization") authHeader: string) {
     try {
       const token = this.tokenService.extract(authHeader);
-      await verifyToken(token);
+      await this.authInstance.verifyToken(token);
 
       return {
         ok: true,
-        data: await trabajadorInstance.descargarTrabajadoresHit(),
+        data: await this.trabajadorInstance.descargarTrabajadoresHit(),
       };
     } catch (err) {
       console.log(err);
@@ -133,7 +137,7 @@ export class TrabajadoresController {
     try {
       return {
         ok: true,
-        data: await trabajadorInstance.sincronizarConHit(),
+        data: await this.trabajadorInstance.sincronizarConHit(),
       };
     } catch (err) {
       console.log(err);
@@ -148,6 +152,22 @@ export class TrabajadoresController {
       return {
         ok: true,
         data: await this.messagingService.subscribeToTopic(token),
+      };
+    } catch (err) {
+      console.log(err);
+      return { ok: false, message: err.message };
+    }
+  }
+
+  @Post("registro")
+  async registroUsuarios(@Body() { dni, password }) {
+    try {
+      if (!dni || !password || password < 6)
+        throw Error("Algunos parámetros no son correctos");
+
+      return {
+        ok: true,
+        data: await this.trabajadorInstance.registrarUsuario(dni, password),
       };
     } catch (err) {
       console.log(err);

@@ -4,12 +4,16 @@ import {
   Injectable,
   UnauthorizedException,
 } from "@nestjs/common";
-import { verifyToken } from "../firebase/auth";
 import { TokenService } from "../get-token/get-token.service";
+import { AuthService } from "../firebase/auth";
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-  constructor(private readonly tokenService: TokenService) {}
+  constructor(
+    private readonly authInstance: AuthService,
+    private readonly tokenService: TokenService,
+  ) {}
+
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     const authHeader = request.headers["authorization"];
@@ -22,7 +26,7 @@ export class AuthGuard implements CanActivate {
     const token = this.tokenService.extract(authHeader);
 
     try {
-      await verifyToken(token);
+      await this.authInstance.verifyToken(token);
     } catch (err) {
       throw new UnauthorizedException("No estás autorizado/a");
     }

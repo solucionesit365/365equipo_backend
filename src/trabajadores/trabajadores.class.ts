@@ -1,8 +1,18 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, Inject, forwardRef } from "@nestjs/common";
 import * as schTrabajadores from "./trabajadores.mssql";
+import * as moment from "moment";
+import { EmailClass } from "../email/email.class";
+import { AuthService, auth } from "../firebase/auth";
 
 @Injectable()
 export class Trabajador {
+  constructor(
+    @Inject(forwardRef(() => EmailClass))
+    private readonly authInstance: AuthService,
+
+    private emailInstance: EmailClass,
+  ) {}
+
   async getTrabajadorByAppId(uid: string) {
     const resUser = await schTrabajadores.getTrabajadorByAppId(uid);
     if (resUser) return resUser;
@@ -39,7 +49,10 @@ export class Trabajador {
   }
 
   async getTrabajadorTokenQR(idTrabajador: number, tokenQR: string) {
-    const resUser = await schTrabajadores.getTrabajadorTokenQR(idTrabajador, tokenQR);
+    const resUser = await schTrabajadores.getTrabajadorTokenQR(
+      idTrabajador,
+      tokenQR,
+    );
 
     if (resUser) return resUser;
     throw Error("No se ha podido obtener la información del usuario");
@@ -209,6 +222,47 @@ export class Trabajador {
       // usuariosNoActualizadosApp: totales.usuariosNoActualizadosApp,
     };
   }
-}
 
-export const trabajadorInstance = new Trabajador();
+  async registrarUsuario(dni: string, password: string) {
+    dni = dni.trim().toUpperCase();
+    const datosUsuario = await schTrabajadores.getTrabajadorByDni(dni);
+
+    if (!moment(datosUsuario.inicioContrato, "DD/MM/YYYY").isValid())
+      throw Error("Fecha de inicio de contrato incorrecta");
+
+    const arrayEmails = datosUsuario.emails.split(";");
+
+    if (!datosUsuario.telefonos)
+      throw Error("Teléfono no registrado en la ficha");
+
+    if (!arrayEmails[0].trim()) throw Error("Email no registrado en la ficha");
+
+    const usuarioCreado = await auth.createUser({
+      email: arrayEmails[0].trim(),
+      emailVerified: false,
+      phoneNumber: "+34" + datosUsuario.telefonos,
+      password: password,
+      displayName: datosUsuario.displayName,
+      disabled: false,
+    });
+
+    await schTrabajadores.setIdApp(datosUsuario.id, usuarioCreado.uid);
+
+    const link = await auth.generateEmailVerificationLink(usuarioCreado.email);
+    const body = ` Haz click en el siguiente enlace para verificar tu email:<br>
+      ${link}
+    `;
+
+    await this.emailInstance.enviarEmail(
+      usuarioCreado.email,
+      body,
+      "365 Equipo - Verificar email",
+    );
+
+    return true;
+  }
+
+  async resolverCaptcha(): Promise<boolean> {
+    return true;
+  }
+}
