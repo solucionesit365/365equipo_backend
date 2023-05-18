@@ -9,9 +9,13 @@ export class EmailClass {
     this.transporter = nodemailer.createTransport({
       host: "smtp.gmail.com",
       port: 587,
+      service: "gmail",
       auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
+        type: "OAuth2",
+        user: "noreply@365equipo.com",
+        clientId: process.env.CLIENT_ID,
+        clientSecret: process.env.CLIENT_SECRET,
+        refreshToken: process.env.REFRESH_TOKEN,
       },
     });
   }
