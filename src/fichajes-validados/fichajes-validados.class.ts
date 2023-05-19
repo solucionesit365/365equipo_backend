@@ -6,11 +6,22 @@ import { FichajesValidadosDatabase } from "./fichajes-validados.mongodb";
 export class FichajesValidados {
   constructor(
     private readonly schFichajesValidados: FichajesValidadosDatabase,
-  ) {}
+  ) { }
 
   async addFichajesValidados(fichajeValidado: FichajeValidadoDto) {
     return await this.schFichajesValidados.insertarFichajeValidado(
       fichajeValidado,
     );
+  }
+
+  async getFichajesValidados(idTrabajador: number) {
+    return await this.schFichajesValidados.getFichajesValidados(idTrabajador);
+  };
+  async updateFichajesValidados(fichajesValidados: FichajeValidadoDto) {
+    return await this.schFichajesValidados.updateFichajesValidados(fichajesValidados);
+  }
+
+  async getFichajesPagar(idResponsable: number, aPagar: boolean) {
+    return await this.schFichajesValidados.getFichajesPagar(idResponsable, aPagar);
   }
 }

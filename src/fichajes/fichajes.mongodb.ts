@@ -3,6 +3,7 @@ import { MongoDbService } from "../bbdd/mongodb";
 import { FichajeDto } from "./fichajes.interface";
 import { FacTenaMssql } from "../bbdd/mssql.class";
 import * as moment from "moment";
+import { ObjectId } from "mongodb";
 
 @Injectable()
 export class FichajesDatabase {
@@ -158,6 +159,29 @@ export class FichajesDatabase {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const fichajesCollection = db.collection<FichajeDto>("fichajes");
 
-    return await fichajesCollection.find({ idExterno: idSql, validado: validado}).toArray();
+    return await fichajesCollection.find({ idExterno: idSql, validado: validado }).toArray();
+  }
+
+  async updateFichaje(id: string, validado: boolean) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const anuncios = db.collection("fichajes");
+    let idEnviar = null;
+    if (id.includes('-')) {
+      idEnviar = id
+    } else {
+      idEnviar = new ObjectId(id)
+    }
+    const resUpdate = await anuncios.updateOne(
+      {
+        _id: idEnviar,
+      },
+      {
+        $set: {
+          validado: validado
+        },
+      },
+    );
+
+    return resUpdate.acknowledged;
   }
 }
