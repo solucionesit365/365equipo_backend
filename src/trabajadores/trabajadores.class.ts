@@ -210,6 +210,7 @@ export class Trabajador {
       modificarEnApp,
     );
 
+    // Excluir usuario de test id: 999999
     await schTrabajadores.eliminarUsuarios(arrayEliminar);
 
     return {

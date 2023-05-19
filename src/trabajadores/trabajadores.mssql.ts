@@ -497,7 +497,7 @@ export async function eliminarUsuarios(arrayUsuarios) {
   let sql = "";
 
   for (let i = 0; i < arrayUsuarios.length; i += 1) {
-    if (arrayUsuarios[i].id)
+    if (arrayUsuarios[i].id && arrayUsuarios[i].id != 999999)
       sql += `DELETE FROM trabajadores WHERE id = ${arrayUsuarios[i].id};`;
   }
 

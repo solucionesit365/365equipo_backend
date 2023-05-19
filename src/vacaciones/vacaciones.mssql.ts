@@ -15,6 +15,7 @@ import { recSoluciones } from "../bbdd/mssql";
 //         tr.telefonos,
 //         FORMAT(tr.fechaNacimiento, 'dd/MM/yyyy') as fechaNacimiento,
 //         tr.nacionalidad,
+// Substituir por la constante
 //         tr.nSeguridadSocial,
 //         tr.codigoPostal,
 //         tr.cuentaCorriente,
