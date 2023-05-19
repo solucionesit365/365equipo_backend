@@ -6,6 +6,7 @@ export interface TCuadrante {
   semana: number;
   year: number;
   arraySemanalHoras: {
+    bloqueado?: boolean;
     horaEntrada: string;
     horaSalida: string;
     idPlan: string;

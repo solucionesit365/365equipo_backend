@@ -59,9 +59,12 @@ export class Cuadrantes {
   private async getPendientesEnvio() {
     return await this.schCuadrantes.getPendientesEnvio();
   }
- async getCuadranteSemanaTrabajador(idTrabajador: number, semana: number){
-  return await this.schCuadrantes.getCuadranteSemanaTrabajador(idTrabajador, semana)
-}
+  async getCuadranteSemanaTrabajador(idTrabajador: number, semana: number) {
+    return await this.schCuadrantes.getCuadranteSemanaTrabajador(
+      idTrabajador,
+      semana,
+    );
+  }
   public async sincronizarConHit() {
     const cuadrantes = await this.getPendientesEnvio();
     const tiendas = await this.tiendasInstance.getTiendas();
@@ -302,8 +305,14 @@ export class Cuadrantes {
       cuadrante._id = oldCuadrante._id;
     }
     cuadrante.enviado = false;
+
     for (let i = 0; i < cuadrante.arraySemanalHoras.length; i += 1) {
       let update = false;
+      if (cuadrante.arraySemanalHoras[i].bloqueado) {
+        cuadrante.arraySemanalHoras[i] = oldCuadrante.arraySemanalHoras[i];
+        continue;
+      }
+
       if (cuadrante.arraySemanalHoras[i].idPlan) {
         update = true;
         if (
