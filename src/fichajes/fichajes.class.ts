@@ -10,7 +10,7 @@ export class Fichajes {
   constructor(
     private readonly schFichajes: FichajesDatabase,
     private readonly trabajadoresInstance: Trabajador,
-  ) {}
+  ) { }
 
   async nuevaEntrada(uid: string) {
     const hora = new Date();
@@ -116,5 +116,12 @@ export class Fichajes {
 
   async getFichajesByIdSql(idSql: number, validado: boolean) {
     return this.schFichajes.getFichajesByIdSql(idSql, validado);
+  }
+
+  async updateFichaje(id: string, validado: boolean) {
+    if (typeof id === "string")
+      console.log(id + " - " + validado);
+
+    return await this.schFichajes.updateFichaje(id, validado)
   }
 }
