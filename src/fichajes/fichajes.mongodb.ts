@@ -10,7 +10,7 @@ export class FichajesDatabase {
   constructor(
     private readonly mongoDbService: MongoDbService,
     private readonly hitInstance: FacTenaMssql,
-  ) { }
+  ) {}
 
   async nuevaEntrada(uid: string, hora: Date, idExterno: number) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
@@ -82,13 +82,14 @@ export class FichajesDatabase {
       if (fichajes[i].tipo === "ENTRADA") {
         sql += `
         DELETE FROM cdpDadesFichador WHERE idr = '${fichajes[
-            i
-          ]._id.toString()}';
+          i
+        ]._id.toString()}';
         INSERT INTO cdpDadesFichador (id, tmst, accio, usuari, idr, lloc, comentari) 
         VALUES (0, CONVERT(datetime, '${hora.format(
-            "YYYY-MM-DD HH:mm:ss",
-          )}', 120), 1, ${fichajes[i].idExterno}, '${fichajes[i]._id
-          }', NULL, '365EquipoDeTrabajo')
+          "YYYY-MM-DD HH:mm:ss",
+        )}', 120), 1, ${fichajes[i].idExterno}, '${
+          fichajes[i]._id
+        }', NULL, '365EquipoDeTrabajo')
         `;
       } else if (fichajes[i].tipo === "SALIDA") {
         sql += `
@@ -159,17 +160,19 @@ export class FichajesDatabase {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const fichajesCollection = db.collection<FichajeDto>("fichajes");
 
-    return await fichajesCollection.find({ idExterno: idSql, validado: validado }).toArray();
+    return await fichajesCollection
+      .find({ idExterno: idSql, validado: validado })
+      .toArray();
   }
 
   async updateFichaje(id: string, validado: boolean) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const anuncios = db.collection("fichajes");
     let idEnviar = null;
-    if (id.includes('-')) {
-      idEnviar = id
+    if (id?.length === 24) {
+      idEnviar = new ObjectId(id);
     } else {
-      idEnviar = new ObjectId(id)
+      idEnviar = id;
     }
     const resUpdate = await anuncios.updateOne(
       {
@@ -177,7 +180,7 @@ export class FichajesDatabase {
       },
       {
         $set: {
-          validado: validado
+          validado: validado,
         },
       },
     );
