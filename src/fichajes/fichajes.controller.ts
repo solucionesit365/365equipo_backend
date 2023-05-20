@@ -5,6 +5,7 @@ import {
   Headers,
   Get,
   Query,
+  Body,
 } from "@nestjs/common";
 import { AuthGuard } from "../auth/auth.guard";
 import { TokenService } from "../get-token/get-token.service";
@@ -124,6 +125,32 @@ export class FichajesController {
         ok: true,
         data: fichajes,
       };
+    } catch (err) {
+      console.log(err);
+      return { ok: false, message: err.message };
+    }
+  }
+
+  @Post("updateFichaje")
+  async updateFichaje(
+    @Headers("authorization") authHeader: string,
+    @Body() { id, validado },
+  ) {
+    try {
+      const token = this.tokenService.extract(authHeader);
+      await this.authInstance.verifyToken(token);
+      // const validadoBoolean = validado == 'true' ? true : false;
+      // Falta comprobación de quién puede enviar un anuncio, ahora
+      // mismo cualquiera lo puede hacer.
+      const respFichaje = await this.fichajesInstance.updateFichaje(
+        id,
+        validado,
+      );
+      if (respFichaje)
+        return {
+          ok: true,
+        };
+      throw Error("No se ha podido modificar el fichaje");
     } catch (err) {
       console.log(err);
       return { ok: false, message: err.message };
