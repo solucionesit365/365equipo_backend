@@ -1,4 +1,5 @@
-import { recSoluciones } from "../bbdd/mssql";
+import { recSoluciones, recSolucionesClassic } from "../bbdd/mssql";
+import { SolicitudVacaciones } from "./vacaciones.interface";
 
 /* Todos */
 // export async function getTrabajadores() {
@@ -291,4 +292,31 @@ export async function setEstadoSolicitud(
 
   if (retSetEstado.rowsAffected[0] > 0) return true;
   return false;
+}
+
+export async function nuevaSolicitudVacaciones(solicitud: SolicitudVacaciones) {
+  const sql = `
+  INSERT INTO solicitudVacaciones (
+    idBeneficiario, 
+    dias, 
+    fechaInicio, 
+    fechaFinal, 
+    fechaIncorporacion, 
+    observaciones,
+    estado
+    )
+  VALUES (
+    ${solicitud.idBeneficiario}, 
+    ${solicitud.totalDias},
+    CONVERT(datetime, '${solicitud.fechaInicial}', 103), 
+    CONVERT(datetime, '${solicitud.fechaFinal}', 103), 
+    CONVERT(datetime, '${solicitud.fechaIncorporacion}', 103), 
+    '${solicitud.observaciones}', 
+    'PENDIENTE'
+    );
+  `;
+
+  await recSolucionesClassic("soluciones", sql);
+
+  return true;
 }

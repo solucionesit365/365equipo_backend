@@ -189,4 +189,39 @@ export class VacacionesController {
       return { ok: false, message: err.message };
     }
   }
+
+  @Post("nuevaSolicitud")
+  async nuevaSolicitudVacaciones(
+    @Headers("authorization") authHeader: string,
+    @Body() data,
+  ) {
+    try {
+      const token = this.tokenService.extract(authHeader);
+      await this.authInstance.verifyToken(token);
+
+      if (
+        data.idBeneficiario &&
+        data.totalDias &&
+        data.fechaInicial &&
+        data.fechaFinal &&
+        data.fechaIncorporacion &&
+        data.observaciones
+      ) {
+        return {
+          ok: true,
+          data: await this.vacacionesInstance.nuevaSolicitudVacaciones({
+            idBeneficiario: data.idBeneficiario,
+            fechaInicial: data.fechaInicial,
+            fechaFinal: data.fechaFinal,
+            fechaIncorporacion: data.fechaIncorporacion,
+            observaciones: data.observaciones,
+            totalDias: data.totalDias,
+          }),
+        };
+      } else throw Error("Faltan parámetros");
+    } catch (err) {
+      console.log(err);
+      return { ok: false, message: err.message };
+    }
+  }
 }

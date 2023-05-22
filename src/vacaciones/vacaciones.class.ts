@@ -3,10 +3,15 @@ import { recHit, recSoluciones } from "../bbdd/mssql";
 import * as schVacaciones from "./vacaciones.mssql";
 import { Injectable } from "@nestjs/common";
 import { Cuadrantes } from "../cuadrantes/cuadrantes.class";
+import { SolicitudVacaciones } from "./vacaciones.interface";
 
 @Injectable()
 export class Vacaciones {
   constructor(private readonly cuadrantesInstance: Cuadrantes) {}
+
+  async nuevaSolicitudVacaciones(solicitud: SolicitudVacaciones) {
+    return await schVacaciones.nuevaSolicitudVacaciones(solicitud);
+  }
 
   async getSolicitudesTrabajadorUid(uid: string) {
     return await schVacaciones.getSolicitudesTrabajadorUid(uid);
@@ -21,7 +26,7 @@ export class Vacaciones {
   }
 
   async getSolicitudes() {
-    return schVacaciones.getSolicitudes();
+    return await schVacaciones.getSolicitudes();
   }
 
   async getSolicitudesParaEnviar() {
@@ -29,7 +34,7 @@ export class Vacaciones {
   }
 
   async getSolicitudesSubordinados(idApp: string) {
-    return schVacaciones.getSolicitudesSubordinados(idApp);
+    return await schVacaciones.getSolicitudesSubordinados(idApp);
   }
 
   async setEstadoSolicitud(
