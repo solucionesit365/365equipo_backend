@@ -1,6 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { MongoDbService } from "../bbdd/mongodb";
-import { NotificacionDto } from "./notificaciones.interface";
+import { InAppNotification, NotificacionDto } from "./notificaciones.interface";
+import { ObjectId } from "mongodb";
 
 @Injectable()
 export class NotificacionsBbdd {
@@ -19,5 +20,57 @@ export class NotificacionsBbdd {
     if (updateResult.acknowledged) return true;
 
     throw Error("No se ha podido guardar o actualizar el token FCM");
+  }
+
+  async newInAppNotification(notification: InAppNotification) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const inAppNotifications =
+      db.collection<InAppNotification>("inAppNotifications");
+    notification.leido = false;
+    const insertResult = await inAppNotifications.insertOne(notification);
+
+    if (insertResult.acknowledged) return insertResult.insertedId;
+    throw Error("No se ha podido insertar la nueva notificación in app");
+  }
+
+  async deleteInAppNotification(id: string) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const inAppNotifications =
+      db.collection<InAppNotification>("inAppNotifications");
+
+    const deleteResult = await inAppNotifications.deleteOne({
+      _id: new ObjectId(id),
+    });
+
+    if (deleteResult.acknowledged && deleteResult.deletedCount > 0) return true;
+    throw Error("No se ha podido eliminar la notificación in app");
+  }
+
+  async getInAppNotifications(uid: string) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const inAppNotifications =
+      db.collection<InAppNotification>("inAppNotifications");
+
+    return await inAppNotifications.find({ uid, leido: false }).toArray();
+  }
+
+  async marcarComoLeida(id: string, uid: string) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const inAppNotifications =
+      db.collection<InAppNotification>("inAppNotifications");
+
+    const updateResult = await inAppNotifications.updateOne(
+      {
+        _id: new ObjectId(id),
+        uid,
+      },
+      {
+        $set: { leido: true },
+      },
+    );
+
+    if (updateResult.acknowledged && updateResult.modifiedCount > 0)
+      return true;
+    throw Error("No se ha podido marcar como leída la notificación");
   }
 }

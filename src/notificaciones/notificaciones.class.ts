@@ -1,6 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { NotificacionsBbdd } from "./notificaciones.mongodb";
 import axios from "axios";
+import { InAppNotification } from "./notificaciones.interface";
 
 @Injectable()
 export class Notificaciones {
@@ -29,5 +30,21 @@ export class Notificaciones {
         },
       },
     );
+  }
+
+  async newInAppNotification(notification: InAppNotification) {
+    return await this.schNotificaciones.newInAppNotification(notification);
+  }
+
+  async deleteInAppNotification(id: string) {
+    return await this.schNotificaciones.deleteInAppNotification(id);
+  }
+
+  async getInAppNotifications(uid: string) {
+    return await this.schNotificaciones.getInAppNotifications(uid);
+  }
+
+  async marcarComoLeida(id: string, uid: string) {
+    return await this.schNotificaciones.marcarComoLeida(id, uid);
   }
 }

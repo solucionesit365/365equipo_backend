@@ -10,7 +10,7 @@ export class FichajesValidadosController {
     private readonly authInstance: AuthService,
     private readonly tokenService: TokenService,
     private readonly fichajesValidadosInstance: FichajesValidados,
-  ) { }
+  ) {}
 
   @Post("addFichajeValidado")
   async addFichajeValidado(
@@ -44,14 +44,17 @@ export class FichajesValidadosController {
   ) {
     try {
       const token = this.tokenService.extract(authHeader);
-      await verifyToken(token);
+      await this.authInstance.verifyToken(token);
 
-      const respValidados = await this.fichajesValidadosInstance.getFichajesValidados(Number(idTrabajador));
+      const respValidados =
+        await this.fichajesValidadosInstance.getFichajesValidados(
+          Number(idTrabajador),
+        );
       if (respValidados.length > 0) {
         return {
           ok: true,
-          data: respValidados
-        }
+          data: respValidados,
+        };
       }
     } catch (err) {
       console.log(err);
@@ -66,9 +69,13 @@ export class FichajesValidadosController {
   ) {
     try {
       const token = this.tokenService.extract(authHeader);
-      await verifyToken(token);
+      await this.authInstance.verifyToken(token);
 
-      if (await this.fichajesValidadosInstance.updateFichajesValidados(FichajesValidados))
+      if (
+        await this.fichajesValidadosInstance.updateFichajesValidados(
+          FichajesValidados,
+        )
+      )
         return {
           ok: true,
         };
@@ -82,20 +89,25 @@ export class FichajesValidadosController {
   @Get("getFichajesPagar")
   async getFichajesPagar(
     @Headers("authorization") authHeader: string,
-    @Query() { idResponsable, aPagar }: { idResponsable: number, aPagar: string },
+    @Query()
+    { idResponsable, aPagar }: { idResponsable: number; aPagar: string },
   ) {
     try {
       const token = this.tokenService.extract(authHeader);
-      await verifyToken(token);
+      await this.authInstance.verifyToken(token);
 
-      const aPagarBoolean = aPagar == 'true' ? true : false;
+      const aPagarBoolean = aPagar == "true" ? true : false;
 
-      const respValidados = await this.fichajesValidadosInstance.getFichajesPagar(Number(idResponsable), aPagarBoolean);
+      const respValidados =
+        await this.fichajesValidadosInstance.getFichajesPagar(
+          Number(idResponsable),
+          aPagarBoolean,
+        );
       if (respValidados.length > 0) {
         return {
           ok: true,
-          data: respValidados
-        }
+          data: respValidados,
+        };
       }
     } catch (err) {
       console.log(err);
