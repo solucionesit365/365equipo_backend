@@ -114,7 +114,10 @@ export class Cuadrantes {
       );
 
       for (let j = 0; j < cuadrante.arraySemanalHoras.length; j += 1) {
-        if (cuadrante.arraySemanalHoras[j]) {
+        if (
+          cuadrante.arraySemanalHoras[j] &&
+          !cuadrante.arraySemanalHoras[j].ausencia
+        ) {
           const entrada = moment(
             cuadrante.arraySemanalHoras[j].horaEntrada,
             "HH:mm",
