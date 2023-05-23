@@ -47,7 +47,7 @@ export class TrabajadoresController {
       await this.authInstance.verifyToken(token);
 
       const resUser = await this.trabajadorInstance.getTrabajadorByAppId(uid);
-      console.log(resUser);
+      // console.log(resUser);
       return { ok: true, data: resUser };
     } catch (err) {
       console.log(err);

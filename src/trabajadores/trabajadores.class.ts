@@ -44,6 +44,10 @@ export class Trabajador {
     return await schTrabajadores.getSubordinados(uid);
   }
 
+  async getSubordinadosById(id: number) {
+    return await schTrabajadores.getSubordinadosById(id);
+  }
+
   async descargarTrabajadoresHit() {
     return await schTrabajadores.getTrabajadoresSage();
   }
@@ -265,5 +269,9 @@ export class Trabajador {
 
   async resolverCaptcha(): Promise<boolean> {
     return true;
+  }
+
+  async getResponsableTienda(idTienda: number) {
+    return await schTrabajadores.getResponsableTienda(idTienda);
   }
 }

@@ -42,7 +42,41 @@ export class Cuadrantes {
   }
 
   async getCuadrantes(idTienda: number, semana: number) {
-    return await this.schCuadrantes.getCuadrantes(idTienda, semana);
+    const responsableTienda =
+      await this.trabajadoresInstance.getResponsableTienda(idTienda);
+    const equipoCompleto = await this.trabajadoresInstance.getSubordinadosById(
+      responsableTienda.id,
+    );
+
+    const cuadrantes: TCuadrante[] = await this.schCuadrantes.getCuadrantes(
+      idTienda,
+      semana,
+    );
+
+    equipoCompleto.forEach((miembro) => {
+      const cuadranteExistente = cuadrantes.find(
+        (cuadrante) => cuadrante.idTrabajador === miembro.id,
+      );
+
+      if (!cuadranteExistente) {
+        const nuevoCuadrante: TCuadrante = {
+          _id: new ObjectId().toString(),
+          idTrabajador: miembro.id,
+          nombre: miembro.nombreApellidos,
+          idTienda: idTienda,
+          semana: semana,
+          year: new Date().getFullYear(),
+          arraySemanalHoras: [null, null, null, null, null, null, null],
+          totalHoras: 0,
+          enviado: false,
+          historialPlanes: [],
+        };
+
+        cuadrantes.push(nuevoCuadrante);
+      }
+    });
+
+    return cuadrantes;
   }
 
   async getTodo() {
