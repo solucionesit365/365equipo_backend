@@ -3,13 +3,15 @@ import * as schTrabajadores from "./trabajadores.mssql";
 import * as moment from "moment";
 import { EmailClass } from "../email/email.class";
 import { AuthService, auth } from "../firebase/auth";
+import { TrabajadorCompleto } from "./trabajadores.interface";
+import { PermisosClass } from "../permisos/permisos.class";
 
 @Injectable()
 export class Trabajador {
   constructor(
     @Inject(forwardRef(() => EmailClass))
     private readonly authInstance: AuthService,
-
+    private readonly permisosInstance: PermisosClass,
     private emailInstance: EmailClass,
   ) {}
 
@@ -273,5 +275,22 @@ export class Trabajador {
 
   async getResponsableTienda(idTienda: number) {
     return await schTrabajadores.getResponsableTienda(idTienda);
+  }
+
+  async guardarCambiosForm(
+    original: any,
+    usuarioGestor: TrabajadorCompleto,
+    payload: any,
+  ) {
+    const cualquieraDe = ["SUPER_ADMIN", "RRHH_ADMIN"];
+
+    if (
+      this.permisosInstance.pasoPermitidoByClaims(
+        usuarioGestor.customClaims?.arrayPermisos,
+        cualquieraDe,
+      )
+    ) {
+      return await schTrabajadores.guardarCambiosForm(payload, original);
+    } else throw Error("No tienes permisos para realizar esta acción");
   }
 }

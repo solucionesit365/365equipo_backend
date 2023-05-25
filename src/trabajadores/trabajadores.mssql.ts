@@ -1,5 +1,5 @@
 import { recHit, recSoluciones, recSolucionesClassic } from "../bbdd/mssql";
-import { TrabajadorSql } from "./trabajadores.interface";
+import { TrabajadorCompleto, TrabajadorSql } from "./trabajadores.interface";
 import * as moment from "moment";
 
 const GET_DATOS_TRABAJADOR = `
@@ -433,4 +433,78 @@ export async function getResponsableTienda(idTienda: number) {
 
   if (resResponsable.recordset.length > 0) return resResponsable.recordset[0];
   return null;
+}
+
+export function sqlHandleCambios(
+  modificado: TrabajadorCompleto,
+  original: TrabajadorCompleto,
+) {
+  let sql = "";
+
+  if (modificado.idResponsable != original.idResponsable) {
+    if (modificado.idTienda != original.idTienda)
+      throw Error("No es posible cambiar el responsable y la tienda a la vez");
+
+    if (original.coordinadora && !modificado.coordinadora) {
+      sql += `
+        UPDATE trabajadores SET idResponsable = null WHERE idResponsable = ${modificado.id};
+      `;
+    } else if (modificado.coordinadora && modificado.idTienda) {
+      sql += `
+      UPDATE trabajadores SET idResponsable = ${modificado.id} WHERE idTienda = ${modificado.idTienda} AND id <> ${modificado.id} AND (coordinadora IS NULL OR coordinadora = 0);
+      `;
+    }
+  } else if (modificado.idTienda != original.idTienda) {
+    if (modificado.coordinadora && original.coordinadora) {
+      sql += `
+        UPDATE trabajadores SET idResponsable = null WHERE idResponsable = ${modificado.id};
+        UPDATE trabajadores SET idResponsable = ${modificado.id} WHERE idTienda = ${modificado.idTienda} AND id <> ${modificado.id} AND (coordinadora IS NULL OR coordinadora = 0);
+        -- FALTA (C)
+      `;
+    }
+  } else if (modificado.coordinadora && modificado.idTienda) {
+    sql += `
+    UPDATE trabajadores SET idResponsable = ${modificado.id} WHERE idTienda = ${modificado.idTienda} AND id <> ${modificado.id} AND (coordinadora IS NULL OR coordinadora = 0);
+  `;
+  } else if (!modificado.coordinadora && original.coordinadora) {
+    sql += `
+      UPDATE trabajadores SET idResponsable = null WHERE idResponsable = ${modificado.id};
+  `;
+  }
+
+  return sql;
+}
+
+export async function guardarCambiosForm(
+  trabajador: TrabajadorCompleto,
+  original: TrabajadorCompleto,
+) {
+  let sql = "";
+  sql += sqlHandleCambios(trabajador, original);
+  sql += `
+    UPDATE trabajadores SET
+    nombreApellidos = '${trabajador.nombreApellidos}',
+    displayName = '${trabajador.displayName}',
+    emails = '${trabajador.emails}',
+    dni = '${trabajador.dni}',
+    direccion = '${trabajador.direccion}',
+    ciudad = '${trabajador.ciudad}',
+    telefonos = '${trabajador.telefonos}',
+    fechaNacimiento = convert(datetime, ${
+      trabajador.fechaNacimiento ? "'" + trabajador.fechaNacimiento + "'" : null
+    }, 103),
+    nacionalidad = '${trabajador.nacionalidad}',
+    nSeguridadSocial = '${trabajador.nSeguridadSocial}',
+    codigoPostal = '${trabajador.codigoPostal}',
+    cuentaCorriente = '${trabajador.cuentaCorriente}',
+    tipoTrabajador = '${trabajador.tipoTrabajador}',
+    idResponsable = ${trabajador.idResponsable},
+    idTienda = ${trabajador.idTienda},
+    coordinadora = ${trabajador.coordinadora ? 1 : 0},
+    tokenQR = '${trabajador.tokenQR}'
+    WHERE id = ${trabajador.id}
+  `;
+
+  await recSolucionesClassic("soluciones", sql);
+  return true;
 }

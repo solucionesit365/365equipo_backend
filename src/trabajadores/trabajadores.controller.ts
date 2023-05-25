@@ -174,4 +174,32 @@ export class TrabajadoresController {
       return { ok: false, message: err.message };
     }
   }
+
+  @Post("guardarCambios")
+  async guardarCambiosForm(
+    @Headers("authorization") authHeader: string,
+    @Body()
+    { modificado, original },
+  ) {
+    try {
+      // Falta comprobar parámetros de entrada
+      const token = this.tokenService.extract(authHeader);
+      await this.authInstance.verifyToken(token);
+
+      const usuario = await this.authInstance.getUserWithToken(token);
+      return {
+        ok: true,
+        data: await this.trabajadorInstance.guardarCambiosForm(
+          original,
+          usuario,
+          modificado,
+        ),
+      };
+    } catch (err) {
+      console.log(err);
+      return { ok: false, message: err.message };
+    }
+  }
+  //traspaso de setCustomClaims hecho
+  // falta la siguiente guardarUsuarioEnSql que se usa en el modal de editar usuario.
 }

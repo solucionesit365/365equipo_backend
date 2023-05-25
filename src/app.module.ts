@@ -39,7 +39,8 @@ import { FichajesValidados } from "./fichajes-validados/fichajes-validados.class
 import { FichajesValidadosDatabase } from "./fichajes-validados/fichajes-validados.mongodb";
 import { EmailClass } from "./email/email.class";
 import { AuthService } from "./firebase/auth";
-import { PermisosController } from './permisos/permisos.controller';
+import { PermisosController } from "./permisos/permisos.controller";
+import { PermisosClass } from "./permisos/permisos.class";
 
 @Module({
   imports: [
@@ -89,6 +90,7 @@ import { PermisosController } from './permisos/permisos.controller';
     Admin,
     FichajesValidadosDatabase,
     AuthService,
+    PermisosClass,
   ],
 })
 export class AppModule {}
