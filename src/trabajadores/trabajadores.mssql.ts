@@ -360,34 +360,34 @@ export async function actualizarUsuarios(
         cuentaCorriente, tipoTrabajador, inicioContrato, finalContrato, antiguedad, idEmpresa
       ) VALUES (
         ${usuario.id},
-        '${usuario.idApp}',
-        '${usuario.nombreApellidos}',
-        '${usuario.displayName}',
-        '${usuario.emails}',
-        '${usuario.dni}',
-        '${usuario.direccion}',
-        '${usuario.ciudad}',
-        '${usuario.telefonos}',
+        ${usuario.idApp ? `'${usuario.idApp}'` : "NULL"},
+        ${usuario.nombreApellidos ? `'${usuario.nombreApellidos}'` : "NULL"},
+        ${usuario.displayName ? `'${usuario.displayName}'` : "NULL"},
+        ${usuario.emails ? `'${usuario.emails}'` : "NULL"},
+        ${usuario.dni ? `'${usuario.dni}'` : "NULL"},
+        ${usuario.direccion ? `'${usuario.direccion}'` : "NULL"},
+        ${usuario.ciudad ? `'${usuario.ciudad}'` : "NULL"},
+        ${usuario.telefonos ? `'${usuario.telefonos}'` : "NULL"},
         ${convertOrNULL(usuario.fechaNacimiento)},
-        '${usuario.nacionalidad}',
-        '${usuario.nSeguridadSocial}',
-        '${usuario.codigoPostal}',
-        '${usuario.cuentaCorriente}',
-        '${usuario.tipoTrabajador}',
+        ${usuario.nacionalidad ? `'${usuario.nacionalidad}'` : "NULL"},
+        ${usuario.nSeguridadSocial ? `'${usuario.nSeguridadSocial}'` : "NULL"},
+        ${usuario.codigoPostal ? `'${usuario.codigoPostal}'` : "NULL"},
+        ${usuario.cuentaCorriente ? `'${usuario.cuentaCorriente}'` : "NULL"},
+        ${usuario.tipoTrabajador ? `'${usuario.tipoTrabajador}'` : "NULL"},
         ${convertOrNULL(usuario.inicioContrato)},
         ${convertOrNULL(usuario.finalContrato)},
         ${convertOrNULL(usuario.antiguedad)},
-        ${usuario.idEmpresa}
+        ${usuario.idEmpresa ? `'${usuario.idEmpresa}'` : "NULL"}
       )`;
 
     const updateQueryBuilder = (usuario) => `
       UPDATE dbo.trabajadores
       SET
-        dni = '${usuario.dni}',
+        dni = ${usuario.dni ? `'${usuario.dni}'` : "NULL"},
         inicioContrato = ${convertOrNULL(usuario.inicioContrato)},
         finalContrato = ${convertOrNULL(usuario.finalContrato)},
         antiguedad = ${convertOrNULL(usuario.antiguedad)},
-        idEmpresa = ${usuario.idEmpresa}
+        idEmpresa = ${usuario.idEmpresa ? `'${usuario.idEmpresa}'` : "NULL"}
       WHERE id = ${usuario.id}`;
 
     const promises = [];
@@ -483,25 +483,41 @@ export async function guardarCambiosForm(
   sql += sqlHandleCambios(trabajador, original);
   sql += `
     UPDATE trabajadores SET
-    nombreApellidos = '${trabajador.nombreApellidos}',
-    displayName = '${trabajador.displayName}',
-    emails = '${trabajador.emails}',
-    dni = '${trabajador.dni}',
-    direccion = '${trabajador.direccion}',
-    ciudad = '${trabajador.ciudad}',
-    telefonos = '${trabajador.telefonos}',
+    nombreApellidos = ${
+      trabajador.nombreApellidos ? `'${trabajador.nombreApellidos}'` : "NULL"
+    },
+    displayName = ${
+      trabajador.displayName ? `'${trabajador.displayName}'` : "NULL"
+    },
+    emails = ${trabajador.emails ? `'${trabajador.emails}'` : "NULL"},
+    dni = ${trabajador.dni ? `'${trabajador.dni}'` : "NULL"},
+    direccion = ${trabajador.direccion ? `'${trabajador.direccion}'` : "NULL"},
+    ciudad = ${trabajador.ciudad ? `'${trabajador.ciudad}'` : "NULL"},
+    telefonos = ${trabajador.telefonos ? `'${trabajador.telefonos}'` : "NULL"},
     fechaNacimiento = convert(datetime, ${
       trabajador.fechaNacimiento ? "'" + trabajador.fechaNacimiento + "'" : null
     }, 103),
-    nacionalidad = '${trabajador.nacionalidad}',
-    nSeguridadSocial = '${trabajador.nSeguridadSocial}',
-    codigoPostal = '${trabajador.codigoPostal}',
-    cuentaCorriente = '${trabajador.cuentaCorriente}',
-    tipoTrabajador = '${trabajador.tipoTrabajador}',
-    idResponsable = ${trabajador.idResponsable},
-    idTienda = ${trabajador.idTienda},
+    nacionalidad = ${
+      trabajador.nacionalidad ? `'${trabajador.nacionalidad}'` : "NULL"
+    },
+    nSeguridadSocial = ${
+      trabajador.nSeguridadSocial ? `'${trabajador.nSeguridadSocial}'` : "NULL"
+    },
+    codigoPostal = ${
+      trabajador.codigoPostal ? `'${trabajador.codigoPostal}'` : "NULL"
+    },
+    cuentaCorriente = ${
+      trabajador.cuentaCorriente ? `'${trabajador.cuentaCorriente}'` : "NULL"
+    },
+    tipoTrabajador = ${
+      trabajador.tipoTrabajador ? `'${trabajador.tipoTrabajador}'` : "NULL"
+    },
+    idResponsable = ${
+      trabajador.idResponsable ? `'${trabajador.idResponsable}'` : "NULL"
+    },
+    idTienda = ${trabajador.idTienda ? `'${trabajador.idTienda}'` : "NULL"},
     coordinadora = ${trabajador.coordinadora ? 1 : 0},
-    tokenQR = '${trabajador.tokenQR}'
+    tokenQR = ${trabajador.tokenQR ? `'${trabajador.tokenQR}'` : "NULL"}
     WHERE id = ${trabajador.id}
   `;
 

@@ -5,6 +5,7 @@ import {
   UseGuards,
   Headers,
   Body,
+  Query,
 } from "@nestjs/common";
 import { AuthGuard } from "../auth/auth.guard";
 import { TokenService } from "../get-token/get-token.service";
@@ -57,6 +58,30 @@ export class PermisosController {
     } catch (err) {
       console.log(err);
       return { ok: false, message: err.message };
+    }
+  }
+
+  @Get("customClaims")
+  async getCustomClaims(
+    @Headers("authorization") authHeader: string,
+    @Query() { idApp }: { idApp: string },
+  ) {
+    try {
+      // Esta función no debe fallar si no encuentra los claims
+      const token = this.tokenService.extract(authHeader);
+      await this.authInstance.verifyToken(token);
+      const usuarioGestor = await this.authInstance.getUserWithToken(token);
+
+      return {
+        ok: true,
+        data: await this.permisosInstance.getCustomClaims(
+          usuarioGestor.customClaims,
+          idApp,
+        ),
+      };
+    } catch (err) {
+      console.log(err);
+      return { ok: true, data: [] };
     }
   }
 }

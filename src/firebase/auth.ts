@@ -65,4 +65,12 @@ export class AuthService {
 
     throw Error("No se ha podido obtener el usuario");
   }
+
+  async getUserByUid(uid: string) {
+    try {
+      return await this.auth.getUser(uid);
+    } catch (error) {
+      console.error("No se ha podido encontrar el usuario por uid", error);
+    }
+  }
 }
