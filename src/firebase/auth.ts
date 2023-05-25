@@ -3,6 +3,7 @@ import { getAuth, UserRecord } from "firebase-admin/auth";
 import { TrabajadorCompleto } from "../trabajadores/trabajadores.interface";
 import { app } from "./app";
 import { Trabajador } from "../trabajadores/trabajadores.class";
+import { EmailClass } from "../email/email.class";
 
 export const auth = getAuth(app);
 
@@ -13,6 +14,8 @@ export class AuthService {
   constructor(
     @Inject(forwardRef(() => Trabajador))
     private trabajadorInstance: Trabajador,
+    @Inject(forwardRef(() => EmailClass))
+    private readonly emailInstance: EmailClass,
   ) {}
 
   async verifyToken(token: string) {

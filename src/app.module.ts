@@ -1,4 +1,4 @@
-import { Module, ValidationPipe } from "@nestjs/common";
+import { Module } from "@nestjs/common";
 // import { APP_PIPE } from "@nestjs/core";
 import { AppController } from "./app.controller";
 import { ConfigModule } from "@nestjs/config";

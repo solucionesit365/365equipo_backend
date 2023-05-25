@@ -9,10 +9,11 @@ import { PermisosClass } from "../permisos/permisos.class";
 @Injectable()
 export class Trabajador {
   constructor(
-    @Inject(forwardRef(() => EmailClass))
+    @Inject(forwardRef(() => AuthService))
     private readonly authInstance: AuthService,
     private readonly permisosInstance: PermisosClass,
-    private emailInstance: EmailClass,
+    @Inject(forwardRef(() => EmailClass))
+    private readonly emailInstance: EmailClass,
   ) {}
 
   async getTrabajadorByAppId(uid: string) {

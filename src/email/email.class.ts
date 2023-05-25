@@ -1,11 +1,18 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, Inject, forwardRef } from "@nestjs/common";
 import * as nodemailer from "nodemailer";
+import { AuthService } from "../firebase/auth";
+import { Trabajador } from "../trabajadores/trabajadores.class";
 
 @Injectable()
 export class EmailClass {
   private transporter: any;
 
-  constructor() {
+  constructor(
+    @Inject(forwardRef(() => AuthService))
+    private readonly authInstance: AuthService,
+    @Inject(forwardRef(() => Trabajador))
+    private readonly trabajadorInstance: Trabajador,
+  ) {
     this.transporter = nodemailer.createTransport({
       host: "smtp.gmail.com",
       port: 587,
@@ -28,5 +35,17 @@ export class EmailClass {
         html: mensaje,
       });
     else throw Error("Faltan datos en enviarEmail");
+  }
+
+  async sendMailByUid(uid: string, mensaje: string, asunto: string) {
+    const usuario = await this.authInstance.getUserByUid(uid);
+
+    this.enviarEmail(usuario.email, mensaje, asunto);
+  }
+
+  async sendMailById(id: number, mensaje: string, asunto: string) {
+    const usuario = await this.trabajadorInstance.getTrabajadorBySqlId(id);
+
+    this.enviarEmail(usuario.emails, mensaje, asunto);
   }
 }

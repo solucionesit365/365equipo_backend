@@ -4,13 +4,39 @@ import * as schVacaciones from "./vacaciones.mssql";
 import { Injectable } from "@nestjs/common";
 import { Cuadrantes } from "../cuadrantes/cuadrantes.class";
 import { SolicitudVacaciones } from "./vacaciones.interface";
+import { EmailClass } from "../email/email.class";
+import { Trabajador } from "../trabajadores/trabajadores.class";
 
 @Injectable()
 export class Vacaciones {
-  constructor(private readonly cuadrantesInstance: Cuadrantes) {}
+  constructor(
+    private readonly cuadrantesInstance: Cuadrantes,
+    private readonly emailInstance: EmailClass,
+    private readonly trabajadorInstance: Trabajador,
+  ) {}
 
   async nuevaSolicitudVacaciones(solicitud: SolicitudVacaciones) {
-    return await schVacaciones.nuevaSolicitudVacaciones(solicitud);
+    if (await schVacaciones.nuevaSolicitudVacaciones(solicitud)) {
+      const usuario = await this.trabajadorInstance.getTrabajadorBySqlId(
+        solicitud.idBeneficiario,
+      );
+      const mensaje = `
+        Beneficiario: ${usuario.nombreApellidos} <br>
+        Fecha de inicio: ${solicitud.fechaInicial} <br>
+        Fecha final: ${solicitud.fechaFinal} <br>
+        Fecha incorporación: ${solicitud.fechaIncorporacion} <br>
+        Total días de vacaciones: ${solicitud.totalDias} <br>
+        Oberservación: ${solicitud.observaciones} <br>
+        Estado: PENDIENTE DE APROBACIÓN.
+    `;
+      this.emailInstance.sendMailById(
+        solicitud.idBeneficiario,
+        mensaje,
+        "NUEVA SOLICITUD DE VACACIONES",
+      );
+      return true;
+    }
+    throw Error("No se ha podido crear la solicitud de vacaciones");
   }
 
   async getSolicitudesTrabajadorUid(uid: string) {

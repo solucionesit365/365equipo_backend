@@ -1,6 +1,5 @@
 import { Injectable, Inject, forwardRef } from "@nestjs/common";
 import { AuthService, auth } from "../firebase/auth";
-import { TrabajadorCompleto } from "../trabajadores/trabajadores.interface";
 
 @Injectable()
 export class PermisosClass {
