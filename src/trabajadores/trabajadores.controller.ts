@@ -200,6 +200,25 @@ export class TrabajadoresController {
       return { ok: false, message: err.message };
     }
   }
-  //traspaso de setCustomClaims hecho
-  // falta la siguiente guardarUsuarioEnSql que se usa en el modal de editar usuario.
+
+  @Get("arbolById")
+  async getArbolById(
+    @Headers("authorization") authHeader: string,
+    @Query() { idSql }: { idSql: string },
+  ) {
+    try {
+      if (!idSql) throw Error("Faltan parámetros");
+
+      const token = this.tokenService.extract(authHeader);
+      await this.authInstance.verifyToken(token);
+
+      return {
+        ok: true,
+        data: await this.trabajadorInstance.getArbolById(Number(idSql)),
+      };
+    } catch (err) {
+      console.log(err);
+      return { ok: false, message: err.message };
+    }
+  }
 }

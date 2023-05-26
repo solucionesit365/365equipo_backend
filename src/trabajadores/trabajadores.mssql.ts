@@ -524,3 +524,53 @@ export async function guardarCambiosForm(
   await recSolucionesClassic("soluciones", sql);
   return true;
 }
+
+export async function getNivelMenosUno(idSql: number) {
+  const sqlSuResponsable = `
+  IF EXISTS (SELECT * from trabajadores where id = (select idResponsable from trabajadores where id = @param0))
+      BEGIN
+          SELECT * from trabajadores where id = (select idResponsable from trabajadores where id = @param0)
+      END
+  ELSE
+      BEGIN
+          SELECT 'Sin responsable' as resultado
+      END
+  `;
+  const resSuResponsable = await recSoluciones(
+    "soluciones",
+    sqlSuResponsable,
+    idSql,
+  );
+
+  if (
+    resSuResponsable.recordset?.length > 0 &&
+    resSuResponsable.recordset[0]?.resultado != "Sin responsable"
+  ) {
+    return resSuResponsable.recordset[0];
+  } else return null;
+}
+
+export async function getNivelUno(idSql: number) {
+  const sql = `
+    SELECT tr.*, ti.nombre as nombreTienda FROM trabajadores tr 
+    LEFT JOIN tiendas ti ON tr.idTienda = ti.id
+    WHERE tr.idResponsable = @param0
+  `;
+  const resNivelUno = await recSoluciones("soluciones", sql, idSql);
+
+  if (resNivelUno.recordset?.length > 0) return resNivelUno.recordset;
+  return null;
+}
+
+export async function getNivelCero(idSql: number) {
+  const sql = `
+    SELECT tr.*, ti.nombre as nombreTienda FROM trabajadores tr
+    LEFT JOIN tiendas ti ON tr.idTienda = ti.id
+    WHERE tr.id = @param0
+  `;
+
+  const resNivelCero = await recSoluciones("soluciones", sql, idSql);
+
+  if (resNivelCero.recordset?.length > 0) return resNivelCero.recordset[0];
+  return null;
+}
