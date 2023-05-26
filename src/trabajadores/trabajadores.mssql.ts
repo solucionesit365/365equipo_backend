@@ -219,7 +219,6 @@ export async function getSubordinadosById(id: number): Promise<
   return [];
 }
 
-/* ¡¡ A HIT !! */
 export async function getTrabajadoresSage(): Promise<
   {
     id: number;

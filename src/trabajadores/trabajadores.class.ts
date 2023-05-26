@@ -244,4 +244,16 @@ export class Trabajador {
       nivelUno,
     };
   }
+
+  private async borrarTrabajadorDeGoogle(uid: string) {
+
+  }
+
+  private async borrarTrabajadorDeSql(idSql: number) {
+
+  }
+
+  public async borrarTrabajador() {
+
+  }
 }

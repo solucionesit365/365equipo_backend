@@ -12,6 +12,7 @@ import { TokenService } from "../get-token/get-token.service";
 import { FirebaseMessagingService } from "../firebase/firebase-messaging.service";
 import { Trabajador } from "./trabajadores.class";
 import { AuthService } from "../firebase/auth";
+import { AdminGuard } from "../auth/admin.guard";
 
 @Controller("trabajadores")
 export class TrabajadoresController {
@@ -123,7 +124,7 @@ export class TrabajadoresController {
 
       return {
         ok: true,
-        data: await this.trabajadorInstance.descargarTrabajadoresHit(),
+        data: await this.trabajadorInstance.sincronizarConHit(),
       };
     } catch (err) {
       console.log(err);
@@ -219,6 +220,22 @@ export class TrabajadoresController {
     } catch (err) {
       console.log(err);
       return { ok: false, message: err.message };
+    }
+  }
+
+  @Post("borrarTrabajador")
+  @UseGuards(AdminGuard)
+  async borrarTrabajador(@Body() {idSql}) {
+    try {
+      if (!idSql) throw Error("Faltan parámetros");
+
+      return {
+        ok: true,
+        data: await this.
+      }
+    } catch (err) {
+      console.log(err);
+      return {ok: false, message: err.message};
     }
   }
 }

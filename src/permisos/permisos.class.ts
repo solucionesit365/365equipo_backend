@@ -8,6 +8,7 @@ export class PermisosClass {
     private readonly authInstance: AuthService,
   ) {}
 
+  /* Eliminar esta función y dejar solo la del AdminGuard */
   pasoPermitidoByClaims(arrayPermisos: any[], cualquieraDe: any[]) {
     if (arrayPermisos) {
       for (let i = 0; i < arrayPermisos.length; i++) {
