@@ -10,7 +10,7 @@ export class Fichajes {
   constructor(
     private readonly schFichajes: FichajesDatabase,
     private readonly trabajadoresInstance: Trabajador,
-  ) { }
+  ) {}
 
   async nuevaEntrada(uid: string) {
     const hora = new Date();
@@ -118,10 +118,17 @@ export class Fichajes {
     return this.schFichajes.getFichajesByIdSql(idSql, validado);
   }
 
-  async updateFichaje(id: string, validado: boolean) {
-    if (typeof id === "string")
-      console.log(id + " - " + validado);
+  async getFichajesByUid(uid: string, fechaInicio: Date, fechaFinal: Date) {
+    return await this.schFichajes.getFichajesByUid(
+      uid,
+      fechaInicio,
+      fechaFinal,
+    );
+  }
 
-    return await this.schFichajes.updateFichaje(id, validado)
+  async updateFichaje(id: string, validado: boolean) {
+    if (typeof id === "string") console.log(id + " - " + validado);
+
+    return await this.schFichajes.updateFichaje(id, validado);
   }
 }

@@ -156,4 +156,33 @@ export class FichajesController {
       return { ok: false, message: err.message };
     }
   }
+
+  @Get("misFichajes")
+  async getMisFichajes(
+    @Headers("authorization") authHeader: string,
+    @Query() { fechaInicio, fechaFinal },
+  ) {
+    try {
+      if (!fechaInicio || !fechaFinal) throw Error("Faltan parámetros");
+
+      const token = this.tokenService.extract(authHeader);
+      await this.authInstance.verifyToken(token);
+      const usuario = await this.authInstance.getUserWithToken(token);
+
+      fechaInicio = new Date(fechaInicio);
+      fechaFinal = new Date(fechaFinal);
+
+      return {
+        ok: true,
+        data: await this.fichajesInstance.getFichajesByUid(
+          usuario.uid,
+          fechaInicio,
+          fechaFinal,
+        ),
+      };
+    } catch (err) {
+      console.log(err);
+      return { ok: false, message: err.message };
+    }
+  }
 }
