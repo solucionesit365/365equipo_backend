@@ -16,6 +16,7 @@ import { TCuadrante } from "./cuadrantes.interface";
 import { SchedulerGuard } from "../scheduler/scheduler.guard";
 import * as moment from "moment";
 import { AuthService } from "../firebase/auth";
+import { Trabajador } from "../trabajadores/trabajadores.class";
 
 @Controller("cuadrantes")
 export class CuadrantesController {
@@ -23,19 +24,20 @@ export class CuadrantesController {
     private readonly authInstance: AuthService,
     private readonly tokenService: TokenService,
     private readonly cuadrantesInstance: Cuadrantes,
+    private readonly trabajadoresInstance: Trabajador,
   ) {}
 
   @Get()
   @UseGuards(AuthGuard)
   async getCuadrantes(
-    @Query() { semana }: { semana: string },
+    @Query() { semana, year }: { semana: string; year: string },
     @Headers("authorization") authHeader: string,
   ) {
     try {
       const token = this.tokenService.extract(authHeader);
       const usuario = await this.authInstance.getUserWithToken(token);
 
-      if (!semana) throw Error("Faltan datos");
+      if (!semana || !year) throw Error("Faltan datos");
 
       if (usuario.coordinadora && usuario.idTienda) {
         return {
@@ -43,6 +45,7 @@ export class CuadrantesController {
           data: await this.cuadrantesInstance.getCuadrantes(
             usuario.idTienda,
             Number(semana),
+            Number(year),
           ),
         };
       }
@@ -106,14 +109,17 @@ export class CuadrantesController {
   @Get("getTiendasUnaSemana")
   @UseGuards(AuthGuard)
   async getTiendas1Semana(
-    @Query() { semana }: { semana: number },
+    @Query() { semana, year }: { semana: string; year: string },
     @Headers("authorization") authHeader: string,
   ) {
     try {
-      if (!semana) throw Error("Faltan datos");
+      if (!semana || !year) throw Error("Faltan datos");
       return {
         ok: true,
-        data: await this.cuadrantesInstance.getTiendas1Semana(Number(semana)),
+        data: await this.cuadrantesInstance.getTiendas1Semana(
+          Number(semana),
+          Number(year),
+        ),
       };
     } catch (err) {
       console.log(err);
@@ -148,21 +154,22 @@ export class CuadrantesController {
     {
       idTienda,
       semana,
+      year,
     }: {
       idTienda: number;
       semana: number;
+      year: number;
     },
     @Headers("authorization") authHeader: string,
   ) {
     try {
-      console.log(idTienda + semana);
-
-      if (!idTienda && !semana) throw Error("Faltan datos");
+      if (!idTienda && !semana && !year) throw Error("Faltan datos");
       return {
         ok: true,
         data: await this.cuadrantesInstance.getCuadrantes(
           Number(idTienda),
           Number(semana),
+          Number(year),
         ),
       };
     } catch (error) {
@@ -267,138 +274,42 @@ export class CuadrantesController {
       arrayParciales: [],
     });
   }
-  // @Post("traspasoBorrar")
-  // async traspasoBorrar() {
-  //   try {
-  //     const resTiendas = await recSoluciones(
-  //       "soluciones",
-  //       "SELECT * FROM tiendas",
-  //     );
-  //     const tiendas = resTiendas.recordset;
-  //     const todos = await this.cuadrantesInstance.getTodo();
 
-  //     const tiendasCorregidas = todos.map((cuadrante) => {
-  //       let idTienda = 0;
-  //       for (let i = 0; i < tiendas.length; i += 1) {
-  //         if (tiendas[i].idExterno === cuadrante.idTienda)
-  //           idTienda = tiendas[i].id;
-  //       }
-  //       cuadrante.idTienda = idTienda;
-  //       return cuadrante;
-  //     });
+  @Post("copiar")
+  @UseGuards(AuthGuard)
+  async copiarSemana(
+    @Headers("authorization") authHeader: string,
+    @Body() { semanaOrigen, semanaDestino, yearOrigen, yearDestino, idTienda },
+  ) {
+    try {
+      if (
+        !semanaOrigen ||
+        !semanaDestino ||
+        (!yearOrigen && !yearDestino && !idTienda)
+      )
+        throw Error("Faltan parámetros");
 
-  //     return tiendasCorregidas;
-  //     // const cuadrantesCreadosRef = db.collection("cuadrantesCreados");
-  //     // const querySnapshot = await cuadrantesCreadosRef
-  //     //   .where("semana", "==", 16)
-  //     //   .get();
-  //     // const cuadrantesCreados = [];
-  //     // querySnapshot.forEach((doc) => {
-  //     //   cuadrantesCreados.push({ id: doc.id, ...doc.data() });
-  //     // });
+      const token = this.tokenService.extract(authHeader);
+      await this.authInstance.verifyToken(token);
 
-  //     // // return cuadrantesCreados;
-  //     // const arrayBueno = cuadrantesCreados.map((cuadrante) => {
-  //     //   const bueno = {
-  //     //     idTienda: cuadrante.tienda,
-  //     //     semana: cuadrante.semana,
-  //     //     totalHoras: cuadrante.totalHoras,
-  //     //     idTrabajador: cuadrante.idTrabajador,
-  //     //     nombre: cuadrante.nombre,
-  //     //     enviado: false,
-  //     //     historialPlanes: [],
-  //     //     arraySemanalHoras: [],
-  //     //   };
+      const usuario = await this.authInstance.getUserWithToken(token);
 
-  //     //   const arraySemanalHoras = [];
-
-  //     //   let i = 0;
-  //     //   if (
-  //     //     cuadrante.arraySemanalHoras[i].horaEntrada &&
-  //     //     cuadrante.arraySemanalHoras[i].horaSalida
-  //     //   ) {
-  //     //     arraySemanalHoras.push({
-  //     //       horaEntrada: cuadrante.arraySemanalHoras[i].horaEntrada,
-  //     //       horaSalida: cuadrante.arraySemanalHoras[i].horaSalida,
-  //     //       idPlan: new ObjectId().toString(),
-  //     //     });
-  //     //   } else arraySemanalHoras.push(null);
-
-  //     //   i = 1;
-  //     //   if (
-  //     //     cuadrante.arraySemanalHoras[i].horaEntrada &&
-  //     //     cuadrante.arraySemanalHoras[i].horaSalida
-  //     //   ) {
-  //     //     arraySemanalHoras.push({
-  //     //       horaEntrada: cuadrante.arraySemanalHoras[i].horaEntrada,
-  //     //       horaSalida: cuadrante.arraySemanalHoras[i].horaSalida,
-  //     //       idPlan: new ObjectId().toString(),
-  //     //     });
-  //     //   } else arraySemanalHoras.push(null);
-  //     //   i = 2;
-  //     //   if (
-  //     //     cuadrante.arraySemanalHoras[i].horaEntrada &&
-  //     //     cuadrante.arraySemanalHoras[i].horaSalida
-  //     //   ) {
-  //     //     arraySemanalHoras.push({
-  //     //       horaEntrada: cuadrante.arraySemanalHoras[i].horaEntrada,
-  //     //       horaSalida: cuadrante.arraySemanalHoras[i].horaSalida,
-  //     //       idPlan: new ObjectId().toString(),
-  //     //     });
-  //     //   } else arraySemanalHoras.push(null);
-  //     //   i = 3;
-  //     //   if (
-  //     //     cuadrante.arraySemanalHoras[i].horaEntrada &&
-  //     //     cuadrante.arraySemanalHoras[i].horaSalida
-  //     //   ) {
-  //     //     arraySemanalHoras.push({
-  //     //       horaEntrada: cuadrante.arraySemanalHoras[i].horaEntrada,
-  //     //       horaSalida: cuadrante.arraySemanalHoras[i].horaSalida,
-  //     //       idPlan: new ObjectId().toString(),
-  //     //     });
-  //     //   } else arraySemanalHoras.push(null);
-  //     //   i = 4;
-  //     //   if (
-  //     //     cuadrante.arraySemanalHoras[i].horaEntrada &&
-  //     //     cuadrante.arraySemanalHoras[i].horaSalida
-  //     //   ) {
-  //     //     arraySemanalHoras.push({
-  //     //       horaEntrada: cuadrante.arraySemanalHoras[i].horaEntrada,
-  //     //       horaSalida: cuadrante.arraySemanalHoras[i].horaSalida,
-  //     //       idPlan: new ObjectId().toString(),
-  //     //     });
-  //     //   } else arraySemanalHoras.push(null);
-  //     //   i = 5;
-  //     //   if (
-  //     //     cuadrante.arraySemanalHoras[i].horaEntrada &&
-  //     //     cuadrante.arraySemanalHoras[i].horaSalida
-  //     //   ) {
-  //     //     arraySemanalHoras.push({
-  //     //       horaEntrada: cuadrante.arraySemanalHoras[i].horaEntrada,
-  //     //       horaSalida: cuadrante.arraySemanalHoras[i].horaSalida,
-  //     //       idPlan: new ObjectId().toString(),
-  //     //     });
-  //     //   } else arraySemanalHoras.push(null);
-  //     //   i = 6;
-  //     //   if (
-  //     //     cuadrante.arraySemanalHoras[i].horaEntrada &&
-  //     //     cuadrante.arraySemanalHoras[i].horaSalida
-  //     //   ) {
-  //     //     arraySemanalHoras.push({
-  //     //       horaEntrada: cuadrante.arraySemanalHoras[i].horaEntrada,
-  //     //       horaSalida: cuadrante.arraySemanalHoras[i].horaSalida,
-  //     //       idPlan: new ObjectId().toString(),
-  //     //     });
-  //     //   } else arraySemanalHoras.push(null);
-
-  //     //   bueno.arraySemanalHoras = arraySemanalHoras;
-  //     //   return bueno;
-  //     // });
-
-  //     // return arrayBueno;
-  //   } catch (err) {
-  //     console.log(err);
-  //     return { ok: false, message: err.message };
-  //   }
-  // }
+      if (await this.trabajadoresInstance.esCoordinadora(usuario.uid)) {
+        return {
+          ok: true,
+          data: await this.cuadrantesInstance.copiarCuadrante(
+            Number(semanaOrigen),
+            Number(semanaDestino),
+            Number(yearOrigen),
+            Number(yearDestino),
+            Number(idTienda),
+          ),
+        };
+      }
+      throw Error("No tienes permisos para realizar esta acción");
+    } catch (err) {
+      console.log(err);
+      return { ok: false, message: err.message };
+    }
+  }
 }

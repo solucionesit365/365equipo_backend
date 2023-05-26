@@ -39,7 +39,7 @@ export class Trabajador {
     return await schTrabajadores.getSubordinadosConTienda(idAppResponsable);
   }
 
-  async esCoordinadora(uid: string) {
+  async esCoordinadora(uid: string): Promise<boolean> {
     return await schTrabajadores.esCoordinadora(uid);
   }
 
