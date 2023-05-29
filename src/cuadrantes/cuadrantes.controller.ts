@@ -260,21 +260,6 @@ export class CuadrantesController {
     }
   }
 
-  @Get("testSemanas")
-  testSemanas() {
-    const fechaInicio = moment("03/04/2023", "DD/MM/YYYY");
-    const fechaFinal = moment("08/05/2023", "DD/MM/YYYY");
-
-    return this.cuadrantesInstance.semanasEnRango({
-      comentario: "",
-      tipo: "BAJA",
-      idUsuario: 3608,
-      fechaFinal: fechaFinal.toDate(),
-      fechaInicio: fechaInicio.toDate(),
-      arrayParciales: [],
-    });
-  }
-
   @Post("copiar")
   @UseGuards(AuthGuard)
   async copiarSemana(

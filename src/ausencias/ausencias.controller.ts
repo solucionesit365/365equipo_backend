@@ -1,19 +1,23 @@
-import { Body, Controller, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, Post, UseGuards, Headers, Get } from "@nestjs/common";
 import { Ausencias } from "./ausencias.class";
 import { AuthGuard } from "../auth/auth.guard";
 
 @Controller("ausencias")
 export class AusenciasController {
-  constructor(private readonly ausenciasInstance: Ausencias) {}
+  constructor(private readonly ausenciasInstance: Ausencias) { }
 
   @Post("nueva")
   // @UseGuards(AuthGuard)
   async addAusencia(
     @Body()
-    { idUsuario, fechaInicio, fechaFinal, tipo, comentario, arrayParciales },
+    { idUsuario, fechaInicio, fechaFinal, tipo, comentario, arrayParciales, nombre },
   ) {
     try {
+      console.log(typeof (idUsuario));
+      console.log(nombre);
+
       if (
+        tipo === "HORAS_JUSTIFICADAS" ||
         tipo === "BAJA" ||
         (tipo === "DIA_PERSONAL" &&
           typeof idUsuario === "number" &&
@@ -29,6 +33,7 @@ export class AusenciasController {
           ok: true,
           data: await this.ausenciasInstance.nuevaAusencia(
             idUsuario,
+            nombre,
             tipo,
             inicio,
             final,
@@ -55,6 +60,19 @@ export class AusenciasController {
     } catch (err) {
       console.log(err);
       return { ok: false, message: err.message };
+    }
+  }
+
+  @Get("getAusencias")
+  @UseGuards(AuthGuard)
+  async getAusencias(@Headers("authorization") authHeader: string,) {
+    try {
+      const respAusencias = await this.ausenciasInstance.getAusencias();
+      console.log(respAusencias);
+      if (respAusencias) return { ok: true, data: respAusencias };
+      else throw Error("No se ha encontrado ninguna ausencia");
+    } catch (error) {
+      console.log(error);
     }
   }
 }

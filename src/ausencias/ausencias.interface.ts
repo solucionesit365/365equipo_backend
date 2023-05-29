@@ -3,6 +3,7 @@ import { ObjectId } from "mongodb";
 export interface AusenciaInterface {
   _id?: ObjectId;
   idUsuario: number;
+  nombre: string;
   tipo: TiposAusencia;
   fechaInicio: Date;
   fechaFinal: Date;
@@ -13,4 +14,4 @@ export interface AusenciaInterface {
   }[];
 }
 
-export type TiposAusencia = "BAJA" | "DIA_PERSONAL" | "VACACIONES";
+export type TiposAusencia = "BAJA" | "DIA_PERSONAL" | "VACACIONES" | "HORAS_JUSTIFICADAS";

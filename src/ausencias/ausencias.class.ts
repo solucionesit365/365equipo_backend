@@ -8,10 +8,11 @@ export class Ausencias {
   constructor(
     private readonly schAusencias: AusenciasDatabase,
     private readonly cuadrantesInstance: Cuadrantes,
-  ) {}
+  ) { }
 
   async nuevaAusencia(
     idUsuario: number,
+    nombre: string,
     tipo: TiposAusencia,
     fechaInicio: Date,
     fechaFinal: Date,
@@ -20,6 +21,7 @@ export class Ausencias {
   ) {
     const resInsert = await this.schAusencias.nuevaAusencia({
       idUsuario,
+      nombre,
       tipo,
       fechaInicio,
       fechaFinal,
@@ -34,6 +36,7 @@ export class Ausencias {
         fechaFinal,
         fechaInicio,
         idUsuario,
+        nombre,
         tipo,
       });
       return resInsert;
@@ -42,5 +45,9 @@ export class Ausencias {
 
   async borrarAusencia(idAusencia: string) {
     return await this.schAusencias.borrarAusencia(idAusencia);
+  }
+
+  async getAusencias() {
+    return await this.schAusencias.getAusencias();
   }
 }
