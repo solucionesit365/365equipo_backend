@@ -261,6 +261,7 @@ export class CuadrantesController {
       comentario: "",
       tipo: "BAJA",
       idUsuario: 3608,
+      nombre: 'Ezequiel',
       fechaFinal: fechaFinal.toDate(),
       fechaInicio: fechaInicio.toDate(),
       arrayParciales: [],

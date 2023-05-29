@@ -20,4 +20,4 @@ export interface TCuadrante {
   historialPlanes: string[];
 }
 
-export type TiposAusencia = "BAJA" | "DIA_PERSONAL" | "VACACIONES";
+export type TiposAusencia = "BAJA" | "DIA_PERSONAL" | "VACACIONES" | "HORAS_JUSTIFICADAS";

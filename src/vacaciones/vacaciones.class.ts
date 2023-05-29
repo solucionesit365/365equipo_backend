@@ -53,6 +53,7 @@ export class Vacaciones {
           fechaInicio: moment(vacaciones.fechaInicio, "DD/MM/YYYY").toDate(),
           fechaFinal: moment(vacaciones.fechaFinal, "DD/MM/YYYY").toDate(),
           idUsuario: vacaciones.idBeneficiario,
+          nombre: vacaciones.idBeneficiario,
           tipo: "VACACIONES",
         });
       }
