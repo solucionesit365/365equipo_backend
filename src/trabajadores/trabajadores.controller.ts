@@ -225,17 +225,17 @@ export class TrabajadoresController {
 
   @Post("borrarTrabajador")
   @UseGuards(AdminGuard)
-  async borrarTrabajador(@Body() {idSql}) {
+  async borrarTrabajador(@Body() { idSql }) {
     try {
       if (!idSql) throw Error("Faltan parámetros");
 
       return {
         ok: true,
-        data: await this.
-      }
+        data: await this.borrarTrabajador(idSql),
+      };
     } catch (err) {
       console.log(err);
-      return {ok: false, message: err.message};
+      return { ok: false, message: err.message };
     }
   }
 }

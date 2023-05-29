@@ -246,14 +246,19 @@ export class Trabajador {
   }
 
   private async borrarTrabajadorDeGoogle(uid: string) {
-
+    await this.authInstance.auth.deleteUser(uid);
   }
 
   private async borrarTrabajadorDeSql(idSql: number) {
-
+    await schTrabajadores.borrarTrabajador(idSql);
   }
 
-  public async borrarTrabajador() {
+  public async borrarTrabajador(idSql: number) {
+    const usuario = await this.getTrabajadorBySqlId(idSql);
 
+    if (usuario) {
+      if (usuario.idApp) await this.borrarTrabajadorDeGoogle(usuario.idApp);
+      await this.borrarTrabajadorDeSql(idSql);
+    } else throw Error("No se ha podido recoger la información del usuario");
   }
 }

@@ -172,6 +172,7 @@ export async function getSubordinados(uid: string): Promise<
     id: number;
     idApp: string;
     nombreApellidos: string;
+    displayName: string;
     idTienda: number;
     antiguedad: string;
     inicioContrato: string;
@@ -182,6 +183,7 @@ export async function getSubordinados(uid: string): Promise<
       id, 
       idApp, 
       nombreApellidos, 
+      displayName,
       idTienda, 
       CONVERT(varchar, antiguedad, 103) as antiguedad, 
       CONVERT(varchar, inicioContrato, 103) as inicioContrato 
@@ -572,4 +574,12 @@ export async function getNivelCero(idSql: number) {
 
   if (resNivelCero.recordset?.length > 0) return resNivelCero.recordset[0];
   return null;
+}
+
+export async function borrarTrabajador(idSql: number) {
+  const sql = "DELETE FROM trabajadores WHERE id = @param0";
+
+  await recSoluciones("soluciones", sql, idSql);
+
+  return true;
 }
