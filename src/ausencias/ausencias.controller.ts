@@ -23,6 +23,7 @@ export class AusenciasController {
       ) {
         const inicio = new Date(fechaInicio);
         const final = new Date(fechaFinal);
+
         arrayParciales.map((fechaIso: string) => new Date(fechaIso));
         return {
           ok: true,

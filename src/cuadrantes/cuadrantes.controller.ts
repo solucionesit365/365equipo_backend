@@ -39,7 +39,7 @@ export class CuadrantesController {
 
       if (!semana || !year) throw Error("Faltan datos");
 
-      if (usuario.coordinadora && usuario.idTienda) {
+      if (usuario.idTienda) {
         return {
           ok: true,
           data: await this.cuadrantesInstance.getCuadrantes(
