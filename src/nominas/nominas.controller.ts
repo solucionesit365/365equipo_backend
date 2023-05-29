@@ -1,11 +1,12 @@
 import { Controller, Get, Headers, Query } from "@nestjs/common";
 import { TokenService } from "../get-token/get-token.service";
-import { getUserWithToken, verifyToken } from "../firebase/auth";
 import { Nominas } from "./nominas.class";
+import { AuthService } from "../firebase/auth";
 
 @Controller("nominas")
 export class NominasController {
   constructor(
+    private readonly authInstance: AuthService,
     private readonly tokenService: TokenService,
     private readonly nominaInstance: Nominas,
   ) {}
@@ -18,8 +19,8 @@ export class NominasController {
       if (typeof idArchivo !== "string") throw Error("Parámetros incorrectos");
 
       const token = this.tokenService.extract(authHeader);
-      await verifyToken(token);
-      const usuario = await getUserWithToken(token);
+      await this.authInstance.verifyToken(token);
+      const usuario = await this.authInstance.getUserWithToken(token);
 
       return {
         ok: true,
@@ -35,8 +36,8 @@ export class NominasController {
   async getListadoNominas(@Headers("authorization") authHeader: string) {
     try {
       const token = this.tokenService.extract(authHeader);
-      await verifyToken(token);
-      const usuario = await getUserWithToken(token);
+      await this.authInstance.verifyToken(token);
+      const usuario = await this.authInstance.getUserWithToken(token);
 
       return {
         ok: true,

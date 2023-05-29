@@ -41,15 +41,50 @@ export class Cuadrantes {
     );
   }
 
-  async getCuadrantes(idTienda: number, semana: number) {
-    return await this.schCuadrantes.getCuadrantes(idTienda, semana);
+  async getCuadrantes(idTienda: number, semana: number, year: number) {
+    const responsableTienda =
+      await this.trabajadoresInstance.getResponsableTienda(idTienda);
+    const equipoCompleto = await this.trabajadoresInstance.getSubordinadosById(
+      responsableTienda.id,
+    );
+
+    const cuadrantes: TCuadrante[] = await this.schCuadrantes.getCuadrantes(
+      idTienda,
+      semana,
+      year,
+    );
+
+    equipoCompleto.forEach((miembro) => {
+      const cuadranteExistente = cuadrantes.find(
+        (cuadrante) => cuadrante.idTrabajador === miembro.id,
+      );
+
+      if (!cuadranteExistente) {
+        const nuevoCuadrante: TCuadrante = {
+          _id: new ObjectId().toString(),
+          idTrabajador: miembro.id,
+          nombre: miembro.nombreApellidos,
+          idTienda: idTienda,
+          semana: semana,
+          year: new Date().getFullYear(),
+          arraySemanalHoras: [null, null, null, null, null, null, null],
+          totalHoras: 0,
+          enviado: false,
+          historialPlanes: [],
+        };
+
+        cuadrantes.push(nuevoCuadrante);
+      }
+    });
+
+    return cuadrantes;
   }
 
   async getTodo() {
     return await this.schCuadrantes.getTodo();
   }
-  async getTiendas1Semana(semana: number) {
-    return await this.schCuadrantes.getTiendas1Semana(semana);
+  async getTiendas1Semana(semana: number, year: number) {
+    return await this.schCuadrantes.getTiendas1Semana(semana, year);
   }
 
   async getSemanas1Tienda(idTienda: number) {
@@ -59,9 +94,12 @@ export class Cuadrantes {
   private async getPendientesEnvio() {
     return await this.schCuadrantes.getPendientesEnvio();
   }
- async getCuadranteSemanaTrabajador(idTrabajador: number, semana: number){
-  return await this.schCuadrantes.getCuadranteSemanaTrabajador(idTrabajador, semana)
-}
+  async getCuadranteSemanaTrabajador(idTrabajador: number, semana: number) {
+    return await this.schCuadrantes.getCuadranteSemanaTrabajador(
+      idTrabajador,
+      semana,
+    );
+  }
   public async sincronizarConHit() {
     const cuadrantes = await this.getPendientesEnvio();
     const tiendas = await this.tiendasInstance.getTiendas();
@@ -77,7 +115,10 @@ export class Cuadrantes {
       );
 
       for (let j = 0; j < cuadrante.arraySemanalHoras.length; j += 1) {
-        if (cuadrante.arraySemanalHoras[j]) {
+        if (
+          cuadrante.arraySemanalHoras[j] &&
+          !cuadrante.arraySemanalHoras[j].ausencia
+        ) {
           const entrada = moment(
             cuadrante.arraySemanalHoras[j].horaEntrada,
             "HH:mm",
@@ -199,111 +240,20 @@ export class Cuadrantes {
     return true;
   }
 
-  // public async sincronizarConHit() {
-  //   const cuadrantes = await this.getPendientesEnvio();
-  //   const tiendas = await this.tiendasInstance.getTiendas();
-
-  //   for (let i = 0; i < cuadrantes.length; i += 1) {
-  //     let query = "DECLARE @idTurno VARCHAR(255) = NULL";
-  //     let subQuery = "";
-
-  //     const sqlBorrar = this.schCuadrantes.borrarHistorial(cuadrantes[i]);
-  //     const nombreTablaPlanificacion = this.schCuadrantes.nombreTablaSqlHit(
-  //       cuadrantes[i].semana,
-  //     );
-
-  //     for (let j = 0; j < cuadrantes[i].arraySemanalHoras.length; j += 1) {
-  //       if (cuadrantes[i].arraySemanalHoras[j]) {
-  //         const entrada = moment(
-  //           cuadrantes[i].arraySemanalHoras[j].horaEntrada,
-  //           "HH:mm",
-  //         );
-  //         const salida = moment(
-  //           cuadrantes[i].arraySemanalHoras[j].horaSalida,
-  //           "HH:mm",
-  //         );
-  //         const tipoTurno = entrada.format("A") === "AM" ? "M" : "T";
-
-  //         subQuery += `
-
-  //           SELECT @idTurno = NULL;
-  //           SELECT TOP 1 @idTurno = idTurno from cdpTurnos WHERE horaInicio = '${
-  //             cuadrantes[i].arraySemanalHoras[j].horaEntrada
-  //           }' AND horaFin = '${cuadrantes[i].arraySemanalHoras[j].horaSalida}';
-
-  //           IF @idTurno IS NOT NULL
-  //             BEGIN
-  //               INSERT INTO ${nombreTablaPlanificacion} (
-  //                 idPlan,
-  //                 fecha,
-  //                 botiga,
-  //                 periode,
-  //                 idTurno,
-  //                 usuarioModif,
-  //                 fechaModif,
-  //                 activo
-  //               )
-  //               VALUES (
-  //                 '${cuadrantes[i].arraySemanalHoras[j].idPlan}',
-  //                 CONVERT(datetime, '${moment()
-  //                   .week(cuadrantes[i].semana)
-  //                   .weekday(j)
-  //                   .format("DD/MM/YYYY")}', 103),
-  //                 ${this.tiendasInstance.convertirTiendaToExterno(
-  //                   cuadrantes[i].idTienda,
-  //                   tiendas,
-  //                 )},
-  //                 '${tipoTurno}',
-  //                 @idTurno,
-  //                 '365EquipoDeTrabajo',
-  //                 GETDATE(),
-  //                 1
-  //               );
-  //             END
-  //           ELSE
-  //               BEGIN
-  //                 SELECT @idTurno = NEWID()
-  //                 INSERT INTO cdpTurnos (
-  //                   nombre,
-  //                   horaInicio,
-  //                   horaFin,
-  //                   idTurno,
-  //                   color,
-  //                   tipoEmpleado
-  //                 )
-  //                 VALUES (
-  //                   'De ${entrada.format("HH:mm")} a ${salida.format(
-  //           "HH:mm",
-  //         )}',
-  //                   '${entrada.format("HH:mm")}',
-  //                   '${salida.format("HH:mm")}',
-  //                   @idTurno,
-  //                   '#DDDDDD',
-  //                   'RESPONSABLE/DEPENDENTA
-  //                 ')
-  //               END
-
-  //       `;
-  //       }
-  //     }
-
-  //     const resPlanes = await recHit("Fac_Tena", sqlBorrar + query + subQuery);
-  //     if (resPlanes.rowsAffected.includes(1)) {
-  //       await this.schCuadrantes.setCuadranteEnviado(cuadrantes[i]._id);
-  //     } else throw Error("Fallo en la consulta");
-  //   }
-
-  //   return true;
-  // }
-
   async saveCuadrante(cuadrante: TCuadrante, oldCuadrante: TCuadrante) {
     if (oldCuadrante) {
       cuadrante.historialPlanes = oldCuadrante.historialPlanes;
       cuadrante._id = oldCuadrante._id;
     }
     cuadrante.enviado = false;
+
     for (let i = 0; i < cuadrante.arraySemanalHoras.length; i += 1) {
       let update = false;
+      if (cuadrante.arraySemanalHoras[i].bloqueado) {
+        cuadrante.arraySemanalHoras[i] = oldCuadrante.arraySemanalHoras[i];
+        continue;
+      }
+
       if (cuadrante.arraySemanalHoras[i].idPlan) {
         update = true;
         if (
@@ -528,5 +478,33 @@ export class Cuadrantes {
         fechaInicio.add(1, "days");
       }
     }
+  }
+
+  async copiarCuadrante(
+    semanaOrigen: number,
+    semanaDestino: number,
+    yearOrigen: number,
+    yearDestino: number,
+    idTienda: number,
+  ) {
+    const cuadrantesOrigen = await this.getCuadrantes(
+      idTienda,
+      semanaOrigen,
+      yearOrigen,
+    );
+
+    const cuadrantesDestino: TCuadrante[] = cuadrantesOrigen.map(
+      (cuadrante) => {
+        cuadrante._id = new ObjectId().toString();
+        cuadrante.semana = semanaDestino;
+        cuadrante.year = yearDestino;
+        cuadrante.enviado = false;
+        return cuadrante;
+      },
+    );
+
+    if (await this.schCuadrantes.insertCuadrantes(cuadrantesDestino))
+      return true;
+    else throw Error("No se han podido guardar las copias de los cuadrantes");
   }
 }

@@ -33,6 +33,7 @@
     "mongodb": "^5.1.0",
     "mssql": "^9.1.1",
     "nest.js": "^1.0.8",
+    "nodemailer": "^6.9.2",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.2.0"
   },
@@ -44,6 +45,7 @@
     "@types/jest": "29.2.4",
     "@types/mssql": "^8.1.2",
     "@types/node": "18.11.18",
+    "@types/nodemailer": "^6.4.7",
     "@types/supertest": "^2.0.11",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",

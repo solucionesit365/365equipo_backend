@@ -5,3 +5,12 @@ export interface NotificacionDto {
   uid: string;
   token: string;
 }
+
+export interface InAppNotification {
+  _id?: ObjectId;
+  uid: string;
+  titulo: string;
+  mensaje: string;
+  leido: boolean;
+  creador: "SISTEMA" | "RRHH";
+}

@@ -1,12 +1,13 @@
 import { Controller, Post, Get, Body, Headers } from "@nestjs/common";
 import { TokenService } from "../get-token/get-token.service";
-import { getUserWithToken, verifyToken } from "../firebase/auth";
 import { AnunciosClass } from "./anuncios.class";
 import { AnuncioDto, UpdateAnuncioDto } from "./anuncios.dto";
+import { AuthService } from "../firebase/auth";
 
 @Controller("anuncios")
 export class AnunciosController {
   constructor(
+    private readonly authInstance: AuthService,
     private readonly tokenService: TokenService,
     private readonly anunciosInstance: AnunciosClass,
   ) {}
@@ -15,9 +16,9 @@ export class AnunciosController {
   async getAnuncios(@Headers("authorization") authHeader: string) {
     try {
       const token = this.tokenService.extract(authHeader);
-      await verifyToken(token);
+      await this.authInstance.verifyToken(token);
 
-      const usuario = await getUserWithToken(token);
+      const usuario = await this.authInstance.getUserWithToken(token);
 
       if (usuario.coordinadora && !usuario.idTienda) {
         return {
@@ -47,7 +48,7 @@ export class AnunciosController {
   ) {
     try {
       const token = this.tokenService.extract(authHeader);
-      await verifyToken(token);
+      await this.authInstance.verifyToken(token);
 
       // Falta comprobación de quién puede enviar un anuncio, ahora
       // mismo cualquiera lo puede hacer.
@@ -69,7 +70,7 @@ export class AnunciosController {
   ) {
     try {
       const token = this.tokenService.extract(authHeader);
-      await verifyToken(token);
+      await this.authInstance.verifyToken(token);
 
       // Falta comprobación de quién puede enviar un anuncio, ahora
       // mismo cualquiera lo puede hacer.
@@ -91,7 +92,7 @@ export class AnunciosController {
   ) {
     try {
       const token = this.tokenService.extract(authHeader);
-      await verifyToken(token);
+      await this.authInstance.verifyToken(token);
 
       // Falta comprobación de quién puede enviar un anuncio, ahora
       // mismo cualquiera lo puede hacer.

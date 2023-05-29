@@ -8,14 +8,16 @@ import {
   UseGuards,
 } from "@nestjs/common";
 import { SchedulerGuard } from "../scheduler/scheduler.guard";
-import { verifyToken } from "../firebase/auth";
 import { TokenService } from "../get-token/get-token.service";
-import { trabajadorInstance } from "../trabajadores/trabajadores.class";
 import { Vacaciones } from "./vacaciones.class";
+import { Trabajador } from "../trabajadores/trabajadores.class";
+import { AuthService } from "../firebase/auth";
 
 @Controller("vacaciones")
 export class VacacionesController {
   constructor(
+    private readonly authInstance: AuthService,
+    private readonly trabajadorInstance: Trabajador,
     private readonly tokenService: TokenService,
     private readonly vacacionesInstance: Vacaciones,
   ) {}
@@ -24,7 +26,7 @@ export class VacacionesController {
   async getSolicitudes(@Headers("authorization") authHeader: string) {
     try {
       const token = this.tokenService.extract(authHeader);
-      await verifyToken(token);
+      await this.authInstance.verifyToken(token);
       return {
         ok: true,
         data: await this.vacacionesInstance.getSolicitudes(),
@@ -56,7 +58,7 @@ export class VacacionesController {
   ) {
     try {
       const token = this.tokenService.extract(authHeader);
-      await verifyToken(token);
+      await this.authInstance.verifyToken(token);
 
       if (uid) {
         return {
@@ -82,7 +84,7 @@ export class VacacionesController {
   ) {
     try {
       const token = this.tokenService.extract(authHeader);
-      await verifyToken(token);
+      await this.authInstance.verifyToken(token);
 
       return {
         ok: true,
@@ -102,17 +104,18 @@ export class VacacionesController {
     try {
       if (!idAppResponsable) throw Error("Faltan datos");
       const token = this.tokenService.extract(authHeader);
-      await verifyToken(token);
+      await this.authInstance.verifyToken(token);
 
       const solicitudesEmpleadosDirectos =
         await this.vacacionesInstance.getSolicitudesSubordinados(
           idAppResponsable,
         );
       const empleadosTipoCoordi =
-        await trabajadorInstance.getSubordinadosConTienda(idAppResponsable);
-      const soyCoordinadora: boolean = await trabajadorInstance.esCoordinadora(
-        idAppResponsable,
-      );
+        await this.trabajadorInstance.getSubordinadosConTienda(
+          idAppResponsable,
+        );
+      const soyCoordinadora: boolean =
+        await this.trabajadorInstance.esCoordinadora(idAppResponsable);
       const addArray = [];
 
       if (empleadosTipoCoordi.length > 0) {
@@ -171,7 +174,7 @@ export class VacacionesController {
       if (!(estado === "APROBADA" || estado === "RECHAZADA"))
         throw Error("Estado de solicitud incorrecto");
       const token = this.tokenService.extract(authHeader);
-      await verifyToken(token);
+      await this.authInstance.verifyToken(token);
 
       return {
         ok: true,
@@ -181,6 +184,41 @@ export class VacacionesController {
           respuesta,
         ),
       };
+    } catch (err) {
+      console.log(err);
+      return { ok: false, message: err.message };
+    }
+  }
+
+  @Post("nuevaSolicitud")
+  async nuevaSolicitudVacaciones(
+    @Headers("authorization") authHeader: string,
+    @Body() data,
+  ) {
+    try {
+      const token = this.tokenService.extract(authHeader);
+      await this.authInstance.verifyToken(token);
+
+      if (
+        data.idBeneficiario &&
+        data.totalDias &&
+        data.fechaInicial &&
+        data.fechaFinal &&
+        data.fechaIncorporacion &&
+        data.observaciones
+      ) {
+        return {
+          ok: true,
+          data: await this.vacacionesInstance.nuevaSolicitudVacaciones({
+            idBeneficiario: data.idBeneficiario,
+            fechaInicial: data.fechaInicial,
+            fechaFinal: data.fechaFinal,
+            fechaIncorporacion: data.fechaIncorporacion,
+            observaciones: data.observaciones,
+            totalDias: data.totalDias,
+          }),
+        };
+      } else throw Error("Faltan parámetros");
     } catch (err) {
       console.log(err);
       return { ok: false, message: err.message };

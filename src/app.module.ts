@@ -1,4 +1,4 @@
-import { Module, ValidationPipe } from "@nestjs/common";
+import { Module } from "@nestjs/common";
 // import { APP_PIPE } from "@nestjs/core";
 import { AppController } from "./app.controller";
 import { ConfigModule } from "@nestjs/config";
@@ -37,6 +37,11 @@ import { Admin } from "./admin/admin.class";
 import { FichajesValidadosController } from "./fichajes-validados/fichajes-validados.controller";
 import { FichajesValidados } from "./fichajes-validados/fichajes-validados.class";
 import { FichajesValidadosDatabase } from "./fichajes-validados/fichajes-validados.mongodb";
+import { EmailClass } from "./email/email.class";
+import { AuthService } from "./firebase/auth";
+import { PermisosController } from "./permisos/permisos.controller";
+import { PermisosClass } from "./permisos/permisos.class";
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -57,6 +62,7 @@ import { FichajesValidadosDatabase } from "./fichajes-validados/fichajes-validad
     AdminController,
     NotificacionesController,
     FichajesValidadosController,
+    PermisosController,
   ],
   providers: [
     AppService,
@@ -70,6 +76,7 @@ import { FichajesValidadosDatabase } from "./fichajes-validados/fichajes-validad
     FacTenaMssql,
     FichajesDatabase,
     Fichajes,
+    EmailClass,
     Trabajador,
     Ausencias,
     AusenciasDatabase,
@@ -82,6 +89,8 @@ import { FichajesValidadosDatabase } from "./fichajes-validados/fichajes-validad
     FichajesValidados,
     Admin,
     FichajesValidadosDatabase,
+    AuthService,
+    PermisosClass,
   ],
 })
 export class AppModule {}

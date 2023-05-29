@@ -13,7 +13,7 @@ moment.locale("es", {
 
 @Injectable()
 export class CuadrantesDatabase {
-  constructor(private readonly mongoDbService: MongoDbService) { }
+  constructor(private readonly mongoDbService: MongoDbService) {}
 
   async insertCuadrante(cuadrante: TCuadrante) {
     cuadrante._id = new ObjectId().toString();
@@ -22,6 +22,15 @@ export class CuadrantesDatabase {
     const resInsert = await cuadrantesCollection.insertOne(cuadrante);
     if (resInsert.acknowledged) return resInsert.insertedId;
     return null;
+  }
+
+  // Muchos
+  async insertCuadrantes(cuadrantes: TCuadrante[]) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes");
+    const resInsert = await cuadrantesCollection.insertMany(cuadrantes);
+    if (resInsert.acknowledged && resInsert.insertedCount > 0) return true;
+    return false;
   }
 
   async updateCuadrante(cuadrante: TCuadrante) {
@@ -77,13 +86,14 @@ export class CuadrantesDatabase {
     return resEnviado.acknowledged;
   }
 
-  async getCuadrantes(idTienda: number, semana: number) {
+  async getCuadrantes(idTienda: number, semana: number, year: number) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes");
     const resCuadrantes = await cuadrantesCollection
       .find({
         idTienda: idTienda,
         semana: semana,
+        year: year,
       })
       .toArray();
 
@@ -97,11 +107,11 @@ export class CuadrantesDatabase {
 
     return resCuadrantes?.length > 0 ? resCuadrantes : [];
   }
-  async getTiendas1Semana(semana: number) {
+  async getTiendas1Semana(semana: number, year: number) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes");
     const resCuadrantes = await cuadrantesCollection
-      .find({ semana: semana })
+      .find({ semana: semana, year: year })
       .toArray();
 
     return resCuadrantes?.length > 0 ? resCuadrantes : [];
@@ -154,8 +164,8 @@ export class CuadrantesDatabase {
       if (cuadrante.historialPlanes[j])
         sqlBorrar += `
           DELETE FROM ${this.nombreTablaSqlHit(
-          cuadrante.semana,
-        )} WHERE idPlan = '${cuadrante.historialPlanes[j]}';
+            cuadrante.semana,
+          )} WHERE idPlan = '${cuadrante.historialPlanes[j]}';
           `;
     }
 

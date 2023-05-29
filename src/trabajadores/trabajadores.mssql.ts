@@ -1,36 +1,40 @@
 import { recHit, recSoluciones, recSolucionesClassic } from "../bbdd/mssql";
-import { TrabajadorSql } from "./trabajadores.interface";
+import { TrabajadorCompleto, TrabajadorSql } from "./trabajadores.interface";
 import * as moment from "moment";
+
+const GET_DATOS_TRABAJADOR = `
+tr.id,
+tr.idApp,
+tr.nombreApellidos,
+tr.displayName,
+tr.emails,
+tr.dni,
+tr.direccion,
+tr.ciudad,
+tr.telefonos,
+CONVERT(nvarchar, tr.fechaNacimiento, 103) as fechaNacimiento,
+tr.nacionalidad,
+tr.nSeguridadSocial,
+tr.codigoPostal,
+tr.cuentaCorriente,
+tr.tipoTrabajador,
+CONVERT(nvarchar, tr.inicioContrato, 103) as inicioContrato,
+CONVERT(nvarchar, tr.finalContrato, 103) as finalContrato,
+tr.idResponsable,
+tr.idTienda,
+(SELECT COUNT(*) FROM trabajadores WHERE idResponsable = tr.id) as coordinadora,
+tr1.nombreApellidos as nombreResponsable,
+ti.nombre as nombreTienda,
+CONVERT(nvarchar, tr.antiguedad, 103) as antiguedad,
+tr.idEmpresa,
+tr.tokenQR
+`;
 
 /* Todos */
 export async function getTrabajadores(todos = false) {
   const sql = `
     SELECT 
-        tr.id,
-        tr.idApp,
-        tr.nombreApellidos,
-        tr.displayName,
-        tr.emails,
-        tr.dni,
-        tr.direccion,
-        tr.ciudad,
-        tr.telefonos,
-        CONVERT(nvarchar, tr.fechaNacimiento, 103) as fechaNacimiento,
-        tr.nacionalidad,
-        tr.nSeguridadSocial,
-        tr.codigoPostal,
-        tr.cuentaCorriente,
-        tr.tipoTrabajador,
-        CONVERT(nvarchar, tr.inicioContrato, 103) as inicioContrato,
-        CONVERT(nvarchar, tr.finalContrato, 103) as finalContrato,
-        tr.idResponsable,
-        tr.idTienda,
-        (SELECT COUNT(*) FROM trabajadores WHERE idResponsable = tr.id) as coordinadora,
-        tr1.nombreApellidos as nombreResponsable,
-        ti.nombre as nombreTienda,
-        CONVERT(nvarchar, tr.antiguedad, 103) as antiguedad,
-        tr.idEmpresa,
-        tr.tokenQR
+        ${GET_DATOS_TRABAJADOR}
     FROM trabajadores tr
     LEFT JOIN trabajadores tr1 ON tr.idResponsable = tr1.id
     LEFT JOIN tiendas ti ON tr.idTienda = ti.id
@@ -47,19 +51,26 @@ export async function getTrabajadores(todos = false) {
   return null;
 }
 
-
 // Identificar usuario QR
 
-export async function getTrabajadorTokenQR(idTrabajador: number, tokenQR: string){
+export async function getTrabajadorTokenQR(
+  idTrabajador: number,
+  tokenQR: string,
+) {
   const sql = `
   SELECT 
   tr.nombreApellidos,
   tr.tipoTrabajador
   FROM trabajadores tr
   WHERE tr.id = @param0 AND tr.tokenQR = @param1
-  `
-  const resTrabajador = await recSoluciones("soluciones", sql, idTrabajador, tokenQR);
-  if (resTrabajador.recordset.length > 0) 
+  `;
+  const resTrabajador = await recSoluciones(
+    "soluciones",
+    sql,
+    idTrabajador,
+    tokenQR,
+  );
+  if (resTrabajador.recordset.length > 0)
     return resTrabajador.recordset[0] as TrabajadorSql;
   return null;
 }
@@ -69,30 +80,7 @@ export async function getTrabajadorByAppId(uid: string) {
   const sql = `
 
   SELECT 
-    tr.id,
-    tr.idApp,
-    tr.nombreApellidos,
-    tr.displayName,
-    tr.emails,
-    tr.dni,
-    tr.direccion,
-    tr.ciudad,
-    tr.telefonos,
-    CONVERT(nvarchar, tr.fechaNacimiento, 103) as fechaNacimiento,
-    tr.nacionalidad,
-    tr.nSeguridadSocial,
-    tr.codigoPostal,
-    tr.cuentaCorriente,
-    tr.tipoTrabajador,
-    CONVERT(nvarchar, tr.inicioContrato, 103) as inicioContrato,
-    CONVERT(nvarchar, tr.finalContrato, 103) as finalContrato,
-    tr.idResponsable,
-    tr.idTienda,
-    (SELECT COUNT(*) FROM trabajadores WHERE idResponsable = tr.id) as coordinadora,
-    tr1.nombreApellidos as nombreResponsable,
-    ti.nombre as nombreTienda,
-    CONVERT(nvarchar, tr.antiguedad, 103) as antiguedad,
-    tr.idEmpresa
+    ${GET_DATOS_TRABAJADOR}
   FROM trabajadores tr
   LEFT JOIN trabajadores tr1 ON tr.idResponsable = tr1.id
   LEFT JOIN tiendas ti ON tr.idTienda = ti.id
@@ -110,36 +98,31 @@ export async function getTrabajadorBySqlId(id: number) {
   const sql = `
 
   SELECT 
-    tr.id,
-    tr.idApp,
-    tr.nombreApellidos,
-    tr.displayName,
-    tr.emails,
-    tr.dni,
-    tr.direccion,
-    tr.ciudad,
-    tr.telefonos,
-    CONVERT(nvarchar, tr.fechaNacimiento, 103) as fechaNacimiento,
-    tr.nacionalidad,
-    tr.nSeguridadSocial,
-    tr.codigoPostal,
-    tr.cuentaCorriente,
-    tr.tipoTrabajador,
-    CONVERT(nvarchar, tr.inicioContrato, 103) as inicioContrato,
-    CONVERT(nvarchar, tr.finalContrato, 103) as finalContrato,
-    tr.idResponsable,
-    tr.idTienda,
-    (SELECT COUNT(*) FROM trabajadores WHERE idResponsable = tr.id) as coordinadora,
-    tr1.nombreApellidos as nombreResponsable,
-    ti.nombre as nombreTienda,
-    CONVERT(nvarchar, tr.antiguedad, 103) as antiguedad,
-    tr.idEmpresa
+    ${GET_DATOS_TRABAJADOR}
   FROM trabajadores tr
   LEFT JOIN trabajadores tr1 ON tr.idResponsable = tr1.id
   LEFT JOIN tiendas ti ON tr.idTienda = ti.id
   WHERE tr.id = @param0 AND tr.inicioContrato IS NOT NULL AND tr.finalContrato IS NULL ORDER BY nombreApellidos
 `;
   const resUser = await recSoluciones("soluciones", sql, id);
+
+  if (resUser.recordset.length > 0)
+    return resUser.recordset[0] as TrabajadorSql;
+  return null;
+}
+
+export async function getTrabajadorByDni(dni: string) {
+  const sql = `
+
+  SELECT 
+    ${GET_DATOS_TRABAJADOR}
+  FROM trabajadores tr
+  LEFT JOIN trabajadores tr1 ON tr.idResponsable = tr1.id
+  LEFT JOIN tiendas ti ON tr.idTienda = ti.id
+  WHERE tr.dni = @param0 AND tr.inicioContrato IS NOT NULL AND tr.finalContrato IS NULL 
+  ORDER BY nombreApellidos
+`;
+  const resUser = await recSoluciones("soluciones", sql, dni);
 
   if (resUser.recordset.length > 0)
     return resUser.recordset[0] as TrabajadorSql;
@@ -189,6 +172,34 @@ export async function getSubordinados(uid: string): Promise<
     id: number;
     idApp: string;
     nombreApellidos: string;
+    displayName: string;
+    idTienda: number;
+    antiguedad: string;
+    inicioContrato: string;
+  }[]
+> {
+  const sql = `
+    select 
+      id, 
+      idApp, 
+      nombreApellidos, 
+      displayName,
+      idTienda, 
+      CONVERT(varchar, antiguedad, 103) as antiguedad, 
+      CONVERT(varchar, inicioContrato, 103) as inicioContrato 
+    from trabajadores 
+    where idResponsable = (select id from trabajadores where idApp = @param0)
+  `;
+  const resSubordinados = await recSoluciones("soluciones", sql, uid);
+  if (resSubordinados.recordset.length > 0) return resSubordinados.recordset;
+  return [];
+}
+
+export async function getSubordinadosById(id: number): Promise<
+  {
+    id: number;
+    idApp: string;
+    nombreApellidos: string;
     idTienda: number;
     antiguedad: string;
     inicioContrato: string;
@@ -203,14 +214,13 @@ export async function getSubordinados(uid: string): Promise<
       CONVERT(varchar, antiguedad, 103) as antiguedad, 
       CONVERT(varchar, inicioContrato, 103) as inicioContrato 
     from trabajadores 
-    where idResponsable = (select id from trabajadores where idApp = @param0)
+    where idResponsable = @param0
   `;
-  const resSubordinados = await recSoluciones("soluciones", sql, uid);
+  const resSubordinados = await recSoluciones("soluciones", sql, id);
   if (resSubordinados.recordset.length > 0) return resSubordinados.recordset;
   return [];
 }
 
-/* ¡¡ A HIT !! */
 export async function getTrabajadoresSage(): Promise<
   {
     id: number;
@@ -287,6 +297,11 @@ export async function getTrabajadoresSage(): Promise<
   else throw Error("Error, no hay trabajadores");
 }
 
+export async function setIdApp(idSql: number, uid: string) {
+  const sql = "UPDATE trabajadores SET idApp = @param0 WHERE id = @param1";
+  await recSoluciones("soluciones", sql, uid, idSql);
+}
+
 function convertOrNULL(value) {
   if (value === null || value === undefined) {
     return "NULL";
@@ -297,112 +312,6 @@ function convertOrNULL(value) {
 function isValidDate(value) {
   return moment(value, "DD/MM/YYYY").isValid();
 }
-
-// export async function actualizarUsuarios(
-//   database: string,
-//   usuariosNuevos,
-//   modificarEnApp,
-// ) {
-//   try {
-//     const usuariosNoActualizadosNuevos = [];
-//     const usuariosNoActualizadosApp = [];
-
-//     // INSERT
-//     const usuariosNuevosValidos = usuariosNuevos.filter((usuario) => {
-//       const isValid =
-//         isValidDate(usuario.fechaNacimiento) &&
-//         isValidDate(usuario.inicioContrato) &&
-//         isValidDate(usuario.antiguedad) &&
-//         usuario.dni &&
-//         usuario.dni != "" &&
-//         usuario.telefonos &&
-//         usuario.telefonos != "" &&
-//         !usuario.finalContrato;
-
-//       if (!isValid) {
-//         usuariosNoActualizadosNuevos.push(usuario);
-//       }
-//       return isValid;
-//     });
-
-//     // UPDATE
-//     const modificarEnAppValidos = modificarEnApp.filter((usuario) => {
-//       const isValid =
-//         isValidDate(usuario.fechaNacimiento) &&
-//         isValidDate(usuario.inicioContrato) &&
-//         isValidDate(usuario.antiguedad);
-
-//       if (!isValid) {
-//         usuariosNoActualizadosApp.push(usuario);
-//       }
-//       return isValid;
-//     });
-
-//     const batchSize = 100; // Ajusta este valor según las necesidades de rendimiento
-
-//     for (let i = 0; i < usuariosNuevosValidos.length; i += batchSize) {
-//       const batch = usuariosNuevosValidos.slice(i, i + batchSize);
-//       const query = batch
-//         .map((usuario) => {
-//           return `
-//   INSERT INTO dbo.trabajadores (
-//     id, idApp, nombreApellidos, displayName, emails, dni, direccion, ciudad,
-//     telefonos, fechaNacimiento, nacionalidad, nSeguridadSocial, codigoPostal,
-//     cuentaCorriente, tipoTrabajador, inicioContrato, finalContrato, antiguedad, idEmpresa
-//   ) VALUES (
-//     ${usuario.id},
-//     '${usuario.idApp}',
-//     '${usuario.nombreApellidos}',
-//     '${usuario.displayName}',
-//     '${usuario.emails}',
-//     '${usuario.dni}',
-//     '${usuario.direccion}',
-//     '${usuario.ciudad}',
-//     '${usuario.telefonos}',
-//     ${convertOrNULL(usuario.fechaNacimiento)},
-//     '${usuario.nacionalidad}',
-//     '${usuario.nSeguridadSocial}',
-//     '${usuario.codigoPostal}',
-//     '${usuario.cuentaCorriente}',
-//     '${usuario.tipoTrabajador}',
-//     ${convertOrNULL(usuario.inicioContrato)},
-//     ${convertOrNULL(usuario.finalContrato)},
-//     ${convertOrNULL(usuario.antiguedad)},
-//     ${usuario.idEmpresa}
-//   )`;
-//         })
-//         .join(";");
-
-//       await recSolucionesClassic(database, query);
-//     }
-
-//     for (let i = 0; i < modificarEnAppValidos.length; i += batchSize) {
-//       const batch = modificarEnAppValidos.slice(i, i + batchSize);
-//       const query = batch
-//         .map((usuario) => {
-//           return `
-//       UPDATE dbo.trabajadores
-//       SET
-//         dni = '${usuario.dni}',
-//         inicioContrato = ${convertOrNULL(usuario.inicioContrato)},
-//         finalContrato = ${convertOrNULL(usuario.finalContrato)},
-//         antiguedad = ${convertOrNULL(usuario.antiguedad)},
-//         idEmpresa = ${usuario.idEmpresa}
-//       WHERE id = ${usuario.id}`;
-//         })
-//         .join(";");
-
-//       await recSolucionesClassic(database, query);
-//     }
-
-//     return {
-//       usuariosNoActualizadosNuevos,
-//       usuariosNoActualizadosApp,
-//     };
-//   } catch (error) {
-//     console.error("Error al actualizar usuarios:", error);
-//   }
-// }
 
 function isValidUsuario(usuario) {
   return (
@@ -452,34 +361,34 @@ export async function actualizarUsuarios(
         cuentaCorriente, tipoTrabajador, inicioContrato, finalContrato, antiguedad, idEmpresa
       ) VALUES (
         ${usuario.id},
-        '${usuario.idApp}',
-        '${usuario.nombreApellidos}',
-        '${usuario.displayName}',
-        '${usuario.emails}',
-        '${usuario.dni}',
-        '${usuario.direccion}',
-        '${usuario.ciudad}',
-        '${usuario.telefonos}',
+        ${usuario.idApp ? `'${usuario.idApp}'` : "NULL"},
+        ${usuario.nombreApellidos ? `'${usuario.nombreApellidos}'` : "NULL"},
+        ${usuario.displayName ? `'${usuario.displayName}'` : "NULL"},
+        ${usuario.emails ? `'${usuario.emails}'` : "NULL"},
+        ${usuario.dni ? `'${usuario.dni}'` : "NULL"},
+        ${usuario.direccion ? `'${usuario.direccion}'` : "NULL"},
+        ${usuario.ciudad ? `'${usuario.ciudad}'` : "NULL"},
+        ${usuario.telefonos ? `'${usuario.telefonos}'` : "NULL"},
         ${convertOrNULL(usuario.fechaNacimiento)},
-        '${usuario.nacionalidad}',
-        '${usuario.nSeguridadSocial}',
-        '${usuario.codigoPostal}',
-        '${usuario.cuentaCorriente}',
-        '${usuario.tipoTrabajador}',
+        ${usuario.nacionalidad ? `'${usuario.nacionalidad}'` : "NULL"},
+        ${usuario.nSeguridadSocial ? `'${usuario.nSeguridadSocial}'` : "NULL"},
+        ${usuario.codigoPostal ? `'${usuario.codigoPostal}'` : "NULL"},
+        ${usuario.cuentaCorriente ? `'${usuario.cuentaCorriente}'` : "NULL"},
+        ${usuario.tipoTrabajador ? `'${usuario.tipoTrabajador}'` : "NULL"},
         ${convertOrNULL(usuario.inicioContrato)},
         ${convertOrNULL(usuario.finalContrato)},
         ${convertOrNULL(usuario.antiguedad)},
-        ${usuario.idEmpresa}
+        ${usuario.idEmpresa ? `'${usuario.idEmpresa}'` : "NULL"}
       )`;
 
     const updateQueryBuilder = (usuario) => `
       UPDATE dbo.trabajadores
       SET
-        dni = '${usuario.dni}',
+        dni = ${usuario.dni ? `'${usuario.dni}'` : "NULL"},
         inicioContrato = ${convertOrNULL(usuario.inicioContrato)},
         finalContrato = ${convertOrNULL(usuario.finalContrato)},
         antiguedad = ${convertOrNULL(usuario.antiguedad)},
-        idEmpresa = ${usuario.idEmpresa}
+        idEmpresa = ${usuario.idEmpresa ? `'${usuario.idEmpresa}'` : "NULL"}
       WHERE id = ${usuario.id}`;
 
     const promises = [];
@@ -509,9 +418,168 @@ export async function eliminarUsuarios(arrayUsuarios) {
   let sql = "";
 
   for (let i = 0; i < arrayUsuarios.length; i += 1) {
-    if (arrayUsuarios[i].id)
+    if (arrayUsuarios[i].id && arrayUsuarios[i].id != 999999)
       sql += `DELETE FROM trabajadores WHERE id = ${arrayUsuarios[i].id};`;
   }
 
   await recSolucionesClassic("soluciones", sql);
+}
+
+export async function getResponsableTienda(idTienda: number) {
+  const sql = `
+    SELECT top 1 tr1.* FROM trabajadores tr1 WHERE tr1.idTienda = @param0 AND (SELECT count(*) FROM trabajadores tr2 WHERE tr1.id = tr2.idResponsable) > 0
+  `;
+
+  const resResponsable = await recSoluciones("soluciones", sql, idTienda);
+
+  if (resResponsable.recordset.length > 0) return resResponsable.recordset[0];
+  return null;
+}
+
+export function sqlHandleCambios(
+  modificado: TrabajadorCompleto,
+  original: TrabajadorCompleto,
+) {
+  let sql = "";
+
+  if (modificado.idResponsable != original.idResponsable) {
+    if (modificado.idTienda != original.idTienda)
+      throw Error("No es posible cambiar el responsable y la tienda a la vez");
+
+    if (original.coordinadora && !modificado.coordinadora) {
+      sql += `
+        UPDATE trabajadores SET idResponsable = null WHERE idResponsable = ${modificado.id};
+      `;
+    } else if (modificado.coordinadora && modificado.idTienda) {
+      sql += `
+      UPDATE trabajadores SET idResponsable = ${modificado.id} WHERE idTienda = ${modificado.idTienda} AND id <> ${modificado.id} AND (coordinadora IS NULL OR coordinadora = 0);
+      `;
+    }
+  } else if (modificado.idTienda != original.idTienda) {
+    if (modificado.coordinadora && original.coordinadora) {
+      sql += `
+        UPDATE trabajadores SET idResponsable = null WHERE idResponsable = ${modificado.id};
+        UPDATE trabajadores SET idResponsable = ${modificado.id} WHERE idTienda = ${modificado.idTienda} AND id <> ${modificado.id} AND (coordinadora IS NULL OR coordinadora = 0);
+        -- FALTA (C)
+      `;
+    }
+  } else if (modificado.coordinadora && modificado.idTienda) {
+    sql += `
+    UPDATE trabajadores SET idResponsable = ${modificado.id} WHERE idTienda = ${modificado.idTienda} AND id <> ${modificado.id} AND (coordinadora IS NULL OR coordinadora = 0);
+  `;
+  } else if (!modificado.coordinadora && original.coordinadora) {
+    sql += `
+      UPDATE trabajadores SET idResponsable = null WHERE idResponsable = ${modificado.id};
+  `;
+  }
+
+  return sql;
+}
+
+export async function guardarCambiosForm(
+  trabajador: TrabajadorCompleto,
+  original: TrabajadorCompleto,
+) {
+  let sql = "";
+  sql += sqlHandleCambios(trabajador, original);
+  sql += `
+    UPDATE trabajadores SET
+    nombreApellidos = ${
+      trabajador.nombreApellidos ? `'${trabajador.nombreApellidos}'` : "NULL"
+    },
+    displayName = ${
+      trabajador.displayName ? `'${trabajador.displayName}'` : "NULL"
+    },
+    emails = ${trabajador.emails ? `'${trabajador.emails}'` : "NULL"},
+    dni = ${trabajador.dni ? `'${trabajador.dni}'` : "NULL"},
+    direccion = ${trabajador.direccion ? `'${trabajador.direccion}'` : "NULL"},
+    ciudad = ${trabajador.ciudad ? `'${trabajador.ciudad}'` : "NULL"},
+    telefonos = ${trabajador.telefonos ? `'${trabajador.telefonos}'` : "NULL"},
+    fechaNacimiento = convert(datetime, ${
+      trabajador.fechaNacimiento ? "'" + trabajador.fechaNacimiento + "'" : null
+    }, 103),
+    nacionalidad = ${
+      trabajador.nacionalidad ? `'${trabajador.nacionalidad}'` : "NULL"
+    },
+    nSeguridadSocial = ${
+      trabajador.nSeguridadSocial ? `'${trabajador.nSeguridadSocial}'` : "NULL"
+    },
+    codigoPostal = ${
+      trabajador.codigoPostal ? `'${trabajador.codigoPostal}'` : "NULL"
+    },
+    cuentaCorriente = ${
+      trabajador.cuentaCorriente ? `'${trabajador.cuentaCorriente}'` : "NULL"
+    },
+    tipoTrabajador = ${
+      trabajador.tipoTrabajador ? `'${trabajador.tipoTrabajador}'` : "NULL"
+    },
+    idResponsable = ${
+      trabajador.idResponsable ? `'${trabajador.idResponsable}'` : "NULL"
+    },
+    idTienda = ${trabajador.idTienda ? `'${trabajador.idTienda}'` : "NULL"},
+    coordinadora = ${trabajador.coordinadora ? 1 : 0},
+    tokenQR = ${trabajador.tokenQR ? `'${trabajador.tokenQR}'` : "NULL"}
+    WHERE id = ${trabajador.id}
+  `;
+
+  await recSolucionesClassic("soluciones", sql);
+  return true;
+}
+
+export async function getNivelMenosUno(idSql: number) {
+  const sqlSuResponsable = `
+  IF EXISTS (SELECT * from trabajadores where id = (select idResponsable from trabajadores where id = @param0))
+      BEGIN
+          SELECT * from trabajadores where id = (select idResponsable from trabajadores where id = @param0)
+      END
+  ELSE
+      BEGIN
+          SELECT 'Sin responsable' as resultado
+      END
+  `;
+  const resSuResponsable = await recSoluciones(
+    "soluciones",
+    sqlSuResponsable,
+    idSql,
+  );
+
+  if (
+    resSuResponsable.recordset?.length > 0 &&
+    resSuResponsable.recordset[0]?.resultado != "Sin responsable"
+  ) {
+    return resSuResponsable.recordset[0];
+  } else return null;
+}
+
+export async function getNivelUno(idSql: number) {
+  const sql = `
+    SELECT tr.*, ti.nombre as nombreTienda FROM trabajadores tr 
+    LEFT JOIN tiendas ti ON tr.idTienda = ti.id
+    WHERE tr.idResponsable = @param0
+  `;
+  const resNivelUno = await recSoluciones("soluciones", sql, idSql);
+
+  if (resNivelUno.recordset?.length > 0) return resNivelUno.recordset;
+  return null;
+}
+
+export async function getNivelCero(idSql: number) {
+  const sql = `
+    SELECT tr.*, ti.nombre as nombreTienda FROM trabajadores tr
+    LEFT JOIN tiendas ti ON tr.idTienda = ti.id
+    WHERE tr.id = @param0
+  `;
+
+  const resNivelCero = await recSoluciones("soluciones", sql, idSql);
+
+  if (resNivelCero.recordset?.length > 0) return resNivelCero.recordset[0];
+  return null;
+}
+
+export async function borrarTrabajador(idSql: number) {
+  const sql = "DELETE FROM trabajadores WHERE id = @param0";
+
+  await recSoluciones("soluciones", sql, idSql);
+
+  return true;
 }

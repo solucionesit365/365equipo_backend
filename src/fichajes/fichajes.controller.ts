@@ -9,26 +9,25 @@ import {
 } from "@nestjs/common";
 import { AuthGuard } from "../auth/auth.guard";
 import { TokenService } from "../get-token/get-token.service";
-import { getUserWithToken, verifyToken } from "../firebase/auth";
 import { Fichajes } from "./fichajes.class";
 import { SchedulerGuard } from "../scheduler/scheduler.guard";
-import * as moment from 'moment';
-import { ObjectId } from "mongodb";
-
+import * as moment from "moment";
+import { AuthService } from "../firebase/auth";
 
 @Controller("fichajes")
 export class FichajesController {
   constructor(
+    private readonly authInstance: AuthService,
     private readonly tokenService: TokenService,
     private readonly fichajesInstance: Fichajes,
-  ) { }
+  ) {}
 
   @Post("entrada")
   @UseGuards(AuthGuard)
   async entrada(@Headers("authorization") authHeader: string) {
     try {
       const token = this.tokenService.extract(authHeader);
-      const usuario = await getUserWithToken(token);
+      const usuario = await this.authInstance.getUserWithToken(token);
 
       return {
         ok: true,
@@ -45,7 +44,7 @@ export class FichajesController {
   async salida(@Headers("authorization") authHeader: string) {
     try {
       const token = this.tokenService.extract(authHeader);
-      const usuario = await getUserWithToken(token);
+      const usuario = await this.authInstance.getUserWithToken(token);
 
       return {
         ok: true,
@@ -66,7 +65,7 @@ export class FichajesController {
     try {
       const date = new Date(dateString);
       const token = this.tokenService.extract(authHeader);
-      const usuario = await getUserWithToken(token);
+      const usuario = await this.authInstance.getUserWithToken(token);
 
       return {
         ok: true,
@@ -108,16 +107,19 @@ export class FichajesController {
   @UseGuards(AuthGuard)
   async getFichajesByIdSql(
     @Headers("authorization") authHeader: string,
-    @Query() { idSql, validado }: { idSql: number, validado: string },
+    @Query() { idSql, validado }: { idSql: number; validado: string },
   ) {
     try {
       if (!idSql && !validado) throw Error("Faltan parámetros");
 
       const token = this.tokenService.extract(authHeader);
-      await verifyToken(token);
-      const validadoBoolean = validado == 'true' ? true : false;
+      await this.authInstance.verifyToken(token);
+      const validadoBoolean = validado == "true" ? true : false;
 
-      let fichajes = await this.fichajesInstance.getFichajesByIdSql(Number(idSql), validadoBoolean);
+      let fichajes = await this.fichajesInstance.getFichajesByIdSql(
+        Number(idSql),
+        validadoBoolean,
+      );
 
       return {
         ok: true,
@@ -132,21 +134,52 @@ export class FichajesController {
   @Post("updateFichaje")
   async updateFichaje(
     @Headers("authorization") authHeader: string,
-    @Body(){id, validado}
+    @Body() { id, validado },
   ) {
     try {
-
       const token = this.tokenService.extract(authHeader);
-      await verifyToken(token);
+      await this.authInstance.verifyToken(token);
       // const validadoBoolean = validado == 'true' ? true : false;
       // Falta comprobación de quién puede enviar un anuncio, ahora
       // mismo cualquiera lo puede hacer.
-      const respFichaje = await this.fichajesInstance.updateFichaje(id, validado);
+      const respFichaje = await this.fichajesInstance.updateFichaje(
+        id,
+        validado,
+      );
       if (respFichaje)
         return {
           ok: true,
         };
       throw Error("No se ha podido modificar el fichaje");
+    } catch (err) {
+      console.log(err);
+      return { ok: false, message: err.message };
+    }
+  }
+
+  @Get("misFichajes")
+  async getMisFichajes(
+    @Headers("authorization") authHeader: string,
+    @Query() { fechaInicio, fechaFinal },
+  ) {
+    try {
+      if (!fechaInicio || !fechaFinal) throw Error("Faltan parámetros");
+
+      const token = this.tokenService.extract(authHeader);
+      await this.authInstance.verifyToken(token);
+      const usuario = await this.authInstance.getUserWithToken(token);
+
+      fechaInicio = new Date(fechaInicio);
+      fechaFinal = new Date(fechaFinal);
+
+      return {
+        ok: true,
+        data: await this.fichajesInstance.getFichajesByUid(
+          usuario.uid,
+          fechaInicio,
+          fechaFinal,
+        ),
+      };
     } catch (err) {
       console.log(err);
       return { ok: false, message: err.message };
