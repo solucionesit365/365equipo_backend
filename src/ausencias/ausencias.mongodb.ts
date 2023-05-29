@@ -6,7 +6,7 @@ import { ObjectId } from "mongodb";
 
 @Injectable()
 export class AusenciasDatabase {
-  constructor(private readonly mongoDbService: MongoDbService) {}
+  constructor(private readonly mongoDbService: MongoDbService) { }
 
   async nuevaAusencia(ausencia: AusenciaInterface) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
@@ -29,5 +29,14 @@ export class AusenciasDatabase {
 
     if (resBorrar.acknowledged && resBorrar.deletedCount > 0) return true;
     return false;
+  }
+  async getAusencias() {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const ausenciasCollection = db.collection<AusenciaInterface>("ausencias");
+
+    const respAusencia = await ausenciasCollection.find({}).toArray()
+
+    return respAusencia;
+
   }
 }

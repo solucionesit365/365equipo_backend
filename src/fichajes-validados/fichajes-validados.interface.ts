@@ -9,7 +9,8 @@ export interface FichajeValidadoDto {
   fecha: Date,
   cuadrante: {
     entrada: string,
-    salida: string
+    salida: string,
+    idPlan: string
   },
   fichajes: {
     entrada: string,
