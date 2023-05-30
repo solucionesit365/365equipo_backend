@@ -41,6 +41,8 @@ import { EmailClass } from "./email/email.class";
 import { AuthService } from "./firebase/auth";
 import { PermisosController } from "./permisos/permisos.controller";
 import { PermisosClass } from "./permisos/permisos.class";
+import { TarjetaClienteController } from "./tarjeta-cliente/tarjeta-cliente.controller";
+import { TarjetaCliente } from "./tarjeta-cliente/tarjeta-cliente.class";
 
 @Module({
   imports: [
@@ -63,6 +65,7 @@ import { PermisosClass } from "./permisos/permisos.class";
     NotificacionesController,
     FichajesValidadosController,
     PermisosController,
+    TarjetaClienteController,
   ],
   providers: [
     AppService,
@@ -91,6 +94,7 @@ import { PermisosClass } from "./permisos/permisos.class";
     FichajesValidadosDatabase,
     AuthService,
     PermisosClass,
+    TarjetaCliente,
   ],
 })
 export class AppModule {}
