@@ -76,13 +76,9 @@ export class TrabajadoresController {
 
   @Get("validarQR")
   async validarQRTrabajador(
-    @Headers("authorization") authHeader: string,
     @Query() { idTrabajador, tokenQR },
   ) {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
-
       if (!idTrabajador && !tokenQR) throw Error("Faltan datos");
       const resUser = await this.trabajadorInstance.getTrabajadorTokenQR(
         Number(idTrabajador),
