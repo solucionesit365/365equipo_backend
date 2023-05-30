@@ -6,7 +6,7 @@ import { trabajadorInstance } from "./trabajadores.class";
 
 @Controller("trabajadores")
 export class TrabajadoresController {
-  constructor(private readonly tokenService: TokenService) {}
+  constructor(private readonly tokenService: TokenService) { }
 
   @Get()
   async getTrabajadores(@Headers("authorization") authHeader: string) {
@@ -103,6 +103,25 @@ export class TrabajadoresController {
         ok: true,
         data: await trabajadorInstance.sincronizarConHit(),
       };
+    } catch (err) {
+      console.log(err);
+      return { ok: false, message: err.message };
+    }
+  }
+  @Get("validarQR")
+  async validarQRTrabajador(
+    @Headers("authorization") authHeader: string,
+    @Query() { idTrabajador, tokenQR },
+  ) {
+    try {
+
+      const token = this.tokenService.extract(authHeader);
+      await verifyToken(token);
+
+      if (!idTrabajador && !tokenQR) throw Error("Faltan datos");
+      const resUser = await trabajadorInstance.getTrabajadorTokenQR(Number(idTrabajador), tokenQR)
+
+      return { ok: true, data: resUser }
     } catch (err) {
       console.log(err);
       return { ok: false, message: err.message };

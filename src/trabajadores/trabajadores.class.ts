@@ -203,6 +203,12 @@ export class Trabajador {
       // usuariosNoActualizadosApp: totales.usuariosNoActualizadosApp,
     };
   }
+  async getTrabajadorTokenQR(idTrabajador: number, tokenQR: string) {
+    const resUser = await schTrabajadores.getTrabajadorTokenQR(idTrabajador, tokenQR);
+
+    if (resUser) return resUser;
+    throw Error("No se ha podido obtener la información del usuario");
+  }
 }
 
 export const trabajadorInstance = new Trabajador();
