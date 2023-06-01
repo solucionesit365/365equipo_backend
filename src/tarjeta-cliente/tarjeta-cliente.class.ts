@@ -1,11 +1,19 @@
 import { Injectable } from "@nestjs/common";
 import * as QRCode from "qrcode";
 import { EmailClass } from "../email/email.class";
-import * as openpgp from "openpgp";
+import {
+  createCipheriv,
+  createDecipheriv,
+  createECDH,
+  randomBytes,
+} from "node:crypto";
 
 @Injectable()
 export class TarjetaCliente {
+  private readonly curve = "secp521r1";
+
   constructor(private readonly emailInstance: EmailClass) {}
+
   async createQrCode(data: string) {
     try {
       let url = await QRCode.toDataURL(data);
@@ -14,30 +22,6 @@ export class TarjetaCliente {
       console.log("Error generando QR: ", err);
       return null;
     }
-  }
-
-  async encryptMessage() {
-    const publicKeyArmored = `-----BEGIN PGP PUBLIC KEY BLOCK-----
-    Version: Keybase OpenPGP v2.0.76
-    Comment: https://keybase.io/crypto
-
-    xsBNBGR1/PQBCACz/Co5vUxJvV7bGOpYWBFyCfTZVu00g9/1UZtQrSMlSbL56cIM
-    D3/Yp6s8t8pz6rMe9Asw51XioyWA/jivohzkrcfRj4901r7r6cJ8p3s2UWfh/zqC
-    ...
-
-    =8zOm
-    -----END PGP PUBLIC KEY BLOCK-----`;
-
-    const message = "Este es mi mensaje secreto.";
-    const passphrase = "gaga-uvah2";
-
-    const publicKey = await openpgp.readKey({ armoredKey: publicKeyArmored });
-
-    const encrypted = await openpgp.encrypt({
-      message: await openpgp.createMessage({ text: "Hello, World!" }),
-      encryptionKeys: publicKey,
-    });
-
   }
 
   async sendQrCodeEmail() {
@@ -151,5 +135,70 @@ export class TarjetaCliente {
       );
       return mensaje;
     }
+  }
+
+  generateKeys() {
+    const ecdh = createECDH(this.curve);
+    const keys = ecdh.generateKeys();
+    const privateKey = ecdh.getPrivateKey();
+    return { publicKey: keys, privateKey };
+  }
+
+  computeSharedSecret(privateKey: Buffer, publicKey: Buffer) {
+    const ecdh = createECDH(this.curve);
+    ecdh.setPrivateKey(privateKey);
+    const sharedSecret = ecdh.computeSecret(publicKey);
+    return sharedSecret;
+  }
+
+  encrypt(sharedSecret: Buffer, message: string) {
+    const iv = randomBytes(16);
+    const cipher = createCipheriv("aes-256-gcm", sharedSecret.slice(0, 32), iv);
+    let encrypted = cipher.update(message, "utf8", "hex");
+    encrypted += cipher.final("hex");
+    const tag = cipher.getAuthTag();
+    return { encrypted, iv, tag };
+  }
+
+  decrypt(sharedSecret: Buffer, encrypted: string, iv: Buffer, tag: Buffer) {
+    const decipher = createDecipheriv(
+      "aes-256-gcm",
+      sharedSecret.slice(0, 32),
+      iv,
+    );
+    decipher.setAuthTag(tag);
+    let decrypted = decipher.update(encrypted, "hex", "utf8");
+    decrypted += decipher.final("utf8");
+    return decrypted;
+  }
+
+  test() {
+    // Alice y Bob generan sus claves
+    const aliceKeys = this.generateKeys();
+    const bobKeys = this.generateKeys();
+
+    // Alice y Bob calculan el secreto compartido
+    const aliceSharedSecret = this.computeSharedSecret(
+      aliceKeys.privateKey,
+      bobKeys.publicKey,
+    );
+    const bobSharedSecret = this.computeSharedSecret(
+      bobKeys.privateKey,
+      aliceKeys.publicKey,
+    );
+
+    // Bob cifra un mensaje para Alice
+    const message = "Hola Alice!";
+    const { encrypted, iv, tag } = this.encrypt(bobSharedSecret, message);
+    console.log(encrypted);
+    // Alice descifra el mensaje
+    const decryptedMessage = this.decrypt(
+      aliceSharedSecret,
+      encrypted,
+      iv,
+      tag,
+    );
+    console.log(decryptedMessage); // Hola Alice!
+    return 0;
   }
 }

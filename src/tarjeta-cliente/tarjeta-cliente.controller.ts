@@ -16,4 +16,17 @@ export class TarjetaClienteController {
       return { ok: false, message: err.message };
     }
   }
+
+  @Post("test2")
+  async test2() {
+    try {
+      return {
+        ok: true,
+        data: this.tarjetaClienteInstance.test(),
+      };
+    } catch (err) {
+      console.log(err);
+      return { ok: false, message: err.message };
+    }
+  }
 }
