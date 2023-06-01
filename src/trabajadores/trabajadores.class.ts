@@ -14,7 +14,7 @@ export class Trabajador {
     private readonly permisosInstance: PermisosClass,
     @Inject(forwardRef(() => EmailClass))
     private readonly emailInstance: EmailClass,
-  ) {}
+  ) { }
 
   async getTrabajadorByAppId(uid: string) {
     const resUser = await schTrabajadores.getTrabajadorByAppId(uid);
@@ -260,5 +260,9 @@ export class Trabajador {
       if (usuario.idApp) await this.borrarTrabajadorDeGoogle(usuario.idApp);
       await this.borrarTrabajadorDeSql(idSql);
     } else throw Error("No se ha podido recoger la información del usuario");
+  }
+
+  async getCoordis() {
+    return await schTrabajadores.getCoordinadoras();
   }
 }

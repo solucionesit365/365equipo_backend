@@ -21,7 +21,7 @@ export class TrabajadoresController {
     private readonly trabajadorInstance: Trabajador,
     private readonly tokenService: TokenService,
     private readonly messagingService: FirebaseMessagingService,
-  ) {}
+  ) { }
 
   @Get()
   async getTrabajadores(@Headers("authorization") authHeader: string) {
@@ -228,6 +228,24 @@ export class TrabajadoresController {
       return {
         ok: true,
         data: await this.borrarTrabajador(idSql),
+      };
+    } catch (err) {
+      console.log(err);
+      return { ok: false, message: err.message };
+    }
+  }
+
+  @Get("getAllCoordis")
+  async getAllCoordis(
+    @Headers("authorization") authHeader: string,
+  ) {
+    try {
+      const token = this.tokenService.extract(authHeader);
+      await this.authInstance.verifyToken(token);
+
+      return {
+        ok: true,
+        data: await this.trabajadorInstance.getCoordis(),
       };
     } catch (err) {
       console.log(err);

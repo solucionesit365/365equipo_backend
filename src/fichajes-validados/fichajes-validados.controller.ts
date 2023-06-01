@@ -10,7 +10,7 @@ export class FichajesValidadosController {
     private readonly authInstance: AuthService,
     private readonly tokenService: TokenService,
     private readonly fichajesValidadosInstance: FichajesValidados,
-  ) {}
+  ) { }
 
   @Post("addFichajeValidado")
   async addFichajeValidado(
@@ -112,6 +112,62 @@ export class FichajesValidadosController {
     } catch (err) {
       console.log(err);
       return { ok: false, message: err.message };
+    }
+  }
+
+  @Get("getAllFichajesPagar")
+  async getAllFichajesPagar(
+    @Headers("authorization") authHeader: string,
+    @Query()
+    { aPagar }: { aPagar: string },
+  ) {
+    try {
+      const token = this.tokenService.extract(authHeader);
+      await this.authInstance.verifyToken(token);
+
+      const aPagarBoolean = aPagar == "true" ? true : false;
+
+      const respValidados =
+        await this.fichajesValidadosInstance.getAllFichajesPagar(
+          aPagarBoolean
+        );
+      if (respValidados.length > 0) {
+        return {
+          ok: true,
+          data: respValidados,
+        };
+      }
+    } catch (err) {
+      console.log(err);
+      return { ok: false, message: err.message };
+    }
+  }
+
+
+  @Get("getAllFichajesValidados")
+  async getAllFichajes(
+    @Headers("authorization") authHeader: string,
+  ) {
+    try {
+      const token = this.tokenService.extract(authHeader);
+      await this.authInstance.verifyToken(token);
+
+      const respAllFichajes = await this.fichajesValidadosInstance.getAllFichajesValidados();
+
+      if (respAllFichajes.length > 0) {
+        return {
+          ok: true,
+          data: respAllFichajes,
+        }
+      } else {
+        return {
+          ok: false,
+          data: [],
+        }
+      }
+
+    } catch (error) {
+      return { ok: false, message: error.message };
     }
   }
 }

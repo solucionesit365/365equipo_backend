@@ -46,4 +46,18 @@ export class FichajesValidadosDatabase {
 
     return await fichajesValidadosCollect.find({ idResponsable, aPagar }).toArray()
   }
+
+  async getAllFichajesPagar(aPagar: boolean) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones")
+    const fichajesValidadosCollect = db.collection<FichajeValidadoDto>("fichajesValidados");
+
+    return await fichajesValidadosCollect.find({aPagar }).toArray()
+  }
+
+  async getAllFichajesValidados() {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const fichajesCollection = db.collection<FichajeValidadoDto>("fichajesValidados");
+
+    return await fichajesCollection.find({}).toArray();
+  }
 }
