@@ -43,6 +43,8 @@ import { PermisosController } from "./permisos/permisos.controller";
 import { PermisosClass } from "./permisos/permisos.class";
 import { TarjetaClienteController } from "./tarjeta-cliente/tarjeta-cliente.controller";
 import { TarjetaCliente } from "./tarjeta-cliente/tarjeta-cliente.class";
+import { CryptoController } from "./crypto/crypto.controller";
+import { CryptoClass } from "./crypto/crypto.class";
 
 @Module({
   imports: [
@@ -66,6 +68,7 @@ import { TarjetaCliente } from "./tarjeta-cliente/tarjeta-cliente.class";
     FichajesValidadosController,
     PermisosController,
     TarjetaClienteController,
+    CryptoController,
   ],
   providers: [
     AppService,
@@ -95,6 +98,7 @@ import { TarjetaCliente } from "./tarjeta-cliente/tarjeta-cliente.class";
     AuthService,
     PermisosClass,
     TarjetaCliente,
+    CryptoClass,
   ],
 })
 export class AppModule {}
