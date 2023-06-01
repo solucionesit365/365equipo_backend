@@ -29,4 +29,17 @@ export class TarjetaClienteController {
       return { ok: false, message: err.message };
     }
   }
+
+  @Post("generar")
+  async generar() {
+    try {
+      return {
+        ok: true,
+        data: this.tarjetaClienteInstance.generarClaves(),
+      };
+    } catch (err) {
+      console.log(err);
+      return { ok: false, message: err.message };
+    }
+  }
 }
