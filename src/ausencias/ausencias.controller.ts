@@ -13,9 +13,6 @@ export class AusenciasController {
     { idUsuario, fechaInicio, fechaFinal, tipo, comentario, arrayParciales, nombre },
   ) {
     try {
-      console.log(typeof (idUsuario));
-      console.log(nombre);
-
       if (
         tipo === "HORAS_JUSTIFICADAS" ||
         tipo === "BAJA" ||
@@ -29,6 +26,8 @@ export class AusenciasController {
         const final = new Date(fechaFinal);
 
         arrayParciales.map((fechaIso: string) => new Date(fechaIso));
+        console.log(arrayParciales);
+
         return {
           ok: true,
           data: await this.ausenciasInstance.nuevaAusencia(

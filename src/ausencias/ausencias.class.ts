@@ -26,7 +26,7 @@ export class Ausencias {
       fechaInicio,
       fechaFinal,
       comentario,
-      arrayParciales: [],
+      arrayParciales,
     });
 
     if (resInsert) {
