@@ -3,14 +3,19 @@ import { TokenService } from "../get-token/get-token.service";
 import { AnunciosClass } from "./anuncios.class";
 import { AnuncioDto, UpdateAnuncioDto } from "./anuncios.dto";
 import { AuthService } from "../firebase/auth";
+import { Trabajador } from "../trabajadores/trabajadores.class";
+import { Notificaciones } from "src/notificaciones/notificaciones.class";
+
 
 @Controller("anuncios")
 export class AnunciosController {
   constructor(
+    private readonly noticiaciones: Notificaciones,
+    private readonly trabajadores: Trabajador,
     private readonly authInstance: AuthService,
     private readonly tokenService: TokenService,
     private readonly anunciosInstance: AnunciosClass,
-  ) {}
+  ) { }
 
   @Get()
   async getAnuncios(@Headers("authorization") authHeader: string) {
@@ -52,10 +57,26 @@ export class AnunciosController {
 
       // Falta comprobación de quién puede enviar un anuncio, ahora
       // mismo cualquiera lo puede hacer.
-      if (await this.anunciosInstance.addAnuncio(anuncio))
+      if (await this.anunciosInstance.addAnuncio(anuncio)) {
+        const arrayTrabajador = await this.trabajadores.getTrabajadores()
+        arrayTrabajador.forEach((trabajador) => {
+          if (trabajador.idApp != null) {
+            this.noticiaciones.newInAppNotification({
+              uid: trabajador.idApp,
+              titulo: "Nuevo anuncio",
+              mensaje: "Tienes un nuevo anuncio ves al tablón de anuncios",
+              leido: false,
+              creador: "SISTEMA",
+            })
+          }
+
+        })
+
         return {
           ok: true,
         };
+      }
+
       throw Error("No se ha podido insertar el anuncio");
     } catch (err) {
       console.log(err);

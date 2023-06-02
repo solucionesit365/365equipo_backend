@@ -3,11 +3,13 @@ import { TokenService } from "../get-token/get-token.service";
 import { FichajesValidados } from "./fichajes-validados.class";
 import { FichajeValidadoDto } from "./fichajes-validados.interface";
 import { AuthService } from "../firebase/auth";
+import { Notificaciones } from "src/notificaciones/notificaciones.class";
 import { query } from "mssql";
 
 @Controller("fichajes-validados")
 export class FichajesValidadosController {
   constructor(
+    private readonly notificaciones: Notificaciones,
     private readonly authInstance: AuthService,
     private readonly tokenService: TokenService,
     private readonly fichajesValidadosInstance: FichajesValidados,
@@ -27,10 +29,19 @@ export class FichajesValidadosController {
         await this.fichajesValidadosInstance.addFichajesValidados(
           fichajeValidado,
         )
-      )
+      ) {
+        // const noti = await this.notificaciones.newInAppNotification({
+        //   uid: "khkO3Y0YJQNGft5ljqrrfeSUAN52",
+        //   titulo: "Hola estoy probando xD",
+        //   mensaje: "Hola, toi arto",
+        //   leido: false,
+        //   creador: "RRHH",
+        // })
         return {
           ok: true,
         };
+      }
+
       throw Error("No se ha podido insertar el anuncio");
     } catch (err) {
       console.log(err);
