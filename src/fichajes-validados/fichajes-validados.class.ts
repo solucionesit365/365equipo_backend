@@ -29,7 +29,13 @@ export class FichajesValidados {
     return await this.schFichajesValidados.getAllFichajesPagar(aPagar);
   }
 
+  async getAllIdResponsable(idResponsable: number) {
+    return await this.schFichajesValidados.getAllIdResponsableFichajesPagar(idResponsable);
+  }
 
+  async getSemanasFichajesPagar(semana:number){
+    return await this.schFichajesValidados.getSemanasFichajesPagar(semana);
+  }
 
   async getAllFichajesValidados() {
     return await this.schFichajesValidados.getAllFichajesValidados();

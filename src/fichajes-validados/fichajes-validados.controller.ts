@@ -3,6 +3,7 @@ import { TokenService } from "../get-token/get-token.service";
 import { FichajesValidados } from "./fichajes-validados.class";
 import { FichajeValidadoDto } from "./fichajes-validados.interface";
 import { AuthService } from "../firebase/auth";
+import { query } from "mssql";
 
 @Controller("fichajes-validados")
 export class FichajesValidadosController {
@@ -136,6 +137,70 @@ export class FichajesValidadosController {
           ok: true,
           data: respValidados,
         };
+      }
+    } catch (err) {
+      console.log(err);
+      return { ok: false, message: err.message };
+    }
+  }
+
+  @Get("getAllIdResponsableFichajesPagar")
+  async getAllIdResponsableFichajesPagar(
+    @Headers("authorization") authHeader: string,
+    @Query()
+    { idResponsable }: { idResponsable: number },
+  ) {
+    try {
+      const token = this.tokenService.extract(authHeader);
+      await this.authInstance.verifyToken(token);
+
+      const respValidados =
+        await this.fichajesValidadosInstance.getAllIdResponsable(
+          Number(idResponsable)
+        );
+      if (respValidados.length > 0) {
+        return {
+          ok: true,
+          data: respValidados,
+        };
+      } else {
+        return {
+          ok: false,
+          data: [],
+          message: "No tiene fichajes validados"
+        }
+      }
+    } catch (err) {
+      console.log(err);
+      return { ok: false, message: err.message };
+    }
+  }
+
+  @Get("getSemanasFichajesPagar")
+  async getSemanasFichajesPagar(
+    @Headers("authorization") authHeader: string,
+    @Query()
+    { semana }: { semana: number },
+  ) {
+    try {
+      const token = this.tokenService.extract(authHeader);
+      await this.authInstance.verifyToken(token);
+
+      const respValidados =
+        await this.fichajesValidadosInstance.getSemanasFichajesPagar(
+          Number(semana)
+        );
+      if (respValidados.length > 0) {
+        return {
+          ok: true,
+          data: respValidados,
+        };
+      } else {
+        return {
+          ok: false,
+          data: [],
+          message: "No tiene fichajes validados en esta semana"
+        }
       }
     } catch (err) {
       console.log(err);

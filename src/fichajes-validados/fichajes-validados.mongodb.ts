@@ -39,7 +39,6 @@ export class FichajesValidadosDatabase {
     );
     return respFichajes
   }
-
   async getFichajesPagar(idResponsable: number, aPagar: boolean) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones")
     const fichajesValidadosCollect = db.collection<FichajeValidadoDto>("fichajesValidados");
@@ -51,7 +50,22 @@ export class FichajesValidadosDatabase {
     const db = (await this.mongoDbService.getConexion()).db("soluciones")
     const fichajesValidadosCollect = db.collection<FichajeValidadoDto>("fichajesValidados");
 
-    return await fichajesValidadosCollect.find({aPagar }).toArray()
+    return await fichajesValidadosCollect.find({ aPagar }).toArray()
+  }
+
+  async getAllIdResponsableFichajesPagar(idResponsable: number) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones")
+    const fichajesIdResponsable = db.collection<FichajeValidadoDto>("fichajesValidados");
+
+    return await fichajesIdResponsable.find({ idResponsable }).toArray()
+  }
+
+  
+  async getSemanasFichajesPagar(semana: number) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones")
+    const fichajesIdResponsable = db.collection<FichajeValidadoDto>("fichajesValidados");
+
+    return await fichajesIdResponsable.find({ semana }).toArray()
   }
 
   async getAllFichajesValidados() {
@@ -60,4 +74,7 @@ export class FichajesValidadosDatabase {
 
     return await fichajesCollection.find({}).toArray();
   }
+
+
+
 }
