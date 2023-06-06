@@ -4,18 +4,18 @@ import { TarjetaCliente } from "./tarjeta-cliente.class";
 @Controller("tarjeta-cliente")
 export class TarjetaClienteController {
   constructor(private readonly tarjetaClienteInstance: TarjetaCliente) {}
-  @Post()
-  async test() {
-    try {
-      return {
-        ok: true,
-        data: await this.tarjetaClienteInstance.sendQrCodeEmail(),
-      };
-    } catch (err) {
-      console.log(err);
-      return { ok: false, message: err.message };
-    }
-  }
+  // @Post()
+  // async test() {
+  //   try {
+  //     return {
+  //       ok: true,
+  //       data: await this.tarjetaClienteInstance.sendQrCodeEmail(),
+  //     };
+  //   } catch (err) {
+  //     console.log(err);
+  //     return { ok: false, message: err.message };
+  //   }
+  // }
 
   // @Post("test2")
   // async test2() {

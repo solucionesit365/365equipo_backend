@@ -17,7 +17,7 @@ export async function recHit(database: string, consultaSQL: string) {
     },
     requestTimeout: 10000,
   };
-  
+
   const pool = await new sql.ConnectionPool(config).connect();
   const result = await pool.request().query(consultaSQL);
   pool.close();
@@ -72,6 +72,52 @@ export async function recSoluciones(
       idleTimeoutMillis: 20000,
     },
     requestTimeout: 20000,
+  };
+
+  const connectionPool = new sql.ConnectionPool(config);
+
+  try {
+    if (typeof query !== "string") {
+      throw new Error("El argumento query debe ser de tipo string");
+    }
+
+    await connectionPool.connect();
+    const request = new sql.Request(connectionPool);
+
+    for (let i = 0; i < args.length; i++) {
+      request.input(`param${i}`, args[i]);
+    }
+
+    return await request.query(query);
+  } catch (error) {
+    console.error("Error al ejecutar la consulta:", error);
+    console.log(query);
+    throw error;
+  } finally {
+    await connectionPool.close();
+  }
+}
+
+export async function recHitBind(
+  database: string,
+  query: string,
+  ...args: any[]
+) {
+  const config = {
+    user: process.env.MSSQL_USER_HIT,
+    password: process.env.MSSQL_PASS_HIT,
+    server: process.env.MSSQL_HOST_HIT,
+    database: database,
+    options: {
+      encrypt: false,
+      trustServerCertificate: true,
+    },
+    pool: {
+      max: 10,
+      min: 0,
+      idleTimeoutMillis: 10000,
+    },
+    requestTimeout: 10000,
   };
 
   const connectionPool = new sql.ConnectionPool(config);

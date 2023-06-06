@@ -45,7 +45,9 @@ import { TarjetaClienteController } from "./tarjeta-cliente/tarjeta-cliente.cont
 import { TarjetaCliente } from "./tarjeta-cliente/tarjeta-cliente.class";
 import { CryptoController } from "./crypto/crypto.controller";
 import { CryptoClass } from "./crypto/crypto.class";
-
+import { ClientesService } from "./clientes/clientes.service";
+import { ClientesController } from "./clientes/clientes.controller";
+import { SolicitudNuevoClienteBbdd } from "./clientes/clientes.mongodb";
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -69,6 +71,7 @@ import { CryptoClass } from "./crypto/crypto.class";
     PermisosController,
     TarjetaClienteController,
     CryptoController,
+    ClientesController,
   ],
   providers: [
     AppService,
@@ -99,6 +102,8 @@ import { CryptoClass } from "./crypto/crypto.class";
     PermisosClass,
     TarjetaCliente,
     CryptoClass,
+    ClientesService,
+    SolicitudNuevoClienteBbdd,
   ],
 })
 export class AppModule {}

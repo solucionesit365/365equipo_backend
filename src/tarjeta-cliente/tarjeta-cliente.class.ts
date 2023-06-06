@@ -6,7 +6,7 @@ import { EmailClass } from "../email/email.class";
 export class TarjetaCliente {
   constructor(private readonly emailInstance: EmailClass) {}
 
-  async createQrCode(data: string) {
+  private async createQrCode(data: string) {
     try {
       let url = await QRCode.toDataURL(data);
       return url;
@@ -16,8 +16,8 @@ export class TarjetaCliente {
     }
   }
 
-  async sendQrCodeEmail() {
-    let url = await this.createQrCode("texto de ejemplo de Eze");
+  async sendQrCodeEmail(codigo: string) {
+    let url = await this.createQrCode(codigo);
 
     if (url) {
       const mensaje = `<p>¡Hola! Aquí está tu código QR:</p><img src="${url}"/>`;
@@ -125,7 +125,6 @@ export class TarjetaCliente {
         "Test Eze QR",
         url,
       );
-      return mensaje;
     }
   }
 }
