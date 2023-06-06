@@ -184,6 +184,8 @@ export class VacacionesController {
         respuesta,
       )
       if (resEstado) {
+        const solicitud = await this.vacacionesInstance.getSolicitudById(idSolicitud)
+        console.log(solicitud);
         // this.notificaciones.newInAppNotification({
         //   uid: ,
         //   titulo: ,
@@ -191,10 +193,8 @@ export class VacacionesController {
         //  leido: false,
         //  creador: "RRHH",
 
-
         // })
-        const solicitud = await this.vacacionesInstance.getSolicitudById(idSolicitud)
-        console.log(solicitud);
+
 
         return {
           ok: true,

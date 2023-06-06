@@ -236,7 +236,6 @@ export class CuadrantesController {
         const notiCuadrante = await this.cuadrantesInstance.saveCuadrante(cuadrante, oldCuadrante);
         if (notiCuadrante) {
           const trabajadorID = await this.trabajadoresInstance.getTrabajadorBySqlId(cuadrante.idTrabajador);
-          console.log(trabajadorID);
 
           this.notificaciones.newInAppNotification({
             uid: trabajadorID.idApp,

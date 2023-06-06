@@ -15,7 +15,7 @@ export class ClientesService {
     private readonly cryptoInstance: CryptoClass,
     private readonly emailInstance: EmailClass,
     private readonly tarjetaClienteInstance: TarjetaCliente,
-  ) {}
+  ) { }
   async handleForm(
     nuevoCliente: boolean,
     newsletter: boolean,
@@ -25,6 +25,8 @@ export class ClientesService {
     telefono?: string,
     codigoPostal?: string,
   ) {
+    console.log(nuevoCliente);
+
     if (nuevoCliente) {
       const solicitud: SolicitudCliente = {
         _id: new ObjectId().toString(),
@@ -39,53 +41,53 @@ export class ClientesService {
       await this.schSolicitudesCliente.nuevaSolicitud(solicitud);
       const emailBody = `
       <!DOCTYPE html>
-<html>
-<head>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-        }
-        .email-container {
-            width: 80%;
-            margin: 0 auto;
-            background-color: #f9f9f9;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        .email-header {
-            text-align: center;
-        }
-        .email-content {
-            margin-top: 20px;
-        }
-        .confirmation-button {
-            display: inline-block;
-            background-color: #4CAF50;
-            color: white;
-            padding: 15px 32px;
-            text-align: center;
-            text-decoration: none;
-            font-size: 16px;
-            margin: 20px 2px;
-            cursor: pointer;
-            border-radius: 5px;
-        }
-    </style>
-</head>
-<body>
-    <div class="email-container">
-        <div class="email-header">
-            <img src="https://365obrador.com/wp-content/uploads/2022/06/logo-365.png" alt="365 Obrador Logo">
-            <h1>Bienvenid@ a 365</h1>
-        </div>
-        <div class="email-content">
-            <p>Gracias por registrarte en 365. Haz clic en el enlace de abajo para confirmar tu dirección de correo electrónico y completar tu registro.</p>
-            <a href="https://365equipo.cloud/clientes/confirmarEmail?idSolicitud=${solicitud._id}" class="confirmation-button">Confirmar correo electrónico</a>
-        </div>
-    </div>
-</body>
-</html>
+        <html>
+        <head>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                }
+                .email-container {
+                    width: 80%;
+                    margin: 0 auto;
+                    background-color: #f9f9f9;
+                    padding: 20px;
+                    border-radius: 5px;
+                    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+                }
+                .email-header {
+                    text-align: center;
+                }
+                .email-content {
+                    margin-top: 20px;
+                }
+                .confirmation-button {
+                    display: inline-block;
+                    background-color: #4CAF50;
+                    color: white;
+                    padding: 15px 32px;
+                    text-align: center;
+                    text-decoration: none;
+                    font-size: 16px;
+                    margin: 20px 2px;
+                    cursor: pointer;
+                    border-radius: 5px;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="email-container">
+                <div class="email-header">
+                    <img src="https://365obrador.com/wp-content/uploads/2022/06/logo-365.png" alt="365 Obrador Logo">
+                    <h1>Bienvenid@ a 365</h1>
+                </div>
+                <div class="email-content">
+                    <p>Gracias por registrarte en 365. Haz clic en el enlace de abajo para confirmar tu dirección de correo electrónico y completar tu registro.</p>
+                    <a href="https://365equipo.cloud/clientes/confirmarEmail?idSolicitud=${solicitud._id}" class="confirmation-button">Confirmar correo electrónico</a>
+                </div>
+            </div>
+        </body>
+        </html>
 
       `;
       // URL para el template https://365equipo.com/clientes/confirmarEmail?idSolicitud=${solicitud._id}
@@ -95,6 +97,9 @@ export class ClientesService {
         "Confirmación de registro en 365",
       );
       return true;
+    } else {
+      console.log("No quiero ser cliente p");
+      await this.tarjetaClienteInstance.sendQrCodeEmail(email, email)
     }
   }
 
@@ -121,6 +126,9 @@ export class ClientesService {
     const solicitud = await this.schSolicitudesCliente.getSolicitud(
       idSolicitud,
     );
+
+    console.log(solicitud);
+
 
     if (!solicitud) throw Error("No existe esta solicitud o ha caducado");
 
