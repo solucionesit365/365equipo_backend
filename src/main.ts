@@ -10,6 +10,7 @@ async function bootstrap() {
       "http://localhost:8080",
       "https://silema.web.app",
       "https://365equipo.com",
+      "https://tarjeta-cliente.web.app",
     ],
   });
   await app.listen(3000);
