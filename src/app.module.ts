@@ -41,7 +41,13 @@ import { EmailClass } from "./email/email.class";
 import { AuthService } from "./firebase/auth";
 import { PermisosController } from "./permisos/permisos.controller";
 import { PermisosClass } from "./permisos/permisos.class";
-
+import { TarjetaClienteController } from "./tarjeta-cliente/tarjeta-cliente.controller";
+import { TarjetaCliente } from "./tarjeta-cliente/tarjeta-cliente.class";
+import { CryptoController } from "./crypto/crypto.controller";
+import { CryptoClass } from "./crypto/crypto.class";
+import { ClientesService } from "./clientes/clientes.service";
+import { ClientesController } from "./clientes/clientes.controller";
+import { SolicitudNuevoClienteBbdd } from "./clientes/clientes.mongodb";
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -63,6 +69,9 @@ import { PermisosClass } from "./permisos/permisos.class";
     NotificacionesController,
     FichajesValidadosController,
     PermisosController,
+    TarjetaClienteController,
+    CryptoController,
+    ClientesController,
   ],
   providers: [
     AppService,
@@ -91,6 +100,10 @@ import { PermisosClass } from "./permisos/permisos.class";
     FichajesValidadosDatabase,
     AuthService,
     PermisosClass,
+    TarjetaCliente,
+    CryptoClass,
+    ClientesService,
+    SolicitudNuevoClienteBbdd,
   ],
 })
 export class AppModule {}

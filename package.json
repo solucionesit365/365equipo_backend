@@ -34,6 +34,8 @@
     "mssql": "^9.1.1",
     "nest.js": "^1.0.8",
     "nodemailer": "^6.9.2",
+    "openpgp": "^5.9.0",
+    "qrcode": "^1.5.3",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.2.0"
   },

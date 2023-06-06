@@ -26,15 +26,34 @@ export class EmailClass {
       },
     });
   }
-  async enviarEmail(to: string, mensaje: string, asunto: string) {
-    if (to && mensaje && asunto)
-      await this.transporter.sendMail({
+  async enviarEmail(
+    to: string,
+    mensaje: string,
+    asunto: string,
+    imagenBase64?: string,
+  ) {
+    if (to && mensaje && asunto) {
+      let mailOptions = {
         from: "noreply@365equipo.com",
         to: to,
         subject: asunto,
         html: mensaje,
-      });
-    else throw Error("Faltan datos en enviarEmail");
+        attachments: [],
+      };
+
+      if (imagenBase64) {
+        mailOptions.attachments.push({
+          filename: "imagen.png",
+          content: imagenBase64.split("base64,")[1],
+          encoding: "base64",
+          cid: "123456",
+        });
+      }
+
+      await this.transporter.sendMail(mailOptions);
+    } else {
+      throw Error("Faltan datos en enviarEmail");
+    }
   }
 
   async sendMailByUid(uid: string, mensaje: string, asunto: string) {
