@@ -4,11 +4,13 @@ import { FichajesValidados } from "./fichajes-validados.class";
 import { FichajeValidadoDto } from "./fichajes-validados.interface";
 import { AuthService } from "../firebase/auth";
 import { Notificaciones } from "src/notificaciones/notificaciones.class";
+import { Trabajador } from "src/trabajadores/trabajadores.class";
 import { query } from "mssql";
 
 @Controller("fichajes-validados")
 export class FichajesValidadosController {
   constructor(
+    private readonly trabajador: Trabajador,
     private readonly notificaciones: Notificaciones,
     private readonly authInstance: AuthService,
     private readonly tokenService: TokenService,
@@ -30,16 +32,27 @@ export class FichajesValidadosController {
           fichajeValidado,
         )
       ) {
-        // const noti = await this.notificaciones.newInAppNotification({
-        //   uid: "khkO3Y0YJQNGft5ljqrrfeSUAN52",
-        //   titulo: "Hola estoy probando xD",
-        //   mensaje: "Hola, toi arto",
-        //   leido: false,
-        //   creador: "RRHH",
-        // })
-        return {
-          ok: true,
-        };
+        // Notificacion Horas a Pagar
+        // if (await this.fichajesValidadosInstance.addFichajesValidados) {
+        //   const arrayTrabajador = await this.trabajador.getTrabajadores()
+        //   arrayTrabajador.forEach((trabajador) => {
+        //     if (trabajador.idApp != null) {
+        //       this.notificaciones.newInAppNotification({
+        //         uid: trabajador.idApp,
+        //         titulo: "Solicitud Horas a pagar  ",
+        //         mensaje: "Tus horas a pagar han sido aprobadas ",
+        //         leido: false,
+        //         creador: "RRHH",
+        //       })
+        //     }
+
+        //   })
+
+        //   return {
+        //     ok: true,
+        //   };
+        // }
+
       }
 
       throw Error("No se ha podido insertar el anuncio");
@@ -116,6 +129,21 @@ export class FichajesValidadosController {
           aPagarBoolean,
         );
       if (respValidados.length > 0) {
+        //Notificacion Horas a Pagar
+        const arrayTrabajador = await this.trabajador.getTrabajadores()
+        arrayTrabajador.forEach((trabajador) => {
+          if (trabajador.idApp != null) {
+            this.notificaciones.newInAppNotification({
+              uid: "khkO3Y0YJQNGft5ljqrrfeSUAN52",
+              titulo: "Solicitud Horas a pagar  ",
+              mensaje: "Tus horas a pagar han sido aprobadas ",
+              leido: false,
+              creador: "RRHH",
+            })
+          }
+
+        })
+
         return {
           ok: true,
           data: respValidados,

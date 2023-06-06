@@ -10,7 +10,7 @@ import { Notificaciones } from "src/notificaciones/notificaciones.class";
 @Controller("anuncios")
 export class AnunciosController {
   constructor(
-    private readonly noticiaciones: Notificaciones,
+    private readonly notificaciones: Notificaciones,
     private readonly trabajadores: Trabajador,
     private readonly authInstance: AuthService,
     private readonly tokenService: TokenService,
@@ -57,11 +57,13 @@ export class AnunciosController {
 
       // Falta comprobación de quién puede enviar un anuncio, ahora
       // mismo cualquiera lo puede hacer.
+
+      //Notificacion Anuncio
       if (await this.anunciosInstance.addAnuncio(anuncio)) {
         const arrayTrabajador = await this.trabajadores.getTrabajadores()
         arrayTrabajador.forEach((trabajador) => {
           if (trabajador.idApp != null) {
-            this.noticiaciones.newInAppNotification({
+            this.notificaciones.newInAppNotification({
               uid: trabajador.idApp,
               titulo: "Nuevo anuncio",
               mensaje: "Tienes un nuevo anuncio ves al tablón de anuncios",
