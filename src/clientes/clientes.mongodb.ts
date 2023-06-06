@@ -26,4 +26,17 @@ export class SolicitudNuevoClienteBbdd {
 
     return await solicitudesClienteCollection.findOne({ _id: idSolicitud });
   }
+
+  async borrarSolicitud(idSolicitud: string) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const solicitudesClienteCollection = db.collection<SolicitudCliente>(
+      "solicitudRegistroCliente",
+    );
+
+    const resDelete = await solicitudesClienteCollection.deleteOne({
+      _id: idSolicitud,
+    });
+
+    return resDelete.acknowledged;
+  }
 }

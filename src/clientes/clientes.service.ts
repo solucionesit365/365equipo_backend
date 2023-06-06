@@ -23,6 +23,7 @@ export class ClientesService {
     nombre?: string,
     apellidos?: string,
     telefono?: string,
+    codigoPostal?: string,
   ) {
     if (nuevoCliente) {
       const solicitud: SolicitudCliente = {
@@ -33,6 +34,7 @@ export class ClientesService {
         apellidos,
         telefono,
         newsletter,
+        codigoPostal,
       };
       await this.schSolicitudesCliente.nuevaSolicitud(solicitud);
       const emailBody = `
@@ -79,13 +81,14 @@ export class ClientesService {
         </div>
         <div class="email-content">
             <p>Gracias por registrarte en 365. Haz clic en el enlace de abajo para confirmar tu dirección de correo electrónico y completar tu registro.</p>
-            <a href="https://365equipo.com/clientes/confirmarEmail?idSolicitud=${solicitud._id}" class="confirmation-button">Confirmar correo electrónico</a>
+            <a href="https://365equipo.cloud/clientes/confirmarEmail?idSolicitud=${solicitud._id}" class="confirmation-button">Confirmar correo electrónico</a>
         </div>
     </div>
 </body>
 </html>
 
       `;
+      // URL para el template https://365equipo.com/clientes/confirmarEmail?idSolicitud=${solicitud._id}
       await this.emailInstance.enviarEmail(
         solicitud.email,
         emailBody,
@@ -95,16 +98,23 @@ export class ClientesService {
     }
   }
 
-  async crearCliente(nombre: string, apellidos: string, telefono: string) {
+  async crearCliente(
+    nombre: string,
+    apellidos: string,
+    telefono: string,
+    codigoPostal: string,
+    toEmail: string,
+  ) {
     const uniqueId = uuidv4();
     const idCliente = "CliBoti_" + uniqueId;
-    await nuevoCliente(nombre, apellidos, telefono, idCliente);
+    await nuevoCliente(nombre, apellidos, telefono, idCliente, codigoPostal);
+    await this.generarStringIdentificacion(idCliente, toEmail);
     return true;
   }
 
-  async generarStringIdentificacion(idCliente: string) {
+  async generarStringIdentificacion(idCliente: string, toEmail: string) {
     const codigoString = this.cryptoInstance.cifrarParaHit(idCliente);
-    await this.tarjetaClienteInstance.sendQrCodeEmail(codigoString);
+    await this.tarjetaClienteInstance.sendQrCodeEmail(codigoString, toEmail);
   }
 
   async confirmarEmail(idSolicitud: SolicitudCliente["_id"]) {
@@ -114,10 +124,18 @@ export class ClientesService {
 
     if (!solicitud) throw Error("No existe esta solicitud o ha caducado");
 
-    return await this.crearCliente(
-      solicitud.nombre,
-      solicitud.apellidos,
-      solicitud.telefono,
-    );
+    if (
+      await this.crearCliente(
+        solicitud.nombre,
+        solicitud.apellidos,
+        solicitud.telefono,
+        solicitud.codigoPostal,
+        solicitud.email,
+      )
+    ) {
+      if (await this.schSolicitudesCliente.borrarSolicitud(solicitud._id))
+        return true;
+    }
+    throw Error("No se ha podido registrar el cliente");
   }
 }

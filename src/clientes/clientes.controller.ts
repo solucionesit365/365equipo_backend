@@ -76,6 +76,7 @@ export class ClientesController {
         data.nombre,
         data.apellidos,
         data.telefono,
+        data.codigoPostal,
       ),
     };
   }
@@ -85,10 +86,14 @@ export class ClientesController {
     try {
       if (!idSolicitud) throw Error("Faltan parámetros");
 
-      return {
-        ok: true,
-        data: await this.clientesInstance.confirmarEmail(idSolicitud),
-      };
+      if (await this.clientesInstance.confirmarEmail(idSolicitud)) {
+        return "¡Perfecto! El email se ha verificado correctamente. Ya puedes cerrar esta página y disfrutar de las ventajas del Club 365.";
+      }
+      return "No se ha podido confirmar el correo con este enlace";
+      // return {
+      //   ok: true,
+      //   data: await this.clientesInstance.confirmarEmail(idSolicitud),
+      // };
     } catch (err) {
       console.log(err);
       return { ok: false, message: err.message };

@@ -8,7 +8,7 @@ export class CryptoController {
 
   // Endpoint de ejemplo, no se debe usar en producción
   @Post("cifrar")
-//   @UseGuards(AuthGuard)
+  //   @UseGuards(AuthGuard)
   async cifrar(@Body() { message }: { message: string }) {
     try {
       return {
@@ -23,9 +23,10 @@ export class CryptoController {
 
   // Endpoint de ejemplo, no se debe usar en producción
   @Post("descifrar")
-//   @UseGuards(AuthGuard)
+  //   @UseGuards(AuthGuard)
   async descifrar(@Body() { encryptedMessage }: { encryptedMessage: string }) {
     try {
+      if (!encryptedMessage) throw Error("Faltan parámetros");
       return {
         ok: true,
         data: this.cryptoInstance.descifrar(encryptedMessage),

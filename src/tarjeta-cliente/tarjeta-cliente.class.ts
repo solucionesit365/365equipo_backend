@@ -16,13 +16,13 @@ export class TarjetaCliente {
     }
   }
 
-  async sendQrCodeEmail(codigo: string) {
+  async sendQrCodeEmail(codigo: string, toEmail: string) {
     let url = await this.createQrCode(codigo);
 
     if (url) {
-      const mensaje = `<p>¡Hola! Aquí está tu código QR:</p><img src="${url}"/>`;
+      // const mensaje = `<p>¡Hola! Aquí está tu código QR:</p><img src="${url}"/>`;
       await this.emailInstance.enviarEmail(
-        "ezequiel@solucionesit365.com",
+        toEmail,
         `
         <!DOCTYPE html>
         <html lang="en">
@@ -122,7 +122,7 @@ export class TarjetaCliente {
         </html>
         
         `,
-        "Test Eze QR",
+        "¡Nueva identificación de cliente 365!",
         url,
       );
     }

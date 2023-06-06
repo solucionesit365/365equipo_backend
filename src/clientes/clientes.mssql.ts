@@ -5,22 +5,31 @@ export async function nuevoCliente(
   apellidos: string,
   telefono: string,
   id: string,
+  codigoPostal: string,
 ) {
   // @param0 = id
   // @param1 = nombre + apellidos
   // @param2 = telefono
+  // @param3 = codigoPostal
   const sql = `
-  IF EXISTS (SELECT * FROM ClientsFinals WHERE Id = @param0 OR Nom = @param1)
+  IF EXISTS (SELECT * FROM ClientsFinals WHERE Id = @param0)
     BEGIN
       SELECT 'YA_EXISTE' as resultado
     END
   ELSE
     BEGIN
-      INSERT INTO ClientsFinals VALUES (@param0, @param1, @param2, '', '', '', '', '', '');
+      INSERT INTO ClientsFinals VALUES (@param0, @param1, @param2, '', '', '', @param3, '', '');
       INSERT INTO Punts (IdClient, Punts, data, Punts2, data2) VALUES (@param0, 2500, GETDATE(), NULL, NULL);
       SELECT 'CREADO' as resultado;
     END
   `;
 
-  await recHitBind("Fac_Tena", sql, id, nombre + " " + apellidos, telefono);
+  await recHitBind(
+    "Fac_Tena",
+    sql,
+    id,
+    nombre + " " + apellidos,
+    telefono,
+    codigoPostal,
+  );
 }

@@ -6,4 +6,5 @@ export interface SolicitudCliente {
   apellidos: string;
   telefono: string;
   newsletter: boolean;
+  codigoPostal: string;
 }
