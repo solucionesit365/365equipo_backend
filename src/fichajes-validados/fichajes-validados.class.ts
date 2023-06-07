@@ -24,4 +24,21 @@ export class FichajesValidados {
   async getFichajesPagar(idResponsable: number, aPagar: boolean) {
     return await this.schFichajesValidados.getFichajesPagar(idResponsable, aPagar);
   }
+
+  async getAllFichajesPagar(aPagar: boolean) {
+    return await this.schFichajesValidados.getAllFichajesPagar(aPagar);
+  }
+
+  async getAllIdResponsable(idResponsable: number) {
+    return await this.schFichajesValidados.getAllIdResponsableFichajesPagar(idResponsable);
+  }
+
+  async getSemanasFichajesPagar(semana:number){
+    return await this.schFichajesValidados.getSemanasFichajesPagar(semana);
+  }
+
+  async getAllFichajesValidados() {
+    return await this.schFichajesValidados.getAllFichajesValidados();
+  };
+
 }

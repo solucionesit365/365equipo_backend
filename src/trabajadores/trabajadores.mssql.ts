@@ -38,10 +38,9 @@ export async function getTrabajadores(todos = false) {
     FROM trabajadores tr
     LEFT JOIN trabajadores tr1 ON tr.idResponsable = tr1.id
     LEFT JOIN tiendas ti ON tr.idTienda = ti.id
-    ${
-      !todos
-        ? "WHERE tr.inicioContrato IS NOT NULL AND tr.finalContrato IS NULL"
-        : ""
+    ${!todos
+      ? "WHERE tr.inicioContrato IS NOT NULL AND tr.finalContrato IS NULL"
+      : ""
     } ORDER BY nombreApellidos
     `;
   const resUsuarios = await recSoluciones("soluciones", sql);
@@ -484,37 +483,28 @@ export async function guardarCambiosForm(
   sql += sqlHandleCambios(trabajador, original);
   sql += `
     UPDATE trabajadores SET
-    nombreApellidos = ${
-      trabajador.nombreApellidos ? `'${trabajador.nombreApellidos}'` : "NULL"
+    nombreApellidos = ${trabajador.nombreApellidos ? `'${trabajador.nombreApellidos}'` : "NULL"
     },
-    displayName = ${
-      trabajador.displayName ? `'${trabajador.displayName}'` : "NULL"
+    displayName = ${trabajador.displayName ? `'${trabajador.displayName}'` : "NULL"
     },
     emails = ${trabajador.emails ? `'${trabajador.emails}'` : "NULL"},
     dni = ${trabajador.dni ? `'${trabajador.dni}'` : "NULL"},
     direccion = ${trabajador.direccion ? `'${trabajador.direccion}'` : "NULL"},
     ciudad = ${trabajador.ciudad ? `'${trabajador.ciudad}'` : "NULL"},
     telefonos = ${trabajador.telefonos ? `'${trabajador.telefonos}'` : "NULL"},
-    fechaNacimiento = convert(datetime, ${
-      trabajador.fechaNacimiento ? "'" + trabajador.fechaNacimiento + "'" : null
+    fechaNacimiento = convert(datetime, ${trabajador.fechaNacimiento ? "'" + trabajador.fechaNacimiento + "'" : null
     }, 103),
-    nacionalidad = ${
-      trabajador.nacionalidad ? `'${trabajador.nacionalidad}'` : "NULL"
+    nacionalidad = ${trabajador.nacionalidad ? `'${trabajador.nacionalidad}'` : "NULL"
     },
-    nSeguridadSocial = ${
-      trabajador.nSeguridadSocial ? `'${trabajador.nSeguridadSocial}'` : "NULL"
+    nSeguridadSocial = ${trabajador.nSeguridadSocial ? `'${trabajador.nSeguridadSocial}'` : "NULL"
     },
-    codigoPostal = ${
-      trabajador.codigoPostal ? `'${trabajador.codigoPostal}'` : "NULL"
+    codigoPostal = ${trabajador.codigoPostal ? `'${trabajador.codigoPostal}'` : "NULL"
     },
-    cuentaCorriente = ${
-      trabajador.cuentaCorriente ? `'${trabajador.cuentaCorriente}'` : "NULL"
+    cuentaCorriente = ${trabajador.cuentaCorriente ? `'${trabajador.cuentaCorriente}'` : "NULL"
     },
-    tipoTrabajador = ${
-      trabajador.tipoTrabajador ? `'${trabajador.tipoTrabajador}'` : "NULL"
+    tipoTrabajador = ${trabajador.tipoTrabajador ? `'${trabajador.tipoTrabajador}'` : "NULL"
     },
-    idResponsable = ${
-      trabajador.idResponsable ? `'${trabajador.idResponsable}'` : "NULL"
+    idResponsable = ${trabajador.idResponsable ? `'${trabajador.idResponsable}'` : "NULL"
     },
     idTienda = ${trabajador.idTienda ? `'${trabajador.idTienda}'` : "NULL"},
     coordinadora = ${trabajador.coordinadora ? 1 : 0},
@@ -582,4 +572,13 @@ export async function borrarTrabajador(idSql: number) {
   await recSoluciones("soluciones", sql, idSql);
 
   return true;
+}
+
+export async function getCoordinadoras() {
+  const sql = `select * from trabajadores where coordinadora= 1 AND idTienda IS NOT NULL`;
+
+  const recCoordi = await recSoluciones("soluciones", sql)
+  console.log(recCoordi);
+
+  return recCoordi.recordset
 }

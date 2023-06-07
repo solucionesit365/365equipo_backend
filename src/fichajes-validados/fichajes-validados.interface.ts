@@ -30,5 +30,6 @@ export interface FichajeValidadoDto {
     respSuper: string,
     estadoValidado: string
   },
-  aPagar: boolean
+  aPagar: boolean,
+  pagado: boolean,
 }
