@@ -18,7 +18,6 @@ import {
   IsOptional,
 } from "class-validator";
 import { ClientesService } from "./clientes.service";
-import { nuevoCliente } from "./clientes.mssql";
 
 class NewClientRequest {
   @IsEmail()

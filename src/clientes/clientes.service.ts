@@ -111,15 +111,25 @@ export class ClientesService {
     toEmail: string,
   ) {
     const uniqueId = uuidv4();
-    const idCliente = "CliBoti_" + uniqueId;
-    await nuevoCliente(nombre, apellidos, telefono, idCliente, codigoPostal);
-    await this.generarStringIdentificacion(idCliente, toEmail);
+    const idCliente = "CliBoti_APP_" + uniqueId;
+    const idExterna = "QR_CLIENT_" + uuidv4();
+
+    await nuevoCliente(
+      nombre,
+      apellidos,
+      telefono,
+      idCliente,
+      codigoPostal,
+      idExterna,
+      toEmail,
+    );
+    await this.generarStringIdentificacion(idExterna, toEmail);
     return true;
   }
 
-  async generarStringIdentificacion(idCliente: string, toEmail: string) {
-    const codigoString = this.cryptoInstance.cifrarParaHit(idCliente);
-    await this.tarjetaClienteInstance.sendQrCodeEmail(codigoString, toEmail);
+  async generarStringIdentificacion(idExterna: string, toEmail: string) {
+    // const codigoString = this.cryptoInstance.cifrarParaHit(idCliente);
+    await this.tarjetaClienteInstance.sendQrCodeEmail(idExterna, toEmail);
   }
 
   async confirmarEmail(idSolicitud: SolicitudCliente["_id"]) {
