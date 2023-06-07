@@ -6,11 +6,13 @@ export async function nuevoCliente(
   telefono: string,
   id: string,
   codigoPostal: string,
+  idExterna: string,
 ) {
   // @param0 = id
   // @param1 = nombre + apellidos
   // @param2 = telefono
   // @param3 = codigoPostal
+  // @param4 = idExterna
   const sql = `
   IF EXISTS (SELECT * FROM ClientsFinals WHERE Id = @param0)
     BEGIN
@@ -18,7 +20,7 @@ export async function nuevoCliente(
     END
   ELSE
     BEGIN
-      INSERT INTO ClientsFinals VALUES (@param0, @param1, @param2, '', '', '', @param3, '', '');
+      INSERT INTO ClientsFinals VALUES (@param0, @param1, @param2, '', '', '', @param3, '', @param4);
       INSERT INTO Punts (IdClient, Punts, data, Punts2, data2) VALUES (@param0, 2500, GETDATE(), NULL, NULL);
       SELECT 'CREADO' as resultado;
     END
