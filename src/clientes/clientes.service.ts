@@ -122,9 +122,9 @@ export class ClientesService {
     return true;
   }
 
-  async generarStringIdentificacion(idCliente: string, toEmail: string) {
-    const codigoString = this.cryptoInstance.cifrarParaHit(idCliente);
-    await this.tarjetaClienteInstance.sendQrCodeEmail(codigoString, toEmail);
+  async generarStringIdentificacion(idExterna: string, toEmail: string) {
+    // const codigoString = this.cryptoInstance.cifrarParaHit(idCliente);
+    await this.tarjetaClienteInstance.sendQrCodeEmail(idExterna, toEmail);
   }
 
   async confirmarEmail(idSolicitud: SolicitudCliente["_id"]) {
