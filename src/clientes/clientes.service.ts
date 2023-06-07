@@ -109,7 +109,15 @@ export class ClientesService {
     const idCliente = "CliBoti_APP_" + uniqueId;
     const idExterna = uuidv4();
 
-    await nuevoCliente(nombre, apellidos, telefono, idCliente, codigoPostal, idExterna);
+    await nuevoCliente(
+      nombre,
+      apellidos,
+      telefono,
+      idCliente,
+      codigoPostal,
+      idExterna,
+      toEmail,
+    );
     await this.generarStringIdentificacion(idExterna, toEmail);
     return true;
   }
