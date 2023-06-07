@@ -107,7 +107,7 @@ export class ClientesService {
   ) {
     const uniqueId = uuidv4();
     const idCliente = "CliBoti_APP_" + uniqueId;
-    const idExterna = uuidv4();
+    const idExterna = "QR_" + uuidv4();
 
     await nuevoCliente(
       nombre,
