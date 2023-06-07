@@ -99,7 +99,7 @@ export class ClientesService {
       return true;
     } else {
       console.log("No quiero ser cliente p");
-      await this.tarjetaClienteInstance.sendQrCodeEmail(email, email)
+      await this.tarjetaClienteInstance.sendQRInvitation(`QR_INVITACION_${email}`, email)
     }
   }
 

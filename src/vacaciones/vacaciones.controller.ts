@@ -184,16 +184,16 @@ export class VacacionesController {
         respuesta,
       )
       if (resEstado) {
-        const solicitud = await this.vacacionesInstance.getSolicitudById(idSolicitud)
-        console.log(solicitud);
-        // this.notificaciones.newInAppNotification({
-        //   uid: ,
-        //   titulo: ,
-        //  mensaje: ,
-        //  leido: false,
-        //  creador: "RRHH",
+        const solicitud = await this.vacacionesInstance.getSolicitudById(Number(idSolicitud))
+        const solicitudTrabajador = await this.trabajadorInstance.getTrabajadorBySqlId(Number(solicitud.idBeneficiario));
+        this.notificaciones.newInAppNotification({
+          uid: solicitudTrabajador.idApp,
+          titulo: "Vacaciones",
+          mensaje: `Tus vacaciones han sido ${estado}S`,
+          leido: false,
+          creador: "SISTEMA",
 
-        // })
+        })
 
 
         return {

@@ -95,15 +95,39 @@ export class FichajesValidadosController {
     try {
       const token = this.tokenService.extract(authHeader);
       await this.authInstance.verifyToken(token);
-
       if (
         await this.fichajesValidadosInstance.updateFichajesValidados(
           FichajesValidados,
         )
-      )
+      ) {
+        const fichajeTrabajador = await this.trabajador.getTrabajadorBySqlId(FichajesValidados.idTrabajador)
+        if (FichajesValidados.aPagar && FichajesValidados.horasPagar.estadoValidado == "PENDIENTE") {
+          this.notificaciones.newInAppNotification({
+            uid: fichajeTrabajador.idApp,
+            titulo: "Solicitud Horas a Pagar",
+            mensaje: `Se ha solicitado ${FichajesValidados.horasPagar.total}h a pagar`,
+            leido: false,
+            creador: "SISTEMA",
+
+          })
+        } if (FichajesValidados.horasPagar.estadoValidado != "PENDIENTE") {
+          {
+            this.notificaciones.newInAppNotification({
+              uid: fichajeTrabajador.idApp,
+              titulo: "Pago de horas",
+              mensaje: `${FichajesValidados.horasPagar.estadoValidado} ${FichajesValidados.horasPagar.total}h `,
+              leido: false,
+              creador: "SISTEMA",
+
+            })
+          }
+        }
+
+
         return {
           ok: true,
         };
+      }
       throw Error("No se ha podido modificar fichaje validado");
     } catch (err) {
       console.log(err);
@@ -129,21 +153,6 @@ export class FichajesValidadosController {
           aPagarBoolean,
         );
       if (respValidados.length > 0) {
-        //Notificacion Horas a Pagar
-        const arrayTrabajador = await this.trabajador.getTrabajadores()
-        arrayTrabajador.forEach((trabajador) => {
-          if (trabajador.idApp != null) {
-            this.notificaciones.newInAppNotification({
-              uid: "khkO3Y0YJQNGft5ljqrrfeSUAN52",
-              titulo: "Solicitud Horas a pagar  ",
-              mensaje: "Tus horas a pagar han sido aprobadas ",
-              leido: false,
-              creador: "RRHH",
-            })
-          }
-
-        })
-
         return {
           ok: true,
           data: respValidados,

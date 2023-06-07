@@ -16,7 +16,7 @@ export class Vacaciones {
   ) { }
   async getSolicitudById(idSolicitud: number) {
 
-    return await schVacaciones.getSolicitudesTrabajadorSqlId(idSolicitud);
+    return await schVacaciones.getSolicitudById(Number(idSolicitud));
   }
   async nuevaSolicitudVacaciones(solicitud: SolicitudVacaciones) {
     if (await schVacaciones.nuevaSolicitudVacaciones(solicitud)) {
