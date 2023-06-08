@@ -12,15 +12,17 @@ import { TokenService } from "../get-token/get-token.service";
 import { Vacaciones } from "./vacaciones.class";
 import { Trabajador } from "../trabajadores/trabajadores.class";
 import { AuthService } from "../firebase/auth";
+import { Notificaciones } from "src/notificaciones/notificaciones.class";
 
 @Controller("vacaciones")
 export class VacacionesController {
   constructor(
+    private readonly notificaciones: Notificaciones,
     private readonly authInstance: AuthService,
     private readonly trabajadorInstance: Trabajador,
     private readonly tokenService: TokenService,
     private readonly vacacionesInstance: Vacaciones,
-  ) {}
+  ) { }
 
   @Get()
   async getSolicitudes(@Headers("authorization") authHeader: string) {
@@ -176,14 +178,32 @@ export class VacacionesController {
       const token = this.tokenService.extract(authHeader);
       await this.authInstance.verifyToken(token);
 
-      return {
-        ok: true,
-        data: await this.vacacionesInstance.setEstadoSolicitud(
-          estado,
-          idSolicitud,
-          respuesta,
-        ),
-      };
+      const resEstado = await this.vacacionesInstance.setEstadoSolicitud(
+        estado,
+        idSolicitud,
+        respuesta,
+      )
+      if (resEstado) {
+        const solicitud = await this.vacacionesInstance.getSolicitudById(Number(idSolicitud))
+        const solicitudTrabajador = await this.trabajadorInstance.getTrabajadorBySqlId(Number(solicitud.idBeneficiario));
+        this.notificaciones.newInAppNotification({
+          uid: solicitudTrabajador.idApp,
+          titulo: "Vacaciones",
+          mensaje: `Tus vacaciones han sido ${estado}S`,
+          leido: false,
+          creador: "SISTEMA",
+
+        })
+
+
+        return {
+          ok: true,
+          data: "En desarrollo",
+
+        };
+      }
+
+
     } catch (err) {
       console.log(err);
       return { ok: false, message: err.message };
