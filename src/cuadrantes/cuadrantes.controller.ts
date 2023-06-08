@@ -17,15 +17,17 @@ import { SchedulerGuard } from "../scheduler/scheduler.guard";
 import * as moment from "moment";
 import { AuthService } from "../firebase/auth";
 import { Trabajador } from "../trabajadores/trabajadores.class";
+import { Notificaciones } from "src/notificaciones/notificaciones.class";
 
 @Controller("cuadrantes")
 export class CuadrantesController {
   constructor(
+    private readonly notificaciones: Notificaciones,
     private readonly authInstance: AuthService,
     private readonly tokenService: TokenService,
     private readonly cuadrantesInstance: Cuadrantes,
     private readonly trabajadoresInstance: Trabajador,
-  ) {}
+  ) { }
 
   @Get()
   @UseGuards(AuthGuard)
@@ -91,7 +93,7 @@ export class CuadrantesController {
     }
   }
 
-  @Get("getTodos")
+  @Get("individual")
   @UseGuards(AuthGuard)
   async getAllCuadrantes(@Headers("authorization") authHeader: string) {
     try {
@@ -218,6 +220,7 @@ export class CuadrantesController {
       const token = this.tokenService.extract(authHeader);
       const usuario = await this.authInstance.getUserWithToken(token);
 
+
       if (usuario.coordinadora && usuario.idTienda) {
         // cuadrante.idTienda = usuario.idTienda;
         // cuadrante.enviado = false;
@@ -229,8 +232,20 @@ export class CuadrantesController {
             cuadrante.year,
           );
         cuadrante.idTienda = usuario.idTienda;
-        await this.cuadrantesInstance.saveCuadrante(cuadrante, oldCuadrante);
-        return { ok: true };
+
+        const notiCuadrante = await this.cuadrantesInstance.saveCuadrante(cuadrante, oldCuadrante);
+        if (notiCuadrante) {
+          const trabajadorID = await this.trabajadoresInstance.getTrabajadorBySqlId(cuadrante.idTrabajador);
+
+          this.notificaciones.newInAppNotification({
+            uid: trabajadorID.idApp,
+            titulo: "CUADRANTE TIENDA",
+            mensaje: `Se ha creado tu horario de la semana ${cuadrante.semana}`,
+            leido: false,
+            creador: "SISTEMA",
+          })
+          return { ok: true };
+        }
       }
       throw Error("No llevas equipo o tienda para realizar esta acción");
     } catch (err) {
