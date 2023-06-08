@@ -38,9 +38,10 @@ export async function getTrabajadores(todos = false) {
     FROM trabajadores tr
     LEFT JOIN trabajadores tr1 ON tr.idResponsable = tr1.id
     LEFT JOIN tiendas ti ON tr.idTienda = ti.id
-    ${!todos
-      ? "WHERE tr.inicioContrato IS NOT NULL AND tr.finalContrato IS NULL"
-      : ""
+    ${
+      !todos
+        ? "WHERE tr.inicioContrato IS NOT NULL AND tr.finalContrato IS NULL"
+        : ""
     } ORDER BY nombreApellidos
     `;
   const resUsuarios = await recSoluciones("soluciones", sql);
@@ -483,28 +484,37 @@ export async function guardarCambiosForm(
   sql += sqlHandleCambios(trabajador, original);
   sql += `
     UPDATE trabajadores SET
-    nombreApellidos = ${trabajador.nombreApellidos ? `'${trabajador.nombreApellidos}'` : "NULL"
+    nombreApellidos = ${
+      trabajador.nombreApellidos ? `'${trabajador.nombreApellidos}'` : "NULL"
     },
-    displayName = ${trabajador.displayName ? `'${trabajador.displayName}'` : "NULL"
+    displayName = ${
+      trabajador.displayName ? `'${trabajador.displayName}'` : "NULL"
     },
     emails = ${trabajador.emails ? `'${trabajador.emails}'` : "NULL"},
     dni = ${trabajador.dni ? `'${trabajador.dni}'` : "NULL"},
     direccion = ${trabajador.direccion ? `'${trabajador.direccion}'` : "NULL"},
     ciudad = ${trabajador.ciudad ? `'${trabajador.ciudad}'` : "NULL"},
     telefonos = ${trabajador.telefonos ? `'${trabajador.telefonos}'` : "NULL"},
-    fechaNacimiento = convert(datetime, ${trabajador.fechaNacimiento ? "'" + trabajador.fechaNacimiento + "'" : null
+    fechaNacimiento = convert(datetime, ${
+      trabajador.fechaNacimiento ? "'" + trabajador.fechaNacimiento + "'" : null
     }, 103),
-    nacionalidad = ${trabajador.nacionalidad ? `'${trabajador.nacionalidad}'` : "NULL"
+    nacionalidad = ${
+      trabajador.nacionalidad ? `'${trabajador.nacionalidad}'` : "NULL"
     },
-    nSeguridadSocial = ${trabajador.nSeguridadSocial ? `'${trabajador.nSeguridadSocial}'` : "NULL"
+    nSeguridadSocial = ${
+      trabajador.nSeguridadSocial ? `'${trabajador.nSeguridadSocial}'` : "NULL"
     },
-    codigoPostal = ${trabajador.codigoPostal ? `'${trabajador.codigoPostal}'` : "NULL"
+    codigoPostal = ${
+      trabajador.codigoPostal ? `'${trabajador.codigoPostal}'` : "NULL"
     },
-    cuentaCorriente = ${trabajador.cuentaCorriente ? `'${trabajador.cuentaCorriente}'` : "NULL"
+    cuentaCorriente = ${
+      trabajador.cuentaCorriente ? `'${trabajador.cuentaCorriente}'` : "NULL"
     },
-    tipoTrabajador = ${trabajador.tipoTrabajador ? `'${trabajador.tipoTrabajador}'` : "NULL"
+    tipoTrabajador = ${
+      trabajador.tipoTrabajador ? `'${trabajador.tipoTrabajador}'` : "NULL"
     },
-    idResponsable = ${trabajador.idResponsable ? `'${trabajador.idResponsable}'` : "NULL"
+    idResponsable = ${
+      trabajador.idResponsable ? `'${trabajador.idResponsable}'` : "NULL"
     },
     idTienda = ${trabajador.idTienda ? `'${trabajador.idTienda}'` : "NULL"},
     coordinadora = ${trabajador.coordinadora ? 1 : 0},
@@ -575,10 +585,89 @@ export async function borrarTrabajador(idSql: number) {
 }
 
 export async function getCoordinadoras() {
-  const sql = `select * from trabajadores where coordinadora= 1 AND idTienda IS NOT NULL`;
+  const sql = `select * from trabajadores where coordinadora = 1 AND idTienda IS NOT NULL`;
 
-  const recCoordi = await recSoluciones("soluciones", sql)
+  const recCoordi = await recSoluciones("soluciones", sql);
   console.log(recCoordi);
 
-  return recCoordi.recordset
+  return recCoordi.recordset;
+}
+
+async function getHistoriaContratos(): Promise<
+  {
+    horasContrato: number;
+    dni: string;
+    inicioContrato: string;
+    finalContrato: string;
+    fechaAlta: string;
+    fechaAntiguedad: string;
+  }[]
+> {
+  const sql = `
+  SELECT 
+    PorJornada as horasContrato, 
+    Dni as dni, 
+    CONVERT(nvarchar, FechaInicioContrato, 103) as inicioContrato, 
+    CONVERT(nvarchar, FechaFinalContrato, 103) as finalContrato, 
+    CONVERT(nvarchar, FechaAlta, 103) as fechaAlta, 
+    CONVERT(nvarchar, FechaAntiguedad, 103) as fechaAntiguedad  
+  FROM silema_ts.sage.dbo.EmpleadoNomina`;
+
+  const resHisContratos = await recHit("Fac_Tena", sql);
+
+  if (resHisContratos.recordset.length > 0) return resHisContratos.recordset;
+  return [];
+}
+
+function convertToDate(dateString) {
+  if (!dateString) {
+    return "NULL";
+  }
+
+  const [day, month, year] = dateString.split("/");
+  const sqlDate = `${year}${month}${day}`;
+
+  return `CONVERT(datetime, '${sqlDate}', 112)`;
+}
+
+export async function copiarHistoriaContratosHitSoluciones() {
+  const arrayContratos = await getHistoriaContratos();
+
+  if (arrayContratos.length === 0)
+    throw Error("No hay contratos para traspasar");
+
+  const batchSize = 1000;
+  let batchStart = 0;
+
+  await recSoluciones("soluciones", "DELETE FROM historicoContratos");
+
+  while (batchStart < arrayContratos.length) {
+    // Extrae un lote de filas
+    const batch = arrayContratos.slice(batchStart, batchStart + batchSize);
+
+    // Construye una consulta de inserción para este lote
+    let insertQuery =
+      "INSERT INTO historicoContratos (horasContrato, dni, inicioContrato, finalContrato, fechaAlta, fechaAntiguedad) VALUES ";
+
+    const rows = batch.map((row) => {
+      return `('${row.horasContrato}', '${row.dni}', ${convertToDate(
+        row.inicioContrato,
+      )}, ${convertToDate(row.finalContrato)}, ${convertToDate(
+        row.fechaAlta,
+      )}, ${convertToDate(row.fechaAntiguedad)})`;
+    });
+
+    insertQuery += rows.join(", ");
+
+    try {
+      await recSolucionesClassic("soluciones", insertQuery);
+    } catch (error) {
+      console.log(`Failed to insert rows: ${error}`);
+    }
+
+    // Avanza al siguiente lote
+    batchStart += batchSize;
+  }
+
+  return true;
 }

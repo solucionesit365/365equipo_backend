@@ -21,7 +21,7 @@ export class TrabajadoresController {
     private readonly trabajadorInstance: Trabajador,
     private readonly tokenService: TokenService,
     private readonly messagingService: FirebaseMessagingService,
-  ) { }
+  ) {}
 
   @Get()
   async getTrabajadores(@Headers("authorization") authHeader: string) {
@@ -75,9 +75,7 @@ export class TrabajadoresController {
   }
 
   @Get("validarQR")
-  async validarQRTrabajador(
-    @Query() { idTrabajador, tokenQR },
-  ) {
+  async validarQRTrabajador(@Query() { idTrabajador, tokenQR }) {
     try {
       if (!idTrabajador && !tokenQR) throw Error("Faltan datos");
       const resUser = await this.trabajadorInstance.getTrabajadorTokenQR(
@@ -135,6 +133,20 @@ export class TrabajadoresController {
       return {
         ok: true,
         data: await this.trabajadorInstance.sincronizarConHit(),
+      };
+    } catch (err) {
+      console.log(err);
+      return { ok: false, message: err.message };
+    }
+  }
+
+  @Get("descargarHistoriaContratos")
+  @UseGuards(SchedulerGuard)
+  async descargarHistoriaContratos() {
+    try {
+      return {
+        ok: true,
+        data: await this.trabajadorInstance.descargarHistoriaContratos(),
       };
     } catch (err) {
       console.log(err);
@@ -236,9 +248,7 @@ export class TrabajadoresController {
   }
 
   @Get("getAllCoordis")
-  async getAllCoordis(
-    @Headers("authorization") authHeader: string,
-  ) {
+  async getAllCoordis(@Headers("authorization") authHeader: string) {
     try {
       const token = this.tokenService.extract(authHeader);
       await this.authInstance.verifyToken(token);

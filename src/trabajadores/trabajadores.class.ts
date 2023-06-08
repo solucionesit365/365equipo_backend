@@ -14,7 +14,7 @@ export class Trabajador {
     private readonly permisosInstance: PermisosClass,
     @Inject(forwardRef(() => EmailClass))
     private readonly emailInstance: EmailClass,
-  ) { }
+  ) {}
 
   async getTrabajadorByAppId(uid: string) {
     const resUser = await schTrabajadores.getTrabajadorByAppId(uid);
@@ -264,5 +264,9 @@ export class Trabajador {
 
   async getCoordis() {
     return await schTrabajadores.getCoordinadoras();
+  }
+
+  async descargarHistoriaContratos() {
+    return await schTrabajadores.copiarHistoriaContratosHitSoluciones();
   }
 }
