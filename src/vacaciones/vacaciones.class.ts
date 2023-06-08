@@ -13,8 +13,11 @@ export class Vacaciones {
     private readonly cuadrantesInstance: Cuadrantes,
     private readonly emailInstance: EmailClass,
     private readonly trabajadorInstance: Trabajador,
-  ) {}
+  ) { }
+  async getSolicitudById(idSolicitud: number) {
 
+    return await schVacaciones.getSolicitudById(Number(idSolicitud));
+  }
   async nuevaSolicitudVacaciones(solicitud: SolicitudVacaciones) {
     if (await schVacaciones.nuevaSolicitudVacaciones(solicitud)) {
       const usuario = await this.trabajadorInstance.getTrabajadorBySqlId(
@@ -29,11 +32,11 @@ export class Vacaciones {
         Oberservación: ${solicitud.observaciones} <br>
         Estado: PENDIENTE DE APROBACIÓN.
     `;
-      this.emailInstance.sendMailById(
-        solicitud.idBeneficiario,
-        mensaje,
-        "NUEVA SOLICITUD DE VACACIONES",
-      );
+      // this.emailInstance.sendMailById(
+      //   solicitud.idBeneficiario,
+      //   mensaje,
+      //   "NUEVA SOLICITUD DE VACACIONES",
+      // );
       return true;
     }
     throw Error("No se ha podido crear la solicitud de vacaciones");
@@ -119,14 +122,14 @@ export class Vacaciones {
 
       WITH Dates AS (
         SELECT CONVERT(datetime, '${fechaInicio.format(
-          "YYYY-MM-DD",
-        )}', 126) AS Date
+      "YYYY-MM-DD",
+    )}', 126) AS Date
         UNION ALL
         SELECT DATEADD(day, 1, Date)
         FROM Dates
         WHERE DATEADD(day, 1, Date) <= CONVERT(datetime, '${fechaFinal.format(
-          "YYYY-MM-DD",
-        )}', 126)
+      "YYYY-MM-DD",
+    )}', 126)
       )
       MERGE ${nombreTabla} AS Target
       USING (SELECT * FROM Dates) AS Source
@@ -142,9 +145,8 @@ export class Vacaciones {
           Target.usuarioModif = '365Equipo'
       WHEN NOT MATCHED THEN
         INSERT (id, fecha, idEmpleado, estado, observaciones, TimeStamp, usuarioModif)
-        VALUES (NEWID(), Source.Date, ${
-          vacaciones.idBeneficiario
-        }, 'VACANCES', '[Horas:24]', GETDATE(), '365Equipo');
+        VALUES (NEWID(), Source.Date, ${vacaciones.idBeneficiario
+      }, 'VACANCES', '[Horas:24]', GETDATE(), '365Equipo');
 
       SET @InsertedRows = @@ROWCOUNT;
 
@@ -156,7 +158,7 @@ export class Vacaciones {
     if (
       resultado.recordset.length > 0 &&
       fechaFinal.diff(fechaInicio, "days") + 1 ===
-        resultado.recordset[0].InsertedRows
+      resultado.recordset[0].InsertedRows
     ) {
       await recSoluciones(
         "soluciones",
