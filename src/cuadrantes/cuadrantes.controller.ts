@@ -93,7 +93,7 @@ export class CuadrantesController {
     }
   }
 
-  @Get("individual")
+  @Get("getTodos")
   @UseGuards(AuthGuard)
   async getAllCuadrantes(@Headers("authorization") authHeader: string) {
     try {
