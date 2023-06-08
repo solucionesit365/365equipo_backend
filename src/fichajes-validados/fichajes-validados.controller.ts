@@ -3,11 +3,15 @@ import { TokenService } from "../get-token/get-token.service";
 import { FichajesValidados } from "./fichajes-validados.class";
 import { FichajeValidadoDto } from "./fichajes-validados.interface";
 import { AuthService } from "../firebase/auth";
+import { Notificaciones } from "src/notificaciones/notificaciones.class";
+import { Trabajador } from "src/trabajadores/trabajadores.class";
 import { query } from "mssql";
 
 @Controller("fichajes-validados")
 export class FichajesValidadosController {
   constructor(
+    private readonly trabajador: Trabajador,
+    private readonly notificaciones: Notificaciones,
     private readonly authInstance: AuthService,
     private readonly tokenService: TokenService,
     private readonly fichajesValidadosInstance: FichajesValidados,
@@ -76,10 +80,33 @@ export class FichajesValidadosController {
         await this.fichajesValidadosInstance.updateFichajesValidados(
           FichajesValidados,
         )
-      )
+      ) {
+        const fichajeTrabajador = await this.trabajador.getTrabajadorBySqlId(FichajesValidados.idTrabajador)
+        if (FichajesValidados.aPagar && FichajesValidados.horasPagar.estadoValidado == "PENDIENTE") {
+          this.notificaciones.newInAppNotification({
+            uid: fichajeTrabajador.idApp,
+            titulo: "Solicitud Horas a Pagar",
+            mensaje: `Se ha solicitado ${FichajesValidados.horasPagar.total}h a pagar`,
+            leido: false,
+            creador: "SISTEMA",
+
+          })
+        } if (FichajesValidados.horasPagar.estadoValidado != "PENDIENTE") {
+          {
+            this.notificaciones.newInAppNotification({
+              uid: fichajeTrabajador.idApp,
+              titulo: "Pago de horas",
+              mensaje: `${FichajesValidados.horasPagar.estadoValidado} ${FichajesValidados.horasPagar.total}h `,
+              leido: false,
+              creador: "SISTEMA",
+
+            })
+          }
+        }
         return {
           ok: true,
         };
+      }
       throw Error("No se ha podido modificar fichaje validado");
     } catch (err) {
       console.log(err);
