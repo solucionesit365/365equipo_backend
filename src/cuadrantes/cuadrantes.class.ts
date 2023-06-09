@@ -41,12 +41,28 @@ export class Cuadrantes {
     );
   }
 
-  async getCuadrantes(idTienda: number, semana: number, year: number) {
+  async getBolsaHorasById(idSql: number) {
+    return 0;
+  }
+
+  async getCuadrantes(
+    idTienda: number,
+    semana: number,
+    year: number,
+    idSql?: number,
+  ) {
     const responsableTienda =
       await this.trabajadoresInstance.getResponsableTienda(idTienda);
     const equipoCompleto = await this.trabajadoresInstance.getSubordinadosById(
       responsableTienda.id,
     );
+
+    if (idSql) {
+      const usuarioActual =
+        await this.trabajadoresInstance.getTrabajadorBySqlId(idSql);
+
+      equipoCompleto.push(usuarioActual);
+    }
 
     const cuadrantes: TCuadrante[] = await this.schCuadrantes.getCuadrantes(
       idTienda,
@@ -54,16 +70,23 @@ export class Cuadrantes {
       year,
     );
 
-    equipoCompleto.forEach((miembro) => {
-      const cuadranteExistente = cuadrantes.find(
-        (cuadrante) => cuadrante.idTrabajador === miembro.id,
-      );
+    const cuadrantesVacios: TCuadrante[] = [];
+    let hayUno = false;
 
-      if (!cuadranteExistente) {
+    for (let i = 0; i < equipoCompleto.length; i += 1) {
+      for (let j = 0; j < cuadrantes.length; j += 1) {
+        if (equipoCompleto[i].id === cuadrantes[j].idTrabajador) {
+          hayUno = true;
+          cuadrantes[j]["horasContrato"] = equipoCompleto[i].horasContrato;
+          break;
+        }
+      }
+
+      if (!hayUno) {
         const nuevoCuadrante: TCuadrante = {
           _id: new ObjectId().toString(),
-          idTrabajador: miembro.id,
-          nombre: miembro.nombreApellidos,
+          idTrabajador: equipoCompleto[i].id,
+          nombre: equipoCompleto[i].nombreApellidos,
           idTienda: idTienda,
           semana: semana,
           year: new Date().getFullYear(),
@@ -71,11 +94,28 @@ export class Cuadrantes {
           totalHoras: 0,
           enviado: false,
           historialPlanes: [],
+          horasContrato: equipoCompleto[i].horasContrato,
+          bolsaHorasInicial: 0,
         };
 
-        cuadrantes.push(nuevoCuadrante);
+        cuadrantesVacios.push(nuevoCuadrante);
       }
-    });
+    }
+    cuadrantes.push(...cuadrantesVacios);
+
+    for (let i = 0; i < cuadrantes.length; i += 1) {
+      cuadrantes[i]["bolsaHorasInicial"] = await this.getBolsaHorasById(
+        cuadrantes[i].idTrabajador,
+      );
+
+      if (!cuadrantes[i].horasContrato) {
+        const trabajadorCuadrante =
+          await this.trabajadoresInstance.getTrabajadorBySqlId(
+            cuadrantes[i].idTrabajador,
+          );
+        cuadrantes[i].horasContrato = trabajadorCuadrante.horasContrato;
+      }
+    }
 
     return cuadrantes;
   }

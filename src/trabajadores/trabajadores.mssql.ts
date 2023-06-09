@@ -23,6 +23,7 @@ CONVERT(nvarchar, tr.finalContrato, 103) as finalContrato,
 tr.idResponsable,
 tr.idTienda,
 (SELECT COUNT(*) FROM trabajadores WHERE idResponsable = tr.id) as coordinadora,
+(SELECT top 1 horasContrato*40/100 FROM historicoContratos WHERE dni = tr.dni)  as horasContrato,
 tr1.nombreApellidos as nombreResponsable,
 ti.nombre as nombreTienda,
 CONVERT(nvarchar, tr.antiguedad, 103) as antiguedad,
@@ -203,17 +204,19 @@ export async function getSubordinadosById(id: number): Promise<
     idTienda: number;
     antiguedad: string;
     inicioContrato: string;
+    horasContrato: number;
   }[]
 > {
   const sql = `
     select 
-      id, 
-      idApp, 
-      nombreApellidos, 
-      idTienda, 
-      CONVERT(varchar, antiguedad, 103) as antiguedad, 
-      CONVERT(varchar, inicioContrato, 103) as inicioContrato 
-    from trabajadores 
+      tr.id, 
+      tr.idApp, 
+      tr.nombreApellidos, 
+      tr.idTienda, 
+      CONVERT(varchar, tr.antiguedad, 103) as antiguedad, 
+      CONVERT(varchar, tr.inicioContrato, 103) as inicioContrato,
+      (SELECT top 1 horasContrato*40/100 FROM historicoContratos WHERE dni = tr.dni)  as horasContrato 
+    from trabajadores tr
     where idResponsable = @param0
   `;
   const resSubordinados = await recSoluciones("soluciones", sql, id);

@@ -19,6 +19,12 @@ export interface TCuadrante {
   totalHoras: number;
   enviado: boolean;
   historialPlanes: string[];
+  horasContrato?: number;
+  bolsaHorasInicial?: number;
 }
 
-export type TiposAusencia = "BAJA" | "DIA_PERSONAL" | "VACACIONES" | "HORAS_JUSTIFICADAS";
+export type TiposAusencia =
+  | "BAJA"
+  | "DIA_PERSONAL"
+  | "VACACIONES"
+  | "HORAS_JUSTIFICADAS";
