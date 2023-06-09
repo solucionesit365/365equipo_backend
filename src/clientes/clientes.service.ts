@@ -93,11 +93,10 @@ export class ClientesService {
       await this.emailInstance.enviarEmail(
         solicitud.email,
         emailBody,
-        "Confirmación de registro en 365",
+        "Confirmació de registre el 365",
       );
       return true;
     } else {
-      console.log("No quiero ser cliente p");
       await this.tarjetaClienteInstance.sendQRInvitation(`QR_INVITACION_${email}`, email)
     }
   }
@@ -135,8 +134,6 @@ export class ClientesService {
     const solicitud = await this.schSolicitudesCliente.getSolicitud(
       idSolicitud,
     );
-
-    console.log(solicitud);
 
 
     if (!solicitud) throw Error("No existe esta solicitud o ha caducado");

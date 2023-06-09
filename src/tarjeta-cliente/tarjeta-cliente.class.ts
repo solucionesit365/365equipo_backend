@@ -213,7 +213,7 @@ export class TarjetaCliente {
                 <p>INVITACIÓ CLIENT</p>
         
                 <p>
-                 Presentant aquest codi QR a la botiga obtindràs una recompensa
+                 Presentant aquest codi QR a la botiga obtindràs el teu Cafè o pa GRATIS
                 </p>
         
                 <img
