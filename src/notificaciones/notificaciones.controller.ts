@@ -19,7 +19,7 @@ export class NotificacionesController {
     private readonly notificacionesInstance: Notificaciones,
     private readonly tokenService: TokenService,
     private readonly authInstance: AuthService,
-  ) {}
+  ) { }
 
   @Post("send")
   async sendNotification(@Body("token") token: string) {
@@ -62,6 +62,25 @@ export class NotificacionesController {
     }
   }
 
+  @Get("getAllInAppNotifications")
+  @UseGuards(AuthGuard)
+  async getAllInAppNotifications(@Headers("authorization") authHeader: string) {
+    try {
+      const token = this.tokenService.extract(authHeader);
+      await this.authInstance.verifyToken(token);
+      const usuario = await this.authInstance.getUserWithToken(token);
+      return {
+        ok: true,
+        data: await this.notificacionesInstance.getAllInAppNotifications(
+          usuario.uid,
+        ),
+      };
+    } catch (err) {
+      console.log(err);
+      return { ok: false, message: err.message };
+    }
+  }
+
   @Post("marcarComoLeida")
   async marcarComoLeida(
     @Headers("authorization") authHeader: string,
@@ -74,6 +93,28 @@ export class NotificacionesController {
       return {
         ok: true,
         data: await this.notificacionesInstance.marcarComoLeida(
+          id,
+          usuario.uid,
+        ),
+      };
+    } catch (err) {
+      console.log(err);
+      return { ok: false, message: err.message };
+    }
+  }
+
+  @Post("marcarComoNoLeida")
+  async marcarComoNoLeida(
+    @Headers("authorization") authHeader: string,
+    @Body("id") id,
+  ) {
+    try {
+      const token = this.tokenService.extract(authHeader);
+      await this.authInstance.verifyToken(token);
+      const usuario = await this.authInstance.getUserWithToken(token);
+      return {
+        ok: true,
+        data: await this.notificacionesInstance.marcarComoNoLeida(
           id,
           usuario.uid,
         ),
