@@ -15,7 +15,7 @@ export class ClientesService {
     private readonly cryptoInstance: CryptoClass,
     private readonly emailInstance: EmailClass,
     private readonly tarjetaClienteInstance: TarjetaCliente,
-  ) { }
+  ) {}
   async handleForm(
     nuevoCliente: boolean,
     newsletter: boolean,
@@ -97,7 +97,10 @@ export class ClientesService {
       );
       return true;
     } else {
-      await this.tarjetaClienteInstance.sendQRInvitation(`QR_INVITACION_${email}`, email)
+      await this.tarjetaClienteInstance.sendQRInvitation(
+        `QR_INVITACION_${email}`,
+        email,
+      );
     }
   }
 
@@ -110,7 +113,8 @@ export class ClientesService {
   ) {
     const uniqueId = uuidv4();
     const idCliente = "CliBoti_APP_" + uniqueId;
-    const idExterna = "QR_CLIENT_" + uuidv4();
+    let idExterna = "QRCLIENT" + uuidv4();
+    idExterna = idExterna.replace(/-/g, "");
 
     await nuevoCliente(
       nombre,
@@ -134,7 +138,6 @@ export class ClientesService {
     const solicitud = await this.schSolicitudesCliente.getSolicitud(
       idSolicitud,
     );
-
 
     if (!solicitud) throw Error("No existe esta solicitud o ha caducado");
 
