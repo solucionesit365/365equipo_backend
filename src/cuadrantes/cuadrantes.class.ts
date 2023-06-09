@@ -55,6 +55,7 @@ export class Cuadrantes {
       await this.trabajadoresInstance.getResponsableTienda(idTienda);
     const equipoCompleto = await this.trabajadoresInstance.getSubordinadosById(
       responsableTienda.id,
+      moment().year(year).week(semana).day(1).startOf("day"),
     );
 
     if (idSql) {

@@ -47,8 +47,8 @@ export class Trabajador {
     return await schTrabajadores.getSubordinados(uid);
   }
 
-  async getSubordinadosById(id: number) {
-    return await schTrabajadores.getSubordinadosById(id);
+  async getSubordinadosById(id: number, conFecha?: moment.Moment) {
+    return await schTrabajadores.getSubordinadosById(id, conFecha);
   }
 
   async descargarTrabajadoresHit() {
