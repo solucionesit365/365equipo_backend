@@ -250,7 +250,7 @@ export async function getSubordinadosById(
   `;
 
   if (conFecha) {
-    sql += ` AND inicioContrato <= @param1 AND (finalContrato >= @param1 OR finalContrato IS NULL)`;
+    sql += ` AND inicioContrato <= @param1 AND (fechaBaja >= @param1 OR fechaBaja IS NULL)`;
   }
 
   sql += `) as horasContrato from trabajadores tr where idResponsable = @param0`;
@@ -645,6 +645,7 @@ async function getHistoriaContratos(): Promise<
     finalContrato: string;
     fechaAlta: string;
     fechaAntiguedad: string;
+    fechaBaja: string;
   }[]
 > {
   const sql = `
@@ -654,7 +655,8 @@ async function getHistoriaContratos(): Promise<
     CONVERT(nvarchar, FechaInicioContrato, 103) as inicioContrato, 
     CONVERT(nvarchar, FechaFinalContrato, 103) as finalContrato, 
     CONVERT(nvarchar, FechaAlta, 103) as fechaAlta, 
-    CONVERT(nvarchar, FechaAntiguedad, 103) as fechaAntiguedad  
+    CONVERT(nvarchar, FechaAntiguedad, 103) as fechaAntiguedad,
+    CONVERT(nvarchar, FechaBaja, 103) as fechaBaja
   FROM silema_ts.sage.dbo.EmpleadoNomina`;
 
   const resHisContratos = await recHit("Fac_Tena", sql);
@@ -691,14 +693,16 @@ export async function copiarHistoriaContratosHitSoluciones() {
 
     // Construye una consulta de inserción para este lote
     let insertQuery =
-      "INSERT INTO historicoContratos (horasContrato, dni, inicioContrato, finalContrato, fechaAlta, fechaAntiguedad) VALUES ";
+      "INSERT INTO historicoContratos (horasContrato, dni, inicioContrato, finalContrato, fechaAlta, fechaAntiguedad, fechaBaja) VALUES ";
 
     const rows = batch.map((row) => {
       return `('${row.horasContrato}', '${row.dni}', ${convertToDate(
         row.inicioContrato,
       )}, ${convertToDate(row.finalContrato)}, ${convertToDate(
         row.fechaAlta,
-      )}, ${convertToDate(row.fechaAntiguedad)})`;
+      )}, ${convertToDate(row.fechaAntiguedad)}, ${convertToDate(
+        row.fechaBaja,
+      )})`;
     });
 
     insertQuery += rows.join(", ");
