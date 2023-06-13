@@ -6,7 +6,7 @@ import { ObjectId } from "mongodb";
 
 @Injectable()
 export class AusenciasDatabase {
-  constructor(private readonly mongoDbService: MongoDbService) { }
+  constructor(private readonly mongoDbService: MongoDbService) {}
 
   async nuevaAusencia(ausencia: AusenciaInterface) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
@@ -34,9 +34,35 @@ export class AusenciasDatabase {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const ausenciasCollection = db.collection<AusenciaInterface>("ausencias");
 
-    const respAusencia = await ausenciasCollection.find({}).toArray()
+    const respAusencia = await ausenciasCollection.find({}).toArray();
 
     return respAusencia;
+  }
 
+  async getAusenciasSincro() {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const ausenciasCollection = db.collection<AusenciaInterface>("ausencias");
+
+    const respAusencia = await ausenciasCollection
+      .find({ enviado: { $ne: true } })
+      .toArray();
+
+    return respAusencia;
+  }
+
+  async marcarComoEnviada(id: ObjectId) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const ausenciasCollection = db.collection<AusenciaInterface>("ausencias");
+
+    const respAusencia = await ausenciasCollection.updateOne(
+      { _id: id },
+      {
+        $set: {
+          enviado: true,
+        },
+      },
+    );
+
+    return respAusencia.acknowledged;
   }
 }

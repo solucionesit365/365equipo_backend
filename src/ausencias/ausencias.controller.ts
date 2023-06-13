@@ -1,16 +1,32 @@
-import { Body, Controller, Post, UseGuards, Headers, Get } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Post,
+  UseGuards,
+  Headers,
+  Get,
+} from "@nestjs/common";
 import { Ausencias } from "./ausencias.class";
 import { AuthGuard } from "../auth/auth.guard";
+import { SchedulerGuard } from "../scheduler/scheduler.guard";
 
 @Controller("ausencias")
 export class AusenciasController {
-  constructor(private readonly ausenciasInstance: Ausencias) { }
+  constructor(private readonly ausenciasInstance: Ausencias) {}
 
   @Post("nueva")
   // @UseGuards(AuthGuard)
   async addAusencia(
     @Body()
-    { idUsuario, fechaInicio, fechaFinal, tipo, comentario, arrayParciales, nombre },
+    {
+      idUsuario,
+      fechaInicio,
+      fechaFinal,
+      tipo,
+      comentario,
+      arrayParciales,
+      nombre,
+    },
   ) {
     try {
       if (
@@ -63,8 +79,8 @@ export class AusenciasController {
   }
 
   @Get("getAusencias")
-  @UseGuards(AuthGuard)
-  async getAusencias(@Headers("authorization") authHeader: string,) {
+  @UseGuards(SchedulerGuard)
+  async getAusencias(@Headers("authorization") authHeader: string) {
     try {
       const respAusencias = await this.ausenciasInstance.getAusencias();
       console.log(respAusencias);
@@ -73,5 +89,14 @@ export class AusenciasController {
     } catch (error) {
       console.log(error);
     }
+  }
+
+  @Post("sincroAusenciasHit")
+  // @UseGuards()
+  async sincroAusenciasHit() {
+    await this.ausenciasInstance.sincroAusenciasHit();
+    return {
+      ok: true,
+    };
   }
 }

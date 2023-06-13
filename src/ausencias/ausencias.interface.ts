@@ -8,10 +8,15 @@ export interface AusenciaInterface {
   fechaInicio: Date;
   fechaFinal: Date;
   comentario: string;
+  enviado?: boolean;
   arrayParciales: {
     dia: Date;
     horas: number;
   }[];
 }
 
-export type TiposAusencia = "BAJA" | "DIA_PERSONAL" | "VACACIONES" | "HORAS_JUSTIFICADAS";
+export type TiposAusencia =
+  | "BAJA"
+  | "DIA_PERSONAL"
+  | "VACACIONES"
+  | "HORAS_JUSTIFICADAS";
