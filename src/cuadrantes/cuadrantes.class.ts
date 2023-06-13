@@ -45,6 +45,27 @@ export class Cuadrantes {
     return 0;
   }
 
+  async getBolsaInicial(idTrabajador: number, year: number, semana: number) {
+    // Pasar el número de la semana correcta, esto se calcula con la semana anterior, ojo
+    // con la primera semana del año.
+    let semanaAnterior: number = null;
+    const lunes = moment().year(year).week(semana).day(1).startOf("day");
+    lunes.diff(7, "days");
+    
+    const semanaBuscar = lunes.isoWeek();
+    const yearBuscar = lunes.year();
+
+    if (semana === 1) {
+      const lastDayOfYear = moment()
+        .year(year - 1)
+        .month(11)
+        .date(31);
+      semanaAnterior = lastDayOfYear.isoWeek();
+    } else semanaAnterior = semana - 1;
+
+
+  }
+
   async getCuadrantes(
     idTienda: number,
     semana: number,
