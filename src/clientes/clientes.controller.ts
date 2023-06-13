@@ -86,7 +86,7 @@ export class ClientesController {
       if (!idSolicitud) throw Error("Faltan parámetros");
 
       if (await this.clientesInstance.confirmarEmail(idSolicitud)) {
-        return "¡Perfecto! El email se ha verificado correctamente. Ya puedes cerrar esta página y disfrutar de las ventajas del Club 365.";
+        return "Perfecte! L'email s'ha verificat correctament. Ja pots tancar aquesta pàgina i gaudir dels avantatges del Club 365.";
       }
       return "No se ha podido confirmar el correo con este enlace";
       // return {
