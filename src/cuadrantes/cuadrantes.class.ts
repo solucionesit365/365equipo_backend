@@ -55,14 +55,6 @@ export class Cuadrantes {
     const semanaBuscar = lunes.isoWeek();
     const yearBuscar = lunes.year();
 
-    if (semana === 1) {
-      const lastDayOfYear = moment()
-        .year(year - 1)
-        .month(11)
-        .date(31);
-      semanaAnterior = lastDayOfYear.isoWeek();
-    } else semanaAnterior = semana - 1;
-
 
   }
 
