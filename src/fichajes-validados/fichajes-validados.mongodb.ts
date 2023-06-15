@@ -5,7 +5,7 @@ import { ObjectId } from "mongodb";
 
 @Injectable()
 export class FichajesValidadosDatabase {
-  constructor(private readonly mongoDbService: MongoDbService) { }
+  constructor(private readonly mongoDbService: MongoDbService) {}
 
   async insertarFichajeValidado(fichajeValidado: FichajeValidadoDto) {
     fichajeValidado._id = new ObjectId().toString();
@@ -19,14 +19,16 @@ export class FichajesValidadosDatabase {
 
   async getFichajesValidados(idTrabajador: number) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
-    const fichajesCollection = db.collection<FichajeValidadoDto>("fichajesValidados");
+    const fichajesCollection =
+      db.collection<FichajeValidadoDto>("fichajesValidados");
 
     return await fichajesCollection.find({ idTrabajador }).toArray();
   }
 
   async updateFichajesValidados(fichajesValidados: FichajeValidadoDto) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones")
-    const fichajesValidadosCollect = db.collection<FichajeValidadoDto>("fichajesValidados");
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const fichajesValidadosCollect =
+      db.collection<FichajeValidadoDto>("fichajesValidados");
     const id = fichajesValidados._id;
     delete fichajesValidados._id;
     const respFichajes = await fichajesValidadosCollect.updateOne(
@@ -37,44 +39,61 @@ export class FichajesValidadosDatabase {
         $set: fichajesValidados,
       },
     );
-    return respFichajes
+    return respFichajes;
   }
   async getFichajesPagar(idResponsable: number, aPagar: boolean) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones")
-    const fichajesValidadosCollect = db.collection<FichajeValidadoDto>("fichajesValidados");
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const fichajesValidadosCollect =
+      db.collection<FichajeValidadoDto>("fichajesValidados");
 
-    return await fichajesValidadosCollect.find({ idResponsable, aPagar }).toArray()
+    return await fichajesValidadosCollect
+      .find({ idResponsable, aPagar })
+      .toArray();
   }
 
   async getAllFichajesPagar(aPagar: boolean) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones")
-    const fichajesValidadosCollect = db.collection<FichajeValidadoDto>("fichajesValidados");
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const fichajesValidadosCollect =
+      db.collection<FichajeValidadoDto>("fichajesValidados");
 
-    return await fichajesValidadosCollect.find({ aPagar }).toArray()
+    return await fichajesValidadosCollect.find({ aPagar }).toArray();
   }
 
   async getAllIdResponsableFichajesPagar(idResponsable: number) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones")
-    const fichajesIdResponsable = db.collection<FichajeValidadoDto>("fichajesValidados");
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const fichajesIdResponsable =
+      db.collection<FichajeValidadoDto>("fichajesValidados");
 
-    return await fichajesIdResponsable.find({ idResponsable }).toArray()
+    return await fichajesIdResponsable.find({ idResponsable }).toArray();
   }
 
-  
   async getSemanasFichajesPagar(semana: number) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones")
-    const fichajesIdResponsable = db.collection<FichajeValidadoDto>("fichajesValidados");
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const fichajesIdResponsable =
+      db.collection<FichajeValidadoDto>("fichajesValidados");
 
-    return await fichajesIdResponsable.find({ semana }).toArray()
+    return await fichajesIdResponsable.find({ semana }).toArray();
   }
 
   async getAllFichajesValidados() {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
-    const fichajesCollection = db.collection<FichajeValidadoDto>("fichajesValidados");
+    const fichajesCollection =
+      db.collection<FichajeValidadoDto>("fichajesValidados");
 
     return await fichajesCollection.find({}).toArray();
   }
 
+  async getParaCuadrante(year: number, semana: number, idTrabajador: number) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const fichajesCollection =
+      db.collection<FichajeValidadoDto>("fichajesValidados");
 
-
+    return await fichajesCollection
+      .find({
+        year,
+        semana,
+        idTrabajador,
+      })
+      .toArray();
+  }
 }

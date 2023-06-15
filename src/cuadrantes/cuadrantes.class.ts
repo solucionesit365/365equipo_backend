@@ -11,6 +11,7 @@ import {
 } from "../ausencias/ausencias.interface";
 import { Trabajador } from "../trabajadores/trabajadores.class";
 import { TrabajadorSql } from "../trabajadores/trabajadores.interface";
+import { FichajesValidados } from "../fichajes-validados/fichajes-validados.class";
 
 moment.locale("custom", {
   week: {
@@ -25,6 +26,7 @@ export class Cuadrantes {
     private readonly tiendasInstance: Tienda,
     private readonly hitInstance: FacTenaMssql,
     private readonly trabajadoresInstance: Trabajador,
+    private readonly fichajesValidadosInstance: FichajesValidados,
   ) {}
 
   async getCuadrantesIndividual(
@@ -41,21 +43,53 @@ export class Cuadrantes {
     );
   }
 
-  async getBolsaHorasById(idSql: number) {
-    return 0;
+  async getBolsaHorasById(
+    idSql: number,
+    year: number,
+    semana: number,
+    horasContrato: number,
+  ): Promise<number> {
+    const { horasCuadranteTotal, horasMasMenos } = await this.getBolsaInicial(
+      idSql,
+      year,
+      semana,
+    );
+
+    return horasContrato - horasCuadranteTotal + horasMasMenos;
   }
 
   async getBolsaInicial(idTrabajador: number, year: number, semana: number) {
     // Pasar el número de la semana correcta, esto se calcula con la semana anterior, ojo
     // con la primera semana del año.
-    let semanaAnterior: number = null;
+
     const lunes = moment().year(year).week(semana).day(1).startOf("day");
     lunes.diff(7, "days");
-    
+
     const semanaBuscar = lunes.isoWeek();
     const yearBuscar = lunes.year();
 
+    const fichajesValidados =
+      await this.fichajesValidadosInstance.getParaCuadrante(
+        yearBuscar,
+        semanaBuscar,
+        idTrabajador,
+      );
 
+    let horasCuadranteTotal = 0;
+    let horasMasMenos = 0;
+
+    for (let i = 0; i < fichajesValidados.length; i += 1) {
+      horasMasMenos +=
+        fichajesValidados[i].horasExtra +
+        fichajesValidados[i].horasAprendiz +
+        fichajesValidados[i].horasCoordinacion;
+      horasCuadranteTotal += fichajesValidados[i].horasCuadrante;
+    }
+
+    return {
+      horasCuadranteTotal,
+      horasMasMenos,
+    };
   }
 
   async getCuadrantes(
@@ -92,6 +126,7 @@ export class Cuadrantes {
         if (equipoCompleto[i].id === cuadrantes[j].idTrabajador) {
           hayUno = true;
           cuadrantes[j]["horasContrato"] = equipoCompleto[i].horasContrato;
+
           break;
         }
       }
@@ -120,6 +155,9 @@ export class Cuadrantes {
     for (let i = 0; i < cuadrantes.length; i += 1) {
       cuadrantes[i]["bolsaHorasInicial"] = await this.getBolsaHorasById(
         cuadrantes[i].idTrabajador,
+        cuadrantes[i].year,
+        cuadrantes[i].semana,
+        cuadrantes[i].horasContrato,
       );
 
       if (!cuadrantes[i].horasContrato) {
