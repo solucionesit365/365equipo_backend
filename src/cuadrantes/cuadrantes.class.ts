@@ -55,7 +55,7 @@ export class Cuadrantes {
       semana,
     );
 
-    return horasContrato - horasCuadranteTotal + horasMasMenos;
+    return horasContrato - (horasCuadranteTotal + horasMasMenos);
   }
 
   async getBolsaInicial(idTrabajador: number, year: number, semana: number) {
@@ -90,19 +90,6 @@ export class Cuadrantes {
       horasCuadranteTotal,
       horasMasMenos,
     };
-  }
-
-  async getBolsaInicial(idTrabajador: number, year: number, semana: number) {
-    // Pasar el número de la semana correcta, esto se calcula con la semana anterior, ojo
-    // con la primera semana del año.
-    let semanaAnterior: number = null;
-    const lunes = moment().year(year).week(semana).day(1).startOf("day");
-    lunes.diff(7, "days");
-    
-    const semanaBuscar = lunes.isoWeek();
-    const yearBuscar = lunes.year();
-
-
   }
 
   async getCuadrantes(
