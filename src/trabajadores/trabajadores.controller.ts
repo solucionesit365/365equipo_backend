@@ -21,7 +21,7 @@ export class TrabajadoresController {
     private readonly trabajadorInstance: Trabajador,
     private readonly tokenService: TokenService,
     private readonly messagingService: FirebaseMessagingService,
-  ) {}
+  ) { }
 
   @Get()
   async getTrabajadores(@Headers("authorization") authHeader: string) {
@@ -73,6 +73,27 @@ export class TrabajadoresController {
       return { ok: false, message: err.message };
     }
   }
+
+  @Get("getHistoricoContratos")
+  async getHistoricoContratos(
+    @Headers("authorization") authHeader: string,
+    @Query() { dni },
+  ) {
+    try {
+      const token = this.tokenService.extract(authHeader);
+      await this.authInstance.verifyToken(token);
+
+      const resUser = await this.trabajadorInstance.getHistoricosContratos(dni);
+
+      return { ok: true, data: resUser };
+
+    } catch (error) {
+      console.log(error);
+      return { ok: false, message: error.message };
+    }
+  }
+
+
 
   @Get("validarQR")
   async validarQRTrabajador(@Query() { idTrabajador, tokenQR }) {
