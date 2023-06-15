@@ -39,6 +39,45 @@ export class VacacionesController {
     }
   }
 
+  @Get("getVacacionesByTiendas")
+  async getVacacionesByTiendas(@Headers("authorization") authHeader: string,
+    @Query() { idTienda },) {
+    try {
+      const token = this.tokenService.extract(authHeader);
+      await this.authInstance.verifyToken(token);
+      console.log(idTienda);
+
+      const resVacacionesByTienda = await this.vacacionesInstance.getVacacionesByTiendas(Number(idTienda))
+      return {
+        ok: true,
+        data: resVacacionesByTienda
+      };
+    } catch (err) {
+      console.log(err);
+      return { ok: false, message: err.message };
+    }
+  }
+
+  @Get("getVacacionesByEstado")
+  async getVacacionesByEstado(@Headers("authorization") authHeader: string,
+    @Query() { estado },) {
+    try {
+      const token = this.tokenService.extract(authHeader);
+      await this.authInstance.verifyToken(token);
+      console.log(estado);
+
+      const resVacacionesByEstado = await this.vacacionesInstance.getVacacionesByEstado(estado)
+      return {
+        ok: true,
+        data: resVacacionesByEstado
+      };
+    } catch (err) {
+      console.log(err);
+      return { ok: false, message: err.message };
+    }
+  }
+
+
   @Get("sendToHit")
   @UseGuards(SchedulerGuard)
   async pendientesEnvio() {
@@ -244,4 +283,6 @@ export class VacacionesController {
       return { ok: false, message: err.message };
     }
   }
+
+
 }
