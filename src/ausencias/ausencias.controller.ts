@@ -8,11 +8,14 @@ import {
 } from "@nestjs/common";
 import { Ausencias } from "./ausencias.class";
 import { AuthGuard } from "../auth/auth.guard";
-import { SchedulerGuard } from "../scheduler/scheduler.guard";
+import { TokenService } from "../get-token/get-token.service";
+import { AuthService } from "../firebase/auth";
 
 @Controller("ausencias")
 export class AusenciasController {
-  constructor(private readonly ausenciasInstance: Ausencias) {}
+  constructor(private readonly ausenciasInstance: Ausencias,
+    private readonly authInstance: AuthService,
+    private readonly tokenService: TokenService,) { }
 
   @Post("nueva")
   // @UseGuards(AuthGuard)
@@ -79,9 +82,12 @@ export class AusenciasController {
   }
 
   @Get("getAusencias")
-  @UseGuards(SchedulerGuard)
+  @UseGuards(AuthGuard)
   async getAusencias(@Headers("authorization") authHeader: string) {
     try {
+      const token = this.tokenService.extract(authHeader);
+      await this.authInstance.verifyToken(token);
+
       const respAusencias = await this.ausenciasInstance.getAusencias();
       console.log(respAusencias);
       if (respAusencias) return { ok: true, data: respAusencias };
