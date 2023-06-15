@@ -1,16 +1,35 @@
-import { Body, Controller, Post, UseGuards, Headers, Get } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Post,
+  UseGuards,
+  Headers,
+  Get,
+} from "@nestjs/common";
 import { Ausencias } from "./ausencias.class";
 import { AuthGuard } from "../auth/auth.guard";
+import { TokenService } from "../get-token/get-token.service";
+import { AuthService } from "../firebase/auth";
 
 @Controller("ausencias")
 export class AusenciasController {
-  constructor(private readonly ausenciasInstance: Ausencias) { }
+  constructor(private readonly ausenciasInstance: Ausencias,
+    private readonly authInstance: AuthService,
+    private readonly tokenService: TokenService,) { }
 
   @Post("nueva")
   // @UseGuards(AuthGuard)
   async addAusencia(
     @Body()
-    { idUsuario, fechaInicio, fechaFinal, tipo, comentario, arrayParciales, nombre },
+    {
+      idUsuario,
+      fechaInicio,
+      fechaFinal,
+      tipo,
+      comentario,
+      arrayParciales,
+      nombre,
+    },
   ) {
     try {
       if (
@@ -64,8 +83,11 @@ export class AusenciasController {
 
   @Get("getAusencias")
   @UseGuards(AuthGuard)
-  async getAusencias(@Headers("authorization") authHeader: string,) {
+  async getAusencias(@Headers("authorization") authHeader: string) {
     try {
+      const token = this.tokenService.extract(authHeader);
+      await this.authInstance.verifyToken(token);
+
       const respAusencias = await this.ausenciasInstance.getAusencias();
       console.log(respAusencias);
       if (respAusencias) return { ok: true, data: respAusencias };
@@ -73,5 +95,14 @@ export class AusenciasController {
     } catch (error) {
       console.log(error);
     }
+  }
+
+  @Post("sincroAusenciasHit")
+  // @UseGuards()
+  async sincroAusenciasHit() {
+    await this.ausenciasInstance.sincroAusenciasHit();
+    return {
+      ok: true,
+    };
   }
 }

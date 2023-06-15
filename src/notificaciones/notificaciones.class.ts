@@ -5,7 +5,7 @@ import { InAppNotification } from "./notificaciones.interface";
 
 @Injectable()
 export class Notificaciones {
-  constructor(private readonly schNotificaciones: NotificacionsBbdd) {}
+  constructor(private readonly schNotificaciones: NotificacionsBbdd) { }
   async saveToken(uid: string, token: string) {
     return await this.schNotificaciones.saveToken(uid, token);
   }
@@ -44,7 +44,15 @@ export class Notificaciones {
     return await this.schNotificaciones.getInAppNotifications(uid);
   }
 
+  async getAllInAppNotifications(uid: string) {
+    return await this.schNotificaciones.getAllInAppNotifications(uid);
+  }
+
   async marcarComoLeida(id: string, uid: string) {
     return await this.schNotificaciones.marcarComoLeida(id, uid);
+  }
+
+  async marcarComoNoLeida(id: string, uid: string) {
+    return await this.schNotificaciones.marcarComoNoLeida(id, uid);
   }
 }

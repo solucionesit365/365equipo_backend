@@ -23,6 +23,7 @@ CONVERT(nvarchar, tr.finalContrato, 103) as finalContrato,
 tr.idResponsable,
 tr.idTienda,
 (SELECT COUNT(*) FROM trabajadores WHERE idResponsable = tr.id) as coordinadora,
+(SELECT top 1 horasContrato*40/100 FROM historicoContratos WHERE dni = tr.dni)  as horasContrato,
 tr1.nombreApellidos as nombreResponsable,
 ti.nombre as nombreTienda,
 CONVERT(nvarchar, tr.antiguedad, 103) as antiguedad,
@@ -38,10 +39,9 @@ export async function getTrabajadores(todos = false) {
     FROM trabajadores tr
     LEFT JOIN trabajadores tr1 ON tr.idResponsable = tr1.id
     LEFT JOIN tiendas ti ON tr.idTienda = ti.id
-    ${
-      !todos
-        ? "WHERE tr.inicioContrato IS NOT NULL AND tr.finalContrato IS NULL"
-        : ""
+    ${!todos
+      ? "WHERE tr.inicioContrato IS NOT NULL AND tr.finalContrato IS NULL"
+      : ""
     } ORDER BY nombreApellidos
     `;
   const resUsuarios = await recSoluciones("soluciones", sql);
@@ -195,7 +195,38 @@ export async function getSubordinados(uid: string): Promise<
   return [];
 }
 
-export async function getSubordinadosById(id: number): Promise<
+// export async function getSubordinadosById(id: number, conFecha?: moment.Moment): Promise<
+//   {
+//     id: number;
+//     idApp: string;
+//     nombreApellidos: string;
+//     idTienda: number;
+//     antiguedad: string;
+//     inicioContrato: string;
+//     horasContrato: number;
+//   }[]
+// > {
+//   const sql = `
+//     select
+//       tr.id,
+//       tr.idApp,
+//       tr.nombreApellidos,
+//       tr.idTienda,
+//       CONVERT(varchar, tr.antiguedad, 103) as antiguedad,
+//       CONVERT(varchar, tr.inicioContrato, 103) as inicioContrato,
+//       (SELECT top 1 horasContrato*40/100 FROM historicoContratos WHERE dni = tr.dni)  as horasContrato
+//     from trabajadores tr
+//     where idResponsable = @param0
+//   `;
+//   const resSubordinados = await recSoluciones("soluciones", sql, id);
+//   if (resSubordinados.recordset.length > 0) return resSubordinados.recordset;
+//   return [];
+// }
+
+export async function getSubordinadosById(
+  id: number,
+  conFecha?: moment.Moment,
+): Promise<
   {
     id: number;
     idApp: string;
@@ -203,20 +234,32 @@ export async function getSubordinadosById(id: number): Promise<
     idTienda: number;
     antiguedad: string;
     inicioContrato: string;
+    horasContrato: number;
   }[]
 > {
-  const sql = `
+  let sql = `
     select 
-      id, 
-      idApp, 
-      nombreApellidos, 
-      idTienda, 
-      CONVERT(varchar, antiguedad, 103) as antiguedad, 
-      CONVERT(varchar, inicioContrato, 103) as inicioContrato 
-    from trabajadores 
-    where idResponsable = @param0
+      tr.id, 
+      tr.idApp, 
+      tr.nombreApellidos, 
+      tr.idTienda, 
+      CONVERT(varchar, tr.antiguedad, 103) as antiguedad, 
+      CONVERT(varchar, tr.inicioContrato, 103) as inicioContrato,
+      (SELECT top 1 horasContrato*40/100 FROM historicoContratos WHERE dni = tr.dni
   `;
-  const resSubordinados = await recSoluciones("soluciones", sql, id);
+
+  if (conFecha) {
+    sql += ` AND inicioContrato <= @param1 AND (fechaBaja >= @param1 OR fechaBaja IS NULL)`;
+  }
+
+  sql += `) as horasContrato from trabajadores tr where idResponsable = @param0`;
+
+  const resSubordinados = await recSoluciones(
+    "soluciones",
+    sql,
+    id,
+    conFecha ? conFecha.format("YYYY-MM-DD HH:mm:ss") : undefined,
+  );
   if (resSubordinados.recordset.length > 0) return resSubordinados.recordset;
   return [];
 }
@@ -484,37 +527,28 @@ export async function guardarCambiosForm(
   sql += sqlHandleCambios(trabajador, original);
   sql += `
     UPDATE trabajadores SET
-    nombreApellidos = ${
-      trabajador.nombreApellidos ? `'${trabajador.nombreApellidos}'` : "NULL"
+    nombreApellidos = ${trabajador.nombreApellidos ? `'${trabajador.nombreApellidos}'` : "NULL"
     },
-    displayName = ${
-      trabajador.displayName ? `'${trabajador.displayName}'` : "NULL"
+    displayName = ${trabajador.displayName ? `'${trabajador.displayName}'` : "NULL"
     },
     emails = ${trabajador.emails ? `'${trabajador.emails}'` : "NULL"},
     dni = ${trabajador.dni ? `'${trabajador.dni}'` : "NULL"},
     direccion = ${trabajador.direccion ? `'${trabajador.direccion}'` : "NULL"},
     ciudad = ${trabajador.ciudad ? `'${trabajador.ciudad}'` : "NULL"},
     telefonos = ${trabajador.telefonos ? `'${trabajador.telefonos}'` : "NULL"},
-    fechaNacimiento = convert(datetime, ${
-      trabajador.fechaNacimiento ? "'" + trabajador.fechaNacimiento + "'" : null
+    fechaNacimiento = convert(datetime, ${trabajador.fechaNacimiento ? "'" + trabajador.fechaNacimiento + "'" : null
     }, 103),
-    nacionalidad = ${
-      trabajador.nacionalidad ? `'${trabajador.nacionalidad}'` : "NULL"
+    nacionalidad = ${trabajador.nacionalidad ? `'${trabajador.nacionalidad}'` : "NULL"
     },
-    nSeguridadSocial = ${
-      trabajador.nSeguridadSocial ? `'${trabajador.nSeguridadSocial}'` : "NULL"
+    nSeguridadSocial = ${trabajador.nSeguridadSocial ? `'${trabajador.nSeguridadSocial}'` : "NULL"
     },
-    codigoPostal = ${
-      trabajador.codigoPostal ? `'${trabajador.codigoPostal}'` : "NULL"
+    codigoPostal = ${trabajador.codigoPostal ? `'${trabajador.codigoPostal}'` : "NULL"
     },
-    cuentaCorriente = ${
-      trabajador.cuentaCorriente ? `'${trabajador.cuentaCorriente}'` : "NULL"
+    cuentaCorriente = ${trabajador.cuentaCorriente ? `'${trabajador.cuentaCorriente}'` : "NULL"
     },
-    tipoTrabajador = ${
-      trabajador.tipoTrabajador ? `'${trabajador.tipoTrabajador}'` : "NULL"
+    tipoTrabajador = ${trabajador.tipoTrabajador ? `'${trabajador.tipoTrabajador}'` : "NULL"
     },
-    idResponsable = ${
-      trabajador.idResponsable ? `'${trabajador.idResponsable}'` : "NULL"
+    idResponsable = ${trabajador.idResponsable ? `'${trabajador.idResponsable}'` : "NULL"
     },
     idTienda = ${trabajador.idTienda ? `'${trabajador.idTienda}'` : "NULL"},
     coordinadora = ${trabajador.coordinadora ? 1 : 0},
@@ -601,6 +635,7 @@ async function getHistoriaContratos(): Promise<
     finalContrato: string;
     fechaAlta: string;
     fechaAntiguedad: string;
+    fechaBaja: string;
   }[]
 > {
   const sql = `
@@ -610,7 +645,8 @@ async function getHistoriaContratos(): Promise<
     CONVERT(nvarchar, FechaInicioContrato, 103) as inicioContrato, 
     CONVERT(nvarchar, FechaFinalContrato, 103) as finalContrato, 
     CONVERT(nvarchar, FechaAlta, 103) as fechaAlta, 
-    CONVERT(nvarchar, FechaAntiguedad, 103) as fechaAntiguedad  
+    CONVERT(nvarchar, FechaAntiguedad, 103) as fechaAntiguedad,
+    CONVERT(nvarchar, FechaBaja, 103) as fechaBaja
   FROM silema_ts.sage.dbo.EmpleadoNomina`;
 
   const resHisContratos = await recHit("Fac_Tena", sql);
@@ -647,14 +683,16 @@ export async function copiarHistoriaContratosHitSoluciones() {
 
     // Construye una consulta de inserción para este lote
     let insertQuery =
-      "INSERT INTO historicoContratos (horasContrato, dni, inicioContrato, finalContrato, fechaAlta, fechaAntiguedad) VALUES ";
+      "INSERT INTO historicoContratos (horasContrato, dni, inicioContrato, finalContrato, fechaAlta, fechaAntiguedad, fechaBaja) VALUES ";
 
     const rows = batch.map((row) => {
       return `('${row.horasContrato}', '${row.dni}', ${convertToDate(
         row.inicioContrato,
       )}, ${convertToDate(row.finalContrato)}, ${convertToDate(
         row.fechaAlta,
-      )}, ${convertToDate(row.fechaAntiguedad)})`;
+      )}, ${convertToDate(row.fechaAntiguedad)}, ${convertToDate(
+        row.fechaBaja,
+      )})`;
     });
 
     insertQuery += rows.join(", ");
@@ -670,4 +708,14 @@ export async function copiarHistoriaContratosHitSoluciones() {
   }
 
   return true;
+}
+export async function getHistoricoContratos(dni: string) {
+  const sql = `select * from historicoContratos where dni = @param0`
+
+  const resUser = await recSoluciones("soluciones", sql, dni);
+
+  if (resUser.recordset.length > 0)
+    return resUser.recordset;
+  return null;
+
 }

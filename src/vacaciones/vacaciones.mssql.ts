@@ -320,3 +320,51 @@ export async function nuevaSolicitudVacaciones(solicitud: SolicitudVacaciones) {
 
   return true;
 }
+
+export async function getVacacionesByTiendas(idTienda: number) {
+  const sql = `  SELECT 
+  so.idBeneficiario,
+  so.dias, 
+  CONVERT(nvarchar, so.fechaInicio, 103) as fechaInicio,
+  CONVERT(nvarchar, so.fechaFinal, 103) as fechaFinal,
+  CONVERT(nvarchar, so.fechaIncorporacion, 103) as fechaIncorporacion,
+  CONVERT(nvarchar, so.fechaCreacion, 103) as fechaCreacion,
+  so.estado,
+  so.observaciones,
+  so.idSolicitud,
+  (select idResponsable from trabajadores where id = so.idBeneficiario) as idResponsable,
+  (select idTienda from trabajadores where id = so.idBeneficiario) as idTienda,
+  (select nombreApellidos from trabajadores where id = so.idBeneficiario) as nombreApellidos,
+  (select nombre from tiendas where id = (select idTienda from trabajadores where id = so.idBeneficiario)) as nombreTienda,
+  (select nombreApellidos from trabajadores where id = (select idResponsable from trabajadores where id = so.idBeneficiario)) as nombreResponsable,
+ trabajadores.idTienda
+FROM solicitudVacaciones so INNER JOIN trabajadores ON so.idBeneficiario = trabajadores.id where trabajadores.idTienda =@param0`;
+
+  const resVacacionesByTienda = await recSoluciones("soluciones", sql, idTienda);
+  if (resVacacionesByTienda.recordset.length > 0) return resVacacionesByTienda.recordset;
+  return [];
+}
+export async function getVacacionesByEstado(estado: string) {
+  const sql = `  SELECT 
+  so.idBeneficiario,
+  so.dias, 
+  CONVERT(nvarchar, so.fechaInicio, 103) as fechaInicio,
+  CONVERT(nvarchar, so.fechaFinal, 103) as fechaFinal,
+  CONVERT(nvarchar, so.fechaIncorporacion, 103) as fechaIncorporacion,
+  CONVERT(nvarchar, so.fechaCreacion, 103) as fechaCreacion,
+  so.estado,
+  so.observaciones,
+  so.idSolicitud,
+  (select idResponsable from trabajadores where id = so.idBeneficiario) as idResponsable,
+  (select idTienda from trabajadores where id = so.idBeneficiario) as idTienda,
+  (select nombreApellidos from trabajadores where id = so.idBeneficiario) as nombreApellidos,
+  (select nombre from tiendas where id = (select idTienda from trabajadores where id = so.idBeneficiario)) as nombreTienda,
+  (select nombreApellidos from trabajadores where id = (select idResponsable from trabajadores where id = so.idBeneficiario)) as nombreResponsable
+FROM solicitudVacaciones so INNER JOIN trabajadores ON so.idBeneficiario = trabajadores.id where so.estado =@param0`;
+
+  const resVacacionesByEstado = await recSoluciones("soluciones", sql, estado);
+  if (resVacacionesByEstado.recordset.length > 0) return resVacacionesByEstado.recordset;
+  return [];
+}
+
+

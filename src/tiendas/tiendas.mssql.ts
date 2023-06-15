@@ -2,7 +2,8 @@ import { recHit, recSoluciones, recSolucionesClassic } from "../bbdd/mssql";
 import { Tienda } from "./tiendas.dto";
 
 export async function getTiendas(): Promise<Tienda[]> {
-  const sql = "SELECT * FROM tiendas";
+  const sql =
+    "SELECT id, LOWER(nombre) as nombre, direccion, idExterno FROM tiendas ORDER BY nombre";
   const resTiendas = await recSoluciones("soluciones", sql);
 
   if (resTiendas.recordset.length > 0) return resTiendas.recordset;

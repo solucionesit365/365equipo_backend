@@ -177,4 +177,13 @@ export class Vacaciones {
 
     return true;
   }
+
+  async getVacacionesByTiendas(idTienda: number) {
+    return await schVacaciones.getVacacionesByTiendas(idTienda);
+  }
+
+  async getVacacionesByEstado(estado: string) {
+    return await schVacaciones.getVacacionesByEstado(estado);
+  }
+
 }

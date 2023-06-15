@@ -5,7 +5,7 @@ import { ObjectId } from "mongodb";
 
 @Injectable()
 export class NotificacionsBbdd {
-  constructor(private readonly mongoDbService: MongoDbService) {}
+  constructor(private readonly mongoDbService: MongoDbService) { }
 
   async saveToken(uid: string, token: string) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
@@ -54,6 +54,14 @@ export class NotificacionsBbdd {
     return await inAppNotifications.find({ uid, leido: false }).toArray();
   }
 
+  async getAllInAppNotifications(uid: string) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const inAppNotifications =
+      db.collection<InAppNotification>("inAppNotifications");
+
+    return await inAppNotifications.find({ uid, leido: true }).toArray();
+  }
+
   async marcarComoLeida(id: string, uid: string) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const inAppNotifications =
@@ -72,5 +80,25 @@ export class NotificacionsBbdd {
     if (updateResult.acknowledged && updateResult.modifiedCount > 0)
       return true;
     throw Error("No se ha podido marcar como leída la notificación");
+  }
+
+  async marcarComoNoLeida(id: string, uid: string) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const inAppNotifications =
+      db.collection<InAppNotification>("inAppNotifications");
+
+    const updateResult = await inAppNotifications.updateOne(
+      {
+        _id: new ObjectId(id),
+        uid,
+      },
+      {
+        $set: { leido: false },
+      },
+    );
+
+    if (updateResult.acknowledged && updateResult.modifiedCount > 0)
+      return true;
+    throw Error("No se ha podido marcar como no leída la notificación");
   }
 }
