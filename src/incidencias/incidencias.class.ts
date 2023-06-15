@@ -16,6 +16,23 @@ export class Incidencia {
         throw Error("No se ha podido insertar la incidencia");
 
     }
+    async getIncidencias() {
+        return await this.schIncidencias.getIncidencias();
+    }
 
+    async getIncidenciasByEstado(estado: string) {
+        return await this.schIncidencias.getIncidenciasByEstado(estado);
+    }
 
+    async getIncidenciasByCategoria(categoria: string) {
+        return await this.schIncidencias.getIncidenciasByCategoria(categoria);
+    }
+
+    async getIncidenciasByPrioridad(prioridad: string) {
+        return await this.schIncidencias.getIncidenciasByPrioridad(prioridad);
+    }
+
+    // async updateIncidenciaEstado(uid: string, estado: string) {
+    //     return await this.schIncidencias.updateIncidenciaEstado(uid, estado);
+    // }
 }

@@ -7,6 +7,7 @@ export interface Incidencias {
     estado: string;
     fechaCreacion: Date;
     multimedia: string;
+    prioridad: string;
     mensajes: {
         fechaResp: Date,
         mensaje: string,
