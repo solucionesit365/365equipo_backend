@@ -1,5 +1,7 @@
+import { ObjectId } from "mongodb";
+
 export interface Incidencias {
-    _id: string;
+    _id: ObjectId;
     autorizoLLamada: boolean;
     categoria: string;
     descripcion: string;

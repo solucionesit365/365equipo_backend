@@ -1,12 +1,15 @@
 import { Injectable } from "@nestjs/common";
 import { MongoDbService } from "../bbdd/mongodb";
 import { Incidencias } from "./incidencias.interface";
+import { ObjectId } from "mongodb";
+import { toArray } from "rxjs";
 
 @Injectable()
 export class IncidenciasClass {
     constructor(private readonly mongoDbService: MongoDbService) { }
 
     async nuevaIncidencia(incidencias: Incidencias) {
+        incidencias._id = new ObjectId();
         const db = (await this.mongoDbService.getConexion()).db("soluciones");
         const incidenciasCollection = db.collection<Incidencias>(
             "incidencias",
@@ -21,7 +24,6 @@ export class IncidenciasClass {
     async getIncidencias() {
         const db = (await this.mongoDbService.getConexion()).db("soluciones");
         const incidenciasCollection = db.collection<Incidencias>("incidencias");
-
         const respIncidencias = await incidenciasCollection.find({}).toArray();
 
         return respIncidencias;
@@ -50,22 +52,57 @@ export class IncidenciasClass {
         return respIncidencias;
     }
 
-    //cambiar estado
-    // async updateIncidenciaEstado(uid: string, estado: string) {
-    //     const db = (await this.mongoDbService.getConexion()).db("soluciones")
-    //     const incidenciasCollection = db.collection<Incidencias>("incidencias");
-    //     const respIncidencias = await incidenciasCollection.updateOne(
-    //         {
-    //             uid
-    //         },
-    //         {
-    //             $set: estado ,
-    //         },
-    //     );
 
-    //     if (respIncidencias.acknowledged && respIncidencias.modifiedCount > 0)
-    //         return true;
-    //     throw Error("No se ha podido marcar como no leída la notificación");
-    // }
+
+    // cambiar estado
+    async updateIncidenciaEstado(incidencias: Incidencias) {
+        const db = (await this.mongoDbService.getConexion()).db("soluciones")
+        const incidenciasCollection = db.collection<Incidencias>("incidencias");
+
+        const respIncidencias = await incidenciasCollection.updateOne(
+            {
+                _id: new ObjectId(incidencias._id),
+            },
+            {
+                $set: {
+                    estado: incidencias.estado,
+                }
+            },
+        );
+
+        if (respIncidencias.acknowledged && respIncidencias.modifiedCount > 0)
+            return true;
+        throw Error("No se ha podido modificar el estado");
+    }
+
+
+    async updateIncidenciaMensajes(incidencias: Incidencias) {
+        const db = (await this.mongoDbService.getConexion()).db("soluciones")
+        const incidenciasCollection = db.collection<Incidencias>("incidencias");
+
+
+        const respIncidencias = await incidenciasCollection.updateOne(
+            {
+                _id: new ObjectId(incidencias._id),
+            },
+            {
+                $set: {
+                    mensajes: incidencias.mensajes,
+                }
+            },
+        );
+
+        if (respIncidencias.acknowledged && respIncidencias.modifiedCount > 0)
+            return true;
+        throw Error("No se ha podido mandar el mensaje");
+    }
+
+    async getIncidenciasByUid(uid: string) {
+        const db = (await this.mongoDbService.getConexion()).db("soluciones")
+        const incidenciasCollection = db.collection<Incidencias>("incidencias");
+        const respIncidencias = await incidenciasCollection.find({ uid }).toArray();
+        return respIncidencias
+
+    }
 
 }

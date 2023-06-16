@@ -32,7 +32,15 @@ export class Incidencia {
         return await this.schIncidencias.getIncidenciasByPrioridad(prioridad);
     }
 
-    // async updateIncidenciaEstado(uid: string, estado: string) {
-    //     return await this.schIncidencias.updateIncidenciaEstado(uid, estado);
-    // }
+    async updateIncidenciaEstado(incidencias: Incidencias) {
+        return await this.schIncidencias.updateIncidenciaEstado(incidencias);
+    }
+
+    async updateIncidenciaMensajes(incidencias: Incidencias) {
+        return await this.schIncidencias.updateIncidenciaMensajes(incidencias);
+    }
+
+    async getIncidenciasByUid(uid: string) {
+        return await this.schIncidencias.getIncidenciasByUid(uid);
+    }
 }

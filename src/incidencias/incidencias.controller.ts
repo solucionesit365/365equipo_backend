@@ -103,8 +103,7 @@ export class IncidenciasController {
             const token = this.tokenService.extract(authHeader);
             await this.authInstance.verifyToken(token);
             const respIncidencias = await this.incidenciaInstance.getIncidenciasByPrioridad(prioridad)
-            console.log(respIncidencias);
-            console.log(prioridad);
+
             return {
                 ok: true,
                 data: respIncidencias,
@@ -115,27 +114,70 @@ export class IncidenciasController {
         }
     }
 
-    // @Post("updateIncidenciaEstado")
-    // async updateIncidenciaEstado(
-    //     @Headers("authorization") authHeader: string,
-    //     @Body("estado") estado,
-    // ) {
-    //     try {
-    //         const token = this.tokenService.extract(authHeader);
-    //         await this.authInstance.verifyToken(token);
-    //         const usuario = await this.authInstance.getUserWithToken(token);
-    //         return {
-    //             ok: true,
-    //             data: await this.incidenciaInstance.updateIncidenciaEstado(
-    //                 usuario.uid,
-    //                 estado
-    //             ),
-    //         };
-    //     } catch (err) {
-    //         console.log(err);
-    //         return { ok: false, message: err.message };
-    //     }
-    // }
+    @Post("updateIncidenciaEstado")
+    async updateIncidenciaEstado(
+        @Headers("authorization") authHeader: string,
+        @Body() incidencia: Incidencias
+    ) {
+        try {
+            const token = this.tokenService.extract(authHeader);
+            await this.authInstance.verifyToken(token);
+            return {
+                ok: true,
+                data: await this.incidenciaInstance.updateIncidenciaEstado(
+                    incidencia
+                ),
+            };
+        } catch (err) {
+            console.log(err);
+            return { ok: false, message: err.message };
+        }
+    }
+
+    // updateIncidenciaMensajes
+
+    @Post("updateIncidenciaMensajes")
+    async updateIncidenciaMensajes(
+        @Headers("authorization") authHeader: string,
+        @Body() incidencia: Incidencias
+    ) {
+        try {
+            const token = this.tokenService.extract(authHeader);
+            await this.authInstance.verifyToken(token);
+            return {
+                ok: true,
+                data: await this.incidenciaInstance.updateIncidenciaMensajes(
+                    incidencia
+                ),
+            };
+        } catch (err) {
+            console.log(err);
+            return { ok: false, message: err.message };
+        }
+    }
+
+    @Get("getIncidenciasByUid")
+    @UseGuards(AuthGuard)
+    async getIncidenciasByUid(
+        @Headers("authorization") authHeader: string,
+        @Query() { uid }: { uid: string },
+    ) {
+        try {
+            const token = this.tokenService.extract(authHeader);
+            await this.authInstance.verifyToken(token);
+            const respIncidencias = await this.incidenciaInstance.getIncidenciasByUid(uid)
+
+            return {
+                ok: true,
+                data: respIncidencias,
+            };
+        } catch (err) {
+            console.log(err);
+            return { ok: false, message: err.message };
+        }
+    }
+
+
 
 
 }
