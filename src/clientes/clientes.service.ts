@@ -122,13 +122,20 @@ export class ClientesService {
       idExterna,
       toEmail,
     );
-    await this.generarStringIdentificacion(idExterna, toEmail);
+
     return idExterna;
   }
 
-  async generarStringIdentificacion(idExterna: string, toEmail: string) {
-    // const codigoString = this.cryptoInstance.cifrarParaHit(idCliente);
-    await this.tarjetaClienteInstance.sendQrCodeEmail(idExterna, toEmail);
+  async enviarStringIdentificacion(
+    idExterna: string,
+    toEmail: string,
+    walletUrl: string,
+  ) {
+    await this.tarjetaClienteInstance.sendQrCodeEmail(
+      idExterna,
+      toEmail,
+      walletUrl,
+    );
   }
 
   async confirmarEmail(idSolicitud: SolicitudCliente["_id"]) {
@@ -145,10 +152,16 @@ export class ClientesService {
       solicitud.codigoPostal,
       solicitud.email,
     );
+    const walletUrl = await this.createPassObject(idExterna, solicitud.nombre);
+    await this.enviarStringIdentificacion(
+      idExterna,
+      solicitud.email,
+      walletUrl,
+    );
 
     if (idExterna) {
       if (await this.schSolicitudesCliente.borrarSolicitud(solicitud._id))
-        return this.createPassObject(idExterna, solicitud.nombre);
+        return walletUrl;
     }
     throw Error("No se ha podido registrar el cliente");
   }

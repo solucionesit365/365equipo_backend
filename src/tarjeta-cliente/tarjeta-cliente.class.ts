@@ -4,7 +4,7 @@ import { EmailClass } from "../email/email.class";
 
 @Injectable()
 export class TarjetaCliente {
-  constructor(private readonly emailInstance: EmailClass) { }
+  constructor(private readonly emailInstance: EmailClass) {}
 
   private async createQrCode(data: string) {
     try {
@@ -16,7 +16,7 @@ export class TarjetaCliente {
     }
   }
 
-  async sendQrCodeEmail(codigo: string, toEmail: string) {
+  async sendQrCodeEmail(codigo: string, toEmail: string, walletUrl: string) {
     let url = await this.createQrCode(codigo);
 
     if (url) {
@@ -110,6 +110,14 @@ export class TarjetaCliente {
                   src="cid:123456"
                 />
         
+                <p style="text-align: center;">
+                <a href="${walletUrl}">
+                <img
+                  src="https://365equipo.com/ca_add_to_google_wallet_add-wallet-badge.svg"
+                  alt="Añadir a Wallet"
+                />
+              </a>
+                </p>
                 <p id="team">
                  Gràcies per formar part del #Club365<br />
                   Equip 365 Obrador
