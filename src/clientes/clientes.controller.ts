@@ -91,14 +91,10 @@ export class ClientesController {
       if (!idSolicitud) throw Error("Faltan parámetros");
 
       const walletUrl = await this.clientesInstance.confirmarEmail(idSolicitud);
-      if (walletUrl) {
-        console.log("123987456");
-        throw Error(
-          "Error que buscaba",
-        ); //return res.render("verificado", { walletUrl });
-      }
+      if (walletUrl) return res.render("verificado", { walletUrl });
       else throw Error("Error de verificación de email");
     } catch (err) {
+      console.log(err);
       return res.render("falloVerificado");
     }
   }
