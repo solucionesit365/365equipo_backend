@@ -170,18 +170,21 @@ export class ClientesService {
     // TODO: Create a new Generic pass for the user
     const issuerId = "3388000000022232953";
     const classId = `${issuerId}.tarjetas-cliente`;
-    const credentials = JSON.parse(process.env.API_EZE_CREDENTIALS);
+    const credentials =
+      process.env.NODE_ENV === "development"
+        ? require(process.env.GOOGLE_APPLICATION_CREDENTIALS)
+        : JSON.parse(process.env.API_EZE_CREDENTIALS);
 
     let objectId = `${issuerId}.${idTarjetaCliente}`;
 
     let genericObject = {
-      id: objectId,
+      id: `${objectId}`,
       classId: classId,
       genericType: "GENERIC_TYPE_UNSPECIFIED",
       hexBackgroundColor: "#4285f4",
       logo: {
         sourceUri: {
-          uri: "https://365equipo.com/favicon.png",
+          uri: "https://storage.googleapis.com/wallet-lab-tools-codelab-artifacts-public/pass_google_logo.jpg",
         },
       },
       cardTitle: {
@@ -208,7 +211,7 @@ export class ClientesService {
       },
       heroImage: {
         sourceUri: {
-          uri: "https://365equipo.com/logoQrWallet.png",
+          uri: "https://storage.googleapis.com/wallet-lab-tools-codelab-artifacts-public/google-io-hero-demo-only.jpg",
         },
       },
     };

@@ -98,4 +98,17 @@ export class ClientesController {
       return res.render("falloVerificado");
     }
   }
+
+  @Get("test")
+  async testClientQr() {
+    try {
+      return await this.clientesInstance.createPassObject(
+        "QRCLIENT",
+        "Ezequiel C.O",
+      );
+    } catch (err) {
+      console.log(err);
+      return { ok: false, message: err.message };
+    }
+  }
 }
