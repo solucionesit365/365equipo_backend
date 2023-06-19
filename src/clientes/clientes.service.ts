@@ -13,7 +13,6 @@ import * as jwt from "jsonwebtoken";
 export class ClientesService {
   constructor(
     private readonly schSolicitudesCliente: SolicitudNuevoClienteBbdd,
-    private readonly cryptoInstance: CryptoClass,
     private readonly emailInstance: EmailClass,
     private readonly tarjetaClienteInstance: TarjetaCliente,
   ) {}

@@ -92,8 +92,7 @@ export class ClientesController {
 
       const walletUrl = await this.clientesInstance.confirmarEmail(idSolicitud);
       if (walletUrl) return res.render("verificado", { walletUrl });
-
-      throw Error("Error de verificación de email");
+      else throw Error("Error de verificación de email");
     } catch (err) {
       return res.render("falloVerificado");
     }
