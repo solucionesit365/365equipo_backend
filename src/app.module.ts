@@ -41,7 +41,6 @@ import { EmailClass } from "./email/email.class";
 import { AuthService } from "./firebase/auth";
 import { PermisosController } from "./permisos/permisos.controller";
 import { PermisosClass } from "./permisos/permisos.class";
-import { TarjetaClienteController } from "./tarjeta-cliente/tarjeta-cliente.controller";
 import { TarjetaCliente } from "./tarjeta-cliente/tarjeta-cliente.class";
 import { CryptoController } from "./crypto/crypto.controller";
 import { CryptoClass } from "./crypto/crypto.class";
@@ -69,7 +68,6 @@ import { SolicitudNuevoClienteBbdd } from "./clientes/clientes.mongodb";
     NotificacionesController,
     FichajesValidadosController,
     PermisosController,
-    TarjetaClienteController,
     CryptoController,
     ClientesController,
   ],

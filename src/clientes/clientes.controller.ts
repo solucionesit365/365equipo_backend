@@ -7,6 +7,7 @@ import {
   ValidationPipe,
   Get,
   Query,
+  Res,
 } from "@nestjs/common";
 // import { NewClientRequest } from "./clientes.interface";
 import {
@@ -18,6 +19,7 @@ import {
   IsOptional,
 } from "class-validator";
 import { ClientesService } from "./clientes.service";
+import { Response } from "express";
 
 class NewClientRequest {
   @IsEmail()
@@ -81,12 +83,16 @@ export class ClientesController {
   }
 
   @Get("confirmarEmail")
-  async confirmarEmail(@Query("idSolicitud") idSolicitud: string) {
+  async confirmarEmail(
+    @Query("idSolicitud") idSolicitud: string,
+    @Res() res: Response,
+  ) {
     try {
       if (!idSolicitud) throw Error("Faltan parámetros");
 
-      if (await this.clientesInstance.confirmarEmail(idSolicitud)) {
-        return "Perfecte! L'email s'ha verificat correctament. Ja pots tancar aquesta pàgina i gaudir dels avantatges del Club 365.";
+      const walletUrl = await this.clientesInstance.confirmarEmail(idSolicitud);
+      if (walletUrl) {
+        return res.render("verificado", { walletUrl });
       }
       return "No se ha podido confirmar el correo con este enlace";
       // return {
@@ -94,8 +100,7 @@ export class ClientesController {
       //   data: await this.clientesInstance.confirmarEmail(idSolicitud),
       // };
     } catch (err) {
-      console.log(err);
-      return { ok: false, message: err.message };
+      return res.render("falloVerificado");
     }
   }
 }

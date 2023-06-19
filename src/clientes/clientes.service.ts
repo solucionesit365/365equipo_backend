@@ -7,6 +7,7 @@ import { ObjectId } from "mongodb";
 import { EmailClass } from "../email/email.class";
 import { CryptoClass } from "../crypto/crypto.class";
 import { TarjetaCliente } from "../tarjeta-cliente/tarjeta-cliente.class";
+import * as jwt from "jsonwebtoken";
 
 @Injectable()
 export class ClientesService {
@@ -126,7 +127,7 @@ export class ClientesService {
       toEmail,
     );
     await this.generarStringIdentificacion(idExterna, toEmail);
-    return true;
+    return idExterna;
   }
 
   async generarStringIdentificacion(idExterna: string, toEmail: string) {
@@ -141,18 +142,86 @@ export class ClientesService {
 
     if (!solicitud) throw Error("No existe esta solicitud o ha caducado");
 
-    if (
-      await this.crearCliente(
-        solicitud.nombre,
-        solicitud.apellidos,
-        solicitud.telefono,
-        solicitud.codigoPostal,
-        solicitud.email,
-      )
-    ) {
+    const idExterna = await this.crearCliente(
+      solicitud.nombre,
+      solicitud.apellidos,
+      solicitud.telefono,
+      solicitud.codigoPostal,
+      solicitud.email,
+    );
+
+    if (idExterna) {
       if (await this.schSolicitudesCliente.borrarSolicitud(solicitud._id))
-        return true;
+        return this.createPassObject(idExterna);
     }
     throw Error("No se ha podido registrar el cliente");
+  }
+
+  async createPassObject(idTarjetaCliente: string) {
+    // TODO: Create a new Generic pass for the user
+    const issuerId = "3388000000022232953";
+    const classId = `${issuerId}.tarjetas-cliente`;
+    const credentials = require(process.env.GOOGLE_APPLICATION_CREDENTIALS);
+
+    let objectId = `${issuerId}.${idTarjetaCliente}`;
+
+    const nombreCliente = "Ezequiel Carissimo Oms";
+
+    let genericObject = {
+      id: `${objectId}`,
+      classId: classId,
+      genericType: "GENERIC_TYPE_UNSPECIFIED",
+      hexBackgroundColor: "#4285f4",
+      logo: {
+        sourceUri: {
+          uri: "https://365equipo.com/favicon.png",
+        },
+      },
+      cardTitle: {
+        defaultValue: {
+          language: "ca",
+          value: "365 Obrador",
+        },
+      },
+      subheader: {
+        defaultValue: {
+          language: "ca",
+          value: "Nom client",
+        },
+      },
+      header: {
+        defaultValue: {
+          language: "ca",
+          value: nombreCliente,
+        },
+      },
+      barcode: {
+        type: "QR_CODE",
+        value: `${objectId}`,
+      },
+      heroImage: {
+        sourceUri: {
+          uri: "https://365equipo.com/logoQrWallet.jpg",
+        },
+      },
+    };
+
+    // TODO: Create the signed JWT and link
+    const claims = {
+      iss: credentials.client_email,
+      aud: "google",
+      origins: [],
+      typ: "savetowallet",
+      payload: {
+        genericObjects: [genericObject],
+      },
+    };
+
+    const token = jwt.sign(claims, credentials.private_key, {
+      algorithm: "RS256",
+    });
+    const saveUrl = `https://pay.google.com/gp/v/save/${token}`;
+
+    return saveUrl;
   }
 }
