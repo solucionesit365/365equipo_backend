@@ -148,20 +148,18 @@ export class ClientesService {
 
     if (idExterna) {
       if (await this.schSolicitudesCliente.borrarSolicitud(solicitud._id))
-        return this.createPassObject(idExterna);
+        return this.createPassObject(idExterna, solicitud.nombre);
     }
     throw Error("No se ha podido registrar el cliente");
   }
 
-  async createPassObject(idTarjetaCliente: string) {
+  async createPassObject(idTarjetaCliente: string, nombre: string) {
     // TODO: Create a new Generic pass for the user
     const issuerId = "3388000000022232953";
     const classId = `${issuerId}.tarjetas-cliente`;
     const credentials = JSON.parse(process.env.API_EZE_CREDENTIALS);
 
     let objectId = `${issuerId}.${idTarjetaCliente}`;
-
-    const nombreCliente = "Ezequiel Carissimo Oms";
 
     let genericObject = {
       id: `${objectId}`,
@@ -188,7 +186,7 @@ export class ClientesService {
       header: {
         defaultValue: {
           language: "ca",
-          value: nombreCliente,
+          value: nombre,
         },
       },
       barcode: {
