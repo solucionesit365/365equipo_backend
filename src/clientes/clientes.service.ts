@@ -5,7 +5,6 @@ import { SolicitudNuevoClienteBbdd } from "./clientes.mongodb";
 import { SolicitudCliente } from "./clientes.interface";
 import { ObjectId } from "mongodb";
 import { EmailClass } from "../email/email.class";
-import { CryptoClass } from "../crypto/crypto.class";
 import { TarjetaCliente } from "../tarjeta-cliente/tarjeta-cliente.class";
 import * as jwt from "jsonwebtoken";
 
@@ -25,8 +24,6 @@ export class ClientesService {
     telefono?: string,
     codigoPostal?: string,
   ) {
-    console.log(nuevoCliente);
-
     if (nuevoCliente) {
       const solicitud: SolicitudCliente = {
         _id: new ObjectId().toString(),
@@ -160,7 +157,7 @@ export class ClientesService {
     // TODO: Create a new Generic pass for the user
     const issuerId = "3388000000022232953";
     const classId = `${issuerId}.tarjetas-cliente`;
-    const credentials = require(process.env.API_EZE_CREDENTIALS);
+    const credentials = JSON.parse(process.env.API_EZE_CREDENTIALS);
 
     let objectId = `${issuerId}.${idTarjetaCliente}`;
 
