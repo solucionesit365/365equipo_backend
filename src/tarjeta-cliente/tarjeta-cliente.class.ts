@@ -113,7 +113,7 @@ export class TarjetaCliente {
                 <p style="text-align: center;">
                 <a href="${walletUrl}">
                 <img
-                  src="https://365equipo.com/ca_add_to_google_wallet_add-wallet-badge.svg"
+                  src="https://365equipo.com/ca_add_to_google_wallet_add-wallet-badge.png"
                   alt="Añadir a Wallet"
                 />
               </a>

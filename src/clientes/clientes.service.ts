@@ -175,7 +175,7 @@ export class ClientesService {
     let objectId = `${issuerId}.${idTarjetaCliente}`;
 
     let genericObject = {
-      id: `${objectId}`,
+      id: objectId,
       classId: classId,
       genericType: "GENERIC_TYPE_UNSPECIFIED",
       hexBackgroundColor: "#4285f4",
@@ -208,7 +208,7 @@ export class ClientesService {
       },
       heroImage: {
         sourceUri: {
-          uri: "https://365equipo.com/logoQrWallet.jpg",
+          uri: "https://365equipo.com/logoQrWallet.png",
         },
       },
     };
