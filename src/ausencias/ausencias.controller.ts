@@ -13,7 +13,8 @@ import { AuthService } from "../firebase/auth";
 
 @Controller("ausencias")
 export class AusenciasController {
-  constructor(private readonly ausenciasInstance: Ausencias,
+  constructor(
+    private readonly ausenciasInstance: Ausencias,
     private readonly authInstance: AuthService,
     private readonly tokenService: TokenService,) { }
 
@@ -45,7 +46,6 @@ export class AusenciasController {
         const final = new Date(fechaFinal);
 
         arrayParciales.map((fechaIso: string) => new Date(fechaIso));
-        console.log(arrayParciales);
 
         return {
           ok: true,
@@ -66,15 +66,21 @@ export class AusenciasController {
     }
   }
 
-  @Post("borrar")
-  async borrarAusencia(@Body() { idAusencia }) {
+  @Post("deleteAusencia")
+  async deleteAusencia(
+    @Headers("authorization") authHeader: string,
+    @Body() { idAusencia }) {
     try {
-      if (typeof idAusencia === "string") {
-        const res = await this.ausenciasInstance.borrarAusencia(idAusencia);
+      const token = this.tokenService.extract(authHeader);
+      await this.authInstance.verifyToken(token);
+      const respAusencias = await this.ausenciasInstance.deleteAusencia(idAusencia);
+      if (respAusencias)
+        return {
+          ok: true,
+          data: respAusencias
+        };
 
-        if (res) return { ok: true, data: true };
-        else throw Error("No se ha podido borrar esta ausencia");
-      } else throw Error("Parámetros incorrectos");
+      throw Error("No se ha podido borrar la ausencia");
     } catch (err) {
       console.log(err);
       return { ok: false, message: err.message };
@@ -89,7 +95,6 @@ export class AusenciasController {
       await this.authInstance.verifyToken(token);
 
       const respAusencias = await this.ausenciasInstance.getAusencias();
-      console.log(respAusencias);
       if (respAusencias) return { ok: true, data: respAusencias };
       else throw Error("No se ha encontrado ninguna ausencia");
     } catch (error) {
