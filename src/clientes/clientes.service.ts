@@ -160,7 +160,7 @@ export class ClientesService {
     // TODO: Create a new Generic pass for the user
     const issuerId = "3388000000022232953";
     const classId = `${issuerId}.tarjetas-cliente`;
-    const credentials = require(process.env.GOOGLE_APPLICATION_CREDENTIALS);
+    const credentials = require(process.env.API_EZE_CREDENTIALS);
 
     let objectId = `${issuerId}.${idTarjetaCliente}`;
 
