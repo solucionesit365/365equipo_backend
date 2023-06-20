@@ -14,7 +14,7 @@ export class Trabajador {
     private readonly permisosInstance: PermisosClass,
     @Inject(forwardRef(() => EmailClass))
     private readonly emailInstance: EmailClass,
-  ) { }
+  ) {}
 
   async getTrabajadorByAppId(uid: string) {
     const resUser = await schTrabajadores.getTrabajadorByAppId(uid);
@@ -274,5 +274,9 @@ export class Trabajador {
     const resUser = await schTrabajadores.getHistoricoContratos(dni);
     if (resUser) return resUser;
     throw Error("No se ha podido obtener la información del usuario");
+  }
+
+  async getHorasContratoById(idSql: number, fecha: moment.Moment) {
+    return await schTrabajadores.getHorasContrato(idSql, fecha);
   }
 }

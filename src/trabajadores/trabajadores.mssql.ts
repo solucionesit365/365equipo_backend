@@ -264,6 +264,26 @@ export async function getSubordinadosById(
   return [];
 }
 
+export async function getHorasContrato(idSql: number, conFecha: moment.Moment) {
+  const sql = `
+    SELECT top 1 horasContrato*40/100 as horasContrato
+    FROM historicoContratos 
+    WHERE 
+      dni = (select dni from trabajadores where id = @param0) AND 
+      inicioContrato <= @param1 AND 
+      (fechaBaja >= @param1 OR fechaBaja IS NULL)
+  `;
+
+  const resSubordinados = await recSoluciones(
+    "soluciones",
+    sql,
+    idSql,
+    conFecha ? conFecha.format("YYYY-MM-DD HH:mm:ss") : undefined,
+  );
+
+  return resSubordinados.recordset[0]?.horasContrato;
+}
+
 export async function getTrabajadoresSage(): Promise<
   {
     id: number;

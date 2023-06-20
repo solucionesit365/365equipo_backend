@@ -108,7 +108,12 @@ export class Cuadrantes {
     if (idSql) {
       const usuarioActual =
         await this.trabajadoresInstance.getTrabajadorBySqlId(idSql);
-
+      const horasContratoCurrentUser =
+        await this.trabajadoresInstance.getHorasContratoById(
+          idSql,
+          moment().year(year).week(semana).day(1).startOf("day"),
+        );
+      usuarioActual.horasContrato = horasContratoCurrentUser;
       equipoCompleto.push(usuarioActual);
     }
 

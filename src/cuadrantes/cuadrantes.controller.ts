@@ -27,7 +27,7 @@ export class CuadrantesController {
     private readonly tokenService: TokenService,
     private readonly cuadrantesInstance: Cuadrantes,
     private readonly trabajadoresInstance: Trabajador,
-  ) { }
+  ) {}
 
   @Get()
   @UseGuards(AuthGuard)
@@ -48,6 +48,7 @@ export class CuadrantesController {
             usuario.idTienda,
             Number(semana),
             Number(year),
+            usuario.id,
           ),
         };
       }
@@ -220,7 +221,6 @@ export class CuadrantesController {
       const token = this.tokenService.extract(authHeader);
       const usuario = await this.authInstance.getUserWithToken(token);
 
-
       if (usuario.coordinadora && usuario.idTienda) {
         // cuadrante.idTienda = usuario.idTienda;
         // cuadrante.enviado = false;
@@ -233,9 +233,15 @@ export class CuadrantesController {
           );
         cuadrante.idTienda = usuario.idTienda;
 
-        const notiCuadrante = await this.cuadrantesInstance.saveCuadrante(cuadrante, oldCuadrante);
+        const notiCuadrante = await this.cuadrantesInstance.saveCuadrante(
+          cuadrante,
+          oldCuadrante,
+        );
         if (notiCuadrante) {
-          const trabajadorID = await this.trabajadoresInstance.getTrabajadorBySqlId(cuadrante.idTrabajador);
+          const trabajadorID =
+            await this.trabajadoresInstance.getTrabajadorBySqlId(
+              cuadrante.idTrabajador,
+            );
 
           this.notificaciones.newInAppNotification({
             uid: trabajadorID.idApp,
@@ -243,7 +249,7 @@ export class CuadrantesController {
             mensaje: `Se ha creado tu horario de la semana ${cuadrante.semana}`,
             leido: false,
             creador: "SISTEMA",
-          })
+          });
           return { ok: true };
         }
       }
