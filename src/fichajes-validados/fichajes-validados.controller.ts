@@ -1,11 +1,19 @@
-import { Controller, Post, Get, Body, Headers, Query } from "@nestjs/common";
+import {
+  Controller,
+  Post,
+  Get,
+  Body,
+  Headers,
+  Query,
+  UseGuards,
+} from "@nestjs/common";
 import { TokenService } from "../get-token/get-token.service";
 import { FichajesValidados } from "./fichajes-validados.class";
 import { FichajeValidadoDto } from "./fichajes-validados.interface";
 import { AuthService } from "../firebase/auth";
 import { Notificaciones } from "src/notificaciones/notificaciones.class";
 import { Trabajador } from "src/trabajadores/trabajadores.class";
-import { query } from "mssql";
+import { AuthGuard } from "../auth/auth.guard";
 
 @Controller("fichajes-validados")
 export class FichajesValidadosController {
@@ -15,7 +23,7 @@ export class FichajesValidadosController {
     private readonly authInstance: AuthService,
     private readonly tokenService: TokenService,
     private readonly fichajesValidadosInstance: FichajesValidados,
-  ) { }
+  ) {}
 
   @Post("addFichajeValidado")
   async addFichajeValidado(
@@ -81,17 +89,22 @@ export class FichajesValidadosController {
           FichajesValidados,
         )
       ) {
-        const fichajeTrabajador = await this.trabajador.getTrabajadorBySqlId(FichajesValidados.idTrabajador)
-        if (FichajesValidados.aPagar && FichajesValidados.horasPagar.estadoValidado == "PENDIENTE") {
+        const fichajeTrabajador = await this.trabajador.getTrabajadorBySqlId(
+          FichajesValidados.idTrabajador,
+        );
+        if (
+          FichajesValidados.aPagar &&
+          FichajesValidados.horasPagar.estadoValidado == "PENDIENTE"
+        ) {
           this.notificaciones.newInAppNotification({
             uid: fichajeTrabajador.idApp,
             titulo: "Solicitud Horas a Pagar",
             mensaje: `Se ha solicitado ${FichajesValidados.horasPagar.total}h a pagar`,
             leido: false,
             creador: "SISTEMA",
-
-          })
-        } if (FichajesValidados.horasPagar.estadoValidado != "PENDIENTE") {
+          });
+        }
+        if (FichajesValidados.horasPagar.estadoValidado != "PENDIENTE") {
           {
             this.notificaciones.newInAppNotification({
               uid: fichajeTrabajador.idApp,
@@ -99,8 +112,7 @@ export class FichajesValidadosController {
               mensaje: `${FichajesValidados.horasPagar.estadoValidado} ${FichajesValidados.horasPagar.total}h `,
               leido: false,
               creador: "SISTEMA",
-
-            })
+            });
           }
         }
         return {
@@ -156,9 +168,7 @@ export class FichajesValidadosController {
       const aPagarBoolean = aPagar == "true" ? true : false;
 
       const respValidados =
-        await this.fichajesValidadosInstance.getAllFichajesPagar(
-          aPagarBoolean
-        );
+        await this.fichajesValidadosInstance.getAllFichajesPagar(aPagarBoolean);
       if (respValidados.length > 0) {
         return {
           ok: true,
@@ -183,7 +193,7 @@ export class FichajesValidadosController {
 
       const respValidados =
         await this.fichajesValidadosInstance.getAllIdResponsable(
-          Number(idResponsable)
+          Number(idResponsable),
         );
       if (respValidados.length > 0) {
         return {
@@ -194,8 +204,8 @@ export class FichajesValidadosController {
         return {
           ok: false,
           data: [],
-          message: "No tiene fichajes validados"
-        }
+          message: "No tiene fichajes validados",
+        };
       }
     } catch (err) {
       console.log(err);
@@ -215,7 +225,7 @@ export class FichajesValidadosController {
 
       const respValidados =
         await this.fichajesValidadosInstance.getSemanasFichajesPagar(
-          Number(semana)
+          Number(semana),
         );
       if (respValidados.length > 0) {
         return {
@@ -226,8 +236,8 @@ export class FichajesValidadosController {
         return {
           ok: false,
           data: [],
-          message: "No tiene fichajes validados en esta semana"
-        }
+          message: "No tiene fichajes validados en esta semana",
+        };
       }
     } catch (err) {
       console.log(err);
@@ -235,29 +245,52 @@ export class FichajesValidadosController {
     }
   }
 
-
   @Get("getAllFichajesValidados")
-  async getAllFichajes(
-    @Headers("authorization") authHeader: string,
-  ) {
+  async getAllFichajes(@Headers("authorization") authHeader: string) {
     try {
       const token = this.tokenService.extract(authHeader);
       await this.authInstance.verifyToken(token);
 
-      const respAllFichajes = await this.fichajesValidadosInstance.getAllFichajesValidados();
+      const respAllFichajes =
+        await this.fichajesValidadosInstance.getAllFichajesValidados();
 
       if (respAllFichajes.length > 0) {
         return {
           ok: true,
           data: respAllFichajes,
-        }
+        };
       } else {
         return {
           ok: false,
           data: [],
-        }
+        };
       }
+    } catch (error) {
+      return { ok: false, message: error.message };
+    }
+  }
 
+  @Get("getResumen")
+  @UseGuards(AuthGuard)
+  async getResumen(
+    @Headers("authorization") authHeader: string,
+    @Query() params,
+  ) {
+    try {
+      // const token = this.tokenService.extract(authHeader);
+      // await this.authInstance.verifyToken(token);
+
+      if (!params.year || !params.semana || !params.idTienda)
+        throw Error("Faltan parámetros");
+
+      return {
+        ok: true,
+        data: await this.fichajesValidadosInstance.resumenSemana(
+          Number(params.year),
+          Number(params.semana),
+          Number(params.idTienda),
+        ),
+      };
     } catch (error) {
       return { ok: false, message: error.message };
     }

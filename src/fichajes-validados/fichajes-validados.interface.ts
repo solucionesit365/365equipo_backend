@@ -6,7 +6,7 @@ export interface FichajeValidadoDto {
   idResponsable: number;
   nombre: string;
   semana: number;
-  fecha: Date;
+  fecha: string;
   cuadrante: {
     entrada: string;
     salida: string;

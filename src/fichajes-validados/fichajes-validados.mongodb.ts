@@ -83,6 +83,24 @@ export class FichajesValidadosDatabase {
     return await fichajesCollection.find({}).toArray();
   }
 
+  async getValidadosSemanaResponsable(
+    year: number,
+    semana: number,
+    idResponsable: number,
+  ) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const fichajesCollection =
+      db.collection<FichajeValidadoDto>("fichajesValidados");
+
+    return await fichajesCollection
+      .find({
+        year,
+        semana,
+        idResponsable,
+      })
+      .toArray();
+  }
+
   async getParaCuadrante(year: number, semana: number, idTrabajador: number) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const fichajesCollection =
