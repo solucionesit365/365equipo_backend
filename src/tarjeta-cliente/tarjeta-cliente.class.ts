@@ -99,7 +99,7 @@ export class TarjetaCliente {
             <div id="root">
               <span id="logo">365 Obrador</span>
               <div id="content">
-                <p>Hola! Ja formés part del #Club365</p>
+                <p>Hola! Ja formes part del #Club365</p>
         
                 <p>
                   Amb aquest QR podràs identificar-te en les nostres botigues i acumular punts
@@ -129,7 +129,7 @@ export class TarjetaCliente {
         </html>
         
         `,
-        "¡Ja formés part del #Club365!",
+        "¡Ja formes part del #Club365!",
         url,
       );
     }
