@@ -7,6 +7,7 @@ import { ObjectId } from "mongodb";
 import { EmailClass } from "../email/email.class";
 import { TarjetaCliente } from "../tarjeta-cliente/tarjeta-cliente.class";
 import * as jwt from "jsonwebtoken";
+import { GoogleAuth } from "google-auth-library";
 
 @Injectable()
 export class ClientesService {
@@ -138,7 +139,11 @@ export class ClientesService {
     );
   }
 
-  async confirmarEmail(idSolicitud: SolicitudCliente["_id"]) {
+  async confirmarEmail(
+    idSolicitud: SolicitudCliente["_id"],
+    issuerId: string,
+    classId: string,
+  ) {
     const solicitud = await this.schSolicitudesCliente.getSolicitud(
       idSolicitud,
     );
@@ -152,7 +157,13 @@ export class ClientesService {
       solicitud.codigoPostal,
       solicitud.email,
     );
-    const walletUrl = await this.createPassObject(idExterna, solicitud.nombre);
+    const walletUrl = await this.createPassObject(
+      idExterna,
+      solicitud.nombre,
+      issuerId,
+      classId,
+    );
+
     await this.enviarStringIdentificacion(
       idExterna,
       solicitud.email,
@@ -166,16 +177,23 @@ export class ClientesService {
     throw Error("No se ha podido registrar el cliente");
   }
 
-  async createPassObject(idTarjetaCliente: string, nombre: string) {
+  async createPassObject(
+    idTarjetaCliente: string,
+    nombre: string,
+    issuerId: string,
+    classId: string,
+  ) {
     // TODO: Create a new Generic pass for the user
-    const issuerId = "3388000000022232953";
-    const classId = `${issuerId}.tarjetas-cliente`;
-    const credentials = JSON.parse(process.env.API_EZE_CREDENTIALS);
 
     let objectId = `${issuerId}.${idTarjetaCliente}`;
 
+    const credentials =
+      process.env.NODE_ENV === "development"
+        ? require(process.env.GOOGLE_APPLICATION_CREDENTIALS)
+        : JSON.parse(process.env.API_EZE_CREDENTIALS);
+
     let genericObject = {
-      id: objectId,
+      id: `${objectId}`,
       classId: classId,
       genericType: "GENERIC_TYPE_UNSPECIFIED",
       hexBackgroundColor: "#4285f4",
@@ -230,5 +248,145 @@ export class ClientesService {
     const saveUrl = `https://pay.google.com/gp/v/save/${token}`;
 
     return saveUrl;
+  }
+
+  async createPassClass(classId: string) {
+    const credentials =
+      process.env.NODE_ENV === "development"
+        ? require(process.env.GOOGLE_APPLICATION_CREDENTIALS)
+        : JSON.parse(process.env.API_EZE_CREDENTIALS);
+
+    const httpClient = new GoogleAuth({
+      credentials: credentials,
+      scopes: "https://www.googleapis.com/auth/wallet_object.issuer",
+    });
+
+    const baseUrl = "https://walletobjects.googleapis.com/walletobjects/v1";
+
+    let genericClass = {
+      id: `${classId}`,
+      // classTemplateInfo: {
+      //   cardTemplateOverride: {
+      //     cardRowTemplateInfos: [
+      //       {
+      //         twoItems: {
+      //           startItem: {
+      //             firstValue: {
+      //               fields: [
+      //                 {
+      //                   fieldPath: 'object.textModulesData["points"]',
+      //                 },
+      //               ],
+      //             },
+      //           },
+      //           endItem: {
+      //             firstValue: {
+      //               fields: [
+      //                 {
+      //                   fieldPath: 'object.textModulesData["contacts"]',
+      //                 },
+      //               ],
+      //             },
+      //           },
+      //         },
+      //       },
+      //     ],
+      //   },
+      //   // detailsTemplateOverride: {
+      //   //   detailsItemInfos: [
+      //   //     {
+      //   //       item: {
+      //   //         firstValue: {
+      //   //           fields: [
+      //   //             {
+      //   //               fieldPath: 'class.imageModulesData["event_banner"]',
+      //   //             },
+      //   //           ],
+      //   //         },
+      //   //       },
+      //   //     },
+      //   //     {
+      //   //       item: {
+      //   //         firstValue: {
+      //   //           fields: [
+      //   //             {
+      //   //               fieldPath: 'class.textModulesData["game_overview"]',
+      //   //             },
+      //   //           ],
+      //   //         },
+      //   //       },
+      //   //     },
+      //   //     {
+      //   //       item: {
+      //   //         firstValue: {
+      //   //           fields: [
+      //   //             {
+      //   //               fieldPath: 'class.linksModuleData.uris["official_site"]',
+      //   //             },
+      //   //           ],
+      //   //         },
+      //   //       },
+      //   //     },
+      //   //   ],
+      //   // },
+      // },
+      // imageModulesData: [
+      //   {
+      //     mainImage: {
+      //       sourceUri: {
+      //         uri: "https://365equipo.com/logoQrWallet.png",
+      //       },
+      //       contentDescription: {
+      //         defaultValue: {
+      //           language: "es-ES",
+      //           value: "365 Obrador",
+      //         },
+      //       },
+      //     },
+      //     id: "365_banner",
+      //   },
+      // ],
+      // textModulesData: [
+      //   {
+      //     header: "Gather points meeting new people at Google I/O",
+      //     body: "Join the game and accumulate points in this badge by meeting other attendees in the event.",
+      //     id: "game_overview",
+      //   },
+      // ],
+      // linksModuleData: {
+      //   uris: [
+      //     {
+      //       uri: "https://365obrador.com",
+      //       description: "365 Obrador",
+      //       id: "official_site",
+      //     },
+      //   ],
+      // },
+    };
+
+    let response;
+    try {
+      // Check if the class exists already
+      response = await httpClient.request({
+        url: `${baseUrl}/genericClass/${classId}`,
+        method: "GET",
+      });
+      console.log("La clase ya existe");
+    } catch (err) {
+      if (err.response && err.response.status === 404) {
+        // Class does not exist
+        // Create it now
+        response = await httpClient.request({
+          url: `${baseUrl}/genericClass`,
+          method: "POST",
+          data: genericClass,
+        });
+
+        console.log("Class insert response");
+        console.log(response);
+      } else {
+        console.log(err);
+      }
+    }
   }
 }
