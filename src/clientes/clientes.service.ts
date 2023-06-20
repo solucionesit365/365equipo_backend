@@ -190,7 +190,7 @@ export class ClientesService {
     const credentials =
       process.env.NODE_ENV === "development"
         ? require(process.env.GOOGLE_APPLICATION_CREDENTIALS)
-        : JSON.parse(process.env.API_EZE_CREDENTIALS);
+        : JSON.parse(process.env.WALLET_ACCOUNT);
 
     let genericObject = {
       id: `${objectId}`,
@@ -254,7 +254,7 @@ export class ClientesService {
     const credentials =
       process.env.NODE_ENV === "development"
         ? require(process.env.GOOGLE_APPLICATION_CREDENTIALS)
-        : JSON.parse(process.env.API_EZE_CREDENTIALS);
+        : JSON.parse(process.env.WALLET_ACCOUNT);
 
     const httpClient = new GoogleAuth({
       credentials: credentials,
