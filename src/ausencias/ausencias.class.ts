@@ -10,7 +10,7 @@ export class Ausencias {
   constructor(
     private readonly schAusencias: AusenciasDatabase,
     private readonly cuadrantesInstance: Cuadrantes,
-  ) {}
+  ) { }
 
   async nuevaAusencia(
     idUsuario: number,
@@ -45,8 +45,8 @@ export class Ausencias {
     }
   }
 
-  async borrarAusencia(idAusencia: string) {
-    return await this.schAusencias.borrarAusencia(idAusencia);
+  async deleteAusencia(idAusencia: string) {
+    return await this.schAusencias.deleteAusencia(idAusencia);
   }
 
   async getAusencias() {
@@ -107,8 +107,7 @@ export class Ausencias {
         if (esParcial) {
           observaciones =
             ausenciasPendientes[i].tipo +
-            `[Horas:${
-              ausenciasPendientes[i].arrayParciales[esParcial.index].horas
+            `[Horas:${ausenciasPendientes[i].arrayParciales[esParcial.index].horas
             }]`;
         } else {
           observaciones = ausenciasPendientes[i].tipo + `[Horas:8]`;

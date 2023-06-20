@@ -6,7 +6,7 @@ import { ObjectId } from "mongodb";
 
 @Injectable()
 export class AusenciasDatabase {
-  constructor(private readonly mongoDbService: MongoDbService) {}
+  constructor(private readonly mongoDbService: MongoDbService) { }
 
   async nuevaAusencia(ausencia: AusenciaInterface) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
@@ -19,17 +19,18 @@ export class AusenciasDatabase {
     throw Error("No se ha podido crear la nueva ausencia");
   }
 
-  async borrarAusencia(idAusencia: string) {
+  async deleteAusencia(idAusencia: string) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const ausenciasCollection = db.collection<AusenciaInterface>("ausencias");
 
-    const resBorrar = await ausenciasCollection.deleteOne({
+    const resDelete = await ausenciasCollection.deleteOne({
       _id: new ObjectId(idAusencia),
     });
 
-    if (resBorrar.acknowledged && resBorrar.deletedCount > 0) return true;
-    return false;
+    return resDelete.acknowledged && resDelete.deletedCount > 0;
   }
+
+
   async getAusencias() {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const ausenciasCollection = db.collection<AusenciaInterface>("ausencias");
