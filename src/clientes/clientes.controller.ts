@@ -90,7 +90,14 @@ export class ClientesController {
     try {
       if (!idSolicitud) throw Error("Faltan parámetros");
 
-      const walletUrl = await this.clientesInstance.confirmarEmail(idSolicitud);
+      const issuerId = "3388000000022232953";
+      const classId = `${issuerId}.tarjetas-cliente`;
+
+      const walletUrl = await this.clientesInstance.confirmarEmail(
+        idSolicitud,
+        issuerId,
+        classId,
+      );
       if (walletUrl) return res.render("verificado", { walletUrl });
       else throw Error("Error de verificación de email");
     } catch (err) {
@@ -102,9 +109,15 @@ export class ClientesController {
   @Get("test")
   async testClientQr() {
     try {
+      const issuerId = "3388000000022232953";
+      const classId = `${issuerId}.tarjetas-cliente`;
+
+      //await this.clientesInstance.createPassClass(classId);
       return await this.clientesInstance.createPassObject(
         "QRCLIENT",
         "Ezequiel C.O",
+        issuerId,
+        classId,
       );
     } catch (err) {
       console.log(err);
