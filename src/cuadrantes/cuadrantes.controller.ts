@@ -312,4 +312,25 @@ export class CuadrantesController {
       return { ok: false, message: err.message };
     }
   }
+
+  @Get("getByYear")
+  @UseGuards(AuthGuard)
+  async getByYear(
+    @Query() { year }: { year: number },
+    @Headers("authorization") authHeader: string,
+  ) {
+    try {
+      const token = this.tokenService.extract(authHeader);
+      await this.authInstance.verifyToken(token);
+
+      if (!year) throw Error("Faltan datos");
+      return {
+        ok: true,
+        data: await this.cuadrantesInstance.getByYear(Number(year)),
+      };
+    } catch (error) {
+      console.log(error);
+      return { ok: false, message: error.message };
+    }
+  }
 }

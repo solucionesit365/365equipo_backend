@@ -27,7 +27,7 @@ export class Cuadrantes {
     private readonly hitInstance: FacTenaMssql,
     private readonly trabajadoresInstance: Trabajador,
     private readonly fichajesValidadosInstance: FichajesValidados,
-  ) {}
+  ) { }
 
   async getCuadrantesIndividual(
     idTienda: number,
@@ -223,15 +223,13 @@ export class Cuadrantes {
 
           subQuery += `
             SELECT @idTurno = NULL;
-            SELECT TOP 1 @idTurno = idTurno from cdpTurnos WHERE horaInicio = '${
-              cuadrante.arraySemanalHoras[j].horaEntrada
+            SELECT TOP 1 @idTurno = idTurno from cdpTurnos WHERE horaInicio = '${cuadrante.arraySemanalHoras[j].horaEntrada
             }' AND horaFin = '${cuadrante.arraySemanalHoras[j].horaSalida}';
   
             IF @idTurno IS NOT NULL
               BEGIN
-                DELETE FROM ${nombreTablaPlanificacion} WHERE idPlan = '${
-            cuadrante.arraySemanalHoras[j].idPlan
-          }';
+                DELETE FROM ${nombreTablaPlanificacion} WHERE idPlan = '${cuadrante.arraySemanalHoras[j].idPlan
+            }';
                 INSERT INTO ${nombreTablaPlanificacion} (
                   idPlan, 
                   fecha, 
@@ -245,13 +243,13 @@ export class Cuadrantes {
                 VALUES (
                   '${cuadrante.arraySemanalHoras[j].idPlan}', 
                   CONVERT(datetime, '${moment()
-                    .week(cuadrante.semana)
-                    .weekday(j)
-                    .format("DD/MM/YYYY")}', 103),
+              .week(cuadrante.semana)
+              .weekday(j)
+              .format("DD/MM/YYYY")}', 103),
                   ${this.tiendasInstance.convertirTiendaToExterno(
-                    cuadrante.idTienda,
-                    tiendas,
-                  )}, 
+                cuadrante.idTienda,
+                tiendas,
+              )}, 
                   '${tipoTurno}', 
                   @idTurno, 
                   '365EquipoDeTrabajo', 
@@ -278,9 +276,8 @@ export class Cuadrantes {
                   '#DDDDDD', 
                   'RESPONSABLE/DEPENDENTA
                   ');
-                  DELETE FROM ${nombreTablaPlanificacion} WHERE idPlan = '${
-            cuadrante.arraySemanalHoras[j].idPlan
-          }';
+                  DELETE FROM ${nombreTablaPlanificacion} WHERE idPlan = '${cuadrante.arraySemanalHoras[j].idPlan
+            }';
                   INSERT INTO ${nombreTablaPlanificacion} (
                     idPlan, 
                     fecha, 
@@ -294,13 +291,13 @@ export class Cuadrantes {
                   VALUES (
                     '${cuadrante.arraySemanalHoras[j].idPlan}', 
                     CONVERT(datetime, '${moment()
-                      .week(cuadrante.semana)
-                      .weekday(j)
-                      .format("DD/MM/YYYY")}', 103),
+              .week(cuadrante.semana)
+              .weekday(j)
+              .format("DD/MM/YYYY")}', 103),
                     ${this.tiendasInstance.convertirTiendaToExterno(
-                      cuadrante.idTienda,
-                      tiendas,
-                    )}, 
+                cuadrante.idTienda,
+                tiendas,
+              )}, 
                     '${tipoTurno}', 
                     @idTurno, 
                     '365EquipoDeTrabajo', 
@@ -598,5 +595,9 @@ export class Cuadrantes {
     if (await this.schCuadrantes.insertCuadrantes(cuadrantesDestino))
       return true;
     else throw Error("No se han podido guardar las copias de los cuadrantes");
+  }
+
+  async getByYear(year: number) {
+    return await this.schCuadrantes.getByYear(year);
   }
 }

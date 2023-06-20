@@ -13,7 +13,7 @@ moment.locale("es", {
 
 @Injectable()
 export class CuadrantesDatabase {
-  constructor(private readonly mongoDbService: MongoDbService) {}
+  constructor(private readonly mongoDbService: MongoDbService) { }
 
   async insertCuadrante(cuadrante: TCuadrante) {
     cuadrante._id = new ObjectId().toString();
@@ -164,8 +164,8 @@ export class CuadrantesDatabase {
       if (cuadrante.historialPlanes[j])
         sqlBorrar += `
           DELETE FROM ${this.nombreTablaSqlHit(
-            cuadrante.semana,
-          )} WHERE idPlan = '${cuadrante.historialPlanes[j]}';
+          cuadrante.semana,
+        )} WHERE idPlan = '${cuadrante.historialPlanes[j]}';
           `;
     }
 
@@ -206,5 +206,13 @@ export class CuadrantesDatabase {
     const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes");
 
     await cuadrantesCollection.insertOne(cuadrante);
+  }
+
+  async getByYear(year: number) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes");
+    const resCuadrantesYear = await cuadrantesCollection.find({ year }).toArray()
+
+    return resCuadrantesYear?.length > 0 ? resCuadrantesYear : [];
   }
 }
