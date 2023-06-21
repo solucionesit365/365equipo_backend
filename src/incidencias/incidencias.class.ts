@@ -19,18 +19,34 @@ export class Incidencia {
     async getIncidencias() {
         return await this.schIncidencias.getIncidencias();
     }
+    async getIncidenciasRrhh() {
+        return await this.schIncidencias.getIncidenciasRrhh();
+    }
 
     async getIncidenciasByEstado(estado: string) {
         return await this.schIncidencias.getIncidenciasByEstado(estado);
+    }
+
+    async getIncidenciasEstadoRrhh(estado: string) {
+        return await this.schIncidencias.getIncidenciasEstadoRrhh(estado);
     }
 
     async getIncidenciasByCategoria(categoria: string) {
         return await this.schIncidencias.getIncidenciasByCategoria(categoria);
     }
 
+    async getIncidenciasByCategoriaRrhh(categoria: string) {
+        return await this.schIncidencias.getIncidenciasByCategoriaRrhh(categoria);
+    }
+
     async getIncidenciasByPrioridad(prioridad: string) {
         return await this.schIncidencias.getIncidenciasByPrioridad(prioridad);
     }
+
+    async getIncidenciasByPrioridadRrhh(prioridad: string) {
+        return await this.schIncidencias.getIncidenciasByPrioridadRrhh(prioridad);
+    }
+
 
     async updateIncidenciaEstado(incidencias: Incidencias) {
         return await this.schIncidencias.updateIncidenciaEstado(incidencias);

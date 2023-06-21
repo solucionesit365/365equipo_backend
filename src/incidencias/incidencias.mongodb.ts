@@ -29,6 +29,14 @@ export class IncidenciasClass {
         return respIncidencias;
     }
 
+    async getIncidenciasRrhh() {
+        const db = (await this.mongoDbService.getConexion()).db("soluciones");
+        const incidenciasCollection = db.collection<Incidencias>("incidencias");
+        const respIncidencias = await incidenciasCollection.find({}).toArray();
+
+        return respIncidencias;
+    }
+
     async getIncidenciasByEstado(estado: string) {
         const db = (await this.mongoDbService.getConexion()).db("soluciones");
         const incidenciasCollection = db.collection<Incidencias>("incidencias");
@@ -36,6 +44,16 @@ export class IncidenciasClass {
 
         return respIncidencias;
     }
+
+    async getIncidenciasEstadoRrhh(estado: string) {
+        const db = (await this.mongoDbService.getConexion()).db("soluciones");
+        const incidenciasCollection = db.collection<Incidencias>("incidencias");
+        const respIncidencias = await incidenciasCollection.find({ estado }).toArray();
+
+        return respIncidencias;
+    }
+
+
     async getIncidenciasByCategoria(categoria: string) {
         const db = (await this.mongoDbService.getConexion()).db("soluciones");
         const incidenciasCollection = db.collection<Incidencias>("incidencias");
@@ -44,7 +62,23 @@ export class IncidenciasClass {
         return respIncidencias;
     }
 
+    async getIncidenciasByCategoriaRrhh(categoria: string) {
+        const db = (await this.mongoDbService.getConexion()).db("soluciones");
+        const incidenciasCollection = db.collection<Incidencias>("incidencias");
+        const respIncidencias = await incidenciasCollection.find({ categoria }).toArray();
+
+        return respIncidencias;
+    }
+
     async getIncidenciasByPrioridad(prioridad: string) {
+        const db = (await this.mongoDbService.getConexion()).db("soluciones");
+        const incidenciasCollection = db.collection<Incidencias>("incidencias");
+        const respIncidencias = await incidenciasCollection.find({ prioridad }).toArray();
+
+        return respIncidencias;
+    }
+
+    async getIncidenciasByPrioridadRrhh(prioridad: string) {
         const db = (await this.mongoDbService.getConexion()).db("soluciones");
         const incidenciasCollection = db.collection<Incidencias>("incidencias");
         const respIncidencias = await incidenciasCollection.find({ prioridad }).toArray();

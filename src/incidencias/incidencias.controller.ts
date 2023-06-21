@@ -12,6 +12,8 @@ import { TokenService } from "../get-token/get-token.service";
 import { AuthService } from "../firebase/auth";
 import { Incidencia } from "./incidencias.class";
 import { Incidencias } from './incidencias.interface';
+import { Notificaciones } from "src/notificaciones/notificaciones.class";
+import { Trabajador } from "../trabajadores/trabajadores.class";
 
 @Controller('incidencias')
 export class IncidenciasController {
@@ -19,6 +21,8 @@ export class IncidenciasController {
         private readonly authInstance: AuthService,
         private readonly tokenService: TokenService,
         private readonly incidenciaInstance: Incidencia,
+        private readonly notificaciones: Notificaciones,
+        private readonly trabajadores: Trabajador,
     ) { }
 
     @Post("nuevaIncidencia")
@@ -33,6 +37,7 @@ export class IncidenciasController {
                 ok: true,
                 data: await this.incidenciaInstance.nuevaIncidencia(incidencia)
             };
+
         } catch (err) {
             console.log(err);
             return { ok: false, message: err.message };
@@ -41,13 +46,42 @@ export class IncidenciasController {
 
     @Get("getIncidencias")
     @UseGuards(AuthGuard)
-    async getIncidencias(@Headers("authorization") authHeader: string) {
+    async getIncidencia(@Headers("authorization") authHeader: string) {
         try {
             const token = this.tokenService.extract(authHeader);
             await this.authInstance.verifyToken(token);
             const respIncidencias = await this.incidenciaInstance.getIncidencias();
-            if (respIncidencias) return { ok: true, data: respIncidencias };
-            else throw Error("No se ha encontrado ninguna ausencia");
+            if (respIncidencias) {
+                // Filtrar las incidencias por destinatario
+                const filteredIncidencias = respIncidencias.filter(incidencia =>
+                    incidencia.destinatario === "tecnicos"
+                );
+                return { ok: true, data: filteredIncidencias };
+            } else {
+                throw Error("No se ha encontrado ninguna incidencia");
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+
+    @Get("getIncidenciasRrhh")
+    @UseGuards(AuthGuard)
+    async getIncidenciasRrhh(@Headers("authorization") authHeader: string) {
+        try {
+            const token = this.tokenService.extract(authHeader);
+            await this.authInstance.verifyToken(token);
+            const respIncidencias = await this.incidenciaInstance.getIncidencias();
+            if (respIncidencias) {
+                // Filtrar las incidencias por destinatario
+                const filteredIncidencias = respIncidencias.filter(incidencia =>
+                    incidencia.destinatario === "rrhh"
+                );
+                return { ok: true, data: filteredIncidencias };
+            } else {
+                throw Error("No se ha encontrado ninguna incidencia");
+            }
         } catch (error) {
             console.log(error);
         }
@@ -63,10 +97,32 @@ export class IncidenciasController {
             const token = this.tokenService.extract(authHeader);
             await this.authInstance.verifyToken(token);
             const respIncidencias = await this.incidenciaInstance.getIncidenciasByEstado(estado)
-            return {
-                ok: true,
-                data: respIncidencias,
-            };
+            // Filtrar las incidencias por destinatario
+            const filteredIncidencias = respIncidencias.filter(incidencia =>
+                incidencia.destinatario === "tecnicos"
+            );
+            return { ok: true, data: filteredIncidencias };
+        } catch (err) {
+            console.log(err);
+            return { ok: false, message: err.message };
+        }
+    }
+
+    @Get("getIncidenciasEstadoRrhh")
+    @UseGuards(AuthGuard)
+    async getIncidenciasEstadoRrhh(
+        @Headers("authorization") authHeader: string,
+        @Query() { estado }: { estado: string },
+    ) {
+        try {
+            const token = this.tokenService.extract(authHeader);
+            await this.authInstance.verifyToken(token);
+            const respIncidencias = await this.incidenciaInstance.getIncidenciasEstadoRrhh(estado)
+            // Filtrar las incidencias por destinatario
+            const filteredIncidencias = respIncidencias.filter(incidencia =>
+                incidencia.destinatario === "rrhh"
+            );
+            return { ok: true, data: filteredIncidencias };
         } catch (err) {
             console.log(err);
             return { ok: false, message: err.message };
@@ -83,10 +139,33 @@ export class IncidenciasController {
             const token = this.tokenService.extract(authHeader);
             await this.authInstance.verifyToken(token);
             const respIncidencias = await this.incidenciaInstance.getIncidenciasByCategoria(categoria)
-            return {
-                ok: true,
-                data: respIncidencias,
-            };
+            // Filtrar las incidencias por destinatario
+            const filteredIncidencias = respIncidencias.filter(incidencia =>
+                incidencia.destinatario === "tecnicos"
+            );
+            return { ok: true, data: filteredIncidencias };
+        } catch (err) {
+            console.log(err);
+            return { ok: false, message: err.message };
+        }
+    }
+
+
+    @Get("getIncidenciasByCategoriaRrhh")
+    @UseGuards(AuthGuard)
+    async getIncidenciasByCategoriaRrhh(
+        @Headers("authorization") authHeader: string,
+        @Query() { categoria }: { categoria: string },
+    ) {
+        try {
+            const token = this.tokenService.extract(authHeader);
+            await this.authInstance.verifyToken(token);
+            const respIncidencias = await this.incidenciaInstance.getIncidenciasByCategoriaRrhh(categoria)
+            // Filtrar las incidencias por destinatario
+            const filteredIncidencias = respIncidencias.filter(incidencia =>
+                incidencia.destinatario === "rrhh"
+            );
+            return { ok: true, data: filteredIncidencias };
         } catch (err) {
             console.log(err);
             return { ok: false, message: err.message };
@@ -103,16 +182,39 @@ export class IncidenciasController {
             const token = this.tokenService.extract(authHeader);
             await this.authInstance.verifyToken(token);
             const respIncidencias = await this.incidenciaInstance.getIncidenciasByPrioridad(prioridad)
-
-            return {
-                ok: true,
-                data: respIncidencias,
-            };
+            // Filtrar las incidencias por destinatario
+            const filteredIncidencias = respIncidencias.filter(incidencia =>
+                incidencia.destinatario === "tecnicos"
+            );
+            return { ok: true, data: filteredIncidencias };
         } catch (err) {
             console.log(err);
             return { ok: false, message: err.message };
         }
     }
+
+    @Get("getIncidenciasByPrioridadRrhh")
+    @UseGuards(AuthGuard)
+    async getIncidenciasByPrioridadRrhh(
+        @Headers("authorization") authHeader: string,
+        @Query() { prioridad }: { prioridad: string },
+    ) {
+        try {
+            const token = this.tokenService.extract(authHeader);
+            await this.authInstance.verifyToken(token);
+            const respIncidencias = await this.incidenciaInstance.getIncidenciasByPrioridadRrhh(prioridad)
+
+            // Filtrar las incidencias por destinatario
+            const filteredIncidencias = respIncidencias.filter(incidencia =>
+                incidencia.destinatario === "rrhh"
+            );
+            return { ok: true, data: filteredIncidencias };
+        } catch (err) {
+            console.log(err);
+            return { ok: false, message: err.message };
+        }
+    }
+
 
     @Post("updateIncidenciaEstado")
     async updateIncidenciaEstado(
@@ -122,12 +224,24 @@ export class IncidenciasController {
         try {
             const token = this.tokenService.extract(authHeader);
             await this.authInstance.verifyToken(token);
-            return {
-                ok: true,
-                data: await this.incidenciaInstance.updateIncidenciaEstado(
-                    incidencia
-                ),
-            };
+
+            if (await this.incidenciaInstance.updateIncidenciaEstado(
+                incidencia)) {
+                const arrayTrabajador = await this.trabajadores.getTrabajadorByAppId(incidencia.uid)
+                if (arrayTrabajador.idApp != null) {
+                    this.notificaciones.newInAppNotification({
+                        uid: arrayTrabajador.idApp,
+                        titulo: "Estado de la incidencia",
+                        mensaje: `El estado de tu incidencia a cambiado a ${incidencia.estado}`,
+                        leido: false,
+                        creador: "SISTEMA",
+                    })
+                }
+
+                return {
+                    ok: true,
+                }
+            }
         } catch (err) {
             console.log(err);
             return { ok: false, message: err.message };
@@ -144,12 +258,24 @@ export class IncidenciasController {
         try {
             const token = this.tokenService.extract(authHeader);
             await this.authInstance.verifyToken(token);
-            return {
-                ok: true,
-                data: await this.incidenciaInstance.updateIncidenciaMensajes(
-                    incidencia
-                ),
-            };
+            if (await this.incidenciaInstance.updateIncidenciaMensajes(
+                incidencia)) {
+                const arrayTrabajador = await this.trabajadores.getTrabajadorByAppId(incidencia.uid)
+                if (arrayTrabajador.idApp != null) {
+                    this.notificaciones.newInAppNotification({
+                        uid: arrayTrabajador.idApp,
+                        titulo: "Mensaje Incidencia",
+                        mensaje: "Te han respondido la incidencia",
+                        leido: false,
+                        creador: "SISTEMA",
+                    })
+                }
+
+
+                return {
+                    ok: true,
+                }
+            }
         } catch (err) {
             console.log(err);
             return { ok: false, message: err.message };
@@ -176,8 +302,5 @@ export class IncidenciasController {
             return { ok: false, message: err.message };
         }
     }
-
-
-
 
 }
