@@ -16,5 +16,5 @@ export interface Incidencias {
         nombre: string
     }[],
     nombre: string,
-    idqsl: number
+    uid: string
 }
