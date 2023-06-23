@@ -30,20 +30,22 @@ export class Cuadrantes {
     private readonly fichajesValidadosInstance: FichajesValidados,
   ) {}
 
+  // Cuadrante 2.0
   async getCuadrantesIndividual(
     idTienda: number,
     idTrabajador: number,
-    semana: number,
-    year: number,
+    fechaInicioBusqueda: Date,
+    fechaFinalBusqueda: Date,
   ) {
     return await this.schCuadrantes.getCuadrantesIndividual(
       idTienda,
       idTrabajador,
-      semana,
-      year,
+      fechaInicioBusqueda,
+      fechaFinalBusqueda,
     );
   }
 
+  // No se puede traspasar fácilmente
   async getBolsaHorasById(
     idSql: number,
     year: number,
@@ -59,15 +61,13 @@ export class Cuadrantes {
     return horasContrato - (horasCuadranteTotal + horasMasMenos);
   }
 
-  async getBolsaInicial(idTrabajador: number, year: number, semana: number) {
+  // No se puede traspasar fácilmente
+  async getBolsaInicial(idTrabajador: number, lunesActual: DateTime) {
     // Pasar el número de la semana correcta, esto se calcula con la semana anterior, ojo
     // con la primera semana del año.
 
-    const lunes = moment().year(year).week(semana).day(1).startOf("day");
-    lunes.diff(7, "days");
-
-    const semanaBuscar = lunes.isoWeek();
-    const yearBuscar = lunes.year();
+    const lunesAnterior = lunesActual.minus({ days: 7 }).startOf("week");
+    const domingoAnterior = lunesAnterior.minus({ days: 1 });
 
     const fichajesValidados =
       await this.fichajesValidadosInstance.getParaCuadrante(
@@ -93,17 +93,18 @@ export class Cuadrantes {
     };
   }
 
+  // Cuadrantes
   async getCuadrantes(
     idTienda: number,
-    semana: number,
-    year: number,
+    fechaInicioBusqueda: Date,
+    fechaFinalBusqueda: Date,
     idSql?: number,
   ) {
     const responsableTienda =
       await this.trabajadoresInstance.getResponsableTienda(idTienda);
     const equipoCompleto = await this.trabajadoresInstance.getSubordinadosById(
       responsableTienda.id,
-      moment().year(year).week(semana).day(1).startOf("day"),
+      DateTime.fromJSDate(fechaInicioBusqueda).startOf("week"),
     );
 
     if (idSql) {
@@ -112,7 +113,7 @@ export class Cuadrantes {
       const horasContratoCurrentUser =
         await this.trabajadoresInstance.getHorasContratoById(
           idSql,
-          moment().year(year).week(semana).day(1).startOf("day"),
+          DateTime.fromJSDate(fechaInicioBusqueda).startOf("week"),
         );
       usuarioActual.horasContrato = horasContratoCurrentUser;
       equipoCompleto.push(usuarioActual);
@@ -120,8 +121,8 @@ export class Cuadrantes {
 
     const cuadrantes: TCuadrante[] = await this.schCuadrantes.getCuadrantes(
       idTienda,
-      semana,
-      year,
+      fechaInicioBusqueda,
+      fechaFinalBusqueda,
     );
 
     const cuadrantesVacios: TCuadrante[] = [];
@@ -139,18 +140,18 @@ export class Cuadrantes {
 
       if (!hayUno) {
         const nuevoCuadrante: TCuadrante = {
-          _id: new ObjectId().toString(),
+          _id: new ObjectId(),
           idTrabajador: equipoCompleto[i].id,
           nombre: equipoCompleto[i].nombreApellidos,
           idTienda: idTienda,
-          semana: semana,
-          year: new Date().getFullYear(),
-          arraySemanalHoras: [null, null, null, null, null, null, null],
           totalHoras: 0,
           enviado: false,
           historialPlanes: [],
           horasContrato: equipoCompleto[i].horasContrato,
-          bolsaHorasInicial: 0,
+          idPlan: null,
+          fechaInicio: undefined,
+          fechaFinal: undefined,
+          ausencia: null,
         };
 
         cuadrantesVacios.push(nuevoCuadrante);

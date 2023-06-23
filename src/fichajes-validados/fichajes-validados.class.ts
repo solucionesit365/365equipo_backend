@@ -5,6 +5,7 @@ import { Trabajador } from "../trabajadores/trabajadores.class";
 import { TrabajadorCompleto } from "../trabajadores/trabajadores.interface";
 import * as moment from "moment";
 import { WithId } from "mongodb";
+import { DateTime } from "luxon";
 
 @Injectable()
 export class FichajesValidados {
@@ -53,10 +54,11 @@ export class FichajesValidados {
     return await this.schFichajesValidados.getAllFichajesValidados();
   }
 
-  async getParaCuadrante(year: number, semana: number, idTrabajador: number) {
+  // Cuadrantes 2.0
+  async getParaCuadrante(lunes: DateTime, domingo: DateTime, idTrabajador: number) {
     return await this.schFichajesValidados.getParaCuadrante(
-      year,
-      semana,
+      lunes,
+      domingo,
       idTrabajador,
     );
   }
