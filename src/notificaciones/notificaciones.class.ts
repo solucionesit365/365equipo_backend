@@ -44,6 +44,10 @@ export class Notificaciones {
     return await this.schNotificaciones.getInAppNotifications(uid);
   }
 
+  async getInAppNotificationsPendientes(uid: string) {
+    return await this.schNotificaciones.getInAppNotificationsPendientes(uid);
+  }
+
   async getAllInAppNotifications(uid: string) {
     return await this.schNotificaciones.getAllInAppNotifications(uid);
   }

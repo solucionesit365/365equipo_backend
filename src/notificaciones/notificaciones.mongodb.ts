@@ -54,6 +54,14 @@ export class NotificacionsBbdd {
     return await inAppNotifications.find({ uid, leido: false }).toArray();
   }
 
+  async getInAppNotificationsPendientes(uid: string) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const inAppNotifications =
+      db.collection<InAppNotification>("inAppNotifications");
+
+    return await inAppNotifications.find({ uid, leido: false }).toArray();
+  }
+
   async getAllInAppNotifications(uid: string) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const inAppNotifications =
