@@ -49,6 +49,11 @@ export class Ausencias {
     return await this.schAusencias.deleteAusencia(idAusencia);
   }
 
+  async updateAusencia(ausencia: AusenciaInterface) {
+    return await this.schAusencias.updateAusencia(ausencia);
+  }
+
+
   async getAusencias() {
     return await this.schAusencias.getAusencias();
   }

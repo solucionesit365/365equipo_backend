@@ -30,6 +30,33 @@ export class AusenciasDatabase {
     return resDelete.acknowledged && resDelete.deletedCount > 0;
   }
 
+  async updateAusencia(ausencia: AusenciaInterface) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const ausenciasCollection = db.collection<AusenciaInterface>("ausencias");
+
+    const resUpdate = await ausenciasCollection.updateOne(
+      {
+        _id: new ObjectId(ausencia._id),
+      },
+      {
+        $set: {
+          fechaInicio: new Date(ausencia.fechaInicio),
+          fechaFinal: new Date(ausencia.fechaFinal),
+          tipo: ausencia.tipo,
+          comentario: ausencia.comentario,
+          arrayParciales: ausencia.arrayParciales
+        },
+      },
+    );
+    console.log(ausencia);
+
+
+    if (resUpdate.acknowledged && resUpdate.matchedCount > 0)
+      return true;
+    throw Error("No se ha podido modificar la ausencia");
+  }
+
+
 
   async getAusencias() {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
