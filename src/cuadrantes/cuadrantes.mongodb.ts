@@ -4,43 +4,48 @@ import { TCuadrante } from "./cuadrantes.interface";
 import * as moment from "moment";
 import { ObjectId } from "mongodb";
 import { AusenciaInterface } from "../ausencias/ausencias.interface";
+import { DateTime } from "luxon";
 
 moment.locale("es", {
   week: {
     dow: 1, // Lunes es el primer día de la semana
   },
 });
+// IMPORTANTE, FECHA INICIO PARA UNA SEMANA DEBE SER EL LUNES A LAS 00:00
+// Y LA FECHA FINAL DOMINGO A LAS 23:59:59
 
 @Injectable()
 export class CuadrantesDatabase {
   constructor(private readonly mongoDbService: MongoDbService) {}
 
+  // Cuadrantes 2.0
   async insertCuadrante(cuadrante: TCuadrante) {
-    cuadrante._id = new ObjectId().toString();
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
-    const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes");
+    const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes2");
     const resInsert = await cuadrantesCollection.insertOne(cuadrante);
     if (resInsert.acknowledged) return resInsert.insertedId;
     return null;
   }
 
-  // Muchos
+  // Cuadrantes 2.0
   async insertCuadrantes(cuadrantes: TCuadrante[]) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
-    const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes");
+    const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes2");
     const resInsert = await cuadrantesCollection.insertMany(cuadrantes);
     if (resInsert.acknowledged && resInsert.insertedCount > 0) return true;
     return false;
   }
 
+  // Cuadrantes 2.0
   async updateCuadrante(cuadrante: TCuadrante) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
-    const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes");
+    const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes2");
     const resInsert = await cuadrantesCollection.updateOne(
       { _id: cuadrante._id },
       {
         $set: {
-          arraySemanalHoras: cuadrante.arraySemanalHoras,
+          fechaInicio: cuadrante.fechaInicio,
+          fechaFinal: cuadrante.fechaFinal,
           historialPlanes: cuadrante.historialPlanes,
           totalHoras: cuadrante.totalHoras,
           enviado: false,
@@ -53,27 +58,35 @@ export class CuadrantesDatabase {
     );
   }
 
+  // Cuadrantes 2.0
   async getCuadrantesIndividual(
     idTienda: number,
     idTrabajador: number,
-    semana: number,
-    year: number,
+    fechaInicioBusqueda: Date,
+    fechaFinalBusqueda: Date,
   ) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
-    const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes");
-    const resCuadrantes = await cuadrantesCollection.findOne({
-      idTienda,
-      semana,
-      idTrabajador,
-      year: Number(year),
-    });
+    const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes2");
+    const resCuadrantes = await cuadrantesCollection
+      .find({
+        idTienda,
+        idTrabajador,
+        fechaInicio: {
+          $gte: fechaInicioBusqueda,
+        },
+        fechaFinal: {
+          $lte: fechaFinalBusqueda,
+        },
+      })
+      .toArray();
 
     return resCuadrantes;
   }
 
-  async setCuadranteEnviado(idCuadrante: string) {
+  // Cuadrantes 2.0
+  async setCuadranteEnviado(idCuadrante: ObjectId) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
-    const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes");
+    const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes2");
     const resEnviado = await cuadrantesCollection.updateOne(
       { _id: idCuadrante },
       {
@@ -86,39 +99,56 @@ export class CuadrantesDatabase {
     return resEnviado.acknowledged;
   }
 
-  async getCuadrantes(idTienda: number, semana: number, year: number) {
+  // Cuadrantes 2.0
+  async getCuadrantes(
+    idTienda: number,
+    fechaInicioBusqueda: Date,
+    fechaFinalBusqueda: Date,
+  ) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
-    const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes");
+    const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes2");
     const resCuadrantes = await cuadrantesCollection
       .find({
         idTienda: idTienda,
-        semana: semana,
-        year: year,
+        fechaInicio: {
+          $gte: fechaInicioBusqueda,
+        },
+        fechaFinal: {
+          $lte: fechaFinalBusqueda,
+        },
       })
       .toArray();
 
     return resCuadrantes?.length > 0 ? resCuadrantes : [];
   }
 
+  // Cuadrantes 2.0 (Falta filtro max. año)
   async getTodo() {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
-    const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes");
+    const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes2");
     const resCuadrantes = await cuadrantesCollection.find({}).toArray();
 
     return resCuadrantes?.length > 0 ? resCuadrantes : [];
   }
-  async getTiendas1Semana(semana: number, year: number) {
+
+  // Cuadrantes 2.0
+  async getTiendas1Semana(fechaInicioBusqueda: Date, fechaFinalBusqueda: Date) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
-    const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes");
+    const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes2");
     const resCuadrantes = await cuadrantesCollection
-      .find({ semana: semana, year: year })
+      .find({
+        fechaInicio: { $gte: fechaInicioBusqueda },
+        fechaFinal: { $lte: fechaFinalBusqueda },
+      })
       .toArray();
 
     return resCuadrantes?.length > 0 ? resCuadrantes : [];
   }
+
+  // Cuadrantes 2.0
   async getSemanas1Tienda(idTienda: number) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
-    const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes");
+    const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes2");
     const resCuadrantes = await cuadrantesCollection
       .find({ idTienda: idTienda })
       .toArray();
@@ -126,18 +156,29 @@ export class CuadrantesDatabase {
     return resCuadrantes?.length > 0 ? resCuadrantes : [];
   }
 
-  async getCuadranteSemanaTrabajador(idTrabajador: number, semana: number) {
+  // Cuadrantes 2.0
+  async getCuadranteSemanaTrabajador(
+    idTrabajador: number,
+    fechaInicioBusqueda: Date,
+    fechaFinalBusqueda: Date,
+  ) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
-    const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes");
+    const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes2");
     const resCuadrantes = await cuadrantesCollection
-      .find({ idTrabajador: idTrabajador, semana: semana })
+      .find({
+        idTrabajador: idTrabajador,
+        fechaInicio: { $gte: fechaInicioBusqueda },
+        fechaFinal: { $lte: fechaFinalBusqueda },
+      })
       .toArray();
 
     return resCuadrantes?.length > 0 ? resCuadrantes : [];
   }
+
+  // Cuadrantes 2.0
   async getPendientesEnvio() {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
-    const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes");
+    const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes2");
     const resCuadrantes = await cuadrantesCollection
       .find({ enviado: false })
       .toArray();
@@ -145,18 +186,19 @@ export class CuadrantesDatabase {
     return resCuadrantes?.length > 0 ? resCuadrantes : [];
   }
 
-  public getMondayMoment(weekNumber: number) {
-    const year = moment().year();
-    const startOfWeek = moment().year(year).week(weekNumber).startOf("week");
-
-    return startOfWeek;
+  // Cuadrante 2.0
+  public getMondayMoment(fecha: Date) {
+    // Devuelve el lunes
+    return DateTime.fromJSDate(fecha).startOf("week");
   }
 
-  public nombreTablaSqlHit(weekNumber: number) {
-    const lunes = this.getMondayMoment(weekNumber);
-    return `cdpPlanificacion_${lunes.format("YYYY_MM_DD")}`;
+  // Cuadrantes 2.0
+  public nombreTablaSqlHit(fecha: Date) {
+    const lunes = this.getMondayMoment(fecha);
+    return `cdpPlanificacion_${lunes.toFormat("yyyy_MM_dd")}`;
   }
 
+  // Cuadrantes 2.0
   borrarHistorial(cuadrante: TCuadrante) {
     let sqlBorrar = "";
 
@@ -164,7 +206,7 @@ export class CuadrantesDatabase {
       if (cuadrante.historialPlanes[j])
         sqlBorrar += `
           DELETE FROM ${this.nombreTablaSqlHit(
-            cuadrante.semana,
+            cuadrante.fechaInicio,
           )} WHERE idPlan = '${cuadrante.historialPlanes[j]}';
           `;
     }
@@ -174,37 +216,30 @@ export class CuadrantesDatabase {
     // await recHit("Fac_Tena", sqlBorrar);
   }
 
-  async cuadrantesPorAusencia(
-    ausencia: AusenciaInterface,
-    semanas: { year: number; week: number }[],
-  ): Promise<TCuadrante[]> {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
-    const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes");
+  // // NO SE PUEDE TRADUCIR A CUADRANTES 2.0 DE FORMA FÁCIL
+  // async cuadrantesPorAusencia(
+  //   ausencia: AusenciaInterface,
+  // ): Promise<TCuadrante[]> {
+  //   const db = (await this.mongoDbService.getConexion()).db("soluciones");
+  //   const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes2");
 
-    const cuadrantes = await cuadrantesCollection
-      .find({
-        idTrabajador: ausencia.idUsuario,
-        $or: semanas.map(({ year, week }) => ({ year, semana: week })),
-      })
-      .toArray();
+  //   const cuadrantes = await cuadrantesCollection
+  //     .find({
+  //       idTrabajador: ausencia.idUsuario,
+  //       $or: semanas.map(({ year, week }) => ({ year, semana: week })),
+  //     })
+  //     .toArray();
 
-    return cuadrantes;
-  }
+  //   return cuadrantes;
+  // }
 
+  // Cuadrante 2.0
   async actualizarCuadranteAusencia(cuadrante: TCuadrante): Promise<void> {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
-    const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes");
+    const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes2");
+    const id = cuadrante._id;
+    delete cuadrante._id;
 
-    await cuadrantesCollection.updateOne(
-      { _id: cuadrante._id },
-      { $set: cuadrante },
-    );
-  }
-
-  async crearCuadranteAusencia(cuadrante: TCuadrante): Promise<void> {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
-    const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes");
-
-    await cuadrantesCollection.insertOne(cuadrante);
+    await cuadrantesCollection.updateOne({ _id: id }, { $set: cuadrante });
   }
 }

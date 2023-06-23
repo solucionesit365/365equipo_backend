@@ -12,6 +12,7 @@ import {
 import { Trabajador } from "../trabajadores/trabajadores.class";
 import { TrabajadorSql } from "../trabajadores/trabajadores.interface";
 import { FichajesValidados } from "../fichajes-validados/fichajes-validados.class";
+import { DateTime } from "luxon";
 
 moment.locale("custom", {
   week: {

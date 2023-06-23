@@ -94,6 +94,7 @@ export class CuadrantesController {
     }
   }
 
+  // Habrá que hacer filtro de máximo el último año
   @Get("getTodos")
   @UseGuards(AuthGuard)
   async getAllCuadrantes(@Headers("authorization") authHeader: string) {
