@@ -222,11 +222,9 @@ export class CuadrantesController {
       const usuario = await this.authInstance.getUserWithToken(token);
 
       if (usuario.coordinadora && usuario.idTienda) {
-        // cuadrante.idTienda = usuario.idTienda;
-        // cuadrante.enviado = false;
         const oldCuadrante =
           await this.cuadrantesInstance.getCuadrantesIndividual(
-            usuario.idTienda,
+            cuadrante.idTienda,
             cuadrante.idTrabajador,
             cuadrante.semana,
             cuadrante.year,

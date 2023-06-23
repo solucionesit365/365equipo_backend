@@ -157,6 +157,11 @@ export class Cuadrantes {
     }
     cuadrantes.push(...cuadrantesVacios);
 
+    // Cuadrantes multitienda:
+    // Falta añadir un tercer push, para los trabajadores que vienen de otro responsable,
+    // pero que van a trabajar a esta tienda. Se deben mostrar todos los que vengan a trabajar
+    // a la tienda aunque no sean subordinados de la tienda destino
+
     for (let i = 0; i < cuadrantes.length; i += 1) {
       cuadrantes[i]["bolsaHorasInicial"] = await this.getBolsaHorasById(
         cuadrantes[i].idTrabajador,
