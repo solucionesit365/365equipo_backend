@@ -7,9 +7,11 @@ import {
   Get,
 } from "@nestjs/common";
 import { Ausencias } from "./ausencias.class";
+import { AusenciaInterface } from "./ausencias.interface";
 import { AuthGuard } from "../auth/auth.guard";
 import { TokenService } from "../get-token/get-token.service";
 import { AuthService } from "../firebase/auth";
+
 
 @Controller("ausencias")
 export class AusenciasController {
@@ -81,6 +83,31 @@ export class AusenciasController {
         };
 
       throw Error("No se ha podido borrar la ausencia");
+    } catch (err) {
+      console.log(err);
+      return { ok: false, message: err.message };
+    }
+  }
+
+  @Post("updateAusencia")
+  async updateAusencia(
+    @Body() ausencia: AusenciaInterface,
+    @Headers("authorization") authHeader: string,
+  ) {
+    try {
+      const token = this.tokenService.extract(authHeader);
+      await this.authInstance.verifyToken(token);
+      const respAusencia = await this.ausenciasInstance.updateAusencia(ausencia);
+      if (respAusencia)
+        return {
+          ok: true,
+          data: respAusencia
+        };
+      console.log(respAusencia);
+      console.log(ausencia);
+
+
+      throw Error("No se ha podido modificar la ausencia");
     } catch (err) {
       console.log(err);
       return { ok: false, message: err.message };
