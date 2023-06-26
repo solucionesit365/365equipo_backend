@@ -11,6 +11,7 @@ import { Notificaciones } from "./notificaciones.class";
 import { AuthGuard } from "../auth/auth.guard";
 import { TokenService } from "../get-token/get-token.service";
 import { AuthService } from "../firebase/auth";
+import { log } from "console";
 
 @Controller("notificaciones")
 export class NotificacionesController {
@@ -56,6 +57,26 @@ export class NotificacionesController {
           usuario.uid,
         ),
       };
+    } catch (err) {
+      console.log(err);
+      return { ok: false, message: err.message };
+    }
+  }
+
+  @Get("inAppNotificationsPendientes")
+  @UseGuards(AuthGuard)
+  async getInAppNotificationsPendientes(@Headers("authorization") authHeader: string) {
+    try {
+      const token = this.tokenService.extract(authHeader);
+      await this.authInstance.verifyToken(token);
+      const usuario = await this.authInstance.getUserWithToken(token);
+      const notificacionesPendientes = await this.notificacionesInstance.getInAppNotificationsPendientes(
+        usuario.uid,
+      );
+      return {
+        ok: true,
+        count: notificacionesPendientes.length, // Devuelve el número de notificaciones pendientes
+      }
     } catch (err) {
       console.log(err);
       return { ok: false, message: err.message };
