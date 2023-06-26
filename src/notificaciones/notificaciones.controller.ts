@@ -73,8 +73,6 @@ export class NotificacionesController {
       const notificacionesPendientes = await this.notificacionesInstance.getInAppNotificationsPendientes(
         usuario.uid,
       );
-
-
       return {
         ok: true,
         count: notificacionesPendientes.length, // Devuelve el número de notificaciones pendientes
