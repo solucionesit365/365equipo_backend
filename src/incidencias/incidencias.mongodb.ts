@@ -139,4 +139,27 @@ export class IncidenciasClass {
 
     }
 
+
+    async updateIncidenciaDestinatario(incidencias: Incidencias) {
+        const db = (await this.mongoDbService.getConexion()).db("soluciones")
+        const incidenciasCollection = db.collection<Incidencias>("incidencias");
+
+
+        const respIncidencias = await incidenciasCollection.updateOne(
+            {
+                _id: new ObjectId(incidencias._id),
+            },
+            {
+                $set: {
+                    destinatario: incidencias.destinatario,
+                }
+            },
+        );
+
+        if (respIncidencias.acknowledged && respIncidencias.modifiedCount > 0)
+            return true;
+        throw Error("No se ha podido mandar el mensaje");
+    }
+
+
 }
