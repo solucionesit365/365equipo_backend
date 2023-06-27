@@ -480,6 +480,50 @@ export class Cuadrantes {
     };
   }
 
+  async addAusenciaToCuadrantes(ausencia: AusenciaInterface) {
+    const fechaInicio = DateTime.fromJSDate(ausencia.fechaInicio);
+    const fechaFinal = DateTime.fromJSDate(ausencia.fechaFinal);
+    const cuadrantesFinal: TCuadrante[] = [];
+    const cuadrantesEnMedio = await this.schCuadrantes.getCuadrantesIndividual(
+      ausencia.idUsuario,
+      ausencia.fechaInicio,
+      ausencia.fechaFinal,
+    );
+    const trabajador = await this.trabajadoresInstance.getTrabajadorBySqlId(
+      ausencia.idUsuario,
+    );
+
+    let auxFecha = fechaInicio;
+    while (auxFecha <= fechaFinal) {
+      const cuadranteMolesto = cuadrantesEnMedio.find((cuadrante) => DateTime.fromJSDate(cuadrante.fechaInicio).hasSame(auxFecha, "day"));
+      if (cuadranteMolesto) {
+        // Existe un cuadrante en este día, hay que modificarlo y poner que habrá ausencia ese día
+      } else {
+        cuadrantesFinal.push({
+          _id: new ObjectId(),
+          idTrabajador: ausencia.idUsuario,
+          idPlan: new ObjectId().toString(),
+          idTienda: trabajador.idTienda,
+          fechaInicio: null,
+          fechaFinal: null,
+          nombre: trabajador.nombreApellidos,
+          totalHoras: 0,
+          enviado: false,
+          historialPlanes: [],
+          horasContrato: trabajador.horasContrato,
+          ausencia: {
+            tipo: ausencia.tipo,
+            total: ausencia.total,
+            horasJustificadas: (ausencia.total) ? ausencia.
+          }
+        });
+      }
+
+      auxFecha = auxFecha.plus({day: 1});
+    }
+  }
+
+  // 
   async agregarAusencia(ausencia: AusenciaInterface): Promise<void> {
     const cuadrantes =
       semanas.length > 0

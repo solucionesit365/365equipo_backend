@@ -19,8 +19,8 @@ export interface TCuadrante {
   idTrabajador: number;
   idPlan: string;
   idTienda: number;
-  fechaInicio: Date,
-  fechaFinal: Date,
+  fechaInicio: Date;
+  fechaFinal: Date;
   nombre: string;
   totalHoras: number;
   enviado: boolean;
@@ -28,7 +28,8 @@ export interface TCuadrante {
   horasContrato: number;
   ausencia: {
     tipo: TiposAusencia;
-    horas: number;
+    horasJustificadas?: number;
+    total: boolean;
     idAusencia: ObjectId;
   };
 }

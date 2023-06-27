@@ -32,7 +32,7 @@ export class Ausencias {
     });
 
     if (resInsert) {
-      await this.cuadrantesInstance.agregarAusencia({
+      await this.cuadrantesInstance.addAusenciaToCuadrantes({
         arrayParciales,
         comentario,
         fechaFinal,

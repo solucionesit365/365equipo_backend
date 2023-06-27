@@ -9,9 +9,10 @@ export interface AusenciaInterface {
   fechaFinal: Date;
   comentario: string;
   enviado?: boolean;
+  total: boolean;
   arrayParciales: {
     dia: Date;
-    horas: number;
+    horasJustificadas: number;
   }[];
 }
 

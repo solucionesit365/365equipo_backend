@@ -60,7 +60,6 @@ export class CuadrantesDatabase {
 
   // Cuadrantes 2.0
   async getCuadrantesIndividual(
-    idTienda: number,
     idTrabajador: number,
     fechaInicioBusqueda: Date,
     fechaFinalBusqueda: Date,
@@ -69,7 +68,6 @@ export class CuadrantesDatabase {
     const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes2");
     const resCuadrantes = await cuadrantesCollection
       .find({
-        idTienda,
         idTrabajador,
         fechaInicio: {
           $gte: fechaInicioBusqueda,
@@ -159,24 +157,24 @@ export class CuadrantesDatabase {
     return resCuadrantes?.length > 0 ? resCuadrantes : [];
   }
 
-  // Cuadrantes 2.0
-  async getCuadranteSemanaTrabajador(
-    idTrabajador: number,
-    fechaInicioBusqueda: DateTime,
-    fechaFinalBusqueda: DateTime,
-  ) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
-    const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes2");
-    const resCuadrantes = await cuadrantesCollection
-      .find({
-        idTrabajador: idTrabajador,
-        fechaInicio: { $gte: fechaInicioBusqueda.toJSDate() },
-        fechaFinal: { $lte: fechaFinalBusqueda.toJSDate() },
-      })
-      .toArray();
+  // // Cuadrantes 2.0
+  // async getCuadranteSemanaTrabajador(
+  //   idTrabajador: number,
+  //   fechaInicioBusqueda: DateTime,
+  //   fechaFinalBusqueda: DateTime,
+  // ) {
+  //   const db = (await this.mongoDbService.getConexion()).db("soluciones");
+  //   const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes2");
+  //   const resCuadrantes = await cuadrantesCollection
+  //     .find({
+  //       idTrabajador: idTrabajador,
+  //       fechaInicio: { $gte: fechaInicioBusqueda.toJSDate() },
+  //       fechaFinal: { $lte: fechaFinalBusqueda.toJSDate() },
+  //     })
+  //     .toArray();
 
-    return resCuadrantes?.length > 0 ? resCuadrantes : [];
-  }
+  //   return resCuadrantes?.length > 0 ? resCuadrantes : [];
+  // }
 
   // Cuadrantes 2.0
   async getPendientesEnvio() {

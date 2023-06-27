@@ -80,7 +80,7 @@ export class Vacaciones {
     if (resSeter) {
       if (estado === "APROBADA") {
         const vacaciones = await schVacaciones.getSolicitudById(idSolicitud);
-        await this.cuadrantesInstance.agregarAusencia({
+        await this.cuadrantesInstance.addAusenciaToCuadrantes({
           arrayParciales: [],
           comentario: "Vacaciones",
           fechaInicio: moment(vacaciones.fechaInicio, "DD/MM/YYYY").toDate(),
