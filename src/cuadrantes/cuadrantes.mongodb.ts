@@ -61,8 +61,8 @@ export class CuadrantesDatabase {
   // Cuadrantes 2.0
   async getCuadrantesIndividual(
     idTrabajador: number,
-    fechaInicioBusqueda: Date,
-    fechaFinalBusqueda: Date,
+    fechaInicioBusqueda: DateTime,
+    fechaFinalBusqueda: DateTime,
   ) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes2");
@@ -70,10 +70,10 @@ export class CuadrantesDatabase {
       .find({
         idTrabajador,
         fechaInicio: {
-          $gte: fechaInicioBusqueda,
+          $gte: fechaInicioBusqueda.toJSDate(),
         },
         fechaFinal: {
-          $lte: fechaFinalBusqueda,
+          $lte: fechaFinalBusqueda.toJSDate(),
         },
       })
       .toArray();
@@ -233,7 +233,6 @@ export class CuadrantesDatabase {
 
   //   return cuadrantes;
   // }
-
 
   // Cuadrantes 2.0 (Se utiliza solo como trigger de una nueva ausencia)
   async updateOrInsertManyCuadrantes(cuadrantes: TCuadrante[]) {

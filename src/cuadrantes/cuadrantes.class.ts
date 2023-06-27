@@ -5,12 +5,9 @@ import { ObjectId } from "mongodb";
 import { TCuadrante } from "./cuadrantes.interface";
 import { Tienda } from "../tiendas/tiendas.class";
 import { FacTenaMssql } from "../bbdd/mssql.class";
-import {
-  AusenciaInterface,
-  TiposAusencia,
-} from "../ausencias/ausencias.interface";
+import { AusenciaInterface } from "../ausencias/ausencias.interface";
 import { Trabajador } from "../trabajadores/trabajadores.class";
-import { TrabajadorSql } from "../trabajadores/trabajadores.interface";
+
 import { FichajesValidados } from "../fichajes-validados/fichajes-validados.class";
 import { DateTime } from "luxon";
 
@@ -32,13 +29,11 @@ export class Cuadrantes {
 
   // Cuadrante 2.0
   async getCuadrantesIndividual(
-    idTienda: number,
     idTrabajador: number,
-    fechaInicioBusqueda: Date,
-    fechaFinalBusqueda: Date,
+    fechaInicioBusqueda: DateTime,
+    fechaFinalBusqueda: DateTime,
   ) {
     return await this.schCuadrantes.getCuadrantesIndividual(
-      idTienda,
       idTrabajador,
       fechaInicioBusqueda,
       fechaFinalBusqueda,
@@ -208,7 +203,7 @@ export class Cuadrantes {
     const fechaInicio = fecha.startOf("week");
     const fechaFinal = fecha.endOf("week");
 
-    return await this.schCuadrantes.getCuadranteSemanaTrabajador(
+    return await this.schCuadrantes.getCuadrantesIndividual(
       idTrabajador,
       fechaInicio,
       fechaFinal,
@@ -375,111 +370,6 @@ export class Cuadrantes {
     }
   }
 
-  private estaEnRango(
-    fecha: moment.Moment,
-    fechaInicio: moment.Moment,
-    fechaFinal: moment.Moment,
-  ): boolean {
-    // Agrega un día a la fecha final para incluirlo en el rango
-    fechaFinal.add(1, "days");
-    return fecha.isSameOrAfter(fechaInicio) && fecha.isBefore(fechaFinal);
-  }
-
-  private crearAusencia(
-    parcial: { dia: Date; horas: number },
-    tipo: TiposAusencia,
-  ): {
-    tipo: TiposAusencia;
-    parcial: boolean;
-    horasParcial?: number;
-  } {
-    if (parcial) {
-      return {
-        tipo: tipo,
-        parcial: true,
-        horasParcial: parcial.horas,
-      };
-    }
-    return {
-      tipo: tipo,
-      parcial: false,
-    };
-  }
-
-  private actualizarCuadranteConAusencia(
-    cuadrante: TCuadrante,
-    ausencia: AusenciaInterface,
-  ): void {
-    cuadrante.arraySemanalHoras = cuadrante.arraySemanalHoras.map(
-      (horas, index) => {
-        const fecha = moment()
-          .year(cuadrante.year)
-          .isoWeek(cuadrante.semana)
-          .day(index + 1);
-        if (
-          this.estaEnRango(
-            fecha,
-            moment(ausencia.fechaInicio),
-            moment(ausencia.fechaFinal),
-          )
-        ) {
-          const parcial = ausencia.arrayParciales.find((p) =>
-            moment(p.dia).isSame(fecha, "day"),
-          );
-          return {
-            horaEntrada: horas ? horas.horaEntrada : "",
-            horaSalida: horas ? horas.horaSalida : "",
-            idPlan: horas ? horas.idPlan : "",
-            ausencia: this.crearAusencia(parcial, ausencia.tipo),
-          };
-        }
-        return horas;
-      },
-    );
-  }
-
-  private crearNuevoCuadrante(
-    trabajador: TrabajadorSql,
-    semana: { week: number; year: number },
-    ausencia: AusenciaInterface,
-  ): TCuadrante {
-    return {
-      idTrabajador: ausencia.idUsuario,
-      nombre: trabajador.nombreApellidos,
-      idTienda: trabajador.idTienda,
-      enviado: false,
-      historialPlanes: [],
-      totalHoras: null,
-      semana: semana.week,
-      year: semana.year,
-      arraySemanalHoras: Array.from({ length: 7 }, (_, index) => {
-        const fecha = moment()
-          .year(semana.year)
-          .isoWeek(semana.week)
-          .day(index + 1);
-
-        if (
-          this.estaEnRango(
-            fecha,
-            moment(ausencia.fechaInicio),
-            moment(ausencia.fechaFinal),
-          )
-        ) {
-          const parcial = ausencia.arrayParciales.find((p) =>
-            moment(p.dia).isSame(fecha, "day"),
-          );
-          return {
-            horaEntrada: "",
-            horaSalida: "",
-            idPlan: "",
-            ausencia: this.crearAusencia(parcial, ausencia.tipo),
-          };
-        }
-        return null;
-      }),
-    };
-  }
-
   // Cuadrantes 2.0
   async addAusenciaToCuadrantes(ausencia: AusenciaInterface) {
     const fechaInicio = DateTime.fromJSDate(ausencia.fechaInicio);
@@ -487,8 +377,8 @@ export class Cuadrantes {
     const cuadrantesFinal: TCuadrante[] = [];
     const cuadrantesEnMedio = await this.schCuadrantes.getCuadrantesIndividual(
       ausencia.idUsuario,
-      ausencia.fechaInicio,
-      ausencia.fechaFinal,
+      DateTime.fromJSDate(ausencia.fechaInicio),
+      DateTime.fromJSDate(ausencia.fechaFinal),
     );
     const trabajador = await this.trabajadoresInstance.getTrabajadorBySqlId(
       ausencia.idUsuario,
