@@ -102,8 +102,8 @@ export class CuadrantesDatabase {
   // Cuadrantes 2.0
   async getCuadrantes(
     idTienda: number,
-    fechaInicioBusqueda: Date,
-    fechaFinalBusqueda: Date,
+    fechaInicioBusqueda: DateTime,
+    fechaFinalBusqueda: DateTime,
   ) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes2");
@@ -111,10 +111,10 @@ export class CuadrantesDatabase {
       .find({
         idTienda: idTienda,
         fechaInicio: {
-          $gte: fechaInicioBusqueda,
+          $gte: fechaInicioBusqueda.toJSDate(),
         },
         fechaFinal: {
-          $lte: fechaFinalBusqueda,
+          $lte: fechaFinalBusqueda.toJSDate(),
         },
       })
       .toArray();
@@ -132,13 +132,16 @@ export class CuadrantesDatabase {
   }
 
   // Cuadrantes 2.0
-  async getTiendas1Semana(fechaInicioBusqueda: Date, fechaFinalBusqueda: Date) {
+  async getTiendas1Semana(
+    fechaInicioBusqueda: DateTime,
+    fechaFinalBusqueda: DateTime,
+  ) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes2");
     const resCuadrantes = await cuadrantesCollection
       .find({
-        fechaInicio: { $gte: fechaInicioBusqueda },
-        fechaFinal: { $lte: fechaFinalBusqueda },
+        fechaInicio: { $gte: fechaInicioBusqueda.toJSDate() },
+        fechaFinal: { $lte: fechaFinalBusqueda.toJSDate() },
       })
       .toArray();
 
@@ -159,16 +162,16 @@ export class CuadrantesDatabase {
   // Cuadrantes 2.0
   async getCuadranteSemanaTrabajador(
     idTrabajador: number,
-    fechaInicioBusqueda: Date,
-    fechaFinalBusqueda: Date,
+    fechaInicioBusqueda: DateTime,
+    fechaFinalBusqueda: DateTime,
   ) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes2");
     const resCuadrantes = await cuadrantesCollection
       .find({
         idTrabajador: idTrabajador,
-        fechaInicio: { $gte: fechaInicioBusqueda },
-        fechaFinal: { $lte: fechaFinalBusqueda },
+        fechaInicio: { $gte: fechaInicioBusqueda.toJSDate() },
+        fechaFinal: { $lte: fechaFinalBusqueda.toJSDate() },
       })
       .toArray();
 
@@ -194,7 +197,7 @@ export class CuadrantesDatabase {
 
   // Cuadrantes 2.0
   public nombreTablaSqlHit(fecha: Date) {
-    const lunes = this.getMondayMoment(fecha);
+    const lunes = DateTime.fromJSDate(fecha).startOf("week");
     return `cdpPlanificacion_${lunes.toFormat("yyyy_MM_dd")}`;
   }
 

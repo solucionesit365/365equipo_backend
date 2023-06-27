@@ -83,9 +83,10 @@ export class FichajesValidadosDatabase {
     return await fichajesCollection.find({}).toArray();
   }
 
+  // Cuadrantes 2.0
   async getValidadosSemanaResponsable(
-    year: number,
-    semana: number,
+    fechaInicioBusqueda: DateTime,
+    fechaFinalBusqueda: DateTime,
     idResponsable: number,
   ) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
@@ -94,8 +95,8 @@ export class FichajesValidadosDatabase {
 
     return await fichajesCollection
       .find({
-        year,
-        semana,
+        fechaEntrada: { $gte: fechaInicioBusqueda.toJSDate() },
+        fechaSalida: { $lte: fechaFinalBusqueda.toJSDate() },
         idResponsable,
       })
       .toArray();
@@ -113,8 +114,8 @@ export class FichajesValidadosDatabase {
 
     return await fichajesCollection
       .find({
-        fechaEntrada: lunes.toJSDate(),
-        fechaSalida: domingo.toJSDate(),
+        fechaEntrada: { $gte: lunes.toJSDate() },
+        fechaSalida: { $lte: domingo.toJSDate() },
         idTrabajador,
       })
       .toArray();

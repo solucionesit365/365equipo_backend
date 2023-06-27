@@ -55,7 +55,11 @@ export class FichajesValidados {
   }
 
   // Cuadrantes 2.0
-  async getParaCuadrante(lunes: DateTime, domingo: DateTime, idTrabajador: number) {
+  async getParaCuadrante(
+    lunes: DateTime,
+    domingo: DateTime,
+    idTrabajador: number,
+  ) {
     return await this.schFichajesValidados.getParaCuadrante(
       lunes,
       domingo,
@@ -63,10 +67,9 @@ export class FichajesValidados {
     );
   }
 
-  async resumenSemana(year: number, semana: number, idTienda: number) {
-    const lunes = moment(
-      year + "-W" + (semana < 10 ? "0" + semana : semana) + "-1",
-    );
+  // Cuadrantes 2.0
+  async resumenSemana(fechaBusqueda: Date, idTienda: number) {
+    const lunes = DateTime.fromJSDate(fechaBusqueda).startOf("week");
     const responsable: TrabajadorCompleto =
       await this.trabajadoresInstance.getResponsableTienda(idTienda);
     const subordinados = await this.trabajadoresInstance.getSubordinadosById(
@@ -74,8 +77,8 @@ export class FichajesValidados {
     );
     const arrayValidados =
       await this.schFichajesValidados.getValidadosSemanaResponsable(
-        year,
-        semana,
+        lunes,
+        lunes.endOf("week"),
         responsable.id,
       );
 
@@ -92,19 +95,15 @@ export class FichajesValidados {
     }
 
     for (let i = 0; i < arrayValidados.length; i += 1) {
-      const dayIndex = this.getNumeroSemana(arrayValidados[i].fecha);
+      const dayIndex =
+        DateTime.fromJSDate(arrayValidados[i].fechaEntrada).weekday - 1;
       this.addToSubordinados(subordinados, arrayValidados[i], dayIndex);
     }
 
     return subordinados; // Hacer map para filtrar datos innecesarios.
   }
 
-  getNumeroSemana(stringDate: string) {
-    const date = moment(stringDate, "YYYY-MM-DD");
-    const dayOfWeek = (date.day() + 6) % 7;
-    return dayOfWeek;
-  }
-
+  // Cuadrantes 2.0
   addToSubordinados(
     subordinados: {
       id: number;
