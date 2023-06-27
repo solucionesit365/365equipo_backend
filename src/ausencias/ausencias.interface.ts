@@ -9,11 +9,8 @@ export interface AusenciaInterface {
   fechaFinal: Date;
   comentario: string;
   enviado?: boolean;
-  total: boolean;
-  arrayParciales: {
-    dia: Date;
-    horasJustificadas: number;
-  }[];
+  completa: boolean;
+  horas?: number;
 }
 
 export type TiposAusencia =

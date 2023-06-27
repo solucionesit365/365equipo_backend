@@ -28,8 +28,8 @@ export interface TCuadrante {
   horasContrato: number;
   ausencia: {
     tipo: TiposAusencia;
-    horasJustificadas?: number;
-    total: boolean;
+    horas?: number;
+    completa: boolean;
     idAusencia: ObjectId;
   };
 }

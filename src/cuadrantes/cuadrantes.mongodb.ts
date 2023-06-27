@@ -234,13 +234,23 @@ export class CuadrantesDatabase {
   //   return cuadrantes;
   // }
 
-  // Cuadrante 2.0
-  async actualizarCuadranteAusencia(cuadrante: TCuadrante): Promise<void> {
+
+  // Cuadrantes 2.0 (Se utiliza solo como trigger de una nueva ausencia)
+  async updateOrInsertManyCuadrantes(cuadrantes: TCuadrante[]) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes2");
-    const id = cuadrante._id;
-    delete cuadrante._id;
 
-    await cuadrantesCollection.updateOne({ _id: id }, { $set: cuadrante });
+    for (const cuadrante of cuadrantes) {
+      const filtro = { _id: cuadrante._id };
+
+      const documentoExistente = await cuadrantesCollection.findOne(filtro);
+
+      if (documentoExistente) {
+        delete cuadrante._id;
+        await cuadrantesCollection.updateOne(filtro, { $set: cuadrante });
+      } else {
+        await cuadrantesCollection.insertOne(cuadrante);
+      }
+    }
   }
 }

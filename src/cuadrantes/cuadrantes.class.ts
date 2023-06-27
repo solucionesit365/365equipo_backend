@@ -480,6 +480,7 @@ export class Cuadrantes {
     };
   }
 
+  // Cuadrantes 2.0
   async addAusenciaToCuadrantes(ausencia: AusenciaInterface) {
     const fechaInicio = DateTime.fromJSDate(ausencia.fechaInicio);
     const fechaFinal = DateTime.fromJSDate(ausencia.fechaFinal);
@@ -495,9 +496,17 @@ export class Cuadrantes {
 
     let auxFecha = fechaInicio;
     while (auxFecha <= fechaFinal) {
-      const cuadranteMolesto = cuadrantesEnMedio.find((cuadrante) => DateTime.fromJSDate(cuadrante.fechaInicio).hasSame(auxFecha, "day"));
+      const cuadranteMolesto = cuadrantesEnMedio.find((cuadrante) =>
+        DateTime.fromJSDate(cuadrante.fechaInicio).hasSame(auxFecha, "day"),
+      );
       if (cuadranteMolesto) {
-        // Existe un cuadrante en este día, hay que modificarlo y poner que habrá ausencia ese día
+        cuadranteMolesto.ausencia = {
+          tipo: ausencia.tipo,
+          completa: ausencia.completa,
+          horas: ausencia.completa ? undefined : ausencia.horas,
+          idAusencia: ausencia._id,
+        };
+        cuadrantesFinal.push(cuadranteMolesto);
       } else {
         cuadrantesFinal.push({
           _id: new ObjectId(),
@@ -513,100 +522,38 @@ export class Cuadrantes {
           horasContrato: trabajador.horasContrato,
           ausencia: {
             tipo: ausencia.tipo,
-            total: ausencia.total,
-            horasJustificadas: (ausencia.total) ? ausencia.
-          }
+            completa: ausencia.completa,
+            horas: ausencia.completa ? undefined : ausencia.horas,
+            idAusencia: ausencia._id,
+          },
         });
       }
 
-      auxFecha = auxFecha.plus({day: 1});
+      auxFecha = auxFecha.plus({ day: 1 });
     }
+
+    await this.schCuadrantes.updateOrInsertManyCuadrantes(cuadrantesFinal);
   }
 
-  // 
-  async agregarAusencia(ausencia: AusenciaInterface): Promise<void> {
-    const cuadrantes =
-      semanas.length > 0
-        ? await this.schCuadrantes.cuadrantesPorAusencia(ausencia, semanas)
-        : [];
-    const trabajador = await this.trabajadoresInstance.getTrabajadorBySqlId(
-      ausencia.idUsuario,
-    );
-
-    const cuadrantesPorSemana = new Map(
-      semanas.map((semana) => [
-        `${semana.year}-${semana.week}`,
-        cuadrantes.find(
-          (cuadrante) =>
-            cuadrante.year === semana.year && cuadrante.semana === semana.week,
-        ),
-      ]),
-    );
-
-    for (const semana of semanas) {
-      const cuadrante = cuadrantesPorSemana.get(
-        `${semana.year}-${semana.week}`,
-      );
-
-      if (cuadrante) {
-        this.actualizarCuadranteConAusencia(cuadrante, ausencia);
-        await this.schCuadrantes.actualizarCuadranteAusencia(cuadrante);
-      } else {
-        const nuevoCuadrante = this.crearNuevoCuadrante(
-          trabajador,
-          semana,
-          ausencia,
-        );
-        await this.schCuadrantes.crearCuadranteAusencia(nuevoCuadrante);
-      }
-    }
-
-    if (cuadrantes.length === 0) {
-      const fechaInicio = moment(ausencia.fechaInicio);
-      const fechaFinal = moment(ausencia.fechaFinal);
-
-      while (fechaInicio.isSameOrBefore(fechaFinal, "day")) {
-        const semana = {
-          year: fechaInicio.year(),
-          week: fechaInicio.isoWeek(),
-        };
-
-        if (!cuadrantesPorSemana.has(`${semana.year}-${semana.week}`)) {
-          const nuevoCuadrante = this.crearNuevoCuadrante(
-            trabajador,
-            semana,
-            ausencia,
-          );
-          await this.schCuadrantes.crearCuadranteAusencia(nuevoCuadrante);
-          cuadrantesPorSemana.set(
-            `${semana.year}-${semana.week}`,
-            nuevoCuadrante,
-          );
-        }
-
-        fechaInicio.add(1, "days");
-      }
-    }
-  }
-
+  // Cuadrantes 2.0
   async copiarCuadrante(
-    semanaOrigen: number,
-    semanaDestino: number,
-    yearOrigen: number,
-    yearDestino: number,
+    lunesOrigen: DateTime,
+    lunesDestino: DateTime,
     idTienda: number,
   ) {
-    const cuadrantesOrigen = await this.getCuadrantes(
-      idTienda,
-      semanaOrigen,
-      yearOrigen,
+    const cuadrantesOrigen = await this.getCuadrantes(idTienda, lunesOrigen);
+    const diferenciaSemanas = Math.abs(
+      lunesOrigen.diff(lunesDestino, "weeks").weeks,
     );
-
     const cuadrantesDestino: TCuadrante[] = cuadrantesOrigen.map(
       (cuadrante) => {
-        cuadrante._id = new ObjectId().toString();
-        cuadrante.semana = semanaDestino;
-        cuadrante.year = yearDestino;
+        cuadrante._id = new ObjectId();
+        cuadrante.fechaInicio = DateTime.fromJSDate(cuadrante.fechaInicio)
+          .plus({ weeks: diferenciaSemanas })
+          .toJSDate();
+        cuadrante.fechaFinal = DateTime.fromJSDate(cuadrante.fechaFinal)
+          .plus({ weeks: diferenciaSemanas })
+          .toJSDate();
         cuadrante.enviado = false;
         return cuadrante;
       },
