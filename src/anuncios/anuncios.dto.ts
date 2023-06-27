@@ -29,7 +29,15 @@ export class AnuncioDto {
 
   @IsNumber()
   visto: number;
+
+  fechaCreacion: Date;
+
+  constructor() {
+    this.fechaCreacion = new Date();
+  }
 }
+
+
 
 export class UpdateAnuncioDto {
   @IsString()
@@ -50,6 +58,16 @@ export class UpdateAnuncioDto {
   @IsString()
   titulo: string;
 }
+// export class OfertasAnuncios {
+//   _id: string;
+//   anuncioId: string;
+//   nombrePostulante: string;
+//   idsql: number;
+//   comentario: string;
+//   archivo: string;
+//   puestoActual: string;
+
+// }
 
 // export class AddAnuncioDto {
 //   @ValidateNested()
