@@ -14,3 +14,14 @@ export interface AuditoriasInterface {
     habilitado: boolean;
     deptCreador: string;
 }
+
+export interface AuditoriaRespuestas {
+    _id: ObjectId;
+    auditoria: string,
+    idAuditoria: string,
+    descripcion: string,
+    persona: string,
+    respuestas: [],
+    tienda: number,
+    ultimaRespuesta: Date
+}
