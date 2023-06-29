@@ -5,7 +5,7 @@ import * as moment from "moment";
 
 @Injectable()
 export class AnunciosClass {
-  constructor(private readonly anunciosService: AnunciosService) {}
+  constructor(private readonly anunciosService: AnunciosService) { }
 
   async getAnuncios(idTienda?: number) {
     const arrayAnuncios = await this.anunciosService.getAnuncios(idTienda);
@@ -29,4 +29,8 @@ export class AnunciosClass {
   async deleteAnuncio(_id: string) {
     return await this.anunciosService.deleteAnuncio(_id);
   }
+
+  // async guardarOfertaAnuncio(ofertas: OfertasAnuncios) {
+  //   return await this.anunciosService.guardarOfertaAnuncio(ofertas);
+  // }
 }

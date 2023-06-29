@@ -129,4 +129,25 @@ export class AnunciosController {
       return { ok: false, message: err.message };
     }
   }
+
+  // @Post("guardarOfertaAnuncio")
+  // async guardarOfertaAnuncio(
+  //   @Body() oferta: OfertasAnuncios,
+  //   @Headers("authorization") authHeader: string,
+  // ) {
+  //   try {
+  //     const token = this.tokenService.extract(authHeader);
+  //     await this.authInstance.verifyToken(token);
+  //     if (await this.anunciosInstance.guardarOfertaAnuncio(oferta))
+  //       return {
+  //         ok: true,
+  //       };
+  //     throw Error("No se ha podido guardar el anuncio");
+
+  //   } catch (err) {
+  //     console.log(err);
+  //     return { ok: false, message: err.message };
+  //   }
+  // }
+
 }

@@ -6,7 +6,7 @@ import { AnuncioDto, UpdateAnuncioDto } from "./anuncios.dto";
 
 @Injectable()
 export class AnunciosService {
-  constructor(private readonly mongoDbService: MongoDbService) {}
+  constructor(private readonly mongoDbService: MongoDbService) { }
 
   async getAnuncios(idTienda: number) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
@@ -62,4 +62,13 @@ export class AnunciosService {
 
     return resDelete.acknowledged && resDelete.deletedCount > 0;
   }
+
+  // async guardarOfertaAnuncio(ofertas: OfertasAnuncios) {
+  //   const db = (await this.mongoDbService.getConexion()).db("soluciones");
+  //   const anunciosOfertas = db.collection<OfertasAnuncios>("ofertasAnuncios");
+  //   const resInsert = await anunciosOfertas.insertOne(ofertas);
+  //   if (resInsert.acknowledged) return resInsert.insertedId;
+  //   return null;
+
+  // }
 }
