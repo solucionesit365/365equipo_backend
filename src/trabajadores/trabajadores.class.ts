@@ -139,7 +139,6 @@ export class Trabajador {
     });
 
     const totales = await schTrabajadores.actualizarUsuarios(
-      "soluciones",
       usuariosNuevos,
       modificarEnApp,
     );

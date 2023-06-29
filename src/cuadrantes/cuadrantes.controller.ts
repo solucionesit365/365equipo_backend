@@ -18,6 +18,7 @@ import * as moment from "moment";
 import { AuthService } from "../firebase/auth";
 import { Trabajador } from "../trabajadores/trabajadores.class";
 import { Notificaciones } from "src/notificaciones/notificaciones.class";
+import { DateTime } from "luxon";
 
 @Controller("cuadrantes")
 export class CuadrantesController {
@@ -29,25 +30,25 @@ export class CuadrantesController {
     private readonly trabajadoresInstance: Trabajador,
   ) {}
 
+  // Cuadrantes 2.0
   @Get()
   @UseGuards(AuthGuard)
   async getCuadrantes(
-    @Query() { semana, year }: { semana: string; year: string },
+    @Query() { fecha }: { fecha: string },
     @Headers("authorization") authHeader: string,
   ) {
     try {
       const token = this.tokenService.extract(authHeader);
       const usuario = await this.authInstance.getUserWithToken(token);
 
-      if (!semana || !year) throw Error("Faltan datos");
+      if (!fecha) throw Error("Faltan datos");
 
       if (usuario.idTienda) {
         return {
           ok: true,
           data: await this.cuadrantesInstance.getCuadrantes(
             usuario.idTienda,
-            Number(semana),
-            Number(year),
+            DateTime.fromJSDate(new Date(fecha)),
             usuario.id,
           ),
         };
@@ -59,31 +60,31 @@ export class CuadrantesController {
     }
   }
 
+  // Cuadrantes 2.0
   @Get("individual")
   @UseGuards(AuthGuard)
   async getCuadrantesIndividual(
     @Query()
-    {
-      semana,
-      idTrabajador,
-      year,
-    }: { semana: string; idTrabajador: string; year: number },
+    { idTrabajador, fecha }: { idTrabajador: string; fecha: string },
     @Headers("authorization") authHeader: string,
   ) {
     try {
       const token = this.tokenService.extract(authHeader);
       const usuario = await this.authInstance.getUserWithToken(token);
 
-      if (!semana || !idTrabajador) throw Error("Faltan datos");
+      if (!fecha || !idTrabajador) throw Error("Faltan datos");
 
       if (usuario.coordinadora && usuario.idTienda) {
+        const fechaInicioBusqueda = DateTime.fromJSDate(
+          new Date(fecha),
+        ).startOf("week");
+        const fechaFinalBusqueda = fechaInicioBusqueda.endOf("week");
         return {
           ok: true,
           data: await this.cuadrantesInstance.getCuadrantesIndividual(
-            usuario.idTienda,
             Number(idTrabajador),
-            Number(semana),
-            year,
+            fechaInicioBusqueda,
+            fechaFinalBusqueda,
           ),
         };
       }
@@ -94,7 +95,7 @@ export class CuadrantesController {
     }
   }
 
-  // Habrá que hacer filtro de máximo el último año
+  // Cuadrantes 2.0 (Habrá que hacer filtro de máximo el último año)
   @Get("getTodos")
   @UseGuards(AuthGuard)
   async getAllCuadrantes(@Headers("authorization") authHeader: string) {
@@ -113,16 +114,15 @@ export class CuadrantesController {
   @Get("getTiendasUnaSemana")
   @UseGuards(AuthGuard)
   async getTiendas1Semana(
-    @Query() { semana, year }: { semana: string; year: string },
+    @Query() { fecha }: { fecha: string },
     @Headers("authorization") authHeader: string,
   ) {
     try {
-      if (!semana || !year) throw Error("Faltan datos");
+      if (!fecha) throw Error("Faltan datos");
       return {
         ok: true,
         data: await this.cuadrantesInstance.getTiendas1Semana(
-          Number(semana),
-          Number(year),
+          DateTime.fromJSDate(new Date(fecha)),
         ),
       };
     } catch (err) {

@@ -6,6 +6,7 @@ import { Cuadrantes } from "../cuadrantes/cuadrantes.class";
 import { SolicitudVacaciones } from "./vacaciones.interface";
 import { EmailClass } from "../email/email.class";
 import { Trabajador } from "../trabajadores/trabajadores.class";
+import { DateTime } from "luxon";
 
 @Injectable()
 export class Vacaciones {
@@ -13,9 +14,8 @@ export class Vacaciones {
     private readonly cuadrantesInstance: Cuadrantes,
     private readonly emailInstance: EmailClass,
     private readonly trabajadorInstance: Trabajador,
-  ) { }
+  ) {}
   async getSolicitudById(idSolicitud: number) {
-
     return await schVacaciones.getSolicitudById(Number(idSolicitud));
   }
   async nuevaSolicitudVacaciones(solicitud: SolicitudVacaciones) {
@@ -66,6 +66,7 @@ export class Vacaciones {
     return await schVacaciones.getSolicitudesSubordinados(idApp);
   }
 
+  // Cuadrantes 2.0
   async setEstadoSolicitud(
     estado: string,
     idSolicitud: number,
@@ -81,10 +82,17 @@ export class Vacaciones {
       if (estado === "APROBADA") {
         const vacaciones = await schVacaciones.getSolicitudById(idSolicitud);
         await this.cuadrantesInstance.addAusenciaToCuadrantes({
-          arrayParciales: [],
+          completa: true,
+          enviado: false,
           comentario: "Vacaciones",
-          fechaInicio: moment(vacaciones.fechaInicio, "DD/MM/YYYY").toDate(),
-          fechaFinal: moment(vacaciones.fechaFinal, "DD/MM/YYYY").toDate(),
+          fechaInicio: DateTime.fromFormat(
+            vacaciones.fechaInicio,
+            "dd/MM/yyyy",
+          ).toJSDate(),
+          fechaFinal: DateTime.fromFormat(
+            vacaciones.fechaFinal,
+            "dd/MM/yyyy",
+          ).toJSDate(),
           idUsuario: vacaciones.idBeneficiario,
           nombre: vacaciones.idBeneficiario,
           tipo: "VACACIONES",
@@ -122,14 +130,14 @@ export class Vacaciones {
 
       WITH Dates AS (
         SELECT CONVERT(datetime, '${fechaInicio.format(
-      "YYYY-MM-DD",
-    )}', 126) AS Date
+          "YYYY-MM-DD",
+        )}', 126) AS Date
         UNION ALL
         SELECT DATEADD(day, 1, Date)
         FROM Dates
         WHERE DATEADD(day, 1, Date) <= CONVERT(datetime, '${fechaFinal.format(
-      "YYYY-MM-DD",
-    )}', 126)
+          "YYYY-MM-DD",
+        )}', 126)
       )
       MERGE ${nombreTabla} AS Target
       USING (SELECT * FROM Dates) AS Source
@@ -145,8 +153,9 @@ export class Vacaciones {
           Target.usuarioModif = '365Equipo'
       WHEN NOT MATCHED THEN
         INSERT (id, fecha, idEmpleado, estado, observaciones, TimeStamp, usuarioModif)
-        VALUES (NEWID(), Source.Date, ${vacaciones.idBeneficiario
-      }, 'VACANCES', '[Horas:24]', GETDATE(), '365Equipo');
+        VALUES (NEWID(), Source.Date, ${
+          vacaciones.idBeneficiario
+        }, 'VACANCES', '[Horas:24]', GETDATE(), '365Equipo');
 
       SET @InsertedRows = @@ROWCOUNT;
 
@@ -158,10 +167,9 @@ export class Vacaciones {
     if (
       resultado.recordset.length > 0 &&
       fechaFinal.diff(fechaInicio, "days") + 1 ===
-      resultado.recordset[0].InsertedRows
+        resultado.recordset[0].InsertedRows
     ) {
       await recSoluciones(
-        "soluciones",
         "UPDATE solicitudVacaciones SET enviado = 1 WHERE idSolicitud = @param0",
         vacaciones.idSolicitud,
       );
@@ -185,5 +193,4 @@ export class Vacaciones {
   async getVacacionesByEstado(estado: string) {
     return await schVacaciones.getVacacionesByEstado(estado);
   }
-
 }
