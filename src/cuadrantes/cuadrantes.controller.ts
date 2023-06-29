@@ -110,7 +110,7 @@ export class CuadrantesController {
     }
   }
 
-  //Todas las tiendas 1 semana
+  //Cuadrantes 2.0 (Todas las tiendas 1 semana)
   @Get("getTiendasUnaSemana")
   @UseGuards(AuthGuard)
   async getTiendas1Semana(
@@ -131,13 +131,10 @@ export class CuadrantesController {
     }
   }
 
-  //Todas las semanas 1 tienda
+  // Cuadrantes 2.0 (Todas las semanas 1 tienda)
   @Get("getTiendaTodasSemanas")
   @UseGuards(AuthGuard)
-  async getSemanas1Tienda(
-    @Query() { idTienda }: { idTienda: number },
-    @Headers("authorization") authHeader: string,
-  ) {
+  async getSemanas1Tienda(@Query() { idTienda }: { idTienda: number }) {
     try {
       if (!idTienda) throw Error("Faltan datos");
       return {
@@ -150,30 +147,20 @@ export class CuadrantesController {
     }
   }
 
-  //1Tienda 1 Semana
+  // Cuadrantes 2.0 (1Tienda 1 Semana)
   @Get("getTiendaSemana")
   @UseGuards(AuthGuard)
   async getTiendaSemana(
     @Query()
-    {
-      idTienda,
-      semana,
-      year,
-    }: {
-      idTienda: number;
-      semana: number;
-      year: number;
-    },
-    @Headers("authorization") authHeader: string,
+    { idTienda, fecha }: { idTienda: number; fecha: string },
   ) {
     try {
-      if (!idTienda && !semana && !year) throw Error("Faltan datos");
+      if (!idTienda) throw Error("Faltan datos");
       return {
         ok: true,
         data: await this.cuadrantesInstance.getCuadrantes(
           Number(idTienda),
-          Number(semana),
-          Number(year),
+          DateTime.fromJSDate(new Date(fecha)),
         ),
       };
     } catch (error) {
@@ -181,28 +168,21 @@ export class CuadrantesController {
       return { ok: false, message: error.message };
     }
   }
-  //obtener cuadrantes por semana y trabajador:
 
+  // Cuadrantes 2.0 (Obtener cuadrantes por semana y trabajador)
   @Get("cuadranteSemanaTrabajador")
   @UseGuards(AuthGuard)
   async getCuadranteSemanaTrabajador(
     @Query()
-    {
-      idTrabajador,
-      semana,
-    }: {
-      idTrabajador: number;
-      semana: number;
-    },
-    @Headers("authorization") authHeader: string,
+    { idTrabajador, fecha }: { idTrabajador: number; fecha: string },
   ) {
     try {
-      if (!idTrabajador && !semana) throw Error("Faltan datos");
+      if (!idTrabajador) throw Error("Faltan datos");
       return {
         ok: true,
         data: await this.cuadrantesInstance.getCuadranteSemanaTrabajador(
           Number(idTrabajador),
-          Number(semana),
+          DateTime.fromJSDate(new Date(fecha)),
         ),
       };
     } catch (error) {
@@ -211,31 +191,39 @@ export class CuadrantesController {
     }
   }
 
+  //
   @Post("saveCuadrante")
   @UseGuards(AuthGuard)
   async saveCuadrante(
-    @Body() cuadrante: TCuadrante,
+    @Body() cuadrante: TCuadrante[],
     @Headers("authorization") authHeader: string,
   ) {
     try {
       if (!cuadrante) throw Error("Faltan datos");
       const token = this.tokenService.extract(authHeader);
-      const usuario = await this.authInstance.getUserWithToken(token);
+      const coordinadora = await this.authInstance.getUserWithToken(token);
 
-      if (usuario.coordinadora && usuario.idTienda) {
+      if (coordinadora.coordinadora && coordinadora.idTienda) {
+        const fechaInicioBusqueda = DateTime.fromJSDate(
+          new Date(cuadrante.fechaInicio),
+        ).startOf("week");
+        const fechaFinalBusqueda = DateTime.fromJSDate(
+          new Date(cuadrante.fechaFinal),
+        );
+
         const oldCuadrante =
           await this.cuadrantesInstance.getCuadrantesIndividual(
-            cuadrante.idTienda,
             cuadrante.idTrabajador,
-            cuadrante.semana,
-            cuadrante.year,
+            fechaInicioBusqueda,
+            fechaFinalBusqueda,
           );
-        cuadrante.idTienda = usuario.idTienda;
+        cuadrante.idTienda = coordinadora.idTienda;
 
         const notiCuadrante = await this.cuadrantesInstance.saveCuadrante(
           cuadrante,
           oldCuadrante,
         );
+
         if (notiCuadrante) {
           const trabajadorID =
             await this.trabajadoresInstance.getTrabajadorBySqlId(
