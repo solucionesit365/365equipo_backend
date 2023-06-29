@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import * as moment from "moment";
 import { CuadrantesDatabase } from "./cuadrantes.mongodb";
 import { ObjectId } from "mongodb";
-import { TCuadrante } from "./cuadrantes.interface";
+import { TCuadrante, TCuadranteRequest } from "./cuadrantes.interface";
 import { Tienda } from "../tiendas/tiendas.class";
 import { FacTenaMssql } from "../bbdd/mssql.class";
 import { AusenciaInterface } from "../ausencias/ausencias.interface";
@@ -452,5 +452,56 @@ export class Cuadrantes {
     if (await this.schCuadrantes.insertCuadrantes(cuadrantesDestino))
       return true;
     else throw Error("No se han podido guardar las copias de los cuadrantes");
+  }
+
+  // Cuadrantes 2.0
+  public getNuevosAndModificados(
+    oldCuadrantes: TCuadrante[],
+    newCuadrantes: TCuadranteRequest[],
+  ): { nuevos: TCuadrante[]; modificados: TCuadrante[] } {
+    const modificados: TCuadrante[] = [];
+    const nuevos: TCuadrante[] = [];
+
+    for (let i = 0; i < newCuadrantes.length; i += 1) {
+      const cuadranteMismoDia = oldCuadrantes.find((cuadrante) => {
+        if (
+          DateTime.fromJSDate(cuadrante.fechaInicio).hasSame(
+            DateTime.fromJSDate(new Date(newCuadrantes[i].fechaInicio)),
+            "day",
+          ) &&
+          !cuadrante.ausencia
+        ) {
+          return true;
+        }
+      });
+
+      if (cuadranteMismoDia) {
+        cuadranteMismoDia.enviado = false;
+        cuadranteMismoDia.fechaInicio = new Date(newCuadrantes[i].fechaInicio);
+        cuadranteMismoDia.fechaFinal = new Date(newCuadrantes[i].fechaFinal);
+        cuadranteMismoDia.historialPlanes.push(
+          cuadranteMismoDia._id.toString(),
+        );
+        cuadranteMismoDia.ausencia = newCuadrantes[i].ausencia;
+        cuadranteMismoDia.idTienda = newCuadrantes[i].idTienda;
+        cuadranteMismoDia.totalHoras = newCuadrantes[i].totalHoras;
+
+        modificados.push(cuadranteMismoDia);
+      } else
+        nuevos.push({
+          _id: new ObjectId(),
+          ausencia: newCuadrantes[i].ausencia,
+          enviado: false,
+          fechaInicio: new Date(newCuadrantes[i].fechaInicio),
+          fechaFinal: new Date(newCuadrantes[i].fechaFinal),
+          historialPlanes: [],
+          horasContrato: newCuadrantes[i].horasContrato,
+          idTienda: newCuadrantes[i].idTienda,
+          idTrabajador: newCuadrantes[i].idTrabajador,
+          nombre: newCuadrantes[i].nombre,
+          totalHoras: newCuadrantes[i].totalHoras,
+        });
+    }
+    return { nuevos, modificados };
   }
 }

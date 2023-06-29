@@ -17,10 +17,28 @@ const lol = {
 export interface TCuadrante {
   _id: ObjectId;
   idTrabajador: number;
-  idPlan: string;
+  // idPlan: string;
   idTienda: number;
   fechaInicio: Date;
   fechaFinal: Date;
+  nombre: string;
+  totalHoras: number;
+  enviado: boolean;
+  historialPlanes: string[];
+  horasContrato: number;
+  ausencia: {
+    tipo: TiposAusencia;
+    horas?: number;
+    completa: boolean;
+    idAusencia: ObjectId;
+  };
+}
+
+export interface TCuadranteRequest {
+  idTrabajador: number;
+  idTienda: number;
+  fechaInicio: string;
+  fechaFinal: string;
   nombre: string;
   totalHoras: number;
   enviado: boolean;

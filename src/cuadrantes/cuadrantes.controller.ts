@@ -12,7 +12,7 @@ import {
 import { AuthGuard } from "../auth/auth.guard";
 import { TokenService } from "../get-token/get-token.service";
 import { Cuadrantes } from "./cuadrantes.class";
-import { TCuadrante } from "./cuadrantes.interface";
+import { TCuadrante, TCuadranteRequest } from "./cuadrantes.interface";
 import { SchedulerGuard } from "../scheduler/scheduler.guard";
 import * as moment from "moment";
 import { AuthService } from "../firebase/auth";
@@ -195,57 +195,129 @@ export class CuadrantesController {
   @Post("saveCuadrante")
   @UseGuards(AuthGuard)
   async saveCuadrante(
-    @Body() cuadrante: TCuadrante[],
+    @Body()
+    {
+      cuadrantes,
+      fecha,
+      idTrabajador,
+    }: { cuadrantes: TCuadranteRequest[]; fecha: string; idTrabajador: number }, // 7 cuadrantes diarios
     @Headers("authorization") authHeader: string,
   ) {
     try {
-      if (!cuadrante) throw Error("Faltan datos");
+      if (!cuadrantes || !fecha || !idTrabajador) throw Error("Faltan datos");
       const token = this.tokenService.extract(authHeader);
-      const coordinadora = await this.authInstance.getUserWithToken(token);
+      const userCoordinadora = await this.authInstance.getUserWithToken(token);
 
-      if (coordinadora.coordinadora && coordinadora.idTienda) {
-        const fechaInicioBusqueda = DateTime.fromJSDate(
-          new Date(cuadrante.fechaInicio),
-        ).startOf("week");
-        const fechaFinalBusqueda = DateTime.fromJSDate(
-          new Date(cuadrante.fechaFinal),
-        );
+      if (userCoordinadora.coordinadora && userCoordinadora.idTienda) {
+        const lunes = DateTime.fromJSDate(new Date(fecha)).startOf("week");
+        const domingo = lunes.endOf("week");
 
-        const oldCuadrante =
+        // Get cuadrantes de la bbdd
+        const oldCuadrantes =
           await this.cuadrantesInstance.getCuadrantesIndividual(
-            cuadrante.idTrabajador,
-            fechaInicioBusqueda,
-            fechaFinalBusqueda,
+            idTrabajador,
+            lunes,
+            domingo,
           );
-        cuadrante.idTienda = coordinadora.idTienda;
 
-        const notiCuadrante = await this.cuadrantesInstance.saveCuadrante(
-          cuadrante,
-          oldCuadrante,
-        );
+        // Get modificados o nuevos
+        const { nuevos, modificados } =
+          this.cuadrantesInstance.getNuevosAndModificados(
+            oldCuadrantes,
+            cuadrantes,
+          );
+        
+        
 
-        if (notiCuadrante) {
-          const trabajadorID =
-            await this.trabajadoresInstance.getTrabajadorBySqlId(
-              cuadrante.idTrabajador,
-            );
+        // const oldCuadrante =
+        //   await this.cuadrantesInstance.getCuadrantesIndividual(
+        //     cuadrante.idTrabajador,
+        //     fechaInicioBusqueda,
+        //     fechaFinalBusqueda,
+        //   );
+        // cuadrante.idTienda = userCoordinadora.idTienda;
 
-          this.notificaciones.newInAppNotification({
-            uid: trabajadorID.idApp,
-            titulo: "CUADRANTE TIENDA",
-            mensaje: `Se ha creado tu horario de la semana ${cuadrante.semana}`,
-            leido: false,
-            creador: "SISTEMA",
-          });
-          return { ok: true };
-        }
-      }
-      throw Error("No llevas equipo o tienda para realizar esta acción");
+        // const notiCuadrante = await this.cuadrantesInstance.saveCuadrante(
+        //   cuadrante,
+        //   oldCuadrante,
+        // );
+
+        // if (notiCuadrante) {
+        //   const trabajadorID =
+        //     await this.trabajadoresInstance.getTrabajadorBySqlId(
+        //       cuadrante.idTrabajador,
+        //     );
+
+        //   this.notificaciones.newInAppNotification({
+        //     uid: trabajadorID.idApp,
+        //     titulo: "CUADRANTE TIENDA",
+        //     mensaje: `Se ha creado tu horario de la semana ${cuadrante.semana}`,
+        //     leido: false,
+        //     creador: "SISTEMA",
+        //   });
+        //   return { ok: true };
+        // }
+      } else throw Error("No llevas equipo o tienda para realizar esta acción");
     } catch (err) {
       console.log(err);
       return { ok: false, message: err.message };
     }
   }
+  // Copia del antiguo saveCuadrante
+  // @Post("saveCuadrante")
+  // @UseGuards(AuthGuard)
+  // async saveCuadrante(
+  //   @Body() cuadrante: TCuadrante[],
+  //   @Headers("authorization") authHeader: string,
+  // ) {
+  //   try {
+  //     if (!cuadrante) throw Error("Faltan datos");
+  //     const token = this.tokenService.extract(authHeader);
+  //     const coordinadora = await this.authInstance.getUserWithToken(token);
+
+  //     if (coordinadora.coordinadora && coordinadora.idTienda) {
+  //       const fechaInicioBusqueda = DateTime.fromJSDate(
+  //         new Date(cuadrante.fechaInicio),
+  //       ).startOf("week");
+  //       const fechaFinalBusqueda = DateTime.fromJSDate(
+  //         new Date(cuadrante.fechaFinal),
+  //       );
+
+  //       const oldCuadrante =
+  //         await this.cuadrantesInstance.getCuadrantesIndividual(
+  //           cuadrante.idTrabajador,
+  //           fechaInicioBusqueda,
+  //           fechaFinalBusqueda,
+  //         );
+  //       cuadrante.idTienda = coordinadora.idTienda;
+
+  //       const notiCuadrante = await this.cuadrantesInstance.saveCuadrante(
+  //         cuadrante,
+  //         oldCuadrante,
+  //       );
+
+  //       if (notiCuadrante) {
+  //         const trabajadorID =
+  //           await this.trabajadoresInstance.getTrabajadorBySqlId(
+  //             cuadrante.idTrabajador,
+  //           );
+
+  //         this.notificaciones.newInAppNotification({
+  //           uid: trabajadorID.idApp,
+  //           titulo: "CUADRANTE TIENDA",
+  //           mensaje: `Se ha creado tu horario de la semana ${cuadrante.semana}`,
+  //           leido: false,
+  //           creador: "SISTEMA",
+  //         });
+  //         return { ok: true };
+  //       }
+  //     }
+  //     throw Error("No llevas equipo o tienda para realizar esta acción");
+  //   } catch (err) {
+  //     console.log(err);
+  //     return { ok: false, message: err.message };
+  //   }
+  // }
 
   @Post("sincronizarConHit")
   @UseGuards(SchedulerGuard)
