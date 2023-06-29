@@ -303,4 +303,24 @@ export class IncidenciasController {
         }
     }
 
+
+    @Post("updateIncidenciaDestinatario")
+    async updateIncidenciaDestinatario(
+        @Headers("authorization") authHeader: string,
+        @Body() incidencia: Incidencias
+    ) {
+        try {
+            const token = this.tokenService.extract(authHeader);
+            await this.authInstance.verifyToken(token);
+            return {
+                ok: true,
+                data: await this.incidenciaInstance.updateIncidenciaDestinatario(
+                    incidencia)
+            }
+        } catch (err) {
+            console.log(err);
+            return { ok: false, message: err.message };
+        }
+    }
+
 }

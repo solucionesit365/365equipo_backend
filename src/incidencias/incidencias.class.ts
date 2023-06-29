@@ -59,4 +59,8 @@ export class Incidencia {
     async getIncidenciasByUid(uid: string) {
         return await this.schIncidencias.getIncidenciasByUid(uid);
     }
+
+    async updateIncidenciaDestinatario(incidencias: Incidencias) {
+        return await this.schIncidencias.updateIncidenciaDestinatario(incidencias)
+    }
 }
