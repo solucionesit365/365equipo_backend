@@ -12,6 +12,7 @@ import { TokenService } from "../get-token/get-token.service";
 import { AuthService } from "../firebase/auth";
 import { AuditoriasInterface, AuditoriaRespuestas } from "./auditorias.interface"
 import { Auditorias } from './auditorias.class';
+import { Tienda } from 'src/tiendas/tiendas.class';
 import { query } from 'mssql';
 
 
@@ -21,6 +22,7 @@ export class AuditoriasController {
         private readonly authInstance: AuthService,
         private readonly tokenService: TokenService,
         private readonly auditoriaInstance: Auditorias,
+        private readonly tiendasInstance: Tienda,
     ) { }
 
     @Post("nuevaAuditoria")
@@ -50,6 +52,22 @@ export class AuditoriasController {
             await this.authInstance.verifyToken(token);
 
             const respAuditoria = await this.auditoriaInstance.getAuditorias();
+            if (respAuditoria) return { ok: true, data: respAuditoria };
+            else throw Error("No se ha encontrado ninguna auditoria");
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    @Get("getAuditoriasHabilitado")
+    @UseGuards(AuthGuard)
+    async getAuditoriasHabilitado(@Headers("authorization") authHeader: string,
+        @Query() { habilitado }: { habilitado: string }) {
+        try {
+
+            const habilitadoBollean = habilitado == "true" ? true : false
+
+            const respAuditoria = await this.auditoriaInstance.getAuditoriasHabilitado(habilitadoBollean);
             if (respAuditoria) return { ok: true, data: respAuditoria };
             else throw Error("No se ha encontrado ninguna auditoria");
         } catch (error) {
@@ -103,7 +121,7 @@ export class AuditoriasController {
             return { ok: false, message: err.message };
         }
     }
-
+    //Respuestas auditorias
     @Post("respuestasAuditorias")
     @UseGuards(AuthGuard)
     async respuestasAuditorias(@Headers("authorization") authHeader: string,
@@ -123,20 +141,58 @@ export class AuditoriasController {
         }
     }
 
+    //Ver Respuestas Auditorias
     @Get("getRespuestaAuditorias")
     @UseGuards(AuthGuard)
     async getRespuestaAuditoria(@Headers("authorization") authHeader: string,
-        @Body("id") id) {
+        @Query() { idAuditoria }: { idAuditoria: string }) {
         try {
-            const token = this.tokenService.extract(authHeader);
-            await this.authInstance.verifyToken(token);
-            return {
-                ok: true,
-                data: await this.auditoriaInstance.getRespuestasAuditorias(id)
-            };
+            let respMongo = [];
+            if (idAuditoria) {
+                respMongo = await this.auditoriaInstance.getRespuestasAuditorias(idAuditoria);
+            }
+            if (respMongo.length > 0) {
+                return {
+                    ok: true,
+                    data: respMongo
+                };
+            } else return { ok: false, data: [] }
+
         } catch (error) {
             console.log(error);
             return { ok: false, message: error.message };
+        }
+    }
+
+    //Mostrar todas las tiendas 
+    @Get("tiendasAuditoria")
+    @UseGuards(AuthGuard)
+    async tiendasAuditoria(@Headers("authorization") authHeader: string) {
+        try {
+
+            const resptiendas = await this.tiendasInstance.getTiendas();
+            if (resptiendas) return { ok: true, data: resptiendas };
+            else throw Error("No se ha encontrado ninguna tienda");
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    //Mostrar auditorias por idTienda
+    @Get("getAuditoriasTienda")
+    @UseGuards(AuthGuard)
+    async getAuditoriasTienda(@Headers("authorization") authHeader: string,
+        @Query() { tienda, habilitado }: { tienda: number; habilitado: boolean }
+    ) {
+        try {
+
+            const habilitadoBollean = habilitado = "true" ? true : false
+
+            const respAuditoria = await this.auditoriaInstance.getAuditoriasTienda(Number(tienda), habilitadoBollean);
+            if (respAuditoria) return { ok: true, data: respAuditoria };
+            else throw Error("No se ha encontrado ninguna auditoria");
+        } catch (error) {
+            console.log(error);
         }
     }
 

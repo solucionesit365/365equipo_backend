@@ -27,6 +27,14 @@ export class AuditoriaDatabase {
         return respAuditorias;
     }
 
+
+    async getAuditoriasHabilitado(habilitado: boolean) {
+        const db = (await this.mongoDbService.getConexion()).db("soluciones");
+        const auditoriasCollection = db.collection<AuditoriasInterface>("auditorias");
+        const respAuditorias = await auditoriasCollection.find({ habilitado: habilitado }).toArray();
+
+        return respAuditorias;
+    }
     //Habilitar auditoria
     async updateHabilitarAuditoria(auditorias: AuditoriasInterface) {
         const db = (await this.mongoDbService.getConexion()).db("soluciones");
@@ -80,16 +88,24 @@ export class AuditoriaDatabase {
         throw Error("No se ha podido guardar la respuesta de la auditoria");
     }
 
-
     //Ver Respuestas Auditorias
-    async getRespuestasAuditorias(id: string) {
+    async getRespuestasAuditorias(idAuditoria: string) {
         const db = (await this.mongoDbService.getConexion()).db("soluciones");
         const auditoriasCollection = db.collection<AuditoriaRespuestas>("auditoriasRespuestas");
 
-        const respAuditorias = await auditoriasCollection.find({ id }).toArray();
+        const respAuditorias = await auditoriasCollection.find({ idAuditoria: idAuditoria }).toArray();
 
         return respAuditorias;
     }
 
+
+    //Mostrar auditorias por idTienda
+    async getAuditoriasTienda(tienda: number, habilitado: boolean) {
+        const db = (await this.mongoDbService.getConexion()).db("soluciones");
+        const auditoriasCollection = db.collection<AuditoriasInterface>("auditorias");
+        const respAuditorias = await auditoriasCollection.find({ tienda, habilitado }).toArray();
+
+        return respAuditorias;
+    }
 
 }

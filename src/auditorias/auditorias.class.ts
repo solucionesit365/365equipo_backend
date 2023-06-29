@@ -21,6 +21,11 @@ export class Auditorias {
         return await this.schAuditorias.getAuditorias();
     }
 
+    async getAuditoriasHabilitado(habilitado: boolean) {
+        return await this.schAuditorias.getAuditoriasHabilitado(habilitado);
+    }
+
+
     async updateHabilitarAuditoria(auditoria: AuditoriasInterface) {
         return await this.schAuditorias.updateHabilitarAuditoria(auditoria);
     }
@@ -38,9 +43,15 @@ export class Auditorias {
 
     }
 
-    async getRespuestasAuditorias(id: string) {
-        return await this.schAuditorias.getRespuestasAuditorias(id);
+    //Ver Respuestas Auditorias
+    async getRespuestasAuditorias(idAuditoria: string) {
+        return await this.schAuditorias.getRespuestasAuditorias(idAuditoria);
 
+    }
+
+    //Mostrar auditorias por idTienda
+    async getAuditoriasTienda(tienda: number, habilitado: boolean) {
+        return await this.schAuditorias.getAuditoriasTienda(tienda, habilitado);
     }
 
 }
