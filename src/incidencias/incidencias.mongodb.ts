@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { MongoDbService } from "../bbdd/mongodb";
-import { Incidencias } from "./incidencias.interface";
+import { Incidencias, IncidenciasInvitado } from "./incidencias.interface";
 import { ObjectId } from "mongodb";
 import { toArray } from "rxjs";
 
@@ -18,6 +18,19 @@ export class IncidenciasClass {
         if (resInsert.acknowledged) return resInsert.insertedId;
         throw Error(
             "No se ha podido insertar la incidencia",
+        );
+    }
+    //Incidencia Invitado
+    async nuevaIncidenciaInvitado(incidencia: IncidenciasInvitado) {
+        incidencia._id = new ObjectId();
+        const db = (await this.mongoDbService.getConexion()).db("soluciones");
+        const incidenciasCollection = db.collection<IncidenciasInvitado>(
+            "incidencias",
+        );
+        const resInsert = await incidenciasCollection.insertOne(incidencia);
+        if (resInsert.acknowledged) return resInsert.insertedId;
+        throw Error(
+            "No se ha podido insertar la incidencia Invitado",
         );
     }
 
