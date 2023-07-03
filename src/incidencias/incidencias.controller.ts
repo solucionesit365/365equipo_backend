@@ -323,4 +323,25 @@ export class IncidenciasController {
         }
     }
 
+    @Post("deleteIncidencia")
+    async deleteIncidencias(
+        @Headers("authorization") authHeader: string,
+        @Body() { _id }: { _id: string }) {
+        try {
+            const token = this.tokenService.extract(authHeader);
+            await this.authInstance.verifyToken(token);
+            const respAusencias = await this.incidenciaInstance.deleteIncidencias(_id);
+            if (respAusencias)
+                return {
+                    ok: true,
+                    data: respAusencias
+                };
+
+            throw Error("No se ha podido borrar la incidencia");
+        } catch (err) {
+            console.log(err);
+            return { ok: false, message: err.message };
+        }
+    }
+
 }
