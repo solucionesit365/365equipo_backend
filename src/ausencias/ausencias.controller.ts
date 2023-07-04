@@ -114,6 +114,31 @@ export class AusenciasController {
     }
   }
 
+
+  @Post("updateAusenciaResto")
+  async updateAusenciaResto(
+    @Body() ausencia: AusenciaInterface,
+    @Headers("authorization") authHeader: string,
+  ) {
+    try {
+      const token = this.tokenService.extract(authHeader);
+      await this.authInstance.verifyToken(token);
+      const respAusencia = await this.ausenciasInstance.updateAusenciaResto(ausencia);
+      if (respAusencia)
+        return {
+          ok: true,
+          data: respAusencia
+        };
+      console.log(respAusencia);
+      console.log(ausencia);
+
+
+      throw Error("No se ha podido modificar la ausencia");
+    } catch (err) {
+      console.log(err);
+      return { ok: false, message: err.message };
+    }
+  }
   @Get("getAusencias")
   @UseGuards(AuthGuard)
   async getAusencias(@Headers("authorization") authHeader: string) {

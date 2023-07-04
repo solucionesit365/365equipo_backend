@@ -11,7 +11,7 @@ import { AuthGuard } from "../auth/auth.guard";
 import { TokenService } from "../get-token/get-token.service";
 import { AuthService } from "../firebase/auth";
 import { Incidencia } from "./incidencias.class";
-import { Incidencias } from './incidencias.interface';
+import { Incidencias, IncidenciasInvitado } from './incidencias.interface';
 import { Notificaciones } from "src/notificaciones/notificaciones.class";
 import { Trabajador } from "../trabajadores/trabajadores.class";
 
@@ -36,6 +36,23 @@ export class IncidenciasController {
             return {
                 ok: true,
                 data: await this.incidenciaInstance.nuevaIncidencia(incidencia)
+            };
+
+        } catch (err) {
+            console.log(err);
+            return { ok: false, message: err.message };
+        }
+    }
+
+    //Incidencia invitado
+
+    @Post("nuevaIncidenciaInvitado")
+    async nuevaIncidenciaInvitado(@Headers("authorization") authHeader: string,
+        @Body() incidencia: IncidenciasInvitado) {
+        try {
+            return {
+                ok: true,
+                data: await this.incidenciaInstance.nuevaIncidenciaInvitado(incidencia)
             };
 
         } catch (err) {
@@ -297,6 +314,26 @@ export class IncidenciasController {
                 ok: true,
                 data: respIncidencias,
             };
+        } catch (err) {
+            console.log(err);
+            return { ok: false, message: err.message };
+        }
+    }
+
+
+    @Post("updateIncidenciaDestinatario")
+    async updateIncidenciaDestinatario(
+        @Headers("authorization") authHeader: string,
+        @Body() incidencia: Incidencias
+    ) {
+        try {
+            const token = this.tokenService.extract(authHeader);
+            await this.authInstance.verifyToken(token);
+            return {
+                ok: true,
+                data: await this.incidenciaInstance.updateIncidenciaDestinatario(
+                    incidencia)
+            }
         } catch (err) {
             console.log(err);
             return { ok: false, message: err.message };

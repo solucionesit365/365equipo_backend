@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { MongoDbService } from "../bbdd/mongodb";
-import { Incidencias } from "./incidencias.interface";
+import { Incidencias, IncidenciasInvitado } from "./incidencias.interface";
 import { ObjectId } from "mongodb";
 import { toArray } from "rxjs";
 
@@ -18,6 +18,19 @@ export class IncidenciasClass {
         if (resInsert.acknowledged) return resInsert.insertedId;
         throw Error(
             "No se ha podido insertar la incidencia",
+        );
+    }
+    //Incidencia Invitado
+    async nuevaIncidenciaInvitado(incidencia: IncidenciasInvitado) {
+        incidencia._id = new ObjectId();
+        const db = (await this.mongoDbService.getConexion()).db("soluciones");
+        const incidenciasCollection = db.collection<IncidenciasInvitado>(
+            "incidencias",
+        );
+        const resInsert = await incidenciasCollection.insertOne(incidencia);
+        if (resInsert.acknowledged) return resInsert.insertedId;
+        throw Error(
+            "No se ha podido insertar la incidencia Invitado",
         );
     }
 
@@ -138,5 +151,28 @@ export class IncidenciasClass {
         return respIncidencias
 
     }
+
+
+    async updateIncidenciaDestinatario(incidencias: Incidencias) {
+        const db = (await this.mongoDbService.getConexion()).db("soluciones")
+        const incidenciasCollection = db.collection<Incidencias>("incidencias");
+
+
+        const respIncidencias = await incidenciasCollection.updateOne(
+            {
+                _id: new ObjectId(incidencias._id),
+            },
+            {
+                $set: {
+                    destinatario: incidencias.destinatario,
+                }
+            },
+        );
+
+        if (respIncidencias.acknowledged && respIncidencias.modifiedCount > 0)
+            return true;
+        throw Error("No se ha podido mandar el mensaje");
+    }
+
 
 }

@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { IncidenciasClass } from "./incidencias.mongodb"
-import { Incidencias } from "./incidencias.interface";
+import { Incidencias, IncidenciasInvitado } from "./incidencias.interface";
 
 
 @Injectable()
@@ -11,6 +11,15 @@ export class Incidencia {
 
     async nuevaIncidencia(incidencia: Incidencias) {
         const insertIncidencia = await this.schIncidencias.nuevaIncidencia(incidencia)
+        if (insertIncidencia) return true;
+
+        throw Error("No se ha podido insertar la incidencia");
+
+    }
+
+    // incidenciaInvitado
+    async nuevaIncidenciaInvitado(incidencia: IncidenciasInvitado) {
+        const insertIncidencia = await this.schIncidencias.nuevaIncidenciaInvitado(incidencia)
         if (insertIncidencia) return true;
 
         throw Error("No se ha podido insertar la incidencia");
@@ -58,5 +67,9 @@ export class Incidencia {
 
     async getIncidenciasByUid(uid: string) {
         return await this.schIncidencias.getIncidenciasByUid(uid);
+    }
+
+    async updateIncidenciaDestinatario(incidencias: Incidencias) {
+        return await this.schIncidencias.updateIncidenciaDestinatario(incidencias)
     }
 }
