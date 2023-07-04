@@ -50,6 +50,9 @@ import { SolicitudNuevoClienteBbdd } from "./clientes/clientes.mongodb";
 import { IncidenciasController } from './incidencias/incidencias.controller';
 import { IncidenciasClass } from "./incidencias/incidencias.mongodb";
 import { Incidencia } from "./incidencias/incidencias.class";
+import { VerificacionmfaController } from './verificacionMFA/verificacionmfa.controller';
+import { VerifiacacionDatabase } from "./verificacionMFA/verificacionmfa.mongodb";
+import { VerificacionClass } from "./verificacionMFA/verificacionmfa.class";
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -74,6 +77,7 @@ import { Incidencia } from "./incidencias/incidencias.class";
     CryptoController,
     ClientesController,
     IncidenciasController,
+    VerificacionmfaController,
   ],
   providers: [
     AppService,
@@ -107,7 +111,9 @@ import { Incidencia } from "./incidencias/incidencias.class";
     ClientesService,
     SolicitudNuevoClienteBbdd,
     IncidenciasClass,
-    Incidencia
+    Incidencia,
+    VerifiacacionDatabase,
+    VerificacionClass
   ],
 })
 export class AppModule { }
