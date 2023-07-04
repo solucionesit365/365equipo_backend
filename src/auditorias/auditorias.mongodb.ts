@@ -108,4 +108,15 @@ export class AuditoriaDatabase {
         return respAuditorias;
     }
 
+
+    async deleteAuditoria(auditorias: AuditoriasInterface) {
+        const db = (await this.mongoDbService.getConexion()).db("soluciones");
+        const auditoriasCollection = db.collection<AuditoriasInterface>("auditorias");
+        const respAuditorias = await auditoriasCollection.deleteOne(
+            {
+                _id: new ObjectId(auditorias._id),
+            },
+        )
+        return respAuditorias.acknowledged && respAuditorias.deletedCount > 0;
+    }
 }
