@@ -73,7 +73,10 @@ export class Incidencia {
         return await this.schIncidencias.updateIncidenciaDestinatario(incidencias)
     }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> a6b675354cade01cb9226206daeadec05f122c82
     async deleteIncidencias(_id: string) {
         return await this.schIncidencias.deleteIncidencias(_id);
     }
