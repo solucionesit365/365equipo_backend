@@ -72,4 +72,10 @@ export class Incidencia {
     async updateIncidenciaDestinatario(incidencias: Incidencias) {
         return await this.schIncidencias.updateIncidenciaDestinatario(incidencias)
     }
+
+
+    async deleteIncidencias(_id: string) {
+        return await this.schIncidencias.deleteIncidencias(_id);
+    }
+
 }
