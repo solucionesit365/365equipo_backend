@@ -53,6 +53,9 @@ import { Incidencia } from "./incidencias/incidencias.class";
 import { VerificacionmfaController } from './verificacionMFA/verificacionmfa.controller';
 import { VerifiacacionDatabase } from "./verificacionMFA/verificacionmfa.mongodb";
 import { VerificacionClass } from "./verificacionMFA/verificacionmfa.class";
+import { AuditoriasController } from './auditorias/auditorias.controller';
+import { AuditoriaDatabase } from "./auditorias/auditorias.mongodb";
+import { Auditorias } from "./auditorias/auditorias.class";
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -77,6 +80,7 @@ import { VerificacionClass } from "./verificacionMFA/verificacionmfa.class";
     CryptoController,
     ClientesController,
     IncidenciasController,
+    AuditoriasController,
     VerificacionmfaController,
   ],
   providers: [
@@ -112,6 +116,8 @@ import { VerificacionClass } from "./verificacionMFA/verificacionmfa.class";
     SolicitudNuevoClienteBbdd,
     IncidenciasClass,
     Incidencia,
+    AuditoriaDatabase,
+    Auditorias,
     VerifiacacionDatabase,
     VerificacionClass
   ],
