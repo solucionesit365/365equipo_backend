@@ -59,4 +59,9 @@ export class Auditorias {
         return await this.schAuditorias.deleteAuditoria(auditorias);
     }
 
+    //Update Auditoria
+    async updateAuditoria(auditorias: AuditoriasInterface) {
+        return await this.schAuditorias.updateAuditoria(auditorias);
+    }
+
 }

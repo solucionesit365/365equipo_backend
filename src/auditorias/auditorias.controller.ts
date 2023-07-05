@@ -220,4 +220,28 @@ export class AuditoriasController {
         }
     }
 
+    //Update Auditoria
+    @Post("updateAuditoria")
+    async updateAuditoria(
+        @Body() auditoria: AuditoriasInterface,
+        @Headers("authorization") authHeader: string,
+    ) {
+        try {
+            console.log(auditoria);
+
+            const token = this.tokenService.extract(authHeader);
+            await this.authInstance.verifyToken(token);
+
+            if (await this.auditoriaInstance.updateAuditoria(auditoria))
+                return {
+                    ok: true,
+                };
+            throw Error("No se ha podido modificar la auditoria");
+        } catch (err) {
+            console.log(err);
+            return { ok: false, message: err.message };
+        }
+    }
+
+
 }
