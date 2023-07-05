@@ -28,7 +28,8 @@ tr1.nombreApellidos as nombreResponsable,
 ti.nombre as nombreTienda,
 CONVERT(nvarchar, tr.antiguedad, 103) as antiguedad,
 tr.idEmpresa,
-tr.tokenQR
+tr.tokenQR,
+tr.displayFoto
 `;
 
 /* Todos */
@@ -738,4 +739,12 @@ export async function getHistoricoContratos(dni: string) {
     return resUser.recordset;
   return null;
 
+}
+
+export async function uploadFoto(displayFoto: string, uid: string) {
+  const sql = `update trabajadores set displayFoto=@param0 where idApp=@param1`;
+  const resUser = await recSoluciones("soluciones", sql, displayFoto, uid);
+  if (resUser.recordset)
+    return resUser.recordset;
+  return null;
 }
