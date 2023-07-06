@@ -108,4 +108,37 @@ export class AuditoriaDatabase {
         return respAuditorias;
     }
 
+    //Borrar auditoria
+    async deleteAuditoria(auditorias: AuditoriasInterface) {
+        const db = (await this.mongoDbService.getConexion()).db("soluciones");
+        const auditoriasCollection = db.collection<AuditoriasInterface>("auditorias");
+        const respAuditorias = await auditoriasCollection.deleteOne(
+            {
+                _id: new ObjectId(auditorias._id),
+            },
+        )
+        return respAuditorias.acknowledged && respAuditorias.deletedCount > 0;
+    }
+
+    //Update auditoria
+    async updateAuditoria(auditoria: AuditoriasInterface) {
+        const db = (await this.mongoDbService.getConexion()).db("soluciones");
+        const auditoriasCollection = db.collection<AuditoriasInterface>("auditorias");
+
+        const respAuditorias = await auditoriasCollection.updateOne(
+            {
+                _id: new ObjectId(auditoria._id),
+            },
+            {
+                $set: {
+                    tituloAuditoria: auditoria.tituloAuditoria,
+                    caducidad: auditoria.caducidad,
+                    descripcion: auditoria.descripcion,
+
+                },
+            },
+        );
+
+        return respAuditorias.acknowledged;
+    }
 }

@@ -196,4 +196,52 @@ export class AuditoriasController {
         }
     }
 
+    //Borrar auditoria 
+    @Post("deleteAuditoria")
+    async deleteAuditoria(
+        @Body() auditoria: AuditoriasInterface,
+        @Headers("authorization") authHeader: string,
+    ) {
+        try {
+            const token = this.tokenService.extract(authHeader);
+            await this.authInstance.verifyToken(token);
+            const respAuditoria = await this.auditoriaInstance.deleteAuditoria(auditoria);
+            if (respAuditoria)
+                return {
+                    ok: true,
+                    data: respAuditoria
+                };
+            console.log(respAuditoria);
+
+            throw Error("No se ha podido borrar la auditoria");
+        } catch (err) {
+            console.log(err);
+            return { ok: false, message: err.message };
+        }
+    }
+
+    //Update Auditoria
+    @Post("updateAuditoria")
+    async updateAuditoria(
+        @Body() auditoria: AuditoriasInterface,
+        @Headers("authorization") authHeader: string,
+    ) {
+        try {
+            console.log(auditoria);
+
+            const token = this.tokenService.extract(authHeader);
+            await this.authInstance.verifyToken(token);
+
+            if (await this.auditoriaInstance.updateAuditoria(auditoria))
+                return {
+                    ok: true,
+                };
+            throw Error("No se ha podido modificar la auditoria");
+        } catch (err) {
+            console.log(err);
+            return { ok: false, message: err.message };
+        }
+    }
+
+
 }
