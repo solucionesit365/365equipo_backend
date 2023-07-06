@@ -174,5 +174,14 @@ export class IncidenciasClass {
         throw Error("No se ha podido mandar el mensaje");
     }
 
+    async deleteIncidencias(_id: string) {
+        const db = (await this.mongoDbService.getConexion()).db("soluciones");
+        const incidenciasCollection = db.collection<Incidencias>("incidencias");
+
+        const resDelete = await incidenciasCollection.deleteOne({
+            _id: new ObjectId(_id),
+        });
+        return resDelete.acknowledged && resDelete.deletedCount > 0;
+    }
 
 }
