@@ -13,6 +13,7 @@ import { FirebaseMessagingService } from "../firebase/firebase-messaging.service
 import { Trabajador } from "./trabajadores.class";
 import { AuthService } from "../firebase/auth";
 import { AdminGuard } from "../auth/admin.guard";
+import { uploadFoto } from "./trabajadores.mssql";
 
 @Controller("trabajadores")
 export class TrabajadoresController {
@@ -282,5 +283,23 @@ export class TrabajadoresController {
       console.log(err);
       return { ok: false, message: err.message };
     }
+  }
+
+  @Post("uploadFoto")
+  async uploadFoto(@Headers("authorization") authHeader: string,
+    @Body() { displayFoto, uid }) {
+    try {
+      const token = this.tokenService.extract(authHeader);
+      await this.authInstance.verifyToken(token);
+
+      return {
+        ok: true,
+        data: await this.trabajadorInstance.uploadFoto(displayFoto, uid)
+      }
+    } catch (error) {
+      console.log(error);
+      return { ok: false, message: error.message };
+    }
+
   }
 }

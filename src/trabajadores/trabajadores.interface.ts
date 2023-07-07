@@ -27,6 +27,7 @@ export interface TrabajadorSql {
   antiguedad: string;
   tokenQR: string;
   horasContrato: number;
+  displayFoto: string
 }
 
 // export interface TrabajadorCompleto extends TrabajadorSql, UserRecord {
@@ -38,6 +39,6 @@ type UserRecordWithoutToJSON = Omit<UserRecord, "toJSON">;
 
 export interface TrabajadorCompleto
   extends TrabajadorSql,
-    UserRecordWithoutToJSON {
+  UserRecordWithoutToJSON {
   displayName: string;
 }
