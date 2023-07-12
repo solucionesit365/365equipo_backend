@@ -340,41 +340,41 @@ export class CuadrantesController {
     }
   }
 
-  @Post("copiar")
-  @UseGuards(AuthGuard)
-  async copiarSemana(
-    @Headers("authorization") authHeader: string,
-    @Body() { semanaOrigen, semanaDestino, yearOrigen, yearDestino, idTienda },
-  ) {
-    try {
-      if (
-        !semanaOrigen ||
-        !semanaDestino ||
-        (!yearOrigen && !yearDestino && !idTienda)
-      )
-        throw Error("Faltan parámetros");
+  // @Post("copiar")
+  // @UseGuards(AuthGuard)
+  // async copiarSemana(
+  //   @Headers("authorization") authHeader: string,
+  //   @Body() { semanaOrigen, semanaDestino, yearOrigen, yearDestino, idTienda },
+  // ) {
+  //   try {
+  //     if (
+  //       !semanaOrigen ||
+  //       !semanaDestino ||
+  //       (!yearOrigen && !yearDestino && !idTienda)
+  //     )
+  //       throw Error("Faltan parámetros");
 
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
+  //     const token = this.tokenService.extract(authHeader);
+  //     await this.authInstance.verifyToken(token);
 
-      const usuario = await this.authInstance.getUserWithToken(token);
+  //     const usuario = await this.authInstance.getUserWithToken(token);
 
-      if (await this.trabajadoresInstance.esCoordinadora(usuario.uid)) {
-        return {
-          ok: true,
-          data: await this.cuadrantesInstance.copiarCuadrante(
-            Number(semanaOrigen),
-            Number(semanaDestino),
-            Number(yearOrigen),
-            Number(yearDestino),
-            Number(idTienda),
-          ),
-        };
-      }
-      throw Error("No tienes permisos para realizar esta acción");
-    } catch (err) {
-      console.log(err);
-      return { ok: false, message: err.message };
-    }
-  }
+  //     if (await this.trabajadoresInstance.esCoordinadora(usuario.uid)) {
+  //       return {
+  //         ok: true,
+  //         data: await this.cuadrantesInstance.copiarCuadrante(
+  //           Number(semanaOrigen),
+  //           Number(semanaDestino),
+  //           Number(yearOrigen),
+  //           Number(yearDestino),
+  //           Number(idTienda),
+  //         ),
+  //       };
+  //     }
+  //     throw Error("No tienes permisos para realizar esta acción");
+  //   } catch (err) {
+  //     console.log(err);
+  //     return { ok: false, message: err.message };
+  //   }
+  // }
 }

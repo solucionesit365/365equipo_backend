@@ -490,6 +490,7 @@ export class Cuadrantes {
       } else
         nuevos.push({
           _id: new ObjectId(),
+          idPlan: new ObjectId().toString(),
           ausencia: newCuadrantes[i].ausencia,
           enviado: false,
           fechaInicio: new Date(newCuadrantes[i].fechaInicio),

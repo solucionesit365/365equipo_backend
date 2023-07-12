@@ -1,3 +1,4 @@
+import { DateTime } from "luxon";
 import { recHit, recSoluciones, recSolucionesClassic } from "../bbdd/mssql";
 import { TrabajadorCompleto, TrabajadorSql } from "./trabajadores.interface";
 import * as moment from "moment";
@@ -217,7 +218,7 @@ export async function getSubordinados(uid: string): Promise<
 
 export async function getSubordinadosById(
   id: number,
-  conFecha?: moment.Moment,
+  conFecha?: DateTime,
 ): Promise<
   {
     id: number;
@@ -249,13 +250,13 @@ export async function getSubordinadosById(
   const resSubordinados = await recSoluciones(
     sql,
     id,
-    conFecha ? conFecha.format("YYYY-MM-DD HH:mm:ss") : undefined,
+    conFecha ? conFecha.toISO() : undefined,
   );
   if (resSubordinados.recordset.length > 0) return resSubordinados.recordset;
   return [];
 }
 
-export async function getHorasContrato(idSql: number, conFecha: moment.Moment) {
+export async function getHorasContrato(idSql: number, conFecha: DateTime) {
   const sql = `
     SELECT top 1 horasContrato*40/100 as horasContrato
     FROM historicoContratos 
@@ -268,7 +269,7 @@ export async function getHorasContrato(idSql: number, conFecha: moment.Moment) {
   const resSubordinados = await recSoluciones(
     sql,
     idSql,
-    conFecha ? conFecha.format("YYYY-MM-DD HH:mm:ss") : undefined,
+    conFecha ? conFecha.toISO() : undefined,
   );
 
   return resSubordinados.recordset[0]?.horasContrato;

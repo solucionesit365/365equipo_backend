@@ -17,7 +17,7 @@ const lol = {
 export interface TCuadrante {
   _id: ObjectId;
   idTrabajador: number;
-  // idPlan: string;
+  idPlan: string;
   idTienda: number;
   fechaInicio: Date;
   fechaFinal: Date;
