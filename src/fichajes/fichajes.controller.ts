@@ -20,7 +20,7 @@ export class FichajesController {
     private readonly authInstance: AuthService,
     private readonly tokenService: TokenService,
     private readonly fichajesInstance: Fichajes,
-  ) {}
+  ) { }
 
   @Post("entrada")
   @UseGuards(AuthGuard)
