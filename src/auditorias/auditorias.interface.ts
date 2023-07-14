@@ -42,6 +42,7 @@ export interface AuditoriaRespuestas {
     descripcion: string,
     persona: string,
     respuestas: [],
+    respuestasEvaluador: [],
     tienda: number,
     ultimaRespuesta: Date
 }
