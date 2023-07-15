@@ -23,7 +23,9 @@ CONVERT(nvarchar, tr.finalContrato, 103) as finalContrato,
 tr.idResponsable,
 tr.idTienda,
 (SELECT COUNT(*) FROM trabajadores WHERE idResponsable = tr.id) as coordinadora,
-(SELECT top 1 horasContrato*40/100 FROM historicoContratos WHERE dni = tr.dni)  as horasContrato,
+(SELECT top 1 horasContrato*40/100 FROM historicoContratos WHERE dni = tr.dni
+AND inicioContrato <= GETDATE() AND (fechaBaja >= GETDATE() OR fechaBaja IS NULL)
+) as horasContrato,
 tr1.nombreApellidos as nombreResponsable,
 ti.nombre as nombreTienda,
 CONVERT(nvarchar, tr.antiguedad, 103) as antiguedad,
