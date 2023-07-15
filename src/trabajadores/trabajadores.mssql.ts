@@ -41,9 +41,10 @@ export async function getTrabajadores(todos = false) {
     FROM trabajadores tr
     LEFT JOIN trabajadores tr1 ON tr.idResponsable = tr1.id
     LEFT JOIN tiendas ti ON tr.idTienda = ti.id
-    ${!todos
-      ? "WHERE tr.inicioContrato IS NOT NULL AND tr.finalContrato IS NULL"
-      : ""
+    ${
+      !todos
+        ? "WHERE tr.inicioContrato IS NOT NULL AND tr.finalContrato IS NULL"
+        : ""
     } ORDER BY nombreApellidos
     `;
   const resUsuarios = await recSoluciones(sql);
@@ -250,7 +251,7 @@ export async function getSubordinadosById(
   const resSubordinados = await recSoluciones(
     sql,
     id,
-    conFecha ? conFecha.toISO() : undefined,
+    conFecha ? conFecha.toSQL({ includeOffset: false }) : undefined,
   );
   if (resSubordinados.recordset.length > 0) return resSubordinados.recordset;
   return [];
@@ -269,7 +270,7 @@ export async function getHorasContrato(idSql: number, conFecha: DateTime) {
   const resSubordinados = await recSoluciones(
     sql,
     idSql,
-    conFecha ? conFecha.toISO() : undefined,
+    conFecha ? conFecha.toSQL({includeOffset: false}) : undefined,
   );
 
   return resSubordinados.recordset[0]?.horasContrato;
@@ -534,28 +535,37 @@ export async function guardarCambiosForm(
   sql += sqlHandleCambios(trabajador, original);
   sql += `
     UPDATE trabajadores SET
-    nombreApellidos = ${trabajador.nombreApellidos ? `'${trabajador.nombreApellidos}'` : "NULL"
+    nombreApellidos = ${
+      trabajador.nombreApellidos ? `'${trabajador.nombreApellidos}'` : "NULL"
     },
-    displayName = ${trabajador.displayName ? `'${trabajador.displayName}'` : "NULL"
+    displayName = ${
+      trabajador.displayName ? `'${trabajador.displayName}'` : "NULL"
     },
     emails = ${trabajador.emails ? `'${trabajador.emails}'` : "NULL"},
     dni = ${trabajador.dni ? `'${trabajador.dni}'` : "NULL"},
     direccion = ${trabajador.direccion ? `'${trabajador.direccion}'` : "NULL"},
     ciudad = ${trabajador.ciudad ? `'${trabajador.ciudad}'` : "NULL"},
     telefonos = ${trabajador.telefonos ? `'${trabajador.telefonos}'` : "NULL"},
-    fechaNacimiento = convert(datetime, ${trabajador.fechaNacimiento ? "'" + trabajador.fechaNacimiento + "'" : null
+    fechaNacimiento = convert(datetime, ${
+      trabajador.fechaNacimiento ? "'" + trabajador.fechaNacimiento + "'" : null
     }, 103),
-    nacionalidad = ${trabajador.nacionalidad ? `'${trabajador.nacionalidad}'` : "NULL"
+    nacionalidad = ${
+      trabajador.nacionalidad ? `'${trabajador.nacionalidad}'` : "NULL"
     },
-    nSeguridadSocial = ${trabajador.nSeguridadSocial ? `'${trabajador.nSeguridadSocial}'` : "NULL"
+    nSeguridadSocial = ${
+      trabajador.nSeguridadSocial ? `'${trabajador.nSeguridadSocial}'` : "NULL"
     },
-    codigoPostal = ${trabajador.codigoPostal ? `'${trabajador.codigoPostal}'` : "NULL"
+    codigoPostal = ${
+      trabajador.codigoPostal ? `'${trabajador.codigoPostal}'` : "NULL"
     },
-    cuentaCorriente = ${trabajador.cuentaCorriente ? `'${trabajador.cuentaCorriente}'` : "NULL"
+    cuentaCorriente = ${
+      trabajador.cuentaCorriente ? `'${trabajador.cuentaCorriente}'` : "NULL"
     },
-    tipoTrabajador = ${trabajador.tipoTrabajador ? `'${trabajador.tipoTrabajador}'` : "NULL"
+    tipoTrabajador = ${
+      trabajador.tipoTrabajador ? `'${trabajador.tipoTrabajador}'` : "NULL"
     },
-    idResponsable = ${trabajador.idResponsable ? `'${trabajador.idResponsable}'` : "NULL"
+    idResponsable = ${
+      trabajador.idResponsable ? `'${trabajador.idResponsable}'` : "NULL"
     },
     idTienda = ${trabajador.idTienda ? `'${trabajador.idTienda}'` : "NULL"},
     coordinadora = ${trabajador.coordinadora ? 1 : 0},
@@ -713,20 +723,17 @@ export async function copiarHistoriaContratosHitSoluciones() {
   return true;
 }
 export async function getHistoricoContratos(dni: string) {
-  const sql = `select * from historicoContratos where dni = @param0`
+  const sql = `select * from historicoContratos where dni = @param0`;
 
   const resUser = await recSoluciones(sql, dni);
 
-  if (resUser.recordset.length > 0)
-    return resUser.recordset;
+  if (resUser.recordset.length > 0) return resUser.recordset;
   return null;
-
 }
 
 export async function uploadFoto(displayFoto: string, uid: string) {
   const sql = `update trabajadores set displayFoto=@param0 where idApp=@param1`;
-  const resUser = await recSoluciones("soluciones", sql, displayFoto, uid);
-  if (resUser.recordset)
-    return resUser.recordset;
+  const resUser = await recSoluciones(sql, displayFoto, uid);
+  if (resUser.recordset) return resUser.recordset;
   return null;
 }
