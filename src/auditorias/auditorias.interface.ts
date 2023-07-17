@@ -45,4 +45,5 @@ export interface AuditoriaRespuestas {
     respuestasEvaluador: [],
     tienda: number,
     ultimaRespuesta: Date
+    evaluada: boolean
 }

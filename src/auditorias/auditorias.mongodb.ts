@@ -151,7 +151,8 @@ export class AuditoriaDatabase {
             _id: new ObjectId(auditoria._id),
         }, {
             $set: {
-                respuestasEvaluador: auditoria.respuestasEvaluador
+                respuestasEvaluador: auditoria.respuestasEvaluador,
+                evaluada: auditoria.evaluada
             }
         }
         )
