@@ -176,9 +176,11 @@ export async function getSubordinados(uid: string): Promise<
     idApp: string;
     nombreApellidos: string;
     displayName: string;
+    displayfoto: string;
     idTienda: number;
     antiguedad: string;
     inicioContrato: string;
+
   }[]
 > {
   const sql = `
@@ -187,6 +189,7 @@ export async function getSubordinados(uid: string): Promise<
       idApp, 
       nombreApellidos, 
       displayName,
+      displayFoto,
       idTienda, 
       CONVERT(varchar, antiguedad, 103) as antiguedad, 
       CONVERT(varchar, inicioContrato, 103) as inicioContrato 
