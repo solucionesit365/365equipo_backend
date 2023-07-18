@@ -45,7 +45,7 @@ export class VacacionesController {
     try {
       const token = this.tokenService.extract(authHeader);
       await this.authInstance.verifyToken(token);
-      console.log(idTienda);
+
 
       const resVacacionesByTienda = await this.vacacionesInstance.getVacacionesByTiendas(Number(idTienda))
       return {
