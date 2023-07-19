@@ -13,6 +13,7 @@ import { Vacaciones } from "./vacaciones.class";
 import { Trabajador } from "../trabajadores/trabajadores.class";
 import { AuthService } from "../firebase/auth";
 import { Notificaciones } from "src/notificaciones/notificaciones.class";
+import { EmailClass } from "src/email/email.class";
 
 @Controller("vacaciones")
 export class VacacionesController {
@@ -22,6 +23,7 @@ export class VacacionesController {
     private readonly trabajadorInstance: Trabajador,
     private readonly tokenService: TokenService,
     private readonly vacacionesInstance: Vacaciones,
+    private readonly email: EmailClass,
   ) { }
 
   @Get()
@@ -29,6 +31,7 @@ export class VacacionesController {
     try {
       const token = this.tokenService.extract(authHeader);
       await this.authInstance.verifyToken(token);
+
       return {
         ok: true,
         data: await this.vacacionesInstance.getSolicitudes(),
@@ -45,7 +48,7 @@ export class VacacionesController {
     try {
       const token = this.tokenService.extract(authHeader);
       await this.authInstance.verifyToken(token);
-      console.log(idTienda);
+
 
       const resVacacionesByTienda = await this.vacacionesInstance.getVacacionesByTiendas(Number(idTienda))
       return {
@@ -64,7 +67,6 @@ export class VacacionesController {
     try {
       const token = this.tokenService.extract(authHeader);
       await this.authInstance.verifyToken(token);
-      console.log(estado);
 
       const resVacacionesByEstado = await this.vacacionesInstance.getVacacionesByEstado(estado)
       return {
@@ -217,6 +219,8 @@ export class VacacionesController {
       const token = this.tokenService.extract(authHeader);
       await this.authInstance.verifyToken(token);
 
+
+
       const resEstado = await this.vacacionesInstance.setEstadoSolicitud(
         estado,
         idSolicitud,
@@ -233,6 +237,8 @@ export class VacacionesController {
           creador: "SISTEMA",
 
         })
+
+        this.email.enviarEmail(solicitudTrabajador.emails, `Tus vacaciones han sido: ${estado}S <br/> Motivo: ${respuesta} `, "Estado de Vacaciones")
 
 
         return {
@@ -257,6 +263,26 @@ export class VacacionesController {
     try {
       const token = this.tokenService.extract(authHeader);
       await this.authInstance.verifyToken(token);
+      const solicitudTrabajador = await this.trabajadorInstance.getTrabajadorBySqlId(Number(data.idBeneficiario));
+      this.email.enviarEmail(solicitudTrabajador.emails, `Tu solicitud ha sido enviada con estos datos: <br/> 
+      <table>
+      <tr style="background-color:#0000ff ">
+        <th>Fecha Inicio</th>
+        <th>Fecha Final</th>
+        <th>Fecha Incorporación</th>
+        <th>Observación</th>
+        <th>Total de días</th>
+      </tr>
+      <tr>
+        
+        <td>${data.fechaInicial}</td>
+        <td>${data.fechaFinal}</td>
+        <td>${data.fechaIncorporacion}</td>
+        <td>${data.observaciones}</td>
+        <td>${data.totalDias}</td>
+      </tr>
+    </table>
+     `, "Solicitud de Vacaciones")
 
       if (
         data.idBeneficiario &&
@@ -264,7 +290,9 @@ export class VacacionesController {
         data.fechaInicial &&
         data.fechaFinal &&
         data.fechaIncorporacion &&
-        data.observaciones
+        data.observaciones &&
+        data.creador &&
+        data.tienda
       ) {
         return {
           ok: true,
@@ -275,6 +303,8 @@ export class VacacionesController {
             fechaIncorporacion: data.fechaIncorporacion,
             observaciones: data.observaciones,
             totalDias: data.totalDias,
+            creador: data.creador,
+            tienda: data.tienda
           }),
         };
       } else throw Error("Faltan parámetros");

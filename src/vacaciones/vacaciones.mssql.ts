@@ -303,7 +303,9 @@ export async function nuevaSolicitudVacaciones(solicitud: SolicitudVacaciones) {
     fechaFinal, 
     fechaIncorporacion, 
     observaciones,
-    estado
+    estado,
+    creador,
+    tienda
     )
   VALUES (
     ${solicitud.idBeneficiario}, 
@@ -312,8 +314,8 @@ export async function nuevaSolicitudVacaciones(solicitud: SolicitudVacaciones) {
     CONVERT(datetime, '${solicitud.fechaFinal}', 103), 
     CONVERT(datetime, '${solicitud.fechaIncorporacion}', 103), 
     '${solicitud.observaciones}', 
-    'PENDIENTE'
-    );
+    'PENDIENTE','${solicitud.creador}','${solicitud.tienda}' ) 
+    ;
   `;
 
   await recSolucionesClassic("soluciones", sql);
