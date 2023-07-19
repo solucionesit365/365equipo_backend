@@ -12,7 +12,7 @@ import {
 import { AuthGuard } from "../auth/auth.guard";
 import { TokenService } from "../get-token/get-token.service";
 import { Cuadrantes } from "./cuadrantes.class";
-import { TCuadrante, TCuadranteRequest } from "./cuadrantes.interface";
+import { TCuadrante, TRequestCuadrante } from "./cuadrantes.interface";
 import { SchedulerGuard } from "../scheduler/scheduler.guard";
 import * as moment from "moment";
 import { AuthService } from "../firebase/auth";
@@ -30,7 +30,6 @@ export class CuadrantesController {
     private readonly trabajadoresInstance: Trabajador,
   ) {}
 
-  // Cuadrantes 2.0
   @Get()
   @UseGuards(AuthGuard)
   async getCuadrantes(
@@ -60,12 +59,11 @@ export class CuadrantesController {
     }
   }
 
-  // Cuadrantes 2.0
   @Get("individual")
   @UseGuards(AuthGuard)
   async getCuadrantesIndividual(
     @Query()
-    { idTrabajador, fecha }: { idTrabajador: string; fecha: string },
+    { idTrabajador, fecha }: { fecha: string; idTrabajador: string },
     @Headers("authorization") authHeader: string,
   ) {
     try {
@@ -75,16 +73,17 @@ export class CuadrantesController {
       if (!fecha || !idTrabajador) throw Error("Faltan datos");
 
       if (usuario.coordinadora && usuario.idTienda) {
-        const fechaInicioBusqueda = DateTime.fromJSDate(
-          new Date(fecha),
-        ).startOf("week");
-        const fechaFinalBusqueda = fechaInicioBusqueda.endOf("week");
+        const fechaInicio = DateTime.fromJSDate(new Date(fecha)).startOf(
+          "week",
+        );
+        const fechaFinal = fechaInicio.endOf("week");
+
         return {
           ok: true,
           data: await this.cuadrantesInstance.getCuadrantesIndividual(
             Number(idTrabajador),
-            fechaInicioBusqueda,
-            fechaFinalBusqueda,
+            fechaInicio,
+            fechaFinal,
           ),
         };
       }
@@ -95,7 +94,6 @@ export class CuadrantesController {
     }
   }
 
-  // Cuadrantes 2.0 (Habrá que hacer filtro de máximo el último año)
   @Get("getTodos")
   @UseGuards(AuthGuard)
   async getAllCuadrantes(@Headers("authorization") authHeader: string) {
@@ -110,13 +108,10 @@ export class CuadrantesController {
     }
   }
 
-  //Cuadrantes 2.0 (Todas las tiendas 1 semana)
+  //Todas las tiendas 1 semana
   @Get("getTiendasUnaSemana")
   @UseGuards(AuthGuard)
-  async getTiendas1Semana(
-    @Query() { fecha }: { fecha: string },
-    @Headers("authorization") authHeader: string,
-  ) {
+  async getTiendas1Semana(@Query() { fecha }: { fecha: string }) {
     try {
       if (!fecha) throw Error("Faltan datos");
       return {
@@ -131,7 +126,7 @@ export class CuadrantesController {
     }
   }
 
-  // Cuadrantes 2.0 (Todas las semanas 1 tienda)
+  //Todas las semanas 1 tienda
   @Get("getTiendaTodasSemanas")
   @UseGuards(AuthGuard)
   async getSemanas1Tienda(@Query() { idTienda }: { idTienda: number }) {
@@ -147,7 +142,7 @@ export class CuadrantesController {
     }
   }
 
-  // Cuadrantes 2.0 (1Tienda 1 Semana)
+  //1Tienda 1 Semana
   @Get("getTiendaSemana")
   @UseGuards(AuthGuard)
   async getTiendaSemana(
@@ -155,7 +150,7 @@ export class CuadrantesController {
     { idTienda, fecha }: { idTienda: number; fecha: string },
   ) {
     try {
-      if (!idTienda) throw Error("Faltan datos");
+      if (!idTienda && !fecha) throw Error("Faltan datos");
       return {
         ok: true,
         data: await this.cuadrantesInstance.getCuadrantes(
@@ -168,16 +163,23 @@ export class CuadrantesController {
       return { ok: false, message: error.message };
     }
   }
+  //obtener cuadrantes por semana y trabajador:
 
-  // Cuadrantes 2.0 (Obtener cuadrantes por semana y trabajador)
   @Get("cuadranteSemanaTrabajador")
   @UseGuards(AuthGuard)
   async getCuadranteSemanaTrabajador(
     @Query()
-    { idTrabajador, fecha }: { idTrabajador: number; fecha: string },
+    {
+      idTrabajador,
+      fecha,
+    }: {
+      idTrabajador: number;
+      fecha: string;
+    },
+    @Headers("authorization") authHeader: string,
   ) {
     try {
-      if (!idTrabajador) throw Error("Faltan datos");
+      if (!idTrabajador && !fecha) throw Error("Faltan datos");
       return {
         ok: true,
         data: await this.cuadrantesInstance.getCuadranteSemanaTrabajador(
@@ -191,133 +193,57 @@ export class CuadrantesController {
     }
   }
 
-  //
   @Post("saveCuadrante")
   @UseGuards(AuthGuard)
   async saveCuadrante(
-    @Body()
-    {
-      cuadrantes,
-      fecha,
-      idTrabajador,
-    }: { cuadrantes: TCuadranteRequest[]; fecha: string; idTrabajador: number }, // 7 cuadrantes diarios
+    @Body() cuadrante: TRequestCuadrante,
     @Headers("authorization") authHeader: string,
   ) {
     try {
-      if (!cuadrantes || !fecha || !idTrabajador) throw Error("Faltan datos");
+      if (!cuadrante) throw Error("Faltan datos");
       const token = this.tokenService.extract(authHeader);
-      const userCoordinadora = await this.authInstance.getUserWithToken(token);
+      const usuario = await this.authInstance.getUserWithToken(token);
 
-      if (userCoordinadora.coordinadora && userCoordinadora.idTienda) {
-        const lunes = DateTime.fromJSDate(new Date(fecha)).startOf("week");
-        const domingo = lunes.endOf("week");
+      if (usuario.coordinadora && usuario.idTienda) {
+        const fechaInicio = DateTime.fromJSDate(
+          new Date(cuadrante.fecha),
+        ).startOf("week");
+        const fechaFinal = fechaInicio.endOf("week");
 
-        // Get cuadrantes de la bbdd
-        const oldCuadrantes =
+        const oldCuadrante =
           await this.cuadrantesInstance.getCuadrantesIndividual(
-            idTrabajador,
-            lunes,
-            domingo,
-          );
-
-        // Get modificados o nuevos
-        const { nuevos, modificados } =
-          this.cuadrantesInstance.getNuevosAndModificados(
-            oldCuadrantes,
-            cuadrantes,
+            cuadrante.idTrabajador,
+            fechaInicio,
+            fechaFinal,
           );
         
-        
+          /* Pasar a individual */
+        const notiCuadrante = await this.cuadrantesInstance.saveCuadrante(
+          cuadrante,
+          oldCuadrante,
+        );
+        if (notiCuadrante) {
+          const trabajadorID =
+            await this.trabajadoresInstance.getTrabajadorBySqlId(
+              cuadrante.idTrabajador,
+            );
 
-        // const oldCuadrante =
-        //   await this.cuadrantesInstance.getCuadrantesIndividual(
-        //     cuadrante.idTrabajador,
-        //     fechaInicioBusqueda,
-        //     fechaFinalBusqueda,
-        //   );
-        // cuadrante.idTienda = userCoordinadora.idTienda;
-
-        // const notiCuadrante = await this.cuadrantesInstance.saveCuadrante(
-        //   cuadrante,
-        //   oldCuadrante,
-        // );
-
-        // if (notiCuadrante) {
-        //   const trabajadorID =
-        //     await this.trabajadoresInstance.getTrabajadorBySqlId(
-        //       cuadrante.idTrabajador,
-        //     );
-
-        //   this.notificaciones.newInAppNotification({
-        //     uid: trabajadorID.idApp,
-        //     titulo: "CUADRANTE TIENDA",
-        //     mensaje: `Se ha creado tu horario de la semana ${cuadrante.semana}`,
-        //     leido: false,
-        //     creador: "SISTEMA",
-        //   });
-        //   return { ok: true };
-        // }
-      } else throw Error("No llevas equipo o tienda para realizar esta acción");
+          this.notificaciones.newInAppNotification({
+            uid: trabajadorID.idApp,
+            titulo: "CUADRANTE TIENDA",
+            mensaje: `Se ha creado tu horario de la semana ${cuadrante.semana}`,
+            leido: false,
+            creador: "SISTEMA",
+          });
+          return { ok: true };
+        }
+      }
+      throw Error("No llevas equipo o tienda para realizar esta acción");
     } catch (err) {
       console.log(err);
       return { ok: false, message: err.message };
     }
   }
-  // Copia del antiguo saveCuadrante
-  // @Post("saveCuadrante")
-  // @UseGuards(AuthGuard)
-  // async saveCuadrante(
-  //   @Body() cuadrante: TCuadrante[],
-  //   @Headers("authorization") authHeader: string,
-  // ) {
-  //   try {
-  //     if (!cuadrante) throw Error("Faltan datos");
-  //     const token = this.tokenService.extract(authHeader);
-  //     const coordinadora = await this.authInstance.getUserWithToken(token);
-
-  //     if (coordinadora.coordinadora && coordinadora.idTienda) {
-  //       const fechaInicioBusqueda = DateTime.fromJSDate(
-  //         new Date(cuadrante.fechaInicio),
-  //       ).startOf("week");
-  //       const fechaFinalBusqueda = DateTime.fromJSDate(
-  //         new Date(cuadrante.fechaFinal),
-  //       );
-
-  //       const oldCuadrante =
-  //         await this.cuadrantesInstance.getCuadrantesIndividual(
-  //           cuadrante.idTrabajador,
-  //           fechaInicioBusqueda,
-  //           fechaFinalBusqueda,
-  //         );
-  //       cuadrante.idTienda = coordinadora.idTienda;
-
-  //       const notiCuadrante = await this.cuadrantesInstance.saveCuadrante(
-  //         cuadrante,
-  //         oldCuadrante,
-  //       );
-
-  //       if (notiCuadrante) {
-  //         const trabajadorID =
-  //           await this.trabajadoresInstance.getTrabajadorBySqlId(
-  //             cuadrante.idTrabajador,
-  //           );
-
-  //         this.notificaciones.newInAppNotification({
-  //           uid: trabajadorID.idApp,
-  //           titulo: "CUADRANTE TIENDA",
-  //           mensaje: `Se ha creado tu horario de la semana ${cuadrante.semana}`,
-  //           leido: false,
-  //           creador: "SISTEMA",
-  //         });
-  //         return { ok: true };
-  //       }
-  //     }
-  //     throw Error("No llevas equipo o tienda para realizar esta acción");
-  //   } catch (err) {
-  //     console.log(err);
-  //     return { ok: false, message: err.message };
-  //   }
-  // }
 
   @Post("sincronizarConHit")
   @UseGuards(SchedulerGuard)

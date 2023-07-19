@@ -34,26 +34,40 @@ export interface TCuadrante {
   };
 }
 
-export interface TCuadranteRequest {
-  idTrabajador: number;
-  idTienda: number;
-  fechaInicio: string;
-  fechaFinal: string;
-  nombre: string;
-  totalHoras: number;
-  enviado: boolean;
-  historialPlanes: string[];
-  horasContrato: number;
-  ausencia: {
-    tipo: TiposAusencia;
-    horas?: number;
-    completa: boolean;
-    idAusencia: ObjectId;
-  };
-}
+// export interface TCuadranteRequest {
+//   idTrabajador: number;
+//   idTienda: number;
+//   fechaInicio: string;
+//   fechaFinal: string;
+//   nombre: string;
+//   totalHoras: number;
+//   enviado: boolean;
+//   historialPlanes: string[];
+//   horasContrato: number;
+//   ausencia: {
+//     tipo: TiposAusencia;
+//     horas?: number;
+//     completa: boolean;
+//     idAusencia: ObjectId;
+//   };
+// }
 
 export type TiposAusencia =
   | "BAJA"
   | "DIA_PERSONAL"
   | "VACACIONES"
   | "HORAS_JUSTIFICADAS";
+
+export interface TRequestCuadrante {
+  semana: number;
+  nombre: string;
+  idTrabajador: number;
+  arraySemanalHoras: {
+    bloqueado: boolean;
+    horaEntrada: string;
+    horaSalida: string;
+    idPlan: string;
+    idTienda: number;
+  }[];
+  fecha: string;
+}
