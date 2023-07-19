@@ -141,4 +141,21 @@ export class AuditoriaDatabase {
 
         return respAuditorias.acknowledged;
     }
+
+    //Update Auditoria Respuestas
+    async updateAuditoriaRespuestas(auditoria: AuditoriaRespuestas) {
+        const db = (await this.mongoDbService.getConexion()).db("soluciones");
+        const auditoriasCollection = db.collection<AuditoriaRespuestas>("auditoriasRespuestas");
+
+        const respAuditoria = await auditoriasCollection.updateOne({
+            _id: new ObjectId(auditoria._id),
+        }, {
+            $set: {
+                respuestasEvaluador: auditoria.respuestasEvaluador,
+                evaluada: auditoria.evaluada
+            }
+        }
+        )
+        return respAuditoria.acknowledged;
+    }
 }

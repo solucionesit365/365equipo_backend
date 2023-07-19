@@ -64,4 +64,9 @@ export class Auditorias {
         return await this.schAuditorias.updateAuditoria(auditorias);
     }
 
+
+    //Update Auditoria Respuestas
+    async updateAuditoriaRespuestas(auditorias: AuditoriaRespuestas) {
+        return await this.schAuditorias.updateAuditoriaRespuestas(auditorias);
+    }
 }
