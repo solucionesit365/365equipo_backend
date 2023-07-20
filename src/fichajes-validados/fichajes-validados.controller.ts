@@ -270,24 +270,20 @@ export class FichajesValidadosController {
     }
   }
 
+  // Cuadrantes 2.0
   @Get("getResumen")
   @UseGuards(AuthGuard)
-  async getResumen(
-    @Headers("authorization") authHeader: string,
-    @Query() params,
-  ) {
+  async getResumen(@Query() params) {
     try {
-      // const token = this.tokenService.extract(authHeader);
-      // await this.authInstance.verifyToken(token);
-
-      if (!params.year || !params.semana || !params.idTienda)
+      if (!params.fechaBusqueda || !params.idTienda)
         throw Error("Faltan parámetros");
+
+      const fechaBusqueda = new Date(params.fechaBusqueda);
 
       return {
         ok: true,
         data: await this.fichajesValidadosInstance.resumenSemana(
-          Number(params.year),
-          Number(params.semana),
+          fechaBusqueda,
           Number(params.idTienda),
         ),
       };

@@ -12,12 +12,13 @@ import {
 import { AuthGuard } from "../auth/auth.guard";
 import { TokenService } from "../get-token/get-token.service";
 import { Cuadrantes } from "./cuadrantes.class";
-import { TCuadrante } from "./cuadrantes.interface";
+import { TCuadrante, TRequestCuadrante } from "./cuadrantes.interface";
 import { SchedulerGuard } from "../scheduler/scheduler.guard";
 import * as moment from "moment";
 import { AuthService } from "../firebase/auth";
 import { Trabajador } from "../trabajadores/trabajadores.class";
 import { Notificaciones } from "src/notificaciones/notificaciones.class";
+import { DateTime } from "luxon";
 
 @Controller("cuadrantes")
 export class CuadrantesController {
@@ -32,22 +33,21 @@ export class CuadrantesController {
   @Get()
   @UseGuards(AuthGuard)
   async getCuadrantes(
-    @Query() { semana, year }: { semana: string; year: string },
+    @Query() { fecha }: { fecha: string },
     @Headers("authorization") authHeader: string,
   ) {
     try {
       const token = this.tokenService.extract(authHeader);
       const usuario = await this.authInstance.getUserWithToken(token);
 
-      if (!semana || !year) throw Error("Faltan datos");
+      if (!fecha) throw Error("Faltan datos");
 
       if (usuario.idTienda) {
         return {
           ok: true,
           data: await this.cuadrantesInstance.getCuadrantes(
             usuario.idTienda,
-            Number(semana),
-            Number(year),
+            DateTime.fromJSDate(new Date(fecha)),
             usuario.id,
           ),
         };
@@ -63,27 +63,27 @@ export class CuadrantesController {
   @UseGuards(AuthGuard)
   async getCuadrantesIndividual(
     @Query()
-    {
-      semana,
-      idTrabajador,
-      year,
-    }: { semana: string; idTrabajador: string; year: number },
+    { idTrabajador, fecha }: { fecha: string; idTrabajador: string },
     @Headers("authorization") authHeader: string,
   ) {
     try {
       const token = this.tokenService.extract(authHeader);
       const usuario = await this.authInstance.getUserWithToken(token);
 
-      if (!semana || !idTrabajador) throw Error("Faltan datos");
+      if (!fecha || !idTrabajador) throw Error("Faltan datos");
 
       if (usuario.coordinadora && usuario.idTienda) {
+        const fechaInicio = DateTime.fromJSDate(new Date(fecha)).startOf(
+          "week",
+        );
+        const fechaFinal = fechaInicio.endOf("week");
+
         return {
           ok: true,
           data: await this.cuadrantesInstance.getCuadrantesIndividual(
-            usuario.idTienda,
             Number(idTrabajador),
-            Number(semana),
-            year,
+            fechaInicio,
+            fechaFinal,
           ),
         };
       }
@@ -111,17 +111,13 @@ export class CuadrantesController {
   //Todas las tiendas 1 semana
   @Get("getTiendasUnaSemana")
   @UseGuards(AuthGuard)
-  async getTiendas1Semana(
-    @Query() { semana, year }: { semana: string; year: string },
-    @Headers("authorization") authHeader: string,
-  ) {
+  async getTiendas1Semana(@Query() { fecha }: { fecha: string }) {
     try {
-      if (!semana || !year) throw Error("Faltan datos");
+      if (!fecha) throw Error("Faltan datos");
       return {
         ok: true,
         data: await this.cuadrantesInstance.getTiendas1Semana(
-          Number(semana),
-          Number(year),
+          DateTime.fromJSDate(new Date(fecha)),
         ),
       };
     } catch (err) {
@@ -133,10 +129,7 @@ export class CuadrantesController {
   //Todas las semanas 1 tienda
   @Get("getTiendaTodasSemanas")
   @UseGuards(AuthGuard)
-  async getSemanas1Tienda(
-    @Query() { idTienda }: { idTienda: number },
-    @Headers("authorization") authHeader: string,
-  ) {
+  async getSemanas1Tienda(@Query() { idTienda }: { idTienda: number }) {
     try {
       if (!idTienda) throw Error("Faltan datos");
       return {
@@ -154,25 +147,15 @@ export class CuadrantesController {
   @UseGuards(AuthGuard)
   async getTiendaSemana(
     @Query()
-    {
-      idTienda,
-      semana,
-      year,
-    }: {
-      idTienda: number;
-      semana: number;
-      year: number;
-    },
-    @Headers("authorization") authHeader: string,
+    { idTienda, fecha }: { idTienda: number; fecha: string },
   ) {
     try {
-      if (!idTienda && !semana && !year) throw Error("Faltan datos");
+      if (!idTienda && !fecha) throw Error("Faltan datos");
       return {
         ok: true,
         data: await this.cuadrantesInstance.getCuadrantes(
           Number(idTienda),
-          Number(semana),
-          Number(year),
+          DateTime.fromJSDate(new Date(fecha)),
         ),
       };
     } catch (error) {
@@ -188,20 +171,20 @@ export class CuadrantesController {
     @Query()
     {
       idTrabajador,
-      semana,
+      fecha,
     }: {
       idTrabajador: number;
-      semana: number;
+      fecha: string;
     },
     @Headers("authorization") authHeader: string,
   ) {
     try {
-      if (!idTrabajador && !semana) throw Error("Faltan datos");
+      if (!idTrabajador && !fecha) throw Error("Faltan datos");
       return {
         ok: true,
         data: await this.cuadrantesInstance.getCuadranteSemanaTrabajador(
           Number(idTrabajador),
-          Number(semana),
+          DateTime.fromJSDate(new Date(fecha)),
         ),
       };
     } catch (error) {
@@ -213,7 +196,7 @@ export class CuadrantesController {
   @Post("saveCuadrante")
   @UseGuards(AuthGuard)
   async saveCuadrante(
-    @Body() cuadrante: TCuadrante,
+    @Body() cuadrante: TRequestCuadrante,
     @Headers("authorization") authHeader: string,
   ) {
     try {
@@ -222,17 +205,19 @@ export class CuadrantesController {
       const usuario = await this.authInstance.getUserWithToken(token);
 
       if (usuario.coordinadora && usuario.idTienda) {
-        // cuadrante.idTienda = usuario.idTienda;
-        // cuadrante.enviado = false;
+        const fechaInicio = DateTime.fromJSDate(
+          new Date(cuadrante.fecha),
+        ).startOf("week");
+        const fechaFinal = fechaInicio.endOf("week");
+
         const oldCuadrante =
           await this.cuadrantesInstance.getCuadrantesIndividual(
-            usuario.idTienda,
             cuadrante.idTrabajador,
-            cuadrante.semana,
-            cuadrante.year,
+            fechaInicio,
+            fechaFinal,
           );
-        cuadrante.idTienda = usuario.idTienda;
-
+        
+          /* Pasar a individual */
         const notiCuadrante = await this.cuadrantesInstance.saveCuadrante(
           cuadrante,
           oldCuadrante,
@@ -281,41 +266,41 @@ export class CuadrantesController {
     }
   }
 
-  @Post("copiar")
-  @UseGuards(AuthGuard)
-  async copiarSemana(
-    @Headers("authorization") authHeader: string,
-    @Body() { semanaOrigen, semanaDestino, yearOrigen, yearDestino, idTienda },
-  ) {
-    try {
-      if (
-        !semanaOrigen ||
-        !semanaDestino ||
-        (!yearOrigen && !yearDestino && !idTienda)
-      )
-        throw Error("Faltan parámetros");
+  // @Post("copiar")
+  // @UseGuards(AuthGuard)
+  // async copiarSemana(
+  //   @Headers("authorization") authHeader: string,
+  //   @Body() { semanaOrigen, semanaDestino, yearOrigen, yearDestino, idTienda },
+  // ) {
+  //   try {
+  //     if (
+  //       !semanaOrigen ||
+  //       !semanaDestino ||
+  //       (!yearOrigen && !yearDestino && !idTienda)
+  //     )
+  //       throw Error("Faltan parámetros");
 
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
+  //     const token = this.tokenService.extract(authHeader);
+  //     await this.authInstance.verifyToken(token);
 
-      const usuario = await this.authInstance.getUserWithToken(token);
+  //     const usuario = await this.authInstance.getUserWithToken(token);
 
-      if (await this.trabajadoresInstance.esCoordinadora(usuario.uid)) {
-        return {
-          ok: true,
-          data: await this.cuadrantesInstance.copiarCuadrante(
-            Number(semanaOrigen),
-            Number(semanaDestino),
-            Number(yearOrigen),
-            Number(yearDestino),
-            Number(idTienda),
-          ),
-        };
-      }
-      throw Error("No tienes permisos para realizar esta acción");
-    } catch (err) {
-      console.log(err);
-      return { ok: false, message: err.message };
-    }
-  }
+  //     if (await this.trabajadoresInstance.esCoordinadora(usuario.uid)) {
+  //       return {
+  //         ok: true,
+  //         data: await this.cuadrantesInstance.copiarCuadrante(
+  //           Number(semanaOrigen),
+  //           Number(semanaDestino),
+  //           Number(yearOrigen),
+  //           Number(yearDestino),
+  //           Number(idTienda),
+  //         ),
+  //       };
+  //     }
+  //     throw Error("No tienes permisos para realizar esta acción");
+  //   } catch (err) {
+  //     console.log(err);
+  //     return { ok: false, message: err.message };
+  //   }
+  // }
 }
