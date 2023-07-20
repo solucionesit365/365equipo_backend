@@ -8,5 +8,11 @@ export interface CalendarioFestivosInterface {
     fechaInicio: Date;
     fechaFinal: Date;
     horaInicio: Date;
-    horaFinal: Date
+    horaFinal: Date;
+    color: {
+        background: string,
+        foreground: string
+    }
+    tienda: number
+    categoria: string
 }
