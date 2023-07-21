@@ -13,6 +13,6 @@ export interface CalendarioFestivosInterface {
         background: string,
         foreground: string
     }
-    tienda: number
-    categoria: string
+    tienda: number[];
+    categoria: string;
 }

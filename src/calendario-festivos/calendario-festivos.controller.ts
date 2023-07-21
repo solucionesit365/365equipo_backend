@@ -5,6 +5,7 @@ import {
     UseGuards,
     Headers,
     Get,
+    Query,
 } from '@nestjs/common';
 import { CalendarioFestivo } from './calendario-festivos.class';
 import { CalendarioFestivosInterface } from './calendario-festivos.interface';
@@ -53,6 +54,28 @@ export class CalendarioFestivosController {
             console.log(error);
         }
     }
+
+
+    @Get("getFestivosByTienda")
+    @UseGuards(AuthGuard)
+    async getFestivosByTienda(@Headers("authorization") authHeader: string,
+        @Query() { tienda }: { tienda: number }) {
+        try {
+            const token = this.tokenService.extract(authHeader);
+            await this.authInstance.verifyToken(token);
+
+            const respCalendario = await this.calendarioFestivosInstance.getfestivosByTienda(Number(tienda));
+            console.log(respCalendario);
+            if (respCalendario) return { ok: true, data: respCalendario };
+
+
+            else throw Error("No se ha encontrado ningun festivo por tienda ");
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+
 
 
 }

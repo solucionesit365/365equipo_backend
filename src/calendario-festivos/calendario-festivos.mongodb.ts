@@ -29,4 +29,17 @@ export class CalendarioFestivosDatabase {
     }
 
 
+    async getFestivosByTienda(tienda: number) {
+        const db = (await this.mongoDbService.getConexion()).db("soluciones");
+        const calendarioCollection = db.collection<CalendarioFestivosInterface>("calendarioFestivos");
+
+        if (tienda) {
+            return await calendarioCollection
+                .find({ tienda: { $in: [tienda, -1] } })
+                .toArray();
+        }
+        return await calendarioCollection.find({}).toArray();
+    }
+
 }
+

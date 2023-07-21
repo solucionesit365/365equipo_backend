@@ -10,8 +10,8 @@ export class CalendarioFestivo {
     ) { }
 
     async nuevoFestivo(festivo: CalendarioFestivosInterface) {
-        const insertAuditoria = await this.schCalendario.nuevoFestivo(festivo)
-        if (insertAuditoria) return true;
+        const insertFestivo = await this.schCalendario.nuevoFestivo(festivo)
+        if (insertFestivo) return true;
 
         throw Error("No se ha podido insertar la auditoria");
 
@@ -19,5 +19,9 @@ export class CalendarioFestivo {
 
     async getfestivos() {
         return await this.schCalendario.getFestivos();
+    }
+
+    async getfestivosByTienda(tienda: number) {
+        return await this.schCalendario.getFestivosByTienda(tienda);
     }
 }
