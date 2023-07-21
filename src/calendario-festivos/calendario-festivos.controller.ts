@@ -65,7 +65,6 @@ export class CalendarioFestivosController {
             await this.authInstance.verifyToken(token);
 
             const respCalendario = await this.calendarioFestivosInstance.getfestivosByTienda(Number(tienda));
-            console.log(respCalendario);
             if (respCalendario) return { ok: true, data: respCalendario };
 
 
