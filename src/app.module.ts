@@ -56,6 +56,9 @@ import { VerificacionClass } from "./verificacionMFA/verificacionmfa.class";
 import { AuditoriasController } from './auditorias/auditorias.controller';
 import { AuditoriaDatabase } from "./auditorias/auditorias.mongodb";
 import { Auditorias } from "./auditorias/auditorias.class";
+import { CalendarioFestivosController } from './calendario-festivos/calendario-festivos.controller';
+import { CalendarioFestivo } from "./calendario-festivos/calendario-festivos.class";
+import { CalendarioFestivosDatabase } from "./calendario-festivos/calendario-festivos.mongodb";
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -82,6 +85,7 @@ import { Auditorias } from "./auditorias/auditorias.class";
     IncidenciasController,
     AuditoriasController,
     VerificacionmfaController,
+    CalendarioFestivosController,
   ],
   providers: [
     AppService,
@@ -119,7 +123,10 @@ import { Auditorias } from "./auditorias/auditorias.class";
     AuditoriaDatabase,
     Auditorias,
     VerifiacacionDatabase,
-    VerificacionClass
+    VerificacionClass,
+    CalendarioFestivosDatabase,
+    CalendarioFestivo
+
   ],
 })
 export class AppModule { }
