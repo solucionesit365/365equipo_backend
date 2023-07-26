@@ -155,8 +155,8 @@ export class Cuadrantes {
         cuadrantesVacios.push(nuevoCuadrante);
       }
     }
-    cuadrantes.push(...cuadrantesVacios);
 
+    cuadrantes.push(...cuadrantesVacios);
     for (let i = 0; i < cuadrantes.length; i += 1) {
       cuadrantes[i]["bolsaHorasInicial"] = await this.getBolsaHorasById(
         cuadrantes[i].idTrabajador,
@@ -170,7 +170,9 @@ export class Cuadrantes {
           await this.trabajadoresInstance.getTrabajadorBySqlId(
             cuadrantes[i].idTrabajador,
           );
-        cuadrantes[i].horasContrato = trabajadorCuadrante.horasContrato;
+        if (trabajadorCuadrante) {
+          cuadrantes[i].horasContrato = trabajadorCuadrante.horasContrato;
+        }
       }
     }
 

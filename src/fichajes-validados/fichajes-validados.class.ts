@@ -49,8 +49,8 @@ export class FichajesValidados {
     return await this.schFichajesValidados.getSemanasFichajesPagar(semana);
   }
 
-  async getAllFichajesValidados() {
-    return await this.schFichajesValidados.getAllFichajesValidados();
+  async getAllFichajesValidados(fecha:string) {
+    return await this.schFichajesValidados.getAllFichajesValidados(fecha);
   }
 
   async getParaCuadrante(year: number, semana: number, idTrabajador: number) {
@@ -59,6 +59,10 @@ export class FichajesValidados {
       semana,
       idTrabajador,
     );
+  }
+
+  async getTiendaDia(tienda: number, dia: string) {
+    return await this.schFichajesValidados.getTiendaDia(tienda, dia);
   }
 
   async resumenSemana(year: number, semana: number, idTienda: number) {

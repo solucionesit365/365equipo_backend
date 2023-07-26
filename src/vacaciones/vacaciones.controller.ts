@@ -24,7 +24,7 @@ export class VacacionesController {
     private readonly tokenService: TokenService,
     private readonly vacacionesInstance: Vacaciones,
     private readonly email: EmailClass,
-  ) { }
+  ) {}
 
   @Get()
   async getSolicitudes(@Headers("authorization") authHeader: string) {
@@ -43,17 +43,19 @@ export class VacacionesController {
   }
 
   @Get("getVacacionesByTiendas")
-  async getVacacionesByTiendas(@Headers("authorization") authHeader: string,
-    @Query() { idTienda },) {
+  async getVacacionesByTiendas(
+    @Headers("authorization") authHeader: string,
+    @Query() { idTienda },
+  ) {
     try {
       const token = this.tokenService.extract(authHeader);
       await this.authInstance.verifyToken(token);
 
-
-      const resVacacionesByTienda = await this.vacacionesInstance.getVacacionesByTiendas(Number(idTienda))
+      const resVacacionesByTienda =
+        await this.vacacionesInstance.getVacacionesByTiendas(Number(idTienda));
       return {
         ok: true,
-        data: resVacacionesByTienda
+        data: resVacacionesByTienda,
       };
     } catch (err) {
       console.log(err);
@@ -62,23 +64,25 @@ export class VacacionesController {
   }
 
   @Get("getVacacionesByEstado")
-  async getVacacionesByEstado(@Headers("authorization") authHeader: string,
-    @Query() { estado },) {
+  async getVacacionesByEstado(
+    @Headers("authorization") authHeader: string,
+    @Query() { estado },
+  ) {
     try {
       const token = this.tokenService.extract(authHeader);
       await this.authInstance.verifyToken(token);
 
-      const resVacacionesByEstado = await this.vacacionesInstance.getVacacionesByEstado(estado)
+      const resVacacionesByEstado =
+        await this.vacacionesInstance.getVacacionesByEstado(estado);
       return {
         ok: true,
-        data: resVacacionesByEstado
+        data: resVacacionesByEstado,
       };
     } catch (err) {
       console.log(err);
       return { ok: false, message: err.message };
     }
   }
-
 
   @Get("sendToHit")
   @UseGuards(SchedulerGuard)
@@ -219,40 +223,67 @@ export class VacacionesController {
       const token = this.tokenService.extract(authHeader);
       await this.authInstance.verifyToken(token);
 
-
-
       const resEstado = await this.vacacionesInstance.setEstadoSolicitud(
         estado,
         idSolicitud,
         respuesta,
-      )
+      );
       if (resEstado) {
-        const solicitud = await this.vacacionesInstance.getSolicitudById(Number(idSolicitud))
-        const solicitudTrabajador = await this.trabajadorInstance.getTrabajadorBySqlId(Number(solicitud.idBeneficiario));
+        const solicitud = await this.vacacionesInstance.getSolicitudById(
+          Number(idSolicitud),
+        );
+        const solicitudTrabajador =
+          await this.trabajadorInstance.getTrabajadorBySqlId(
+            Number(solicitud.idBeneficiario),
+          );
         this.notificaciones.newInAppNotification({
           uid: solicitudTrabajador.idApp,
           titulo: "Vacaciones",
           mensaje: `Tus vacaciones han sido ${estado}S`,
           leido: false,
           creador: "SISTEMA",
+        });
 
-        })
-
-        this.email.enviarEmail(solicitudTrabajador.emails, `Tus vacaciones han sido: ${estado}S <br/> Motivo: ${respuesta} `, "Estado de Vacaciones")
-
+        this.email.enviarEmail(
+          solicitudTrabajador.emails,
+          `Tus vacaciones han sido: ${estado}S <br/> Motivo: ${respuesta} `,
+          "Estado de Vacaciones",
+        );
 
         return {
           ok: true,
           data: "En desarrollo",
-
         };
       }
-
-
     } catch (err) {
       console.log(err);
       return { ok: false, message: err.message };
     }
+  }
+
+  @Post("enviarAlEmail")
+  async enviarAlEmail(
+    @Headers("authorization") authHeader: string,
+    @Body() data,
+  ) {
+    try {
+      const token = this.tokenService.extract(authHeader);
+      await this.authInstance.verifyToken(token);
+      return this.vacacionesInstance.enviarAlEmail(data);
+    } catch (error) {
+      return error;
+    }
+  }
+
+  //Forzar envio de vacaciones al cuadrante
+  @Post("enviarAlCuadrante")
+  async ponerEnCuadrante(
+    @Headers("authorization") authHeader: string,
+    @Body() data,
+  ) {
+    const token = this.tokenService.extract(authHeader);
+    await this.authInstance.verifyToken(token);
+    return this.vacacionesInstance.ponerEnCuadrante(data);
   }
 
   @Post("nuevaSolicitud")
@@ -263,8 +294,13 @@ export class VacacionesController {
     try {
       const token = this.tokenService.extract(authHeader);
       await this.authInstance.verifyToken(token);
-      const solicitudTrabajador = await this.trabajadorInstance.getTrabajadorBySqlId(Number(data.idBeneficiario));
-      this.email.enviarEmail(solicitudTrabajador.emails, `Tu solicitud ha sido enviada con estos datos: <br/> 
+      const solicitudTrabajador =
+        await this.trabajadorInstance.getTrabajadorBySqlId(
+          Number(data.idBeneficiario),
+        );
+      this.email.enviarEmail(
+        solicitudTrabajador.emails,
+        `Tu solicitud ha sido enviada con estos datos: <br/> 
       <table>
       <tr style="background-color:#0000ff ">
         <th>Fecha Inicio</th>
@@ -282,7 +318,9 @@ export class VacacionesController {
         <td>${data.totalDias}</td>
       </tr>
     </table>
-     `, "Solicitud de Vacaciones")
+     `,
+        "Solicitud de Vacaciones",
+      );
 
       if (
         data.idBeneficiario &&
@@ -304,7 +342,7 @@ export class VacacionesController {
             observaciones: data.observaciones,
             totalDias: data.totalDias,
             creador: data.creador,
-            tienda: data.tienda
+            tienda: data.tienda,
           }),
         };
       } else throw Error("Faltan parámetros");
@@ -313,6 +351,4 @@ export class VacacionesController {
       return { ok: false, message: err.message };
     }
   }
-
-
 }
