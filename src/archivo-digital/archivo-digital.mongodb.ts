@@ -18,6 +18,16 @@ export class ArchivoDigitalDatabase {
     throw Error("No se ha podido subir el archivo");
   }
 
+  async getarchivos() {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const archivosDigitalCollection =
+      db.collection<ArchivoDigitalInterface>("archivoDigital");
+    const respArchivos = await archivosDigitalCollection.find({}).toArray();
+
+    return respArchivos;
+  }
+
+  //filtros
   async getArchivosByPropietario(propietario: number) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const archivosDigitalCollection =
@@ -29,11 +39,36 @@ export class ArchivoDigitalDatabase {
     return respArchivos;
   }
 
-  //   async getarchivos() {
-  //     const db = (await this.mongoDbService.getConexion()).db("soluciones");
-  //     const archivosDigitalCollection = db.collection<ArchivoDigitalInterface>("archivoDigital");
-  //     const respArchivos = await archivosDigitalCollection.find({}).toArray();
+  async getArchivosByTipo(tipo: string) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const archivosDigitalCollection =
+      db.collection<ArchivoDigitalInterface>("archivoDigital");
+    const respArchivos = await archivosDigitalCollection
+      .find({ tipo })
+      .toArray();
 
-  //     return respArchivos;
-  //   }
+    return respArchivos;
+  }
+
+  async getArchivosByCreación(creacion: Date) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const archivosDigitalCollection =
+      db.collection<ArchivoDigitalInterface>("archivoDigital");
+    const respArchivos = await archivosDigitalCollection
+      .find({ creacion })
+      .toArray();
+
+    return respArchivos;
+  }
+
+  async getArchivosByPropietarioAndTipo(propietario: number, tipo: string) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const archivosDigitalCollection =
+      db.collection<ArchivoDigitalInterface>("archivoDigital");
+    const respArchivos = await archivosDigitalCollection
+      .find({ propietario, tipo })
+      .toArray();
+
+    return respArchivos;
+  }
 }

@@ -12,6 +12,7 @@ import { ArchivoDigitalInterface } from "./archivo-digital.interface";
 import { AuthGuard } from "../auth/auth.guard";
 import { TokenService } from "../get-token/get-token.service";
 import { AuthService } from "../firebase/auth";
+import moment from "moment";
 
 @Controller("archivo-digital")
 export class ArchivoDigitalController {
@@ -31,8 +32,6 @@ export class ArchivoDigitalController {
       const token = this.tokenService.extract(authHeader);
       await this.authInstance.verifyToken(token);
 
-      console.log(archivo);
-
       return {
         ok: true,
         data: await this.archivoDigitalInstance.nuevoArchivo(archivo),
@@ -43,6 +42,22 @@ export class ArchivoDigitalController {
     }
   }
 
+  @Get("getArchivos")
+  @UseGuards(AuthGuard)
+  async getArchivos(@Headers("authorization") authHeader: string) {
+    try {
+      const token = this.tokenService.extract(authHeader);
+      await this.authInstance.verifyToken(token);
+
+      const respArchivos = await this.archivoDigitalInstance.getarchivos();
+      if (respArchivos) return { ok: true, data: respArchivos };
+      else throw Error("No se ha encontrado ningun archivo ");
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  //filtros
   @Get("getArchivosByPropietario")
   @UseGuards(AuthGuard)
   async getArchivosByPropietario(
@@ -58,6 +73,8 @@ export class ArchivoDigitalController {
         await this.archivoDigitalInstance.getArchivosByPropietario(
           Number(propietario),
         );
+      console.log(respArchivos);
+
       if (respArchivos) return { ok: true, data: respArchivos };
       else throw Error("No se ha encontrado ningun archivo por propietario");
     } catch (error) {
@@ -65,20 +82,74 @@ export class ArchivoDigitalController {
     }
   }
 
-  // @Get("getArchivos")
-  // @UseGuards(AuthGuard)
-  // async getArchivos(@Headers("authorization") authHeader: string,
-  //    ) {
-  //     try {
-  //         const token = this.tokenService.extract(authHeader);
-  //         await this.authInstance.verifyToken(token);
+  @Get("getArchivosByTipo")
+  @UseGuards(AuthGuard)
+  async getArchivosByTipo(
+    @Headers("authorization") authHeader: string,
+    @Query() { tipo }: { tipo: string },
+  ) {
+    try {
+      const token = this.tokenService.extract(authHeader);
+      await this.authInstance.verifyToken(token);
+      console.log(tipo);
 
-  //         const respArchivos = await this.archivoDigitalInstance.getArchivos();
-  //         if (respArchivos) return { ok: true, data: respArchivos };
+      const respArchivos = await this.archivoDigitalInstance.getArchivosByTipo(
+        tipo,
+      );
+      console.log(respArchivos);
 
-  //         else throw Error("No se ha encontrado ningun archivo ");
-  //     } catch (error) {
-  //         console.log(error);
-  //     }
-  // }
+      if (respArchivos) return { ok: true, data: respArchivos };
+      else throw Error("No se ha encontrado ningun archivo por propietario");
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  @Get("getArchivosByCreacion")
+  @UseGuards(AuthGuard)
+  async getArchivosByCreacion(
+    @Headers("authorization") authHeader: string,
+    @Query() { creacion }: { creacion: Date },
+  ) {
+    try {
+      const token = this.tokenService.extract(authHeader);
+      await this.authInstance.verifyToken(token);
+      console.log(creacion);
+
+      const respArchivos =
+        await this.archivoDigitalInstance.getArchivosByCreación(creacion);
+      console.log(respArchivos);
+
+      if (respArchivos) return { ok: true, data: respArchivos };
+      else throw Error("No se ha encontrado ningun archivo por propietario");
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  @Get("getArchivosByPropietarioAndTipo")
+  @UseGuards(AuthGuard)
+  async getArchivosByPropietarioAndTipo(
+    @Headers("authorization") authHeader: string,
+    @Query() { propietario, tipo }: { propietario: number; tipo: string },
+  ) {
+    try {
+      const token = this.tokenService.extract(authHeader);
+      await this.authInstance.verifyToken(token);
+      console.log(propietario);
+      console.log(tipo);
+
+      const respArchivos =
+        await this.archivoDigitalInstance.getArchivosByPropietarioAndTipo(
+          Number(propietario),
+          tipo,
+        );
+      console.log(respArchivos);
+
+      if (respArchivos) return { ok: true, data: respArchivos };
+      else throw Error("No se ha encontrado ningun archivo por propietario");
+    } catch (error) {
+      console.log(error);
+    }
+  }
 }

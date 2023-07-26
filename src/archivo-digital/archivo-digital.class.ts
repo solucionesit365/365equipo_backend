@@ -13,11 +13,27 @@ export class ArchivoDigital {
     throw Error("No se ha podido subir el archivo");
   }
 
+  async getarchivos() {
+    return await this.scharchivoDigital.getarchivos();
+  }
+
+  //filtros
   async getArchivosByPropietario(propietario: number) {
     return await this.scharchivoDigital.getArchivosByPropietario(propietario);
   }
 
-  // async getarchivos() {
-  //     return await this.scharchivoDigital.getarchivos();
-  // }
+  async getArchivosByTipo(tipo: string) {
+    return await this.scharchivoDigital.getArchivosByTipo(tipo);
+  }
+
+  async getArchivosByCreación(creacion: Date) {
+    return await this.scharchivoDigital.getArchivosByCreación(creacion);
+  }
+
+  async getArchivosByPropietarioAndTipo(propietario: number, tipo: string) {
+    return await this.scharchivoDigital.getArchivosByPropietarioAndTipo(
+      propietario,
+      tipo,
+    );
+  }
 }
