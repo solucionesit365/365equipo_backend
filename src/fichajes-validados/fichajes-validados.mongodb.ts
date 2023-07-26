@@ -75,12 +75,12 @@ export class FichajesValidadosDatabase {
     return await fichajesIdResponsable.find({ semana }).toArray();
   }
 
-  async getAllFichajesValidados() {
+  async getAllFichajesValidados(fecha: string) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const fichajesCollection =
       db.collection<FichajeValidadoDto>("fichajesValidados");
 
-    return await fichajesCollection.find({}).toArray();
+    return await fichajesCollection.find({fecha}).toArray();
   }
 
   async getValidadosSemanaResponsable(
@@ -97,6 +97,19 @@ export class FichajesValidadosDatabase {
         year,
         semana,
         idResponsable,
+      })
+      .toArray();
+  }
+
+  async getTiendaDia(tienda: number, dia: string) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const fichajesCollection =
+      db.collection<FichajeValidadoDto>("fichajesValidados");
+
+    return await fichajesCollection
+      .find({
+        tienda: tienda,
+        fecha: dia,
       })
       .toArray();
   }
