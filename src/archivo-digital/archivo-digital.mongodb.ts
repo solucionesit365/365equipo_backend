@@ -1,6 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { MongoDbService } from "../bbdd/mongodb";
 import { ArchivoDigitalInterface } from "./archivo-digital.interface";
+import { ObjectId } from "mongodb";
 
 @Injectable()
 export class ArchivoDigitalDatabase {
@@ -27,7 +28,20 @@ export class ArchivoDigitalDatabase {
     return respArchivos;
   }
 
-  //filtros
+  //Eliminar
+  async deleteArchivo(_id: string) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const archivosDigitalCollection =
+      db.collection<ArchivoDigitalInterface>("archivoDigital");
+
+    const resDelete = await archivosDigitalCollection.deleteOne({
+      _id: new ObjectId(_id),
+    });
+
+    return resDelete.acknowledged && resDelete.deletedCount > 0;
+  }
+
+  //Filtros
   async getArchivosByPropietario(propietario: number) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const archivosDigitalCollection =
@@ -61,6 +75,7 @@ export class ArchivoDigitalDatabase {
     return respArchivos;
   }
 
+  //Ver archivos trabajadores
   async getArchivosByPropietarioAndTipo(propietario: number, tipo: string) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const archivosDigitalCollection =

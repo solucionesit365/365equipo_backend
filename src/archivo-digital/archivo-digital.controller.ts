@@ -57,7 +57,32 @@ export class ArchivoDigitalController {
     }
   }
 
-  //filtros
+  //Eliminar
+
+  @Post("deleteArchivo")
+  async deleteArchivo(
+    @Headers("authorization") authHeader: string,
+    @Body() { _id },
+  ) {
+    try {
+      const token = this.tokenService.extract(authHeader);
+      await this.authInstance.verifyToken(token);
+
+      const respArchivos = await this.archivoDigitalInstance.deleteArchivo(_id);
+      if (respArchivos)
+        return {
+          ok: true,
+          data: respArchivos,
+        };
+
+      throw Error("No se ha podido borrar el archivo");
+    } catch (err) {
+      console.log(err);
+      return { ok: false, message: err.message };
+    }
+  }
+
+  //Filtros
   @Get("getArchivosByPropietario")
   @UseGuards(AuthGuard)
   async getArchivosByPropietario(
@@ -67,13 +92,11 @@ export class ArchivoDigitalController {
     try {
       const token = this.tokenService.extract(authHeader);
       await this.authInstance.verifyToken(token);
-      console.log(propietario);
 
       const respArchivos =
         await this.archivoDigitalInstance.getArchivosByPropietario(
           Number(propietario),
         );
-      console.log(respArchivos);
 
       if (respArchivos) return { ok: true, data: respArchivos };
       else throw Error("No se ha encontrado ningun archivo por propietario");
@@ -91,12 +114,10 @@ export class ArchivoDigitalController {
     try {
       const token = this.tokenService.extract(authHeader);
       await this.authInstance.verifyToken(token);
-      console.log(tipo);
 
       const respArchivos = await this.archivoDigitalInstance.getArchivosByTipo(
         tipo,
       );
-      console.log(respArchivos);
 
       if (respArchivos) return { ok: true, data: respArchivos };
       else throw Error("No se ha encontrado ningun archivo por propietario");
@@ -114,11 +135,9 @@ export class ArchivoDigitalController {
     try {
       const token = this.tokenService.extract(authHeader);
       await this.authInstance.verifyToken(token);
-      console.log(creacion);
 
       const respArchivos =
         await this.archivoDigitalInstance.getArchivosByCreación(creacion);
-      console.log(respArchivos);
 
       if (respArchivos) return { ok: true, data: respArchivos };
       else throw Error("No se ha encontrado ningun archivo por propietario");
@@ -136,15 +155,12 @@ export class ArchivoDigitalController {
     try {
       const token = this.tokenService.extract(authHeader);
       await this.authInstance.verifyToken(token);
-      console.log(propietario);
-      console.log(tipo);
 
       const respArchivos =
         await this.archivoDigitalInstance.getArchivosByPropietarioAndTipo(
           Number(propietario),
           tipo,
         );
-      console.log(respArchivos);
 
       if (respArchivos) return { ok: true, data: respArchivos };
       else throw Error("No se ha encontrado ningun archivo por propietario");

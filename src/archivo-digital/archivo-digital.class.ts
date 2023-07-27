@@ -17,7 +17,12 @@ export class ArchivoDigital {
     return await this.scharchivoDigital.getarchivos();
   }
 
-  //filtros
+  //Eliminar
+  async deleteArchivo(_id: string) {
+    return await this.scharchivoDigital.deleteArchivo(_id);
+  }
+
+  //Filtros
   async getArchivosByPropietario(propietario: number) {
     return await this.scharchivoDigital.getArchivosByPropietario(propietario);
   }
