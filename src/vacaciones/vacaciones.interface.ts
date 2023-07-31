@@ -5,7 +5,6 @@ export interface SolicitudVacaciones {
   fechaFinal: string;
   fechaIncorporacion: string;
   observaciones: string;
-  creador: number,
-  tienda: number,
-
+  creador: number;
+  tienda?: number;
 }

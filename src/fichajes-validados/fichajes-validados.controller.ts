@@ -102,6 +102,7 @@ export class FichajesValidadosController {
             mensaje: `Se ha solicitado ${FichajesValidados.horasPagar.total}h a pagar`,
             leido: false,
             creador: "SISTEMA",
+            url: "",
           });
         }
         if (FichajesValidados.horasPagar.estadoValidado != "PENDIENTE") {
@@ -112,6 +113,7 @@ export class FichajesValidadosController {
               mensaje: `${FichajesValidados.horasPagar.estadoValidado} ${FichajesValidados.horasPagar.total}h `,
               leido: false,
               creador: "SISTEMA",
+              url: "",
             });
           }
         }
