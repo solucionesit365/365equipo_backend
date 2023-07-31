@@ -13,4 +13,5 @@ export interface InAppNotification {
   mensaje: string;
   leido: boolean;
   creador: "SISTEMA" | "RRHH";
+  url: string;
 }

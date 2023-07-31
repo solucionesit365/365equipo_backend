@@ -6,7 +6,6 @@ import { AuthService } from "../firebase/auth";
 import { Trabajador } from "../trabajadores/trabajadores.class";
 import { Notificaciones } from "src/notificaciones/notificaciones.class";
 
-
 @Controller("anuncios")
 export class AnunciosController {
   constructor(
@@ -15,7 +14,7 @@ export class AnunciosController {
     private readonly authInstance: AuthService,
     private readonly tokenService: TokenService,
     private readonly anunciosInstance: AnunciosClass,
-  ) { }
+  ) {}
 
   @Get()
   async getAnuncios(@Headers("authorization") authHeader: string) {
@@ -60,7 +59,7 @@ export class AnunciosController {
 
       //Notificacion Anuncio
       if (await this.anunciosInstance.addAnuncio(anuncio)) {
-        const arrayTrabajador = await this.trabajadores.getTrabajadores()
+        const arrayTrabajador = await this.trabajadores.getTrabajadores();
         arrayTrabajador.forEach((trabajador) => {
           if (trabajador.idApp != null) {
             this.notificaciones.newInAppNotification({
@@ -69,10 +68,10 @@ export class AnunciosController {
               mensaje: "Tienes un nuevo anuncio ves al tablón de anuncios",
               leido: false,
               creador: "SISTEMA",
-            })
+              url: "/anuncios",
+            });
           }
-
-        })
+        });
 
         return {
           ok: true,
@@ -149,5 +148,4 @@ export class AnunciosController {
   //     return { ok: false, message: err.message };
   //   }
   // }
-
 }

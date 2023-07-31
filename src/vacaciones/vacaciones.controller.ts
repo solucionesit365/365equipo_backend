@@ -242,6 +242,7 @@ export class VacacionesController {
           mensaje: `Tus vacaciones han sido ${estado}S`,
           leido: false,
           creador: "SISTEMA",
+          url: "/mis-vacaciones",
         });
 
         this.email.enviarEmail(
@@ -322,6 +323,8 @@ export class VacacionesController {
         "Solicitud de Vacaciones",
       );
 
+      console.log(data);
+
       if (
         data.idBeneficiario &&
         data.totalDias &&
@@ -329,8 +332,7 @@ export class VacacionesController {
         data.fechaFinal &&
         data.fechaIncorporacion &&
         data.observaciones &&
-        data.creador &&
-        data.tienda
+        data.creador
       ) {
         return {
           ok: true,
