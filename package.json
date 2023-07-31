@@ -35,6 +35,7 @@
     "moment": "^2.29.4",
     "mongodb": "^5.1.0",
     "mssql": "^9.1.1",
+    "nest": "^0.1.6",
     "nest.js": "^1.0.8",
     "nodemailer": "^6.9.2",
     "openpgp": "^5.9.0",
