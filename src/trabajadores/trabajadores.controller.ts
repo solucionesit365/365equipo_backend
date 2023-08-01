@@ -22,7 +22,7 @@ export class TrabajadoresController {
     private readonly trabajadorInstance: Trabajador,
     private readonly tokenService: TokenService,
     private readonly messagingService: FirebaseMessagingService,
-  ) { }
+  ) {}
 
   @Get()
   async getTrabajadores(@Headers("authorization") authHeader: string) {
@@ -75,6 +75,26 @@ export class TrabajadoresController {
     }
   }
 
+  @Get("getTrabajadoresByTienda")
+  async getTrabajadoresByTienda(
+    @Headers("authorization") authHeader: string,
+    @Query() { idTienda },
+  ) {
+    try {
+      const token = this.tokenService.extract(authHeader);
+      await this.authInstance.verifyToken(token);
+
+      const resUser = await this.trabajadorInstance.getTrabajadoresByTienda(
+        Number(idTienda),
+      );
+
+      return { ok: true, data: resUser };
+    } catch (err) {
+      console.log(err);
+      return { ok: false, message: err.message };
+    }
+  }
+
   @Get("getHistoricoContratos")
   async getHistoricoContratos(
     @Headers("authorization") authHeader: string,
@@ -87,14 +107,11 @@ export class TrabajadoresController {
       const resUser = await this.trabajadorInstance.getHistoricosContratos(dni);
 
       return { ok: true, data: resUser };
-
     } catch (error) {
       console.log(error);
       return { ok: false, message: error.message };
     }
   }
-
-
 
   @Get("validarQR")
   async validarQRTrabajador(@Query() { idTrabajador, tokenQR }) {
@@ -286,20 +303,21 @@ export class TrabajadoresController {
   }
 
   @Post("uploadFoto")
-  async uploadFoto(@Headers("authorization") authHeader: string,
-    @Body() { displayFoto, uid }) {
+  async uploadFoto(
+    @Headers("authorization") authHeader: string,
+    @Body() { displayFoto, uid },
+  ) {
     try {
       const token = this.tokenService.extract(authHeader);
       await this.authInstance.verifyToken(token);
 
       return {
         ok: true,
-        data: await this.trabajadorInstance.uploadFoto(displayFoto, uid)
-      }
+        data: await this.trabajadorInstance.uploadFoto(displayFoto, uid),
+      };
     } catch (error) {
       console.log(error);
       return { ok: false, message: error.message };
     }
-
   }
 }
