@@ -14,12 +14,20 @@ export class Trabajador {
     private readonly permisosInstance: PermisosClass,
     @Inject(forwardRef(() => EmailClass))
     private readonly emailInstance: EmailClass,
-  ) { }
+  ) {}
 
   async getTrabajadorByAppId(uid: string) {
     const resUser = await schTrabajadores.getTrabajadorByAppId(uid);
     if (resUser) return resUser;
     throw Error("No se ha podido obtener la información del usuario");
+  }
+
+  async getTrabajadoresByTienda(idTienda: number) {
+    const resUser = await schTrabajadores.getTrabajadoresByTienda(idTienda);
+    if (resUser) return resUser;
+    throw Error(
+      `No se ha podido obtener los trabajadores de la tienda ${idTienda} `,
+    );
   }
 
   async getTrabajadorBySqlId(id: number) {
@@ -281,6 +289,6 @@ export class Trabajador {
   }
 
   async uploadFoto(displayFoto: string, uid: string) {
-    return await schTrabajadores.uploadFoto(displayFoto, uid)
+    return await schTrabajadores.uploadFoto(displayFoto, uid);
   }
 }
