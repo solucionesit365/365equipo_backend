@@ -238,18 +238,18 @@ export class CuadrantesController {
           oldCuadrante,
         );
         if (notiCuadrante) {
-          const trabajadorID =
-            await this.trabajadoresInstance.getTrabajadorBySqlId(
-              cuadrante.idTrabajador,
-            );
+          // const trabajadorID =
+          //   await this.trabajadoresInstance.getTrabajadorBySqlId(
+          //     cuadrante.idTrabajador,
+          //   );
 
-          this.notificaciones.newInAppNotification({
-            uid: trabajadorID.idApp,
-            titulo: "CUADRANTE TIENDA",
-            mensaje: `Se ha creado tu horario de la semana ${cuadrante.semana}`,
-            leido: false,
-            creador: "SISTEMA",
-          });
+          // this.notificaciones.newInAppNotification({
+          //   uid: trabajadorID.idApp,
+          //   titulo: "CUADRANTE TIENDA",
+          //   mensaje: `Se ha creado tu horario de la semana ${cuadrante.semana}`,
+          //   leido: false,
+          //   creador: "SISTEMA",
+          // });
           return { ok: true };
         }
       }

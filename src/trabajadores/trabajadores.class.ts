@@ -22,6 +22,14 @@ export class Trabajador {
     throw Error("No se ha podido obtener la información del usuario");
   }
 
+  async getTrabajadoresByTienda(idTienda: number) {
+    const resUser = await schTrabajadores.getTrabajadoresByTienda(idTienda);
+    if (resUser) return resUser;
+    throw Error(
+      `No se ha podido obtener los trabajadores de la tienda ${idTienda} `,
+    );
+  }
+
   async getTrabajadorBySqlId(id: number) {
     const resUser = await schTrabajadores.getTrabajadorBySqlId(id);
     if (resUser) return resUser;
@@ -278,5 +286,9 @@ export class Trabajador {
 
   async getHorasContratoById(idSql: number, fecha: moment.Moment) {
     return await schTrabajadores.getHorasContrato(idSql, fecha);
+  }
+
+  async uploadFoto(displayFoto: string, uid: string) {
+    return await schTrabajadores.uploadFoto(displayFoto, uid);
   }
 }

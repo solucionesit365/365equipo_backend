@@ -6,7 +6,27 @@ export interface AuditoriasInterface {
     descripcion: string;
     caducidad: Date;
     tienda: number;
+    configuracion: {
+        preguntasDependientaA: boolean,
+        preguntasDependientaB_C: boolean,
+        preguntasResponsable: boolean
+    }
     preguntas: {
+        archivo: boolean;
+        pregunta: string;
+        tipo: string;
+    }[];
+    preguntasDependientaA: {
+        archivo: boolean;
+        pregunta: string;
+        tipo: string;
+    }[];
+    preguntasDependientaB_C: {
+        archivo: boolean;
+        pregunta: string;
+        tipo: string;
+    }[];
+    preguntasResponsable: {
         archivo: boolean;
         pregunta: string;
         tipo: string;
@@ -22,6 +42,8 @@ export interface AuditoriaRespuestas {
     descripcion: string,
     persona: string,
     respuestas: [],
+    respuestasEvaluador: [],
     tienda: number,
     ultimaRespuesta: Date
+    evaluada: boolean
 }

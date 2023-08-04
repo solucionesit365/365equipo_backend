@@ -47,15 +47,21 @@ import { CryptoClass } from "./crypto/crypto.class";
 import { ClientesService } from "./clientes/clientes.service";
 import { ClientesController } from "./clientes/clientes.controller";
 import { SolicitudNuevoClienteBbdd } from "./clientes/clientes.mongodb";
-import { IncidenciasController } from './incidencias/incidencias.controller';
+import { IncidenciasController } from "./incidencias/incidencias.controller";
 import { IncidenciasClass } from "./incidencias/incidencias.mongodb";
 import { Incidencia } from "./incidencias/incidencias.class";
-import { VerificacionmfaController } from './verificacionMFA/verificacionmfa.controller';
+import { VerificacionmfaController } from "./verificacionMFA/verificacionmfa.controller";
 import { VerifiacacionDatabase } from "./verificacionMFA/verificacionmfa.mongodb";
 import { VerificacionClass } from "./verificacionMFA/verificacionmfa.class";
-import { AuditoriasController } from './auditorias/auditorias.controller';
+import { AuditoriasController } from "./auditorias/auditorias.controller";
 import { AuditoriaDatabase } from "./auditorias/auditorias.mongodb";
 import { Auditorias } from "./auditorias/auditorias.class";
+import { CalendarioFestivosController } from "./calendario-festivos/calendario-festivos.controller";
+import { CalendarioFestivo } from "./calendario-festivos/calendario-festivos.class";
+import { CalendarioFestivosDatabase } from "./calendario-festivos/calendario-festivos.mongodb";
+import { ArchivoDigitalController } from "./archivo-digital/archivo-digital.controller";
+import { ArchivoDigital } from "./archivo-digital/archivo-digital.class";
+import { ArchivoDigitalDatabase } from "./archivo-digital/archivo-digital.mongodb";
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -82,6 +88,8 @@ import { Auditorias } from "./auditorias/auditorias.class";
     IncidenciasController,
     AuditoriasController,
     VerificacionmfaController,
+    CalendarioFestivosController,
+    ArchivoDigitalController,
   ],
   providers: [
     AppService,
@@ -119,7 +127,11 @@ import { Auditorias } from "./auditorias/auditorias.class";
     AuditoriaDatabase,
     Auditorias,
     VerifiacacionDatabase,
-    VerificacionClass
+    VerificacionClass,
+    CalendarioFestivosDatabase,
+    CalendarioFestivo,
+    ArchivoDigital,
+    ArchivoDigitalDatabase,
   ],
 })
-export class AppModule { }
+export class AppModule {}

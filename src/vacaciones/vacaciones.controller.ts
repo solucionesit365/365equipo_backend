@@ -13,6 +13,7 @@ import { Vacaciones } from "./vacaciones.class";
 import { Trabajador } from "../trabajadores/trabajadores.class";
 import { AuthService } from "../firebase/auth";
 import { Notificaciones } from "src/notificaciones/notificaciones.class";
+import { EmailClass } from "src/email/email.class";
 
 @Controller("vacaciones")
 export class VacacionesController {
@@ -22,13 +23,15 @@ export class VacacionesController {
     private readonly trabajadorInstance: Trabajador,
     private readonly tokenService: TokenService,
     private readonly vacacionesInstance: Vacaciones,
-  ) { }
+    private readonly email: EmailClass,
+  ) {}
 
   @Get()
   async getSolicitudes(@Headers("authorization") authHeader: string) {
     try {
       const token = this.tokenService.extract(authHeader);
       await this.authInstance.verifyToken(token);
+
       return {
         ok: true,
         data: await this.vacacionesInstance.getSolicitudes(),
@@ -40,17 +43,19 @@ export class VacacionesController {
   }
 
   @Get("getVacacionesByTiendas")
-  async getVacacionesByTiendas(@Headers("authorization") authHeader: string,
-    @Query() { idTienda },) {
+  async getVacacionesByTiendas(
+    @Headers("authorization") authHeader: string,
+    @Query() { idTienda },
+  ) {
     try {
       const token = this.tokenService.extract(authHeader);
       await this.authInstance.verifyToken(token);
-      console.log(idTienda);
 
-      const resVacacionesByTienda = await this.vacacionesInstance.getVacacionesByTiendas(Number(idTienda))
+      const resVacacionesByTienda =
+        await this.vacacionesInstance.getVacacionesByTiendas(Number(idTienda));
       return {
         ok: true,
-        data: resVacacionesByTienda
+        data: resVacacionesByTienda,
       };
     } catch (err) {
       console.log(err);
@@ -59,24 +64,25 @@ export class VacacionesController {
   }
 
   @Get("getVacacionesByEstado")
-  async getVacacionesByEstado(@Headers("authorization") authHeader: string,
-    @Query() { estado },) {
+  async getVacacionesByEstado(
+    @Headers("authorization") authHeader: string,
+    @Query() { estado },
+  ) {
     try {
       const token = this.tokenService.extract(authHeader);
       await this.authInstance.verifyToken(token);
-      console.log(estado);
 
-      const resVacacionesByEstado = await this.vacacionesInstance.getVacacionesByEstado(estado)
+      const resVacacionesByEstado =
+        await this.vacacionesInstance.getVacacionesByEstado(estado);
       return {
         ok: true,
-        data: resVacacionesByEstado
+        data: resVacacionesByEstado,
       };
     } catch (err) {
       console.log(err);
       return { ok: false, message: err.message };
     }
   }
-
 
   @Get("sendToHit")
   @UseGuards(SchedulerGuard)
@@ -221,32 +227,64 @@ export class VacacionesController {
         estado,
         idSolicitud,
         respuesta,
-      )
+      );
       if (resEstado) {
-        const solicitud = await this.vacacionesInstance.getSolicitudById(Number(idSolicitud))
-        const solicitudTrabajador = await this.trabajadorInstance.getTrabajadorBySqlId(Number(solicitud.idBeneficiario));
+        const solicitud = await this.vacacionesInstance.getSolicitudById(
+          Number(idSolicitud),
+        );
+        const solicitudTrabajador =
+          await this.trabajadorInstance.getTrabajadorBySqlId(
+            Number(solicitud.idBeneficiario),
+          );
         this.notificaciones.newInAppNotification({
           uid: solicitudTrabajador.idApp,
           titulo: "Vacaciones",
           mensaje: `Tus vacaciones han sido ${estado}S`,
           leido: false,
           creador: "SISTEMA",
+          url: "/mis-vacaciones",
+        });
 
-        })
-
+        this.email.enviarEmail(
+          solicitudTrabajador.emails,
+          `Tus vacaciones han sido: ${estado}S <br/> Motivo: ${respuesta} `,
+          "Estado de Vacaciones",
+        );
 
         return {
           ok: true,
           data: "En desarrollo",
-
         };
       }
-
-
     } catch (err) {
       console.log(err);
       return { ok: false, message: err.message };
     }
+  }
+
+  @Post("enviarAlEmail")
+  async enviarAlEmail(
+    @Headers("authorization") authHeader: string,
+    @Body() data,
+  ) {
+    try {
+      const token = this.tokenService.extract(authHeader);
+      await this.authInstance.verifyToken(token);
+      return this.vacacionesInstance.enviarAlEmail(data);
+    } catch (error) {
+      return error;
+    }
+  }
+
+  //Forzar envio de vacaciones al cuadrante
+  @Post("enviarAlCuadrante")
+  async ponerEnCuadrante(
+    @Headers("authorization") authHeader: string,
+    @Body() data,
+  ) {
+    const token = this.tokenService.extract(authHeader);
+    await this.authInstance.verifyToken(token);
+    return this.vacacionesInstance.ponerEnCuadrante(data);
   }
 
   @Post("nuevaSolicitud")
@@ -257,6 +295,35 @@ export class VacacionesController {
     try {
       const token = this.tokenService.extract(authHeader);
       await this.authInstance.verifyToken(token);
+      const solicitudTrabajador =
+        await this.trabajadorInstance.getTrabajadorBySqlId(
+          Number(data.idBeneficiario),
+        );
+      this.email.enviarEmail(
+        solicitudTrabajador.emails,
+        `Tu solicitud ha sido enviada con estos datos: <br/> 
+      <table>
+      <tr style="background-color:#0000ff ">
+        <th>Fecha Inicio</th>
+        <th>Fecha Final</th>
+        <th>Fecha Incorporación</th>
+        <th>Observación</th>
+        <th>Total de días</th>
+      </tr>
+      <tr>
+        
+        <td>${data.fechaInicial}</td>
+        <td>${data.fechaFinal}</td>
+        <td>${data.fechaIncorporacion}</td>
+        <td>${data.observaciones}</td>
+        <td>${data.totalDias}</td>
+      </tr>
+    </table>
+     `,
+        "Solicitud de Vacaciones",
+      );
+
+      console.log(data);
 
       if (
         data.idBeneficiario &&
@@ -264,7 +331,8 @@ export class VacacionesController {
         data.fechaInicial &&
         data.fechaFinal &&
         data.fechaIncorporacion &&
-        data.observaciones
+        data.observaciones &&
+        data.creador
       ) {
         return {
           ok: true,
@@ -275,6 +343,8 @@ export class VacacionesController {
             fechaIncorporacion: data.fechaIncorporacion,
             observaciones: data.observaciones,
             totalDias: data.totalDias,
+            creador: data.creador,
+            tienda: data.tienda,
           }),
         };
       } else throw Error("Faltan parámetros");
@@ -283,6 +353,4 @@ export class VacacionesController {
       return { ok: false, message: err.message };
     }
   }
-
-
 }

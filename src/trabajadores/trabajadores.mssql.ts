@@ -23,12 +23,15 @@ CONVERT(nvarchar, tr.finalContrato, 103) as finalContrato,
 tr.idResponsable,
 tr.idTienda,
 (SELECT COUNT(*) FROM trabajadores WHERE idResponsable = tr.id) as coordinadora,
-(SELECT top 1 horasContrato*40/100 FROM historicoContratos WHERE dni = tr.dni)  as horasContrato,
+(SELECT top 1 horasContrato*40/100 FROM historicoContratos WHERE dni = tr.dni
+AND inicioContrato <= GETDATE() AND (fechaBaja >= GETDATE() OR fechaBaja IS NULL)
+) as horasContrato,
 tr1.nombreApellidos as nombreResponsable,
 ti.nombre as nombreTienda,
 CONVERT(nvarchar, tr.antiguedad, 103) as antiguedad,
 tr.idEmpresa,
-tr.tokenQR
+tr.tokenQR,
+tr.displayFoto
 `;
 
 /* Todos */
@@ -39,9 +42,10 @@ export async function getTrabajadores(todos = false) {
     FROM trabajadores tr
     LEFT JOIN trabajadores tr1 ON tr.idResponsable = tr1.id
     LEFT JOIN tiendas ti ON tr.idTienda = ti.id
-    ${!todos
-      ? "WHERE tr.inicioContrato IS NOT NULL AND tr.finalContrato IS NULL"
-      : ""
+    ${
+      !todos
+        ? "WHERE tr.inicioContrato IS NOT NULL AND tr.finalContrato IS NULL"
+        : ""
     } ORDER BY nombreApellidos
     `;
   const resUsuarios = await recSoluciones("soluciones", sql);
@@ -72,6 +76,14 @@ export async function getTrabajadorTokenQR(
   );
   if (resTrabajador.recordset.length > 0)
     return resTrabajador.recordset[0] as TrabajadorSql;
+  return null;
+}
+
+export async function getTrabajadoresByTienda(idTienda: number) {
+  const sql = "select * from trabajadores where idTienda = @param0";
+  const resTrabajador = await recSoluciones("soluciones", sql, idTienda);
+  if (resTrabajador.recordset.length > 0)
+    return resTrabajador.recordset;
   return null;
 }
 
@@ -173,6 +185,7 @@ export async function getSubordinados(uid: string): Promise<
     idApp: string;
     nombreApellidos: string;
     displayName: string;
+    displayfoto: string;
     idTienda: number;
     antiguedad: string;
     inicioContrato: string;
@@ -184,6 +197,7 @@ export async function getSubordinados(uid: string): Promise<
       idApp, 
       nombreApellidos, 
       displayName,
+      displayFoto,
       idTienda, 
       CONVERT(varchar, antiguedad, 103) as antiguedad, 
       CONVERT(varchar, inicioContrato, 103) as inicioContrato 
@@ -547,28 +561,37 @@ export async function guardarCambiosForm(
   sql += sqlHandleCambios(trabajador, original);
   sql += `
     UPDATE trabajadores SET
-    nombreApellidos = ${trabajador.nombreApellidos ? `'${trabajador.nombreApellidos}'` : "NULL"
+    nombreApellidos = ${
+      trabajador.nombreApellidos ? `'${trabajador.nombreApellidos}'` : "NULL"
     },
-    displayName = ${trabajador.displayName ? `'${trabajador.displayName}'` : "NULL"
+    displayName = ${
+      trabajador.displayName ? `'${trabajador.displayName}'` : "NULL"
     },
     emails = ${trabajador.emails ? `'${trabajador.emails}'` : "NULL"},
     dni = ${trabajador.dni ? `'${trabajador.dni}'` : "NULL"},
     direccion = ${trabajador.direccion ? `'${trabajador.direccion}'` : "NULL"},
     ciudad = ${trabajador.ciudad ? `'${trabajador.ciudad}'` : "NULL"},
     telefonos = ${trabajador.telefonos ? `'${trabajador.telefonos}'` : "NULL"},
-    fechaNacimiento = convert(datetime, ${trabajador.fechaNacimiento ? "'" + trabajador.fechaNacimiento + "'" : null
+    fechaNacimiento = convert(datetime, ${
+      trabajador.fechaNacimiento ? "'" + trabajador.fechaNacimiento + "'" : null
     }, 103),
-    nacionalidad = ${trabajador.nacionalidad ? `'${trabajador.nacionalidad}'` : "NULL"
+    nacionalidad = ${
+      trabajador.nacionalidad ? `'${trabajador.nacionalidad}'` : "NULL"
     },
-    nSeguridadSocial = ${trabajador.nSeguridadSocial ? `'${trabajador.nSeguridadSocial}'` : "NULL"
+    nSeguridadSocial = ${
+      trabajador.nSeguridadSocial ? `'${trabajador.nSeguridadSocial}'` : "NULL"
     },
-    codigoPostal = ${trabajador.codigoPostal ? `'${trabajador.codigoPostal}'` : "NULL"
+    codigoPostal = ${
+      trabajador.codigoPostal ? `'${trabajador.codigoPostal}'` : "NULL"
     },
-    cuentaCorriente = ${trabajador.cuentaCorriente ? `'${trabajador.cuentaCorriente}'` : "NULL"
+    cuentaCorriente = ${
+      trabajador.cuentaCorriente ? `'${trabajador.cuentaCorriente}'` : "NULL"
     },
-    tipoTrabajador = ${trabajador.tipoTrabajador ? `'${trabajador.tipoTrabajador}'` : "NULL"
+    tipoTrabajador = ${
+      trabajador.tipoTrabajador ? `'${trabajador.tipoTrabajador}'` : "NULL"
     },
-    idResponsable = ${trabajador.idResponsable ? `'${trabajador.idResponsable}'` : "NULL"
+    idResponsable = ${
+      trabajador.idResponsable ? `'${trabajador.idResponsable}'` : "NULL"
     },
     idTienda = ${trabajador.idTienda ? `'${trabajador.idTienda}'` : "NULL"},
     coordinadora = ${trabajador.coordinadora ? 1 : 0},
@@ -730,12 +753,17 @@ export async function copiarHistoriaContratosHitSoluciones() {
   return true;
 }
 export async function getHistoricoContratos(dni: string) {
-  const sql = `select * from historicoContratos where dni = @param0`
+  const sql = `select * from historicoContratos where dni = @param0`;
 
   const resUser = await recSoluciones("soluciones", sql, dni);
 
-  if (resUser.recordset.length > 0)
-    return resUser.recordset;
+  if (resUser.recordset.length > 0) return resUser.recordset;
   return null;
+}
 
+export async function uploadFoto(displayFoto: string, uid: string) {
+  const sql = `update trabajadores set displayFoto=@param0 where idApp=@param1`;
+  const resUser = await recSoluciones("soluciones", sql, displayFoto, uid);
+  if (resUser.recordset) return resUser.recordset;
+  return null;
 }

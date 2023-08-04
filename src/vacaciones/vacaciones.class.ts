@@ -11,11 +11,10 @@ import { Trabajador } from "../trabajadores/trabajadores.class";
 export class Vacaciones {
   constructor(
     private readonly cuadrantesInstance: Cuadrantes,
-    private readonly emailInstance: EmailClass,
+    private readonly email: EmailClass,
     private readonly trabajadorInstance: Trabajador,
-  ) { }
+  ) {}
   async getSolicitudById(idSolicitud: number) {
-
     return await schVacaciones.getSolicitudById(Number(idSolicitud));
   }
   async nuevaSolicitudVacaciones(solicitud: SolicitudVacaciones) {
@@ -95,6 +94,56 @@ export class Vacaciones {
       throw Error("No ha sido posible modificar el estado de la solicitud");
   }
 
+  async ponerEnCuadrante(vacaciones) {
+    if (vacaciones) {
+      await this.cuadrantesInstance.agregarAusencia({
+        arrayParciales: [],
+        comentario: "Vacaciones",
+        fechaInicio: moment(vacaciones.fechaInicio, "DD/MM/YYYY").toDate(),
+        fechaFinal: moment(vacaciones.fechaFinal, "DD/MM/YYYY").toDate(),
+        idUsuario: vacaciones.idBeneficiario,
+        nombre: vacaciones.idBeneficiario,
+        tipo: "VACACIONES",
+      });
+      return { ok: true };
+    }
+  }
+
+  async enviarAlEmail(vacaciones) {
+    const solicitudTrabajador =
+      await this.trabajadorInstance.getTrabajadorBySqlId(
+        Number(vacaciones.idBeneficiario),
+      );
+    this.email.enviarEmail(
+      solicitudTrabajador.emails,
+      `Tu solicitud ha sido enviada con estos datos: <br/> 
+    <table>
+    <tr style="background-color:#0000ff ">
+      <th>Fecha Inicio</th>
+      <th>Fecha Final</th>
+      <th>Fecha Incorporación</th>
+      <th>Creadas el:</th>
+      <th>Observación</th>
+      <th>Total de días</th>
+      <th>Estado</th>
+    </tr>
+    <tr>
+      
+      <td>${vacaciones.fechaInicio}</td>
+      <td>${vacaciones.fechaFinal}</td>
+      <td>${vacaciones.fechaIncorporacion}</td>
+      <td>${vacaciones.fechaCreacion}</td>
+      <td>${vacaciones.observaciones}</td>
+      <td>${vacaciones.dias}</td>
+      <td>${vacaciones.estado}</td>
+    </tr>
+  </table>
+   `,
+      "Solicitud de Vacaciones",
+    );
+    return { ok: true };
+  }
+
   async guardarEnHit(vacaciones: {
     idBeneficiario: number;
     dias: number;
@@ -122,14 +171,14 @@ export class Vacaciones {
 
       WITH Dates AS (
         SELECT CONVERT(datetime, '${fechaInicio.format(
-      "YYYY-MM-DD",
-    )}', 126) AS Date
+          "YYYY-MM-DD",
+        )}', 126) AS Date
         UNION ALL
         SELECT DATEADD(day, 1, Date)
         FROM Dates
         WHERE DATEADD(day, 1, Date) <= CONVERT(datetime, '${fechaFinal.format(
-      "YYYY-MM-DD",
-    )}', 126)
+          "YYYY-MM-DD",
+        )}', 126)
       )
       MERGE ${nombreTabla} AS Target
       USING (SELECT * FROM Dates) AS Source
@@ -145,8 +194,9 @@ export class Vacaciones {
           Target.usuarioModif = '365Equipo'
       WHEN NOT MATCHED THEN
         INSERT (id, fecha, idEmpleado, estado, observaciones, TimeStamp, usuarioModif)
-        VALUES (NEWID(), Source.Date, ${vacaciones.idBeneficiario
-      }, 'VACANCES', '[Horas:24]', GETDATE(), '365Equipo');
+        VALUES (NEWID(), Source.Date, ${
+          vacaciones.idBeneficiario
+        }, 'VACANCES', '[Horas:24]', GETDATE(), '365Equipo');
 
       SET @InsertedRows = @@ROWCOUNT;
 
@@ -158,7 +208,7 @@ export class Vacaciones {
     if (
       resultado.recordset.length > 0 &&
       fechaFinal.diff(fechaInicio, "days") + 1 ===
-      resultado.recordset[0].InsertedRows
+        resultado.recordset[0].InsertedRows
     ) {
       await recSoluciones(
         "soluciones",
@@ -185,5 +235,4 @@ export class Vacaciones {
   async getVacacionesByEstado(estado: string) {
     return await schVacaciones.getVacacionesByEstado(estado);
   }
-
 }
