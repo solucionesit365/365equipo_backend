@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import * as moment from "moment";
 import { CuadrantesDatabase } from "./cuadrantes.mongodb";
 import { ObjectId } from "mongodb";
-import { TCuadrante, TCuadranteRequest } from "./cuadrantes.interface";
+import { TCuadrante, TRequestCuadrante } from "./cuadrantes.interface";
 import { Tienda } from "../tiendas/tiendas.class";
 import { FacTenaMssql } from "../bbdd/mssql.class";
 import { AusenciaInterface } from "../ausencias/ausencias.interface";
@@ -335,39 +335,78 @@ export class Cuadrantes {
     return true;
   }
 
-  // Cuadrantes 2.0
-  async saveCuadrante(cuadrante: TCuadrante, oldCuadrante: TCuadrante) {
-    if (oldCuadrante) {
-      cuadrante.historialPlanes = oldCuadrante.historialPlanes;
-      cuadrante._id = oldCuadrante._id;
-    }
-    cuadrante.enviado = false;
+  // Cuadrantes 2.0 guardado nuevo
+  async saveCuadrante(cuadrantes: TCuadrante[], oldCuadrante: TCuadrante[]) {
+    const cuadrantesModificables: TCuadrante[] = [];
 
-    let update = false;
+    for (let i = 0; i < cuadrantes.length; i += 1) {
+      const fechaCuadrante = DateTime.fromJSDate(cuadrantes[i].fechaInicio);
+      for (let j = 0; j < oldCuadrante.length; j += 1) {
+        const fechaOldCuadrante = DateTime.fromJSDate(
+          oldCuadrante[j].fechaInicio,
+        );
+        let modificado: boolean = null;
 
-    if (cuadrante.idPlan) {
-      update = true;
-      if (!cuadrante.historialPlanes.includes(cuadrante.idPlan))
-        cuadrante.historialPlanes.push(cuadrante.idPlan);
-    }
+        if (fechaCuadrante.hasSame(fechaOldCuadrante, "day")) {
+          cuadrantes[i].ausencia = oldCuadrante[j].ausencia;
+          if (
+            fechaCuadrante.hasSame(fechaOldCuadrante, "hour") &&
+            fechaCuadrante.hasSame(fechaOldCuadrante, "minute")
+          ) {
+            modificado = false;
+          } else modificado = true;
 
-    if (cuadrante.fechaInicio && cuadrante.fechaFinal) {
-      if (!update) {
-        cuadrante.idPlan = new ObjectId().toString();
+          if (modificado) {
+            // No hacer nada si hay ausencia completa, porque está bloqueado
+            if (oldCuadrante[j].ausencia && oldCuadrante[j].ausencia.completa)
+              break;
+
+            cuadrantes[i].historialPlanes = oldCuadrante[j].historialPlanes;
+            cuadrantes[i].historialPlanes.push(cuadrantes[i].idPlan);
+            cuadrantes[i].enviado = false;
+
+            cuadrantesModificables.push(cuadrantes[i]);
+          } else break;
+        }
       }
-    } else {
-      cuadrante = null;
     }
 
-    if (oldCuadrante) {
-      if (await this.schCuadrantes.updateCuadrante(cuadrante)) return true;
-      throw Error("No se ha podido actualizar el cuadrante");
-    } else {
-      cuadrante.historialPlanes = [];
-      const idCuadrante = await this.schCuadrantes.insertCuadrante(cuadrante);
-      if (idCuadrante) return true;
-      throw Error("No se ha podido insertar el cuadrante");
-    }
+    await this.schCuadrantes.guardarCuadrantes(cuadrantesModificables);
+    return true;
+    // guardar esto en bbdd (insert or update)
+
+    // Código bueno pero en modo semanal
+    // if (oldCuadrante) {
+    //   cuadrante.historialPlanes = oldCuadrante.historialPlanes;
+    //   cuadrante._id = oldCuadrante._id;
+    // }
+    // cuadrante.enviado = false;
+
+    // let update = false;
+
+    // if (cuadrante.idPlan) {
+    //   update = true;
+    //   if (!cuadrante.historialPlanes.includes(cuadrante.idPlan))
+    //     cuadrante.historialPlanes.push(cuadrante.idPlan);
+    // }
+
+    // if (cuadrante.fechaInicio && cuadrante.fechaFinal) {
+    //   if (!update) {
+    //     cuadrante.idPlan = new ObjectId().toString();
+    //   }
+    // } else {
+    //   cuadrante = null;
+    // }
+
+    // if (oldCuadrante) {
+    //   if (await this.schCuadrantes.updateCuadrante(cuadrante)) return true;
+    //   throw Error("No se ha podido actualizar el cuadrante");
+    // } else {
+    //   cuadrante.historialPlanes = [];
+    //   const idCuadrante = await this.schCuadrantes.insertCuadrante(cuadrante);
+    //   if (idCuadrante) return true;
+    //   throw Error("No se ha podido insertar el cuadrante");
+    // }
   }
 
   // Cuadrantes 2.0
@@ -454,55 +493,55 @@ export class Cuadrantes {
     else throw Error("No se han podido guardar las copias de los cuadrantes");
   }
 
-  // Cuadrantes 2.0
-  public getNuevosAndModificados(
-    oldCuadrantes: TCuadrante[],
-    newCuadrantes: TCuadranteRequest[],
-  ): { nuevos: TCuadrante[]; modificados: TCuadrante[] } {
-    const modificados: TCuadrante[] = [];
-    const nuevos: TCuadrante[] = [];
+  // // Cuadrantes 2.0
+  // public getNuevosAndModificados(
+  //   oldCuadrantes: TCuadrante[],
+  //   newCuadrantes: TRequestCuadrante[],
+  // ): { nuevos: TCuadrante[]; modificados: TCuadrante[] } {
+  //   const modificados: TCuadrante[] = [];
+  //   const nuevos: TCuadrante[] = [];
 
-    for (let i = 0; i < newCuadrantes.length; i += 1) {
-      const cuadranteMismoDia = oldCuadrantes.find((cuadrante) => {
-        if (
-          DateTime.fromJSDate(cuadrante.fechaInicio).hasSame(
-            DateTime.fromJSDate(new Date(newCuadrantes[i].fechaInicio)),
-            "day",
-          ) &&
-          !cuadrante.ausencia
-        ) {
-          return true;
-        }
-      });
+  //   for (let i = 0; i < newCuadrantes.length; i += 1) {
+  //     const cuadranteMismoDia = oldCuadrantes.find((cuadrante) => {
+  //       if (
+  //         DateTime.fromJSDate(cuadrante.fechaInicio).hasSame(
+  //           DateTime.fromJSDate(new Date(newCuadrantes[i].fechaInicio)),
+  //           "day",
+  //         ) &&
+  //         !cuadrante.ausencia
+  //       ) {
+  //         return true;
+  //       }
+  //     });
 
-      if (cuadranteMismoDia) {
-        cuadranteMismoDia.enviado = false;
-        cuadranteMismoDia.fechaInicio = new Date(newCuadrantes[i].fechaInicio);
-        cuadranteMismoDia.fechaFinal = new Date(newCuadrantes[i].fechaFinal);
-        cuadranteMismoDia.historialPlanes.push(
-          cuadranteMismoDia._id.toString(),
-        );
-        cuadranteMismoDia.ausencia = newCuadrantes[i].ausencia;
-        cuadranteMismoDia.idTienda = newCuadrantes[i].idTienda;
-        cuadranteMismoDia.totalHoras = newCuadrantes[i].totalHoras;
+  //     if (cuadranteMismoDia) {
+  //       cuadranteMismoDia.enviado = false;
+  //       cuadranteMismoDia.fechaInicio = new Date(newCuadrantes[i].fechaInicio);
+  //       cuadranteMismoDia.fechaFinal = new Date(newCuadrantes[i].fechaFinal);
+  //       cuadranteMismoDia.historialPlanes.push(
+  //         cuadranteMismoDia._id.toString(),
+  //       );
+  //       cuadranteMismoDia.ausencia = newCuadrantes[i].ausencia;
+  //       cuadranteMismoDia.idTienda = newCuadrantes[i].idTienda;
+  //       cuadranteMismoDia.totalHoras = newCuadrantes[i].totalHoras;
 
-        modificados.push(cuadranteMismoDia);
-      } else
-        nuevos.push({
-          _id: new ObjectId(),
-          idPlan: new ObjectId().toString(),
-          ausencia: newCuadrantes[i].ausencia,
-          enviado: false,
-          fechaInicio: new Date(newCuadrantes[i].fechaInicio),
-          fechaFinal: new Date(newCuadrantes[i].fechaFinal),
-          historialPlanes: [],
-          horasContrato: newCuadrantes[i].horasContrato,
-          idTienda: newCuadrantes[i].idTienda,
-          idTrabajador: newCuadrantes[i].idTrabajador,
-          nombre: newCuadrantes[i].nombre,
-          totalHoras: newCuadrantes[i].totalHoras,
-        });
-    }
-    return { nuevos, modificados };
-  }
+  //       modificados.push(cuadranteMismoDia);
+  //     } else
+  //       nuevos.push({
+  //         _id: new ObjectId(),
+  //         idPlan: new ObjectId().toString(),
+  //         ausencia: newCuadrantes[i].ausencia,
+  //         enviado: false,
+  //         fechaInicio: new Date(newCuadrantes[i].fechaInicio),
+  //         fechaFinal: new Date(newCuadrantes[i].fechaFinal),
+  //         historialPlanes: [],
+  //         horasContrato: newCuadrantes[i].horasContrato,
+  //         idTienda: newCuadrantes[i].idTienda,
+  //         idTrabajador: newCuadrantes[i].idTrabajador,
+  //         nombre: newCuadrantes[i].nombre,
+  //         totalHoras: newCuadrantes[i].totalHoras,
+  //       });
+  //   }
+  //   return { nuevos, modificados };
+  // }
 }

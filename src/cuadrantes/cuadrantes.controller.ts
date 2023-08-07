@@ -14,11 +14,11 @@ import { TokenService } from "../get-token/get-token.service";
 import { Cuadrantes } from "./cuadrantes.class";
 import { TCuadrante, TRequestCuadrante } from "./cuadrantes.interface";
 import { SchedulerGuard } from "../scheduler/scheduler.guard";
-import * as moment from "moment";
 import { AuthService } from "../firebase/auth";
 import { Trabajador } from "../trabajadores/trabajadores.class";
 import { Notificaciones } from "src/notificaciones/notificaciones.class";
 import { DateTime } from "luxon";
+import { ObjectId } from "mongodb";
 
 @Controller("cuadrantes")
 export class CuadrantesController {
@@ -193,45 +193,106 @@ export class CuadrantesController {
     }
   }
 
+  private convertToLuxon = (
+    hourString: string,
+    dayOffset: number,
+  ): DateTime => {
+    // Obtener el lunes de la semana actual
+    const mondayThisWeek = DateTime.now().startOf("week").plus({ days: 1 });
+
+    const [hour, minute] = hourString.split(":").map(Number);
+
+    return mondayThisWeek.plus({
+      days: dayOffset,
+      hours: hour,
+      minutes: minute,
+    });
+  };
+
   @Post("saveCuadrante")
   @UseGuards(AuthGuard)
   async saveCuadrante(
-    @Body() cuadrante: TRequestCuadrante,
+    @Body() reqCuadrante: TRequestCuadrante,
     @Headers("authorization") authHeader: string,
   ) {
     try {
-      if (!cuadrante) throw Error("Faltan datos");
+      if (!reqCuadrante) throw Error("Faltan datos");
       const token = this.tokenService.extract(authHeader);
       const usuario = await this.authInstance.getUserWithToken(token);
 
       if (usuario.coordinadora && usuario.idTienda) {
         const fechaInicio = DateTime.fromJSDate(
-          new Date(cuadrante.fecha),
+          new Date(reqCuadrante.fecha),
         ).startOf("week");
         const fechaFinal = fechaInicio.endOf("week");
 
+        // Para saber si hay que actualizar o insertar nuevo
         const oldCuadrante =
           await this.cuadrantesInstance.getCuadrantesIndividual(
-            cuadrante.idTrabajador,
+            reqCuadrante.idTrabajador,
             fechaInicio,
             fechaFinal,
           );
-        
-          /* Pasar a individual */
-        const notiCuadrante = await this.cuadrantesInstance.saveCuadrante(
-          cuadrante,
-          oldCuadrante,
-        );
-        if (notiCuadrante) {
+
+        const newArraySemanalHoras: TRequestCuadrante["arraySemanalHoras"] =
+          reqCuadrante.arraySemanalHoras.map((day, index) => ({
+            ...day,
+            horaEntrada: this.convertToLuxon(day.horaEntrada as string, index),
+            horaSalida: this.convertToLuxon(day.horaSalida as string, index),
+          }));
+
+        reqCuadrante.arraySemanalHoras = newArraySemanalHoras;
+
+        const cuadrantesDiarios: TCuadrante[] = [];
+        // Creo los cuadrantes diarios a partir del arraySemanal:
+        for (let i = 0; i < reqCuadrante.arraySemanalHoras.length; i += 1) {
+          cuadrantesDiarios.push({
+            _id: reqCuadrante.arraySemanalHoras[i].idCuadrante
+              ? new ObjectId(reqCuadrante.arraySemanalHoras[i].idCuadrante)
+              : null, // Se creará al insertar con bulkwrite
+            idTrabajador: reqCuadrante.idTrabajador,
+            idPlan: reqCuadrante.arraySemanalHoras[i].idPlan
+              ? reqCuadrante.arraySemanalHoras[i].idPlan
+              : new ObjectId().toString(),
+            idTienda: reqCuadrante.arraySemanalHoras[i].idTienda
+              ? reqCuadrante.arraySemanalHoras[i].idTienda
+              : reqCuadrante.idTiendaDefault,
+            fechaInicio: (
+              reqCuadrante.arraySemanalHoras[i].horaEntrada as DateTime
+            ).toJSDate(),
+            fechaFinal: (
+              reqCuadrante.arraySemanalHoras[i].horaSalida as DateTime
+            ).toJSDate(),
+            nombre: reqCuadrante.nombre,
+            totalHoras: reqCuadrante.totalHoras,
+            enviado: false,
+            historialPlanes: [],
+            horasContrato:
+              (await this.trabajadoresInstance.getHorasContratoById(
+                reqCuadrante.idTrabajador,
+                fechaInicio,
+              )) as number,
+            ausencia: null,
+          });
+        }
+
+        /* Pasar a individual */
+
+        if (
+          await this.cuadrantesInstance.saveCuadrante(
+            cuadrantesDiarios,
+            oldCuadrante,
+          )
+        ) {
           const trabajadorID =
             await this.trabajadoresInstance.getTrabajadorBySqlId(
-              cuadrante.idTrabajador,
+              reqCuadrante.idTrabajador,
             );
 
           this.notificaciones.newInAppNotification({
             uid: trabajadorID.idApp,
             titulo: "CUADRANTE TIENDA",
-            mensaje: `Se ha creado tu horario de la semana ${cuadrante.semana}`,
+            mensaje: `Se ha creado tu horario de la semana ${fechaInicio.weekNumber}`,
             leido: false,
             creador: "SISTEMA",
           });

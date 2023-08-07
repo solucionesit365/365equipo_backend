@@ -1,9 +1,10 @@
 import { Injectable } from "@nestjs/common";
-import { AusenciaInterface, TiposAusencia } from "./ausencias.interface";
+import { TiposAusencia } from "./ausencias.interface";
 import { AusenciasDatabase } from "./ausencias.mongodb";
 import { Cuadrantes } from "../cuadrantes/cuadrantes.class";
 import * as moment from "moment";
 import { recHitBind } from "../bbdd/mssql";
+import { ObjectId } from "mongodb";
 
 @Injectable()
 export class Ausencias {
@@ -21,7 +22,7 @@ export class Ausencias {
     fechaFinal: Date,
     comentario: string,
     completa: boolean,
-    horas: number
+    horas: number,
   ) {
     const resInsert = await this.schAusencias.nuevaAusencia({
       idUsuario,
@@ -31,7 +32,7 @@ export class Ausencias {
       fechaFinal,
       comentario,
       completa,
-      horas
+      horas,
     });
 
     if (resInsert) {
@@ -122,5 +123,9 @@ export class Ausencias {
       if (!this.schAusencias.marcarComoEnviada(ausenciasPendientes[i]._id))
         throw Error("No se ha podido guardar el estado enviado de la ausencia");
     }
+  }
+
+  async getAusenciaById(idAusencia: ObjectId) {
+    return await this.schAusencias.getAusenciasById(idAusencia);
   }
 }

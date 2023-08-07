@@ -27,6 +27,32 @@ export class CuadrantesDatabase {
     return null;
   }
 
+  // Guardado nuevo (insert or update)
+  async guardarCuadrantes(cuadrantesModificables: TCuadrante[]) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes2");
+
+    const bulkOperations = cuadrantesModificables.map((cuadrante) => {
+      if (cuadrante._id) {
+        // Si tiene _id, entonces es una actualización
+        return {
+          updateOne: {
+            filter: { _id: cuadrante._id },
+            update: { $set: cuadrante },
+            upsert: true, // insertar si no existe
+          },
+        };
+      } else {
+        // Si no tiene _id, es una inserción
+        return {
+          insertOne: { document: cuadrante },
+        };
+      }
+    });
+
+    await cuadrantesCollection.bulkWrite(bulkOperations);
+  }
+
   // Cuadrantes 2.0
   async insertCuadrantes(cuadrantes: TCuadrante[]) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");

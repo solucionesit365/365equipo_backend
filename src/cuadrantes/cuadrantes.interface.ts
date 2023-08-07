@@ -1,3 +1,4 @@
+import { DateTime } from "luxon";
 import { ObjectId } from "mongodb";
 
 const lol = {
@@ -26,31 +27,8 @@ export interface TCuadrante {
   enviado: boolean;
   historialPlanes: string[];
   horasContrato: number;
-  ausencia: {
-    tipo: TiposAusencia;
-    horas?: number;
-    completa: boolean;
-    idAusencia: ObjectId;
-  };
+  ausencia: TAusenciaMin;
 }
-
-// export interface TCuadranteRequest {
-//   idTrabajador: number;
-//   idTienda: number;
-//   fechaInicio: string;
-//   fechaFinal: string;
-//   nombre: string;
-//   totalHoras: number;
-//   enviado: boolean;
-//   historialPlanes: string[];
-//   horasContrato: number;
-//   ausencia: {
-//     tipo: TiposAusencia;
-//     horas?: number;
-//     completa: boolean;
-//     idAusencia: ObjectId;
-//   };
-// }
 
 export type TiposAusencia =
   | "BAJA"
@@ -59,15 +37,25 @@ export type TiposAusencia =
   | "HORAS_JUSTIFICADAS";
 
 export interface TRequestCuadrante {
-  semana: number;
   nombre: string;
   idTrabajador: number;
   arraySemanalHoras: {
     bloqueado: boolean;
-    horaEntrada: string;
-    horaSalida: string;
+    horaEntrada: string | DateTime;
+    horaSalida: string | DateTime;
     idPlan: string;
     idTienda: number;
+    idCuadrante: string;
+    ausencia: TAusenciaMin;
   }[];
+  totalHoras: number;
+  idTiendaDefault: number;
   fecha: string;
 }
+
+type TAusenciaMin = {
+  tipo: TiposAusencia;
+  horas?: number;
+  completa: boolean;
+  idAusencia: ObjectId;
+};
