@@ -70,8 +70,8 @@ export class CuadrantesDatabase {
       { _id: cuadrante._id },
       {
         $set: {
-          fechaInicio: cuadrante.fechaInicio,
-          fechaFinal: cuadrante.fechaFinal,
+          fechaInicio: cuadrante.inicio,
+          fechaFinal: cuadrante.final,
           historialPlanes: cuadrante.historialPlanes,
           totalHoras: cuadrante.totalHoras,
           enviado: false,
@@ -233,7 +233,7 @@ export class CuadrantesDatabase {
       if (cuadrante.historialPlanes[j])
         sqlBorrar += `
           DELETE FROM ${this.nombreTablaSqlHit(
-            cuadrante.fechaInicio,
+            cuadrante.inicio,
           )} WHERE idPlan = '${cuadrante.historialPlanes[j]}';
           `;
     }

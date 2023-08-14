@@ -257,10 +257,10 @@ export class CuadrantesController {
             idTienda: reqCuadrante.arraySemanalHoras[i].idTienda
               ? reqCuadrante.arraySemanalHoras[i].idTienda
               : reqCuadrante.idTiendaDefault,
-            fechaInicio: (
+            inicio: (
               reqCuadrante.arraySemanalHoras[i].horaEntrada as DateTime
             ).toJSDate(),
-            fechaFinal: (
+            final: (
               reqCuadrante.arraySemanalHoras[i].horaSalida as DateTime
             ).toJSDate(),
             nombre: reqCuadrante.nombre,

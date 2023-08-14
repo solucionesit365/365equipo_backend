@@ -20,8 +20,8 @@ export interface TCuadrante {
   idTrabajador: number;
   idPlan: string;
   idTienda: number;
-  fechaInicio: Date;
-  fechaFinal: Date;
+  inicio: Date;
+  final: Date;
   nombre: string;
   totalHoras: number;
   enviado: boolean;
