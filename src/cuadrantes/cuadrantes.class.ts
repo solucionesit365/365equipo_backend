@@ -63,6 +63,11 @@ export class Cuadrantes {
     let diaActual = inicioSemana;
     const diasCompletos: WithId<TCuadrante>[] = [];
 
+    const horasContrato = await this.trabajadoresInstance.getHorasContratoById(
+      idTrabajador,
+      inicioSemana,
+    );
+
     while (diaActual <= finalSemana) {
       // Busca si el día actual ya está en arrayCuadrantes
       const diaEncontrado = arrayCuadrantes.find((cuadrante) =>
@@ -72,11 +77,6 @@ export class Cuadrantes {
       if (diaEncontrado) {
         diasCompletos.push(diaEncontrado);
       } else {
-        const horasContrato =
-          await this.trabajadoresInstance.getHorasContratoById(
-            idTrabajador,
-            diaActual,
-          );
         // Si el día no está en arrayCuadrantes, lo añade con inicio y final a las 00:00
         diasCompletos.push({
           _id: new ObjectId(),

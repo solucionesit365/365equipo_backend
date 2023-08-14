@@ -94,6 +94,12 @@ export class CuadrantesController {
     }
   }
 
+  @Get("getNewId")
+  @UseGuards(AuthGuard)
+  async getNewId() {
+    return new ObjectId();
+  }
+
   @Get("getTodos")
   @UseGuards(AuthGuard)
   async getAllCuadrantes(@Headers("authorization") authHeader: string) {
