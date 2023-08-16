@@ -1,161 +1,192 @@
 import { Injectable } from "@nestjs/common";
 import { MongoDbService } from "../bbdd/mongodb";
-import { AuditoriasInterface, AuditoriaRespuestas } from "./auditorias.interface"
+import {
+  AuditoriasInterface,
+  AuditoriaRespuestas,
+} from "./auditorias.interface";
 import * as moment from "moment";
 import { ObjectId } from "mongodb";
 
 @Injectable()
 export class AuditoriaDatabase {
-    constructor(private readonly mongoDbService: MongoDbService) { }
+  constructor(private readonly mongoDbService: MongoDbService) {}
 
-    async nuevaAuditoria(auditorias: AuditoriasInterface) {
-        const db = (await this.mongoDbService.getConexion()).db("soluciones");
-        const auditoriasCollection = db.collection<AuditoriasInterface>("auditorias");
+  async nuevaAuditoria(auditorias: AuditoriasInterface) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const auditoriasCollection =
+      db.collection<AuditoriasInterface>("auditorias");
 
-        const resInsert = await auditoriasCollection.insertOne(auditorias);
+    const resInsert = await auditoriasCollection.insertOne(auditorias);
 
-        if (resInsert.acknowledged) return resInsert.insertedId;
+    if (resInsert.acknowledged) return resInsert.insertedId;
 
-        throw Error("No se ha podido crear la nueva auditoria");
-    }
+    throw Error("No se ha podido crear la nueva auditoria");
+  }
 
-    async getAuditorias() {
-        const db = (await this.mongoDbService.getConexion()).db("soluciones");
-        const auditoriasCollection = db.collection<AuditoriasInterface>("auditorias");
-        const respAuditorias = await auditoriasCollection.find({}).toArray();
+  async getAuditorias() {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const auditoriasCollection =
+      db.collection<AuditoriasInterface>("auditorias");
+    const respAuditorias = await auditoriasCollection.find({}).toArray();
 
-        return respAuditorias;
-    }
+    return respAuditorias;
+  }
 
+  async getAuditoriasHabilitado(habilitado: boolean) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const auditoriasCollection =
+      db.collection<AuditoriasInterface>("auditorias");
+    const respAuditorias = await auditoriasCollection
+      .find({ habilitado: habilitado })
+      .toArray();
 
-    async getAuditoriasHabilitado(habilitado: boolean) {
-        const db = (await this.mongoDbService.getConexion()).db("soluciones");
-        const auditoriasCollection = db.collection<AuditoriasInterface>("auditorias");
-        const respAuditorias = await auditoriasCollection.find({ habilitado: habilitado }).toArray();
+    return respAuditorias;
+  }
+  //Habilitar auditoria
+  async updateHabilitarAuditoria(auditorias: AuditoriasInterface) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const auditoriasCollection =
+      db.collection<AuditoriasInterface>("auditorias");
+    const respAuditorias = await auditoriasCollection.updateOne(
+      {
+        _id: new ObjectId(auditorias._id),
+      },
+      {
+        $set: {
+          habilitado: true,
+        },
+      },
+    );
 
-        return respAuditorias;
-    }
-    //Habilitar auditoria
-    async updateHabilitarAuditoria(auditorias: AuditoriasInterface) {
-        const db = (await this.mongoDbService.getConexion()).db("soluciones");
-        const auditoriasCollection = db.collection<AuditoriasInterface>("auditorias");
-        const respAuditorias = await auditoriasCollection.updateOne(
-            {
-                _id: new ObjectId(auditorias._id),
-            },
-            {
-                $set: {
-                    habilitado: true,
-                }
-            },
-        );
+    if (respAuditorias.acknowledged && respAuditorias.modifiedCount > 0)
+      return true;
+    throw Error("No se ha podido habilitar la auditoria");
+  }
 
-        if (respAuditorias.acknowledged && respAuditorias.modifiedCount > 0)
-            return true;
-        throw Error("No se ha podido habilitar la auditoria");
-    }
+  //Deshabilitar auditoria
+  async updateDeshabilitarAuditoria(auditorias: AuditoriasInterface) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const auditoriasCollection =
+      db.collection<AuditoriasInterface>("auditorias");
+    const respAuditorias = await auditoriasCollection.updateOne(
+      {
+        _id: new ObjectId(auditorias._id),
+      },
+      {
+        $set: {
+          habilitado: false,
+        },
+      },
+    );
 
-    //Deshabilitar auditoria
-    async updateDeshabilitarAuditoria(auditorias: AuditoriasInterface) {
-        const db = (await this.mongoDbService.getConexion()).db("soluciones");
-        const auditoriasCollection = db.collection<AuditoriasInterface>("auditorias");
-        const respAuditorias = await auditoriasCollection.updateOne(
-            {
-                _id: new ObjectId(auditorias._id),
-            },
-            {
-                $set: {
-                    habilitado: false,
-                }
-            },
-        );
+    if (respAuditorias.acknowledged && respAuditorias.modifiedCount > 0)
+      return true;
+    throw Error("No se ha podido deshabilitar la auditoria");
+  }
 
-        if (respAuditorias.acknowledged && respAuditorias.modifiedCount > 0)
-            return true;
-        throw Error("No se ha podido deshabilitar la auditoria");
-    }
+  //Respuestas auditorias
+  async respuestasAuditorias(auditorias: AuditoriaRespuestas) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const auditoriasCollection = db.collection<AuditoriaRespuestas>(
+      "auditoriasRespuestas",
+    );
 
+    const resInsert = await auditoriasCollection.insertOne(auditorias);
 
-    //Respuestas auditorias
-    async respuestasAuditorias(auditorias: AuditoriaRespuestas) {
-        const db = (await this.mongoDbService.getConexion()).db("soluciones");
-        const auditoriasCollection = db.collection<AuditoriaRespuestas>("auditoriasRespuestas");
+    if (resInsert.acknowledged) return resInsert.insertedId;
 
-        const resInsert = await auditoriasCollection.insertOne(auditorias);
+    throw Error("No se ha podido guardar la respuesta de la auditoria");
+  }
 
-        if (resInsert.acknowledged) return resInsert.insertedId;
+  //Ver Respuestas Auditorias
+  async getRespuestasAuditorias(idAuditoria: string) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const auditoriasCollection = db.collection<AuditoriaRespuestas>(
+      "auditoriasRespuestas",
+    );
 
-        throw Error("No se ha podido guardar la respuesta de la auditoria");
-    }
+    const respAuditorias = await auditoriasCollection
+      .find({ idAuditoria: idAuditoria })
+      .toArray();
 
-    //Ver Respuestas Auditorias
-    async getRespuestasAuditorias(idAuditoria: string) {
-        const db = (await this.mongoDbService.getConexion()).db("soluciones");
-        const auditoriasCollection = db.collection<AuditoriaRespuestas>("auditoriasRespuestas");
+    return respAuditorias;
+  }
 
-        const respAuditorias = await auditoriasCollection.find({ idAuditoria: idAuditoria }).toArray();
+  //Mostrar auditorias por idTienda
+  async getAuditoriasTienda(tienda: number, habilitado: boolean) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const auditoriasCollection =
+      db.collection<AuditoriasInterface>("auditorias");
+    const respAuditorias = await auditoriasCollection
+      .find({ tienda, habilitado })
+      .toArray();
 
-        return respAuditorias;
-    }
+    return respAuditorias;
+  }
 
+  async getAuditoriasTiendas(tienda: number) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const auditoriasCollection = db.collection<AuditoriaRespuestas>(
+      "auditoriasRespuestas",
+    );
+    const respAuditorias = await auditoriasCollection
+      .find({ tienda })
+      .toArray();
 
-    //Mostrar auditorias por idTienda
-    async getAuditoriasTienda(tienda: number, habilitado: boolean) {
-        const db = (await this.mongoDbService.getConexion()).db("soluciones");
-        const auditoriasCollection = db.collection<AuditoriasInterface>("auditorias");
-        const respAuditorias = await auditoriasCollection.find({ tienda, habilitado }).toArray();
+    return respAuditorias;
+  }
 
-        return respAuditorias;
-    }
+  //Borrar auditoria
+  async deleteAuditoria(auditorias: AuditoriasInterface) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const auditoriasCollection =
+      db.collection<AuditoriasInterface>("auditorias");
+    const respAuditorias = await auditoriasCollection.deleteOne({
+      _id: new ObjectId(auditorias._id),
+    });
+    return respAuditorias.acknowledged && respAuditorias.deletedCount > 0;
+  }
 
-    //Borrar auditoria
-    async deleteAuditoria(auditorias: AuditoriasInterface) {
-        const db = (await this.mongoDbService.getConexion()).db("soluciones");
-        const auditoriasCollection = db.collection<AuditoriasInterface>("auditorias");
-        const respAuditorias = await auditoriasCollection.deleteOne(
-            {
-                _id: new ObjectId(auditorias._id),
-            },
-        )
-        return respAuditorias.acknowledged && respAuditorias.deletedCount > 0;
-    }
+  //Update auditoria
+  async updateAuditoria(auditoria: AuditoriasInterface) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const auditoriasCollection =
+      db.collection<AuditoriasInterface>("auditorias");
 
-    //Update auditoria
-    async updateAuditoria(auditoria: AuditoriasInterface) {
-        const db = (await this.mongoDbService.getConexion()).db("soluciones");
-        const auditoriasCollection = db.collection<AuditoriasInterface>("auditorias");
+    const respAuditorias = await auditoriasCollection.updateOne(
+      {
+        _id: new ObjectId(auditoria._id),
+      },
+      {
+        $set: {
+          tituloAuditoria: auditoria.tituloAuditoria,
+          caducidad: auditoria.caducidad,
+          descripcion: auditoria.descripcion,
+        },
+      },
+    );
 
-        const respAuditorias = await auditoriasCollection.updateOne(
-            {
-                _id: new ObjectId(auditoria._id),
-            },
-            {
-                $set: {
-                    tituloAuditoria: auditoria.tituloAuditoria,
-                    caducidad: auditoria.caducidad,
-                    descripcion: auditoria.descripcion,
+    return respAuditorias.acknowledged;
+  }
 
-                },
-            },
-        );
+  //Update Auditoria Respuestas
+  async updateAuditoriaRespuestas(auditoria: AuditoriaRespuestas) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const auditoriasCollection = db.collection<AuditoriaRespuestas>(
+      "auditoriasRespuestas",
+    );
 
-        return respAuditorias.acknowledged;
-    }
-
-    //Update Auditoria Respuestas
-    async updateAuditoriaRespuestas(auditoria: AuditoriaRespuestas) {
-        const db = (await this.mongoDbService.getConexion()).db("soluciones");
-        const auditoriasCollection = db.collection<AuditoriaRespuestas>("auditoriasRespuestas");
-
-        const respAuditoria = await auditoriasCollection.updateOne({
-            _id: new ObjectId(auditoria._id),
-        }, {
-            $set: {
-                respuestasEvaluador: auditoria.respuestasEvaluador,
-                evaluada: auditoria.evaluada
-            }
-        }
-        )
-        return respAuditoria.acknowledged;
-    }
+    const respAuditoria = await auditoriasCollection.updateOne(
+      {
+        _id: new ObjectId(auditoria._id),
+      },
+      {
+        $set: {
+          respuestasEvaluador: auditoria.respuestasEvaluador,
+          evaluada: auditoria.evaluada,
+        },
+      },
+    );
+    return respAuditoria.acknowledged;
+  }
 }
