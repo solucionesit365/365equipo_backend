@@ -16,7 +16,6 @@ import {
 } from "./auditorias.interface";
 import { Auditorias } from "./auditorias.class";
 import { Tienda } from "src/tiendas/tiendas.class";
-import { query } from "mssql";
 
 @Controller("auditorias")
 export class AuditoriasController {
@@ -34,9 +33,6 @@ export class AuditoriasController {
     @Body() auditoria: AuditoriasInterface,
   ) {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
-
       return {
         ok: true,
         data: await this.auditoriaInstance.nuevaAuditoria(auditoria),
@@ -51,9 +47,6 @@ export class AuditoriasController {
   @UseGuards(AuthGuard)
   async getAuditorias(@Headers("authorization") authHeader: string) {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
-
       const respAuditoria = await this.auditoriaInstance.getAuditorias();
       if (respAuditoria) return { ok: true, data: respAuditoria };
       else throw Error("No se ha encontrado ninguna auditoria");
@@ -135,9 +128,6 @@ export class AuditoriasController {
     @Body() auditoria: AuditoriaRespuestas,
   ) {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
-
       return {
         ok: true,
         data: await this.auditoriaInstance.respuestasAuditorias(auditoria),
