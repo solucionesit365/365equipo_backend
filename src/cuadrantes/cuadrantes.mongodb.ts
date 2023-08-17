@@ -31,7 +31,7 @@ export class CuadrantesDatabase {
   async guardarCuadrantes(cuadrantesModificables: TCuadrante[]) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes2");
-    console.log("wow ese: ", cuadrantesModificables[0]._id.toString());
+
     // 1. Obtener todos los _id de cuadrantesModificables
     const cuadranteIds = cuadrantesModificables.map((c) => c._id);
 
@@ -104,8 +104,7 @@ export class CuadrantesDatabase {
   ) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes2");
-    console.log(fechaInicioBusqueda.toJSDate());
-    console.log(fechaFinalBusqueda.toJSDate());
+
     const resCuadrantes = await cuadrantesCollection
       .find({
         idTrabajador,

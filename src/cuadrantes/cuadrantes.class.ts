@@ -401,10 +401,11 @@ export class Cuadrantes {
 
     for (let i = 0; i < cuadrantes.length; i += 1) {
       const fechaCuadrante = DateTime.fromJSDate(cuadrantes[i].inicio);
+
       for (let j = 0; j < oldCuadrante.length; j += 1) {
         const fechaOldCuadrante = DateTime.fromJSDate(oldCuadrante[j].inicio);
         let modificado: boolean = null;
-
+        COMPROBAR AQUÍ POR QUÉ NO DEVUELVE NADA EN GUARDARCUADRANTES EN LA SIGUIENTE FUNCIÓN (SCHMONGO)
         if (fechaCuadrante.hasSame(fechaOldCuadrante, "day")) {
           cuadrantes[i].ausencia = oldCuadrante[j].ausencia;
           if (
