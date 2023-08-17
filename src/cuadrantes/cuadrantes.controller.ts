@@ -201,18 +201,19 @@ export class CuadrantesController {
 
   private convertToLuxon = (
     hourString: string,
-    dayOffset: number,
+    // dayOffset: number,
   ): DateTime => {
     // Obtener el lunes de la semana actual
-    const mondayThisWeek = DateTime.now().startOf("week").plus({ days: 1 });
+    // const mondayThisWeek = DateTime.now().startOf("week").plus({ days: 1 });
 
-    const [hour, minute] = hourString.split(":").map(Number);
+    // const [hour, minute] = hourString.split(":").map(Number);
 
-    return mondayThisWeek.plus({
-      days: dayOffset,
-      hours: hour,
-      minutes: minute,
-    });
+    // return mondayThisWeek.plus({
+    //   days: dayOffset,
+    //   hours: hour,
+    //   minutes: minute,
+    // });
+    return DateTime.fromJSDate(new Date(hourString));
   };
 
   @Post("saveCuadrante")
@@ -225,6 +226,10 @@ export class CuadrantesController {
       if (!reqCuadrante) throw Error("Faltan datos");
       const token = this.tokenService.extract(authHeader);
       const usuario = await this.authInstance.getUserWithToken(token);
+      const trabajadorEditado =
+        await this.trabajadoresInstance.getTrabajadorBySqlId(
+          reqCuadrante.idTrabajador,
+        );
 
       if (usuario.coordinadora && usuario.idTienda) {
         const fechaInicio = DateTime.fromJSDate(
@@ -241,10 +246,10 @@ export class CuadrantesController {
           );
 
         const newArraySemanalHoras: TRequestCuadrante["arraySemanalHoras"] =
-          reqCuadrante.arraySemanalHoras.map((day, index) => ({
+          reqCuadrante.arraySemanalHoras.map((day) => ({
             ...day,
-            horaEntrada: this.convertToLuxon(day.horaEntrada as string, index),
-            horaSalida: this.convertToLuxon(day.horaSalida as string, index),
+            horaEntrada: this.convertToLuxon(day.horaEntrada as string),
+            horaSalida: this.convertToLuxon(day.horaSalida as string),
           }));
 
         reqCuadrante.arraySemanalHoras = newArraySemanalHoras;
@@ -269,7 +274,7 @@ export class CuadrantesController {
             final: (
               reqCuadrante.arraySemanalHoras[i].horaSalida as DateTime
             ).toJSDate(),
-            nombre: reqCuadrante.nombre,
+            nombre: trabajadorEditado.nombreApellidos,
             totalHoras: reqCuadrante.totalHoras,
             enviado: false,
             historialPlanes: [],

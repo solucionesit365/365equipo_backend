@@ -31,26 +31,38 @@ export class CuadrantesDatabase {
   async guardarCuadrantes(cuadrantesModificables: TCuadrante[]) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes2");
+    console.log("wow ese: ", cuadrantesModificables[0]._id.toString());
+    // 1. Obtener todos los _id de cuadrantesModificables
+    const cuadranteIds = cuadrantesModificables.map((c) => c._id);
 
+    // 2. Consultar cuáles _id existen en la base de datos
+    const existingIds = (
+      await cuadrantesCollection
+        .find({
+          _id: { $in: cuadranteIds },
+        })
+        .toArray()
+    ).map((doc) => doc._id.toString());
+
+    // 3. Crear operaciones bulkWrite
     const bulkOperations = cuadrantesModificables.map((cuadrante) => {
-      if (cuadrante._id) {
-        // Si tiene _id, entonces es una actualización
+      if (existingIds.includes(cuadrante._id.toString())) {
+        // Si el _id existe en la base de datos, es una actualización
         return {
           updateOne: {
             filter: { _id: cuadrante._id },
             update: { $set: cuadrante },
-            upsert: true, // insertar si no existe
           },
         };
       } else {
-        // Si no tiene _id, es una inserción
+        // Si el _id no existe en la base de datos, es una inserción
         return {
           insertOne: { document: cuadrante },
         };
       }
     });
 
-    await cuadrantesCollection.bulkWrite(bulkOperations);
+    console.log(await cuadrantesCollection.bulkWrite(bulkOperations));
   }
 
   // Cuadrantes 2.0
