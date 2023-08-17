@@ -104,14 +104,16 @@ export class CuadrantesDatabase {
   ) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes2");
+    console.log(fechaInicioBusqueda.toJSDate());
+    console.log(fechaFinalBusqueda.toJSDate());
     const resCuadrantes = await cuadrantesCollection
       .find({
         idTrabajador,
-        fechaInicio: {
+        inicio: {
           $gte: fechaInicioBusqueda.toJSDate(),
         },
-        fechaFinal: {
-          $lte: fechaFinalBusqueda.toJSDate(),
+        final: {
+          $lt: fechaFinalBusqueda.toJSDate(),
         },
       })
       .toArray();
