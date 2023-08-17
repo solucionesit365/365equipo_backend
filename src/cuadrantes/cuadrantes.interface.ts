@@ -37,7 +37,7 @@ export type TiposAusencia =
   | "HORAS_JUSTIFICADAS";
 
 export interface TRequestCuadrante {
-  nombre: string;
+  // nombre: string;
   idTrabajador: number;
   arraySemanalHoras: {
     bloqueado: boolean;

@@ -96,7 +96,7 @@ export class CuadrantesController {
 
   @Get("getNewId")
   @UseGuards(AuthGuard)
-  async getNewId() {
+  getNewId() {
     return new ObjectId();
   }
 
