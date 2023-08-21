@@ -62,6 +62,9 @@ import { CalendarioFestivosDatabase } from "./calendario-festivos/calendario-fes
 import { ArchivoDigitalController } from "./archivo-digital/archivo-digital.controller";
 import { ArchivoDigital } from "./archivo-digital/archivo-digital.class";
 import { ArchivoDigitalDatabase } from "./archivo-digital/archivo-digital.mongodb";
+import { EvaluacionesController } from "./evaluaciones/evaluaciones.controller";
+import { EvaluacionesDatabase } from "./evaluaciones/evaluaciones.mongodb";
+import { EvaluacionesClass } from "./evaluaciones/evaluaciones.class";
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -90,6 +93,7 @@ import { ArchivoDigitalDatabase } from "./archivo-digital/archivo-digital.mongod
     VerificacionmfaController,
     CalendarioFestivosController,
     ArchivoDigitalController,
+    EvaluacionesController,
   ],
   providers: [
     AppService,
@@ -132,6 +136,8 @@ import { ArchivoDigitalDatabase } from "./archivo-digital/archivo-digital.mongod
     CalendarioFestivo,
     ArchivoDigital,
     ArchivoDigitalDatabase,
+    EvaluacionesDatabase,
+    EvaluacionesClass,
   ],
 })
 export class AppModule {}
