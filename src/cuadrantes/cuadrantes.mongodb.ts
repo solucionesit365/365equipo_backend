@@ -28,41 +28,27 @@ export class CuadrantesDatabase {
   }
 
   // Guardado nuevo (insert or update)
-  async guardarCuadrantes(cuadrantesModificables: TCuadrante[]) {
+  async guardarCuadrantes(
+    cuadrantesModificables: TCuadrante[],
+    cuadrantesNuevos: TCuadrante[],
+  ) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes2");
 
-    // 1. Obtener todos los _id de cuadrantesModificables
-    const cuadranteIds = cuadrantesModificables.map((c) => c._id);
+    // 1. Modificar los cuadrantes existentes
+    for (let cuadrante of cuadrantesModificables) {
+      const { _id, ...dataToUpdate } = cuadrante;
 
-    // 2. Consultar cuáles _id existen en la base de datos
-    const existingIds = (
-      await cuadrantesCollection
-        .find({
-          _id: { $in: cuadranteIds },
-        })
-        .toArray()
-    ).map((doc) => doc._id.toString());
+      await cuadrantesCollection.updateOne(
+        { _id: _id },
+        { $set: dataToUpdate },
+      );
+    }
 
-    // 3. Crear operaciones bulkWrite
-    const bulkOperations = cuadrantesModificables.map((cuadrante) => {
-      if (existingIds.includes(cuadrante._id.toString())) {
-        // Si el _id existe en la base de datos, es una actualización
-        return {
-          updateOne: {
-            filter: { _id: cuadrante._id },
-            update: { $set: cuadrante },
-          },
-        };
-      } else {
-        // Si el _id no existe en la base de datos, es una inserción
-        return {
-          insertOne: { document: cuadrante },
-        };
-      }
-    });
-
-    console.log(await cuadrantesCollection.bulkWrite(bulkOperations));
+    // 2. Insertar nuevos cuadrantes
+    if (cuadrantesNuevos.length > 0) {
+      await cuadrantesCollection.insertMany(cuadrantesNuevos);
+    }
   }
 
   // Cuadrantes 2.0
@@ -118,6 +104,17 @@ export class CuadrantesDatabase {
       .toArray();
 
     return resCuadrantes;
+  }
+
+  async borrarTurno(idTurno) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes2");
+
+    const resCuadrantes = await cuadrantesCollection.deleteOne({
+      _id: new ObjectId(idTurno),
+    });
+
+    return resCuadrantes.acknowledged;
   }
 
   // Cuadrantes 2.0

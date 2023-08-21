@@ -100,6 +100,21 @@ export class CuadrantesController {
     return new ObjectId();
   }
 
+  @Post("borrarTurno")
+  @UseGuards(AuthGuard)
+  async borrarTurno(@Body() { idTurno }) {
+    try {
+      if (idTurno) {
+        return {
+          ok: await this.cuadrantesInstance.borrarTurno(idTurno),
+        };
+      } else throw Error("Faltan parámetros");
+    } catch (err) {
+      console.log(err);
+      return { ok: false, message: err.message };
+    }
+  }
+
   @Get("getTodos")
   @UseGuards(AuthGuard)
   async getAllCuadrantes(@Headers("authorization") authHeader: string) {
@@ -257,6 +272,13 @@ export class CuadrantesController {
         const cuadrantesDiarios: TCuadrante[] = [];
         // Creo los cuadrantes diarios a partir del arraySemanal:
         for (let i = 0; i < reqCuadrante.arraySemanalHoras.length; i += 1) {
+          if (
+            (reqCuadrante.arraySemanalHoras[i].horaEntrada as DateTime).equals(
+              reqCuadrante.arraySemanalHoras[i].horaSalida as DateTime,
+            )
+          )
+            continue;
+
           cuadrantesDiarios.push({
             _id: reqCuadrante.arraySemanalHoras[i].idCuadrante
               ? new ObjectId(reqCuadrante.arraySemanalHoras[i].idCuadrante)
@@ -275,7 +297,12 @@ export class CuadrantesController {
               reqCuadrante.arraySemanalHoras[i].horaSalida as DateTime
             ).toJSDate(),
             nombre: trabajadorEditado.nombreApellidos,
-            totalHoras: reqCuadrante.totalHoras,
+            totalHoras: Math.abs(
+              (reqCuadrante.arraySemanalHoras[i].horaEntrada as DateTime).diff(
+                reqCuadrante.arraySemanalHoras[i].horaSalida as DateTime,
+                "hours",
+              ).hours,
+            ),
             enviado: false,
             historialPlanes: [],
             horasContrato:
@@ -284,6 +311,7 @@ export class CuadrantesController {
                 fechaInicio,
               )) as number,
             ausencia: null,
+            borrable: reqCuadrante.arraySemanalHoras[i].borrable ? true : false,
           });
         }
 

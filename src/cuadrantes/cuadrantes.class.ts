@@ -44,13 +44,20 @@ export class Cuadrantes {
       await this.trabajadoresInstance.getTrabajadorBySqlId(idTrabajador)
     ).nombreApellidos;
 
-    return await this.addEmptyDays(
+    const resultado = await this.addEmptyDays(
       arrayCuadrantesTrabajador,
       idTrabajador,
       nombreTrabajador,
       fechaInicioBusqueda,
       fechaFinalBusqueda,
     );
+    return resultado;
+  }
+
+  // Cuadrantes 2.0 INCOMPLETO!!!
+  async borrarTurno(idTurno: string) {
+    // FALTA AGREGAR UN TRIGGER PARA MODIFICARLO EN HIT TAMBIÉN !!!
+    return await this.schCuadrantes.borrarTurno(idTurno);
   }
 
   private async addEmptyDays(
@@ -69,14 +76,12 @@ export class Cuadrantes {
     );
 
     while (diaActual <= finalSemana) {
-      // Busca si el día actual ya está en arrayCuadrantes
-      const diaEncontrado = arrayCuadrantes.find((cuadrante) =>
+      // Cuenta cuántas veces el día actual aparece en arrayCuadrantes
+      const vecesDia = arrayCuadrantes.filter((cuadrante) =>
         DateTime.fromJSDate(cuadrante.inicio).hasSame(diaActual, "day"),
-      );
+      ).length;
 
-      if (diaEncontrado) {
-        diasCompletos.push(diaEncontrado);
-      } else {
+      if (vecesDia === 0) {
         // Si el día no está en arrayCuadrantes, lo añade con inicio y final a las 00:00
         diasCompletos.push({
           _id: new ObjectId(),
@@ -92,6 +97,12 @@ export class Cuadrantes {
           idTienda: null,
           ausencia: null,
         });
+      } else {
+        // Si el día está en arrayCuadrantes, añade todos los cuadrantes de ese día
+        const cuadrantesDia = arrayCuadrantes.filter((cuadrante) =>
+          DateTime.fromJSDate(cuadrante.inicio).hasSame(diaActual, "day"),
+        );
+        diasCompletos.push(...cuadrantesDia);
       }
 
       diaActual = diaActual.plus({ days: 1 });
@@ -398,74 +409,52 @@ export class Cuadrantes {
   // Cuadrantes 2.0 guardado nuevo
   async saveCuadrante(cuadrantes: TCuadrante[], oldCuadrante: TCuadrante[]) {
     const cuadrantesModificables: TCuadrante[] = [];
+    const cuadrantesParaAgregar: TCuadrante[] = [];
+    let coincidencia: boolean;
 
     for (let i = 0; i < cuadrantes.length; i += 1) {
       const fechaCuadrante = DateTime.fromJSDate(cuadrantes[i].inicio);
+      coincidencia = false;
 
       for (let j = 0; j < oldCuadrante.length; j += 1) {
         const fechaOldCuadrante = DateTime.fromJSDate(oldCuadrante[j].inicio);
-        let modificado: boolean = null;
-        COMPROBAR AQUÍ POR QUÉ NO DEVUELVE NADA EN GUARDARCUADRANTES EN LA SIGUIENTE FUNCIÓN (SCHMONGO)
-        if (fechaCuadrante.hasSame(fechaOldCuadrante, "day")) {
-          cuadrantes[i].ausencia = oldCuadrante[j].ausencia;
-          if (
-            fechaCuadrante.hasSame(fechaOldCuadrante, "hour") &&
-            fechaCuadrante.hasSame(fechaOldCuadrante, "minute")
-          ) {
-            modificado = false;
-          } else modificado = true;
 
-          if (modificado) {
-            // No hacer nada si hay ausencia completa, porque está bloqueado
-            if (oldCuadrante[j].ausencia && oldCuadrante[j].ausencia.completa)
-              break;
+        // COMPROBAR AQUÍ POR QUÉ NO DEVUELVE NADA EN GUARDARCUADRANTES EN LA SIGUIENTE FUNCIÓN (SCHMONGO)
+        // if (fechaCuadrante.hasSame(fechaOldCuadrante, "day")) {
+        //   cuadrantes[i].ausencia = oldCuadrante[j].ausencia;
+        //   if (
+        //     fechaCuadrante.hasSame(fechaOldCuadrante, "hour") &&
+        //     fechaCuadrante.hasSame(fechaOldCuadrante, "minute")
+        //   ) {
+        //     modificado = false;
+        //   } else modificado = true;
 
-            cuadrantes[i].historialPlanes = oldCuadrante[j].historialPlanes;
-            cuadrantes[i].historialPlanes.push(cuadrantes[i].idPlan);
-            cuadrantes[i].enviado = false;
+        //   if (modificado) {
+        //     // No hacer nada si hay ausencia completa, porque está bloqueado
+        //     if (oldCuadrante[j].ausencia && oldCuadrante[j].ausencia.completa)
+        //       break;
 
-            cuadrantesModificables.push(cuadrantes[i]);
-          } else break;
+        //     cuadrantes[i].historialPlanes = oldCuadrante[j].historialPlanes;
+        //     cuadrantes[i].historialPlanes.push(cuadrantes[i].idPlan);
+        //     cuadrantes[i].enviado = false;
+
+        //     cuadrantesModificables.push(cuadrantes[i]);
+        //   } else break;
+        // }
+        if (cuadrantes[i]._id.toString() === oldCuadrante[j]._id.toString()) {
+          cuadrantesModificables.push(cuadrantes[i]);
+          coincidencia = true;
+          break;
         }
       }
+      if (coincidencia === false) cuadrantesParaAgregar.push(cuadrantes[i]);
     }
 
-    await this.schCuadrantes.guardarCuadrantes(cuadrantesModificables);
+    await this.schCuadrantes.guardarCuadrantes(
+      cuadrantesModificables,
+      cuadrantesParaAgregar,
+    );
     return true;
-    // guardar esto en bbdd (insert or update)
-
-    // Código bueno pero en modo semanal
-    // if (oldCuadrante) {
-    //   cuadrante.historialPlanes = oldCuadrante.historialPlanes;
-    //   cuadrante._id = oldCuadrante._id;
-    // }
-    // cuadrante.enviado = false;
-
-    // let update = false;
-
-    // if (cuadrante.idPlan) {
-    //   update = true;
-    //   if (!cuadrante.historialPlanes.includes(cuadrante.idPlan))
-    //     cuadrante.historialPlanes.push(cuadrante.idPlan);
-    // }
-
-    // if (cuadrante.fechaInicio && cuadrante.fechaFinal) {
-    //   if (!update) {
-    //     cuadrante.idPlan = new ObjectId().toString();
-    //   }
-    // } else {
-    //   cuadrante = null;
-    // }
-
-    // if (oldCuadrante) {
-    //   if (await this.schCuadrantes.updateCuadrante(cuadrante)) return true;
-    //   throw Error("No se ha podido actualizar el cuadrante");
-    // } else {
-    //   cuadrante.historialPlanes = [];
-    //   const idCuadrante = await this.schCuadrantes.insertCuadrante(cuadrante);
-    //   if (idCuadrante) return true;
-    //   throw Error("No se ha podido insertar el cuadrante");
-    // }
   }
 
   // Cuadrantes 2.0

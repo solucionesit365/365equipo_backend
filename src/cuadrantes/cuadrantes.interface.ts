@@ -28,6 +28,7 @@ export interface TCuadrante {
   historialPlanes: string[];
   horasContrato: number;
   ausencia: TAusenciaMin;
+  borrable?: boolean;
 }
 
 export type TiposAusencia =
@@ -47,6 +48,7 @@ export interface TRequestCuadrante {
     idTienda: number;
     idCuadrante: string;
     ausencia: TAusenciaMin;
+    borrable?: boolean;
   }[];
   totalHoras: number;
   idTiendaDefault: number;
