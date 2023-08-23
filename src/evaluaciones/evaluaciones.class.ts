@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { EvaluacionesDatabase } from "./evaluaciones.mongodb";
-import { evaluacionesInterface, TipoEvaluacion} from "./evaluaciones.interface";
+import { evaluacionesInterface} from "./evaluaciones.interface";
 
 @Injectable()
 export class EvaluacionesClass {
@@ -14,7 +14,7 @@ export class EvaluacionesClass {
     }
   }
 
-  async getPlantillas(tipo: TipoEvaluacion) {
+  async getPlantillas(tipo: string) {
     const response = await this.evaluacionesDB.getPlantillas(tipo);
 
     if (response) {

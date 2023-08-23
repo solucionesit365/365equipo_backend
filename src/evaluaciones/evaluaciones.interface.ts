@@ -1,6 +1,6 @@
 export interface evaluacionesInterface {
   titulo: string;
-  tipo: TipoEvaluacion;
+  tipo: string;
   configuracion: {
     preguntasExtras: boolean;
     objetivos: boolean;
@@ -56,4 +56,3 @@ export interface evaluacionesInterface {
   firmaEvaluado: string;
 }
 
-export type TipoEvaluacion = "estructura" | "general";

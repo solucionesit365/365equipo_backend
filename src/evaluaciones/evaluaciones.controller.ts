@@ -13,7 +13,6 @@ import { AuthService } from "../firebase/auth";
 import { EvaluacionesClass } from "./evaluaciones.class";
 import {
   evaluacionesInterface,
-  TipoEvaluacion,
 } from "./evaluaciones.interface";
 import { database } from "firebase-admin";
 @Controller("evaluaciones")
@@ -22,7 +21,7 @@ export class EvaluacionesController {
     private readonly authInstance: AuthService,
     private readonly tokenService: TokenService,
     private readonly evaluacionesclass: EvaluacionesClass,
-  ) {}
+  ) { }
 
   @Post("addPlantilla")
   @UseGuards(AuthGuard)
@@ -50,9 +49,10 @@ export class EvaluacionesController {
   @UseGuards(AuthGuard)
   async getPlantillas(
     @Headers("authorization") authHeader: string,
-    @Query() tipo: TipoEvaluacion,
+    @Query("tipo") tipo: string,
   ) {
     try {
+
       const token = this.tokenService.extract(authHeader);
       await this.authInstance.verifyToken(token);
 
@@ -63,6 +63,6 @@ export class EvaluacionesController {
           data: response,
         };
       }
-    } catch (error) {}
+    } catch (error) { }
   }
 }

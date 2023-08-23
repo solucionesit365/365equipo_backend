@@ -2,12 +2,11 @@ import { Injectable } from "@nestjs/common";
 import { MongoDbService } from "../bbdd/mongodb";
 import {
   evaluacionesInterface,
-  TipoEvaluacion,
 } from "./evaluaciones.interface";
 
 @Injectable()
 export class EvaluacionesDatabase {
-  constructor(private readonly mongoDbService: MongoDbService) {}
+  constructor(private readonly mongoDbService: MongoDbService) { }
 
   async addplantilla(plantilla: evaluacionesInterface) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
@@ -21,11 +20,15 @@ export class EvaluacionesDatabase {
     throw Error("No se ha podido crear la nueva plantilla");
   }
 
-  async getPlantillas(tipo: TipoEvaluacion) {
+  async getPlantillas(tipo: string) {
+    console.log(tipo);
+
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const evaluacionesCollect =
       db.collection<evaluacionesInterface>("evaluaciones");
+    const response = await evaluacionesCollect.find({ tipo }).toArray();
+    console.log(response);
 
-    return await evaluacionesCollect.find({ tipo }).toArray();
+    return response
   }
 }
