@@ -48,6 +48,7 @@ export class CuadrantesController {
           data: await this.cuadrantesInstance.getCuadrantes(
             usuario.idTienda,
             DateTime.fromJSDate(new Date(fecha)),
+            this.cuadrantesInstance.getRole(usuario),
             usuario.id,
           ),
         };
@@ -163,29 +164,30 @@ export class CuadrantesController {
     }
   }
 
-  //1Tienda 1 Semana
-  @Get("getTiendaSemana")
-  @UseGuards(AuthGuard)
-  async getTiendaSemana(
-    @Query()
-    { idTienda, fecha }: { idTienda: number; fecha: string },
-  ) {
-    try {
-      if (!idTienda && !fecha) throw Error("Faltan datos");
-      return {
-        ok: true,
-        data: await this.cuadrantesInstance.getCuadrantes(
-          Number(idTienda),
-          DateTime.fromJSDate(new Date(fecha)),
-        ),
-      };
-    } catch (error) {
-      console.log(error);
-      return { ok: false, message: error.message };
-    }
-  }
-  //obtener cuadrantes por semana y trabajador:
+  // //1Tienda 1 Semana
+  // @Get("getTiendaSemana")
+  // @UseGuards(AuthGuard)
+  // async getTiendaSemana(
+  //   @Query()
+  //   { idTienda, fecha }: { idTienda: number; fecha: string },
+  // ) {
+  //   try {
+  //     if (!idTienda && !fecha) throw Error("Faltan datos");
+  //     return {
+  //       ok: true,
+  //       data: await this.cuadrantesInstance.getCuadrantes(
+  //         Number(idTienda),
+  //         DateTime.fromJSDate(new Date(fecha)),
 
+  //       ),
+  //     };
+  //   } catch (error) {
+  //     console.log(error);
+  //     return { ok: false, message: error.message };
+  //   }
+  // }
+
+  //obtener cuadrantes por semana y trabajador:
   @Get("cuadranteSemanaTrabajador")
   @UseGuards(AuthGuard)
   async getCuadranteSemanaTrabajador(
@@ -388,7 +390,7 @@ export class CuadrantesController {
   //     if (await this.trabajadoresInstance.esCoordinadora(usuario.uid)) {
   //       return {
   //         ok: true,
-  //         data: await this.cuadrantesInstance.copiarCuadrante(
+  //         data: await this.cuadrantesInstance.(
   //           Number(semanaOrigen),
   //           Number(semanaDestino),
   //           Number(yearOrigen),

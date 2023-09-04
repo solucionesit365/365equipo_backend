@@ -10,6 +10,7 @@ import { Trabajador } from "../trabajadores/trabajadores.class";
 
 import { FichajesValidados } from "../fichajes-validados/fichajes-validados.class";
 import { DateTime } from "luxon";
+import { TrabajadorCompleto } from "../trabajadores/trabajadores.interface";
 
 moment.locale("custom", {
   week: {
@@ -158,6 +159,7 @@ export class Cuadrantes {
   async getCuadrantes(
     idTienda: number,
     fechaBusqueda: DateTime,
+    role: "DEPENDIENTA" | "COORDINADORA" | "SUPERVISORA",
     idSql?: number,
   ) {
     const fechaInicioSemana = fechaBusqueda.startOf("week");
@@ -512,84 +514,15 @@ export class Cuadrantes {
     await this.schCuadrantes.updateOrInsertManyCuadrantes(cuadrantesFinal);
   }
 
-  // Cuadrantes 2.0
-  async copiarCuadrante(
-    lunesOrigen: DateTime,
-    lunesDestino: DateTime,
-    idTienda: number,
-  ) {
-    const cuadrantesOrigen = await this.getCuadrantes(idTienda, lunesOrigen);
-    const diferenciaSemanas = Math.abs(
-      lunesOrigen.diff(lunesDestino, "weeks").weeks,
-    );
-    const cuadrantesDestino: TCuadrante[] = cuadrantesOrigen.map(
-      (cuadrante) => {
-        cuadrante._id = new ObjectId();
-        cuadrante.inicio = DateTime.fromJSDate(cuadrante.inicio)
-          .plus({ weeks: diferenciaSemanas })
-          .toJSDate();
-        cuadrante.final = DateTime.fromJSDate(cuadrante.final)
-          .plus({ weeks: diferenciaSemanas })
-          .toJSDate();
-        cuadrante.enviado = false;
-        return cuadrante;
-      },
-    );
+  getRole(
+    usuario: TrabajadorCompleto,
+  ): "DEPENDIENTA" | "COORDINADORA" | "SUPERVISORA" {
+    if (usuario.coordinadora) {
+      return usuario.idTienda ? "COORDINADORA" : "SUPERVISORA";
+    } else if (usuario.idTienda) {
+      return "DEPENDIENTA";
+    }
 
-    if (await this.schCuadrantes.insertCuadrantes(cuadrantesDestino))
-      return true;
-    else throw Error("No se han podido guardar las copias de los cuadrantes");
+    throw Error("Paso no autorizado. No es de ventas.");
   }
-
-  // // Cuadrantes 2.0
-  // public getNuevosAndModificados(
-  //   oldCuadrantes: TCuadrante[],
-  //   newCuadrantes: TRequestCuadrante[],
-  // ): { nuevos: TCuadrante[]; modificados: TCuadrante[] } {
-  //   const modificados: TCuadrante[] = [];
-  //   const nuevos: TCuadrante[] = [];
-
-  //   for (let i = 0; i < newCuadrantes.length; i += 1) {
-  //     const cuadranteMismoDia = oldCuadrantes.find((cuadrante) => {
-  //       if (
-  //         DateTime.fromJSDate(cuadrante.fechaInicio).hasSame(
-  //           DateTime.fromJSDate(new Date(newCuadrantes[i].fechaInicio)),
-  //           "day",
-  //         ) &&
-  //         !cuadrante.ausencia
-  //       ) {
-  //         return true;
-  //       }
-  //     });
-
-  //     if (cuadranteMismoDia) {
-  //       cuadranteMismoDia.enviado = false;
-  //       cuadranteMismoDia.fechaInicio = new Date(newCuadrantes[i].fechaInicio);
-  //       cuadranteMismoDia.fechaFinal = new Date(newCuadrantes[i].fechaFinal);
-  //       cuadranteMismoDia.historialPlanes.push(
-  //         cuadranteMismoDia._id.toString(),
-  //       );
-  //       cuadranteMismoDia.ausencia = newCuadrantes[i].ausencia;
-  //       cuadranteMismoDia.idTienda = newCuadrantes[i].idTienda;
-  //       cuadranteMismoDia.totalHoras = newCuadrantes[i].totalHoras;
-
-  //       modificados.push(cuadranteMismoDia);
-  //     } else
-  //       nuevos.push({
-  //         _id: new ObjectId(),
-  //         idPlan: new ObjectId().toString(),
-  //         ausencia: newCuadrantes[i].ausencia,
-  //         enviado: false,
-  //         fechaInicio: new Date(newCuadrantes[i].fechaInicio),
-  //         fechaFinal: new Date(newCuadrantes[i].fechaFinal),
-  //         historialPlanes: [],
-  //         horasContrato: newCuadrantes[i].horasContrato,
-  //         idTienda: newCuadrantes[i].idTienda,
-  //         idTrabajador: newCuadrantes[i].idTrabajador,
-  //         nombre: newCuadrantes[i].nombre,
-  //         totalHoras: newCuadrantes[i].totalHoras,
-  //       });
-  //   }
-  //   return { nuevos, modificados };
-  // }
 }
