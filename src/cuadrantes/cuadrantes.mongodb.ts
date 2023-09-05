@@ -144,10 +144,10 @@ export class CuadrantesDatabase {
     const resCuadrantes = await cuadrantesCollection
       .find({
         idTienda: idTienda,
-        fechaInicio: {
+        inicio: {
           $gte: fechaInicioBusqueda.toJSDate(),
         },
-        fechaFinal: {
+        final: {
           $lte: fechaFinalBusqueda.toJSDate(),
         },
       })

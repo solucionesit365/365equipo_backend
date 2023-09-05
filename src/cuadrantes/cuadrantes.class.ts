@@ -155,8 +155,122 @@ export class Cuadrantes {
     };
   }
 
-  // Cuadrantes 2.0 (falta multitienda)
-  async getCuadrantes(
+  async recuentoTiendasIndividual(
+    idTrabajador: number,
+    inicioSemana: DateTime,
+    finalSemana: DateTime,
+  ): Promise<number[]> {
+    const cuadrantesTrabajador =
+      await this.schCuadrantes.getCuadrantesIndividual(
+        idTrabajador,
+        inicioSemana,
+        finalSemana,
+      );
+    const tiendasSet = new Set<number>();
+
+    for (const cuadrante of cuadrantesTrabajador) {
+      tiendasSet.add(cuadrante.idTienda);
+    }
+
+    return [...tiendasSet];
+  }
+
+  async recuentoTiendasSubordinados(
+    arrayTrabajadores: number[],
+    inicioSemana: DateTime,
+    finalSemana: DateTime,
+  ): Promise<number[]> {
+    const tiendasSet = new Set<number>();
+
+    for (const idTrabajador of arrayTrabajadores) {
+      const cuadrantesTrabajador =
+        await this.schCuadrantes.getCuadrantesIndividual(
+          idTrabajador,
+          inicioSemana,
+          finalSemana,
+        );
+
+      for (const cuadrante of cuadrantesTrabajador) {
+        tiendasSet.add(cuadrante.idTienda);
+      }
+    }
+
+    return [...tiendasSet];
+  }
+
+  async getCuadranteDependienta(idTrabajador: number, fechaBusqueda: DateTime) {
+    const fechaInicioSemana = fechaBusqueda.startOf("week");
+    const fechaFinalSemana = fechaBusqueda.endOf("week");
+    const puestosTrabajo = await this.recuentoTiendasIndividual(
+      idTrabajador,
+      fechaInicioSemana,
+      fechaFinalSemana,
+    );
+    const cuadrantes: TCuadrante[] = [];
+
+    for (let i = 0; i < puestosTrabajo.length; i += 1) {
+      cuadrantes.push(
+        ...(await this.schCuadrantes.getCuadrantes(
+          puestosTrabajo[i],
+          fechaInicioSemana,
+          fechaFinalSemana,
+        )),
+      );
+    }
+
+    return cuadrantes;
+  }
+
+  async getCuadranteCoordinadora(
+    idTrabajador: number,
+    arrayIdSubordinados: number[],
+    fechaBusqueda: DateTime,
+  ): Promise<TCuadrante[]> {
+    const fechaInicioSemana = fechaBusqueda.startOf("week");
+    const fechaFinalSemana = fechaBusqueda.endOf("week");
+    const puestosTrabajo = await this.recuentoTiendasSubordinados(
+      arrayIdSubordinados,
+      fechaInicioSemana,
+      fechaFinalSemana,
+    );
+    const cuadrantes: TCuadrante[] = [];
+    const puestosTrabajoIndividual = await this.recuentoTiendasIndividual(
+      idTrabajador,
+      fechaInicioSemana,
+      fechaFinalSemana,
+    );
+    const puestosTotales: number[] = [
+      ...new Set([...puestosTrabajoIndividual, ...puestosTrabajo]),
+    ];
+
+    for (let i = 0; i < puestosTotales.length; i += 1) {
+      cuadrantes.push(
+        ...(await this.schCuadrantes.getCuadrantes(
+          puestosTotales[i],
+          fechaInicioSemana,
+          fechaFinalSemana,
+        )),
+      );
+    }
+
+    return cuadrantes;
+  }
+
+  async getCuadranteSupervisora(
+    idTienda: number,
+    fechaBusqueda: DateTime,
+  ): Promise<TCuadrante[]> {
+    const fechaInicioSemana = fechaBusqueda.startOf("week");
+    const fechaFinalSemana = fechaBusqueda.endOf("week");
+    return await this.schCuadrantes.getCuadrantes(
+      idTienda,
+      fechaInicioSemana,
+      fechaFinalSemana,
+    );
+  }
+
+  // Vieja, después borrarla
+  async getCuadrantesOld(
     idTienda: number,
     fechaBusqueda: DateTime,
     role: "DEPENDIENTA" | "COORDINADORA" | "SUPERVISORA",

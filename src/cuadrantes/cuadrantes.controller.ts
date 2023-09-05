@@ -33,7 +33,7 @@ export class CuadrantesController {
   @Get()
   @UseGuards(AuthGuard)
   async getCuadrantes(
-    @Query() { fecha }: { fecha: string },
+    @Query() { fecha, idTienda }: { fecha: string; idTienda?: string },
     @Headers("authorization") authHeader: string,
   ) {
     try {
@@ -42,18 +42,42 @@ export class CuadrantesController {
 
       if (!fecha) throw Error("Faltan datos");
 
-      if (usuario.idTienda) {
-        return {
-          ok: true,
-          data: await this.cuadrantesInstance.getCuadrantes(
-            usuario.idTienda,
-            DateTime.fromJSDate(new Date(fecha)),
-            this.cuadrantesInstance.getRole(usuario),
-            usuario.id,
-          ),
-        };
+      const tipoEmpleado = this.cuadrantesInstance.getRole(usuario);
+      let cuadrantes: TCuadrante[] = [];
+
+      if (tipoEmpleado === "DEPENDIENTA") {
+        cuadrantes = await this.cuadrantesInstance.getCuadranteDependienta(
+          usuario.id,
+          DateTime.fromJSDate(new Date(fecha)),
+        );
       }
-      throw Error("Opción no disponible para este tipo de empled@");
+
+      if (tipoEmpleado === "COORDINADORA") {
+        const arrayEquipo = await this.trabajadoresInstance.getSubordinadosById(
+          usuario.id,
+        );
+        const arrayIdEquipo = arrayEquipo.map(
+          (trabajadorSubordinado) => trabajadorSubordinado.id,
+        );
+
+        cuadrantes = await this.cuadrantesInstance.getCuadranteCoordinadora(
+          usuario.id,
+          arrayIdEquipo,
+          DateTime.fromJSDate(new Date(fecha)),
+        );
+      }
+
+      if (tipoEmpleado === "SUPERVISORA" && Number(idTienda)) {
+        cuadrantes = await this.cuadrantesInstance.getCuadranteSupervisora(
+          Number(idTienda),
+          DateTime.fromJSDate(new Date(fecha)),
+        );
+      }
+
+      return {
+        ok: true,
+        data: cuadrantes,
+      };
     } catch (err) {
       console.log(err);
       return { ok: false, message: err.message };
