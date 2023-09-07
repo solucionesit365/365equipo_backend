@@ -305,6 +305,17 @@ export class CuadrantesController {
           )
             continue;
 
+          const horasContractuales =
+            (await this.trabajadoresInstance.getHorasContratoById(
+              reqCuadrante.idTrabajador,
+              fechaInicio,
+            )) as number;
+          const bolsaHorasInicial =
+            await this.cuadrantesInstance.getBolsaHorasById(
+              reqCuadrante.idTrabajador,
+              reqCuadrante.arraySemanalHoras[i].horaEntrada as DateTime,
+              horasContractuales,
+            );
           cuadrantesDiarios.push({
             _id: reqCuadrante.arraySemanalHoras[i].idCuadrante
               ? new ObjectId(reqCuadrante.arraySemanalHoras[i].idCuadrante)
@@ -331,12 +342,9 @@ export class CuadrantesController {
             ),
             enviado: false,
             historialPlanes: [],
-            horasContrato:
-              (await this.trabajadoresInstance.getHorasContratoById(
-                reqCuadrante.idTrabajador,
-                fechaInicio,
-              )) as number,
+            horasContrato: horasContractuales,
             ausencia: null,
+            bolsaHorasInicial: bolsaHorasInicial,
             borrable: reqCuadrante.arraySemanalHoras[i].borrable ? true : false,
           });
         }
