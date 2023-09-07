@@ -97,6 +97,7 @@ export class Cuadrantes {
           final: diaActual.toJSDate(),
           idTienda: null,
           ausencia: null,
+          bolsaHorasInicial: null, // OJO, MIRAR ESTO 3.0
         });
       } else {
         // Si el día está en arrayCuadrantes, añade todos los cuadrantes de ese día
@@ -331,6 +332,7 @@ export class Cuadrantes {
           inicio: undefined,
           final: undefined,
           ausencia: null,
+          bolsaHorasInicial: 0,
         };
 
         cuadrantesVacios.push(nuevoCuadrante);
@@ -613,6 +615,7 @@ export class Cuadrantes {
           enviado: false,
           historialPlanes: [],
           horasContrato: trabajador.horasContrato,
+          bolsaHorasInicial: null, // OJO, MIRAR ESTO BIEN 3.0
           ausencia: {
             tipo: ausencia.tipo,
             completa: ausencia.completa,

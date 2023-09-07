@@ -28,6 +28,7 @@ export interface TCuadrante {
   historialPlanes: string[];
   horasContrato: number;
   ausencia: TAusenciaMin;
+  bolsaHorasInicial: number;
   borrable?: boolean;
 }
 
