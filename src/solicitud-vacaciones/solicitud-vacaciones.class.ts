@@ -8,6 +8,7 @@ export class solicitudesVacacionesClass {
     private readonly schSolicitudVacaciones: SolicitudVacacionesBdd,
   ) {}
 
+  //Nueva solicitud de vacaciones
   async nuevaSolicitudVacaciones(solicitudVacaciones: SolicitudVacaciones) {
     const insertSolicitudVacaciones =
       await this.schSolicitudVacaciones.nuevaSolicitudVacaciones(
@@ -16,5 +17,22 @@ export class solicitudesVacacionesClass {
     if (insertSolicitudVacaciones) return true;
 
     throw Error("No se ha podido insertar la nueva solicitud de vacaciones");
+  }
+
+  //Mostrar todas las solicitudes de las vacaciones de los trabajadores
+  async getSolicitudes() {
+    return await this.schSolicitudVacaciones.getSolicitudes();
+  }
+
+  //Mostrar Solicitudes de las vacaciones de el trabajador por idSql
+  async getSolicitudesTrabajadorSqlId(idBeneficiario: number) {
+    return await this.schSolicitudVacaciones.getSolicitudesTrabajadorSqlId(
+      idBeneficiario,
+    );
+  }
+
+  //Borrar solicitud
+  async borrarSolicitud(_id: string) {
+    return await this.schSolicitudVacaciones.borrarSolicitud(_id);
   }
 }
