@@ -25,6 +25,8 @@ export interface TCuadrante {
 
 export type TiposAusencia =
   | "BAJA"
+  | "BAJA MATERNIDAD"
+  | "BAJA PATERNIDAD"
   | "DIA_PERSONAL"
   | "VACACIONES"
   | "HORAS_JUSTIFICADAS";
