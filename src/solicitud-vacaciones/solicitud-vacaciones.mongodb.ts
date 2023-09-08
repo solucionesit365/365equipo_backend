@@ -47,7 +47,20 @@ export class SolicitudVacacionesBdd {
     return respSolicitudes;
   }
 
-  //Borrar solicitud
+  async getSolicitudesById(_id: string) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const solicitudVacacionesCollection = db.collection<SolicitudVacaciones>(
+      "solicitudVacaciones",
+    );
+
+    const respSolicitudes = await solicitudVacacionesCollection.findOne({
+      _id: new ObjectId(_id),
+    });
+
+    return respSolicitudes;
+  }
+
+  //Borrar solicitud de vacaciones
   async borrarSolicitud(_id: string) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const solicitudVacacionesCollection = db.collection<SolicitudVacaciones>(
@@ -60,5 +73,30 @@ export class SolicitudVacacionesBdd {
       _id: new ObjectId(_id),
     });
     return resDelete.acknowledged && resDelete.deletedCount > 0;
+  }
+
+  //Actualizar estado de la solicitud de Vacaciones
+  async updateSolicitudVacacionesEstado(
+    solicitudesVacaciones: SolicitudVacaciones,
+  ) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const solicitudVacacionesCollection = db.collection<SolicitudVacaciones>(
+      "solicitudVacaciones",
+    );
+
+    const respSolicitudes = await solicitudVacacionesCollection.updateOne(
+      {
+        _id: new ObjectId(solicitudesVacaciones._id),
+      },
+      {
+        $set: {
+          estado: solicitudesVacaciones.estado,
+        },
+      },
+    );
+
+    if (respSolicitudes.acknowledged && respSolicitudes.modifiedCount > 0)
+      return true;
+    throw Error("No se ha podido modificar el estado");
   }
 }
