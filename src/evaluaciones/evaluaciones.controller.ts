@@ -11,9 +11,7 @@ import { AuthGuard } from "../auth/auth.guard";
 import { TokenService } from "../get-token/get-token.service";
 import { AuthService } from "../firebase/auth";
 import { EvaluacionesClass } from "./evaluaciones.class";
-import {
-  evaluacionesInterface,
-} from "./evaluaciones.interface";
+import { evaluacionesInterface } from "./evaluaciones.interface";
 import { database } from "firebase-admin";
 @Controller("evaluaciones")
 export class EvaluacionesController {
@@ -21,7 +19,7 @@ export class EvaluacionesController {
     private readonly authInstance: AuthService,
     private readonly tokenService: TokenService,
     private readonly evaluacionesclass: EvaluacionesClass,
-  ) { }
+  ) {}
 
   @Post("addPlantilla")
   @UseGuards(AuthGuard)
@@ -52,7 +50,6 @@ export class EvaluacionesController {
     @Query("tipo") tipo: string,
   ) {
     try {
-
       const token = this.tokenService.extract(authHeader);
       await this.authInstance.verifyToken(token);
 
@@ -63,6 +60,46 @@ export class EvaluacionesController {
           data: response,
         };
       }
-    } catch (error) { }
+    } catch (error) {}
+  }
+
+  @Post("addEvaluacion")
+  @UseGuards(AuthGuard)
+  async addEvaluacion(
+    @Headers("authorization") authHeader: string,
+    @Body() evaluacion: evaluacionesInterface,
+  ) {
+    const token = this.tokenService.extract(authHeader);
+    await this.authInstance.verifyToken(token);
+
+    const response = await this.evaluacionesclass.addEvaluacion(evaluacion);
+    if (response) {
+      return {
+        ok: true,
+        data: response,
+      };
+    }
+  }
+
+  @Get("getEvaluados")
+  @UseGuards(AuthGuard)
+  async getEvaluados(
+    @Headers("authorization") authHeader: string,
+    @Query() request,
+  ) {
+    try {
+      const token = this.tokenService.extract(authHeader);
+      await this.authInstance.verifyToken(token);
+      const response = await this.evaluacionesclass.getEvaluados(
+        Number(request.idSql),
+        Number(request.año),
+      );
+      if (response) {
+        return {
+          ok: true,
+          data: response,
+        };
+      }
+    } catch (error) {}
   }
 }

@@ -1,6 +1,9 @@
 export interface evaluacionesInterface {
   titulo: string;
   tipo: string;
+  foto: string;
+  opinionEvaluado: string;
+  opinionResponsable: string;
   configuracion: {
     preguntasExtras: boolean;
     objetivos: boolean;
@@ -15,6 +18,7 @@ export interface evaluacionesInterface {
     nombre: string;
     idSql: number;
     Fecha: string;
+    año: string;
     departamento: string;
   };
   PreguntasEvaluadas: string[];
@@ -47,12 +51,7 @@ export interface evaluacionesInterface {
     origenNecesidad: string;
   };
   preguntasExtras: [];
-  compromisos: {
-    titulo: string;
-    fecha: string;
-    responsable: number;
-  };
+  compromisos: [];
   firmarResponsable: string;
   firmaEvaluado: string;
 }
-
