@@ -15,6 +15,7 @@ import { SolicitudVacaciones } from "./solicitud-vacaciones.interface";
 import { EmailClass } from "src/email/email.class";
 import { Trabajador } from "../trabajadores/trabajadores.class";
 import { Notificaciones } from "src/notificaciones/notificaciones.class";
+import { ObjectId } from "mongodb";
 
 @Controller("solicitud-vacaciones")
 export class SolicitudVacacionesController {
@@ -37,6 +38,33 @@ export class SolicitudVacacionesController {
     try {
       const token = this.tokenService.extract(authHeader);
       await this.authInstance.verifyToken(token);
+      const solicitudTrabajador =
+        await this.trabajadorInstance.getTrabajadorBySqlId(
+          Number(solicitudesVacaciones.idBeneficiario),
+        );
+      this.email.enviarEmail(
+        solicitudTrabajador.emails,
+        `Tu solicitud ha sido enviada con estos datos: <br/> 
+      <table>
+      <tr style="background-color:#0000ff ">
+        <th>Fecha Inicio</th>
+        <th>Fecha Final</th>
+        <th>Fecha Incorporación</th>
+        <th>Observación</th>
+        <th>Total de días</th>
+      </tr>
+      <tr>
+        
+        <td>${solicitudesVacaciones.fechaInicio}</td>
+        <td>${solicitudesVacaciones.fechaFinal}</td>
+        <td>${solicitudesVacaciones.fechaIncorporacion}</td>
+        <td>${solicitudesVacaciones.observaciones}</td>
+        <td>${solicitudesVacaciones.totalDias}</td>
+      </tr>
+    </table>
+     `,
+        "Solicitud de Vacaciones",
+      );
 
       return {
         ok: true,
@@ -60,6 +88,51 @@ export class SolicitudVacacionesController {
       return {
         ok: true,
         data: await this.solicitudVacacionesInstance.getSolicitudes(),
+      };
+    } catch (err) {
+      console.log(err);
+      return { ok: false, message: err.message };
+    }
+  }
+  //Mostrar todas las solciitudes de vacaciones por tiendas
+  @Get("getVacacionesByTiendas")
+  async getVacacionesByTiendas(
+    @Headers("authorization") authHeader: string,
+    @Query() { tienda },
+  ) {
+    try {
+      console.log(tienda);
+
+      const token = this.tokenService.extract(authHeader);
+      await this.authInstance.verifyToken(token);
+
+      const resVacacionesByTienda =
+        await this.solicitudVacacionesInstance.getVacacionesByTiendas(tienda);
+      return {
+        ok: true,
+        data: resVacacionesByTienda,
+      };
+    } catch (err) {
+      console.log(err);
+      return { ok: false, message: err.message };
+    }
+  }
+
+  //Mostrar todas las solcitudes de vacaciones por estados
+  @Get("getVacacionesByEstado")
+  async getVacacionesByEstado(
+    @Headers("authorization") authHeader: string,
+    @Query() { estado },
+  ) {
+    try {
+      const token = this.tokenService.extract(authHeader);
+      await this.authInstance.verifyToken(token);
+
+      const resVacacionesByEstado =
+        await this.solicitudVacacionesInstance.getVacacionesByEstado(estado);
+      return {
+        ok: true,
+        data: resVacacionesByEstado,
       };
     } catch (err) {
       console.log(err);
@@ -93,17 +166,98 @@ export class SolicitudVacacionesController {
     }
   }
 
+  // @Get("solicitudesSubordinados")
+  // async solicitudesSubordinados(
+  //   @Headers("authorization") authHeader: string,
+  //   @Query() { creador },
+  // ) {
+  //   try {
+  //     console.log(creador);
+
+  //     if (!creador) throw Error("Faltan datos");
+  //     const token = this.tokenService.extract(authHeader);
+  //     await this.authInstance.verifyToken(token);
+
+  //     const solicitudesEmpleadosDirectos =
+  //       await this.solicitudVacacionesInstance.getsolicitudesSubordinados(
+  //         creador,
+  //       );
+  //     console.log(solicitudesEmpleadosDirectos);
+
+  //     const addArray = [];
+  //     const empleadosTipoCoordi =
+  //       await this.trabajadorInstance.getSubordinadosConTienda(creador);
+  //     const soyCoordinadora: boolean =
+  //       await this.trabajadorInstance.esCoordinadoraPorId(creador);
+
+  //     empleadosTipoCoordi.forEach(async (empleado) => {
+  //       if (empleado.llevaEquipo > 0) {
+  //         const solicitudesSubordinadosCoordinadora =
+  //           await this.solicitudVacacionesInstance.getsolicitudesSubordinados(
+  //             empleado.creador,
+  //           );
+
+  //         solicitudesSubordinadosCoordinadora.forEach((solicitud) => {
+  //           solicitud["validador"] = creador;
+  //         });
+
+  //         addArray.push(...solicitudesSubordinadosCoordinadora);
+  //       }
+  //     });
+
+  //     if (soyCoordinadora) {
+  //       addArray.forEach((item) => (item["validador"] = creador));
+  //       solicitudesEmpleadosDirectos.forEach(
+  //         (item) => (item["validador"] = creador),
+  //       );
+  //     }
+
+  //     const resultado = [...solicitudesEmpleadosDirectos, ...addArray];
+
+  //     return { ok: true, data: resultado.length > 0 ? resultado : [] };
+  //   } catch (err) {
+  //     console.log(err);
+  //     return { ok: false, message: err.message };
+  //   }
+  // }
+
+  // @Get("solicitudesSubordinados")
+  // async solicitudesSubordinados(
+  //   @Headers("authorization") authHeader: string,
+  //   @Query() { creador },
+  // ) {
+  //   try {
+  //     console.log(creador);
+
+  //     if (!creador) throw Error("Faltan datos");
+
+  //     const token = this.tokenService.extract(authHeader);
+  //     await this.authInstance.verifyToken(token);
+
+  //     const solicitudesEmpleadosDirectos =
+  //       await this.solicitudVacacionesInstance.getsolicitudesSubordinados(
+  //         creador,
+  //       );
+  //     console.log(solicitudesEmpleadosDirectos);
+
+  //     return { ok: true, data: solicitudesEmpleadosDirectos };
+  //   } catch (err) {
+  //     console.log(err);
+  //     return { ok: false, message: err.message };
+  //   }
+  // }
+
   //Borrar solicitud de vacaciones
   @Post("borrarSolicitud")
   async borrarSolicitud(
     @Headers("authorization") authHeader: string,
-    @Query() { _id }: { _id: string },
+    @Body() { _id }: { _id: string },
   ) {
     try {
       const token = this.tokenService.extract(authHeader);
       await this.authInstance.verifyToken(token);
 
-      console.log(_id);
+      console.log("Borrar solicitud:" + _id);
 
       const respSolicitudes =
         await this.solicitudVacacionesInstance.borrarSolicitud(_id);
@@ -134,6 +288,17 @@ export class SolicitudVacacionesController {
     }
   }
 
+  //Forzar envio de vacaciones al cuadrante
+  @Post("enviarAlCuadrante")
+  async ponerEnCuadrante(
+    @Headers("authorization") authHeader: string,
+    @Body() data,
+  ) {
+    const token = this.tokenService.extract(authHeader);
+    await this.authInstance.verifyToken(token);
+    return this.solicitudVacacionesInstance.ponerEnCuadrante(data);
+  }
+
   //Actualizar estado de la solicitud de Vacaciones
   @Post("setEstadoSolicitud")
   async updateSolicitudVacacionesEstado(
@@ -141,14 +306,10 @@ export class SolicitudVacacionesController {
     @Body() solicitudesVacaciones: SolicitudVacaciones,
   ) {
     try {
-      console.log(solicitudesVacaciones);
+      console.log("Actualizar Solicitud:" + solicitudesVacaciones);
 
-      if (!solicitudesVacaciones.estado) throw Error("Estado no proporcionado");
-
-      if (!solicitudesVacaciones._id) throw Error("ID no proporcionado");
-
-      if (!solicitudesVacaciones._id.toString())
-        throw Error("ID no tiene un formato válido");
+      if (!solicitudesVacaciones.estado || !solicitudesVacaciones._id)
+        throw Error("Faltan datos");
 
       if (
         !(
@@ -169,6 +330,7 @@ export class SolicitudVacacionesController {
           await this.solicitudVacacionesInstance.getSolicitudesById(
             solicitudesVacaciones._id.toString(),
           );
+
         const solicitudTrabajador =
           await this.trabajadorInstance.getTrabajadorBySqlId(
             Number(solicitud.idBeneficiario),

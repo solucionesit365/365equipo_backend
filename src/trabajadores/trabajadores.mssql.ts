@@ -82,8 +82,7 @@ export async function getTrabajadorTokenQR(
 export async function getTrabajadoresByTienda(idTienda: number) {
   const sql = "select * from trabajadores where idTienda = @param0";
   const resTrabajador = await recSoluciones("soluciones", sql, idTienda);
-  if (resTrabajador.recordset.length > 0)
-    return resTrabajador.recordset;
+  if (resTrabajador.recordset.length > 0) return resTrabajador.recordset;
   return null;
 }
 
@@ -179,6 +178,21 @@ export async function esCoordinadora(uid: string) {
   return false;
 }
 
+export async function esCoordinadoraPorId(id: number) {
+  const sql = `
+    SELECT 
+      tr.idTienda,
+      tr.idResponsable,
+      (select idApp from trabajadores where id = tr.idResponsable) as idResponsableApp,
+      (select count(*) from trabajadores where idResponsable = tr.id) as llevaEquipo 
+    from trabajadores tr where id = @param0;
+  `;
+  const resCoordi = await recSoluciones("soluciones", sql, id);
+
+  if (resCoordi.recordset.length > 0) return true;
+  return false;
+}
+
 export async function getSubordinados(uid: string): Promise<
   {
     id: number;
@@ -205,6 +219,36 @@ export async function getSubordinados(uid: string): Promise<
     where idResponsable = (select id from trabajadores where idApp = @param0)
   `;
   const resSubordinados = await recSoluciones("soluciones", sql, uid);
+  if (resSubordinados.recordset.length > 0) return resSubordinados.recordset;
+  return [];
+}
+
+export async function getSubordinadosByIdsql(id: number): Promise<
+  {
+    id: number;
+    idApp: string;
+    nombreApellidos: string;
+    displayName: string;
+    displayfoto: string;
+    idTienda: number;
+    antiguedad: string;
+    inicioContrato: string;
+  }[]
+> {
+  const sql = `
+    select 
+      id, 
+      idApp, 
+      nombreApellidos, 
+      displayName,
+      displayFoto,
+      idTienda, 
+      CONVERT(varchar, antiguedad, 103) as antiguedad, 
+      CONVERT(varchar, inicioContrato, 103) as inicioContrato 
+    from trabajadores 
+    where idResponsable = @param0
+  `;
+  const resSubordinados = await recSoluciones("soluciones", sql, id);
   if (resSubordinados.recordset.length > 0) return resSubordinados.recordset;
   return [];
 }

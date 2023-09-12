@@ -1,6 +1,6 @@
 import { ObjectId } from "mongodb";
 export interface SolicitudVacaciones {
-  _id: ObjectId;
+  _id?: ObjectId;
   idBeneficiario: number;
   nombreApellidos: string;
   fechaInicio: string;

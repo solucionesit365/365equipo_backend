@@ -38,8 +38,26 @@ export class solicitudesVacacionesClass {
     );
   }
 
+  async getsolicitudesSubordinados(creador: number) {
+    return await this.schSolicitudVacaciones.getsolicitudesSubordinados(
+      creador,
+    );
+  }
+
+  //Mostrar Solicitudes de vacaciones por _id
   async getSolicitudesById(_id: string) {
     return await this.schSolicitudVacaciones.getSolicitudesById(_id);
+  }
+
+  //Mostrar Solicitudes de las vacaciones por tienda
+  async getVacacionesByTiendas(nombreTienda: string) {
+    return await this.schSolicitudVacaciones.getVacacionesByTiendas(
+      nombreTienda,
+    );
+  }
+  //Mostrar Solicitudes de las vacaciones por estado
+  async getVacacionesByEstado(estado: string) {
+    return await this.schSolicitudVacaciones.getVacacionesByEstado(estado);
   }
 
   //Borrar solicitud de vacaciones
@@ -81,6 +99,21 @@ export class solicitudesVacacionesClass {
       "Solicitud de Vacaciones",
     );
     return { ok: true };
+  }
+
+  async ponerEnCuadrante(vacaciones) {
+    if (vacaciones) {
+      await this.cuadrantesInstance.agregarAusencia({
+        arrayParciales: [],
+        comentario: "Vacaciones",
+        fechaInicio: moment(vacaciones.fechaInicio, "DD/MM/YYYY").toDate(),
+        fechaFinal: moment(vacaciones.fechaFinal, "DD/MM/YYYY").toDate(),
+        idUsuario: vacaciones.idBeneficiario,
+        nombre: vacaciones.idBeneficiario,
+        tipo: "VACACIONES",
+      });
+      return { ok: true };
+    }
   }
 
   //Actualizar estado de la solicitud de Vacaciones

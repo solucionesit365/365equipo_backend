@@ -51,6 +51,10 @@ export class Trabajador {
     return await schTrabajadores.esCoordinadora(uid);
   }
 
+  async esCoordinadoraPorId(id: number) {
+    return await schTrabajadores.esCoordinadoraPorId(id);
+  }
+
   async getSubordinados(uid: string) {
     return await schTrabajadores.getSubordinados(uid);
   }
@@ -59,6 +63,9 @@ export class Trabajador {
     return await schTrabajadores.getSubordinadosById(id, conFecha);
   }
 
+  async getSubordinadosByIdsql(id: number) {
+    return await schTrabajadores.getSubordinadosByIdsql(id);
+  }
   async descargarTrabajadoresHit() {
     return await schTrabajadores.getTrabajadoresSage();
   }

@@ -47,6 +47,42 @@ export class SolicitudVacacionesBdd {
     return respSolicitudes;
   }
 
+  async getVacacionesByTiendas(tienda: string) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const solicitudVacacionesCollection = db.collection<SolicitudVacaciones>(
+      "solicitudVacaciones",
+    );
+    const respSolicitudes = await solicitudVacacionesCollection
+      .find({ tienda })
+      .toArray();
+
+    return respSolicitudes;
+  }
+
+  async getsolicitudesSubordinados(creador: number) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const solicitudVacacionesCollection = db.collection<SolicitudVacaciones>(
+      "solicitudVacaciones",
+    );
+    const respSolicitudes = await solicitudVacacionesCollection
+      .find({ creador })
+      .toArray();
+
+    return respSolicitudes;
+  }
+
+  async getVacacionesByEstado(estado: string) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const solicitudVacacionesCollection = db.collection<SolicitudVacaciones>(
+      "solicitudVacaciones",
+    );
+    const respSolicitudes = await solicitudVacacionesCollection
+      .find({ estado })
+      .toArray();
+
+    return respSolicitudes;
+  }
+
   async getSolicitudesById(_id: string) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const solicitudVacacionesCollection = db.collection<SolicitudVacaciones>(
@@ -66,8 +102,6 @@ export class SolicitudVacacionesBdd {
     const solicitudVacacionesCollection = db.collection<SolicitudVacaciones>(
       "solicitudVacaciones",
     );
-
-    console.log(_id);
 
     const resDelete = await solicitudVacacionesCollection.deleteOne({
       _id: new ObjectId(_id),
@@ -91,6 +125,7 @@ export class SolicitudVacacionesBdd {
       {
         $set: {
           estado: solicitudesVacaciones.estado,
+          respuestaSolicitud: solicitudesVacaciones.respuestaSolicitud,
         },
       },
     );
