@@ -101,8 +101,6 @@ export class SolicitudVacacionesController {
     @Query() { tienda },
   ) {
     try {
-      console.log(tienda);
-
       const token = this.tokenService.extract(authHeader);
       await this.authInstance.verifyToken(token);
 
@@ -150,8 +148,6 @@ export class SolicitudVacacionesController {
       const token = this.tokenService.extract(authHeader);
       await this.authInstance.verifyToken(token);
 
-      console.log(idBeneficiario);
-
       if (idBeneficiario) {
         return {
           ok: true,
@@ -166,86 +162,74 @@ export class SolicitudVacacionesController {
     }
   }
 
-  // @Get("solicitudesSubordinados")
-  // async solicitudesSubordinados(
-  //   @Headers("authorization") authHeader: string,
-  //   @Query() { creador },
-  // ) {
-  //   try {
-  //     console.log(creador);
+  //Mostrar solicitudes de vacaciones de los subordinados
+  @Get("solicitudesSubordinados")
+  async solicitudesSubordinados(
+    @Headers("authorization") authHeader: string,
+    @Query() { idAppResponsable },
+  ) {
+    try {
+      if (!idAppResponsable) throw Error("Faltan datos");
+      const token = this.tokenService.extract(authHeader);
+      await this.authInstance.verifyToken(token);
 
-  //     if (!creador) throw Error("Faltan datos");
-  //     const token = this.tokenService.extract(authHeader);
-  //     await this.authInstance.verifyToken(token);
+      const solicitudesEmpleadosDirectos =
+        await this.solicitudVacacionesInstance.getsolicitudesSubordinados(
+          idAppResponsable,
+        );
+      const empleadosTipoCoordi =
+        await this.trabajadorInstance.getSubordinadosConTienda(
+          idAppResponsable,
+        );
+      const soyCoordinadora: boolean =
+        await this.trabajadorInstance.esCoordinadora(idAppResponsable);
+      const addArray = [];
 
-  //     const solicitudesEmpleadosDirectos =
-  //       await this.solicitudVacacionesInstance.getsolicitudesSubordinados(
-  //         creador,
-  //       );
-  //     console.log(solicitudesEmpleadosDirectos);
+      if (empleadosTipoCoordi.length > 0) {
+        for (let i = 0; i < empleadosTipoCoordi.length; i++) {
+          if (empleadosTipoCoordi[i].llevaEquipo > 0) {
+            // Caso coordinadora
+            const solicitudesSubordinadosCoordinadora =
+              await this.solicitudVacacionesInstance.getsolicitudesSubordinados(
+                empleadosTipoCoordi[i].idApp,
+              );
 
-  //     const addArray = [];
-  //     const empleadosTipoCoordi =
-  //       await this.trabajadorInstance.getSubordinadosConTienda(creador);
-  //     const soyCoordinadora: boolean =
-  //       await this.trabajadorInstance.esCoordinadoraPorId(creador);
+            if (solicitudesSubordinadosCoordinadora.length > 0) {
+              for (
+                let j = 0;
+                j < solicitudesSubordinadosCoordinadora.length;
+                j++
+              ) {
+                solicitudesSubordinadosCoordinadora[j]["validador"] =
+                  idAppResponsable;
+              }
+              addArray.push(...solicitudesSubordinadosCoordinadora);
+            }
+          }
+        }
+      }
 
-  //     empleadosTipoCoordi.forEach(async (empleado) => {
-  //       if (empleado.llevaEquipo > 0) {
-  //         const solicitudesSubordinadosCoordinadora =
-  //           await this.solicitudVacacionesInstance.getsolicitudesSubordinados(
-  //             empleado.creador,
-  //           );
+      if (soyCoordinadora) {
+        for (let i = 0; i < addArray.length; i++) {
+          addArray[i]["validador"] = idAppResponsable;
+        }
 
-  //         solicitudesSubordinadosCoordinadora.forEach((solicitud) => {
-  //           solicitud["validador"] = creador;
-  //         });
+        for (let i = 0; i < solicitudesEmpleadosDirectos.length; i++) {
+          solicitudesEmpleadosDirectos[i]["validador"] = idAppResponsable;
+        }
+      }
 
-  //         addArray.push(...solicitudesSubordinadosCoordinadora);
-  //       }
-  //     });
-
-  //     if (soyCoordinadora) {
-  //       addArray.forEach((item) => (item["validador"] = creador));
-  //       solicitudesEmpleadosDirectos.forEach(
-  //         (item) => (item["validador"] = creador),
-  //       );
-  //     }
-
-  //     const resultado = [...solicitudesEmpleadosDirectos, ...addArray];
-
-  //     return { ok: true, data: resultado.length > 0 ? resultado : [] };
-  //   } catch (err) {
-  //     console.log(err);
-  //     return { ok: false, message: err.message };
-  //   }
-  // }
-
-  // @Get("solicitudesSubordinados")
-  // async solicitudesSubordinados(
-  //   @Headers("authorization") authHeader: string,
-  //   @Query() { creador },
-  // ) {
-  //   try {
-  //     console.log(creador);
-
-  //     if (!creador) throw Error("Faltan datos");
-
-  //     const token = this.tokenService.extract(authHeader);
-  //     await this.authInstance.verifyToken(token);
-
-  //     const solicitudesEmpleadosDirectos =
-  //       await this.solicitudVacacionesInstance.getsolicitudesSubordinados(
-  //         creador,
-  //       );
-  //     console.log(solicitudesEmpleadosDirectos);
-
-  //     return { ok: true, data: solicitudesEmpleadosDirectos };
-  //   } catch (err) {
-  //     console.log(err);
-  //     return { ok: false, message: err.message };
-  //   }
-  // }
+      if (solicitudesEmpleadosDirectos.length > 0) {
+        solicitudesEmpleadosDirectos.push(...addArray);
+        return { ok: true, data: solicitudesEmpleadosDirectos };
+      } else if (addArray.length > 0) {
+        return { ok: true, data: addArray };
+      } else return { ok: true, data: [] };
+    } catch (err) {
+      console.log(err);
+      return { ok: false, message: err.message };
+    }
+  }
 
   //Borrar solicitud de vacaciones
   @Post("borrarSolicitud")

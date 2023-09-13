@@ -59,13 +59,13 @@ export class SolicitudVacacionesBdd {
     return respSolicitudes;
   }
 
-  async getsolicitudesSubordinados(creador: number) {
+  async getsolicitudesSubordinados(idAppResponsable: string) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const solicitudVacacionesCollection = db.collection<SolicitudVacaciones>(
       "solicitudVacaciones",
     );
     const respSolicitudes = await solicitudVacacionesCollection
-      .find({ creador })
+      .find({ idAppResponsable })
       .toArray();
 
     return respSolicitudes;

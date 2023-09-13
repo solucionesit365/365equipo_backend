@@ -38,9 +38,10 @@ export class solicitudesVacacionesClass {
     );
   }
 
-  async getsolicitudesSubordinados(creador: number) {
+  //Mostrar Solicitudes de las vacaciones de los trabajadores a cargo
+  async getsolicitudesSubordinados(idAppResponsable: string) {
     return await this.schSolicitudVacaciones.getsolicitudesSubordinados(
-      creador,
+      idAppResponsable,
     );
   }
 

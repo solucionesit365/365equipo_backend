@@ -163,6 +163,25 @@ export async function getSubordinadosConTienda(
   return [];
 }
 
+export async function getSubordinadosConTiendaPorId(
+  idResponsable: number,
+): Promise<any[]> {
+  const sql = `
+  SELECT 
+    tr.*, 
+    (select count(*) from trabajadores where idResponsable = tr.id) as llevaEquipo,
+    (select idApp from trabajadores where id = tr.idResponsable) as validador,
+    (select nombre from tiendas where id = tr.idTienda) as nombreTienda
+  FROM trabajadores tr
+  WHERE 
+    tr.idResponsable = @param0 
+    AND tr.idTienda is not null
+  `;
+  const resTrabajadores = await recSoluciones("soluciones", sql, idResponsable);
+  if (resTrabajadores.recordset.length > 0) return resTrabajadores.recordset;
+  return [];
+}
+
 export async function esCoordinadora(uid: string) {
   const sql = `
     SELECT 
