@@ -38,8 +38,7 @@ export class AusenciasController {
       if (
         tipo === "HORAS_JUSTIFICADAS" ||
         tipo === "BAJA" ||
-        tipo === "BAJA MATERNIDAD" ||
-        tipo === "BAJA PATERNIDAD" ||
+        tipo === "PERMISO MATERNIDAD/PATERNIDAD" ||
         (tipo === "DIA_PERSONAL" &&
           typeof idUsuario === "number" &&
           typeof fechaInicio === "string" &&
