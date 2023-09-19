@@ -41,6 +41,7 @@ export class AusenciasDatabase {
       {
         $set: {
           fechaInicio: moment(ausencia.fechaInicio, "DD/MM/YYYY").toDate(),
+          fechaFinal: moment(ausencia.fechaFinal, "DD/MM/YYYY").toDate(),
           tipo: ausencia.tipo,
           comentario: ausencia.comentario,
           arrayParciales: ausencia.arrayParciales,
