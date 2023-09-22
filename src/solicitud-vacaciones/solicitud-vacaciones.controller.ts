@@ -344,4 +344,18 @@ export class SolicitudVacacionesController {
       return { ok: false, message: err.message };
     }
   }
+
+  @Get("sendToHit")
+  // @UseGuards(SchedulerGuard)
+  async pendientesEnvio() {
+    try {
+      return {
+        ok: true,
+        data: await this.solicitudVacacionesInstance.sendToHit(),
+      };
+    } catch (err) {
+      console.log(err);
+      return { ok: false, message: err.message };
+    }
+  }
 }

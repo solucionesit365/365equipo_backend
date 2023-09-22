@@ -134,4 +134,35 @@ export class SolicitudVacacionesBdd {
       return true;
     throw Error("No se ha podido modificar el estado");
   }
+
+  async getSolicitudesParaEnviar(): Promise<
+    {
+      idBeneficiario: number;
+      dias: number;
+      fechaInicio: string;
+      fechaFinal: string;
+      fechaIncorporacion: string;
+      observaciones: string;
+      respuestaSolicitud: string;
+      fechaCreacion: string;
+      estado: string;
+      idSolicitud: number;
+      enviado: boolean;
+    }[]
+  > {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const solicitudVacacionesCollection = db.collection<SolicitudVacaciones>(
+      "solicitudVacaciones",
+    );
+
+    const respSolicitudes = await solicitudVacacionesCollection
+      .find({
+        estado: "APROBADA",
+        enviado: false,
+      })
+      .toArray();
+    console.log(respSolicitudes);
+
+    return [];
+  }
 }
