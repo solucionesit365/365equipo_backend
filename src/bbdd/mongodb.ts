@@ -11,7 +11,7 @@ export class MongoDbService {
       process.env.MONGO_PASS
     }@${
       process.env.NODE_ENV === "development"
-        ? "cluster0.w1mji2j.mongodb.net"
+        ? "test-365equipo.cgnccs9.mongodb.net"
         : "soluciones-365equipo.vbpm2wm.mongodb.net/?retryWrites=true&w=majority"
     }`;
     const client = new MongoClient(uri);

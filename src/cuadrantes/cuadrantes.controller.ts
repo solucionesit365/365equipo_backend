@@ -64,6 +64,7 @@ export class CuadrantesController {
           usuario.id,
           arrayIdEquipo,
           DateTime.fromJSDate(new Date(fecha)),
+          usuario.idTienda,
         );
       }
 

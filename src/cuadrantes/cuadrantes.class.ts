@@ -226,6 +226,7 @@ export class Cuadrantes {
     idTrabajador: number,
     arrayIdSubordinados: number[],
     fechaBusqueda: DateTime,
+    idTienda: number,
   ): Promise<TCuadrante[]> {
     const fechaInicioSemana = fechaBusqueda.startOf("week");
     const fechaFinalSemana = fechaBusqueda.endOf("week");
@@ -241,7 +242,11 @@ export class Cuadrantes {
       fechaFinalSemana,
     );
     const puestosTotales: number[] = [
-      ...new Set([...puestosTrabajoIndividual, ...puestosTrabajo]),
+      ...new Set([
+        ...puestosTrabajoIndividual,
+        ...puestosTrabajo,
+        ...[idTienda],
+      ]),
     ];
 
     for (let i = 0; i < puestosTotales.length; i += 1) {
