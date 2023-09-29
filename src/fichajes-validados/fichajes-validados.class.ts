@@ -5,7 +5,6 @@ import { Trabajador } from "../trabajadores/trabajadores.class";
 import { TrabajadorCompleto } from "../trabajadores/trabajadores.interface";
 import * as moment from "moment";
 import { WithId } from "mongodb";
-import { DateTime } from "luxon";
 
 @Injectable()
 export class FichajesValidados {
@@ -50,26 +49,26 @@ export class FichajesValidados {
     return await this.schFichajesValidados.getSemanasFichajesPagar(semana);
   }
 
-  async getAllFichajesValidados() {
-    return await this.schFichajesValidados.getAllFichajesValidados();
+  async getAllFichajesValidados(fecha:string) {
+    return await this.schFichajesValidados.getAllFichajesValidados(fecha);
   }
 
-  // Cuadrantes 2.0
-  async getParaCuadrante(
-    lunes: DateTime,
-    domingo: DateTime,
-    idTrabajador: number,
-  ) {
+  async getParaCuadrante(year: number, semana: number, idTrabajador: number) {
     return await this.schFichajesValidados.getParaCuadrante(
-      lunes,
-      domingo,
+      year,
+      semana,
       idTrabajador,
     );
   }
 
-  // Cuadrantes 2.0
-  async resumenSemana(fechaBusqueda: Date, idTienda: number) {
-    const lunes = DateTime.fromJSDate(fechaBusqueda).startOf("week");
+  async getTiendaDia(tienda: number, dia: string) {
+    return await this.schFichajesValidados.getTiendaDia(tienda, dia);
+  }
+
+  async resumenSemana(year: number, semana: number, idTienda: number) {
+    const lunes = moment(
+      year + "-W" + (semana < 10 ? "0" + semana : semana) + "-1",
+    );
     const responsable: TrabajadorCompleto =
       await this.trabajadoresInstance.getResponsableTienda(idTienda);
     const subordinados = await this.trabajadoresInstance.getSubordinadosById(
@@ -77,8 +76,8 @@ export class FichajesValidados {
     );
     const arrayValidados =
       await this.schFichajesValidados.getValidadosSemanaResponsable(
-        lunes,
-        lunes.endOf("week"),
+        year,
+        semana,
         responsable.id,
       );
 
@@ -95,15 +94,19 @@ export class FichajesValidados {
     }
 
     for (let i = 0; i < arrayValidados.length; i += 1) {
-      const dayIndex =
-        DateTime.fromJSDate(arrayValidados[i].fechaEntrada).weekday - 1;
+      const dayIndex = this.getNumeroSemana(arrayValidados[i].fecha);
       this.addToSubordinados(subordinados, arrayValidados[i], dayIndex);
     }
 
     return subordinados; // Hacer map para filtrar datos innecesarios.
   }
 
-  // Cuadrantes 2.0
+  getNumeroSemana(stringDate: string) {
+    const date = moment(stringDate, "YYYY-MM-DD");
+    const dayOfWeek = (date.day() + 6) % 7;
+    return dayOfWeek;
+  }
+
   addToSubordinados(
     subordinados: {
       id: number;

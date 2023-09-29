@@ -2,13 +2,13 @@ import { Injectable } from "@nestjs/common";
 import { MongoDbService } from "../bbdd/mongodb";
 import { FichajeValidadoDto } from "./fichajes-validados.interface";
 import { ObjectId } from "mongodb";
-import { DateTime } from "luxon";
 
 @Injectable()
 export class FichajesValidadosDatabase {
   constructor(private readonly mongoDbService: MongoDbService) {}
 
   async insertarFichajeValidado(fichajeValidado: FichajeValidadoDto) {
+    fichajeValidado._id = new ObjectId().toString();
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const cuadrantesCollection =
       db.collection<FichajeValidadoDto>("fichajesValidados");
@@ -75,18 +75,17 @@ export class FichajesValidadosDatabase {
     return await fichajesIdResponsable.find({ semana }).toArray();
   }
 
-  async getAllFichajesValidados() {
+  async getAllFichajesValidados(fecha: string) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const fichajesCollection =
       db.collection<FichajeValidadoDto>("fichajesValidados");
 
-    return await fichajesCollection.find({}).toArray();
+    return await fichajesCollection.find({fecha}).toArray();
   }
 
-  // Cuadrantes 2.0
   async getValidadosSemanaResponsable(
-    fechaInicioBusqueda: DateTime,
-    fechaFinalBusqueda: DateTime,
+    year: number,
+    semana: number,
     idResponsable: number,
   ) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
@@ -95,27 +94,35 @@ export class FichajesValidadosDatabase {
 
     return await fichajesCollection
       .find({
-        fechaEntrada: { $gte: fechaInicioBusqueda.toJSDate() },
-        fechaSalida: { $lte: fechaFinalBusqueda.toJSDate() },
+        year,
+        semana,
         idResponsable,
       })
       .toArray();
   }
 
-  // Cuadrantes 2.0
-  async getParaCuadrante(
-    lunes: DateTime,
-    domingo: DateTime,
-    idTrabajador: number,
-  ) {
+  async getTiendaDia(tienda: number, dia: string) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const fichajesCollection =
       db.collection<FichajeValidadoDto>("fichajesValidados");
 
     return await fichajesCollection
       .find({
-        fechaEntrada: { $gte: lunes.toJSDate() },
-        fechaSalida: { $lte: domingo.toJSDate() },
+        tienda: tienda,
+        fecha: dia,
+      })
+      .toArray();
+  }
+
+  async getParaCuadrante(year: number, semana: number, idTrabajador: number) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const fichajesCollection =
+      db.collection<FichajeValidadoDto>("fichajesValidados");
+
+    return await fichajesCollection
+      .find({
+        year,
+        semana,
         idTrabajador,
       })
       .toArray();

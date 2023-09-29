@@ -6,7 +6,6 @@ import { Cuadrantes } from "../cuadrantes/cuadrantes.class";
 import { SolicitudVacaciones } from "./vacaciones.interface";
 import { EmailClass } from "../email/email.class";
 import { Trabajador } from "../trabajadores/trabajadores.class";
-import { DateTime } from "luxon";
 
 @Injectable()
 export class Vacaciones {
@@ -66,7 +65,6 @@ export class Vacaciones {
     return await schVacaciones.getSolicitudesSubordinados(idApp);
   }
 
-  // Cuadrantes 2.0
   async setEstadoSolicitud(
     estado: string,
     idSolicitud: number,
@@ -81,18 +79,11 @@ export class Vacaciones {
     if (resSeter) {
       if (estado === "APROBADA") {
         const vacaciones = await schVacaciones.getSolicitudById(idSolicitud);
-        await this.cuadrantesInstance.addAusenciaToCuadrantes({
-          completa: true,
-          enviado: false,
+        await this.cuadrantesInstance.agregarAusencia({
+          arrayParciales: [],
           comentario: "Vacaciones",
-          fechaInicio: DateTime.fromFormat(
-            vacaciones.fechaInicio,
-            "dd/MM/yyyy",
-          ).toJSDate(),
-          fechaFinal: DateTime.fromFormat(
-            vacaciones.fechaFinal,
-            "dd/MM/yyyy",
-          ).toJSDate(),
+          fechaInicio: moment(vacaciones.fechaInicio, "DD/MM/YYYY").toDate(),
+          fechaFinal: moment(vacaciones.fechaFinal, "DD/MM/YYYY").toDate(),
           idUsuario: vacaciones.idBeneficiario,
           nombre: vacaciones.idBeneficiario,
           tipo: "VACACIONES",
@@ -220,6 +211,7 @@ export class Vacaciones {
         resultado.recordset[0].InsertedRows
     ) {
       await recSoluciones(
+        "soluciones",
         "UPDATE solicitudVacaciones SET enviado = 1 WHERE idSolicitud = @param0",
         vacaciones.idSolicitud,
       );

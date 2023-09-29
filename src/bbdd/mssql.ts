@@ -24,13 +24,15 @@ export async function recHit(database: string, consultaSQL: string) {
   return result;
 }
 
-export async function recSolucionesClassic(consultaSQL: string) {
+export async function recSolucionesClassic(
+  database: string,
+  consultaSQL: string,
+) {
   const config = {
     user: process.env.MSSQL_USER_SOLUCIONES,
     password: process.env.MSSQL_PASS_SOLUCIONES,
     server: process.env.MSSQL_HOST_SOLUCIONES,
-    database:
-      process.env.NODE_ENV === "development" ? "test_soluciones" : "soluciones",
+    database: database,
     options: {
       encrypt: false,
       trustServerCertificate: true,
@@ -50,13 +52,16 @@ export async function recSolucionesClassic(consultaSQL: string) {
   return result;
 }
 
-export async function recSoluciones(query: string, ...args: any[]) {
+export async function recSoluciones(
+  database: string,
+  query: string,
+  ...args: any[]
+) {
   const config = {
     user: process.env.MSSQL_USER_SOLUCIONES,
     password: process.env.MSSQL_PASS_SOLUCIONES,
     server: process.env.MSSQL_HOST_SOLUCIONES,
-    database:
-      process.env.NODE_ENV === "development" ? "test_soluciones" : "soluciones",
+    database: database,
     options: {
       encrypt: false,
       trustServerCertificate: true,

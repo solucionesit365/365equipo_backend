@@ -34,7 +34,7 @@ import { SolicitudVacaciones } from "./vacaciones.interface";
 //     LEFT JOIN tiendas ti ON tr.idTienda = ti.id
 //     WHERE tr.inicioContrato IS NOT NULL AND tr.finalContrato IS NULL ORDER BY nombreApellidos
 //     `;
-//   const resUsuarios = await recSoluciones(sql);
+//   const resUsuarios = await recSoluciones("soluciones", sql);
 
 //   if (resUsuarios.recordset.length > 0)
 //     return resUsuarios.recordset as TrabajadorDto[];
@@ -69,7 +69,12 @@ export async function getSolicitudesTrabajadorUid(uid: string): Promise<
     estado
   FROM solicitudVacaciones where idBeneficiario = (select id from trabajadores where idApp = @param0) AND year(fechaInicio) = @param1
 `;
-  const resUser = await recSoluciones(sql, uid, new Date().getFullYear());
+  const resUser = await recSoluciones(
+    "soluciones",
+    sql,
+    uid,
+    new Date().getFullYear(),
+  );
 
   if (resUser.recordset.length > 0) return resUser.recordset;
   return [];
@@ -103,7 +108,12 @@ export async function getSolicitudesTrabajadorSqlId(id: number): Promise<
     estado
   FROM solicitudVacaciones where idBeneficiario = @param0 AND year(fechaInicio) = @param1
 `;
-  const resUser = await recSoluciones(sql, id, new Date().getFullYear());
+  const resUser = await recSoluciones(
+    "soluciones",
+    sql,
+    id,
+    new Date().getFullYear(),
+  );
 
   if (resUser.recordset.length > 0) return resUser.recordset;
   return [];
@@ -112,7 +122,7 @@ export async function getSolicitudesTrabajadorSqlId(id: number): Promise<
 export async function getSolicitudById(idSolicitud: number) {
   const sql = "SELECT * FROM solicitudVacaciones WHERE idSolicitud = @param0;";
 
-  const resSoli = await recSoluciones(sql, idSolicitud);
+  const resSoli = await recSoluciones("soluciones", sql, idSolicitud);
 
   return resSoli.recordset[0];
 }
@@ -121,7 +131,7 @@ export async function borrarSolicitud(idSolicitud: number): Promise<boolean> {
   const sql = `
     DELETE FROM solicitudVacaciones WHERE idSolicitud = @param0;
 `;
-  await recSoluciones(sql, idSolicitud);
+  await recSoluciones("soluciones", sql, idSolicitud);
 
   return true;
 }
@@ -164,7 +174,7 @@ export async function getSolicitudes(): Promise<
     (select count(*) from trabajadores where idResponsable = so.idBeneficiario) as llevaEquipo
   FROM solicitudVacaciones so
 `;
-  const resSolicitudes = await recSoluciones(sql);
+  const resSolicitudes = await recSoluciones("soluciones", sql);
 
   if (resSolicitudes.recordset.length > 0) return resSolicitudes.recordset;
   return [];
@@ -199,7 +209,7 @@ export async function getSolicitudesParaEnviar(): Promise<
     so.enviado
   FROM solicitudVacaciones so WHERE so.estado = 'APROBADA' AND (so.enviado <> 1 OR so.enviado IS NULL) ORDER BY idSolicitud;
 `;
-  const resSolicitudes = await recSoluciones(sql);
+  const resSolicitudes = await recSoluciones("soluciones", sql);
 
   if (resSolicitudes.recordset.length > 0) return resSolicitudes.recordset;
   return [];
@@ -251,7 +261,7 @@ export async function getSolicitudesSubordinados(idApp: string): Promise<
     )
     order by so.idBeneficiario, so.fechaInicio
 `;
-  const resSolicitudes = await recSoluciones(sql, idApp);
+  const resSolicitudes = await recSoluciones("soluciones", sql, idApp);
 
   if (resSolicitudes.recordset.length > 0) return resSolicitudes.recordset;
   return [];
@@ -267,11 +277,17 @@ export async function setEstadoSolicitud(
   if (estado === "RECHAZADA") {
     const sql =
       "UPDATE solicitudVacaciones SET estado = @param0, respuestaSolicitud = @param1 WHERE idSolicitud = @param2;";
-    retSetEstado = await recSoluciones(sql, estado, respuesta, idSolicitud);
+    retSetEstado = await recSoluciones(
+      "soluciones",
+      sql,
+      estado,
+      respuesta,
+      idSolicitud,
+    );
   } else {
     const sql =
       "UPDATE solicitudVacaciones SET estado = @param0 WHERE idSolicitud = @param1;";
-    retSetEstado = await recSoluciones(sql, estado, idSolicitud);
+    retSetEstado = await recSoluciones("soluciones", sql, estado, idSolicitud);
   }
 
   if (retSetEstado.rowsAffected[0] > 0) return true;
@@ -302,7 +318,7 @@ export async function nuevaSolicitudVacaciones(solicitud: SolicitudVacaciones) {
     ;
   `;
 
-  await recSolucionesClassic(sql);
+  await recSolucionesClassic("soluciones", sql);
 
   return true;
 }
@@ -326,9 +342,8 @@ export async function getVacacionesByTiendas(idTienda: number) {
  trabajadores.idTienda
 FROM solicitudVacaciones so INNER JOIN trabajadores ON so.idBeneficiario = trabajadores.id where trabajadores.idTienda =@param0`;
 
-  const resVacacionesByTienda = await recSoluciones(sql, idTienda);
-  if (resVacacionesByTienda.recordset.length > 0)
-    return resVacacionesByTienda.recordset;
+  const resVacacionesByTienda = await recSoluciones("soluciones", sql, idTienda);
+  if (resVacacionesByTienda.recordset.length > 0) return resVacacionesByTienda.recordset;
   return [];
 }
 export async function getVacacionesByEstado(estado: string) {
@@ -349,8 +364,9 @@ export async function getVacacionesByEstado(estado: string) {
   (select nombreApellidos from trabajadores where id = (select idResponsable from trabajadores where id = so.idBeneficiario)) as nombreResponsable
 FROM solicitudVacaciones so INNER JOIN trabajadores ON so.idBeneficiario = trabajadores.id where so.estado =@param0`;
 
-  const resVacacionesByEstado = await recSoluciones(sql, estado);
-  if (resVacacionesByEstado.recordset.length > 0)
-    return resVacacionesByEstado.recordset;
+  const resVacacionesByEstado = await recSoluciones("soluciones", sql, estado);
+  if (resVacacionesByEstado.recordset.length > 0) return resVacacionesByEstado.recordset;
   return [];
 }
+
+
