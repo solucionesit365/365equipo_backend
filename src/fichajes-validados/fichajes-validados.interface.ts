@@ -1,21 +1,13 @@
 import { ObjectId } from "mongodb";
 
 export interface FichajeValidadoDto {
-  _id?: string;
+  _id: ObjectId;
   idTrabajador: number;
   idResponsable: number;
   nombre: string;
-  semana: number;
-  fecha: string;
-  cuadrante: {
-    entrada: string;
-    salida: string;
-    idPlan: string;
-  };
-  fichajes: {
-    entrada: string;
-    salida: string;
-  };
+  fechaEntrada: Date;
+  fechaSalida: Date;
+  idPlan: string;
   idFichajes: {
     entrada: string;
     salida: string;

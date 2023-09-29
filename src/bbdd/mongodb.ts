@@ -7,7 +7,13 @@ export class MongoDbService {
   private conexion: Promise<MongoClient>;
 
   constructor(private configService: ConfigService) {
-    const uri = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@365-equipo-new.kfiby.mongodb.net`;
+    const uri = `mongodb+srv://${process.env.MONGO_USER}:${
+      process.env.MONGO_PASS
+    }@${
+      process.env.NODE_ENV === "development"
+        ? "test-365equipo.cgnccs9.mongodb.net"
+        : "soluciones-365equipo.vbpm2wm.mongodb.net/?retryWrites=true&w=majority"
+    }`;
     const client = new MongoClient(uri);
     this.conexion = client.connect();
   }

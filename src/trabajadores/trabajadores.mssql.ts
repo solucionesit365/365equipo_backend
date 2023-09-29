@@ -1,3 +1,4 @@
+import { DateTime } from "luxon";
 import { recHit, recSoluciones, recSolucionesClassic } from "../bbdd/mssql";
 import { TrabajadorCompleto, TrabajadorSql } from "./trabajadores.interface";
 import * as moment from "moment";
@@ -48,7 +49,7 @@ export async function getTrabajadores(todos = false) {
         : ""
     } ORDER BY nombreApellidos
     `;
-  const resUsuarios = await recSoluciones("soluciones", sql);
+  const resUsuarios = await recSoluciones(sql);
 
   if (resUsuarios.recordset.length > 0)
     return resUsuarios.recordset as TrabajadorSql[];
@@ -68,22 +69,9 @@ export async function getTrabajadorTokenQR(
   FROM trabajadores tr
   WHERE tr.id = @param0 AND tr.tokenQR = @param1
   `;
-  const resTrabajador = await recSoluciones(
-    "soluciones",
-    sql,
-    idTrabajador,
-    tokenQR,
-  );
+  const resTrabajador = await recSoluciones(sql, idTrabajador, tokenQR);
   if (resTrabajador.recordset.length > 0)
     return resTrabajador.recordset[0] as TrabajadorSql;
-  return null;
-}
-
-export async function getTrabajadoresByTienda(idTienda: number) {
-  const sql = "select * from trabajadores where idTienda = @param0";
-  const resTrabajador = await recSoluciones("soluciones", sql, idTienda);
-  if (resTrabajador.recordset.length > 0)
-    return resTrabajador.recordset;
   return null;
 }
 
@@ -98,7 +86,7 @@ export async function getTrabajadorByAppId(uid: string) {
   LEFT JOIN tiendas ti ON tr.idTienda = ti.id
   WHERE tr.idApp = @param0 AND tr.inicioContrato IS NOT NULL AND tr.finalContrato IS NULL ORDER BY nombreApellidos
 `;
-  const resUser = await recSoluciones("soluciones", sql, uid);
+  const resUser = await recSoluciones(sql, uid);
 
   if (resUser.recordset.length > 0)
     return resUser.recordset[0] as TrabajadorSql;
@@ -116,7 +104,7 @@ export async function getTrabajadorBySqlId(id: number) {
   LEFT JOIN tiendas ti ON tr.idTienda = ti.id
   WHERE tr.id = @param0 AND tr.inicioContrato IS NOT NULL AND tr.finalContrato IS NULL ORDER BY nombreApellidos
 `;
-  const resUser = await recSoluciones("soluciones", sql, id);
+  const resUser = await recSoluciones(sql, id);
 
   if (resUser.recordset.length > 0)
     return resUser.recordset[0] as TrabajadorSql;
@@ -134,7 +122,7 @@ export async function getTrabajadorByDni(dni: string) {
   WHERE tr.dni = @param0 AND tr.inicioContrato IS NOT NULL AND tr.finalContrato IS NULL 
   ORDER BY nombreApellidos
 `;
-  const resUser = await recSoluciones("soluciones", sql, dni);
+  const resUser = await recSoluciones(sql, dni);
 
   if (resUser.recordset.length > 0)
     return resUser.recordset[0] as TrabajadorSql;
@@ -155,11 +143,7 @@ export async function getSubordinadosConTienda(
     tr.idResponsable = (select id from trabajadores where idApp = @param0) 
     AND tr.idTienda is not null
     `;
-  const resTrabajadores = await recSoluciones(
-    "soluciones",
-    sql,
-    idAppResponsable,
-  );
+  const resTrabajadores = await recSoluciones(sql, idAppResponsable);
   if (resTrabajadores.recordset.length > 0) return resTrabajadores.recordset;
   return [];
 }
@@ -173,7 +157,7 @@ export async function esCoordinadora(uid: string) {
       (select count(*) from trabajadores where idResponsable = tr.id) as llevaEquipo 
     from trabajadores tr where idApp = @param0;
   `;
-  const resCoordi = await recSoluciones("soluciones", sql, uid);
+  const resCoordi = await recSoluciones(sql, uid);
 
   if (resCoordi.recordset.length > 0) return true;
   return false;
@@ -189,6 +173,7 @@ export async function getSubordinados(uid: string): Promise<
     idTienda: number;
     antiguedad: string;
     inicioContrato: string;
+
   }[]
 > {
   const sql = `
@@ -204,7 +189,7 @@ export async function getSubordinados(uid: string): Promise<
     from trabajadores 
     where idResponsable = (select id from trabajadores where idApp = @param0)
   `;
-  const resSubordinados = await recSoluciones("soluciones", sql, uid);
+  const resSubordinados = await recSoluciones(sql, uid);
   if (resSubordinados.recordset.length > 0) return resSubordinados.recordset;
   return [];
 }
@@ -232,14 +217,14 @@ export async function getSubordinados(uid: string): Promise<
 //     from trabajadores tr
 //     where idResponsable = @param0
 //   `;
-//   const resSubordinados = await recSoluciones("soluciones", sql, id);
+//   const resSubordinados = await recSoluciones(sql, id);
 //   if (resSubordinados.recordset.length > 0) return resSubordinados.recordset;
 //   return [];
 // }
 
 export async function getSubordinadosById(
   id: number,
-  conFecha?: moment.Moment,
+  conFecha?: DateTime,
 ): Promise<
   {
     id: number;
@@ -269,16 +254,15 @@ export async function getSubordinadosById(
   sql += `) as horasContrato from trabajadores tr where idResponsable = @param0`;
 
   const resSubordinados = await recSoluciones(
-    "soluciones",
     sql,
     id,
-    conFecha ? conFecha.format("YYYY-MM-DD HH:mm:ss") : undefined,
+    conFecha ? conFecha.toSQL({ includeOffset: false }) : undefined,
   );
   if (resSubordinados.recordset.length > 0) return resSubordinados.recordset;
   return [];
 }
 
-export async function getHorasContrato(idSql: number, conFecha: moment.Moment) {
+export async function getHorasContrato(idSql: number, conFecha: DateTime) {
   const sql = `
     SELECT top 1 horasContrato*40/100 as horasContrato
     FROM historicoContratos 
@@ -289,10 +273,9 @@ export async function getHorasContrato(idSql: number, conFecha: moment.Moment) {
   `;
 
   const resSubordinados = await recSoluciones(
-    "soluciones",
     sql,
     idSql,
-    conFecha ? conFecha.format("YYYY-MM-DD HH:mm:ss") : undefined,
+    conFecha ? conFecha.toSQL({includeOffset: false}) : undefined,
   );
 
   return resSubordinados.recordset[0]?.horasContrato;
@@ -376,7 +359,7 @@ export async function getTrabajadoresSage(): Promise<
 
 export async function setIdApp(idSql: number, uid: string) {
   const sql = "UPDATE trabajadores SET idApp = @param0 WHERE id = @param1";
-  await recSoluciones("soluciones", sql, uid, idSql);
+  await recSoluciones(sql, uid, idSql);
 }
 
 function convertOrNULL(value) {
@@ -401,16 +384,12 @@ function isValidUsuario(usuario) {
   );
 }
 
-async function executeBatch(database: string, batch, queryBuilder) {
+async function executeBatch(batch, queryBuilder) {
   const query = batch.map(queryBuilder).join(";");
-  await recSolucionesClassic(database, query);
+  await recSolucionesClassic(query);
 }
 
-export async function actualizarUsuarios(
-  database: string,
-  usuariosNuevos,
-  modificarEnApp,
-) {
+export async function actualizarUsuarios(usuariosNuevos, modificarEnApp) {
   try {
     const usuariosNoActualizadosNuevos = [];
     const usuariosNoActualizadosApp = [];
@@ -472,12 +451,12 @@ export async function actualizarUsuarios(
 
     for (let i = 0; i < usuariosNuevosValidos.length; i += batchSize) {
       const batch = usuariosNuevosValidos.slice(i, i + batchSize);
-      promises.push(executeBatch(database, batch, insertQueryBuilder));
+      promises.push(executeBatch(batch, insertQueryBuilder));
     }
 
     for (let i = 0; i < modificarEnAppValidos.length; i += batchSize) {
       const batch = modificarEnAppValidos.slice(i, i + batchSize);
-      promises.push(executeBatch(database, batch, updateQueryBuilder));
+      promises.push(executeBatch(batch, updateQueryBuilder));
     }
 
     await Promise.all(promises);
@@ -499,7 +478,7 @@ export async function eliminarUsuarios(arrayUsuarios) {
       sql += `DELETE FROM trabajadores WHERE id = ${arrayUsuarios[i].id};`;
   }
 
-  await recSolucionesClassic("soluciones", sql);
+  await recSolucionesClassic(sql);
 }
 
 export async function getResponsableTienda(idTienda: number) {
@@ -507,7 +486,7 @@ export async function getResponsableTienda(idTienda: number) {
     SELECT top 1 tr1.* FROM trabajadores tr1 WHERE tr1.idTienda = @param0 AND (SELECT count(*) FROM trabajadores tr2 WHERE tr1.id = tr2.idResponsable) > 0
   `;
 
-  const resResponsable = await recSoluciones("soluciones", sql, idTienda);
+  const resResponsable = await recSoluciones(sql, idTienda);
 
   if (resResponsable.recordset.length > 0) return resResponsable.recordset[0];
   return null;
@@ -599,7 +578,7 @@ export async function guardarCambiosForm(
     WHERE id = ${trabajador.id}
   `;
 
-  await recSolucionesClassic("soluciones", sql);
+  await recSolucionesClassic(sql);
   return true;
 }
 
@@ -614,11 +593,7 @@ export async function getNivelMenosUno(idSql: number) {
           SELECT 'Sin responsable' as resultado
       END
   `;
-  const resSuResponsable = await recSoluciones(
-    "soluciones",
-    sqlSuResponsable,
-    idSql,
-  );
+  const resSuResponsable = await recSoluciones(sqlSuResponsable, idSql);
 
   if (
     resSuResponsable.recordset?.length > 0 &&
@@ -634,7 +609,7 @@ export async function getNivelUno(idSql: number) {
     LEFT JOIN tiendas ti ON tr.idTienda = ti.id
     WHERE tr.idResponsable = @param0
   `;
-  const resNivelUno = await recSoluciones("soluciones", sql, idSql);
+  const resNivelUno = await recSoluciones(sql, idSql);
 
   if (resNivelUno.recordset?.length > 0) return resNivelUno.recordset;
   return null;
@@ -647,7 +622,7 @@ export async function getNivelCero(idSql: number) {
     WHERE tr.id = @param0
   `;
 
-  const resNivelCero = await recSoluciones("soluciones", sql, idSql);
+  const resNivelCero = await recSoluciones(sql, idSql);
 
   if (resNivelCero.recordset?.length > 0) return resNivelCero.recordset[0];
   return null;
@@ -656,7 +631,7 @@ export async function getNivelCero(idSql: number) {
 export async function borrarTrabajador(idSql: number) {
   const sql = "DELETE FROM trabajadores WHERE id = @param0";
 
-  await recSoluciones("soluciones", sql, idSql);
+  await recSoluciones(sql, idSql);
 
   return true;
 }
@@ -664,7 +639,7 @@ export async function borrarTrabajador(idSql: number) {
 export async function getCoordinadoras() {
   const sql = `select * from trabajadores where coordinadora = 1 AND idTienda IS NOT NULL`;
 
-  const recCoordi = await recSoluciones("soluciones", sql);
+  const recCoordi = await recSoluciones(sql);
   console.log(recCoordi);
 
   return recCoordi.recordset;
@@ -718,7 +693,7 @@ export async function copiarHistoriaContratosHitSoluciones() {
   const batchSize = 1000;
   let batchStart = 0;
 
-  await recSoluciones("soluciones", "DELETE FROM historicoContratos");
+  await recSoluciones("DELETE FROM historicoContratos");
 
   while (batchStart < arrayContratos.length) {
     // Extrae un lote de filas
@@ -741,7 +716,7 @@ export async function copiarHistoriaContratosHitSoluciones() {
     insertQuery += rows.join(", ");
 
     try {
-      await recSolucionesClassic("soluciones", insertQuery);
+      await recSolucionesClassic(insertQuery);
     } catch (error) {
       console.log(`Failed to insert rows: ${error}`);
     }
@@ -755,7 +730,7 @@ export async function copiarHistoriaContratosHitSoluciones() {
 export async function getHistoricoContratos(dni: string) {
   const sql = `select * from historicoContratos where dni = @param0`;
 
-  const resUser = await recSoluciones("soluciones", sql, dni);
+  const resUser = await recSoluciones(sql, dni);
 
   if (resUser.recordset.length > 0) return resUser.recordset;
   return null;
@@ -763,7 +738,7 @@ export async function getHistoricoContratos(dni: string) {
 
 export async function uploadFoto(displayFoto: string, uid: string) {
   const sql = `update trabajadores set displayFoto=@param0 where idApp=@param1`;
-  const resUser = await recSoluciones("soluciones", sql, displayFoto, uid);
+  const resUser = await recSoluciones(sql, displayFoto, uid);
   if (resUser.recordset) return resUser.recordset;
   return null;
 }

@@ -102,7 +102,6 @@ export class FichajesValidadosController {
             mensaje: `Se ha solicitado ${FichajesValidados.horasPagar.total}h a pagar`,
             leido: false,
             creador: "SISTEMA",
-            url: "",
           });
         }
         if (FichajesValidados.horasPagar.estadoValidado != "PENDIENTE") {
@@ -113,7 +112,6 @@ export class FichajesValidadosController {
               mensaje: `${FichajesValidados.horasPagar.estadoValidado} ${FichajesValidados.horasPagar.total}h `,
               leido: false,
               creador: "SISTEMA",
-              url: "",
             });
           }
         }
@@ -248,18 +246,13 @@ export class FichajesValidadosController {
   }
 
   @Get("getAllFichajesValidados")
-  async getAllFichajes(
-    @Query()
-    { fecha }: { fecha: string },
-    @Headers("authorization") authHeader: string,
-  ) {
+  async getAllFichajes(@Headers("authorization") authHeader: string) {
     try {
       const token = this.tokenService.extract(authHeader);
       await this.authInstance.verifyToken(token);
-      console.log(fecha);
 
       const respAllFichajes =
-        await this.fichajesValidadosInstance.getAllFichajesValidados(fecha);
+        await this.fichajesValidadosInstance.getAllFichajesValidados();
 
       if (respAllFichajes.length > 0) {
         return {
@@ -277,57 +270,20 @@ export class FichajesValidadosController {
     }
   }
 
-  @Get("getTiendaDia")
-  async getTiendaDia(
-    @Headers("authorization") authHeader: string,
-    @Query()
-    { tienda, dia }: { tienda: number; dia: string },
-  ) {
-    try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
-      console.log(tienda + " - " + dia);
-
-      if (tienda && dia) {
-        const respFichajesV = await this.fichajesValidadosInstance.getTiendaDia(
-          Number(tienda),
-          dia,
-        );
-        if (respFichajesV.length > 0) {
-          return {
-            ok: true,
-            data: respFichajesV,
-          };
-        } else {
-          return {
-            ok: false,
-            data: [],
-          };
-        }
-      } else throw Error("Faltan datos");
-    } catch (error) {
-      return { ok: false, message: error.message };
-    }
-  }
-
+  // Cuadrantes 2.0
   @Get("getResumen")
   @UseGuards(AuthGuard)
-  async getResumen(
-    @Headers("authorization") authHeader: string,
-    @Query() params,
-  ) {
+  async getResumen(@Query() params) {
     try {
-      // const token = this.tokenService.extract(authHeader);
-      // await this.authInstance.verifyToken(token);
-
-      if (!params.year || !params.semana || !params.idTienda)
+      if (!params.fechaBusqueda || !params.idTienda)
         throw Error("Faltan parámetros");
+
+      const fechaBusqueda = new Date(params.fechaBusqueda);
 
       return {
         ok: true,
         data: await this.fichajesValidadosInstance.resumenSemana(
-          Number(params.year),
-          Number(params.semana),
+          fechaBusqueda,
           Number(params.idTienda),
         ),
       };

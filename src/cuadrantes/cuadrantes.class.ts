@@ -1,17 +1,16 @@
 import { Injectable } from "@nestjs/common";
 import * as moment from "moment";
 import { CuadrantesDatabase } from "./cuadrantes.mongodb";
-import { ObjectId } from "mongodb";
-import { TCuadrante } from "./cuadrantes.interface";
+import { ObjectId, WithId } from "mongodb";
+import { TCuadrante, TRequestCuadrante } from "./cuadrantes.interface";
 import { Tienda } from "../tiendas/tiendas.class";
 import { FacTenaMssql } from "../bbdd/mssql.class";
-import {
-  AusenciaInterface,
-  TiposAusencia,
-} from "../ausencias/ausencias.interface";
+import { AusenciaInterface } from "../ausencias/ausencias.interface";
 import { Trabajador } from "../trabajadores/trabajadores.class";
-import { TrabajadorSql } from "../trabajadores/trabajadores.interface";
+
 import { FichajesValidados } from "../fichajes-validados/fichajes-validados.class";
+import { DateTime } from "luxon";
+import { TrabajadorCompleto } from "../trabajadores/trabajadores.interface";
 
 moment.locale("custom", {
   week: {
@@ -29,49 +28,114 @@ export class Cuadrantes {
     private readonly fichajesValidadosInstance: FichajesValidados,
   ) {}
 
+  // Cuadrante 2.0
   async getCuadrantesIndividual(
-    idTienda: number,
     idTrabajador: number,
-    semana: number,
-    year: number,
+    fechaInicioBusqueda: DateTime,
+    fechaFinalBusqueda: DateTime,
   ) {
-    return await this.schCuadrantes.getCuadrantesIndividual(
-      idTienda,
+    const arrayCuadrantesTrabajador =
+      await this.schCuadrantes.getCuadrantesIndividual(
+        idTrabajador,
+        fechaInicioBusqueda,
+        fechaFinalBusqueda,
+      );
+
+    const nombreTrabajador = (
+      await this.trabajadoresInstance.getTrabajadorBySqlId(idTrabajador)
+    ).nombreApellidos;
+
+    const resultado = await this.addEmptyDays(
+      arrayCuadrantesTrabajador,
       idTrabajador,
-      semana,
-      year,
+      nombreTrabajador,
+      fechaInicioBusqueda,
+      fechaFinalBusqueda,
     );
+    return resultado;
   }
 
+  // Cuadrantes 2.0 INCOMPLETO!!!
+  async borrarTurno(idTurno: string) {
+    // FALTA AGREGAR UN TRIGGER PARA MODIFICARLO EN HIT TAMBIÉN !!!
+    return await this.schCuadrantes.borrarTurno(idTurno);
+  }
+
+  private async addEmptyDays(
+    arrayCuadrantes: WithId<TCuadrante>[],
+    idTrabajador: number,
+    nombreTrabajador: string,
+    inicioSemana: DateTime,
+    finalSemana: DateTime,
+  ) {
+    let diaActual = inicioSemana;
+    const diasCompletos: WithId<TCuadrante>[] = [];
+
+    const horasContrato = await this.trabajadoresInstance.getHorasContratoById(
+      idTrabajador,
+      inicioSemana,
+    );
+
+    while (diaActual <= finalSemana) {
+      // Cuenta cuántas veces el día actual aparece en arrayCuadrantes
+      const vecesDia = arrayCuadrantes.filter((cuadrante) =>
+        DateTime.fromJSDate(cuadrante.inicio).hasSame(diaActual, "day"),
+      ).length;
+
+      if (vecesDia === 0) {
+        // Si el día no está en arrayCuadrantes, lo añade con inicio y final a las 00:00
+        diasCompletos.push({
+          _id: new ObjectId(),
+          enviado: false,
+          historialPlanes: [],
+          horasContrato: horasContrato,
+          idPlan: new ObjectId().toJSON(),
+          idTrabajador: idTrabajador,
+          nombre: nombreTrabajador,
+          totalHoras: 0,
+          inicio: diaActual.toJSDate(),
+          final: diaActual.toJSDate(),
+          idTienda: null,
+          ausencia: null,
+          bolsaHorasInicial: null, // OJO, MIRAR ESTO 3.0
+        });
+      } else {
+        // Si el día está en arrayCuadrantes, añade todos los cuadrantes de ese día
+        const cuadrantesDia = arrayCuadrantes.filter((cuadrante) =>
+          DateTime.fromJSDate(cuadrante.inicio).hasSame(diaActual, "day"),
+        );
+        diasCompletos.push(...cuadrantesDia);
+      }
+
+      diaActual = diaActual.plus({ days: 1 });
+    }
+
+    return diasCompletos;
+  }
+
+  // Cuadrantes 2.0
   async getBolsaHorasById(
     idSql: number,
-    year: number,
-    semana: number,
+    fecha: DateTime,
     horasContrato: number,
   ): Promise<number> {
     const { horasCuadranteTotal, horasMasMenos } = await this.getBolsaInicial(
       idSql,
-      year,
-      semana,
+      fecha,
     );
 
     return horasContrato - (horasCuadranteTotal + horasMasMenos);
   }
 
-  async getBolsaInicial(idTrabajador: number, year: number, semana: number) {
-    // Pasar el número de la semana correcta, esto se calcula con la semana anterior, ojo
-    // con la primera semana del año.
-
-    const lunes = moment().year(year).week(semana).day(1).startOf("day");
-    lunes.diff(7, "days");
-
-    const semanaBuscar = lunes.isoWeek();
-    const yearBuscar = lunes.year();
+  // Cuadrantes 2.0
+  async getBolsaInicial(idTrabajador: number, lunesActual: DateTime) {
+    const lunesAnterior = lunesActual.minus({ days: 7 }).startOf("week");
+    const domingoAnterior = lunesAnterior.minus({ days: 1 });
 
     const fichajesValidados =
       await this.fichajesValidadosInstance.getParaCuadrante(
-        yearBuscar,
-        semanaBuscar,
+        lunesAnterior,
+        domingoAnterior,
         idTrabajador,
       );
 
@@ -92,17 +156,140 @@ export class Cuadrantes {
     };
   }
 
-  async getCuadrantes(
+  async recuentoTiendasIndividual(
+    idTrabajador: number,
+    inicioSemana: DateTime,
+    finalSemana: DateTime,
+  ): Promise<number[]> {
+    const cuadrantesTrabajador =
+      await this.schCuadrantes.getCuadrantesIndividual(
+        idTrabajador,
+        inicioSemana,
+        finalSemana,
+      );
+    const tiendasSet = new Set<number>();
+
+    for (const cuadrante of cuadrantesTrabajador) {
+      tiendasSet.add(cuadrante.idTienda);
+    }
+
+    return [...tiendasSet];
+  }
+
+  async recuentoTiendasSubordinados(
+    arrayTrabajadores: number[],
+    inicioSemana: DateTime,
+    finalSemana: DateTime,
+  ): Promise<number[]> {
+    const tiendasSet = new Set<number>();
+
+    for (const idTrabajador of arrayTrabajadores) {
+      const cuadrantesTrabajador =
+        await this.schCuadrantes.getCuadrantesIndividual(
+          idTrabajador,
+          inicioSemana,
+          finalSemana,
+        );
+
+      for (const cuadrante of cuadrantesTrabajador) {
+        tiendasSet.add(cuadrante.idTienda);
+      }
+    }
+
+    return [...tiendasSet];
+  }
+
+  async getCuadranteDependienta(idTrabajador: number, fechaBusqueda: DateTime) {
+    const fechaInicioSemana = fechaBusqueda.startOf("week");
+    const fechaFinalSemana = fechaBusqueda.endOf("week");
+    const puestosTrabajo = await this.recuentoTiendasIndividual(
+      idTrabajador,
+      fechaInicioSemana,
+      fechaFinalSemana,
+    );
+    const cuadrantes: TCuadrante[] = [];
+
+    for (let i = 0; i < puestosTrabajo.length; i += 1) {
+      cuadrantes.push(
+        ...(await this.schCuadrantes.getCuadrantes(
+          puestosTrabajo[i],
+          fechaInicioSemana,
+          fechaFinalSemana,
+        )),
+      );
+    }
+
+    return cuadrantes;
+  }
+
+  async getCuadranteCoordinadora(
+    idTrabajador: number,
+    arrayIdSubordinados: number[],
+    fechaBusqueda: DateTime,
     idTienda: number,
-    semana: number,
-    year: number,
+  ): Promise<TCuadrante[]> {
+    const fechaInicioSemana = fechaBusqueda.startOf("week");
+    const fechaFinalSemana = fechaBusqueda.endOf("week");
+    const puestosTrabajo = await this.recuentoTiendasSubordinados(
+      arrayIdSubordinados,
+      fechaInicioSemana,
+      fechaFinalSemana,
+    );
+    const cuadrantes: TCuadrante[] = [];
+    const puestosTrabajoIndividual = await this.recuentoTiendasIndividual(
+      idTrabajador,
+      fechaInicioSemana,
+      fechaFinalSemana,
+    );
+    const puestosTotales: number[] = [
+      ...new Set([
+        ...puestosTrabajoIndividual,
+        ...puestosTrabajo,
+        ...[idTienda],
+      ]),
+    ];
+
+    for (let i = 0; i < puestosTotales.length; i += 1) {
+      cuadrantes.push(
+        ...(await this.schCuadrantes.getCuadrantes(
+          puestosTotales[i],
+          fechaInicioSemana,
+          fechaFinalSemana,
+        )),
+      );
+    }
+
+    return cuadrantes;
+  }
+
+  async getCuadranteSupervisora(
+    idTienda: number,
+    fechaBusqueda: DateTime,
+  ): Promise<TCuadrante[]> {
+    const fechaInicioSemana = fechaBusqueda.startOf("week");
+    const fechaFinalSemana = fechaBusqueda.endOf("week");
+    return await this.schCuadrantes.getCuadrantes(
+      idTienda,
+      fechaInicioSemana,
+      fechaFinalSemana,
+    );
+  }
+
+  // Vieja, después borrarla
+  async getCuadrantesOld(
+    idTienda: number,
+    fechaBusqueda: DateTime,
+    role: "DEPENDIENTA" | "COORDINADORA" | "SUPERVISORA",
     idSql?: number,
   ) {
+    const fechaInicioSemana = fechaBusqueda.startOf("week");
+    const fechaFinalSemana = fechaBusqueda.endOf("week");
+
     const responsableTienda =
       await this.trabajadoresInstance.getResponsableTienda(idTienda);
     const equipoCompleto = await this.trabajadoresInstance.getSubordinadosById(
       responsableTienda.id,
-      moment().year(year).week(semana).day(1).startOf("day"),
+      fechaInicioSemana,
     );
 
     if (idSql) {
@@ -111,7 +298,7 @@ export class Cuadrantes {
       const horasContratoCurrentUser =
         await this.trabajadoresInstance.getHorasContratoById(
           idSql,
-          moment().year(year).week(semana).day(1).startOf("day"),
+          fechaInicioSemana,
         );
       usuarioActual.horasContrato = horasContratoCurrentUser;
       equipoCompleto.push(usuarioActual);
@@ -119,8 +306,8 @@ export class Cuadrantes {
 
     const cuadrantes: TCuadrante[] = await this.schCuadrantes.getCuadrantes(
       idTienda,
-      semana,
-      year,
+      fechaInicioSemana,
+      fechaFinalSemana,
     );
 
     const cuadrantesVacios: TCuadrante[] = [];
@@ -138,30 +325,35 @@ export class Cuadrantes {
 
       if (!hayUno) {
         const nuevoCuadrante: TCuadrante = {
-          _id: new ObjectId().toString(),
+          _id: new ObjectId(),
           idTrabajador: equipoCompleto[i].id,
           nombre: equipoCompleto[i].nombreApellidos,
           idTienda: idTienda,
-          semana: semana,
-          year: new Date().getFullYear(),
-          arraySemanalHoras: [null, null, null, null, null, null, null],
           totalHoras: 0,
           enviado: false,
           historialPlanes: [],
           horasContrato: equipoCompleto[i].horasContrato,
+          idPlan: null,
+          inicio: undefined,
+          final: undefined,
+          ausencia: null,
           bolsaHorasInicial: 0,
         };
 
         cuadrantesVacios.push(nuevoCuadrante);
       }
     }
-
     cuadrantes.push(...cuadrantesVacios);
+
+    // Cuadrantes multitienda:
+    // Falta añadir un tercer push, para los trabajadores que vienen de otro responsable,
+    // pero que van a trabajar a esta tienda. Se deben mostrar todos los que vengan a trabajar
+    // a la tienda aunque no sean subordinados de la tienda destino
+
     for (let i = 0; i < cuadrantes.length; i += 1) {
       cuadrantes[i]["bolsaHorasInicial"] = await this.getBolsaHorasById(
         cuadrantes[i].idTrabajador,
-        cuadrantes[i].year,
-        cuadrantes[i].semana,
+        DateTime.fromJSDate(cuadrantes[i].inicio),
         cuadrantes[i].horasContrato,
       );
 
@@ -170,75 +362,77 @@ export class Cuadrantes {
           await this.trabajadoresInstance.getTrabajadorBySqlId(
             cuadrantes[i].idTrabajador,
           );
-        if (trabajadorCuadrante) {
-          cuadrantes[i].horasContrato = trabajadorCuadrante.horasContrato;
-        }
+        cuadrantes[i].horasContrato = trabajadorCuadrante.horasContrato;
       }
     }
 
     return cuadrantes;
   }
 
+  // Cuadrantes 2.0
   async getTodo() {
     return await this.schCuadrantes.getTodo();
   }
-  async getTiendas1Semana(semana: number, year: number) {
-    return await this.schCuadrantes.getTiendas1Semana(semana, year);
+
+  // Cuadrantes 2.0
+  async getTiendas1Semana(fecha: DateTime) {
+    const fechaInicio = fecha.startOf("week");
+    const fechaFinal = fecha.endOf("week");
+
+    return await this.schCuadrantes.getTiendas1Semana(fechaInicio, fechaFinal);
   }
 
+  // Cuadrantes 2.0
   async getSemanas1Tienda(idTienda: number) {
     return await this.schCuadrantes.getSemanas1Tienda(idTienda);
   }
 
+  // Cuadrantes 2.0
   private async getPendientesEnvio() {
     return await this.schCuadrantes.getPendientesEnvio();
   }
-  async getCuadranteSemanaTrabajador(idTrabajador: number, semana: number) {
-    return await this.schCuadrantes.getCuadranteSemanaTrabajador(
+
+  // Cuadrantes 2.0
+  async getCuadranteSemanaTrabajador(idTrabajador: number, fecha: DateTime) {
+    const fechaInicio = fecha.startOf("week");
+    const fechaFinal = fecha.endOf("week");
+
+    return await this.schCuadrantes.getCuadrantesIndividual(
       idTrabajador,
-      semana,
+      fechaInicio,
+      fechaFinal,
     );
   }
+
+  // Cuadrantes 2.0 (faltaría optimizar la velocidad de las consultas batch)
   public async sincronizarConHit() {
     const cuadrantes = await this.getPendientesEnvio();
     const tiendas = await this.tiendasInstance.getTiendas();
 
     // Crear una función asíncrona para manejar la sincronización de cada cuadrante
-    const sincronizarCuadrante = async (cuadrante) => {
+    const sincronizarCuadrante = async (cuadrante: TCuadrante) => {
       let query = "DECLARE @idTurno VARCHAR(255) = NULL";
       let subQuery = "";
 
       const sqlBorrar = this.schCuadrantes.borrarHistorial(cuadrante);
       const nombreTablaPlanificacion = this.schCuadrantes.nombreTablaSqlHit(
-        cuadrante.semana,
+        cuadrante.inicio,
       );
 
-      for (let j = 0; j < cuadrante.arraySemanalHoras.length; j += 1) {
-        if (
-          cuadrante.arraySemanalHoras[j] &&
-          !cuadrante.arraySemanalHoras[j].ausencia
-        ) {
-          const entrada = moment(
-            cuadrante.arraySemanalHoras[j].horaEntrada,
-            "HH:mm",
-          );
-          const salida = moment(
-            cuadrante.arraySemanalHoras[j].horaSalida,
-            "HH:mm",
-          );
-          const tipoTurno = entrada.format("A") === "AM" ? "M" : "T";
+      if (cuadrante && !cuadrante.ausencia) {
+        const entrada = DateTime.fromJSDate(cuadrante.inicio);
+        const salida = DateTime.fromJSDate(cuadrante.final);
+        const tipoTurno = entrada.hour < 12 ? "M" : "T";
 
-          subQuery += `
+        subQuery += `
             SELECT @idTurno = NULL;
-            SELECT TOP 1 @idTurno = idTurno from cdpTurnos WHERE horaInicio = '${
-              cuadrante.arraySemanalHoras[j].horaEntrada
-            }' AND horaFin = '${cuadrante.arraySemanalHoras[j].horaSalida}';
+            SELECT TOP 1 @idTurno = idTurno from cdpTurnos WHERE horaInicio = '${entrada.toISO()}' AND horaFin = '${salida.toISO()}';
   
             IF @idTurno IS NOT NULL
               BEGIN
                 DELETE FROM ${nombreTablaPlanificacion} WHERE idPlan = '${
-            cuadrante.arraySemanalHoras[j].idPlan
-          }';
+          cuadrante.idPlan
+        }';
                 INSERT INTO ${nombreTablaPlanificacion} (
                   idPlan, 
                   fecha, 
@@ -250,11 +444,8 @@ export class Cuadrantes {
                   activo
                 ) 
                 VALUES (
-                  '${cuadrante.arraySemanalHoras[j].idPlan}', 
-                  CONVERT(datetime, '${moment()
-                    .week(cuadrante.semana)
-                    .weekday(j)
-                    .format("DD/MM/YYYY")}', 103),
+                  '${cuadrante.idPlan}', 
+                  '${entrada.toISO()}',
                   ${this.tiendasInstance.convertirTiendaToExterno(
                     cuadrante.idTienda,
                     tiendas,
@@ -278,16 +469,18 @@ export class Cuadrantes {
                   tipoEmpleado
                 ) 
                 VALUES (
-                  'De ${entrada.format("HH:mm")} a ${salida.format("HH:mm")}', 
-                  '${entrada.format("HH:mm")}', 
-                  '${salida.format("HH:mm")}', 
+                  'De ${entrada.toFormat("HH:mm")} a ${salida.toFormat(
+          "HH:mm",
+        )}', 
+                  '${entrada.toFormat("HH:mm")}', 
+                  '${salida.toFormat("HH:mm")}', 
                   @idTurno, 
                   '#DDDDDD', 
                   'RESPONSABLE/DEPENDENTA
                   ');
                   DELETE FROM ${nombreTablaPlanificacion} WHERE idPlan = '${
-            cuadrante.arraySemanalHoras[j].idPlan
-          }';
+          cuadrante.idPlan
+        }';
                   INSERT INTO ${nombreTablaPlanificacion} (
                     idPlan, 
                     fecha, 
@@ -299,11 +492,8 @@ export class Cuadrantes {
                     activo
                   ) 
                   VALUES (
-                    '${cuadrante.arraySemanalHoras[j].idPlan}', 
-                    CONVERT(datetime, '${moment()
-                      .week(cuadrante.semana)
-                      .weekday(j)
-                      .format("DD/MM/YYYY")}', 103),
+                    '${cuadrante.idPlan}', 
+                    '${entrada.toISO()}',
                     ${this.tiendasInstance.convertirTiendaToExterno(
                       cuadrante.idTienda,
                       tiendas,
@@ -316,7 +506,6 @@ export class Cuadrantes {
                   );
               END
           `;
-        }
       }
 
       const resPlanes = await this.hitInstance.recHit(
@@ -330,6 +519,7 @@ export class Cuadrantes {
       }
     };
     // Dividir los cuadrantes en lotes y procesarlos en paralelo con Promise.all
+
     const batchSize = 60; // Ajusta este valor según sea necesario
     for (let i = 0; i < cuadrantes.length; i += batchSize) {
       const batch = cuadrantes.slice(i, i + batchSize);
@@ -339,271 +529,122 @@ export class Cuadrantes {
     return true;
   }
 
-  async saveCuadrante(cuadrante: TCuadrante, oldCuadrante: TCuadrante) {
-    if (oldCuadrante) {
-      cuadrante.historialPlanes = oldCuadrante.historialPlanes;
-      cuadrante._id = oldCuadrante._id;
-    }
-    cuadrante.enviado = false;
+  // Cuadrantes 2.0 guardado nuevo
+  async saveCuadrante(cuadrantes: TCuadrante[], oldCuadrante: TCuadrante[]) {
+    const cuadrantesModificables: TCuadrante[] = [];
+    const cuadrantesParaAgregar: TCuadrante[] = [];
+    let coincidencia: boolean;
 
-    for (let i = 0; i < cuadrante.arraySemanalHoras.length; i += 1) {
-      let update = false;
-      if (cuadrante.arraySemanalHoras[i].bloqueado) {
-        cuadrante.arraySemanalHoras[i] = oldCuadrante.arraySemanalHoras[i];
-        continue;
-      }
+    for (let i = 0; i < cuadrantes.length; i += 1) {
+      const fechaCuadrante = DateTime.fromJSDate(cuadrantes[i].inicio);
+      coincidencia = false;
 
-      if (cuadrante.arraySemanalHoras[i].idPlan) {
-        update = true;
-        if (
-          !cuadrante.historialPlanes.includes(
-            cuadrante.arraySemanalHoras[i].idPlan,
-          )
-        )
-          cuadrante.historialPlanes.push(cuadrante.arraySemanalHoras[i].idPlan);
-      }
+      for (let j = 0; j < oldCuadrante.length; j += 1) {
+        const fechaOldCuadrante = DateTime.fromJSDate(oldCuadrante[j].inicio);
 
-      if (
-        cuadrante.arraySemanalHoras[i].horaEntrada &&
-        cuadrante.arraySemanalHoras[i].horaSalida
-      ) {
-        if (!update) {
-          cuadrante.arraySemanalHoras[i].idPlan = new ObjectId().toString();
+        // COMPROBAR AQUÍ POR QUÉ NO DEVUELVE NADA EN GUARDARCUADRANTES EN LA SIGUIENTE FUNCIÓN (SCHMONGO)
+        // if (fechaCuadrante.hasSame(fechaOldCuadrante, "day")) {
+        //   cuadrantes[i].ausencia = oldCuadrante[j].ausencia;
+        //   if (
+        //     fechaCuadrante.hasSame(fechaOldCuadrante, "hour") &&
+        //     fechaCuadrante.hasSame(fechaOldCuadrante, "minute")
+        //   ) {
+        //     modificado = false;
+        //   } else modificado = true;
+
+        //   if (modificado) {
+        //     // No hacer nada si hay ausencia completa, porque está bloqueado
+        //     if (oldCuadrante[j].ausencia && oldCuadrante[j].ausencia.completa)
+        //       break;
+
+        //     cuadrantes[i].historialPlanes = oldCuadrante[j].historialPlanes;
+        //     cuadrantes[i].historialPlanes.push(cuadrantes[i].idPlan);
+        //     cuadrantes[i].enviado = false;
+
+        //     cuadrantesModificables.push(cuadrantes[i]);
+        //   } else break;
+        // }
+        if (cuadrantes[i]._id.toString() === oldCuadrante[j]._id.toString()) {
+          cuadrantesModificables.push(cuadrantes[i]);
+          coincidencia = true;
+          break;
         }
-      } else {
-        cuadrante.arraySemanalHoras[i] = null;
-        continue;
       }
+      if (coincidencia === false) cuadrantesParaAgregar.push(cuadrantes[i]);
     }
 
-    if (oldCuadrante) {
-      if (await this.schCuadrantes.updateCuadrante(cuadrante)) return true;
-      throw Error("No se ha podido actualizar el cuadrante");
-    } else {
-      cuadrante.historialPlanes = [];
-      const idCuadrante = await this.schCuadrantes.insertCuadrante(cuadrante);
-      if (idCuadrante) return true;
-      throw Error("No se ha podido insertar el cuadrante");
-    }
-  }
-
-  semanasEnRango(ausencia: AusenciaInterface) {
-    const semanas: { year: number; week: number }[] = [];
-    const inicio = moment(ausencia.fechaInicio);
-    const final = moment(ausencia.fechaFinal);
-
-    for (
-      let currentDate = inicio;
-      currentDate.isSameOrBefore(final);
-      currentDate.add(1, "days")
-    ) {
-      const year = currentDate.year();
-      const week = currentDate.isoWeek();
-
-      if (!semanas.some((sw) => sw.year === year && sw.week === week)) {
-        semanas.push({ year, week });
-      }
-    }
-
-    return semanas;
-  }
-
-  private estaEnRango(
-    fecha: moment.Moment,
-    fechaInicio: moment.Moment,
-    fechaFinal: moment.Moment,
-  ): boolean {
-    // Agrega un día a la fecha final para incluirlo en el rango
-    fechaFinal.add(1, "days");
-    return fecha.isSameOrAfter(fechaInicio) && fecha.isBefore(fechaFinal);
-  }
-
-  private crearAusencia(
-    parcial: { dia: Date; horas: number },
-    tipo: TiposAusencia,
-  ): {
-    tipo: TiposAusencia;
-    parcial: boolean;
-    horasParcial?: number;
-  } {
-    if (parcial) {
-      return {
-        tipo: tipo,
-        parcial: true,
-        horasParcial: parcial.horas,
-      };
-    }
-    return {
-      tipo: tipo,
-      parcial: false,
-    };
-  }
-
-  private actualizarCuadranteConAusencia(
-    cuadrante: TCuadrante,
-    ausencia: AusenciaInterface,
-  ): void {
-    cuadrante.arraySemanalHoras = cuadrante.arraySemanalHoras.map(
-      (horas, index) => {
-        const fecha = moment()
-          .year(cuadrante.year)
-          .isoWeek(cuadrante.semana)
-          .day(index + 1);
-        if (
-          this.estaEnRango(
-            fecha,
-            moment(ausencia.fechaInicio),
-            moment(ausencia.fechaFinal),
-          )
-        ) {
-          const parcial = ausencia.arrayParciales.find((p) =>
-            moment(p.dia).isSame(fecha, "day"),
-          );
-          return {
-            horaEntrada: horas ? horas.horaEntrada : "",
-            horaSalida: horas ? horas.horaSalida : "",
-            idPlan: horas ? horas.idPlan : "",
-            ausencia: this.crearAusencia(parcial, ausencia.tipo),
-          };
-        }
-        return horas;
-      },
+    await this.schCuadrantes.guardarCuadrantes(
+      cuadrantesModificables,
+      cuadrantesParaAgregar,
     );
+    return true;
   }
 
-  private crearNuevoCuadrante(
-    trabajador: TrabajadorSql,
-    semana: { week: number; year: number },
-    ausencia: AusenciaInterface,
-  ): TCuadrante {
-    return {
-      idTrabajador: ausencia.idUsuario,
-      nombre: trabajador.nombreApellidos,
-      idTienda: trabajador.idTienda,
-      enviado: false,
-      historialPlanes: [],
-      totalHoras: null,
-      semana: semana.week,
-      year: semana.year,
-      arraySemanalHoras: Array.from({ length: 7 }, (_, index) => {
-        const fecha = moment()
-          .year(semana.year)
-          .isoWeek(semana.week)
-          .day(index + 1);
-
-        if (
-          this.estaEnRango(
-            fecha,
-            moment(ausencia.fechaInicio),
-            moment(ausencia.fechaFinal),
-          )
-        ) {
-          const parcial = ausencia.arrayParciales.find((p) =>
-            moment(p.dia).isSame(fecha, "day"),
-          );
-          return {
-            horaEntrada: "",
-            horaSalida: "",
-            idPlan: "",
-            ausencia: this.crearAusencia(parcial, ausencia.tipo),
-          };
-        }
-        return null;
-      }),
-    };
-  }
-
-  async agregarAusencia(ausencia: AusenciaInterface): Promise<void> {
-    const semanas = this.semanasEnRango(ausencia);
-    const cuadrantes =
-      semanas.length > 0
-        ? await this.schCuadrantes.cuadrantesPorAusencia(ausencia, semanas)
-        : [];
+  // Cuadrantes 2.0
+  async addAusenciaToCuadrantes(ausencia: AusenciaInterface) {
+    const fechaInicio = DateTime.fromJSDate(ausencia.fechaInicio);
+    const fechaFinal = DateTime.fromJSDate(ausencia.fechaFinal);
+    const cuadrantesFinal: TCuadrante[] = [];
+    const cuadrantesEnMedio = await this.schCuadrantes.getCuadrantesIndividual(
+      ausencia.idUsuario,
+      DateTime.fromJSDate(ausencia.fechaInicio),
+      DateTime.fromJSDate(ausencia.fechaFinal),
+    );
     const trabajador = await this.trabajadoresInstance.getTrabajadorBySqlId(
       ausencia.idUsuario,
     );
 
-    const cuadrantesPorSemana = new Map(
-      semanas.map((semana) => [
-        `${semana.year}-${semana.week}`,
-        cuadrantes.find(
-          (cuadrante) =>
-            cuadrante.year === semana.year && cuadrante.semana === semana.week,
-        ),
-      ]),
-    );
-
-    for (const semana of semanas) {
-      const cuadrante = cuadrantesPorSemana.get(
-        `${semana.year}-${semana.week}`,
+    let auxFecha = fechaInicio;
+    while (auxFecha <= fechaFinal) {
+      const cuadranteMolesto = cuadrantesEnMedio.find((cuadrante) =>
+        DateTime.fromJSDate(cuadrante.inicio).hasSame(auxFecha, "day"),
       );
-
-      if (cuadrante) {
-        this.actualizarCuadranteConAusencia(cuadrante, ausencia);
-        await this.schCuadrantes.actualizarCuadranteAusencia(cuadrante);
-      } else {
-        const nuevoCuadrante = this.crearNuevoCuadrante(
-          trabajador,
-          semana,
-          ausencia,
-        );
-        await this.schCuadrantes.crearCuadranteAusencia(nuevoCuadrante);
-      }
-    }
-
-    if (cuadrantes.length === 0) {
-      const fechaInicio = moment(ausencia.fechaInicio);
-      const fechaFinal = moment(ausencia.fechaFinal);
-
-      while (fechaInicio.isSameOrBefore(fechaFinal, "day")) {
-        const semana = {
-          year: fechaInicio.year(),
-          week: fechaInicio.isoWeek(),
+      if (cuadranteMolesto) {
+        cuadranteMolesto.ausencia = {
+          tipo: ausencia.tipo,
+          completa: ausencia.completa,
+          horas: ausencia.completa ? undefined : ausencia.horas,
+          idAusencia: ausencia._id,
         };
-
-        if (!cuadrantesPorSemana.has(`${semana.year}-${semana.week}`)) {
-          const nuevoCuadrante = this.crearNuevoCuadrante(
-            trabajador,
-            semana,
-            ausencia,
-          );
-          await this.schCuadrantes.crearCuadranteAusencia(nuevoCuadrante);
-          cuadrantesPorSemana.set(
-            `${semana.year}-${semana.week}`,
-            nuevoCuadrante,
-          );
-        }
-
-        fechaInicio.add(1, "days");
+        cuadrantesFinal.push(cuadranteMolesto);
+      } else {
+        cuadrantesFinal.push({
+          _id: new ObjectId(),
+          idTrabajador: ausencia.idUsuario,
+          idPlan: new ObjectId().toString(),
+          idTienda: trabajador.idTienda,
+          inicio: null,
+          final: null,
+          nombre: trabajador.nombreApellidos,
+          totalHoras: 0,
+          enviado: false,
+          historialPlanes: [],
+          horasContrato: trabajador.horasContrato,
+          bolsaHorasInicial: null, // OJO, MIRAR ESTO BIEN 3.0
+          ausencia: {
+            tipo: ausencia.tipo,
+            completa: ausencia.completa,
+            horas: ausencia.completa ? undefined : ausencia.horas,
+            idAusencia: ausencia._id,
+          },
+        });
       }
+
+      auxFecha = auxFecha.plus({ day: 1 });
     }
+
+    await this.schCuadrantes.updateOrInsertManyCuadrantes(cuadrantesFinal);
   }
 
-  async copiarCuadrante(
-    semanaOrigen: number,
-    semanaDestino: number,
-    yearOrigen: number,
-    yearDestino: number,
-    idTienda: number,
-  ) {
-    const cuadrantesOrigen = await this.getCuadrantes(
-      idTienda,
-      semanaOrigen,
-      yearOrigen,
-    );
+  getRole(
+    usuario: TrabajadorCompleto,
+  ): "DEPENDIENTA" | "COORDINADORA" | "SUPERVISORA" {
+    if (usuario.coordinadora) {
+      return usuario.idTienda ? "COORDINADORA" : "SUPERVISORA";
+    } else if (usuario.idTienda) {
+      return "DEPENDIENTA";
+    }
 
-    const cuadrantesDestino: TCuadrante[] = cuadrantesOrigen.map(
-      (cuadrante) => {
-        cuadrante._id = new ObjectId().toString();
-        cuadrante.semana = semanaDestino;
-        cuadrante.year = yearDestino;
-        cuadrante.enviado = false;
-        return cuadrante;
-      },
-    );
-
-    if (await this.schCuadrantes.insertCuadrantes(cuadrantesDestino))
-      return true;
-    else throw Error("No se han podido guardar las copias de los cuadrantes");
+    throw Error("Paso no autorizado. No es de ventas.");
   }
 }

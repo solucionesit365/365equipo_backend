@@ -5,7 +5,7 @@ import { InAppNotification } from "./notificaciones.interface";
 
 @Injectable()
 export class Notificaciones {
-  constructor(private readonly schNotificaciones: NotificacionsBbdd) { }
+  constructor(private readonly schNotificaciones: NotificacionsBbdd) {}
   async saveToken(uid: string, token: string) {
     return await this.schNotificaciones.saveToken(uid, token);
   }
@@ -33,7 +33,9 @@ export class Notificaciones {
   }
 
   async newInAppNotification(notification: InAppNotification) {
-    return await this.schNotificaciones.newInAppNotification(notification);
+    if (notification.uid)
+      return await this.schNotificaciones.newInAppNotification(notification);
+    return false;
   }
 
   async deleteInAppNotification(id: string) {

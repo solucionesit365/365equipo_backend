@@ -5,6 +5,7 @@ import { EmailClass } from "../email/email.class";
 import { AuthService, auth } from "../firebase/auth";
 import { TrabajadorCompleto } from "./trabajadores.interface";
 import { PermisosClass } from "../permisos/permisos.class";
+import { DateTime } from "luxon";
 
 @Injectable()
 export class Trabajador {
@@ -55,7 +56,7 @@ export class Trabajador {
     return await schTrabajadores.getSubordinados(uid);
   }
 
-  async getSubordinadosById(id: number, conFecha?: moment.Moment) {
+  async getSubordinadosById(id: number, conFecha?: DateTime) {
     return await schTrabajadores.getSubordinadosById(id, conFecha);
   }
 
@@ -146,7 +147,6 @@ export class Trabajador {
     });
 
     const totales = await schTrabajadores.actualizarUsuarios(
-      "soluciones",
       usuariosNuevos,
       modificarEnApp,
     );
@@ -284,7 +284,7 @@ export class Trabajador {
     throw Error("No se ha podido obtener la información del usuario");
   }
 
-  async getHorasContratoById(idSql: number, fecha: moment.Moment) {
+  async getHorasContratoById(idSql: number, fecha: DateTime) {
     return await schTrabajadores.getHorasContrato(idSql, fecha);
   }
 
