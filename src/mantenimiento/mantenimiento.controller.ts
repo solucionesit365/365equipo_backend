@@ -1,4 +1,4 @@
-import { Controller, Get, Post, UseGuards } from "@nestjs/common";
+import { Controller, Post, UseGuards } from "@nestjs/common";
 import { MongoDbService } from "../bbdd/mongodb";
 import { MantenimientoDto } from "./mantenimiento.interface";
 import { SchedulerGuard } from "../scheduler/scheduler.guard";
@@ -7,7 +7,7 @@ import { SchedulerGuard } from "../scheduler/scheduler.guard";
 export class MantenimientoController {
   constructor(private readonly mongoDbService: MongoDbService) {}
 
-  @Get("getEstado")
+  @Post("getEstado")
   async getEstado() {
     try {
       const db = (await this.mongoDbService.getConexion()).db("soluciones");
