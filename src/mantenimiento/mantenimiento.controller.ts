@@ -18,7 +18,7 @@ export class MantenimientoController {
       });
 
       if (!resEstado) return false;
-      else resEstado.estado;
+      else return !!resEstado.estado;
     } catch (err) {
       console.log(err);
       return 0;
