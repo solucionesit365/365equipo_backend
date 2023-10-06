@@ -5,7 +5,7 @@ import { ObjectId } from "mongodb";
 
 @Injectable()
 export class NotificacionsBbdd {
-  constructor(private readonly mongoDbService: MongoDbService) { }
+  constructor(private readonly mongoDbService: MongoDbService) {}
 
   async saveToken(uid: string, token: string) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");

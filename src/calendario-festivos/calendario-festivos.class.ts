@@ -5,23 +5,20 @@ import * as moment from "moment";
 
 @Injectable()
 export class CalendarioFestivo {
-    constructor(
-        private readonly schCalendario: CalendarioFestivosDatabase,
-    ) { }
+  constructor(private readonly schCalendario: CalendarioFestivosDatabase) {}
 
-    async nuevoFestivo(festivo: CalendarioFestivosInterface) {
-        const insertFestivo = await this.schCalendario.nuevoFestivo(festivo)
-        if (insertFestivo) return true;
+  async nuevoFestivo(festivo: CalendarioFestivosInterface) {
+    const insertFestivo = await this.schCalendario.nuevoFestivo(festivo);
+    if (insertFestivo) return true;
 
-        throw Error("No se ha podido insertar la auditoria");
+    throw Error("No se ha podido insertar la auditoria");
+  }
 
-    }
+  async getfestivos() {
+    return await this.schCalendario.getFestivos();
+  }
 
-    async getfestivos() {
-        return await this.schCalendario.getFestivos();
-    }
-
-    async getfestivosByTienda(tienda: number) {
-        return await this.schCalendario.getFestivosByTienda(tienda);
-    }
+  async getfestivosByTienda(tienda: number) {
+    return await this.schCalendario.getFestivosByTienda(tienda);
+  }
 }

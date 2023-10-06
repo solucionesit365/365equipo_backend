@@ -1,80 +1,77 @@
 import { Injectable } from "@nestjs/common";
-import { IncidenciasClass } from "./incidencias.mongodb"
+import { IncidenciasClass } from "./incidencias.mongodb";
 import { Incidencias, IncidenciasInvitado } from "./incidencias.interface";
-
 
 @Injectable()
 export class Incidencia {
-    constructor(
-        private readonly schIncidencias: IncidenciasClass,
-    ) { }
+  constructor(private readonly schIncidencias: IncidenciasClass) {}
 
-    async nuevaIncidencia(incidencia: Incidencias) {
-        const insertIncidencia = await this.schIncidencias.nuevaIncidencia(incidencia)
-        if (insertIncidencia) return true;
+  async nuevaIncidencia(incidencia: Incidencias) {
+    const insertIncidencia = await this.schIncidencias.nuevaIncidencia(
+      incidencia,
+    );
+    if (insertIncidencia) return true;
 
-        throw Error("No se ha podido insertar la incidencia");
+    throw Error("No se ha podido insertar la incidencia");
+  }
 
-    }
+  // incidenciaInvitado
+  async nuevaIncidenciaInvitado(incidencia: IncidenciasInvitado) {
+    const insertIncidencia = await this.schIncidencias.nuevaIncidenciaInvitado(
+      incidencia,
+    );
+    if (insertIncidencia) return true;
 
-    // incidenciaInvitado
-    async nuevaIncidenciaInvitado(incidencia: IncidenciasInvitado) {
-        const insertIncidencia = await this.schIncidencias.nuevaIncidenciaInvitado(incidencia)
-        if (insertIncidencia) return true;
+    throw Error("No se ha podido insertar la incidencia");
+  }
+  async getIncidencias() {
+    return await this.schIncidencias.getIncidencias();
+  }
+  async getIncidenciasRrhh() {
+    return await this.schIncidencias.getIncidenciasRrhh();
+  }
 
-        throw Error("No se ha podido insertar la incidencia");
+  async getIncidenciasByEstado(estado: string) {
+    return await this.schIncidencias.getIncidenciasByEstado(estado);
+  }
 
-    }
-    async getIncidencias() {
-        return await this.schIncidencias.getIncidencias();
-    }
-    async getIncidenciasRrhh() {
-        return await this.schIncidencias.getIncidenciasRrhh();
-    }
+  async getIncidenciasEstadoRrhh(estado: string) {
+    return await this.schIncidencias.getIncidenciasEstadoRrhh(estado);
+  }
 
-    async getIncidenciasByEstado(estado: string) {
-        return await this.schIncidencias.getIncidenciasByEstado(estado);
-    }
+  async getIncidenciasByCategoria(categoria: string) {
+    return await this.schIncidencias.getIncidenciasByCategoria(categoria);
+  }
 
-    async getIncidenciasEstadoRrhh(estado: string) {
-        return await this.schIncidencias.getIncidenciasEstadoRrhh(estado);
-    }
+  async getIncidenciasByCategoriaRrhh(categoria: string) {
+    return await this.schIncidencias.getIncidenciasByCategoriaRrhh(categoria);
+  }
 
-    async getIncidenciasByCategoria(categoria: string) {
-        return await this.schIncidencias.getIncidenciasByCategoria(categoria);
-    }
+  async getIncidenciasByPrioridad(prioridad: string) {
+    return await this.schIncidencias.getIncidenciasByPrioridad(prioridad);
+  }
 
-    async getIncidenciasByCategoriaRrhh(categoria: string) {
-        return await this.schIncidencias.getIncidenciasByCategoriaRrhh(categoria);
-    }
+  async getIncidenciasByPrioridadRrhh(prioridad: string) {
+    return await this.schIncidencias.getIncidenciasByPrioridadRrhh(prioridad);
+  }
 
-    async getIncidenciasByPrioridad(prioridad: string) {
-        return await this.schIncidencias.getIncidenciasByPrioridad(prioridad);
-    }
+  async updateIncidenciaEstado(incidencias: Incidencias) {
+    return await this.schIncidencias.updateIncidenciaEstado(incidencias);
+  }
 
-    async getIncidenciasByPrioridadRrhh(prioridad: string) {
-        return await this.schIncidencias.getIncidenciasByPrioridadRrhh(prioridad);
-    }
+  async updateIncidenciaMensajes(incidencias: Incidencias) {
+    return await this.schIncidencias.updateIncidenciaMensajes(incidencias);
+  }
 
+  async getIncidenciasByUid(uid: string) {
+    return await this.schIncidencias.getIncidenciasByUid(uid);
+  }
 
-    async updateIncidenciaEstado(incidencias: Incidencias) {
-        return await this.schIncidencias.updateIncidenciaEstado(incidencias);
-    }
+  async updateIncidenciaDestinatario(incidencias: Incidencias) {
+    return await this.schIncidencias.updateIncidenciaDestinatario(incidencias);
+  }
 
-    async updateIncidenciaMensajes(incidencias: Incidencias) {
-        return await this.schIncidencias.updateIncidenciaMensajes(incidencias);
-    }
-
-    async getIncidenciasByUid(uid: string) {
-        return await this.schIncidencias.getIncidenciasByUid(uid);
-    }
-
-    async updateIncidenciaDestinatario(incidencias: Incidencias) {
-        return await this.schIncidencias.updateIncidenciaDestinatario(incidencias)
-    }
-
-    async deleteIncidencias(_id: string) {
-        return await this.schIncidencias.deleteIncidencias(_id);
-    }
-
+  async deleteIncidencias(_id: string) {
+    return await this.schIncidencias.deleteIncidencias(_id);
+  }
 }

@@ -1,17 +1,18 @@
 import * as moment from "moment";
-import { recHit, recSoluciones } from "../bbdd/mssql";
+import { recHit, recSoluciones, recSolucionesNew } from "../bbdd/mssql";
 import * as schVacaciones from "./vacaciones.mssql";
 import { Injectable } from "@nestjs/common";
 import { Cuadrantes } from "../cuadrantes/cuadrantes.class";
 import { SolicitudVacaciones } from "./vacaciones.interface";
 import { EmailClass } from "../email/email.class";
 import { Trabajador } from "../trabajadores/trabajadores.class";
+import { DateTime } from "luxon";
 
 @Injectable()
 export class Vacaciones {
   constructor(
     private readonly cuadrantesInstance: Cuadrantes,
-    private readonly email: EmailClass,
+    private readonly emailInstance: EmailClass,
     private readonly trabajadorInstance: Trabajador,
   ) {}
   async getSolicitudById(idSolicitud: number) {
@@ -65,6 +66,7 @@ export class Vacaciones {
     return await schVacaciones.getSolicitudesSubordinados(idApp);
   }
 
+  // Cuadrantes 2.0
   async setEstadoSolicitud(
     estado: string,
     idSolicitud: number,
@@ -79,11 +81,18 @@ export class Vacaciones {
     if (resSeter) {
       if (estado === "APROBADA") {
         const vacaciones = await schVacaciones.getSolicitudById(idSolicitud);
-        await this.cuadrantesInstance.agregarAusencia({
-          arrayParciales: [],
+        await this.cuadrantesInstance.addAusenciaToCuadrantes({
+          completa: true,
+          enviado: false,
           comentario: "Vacaciones",
-          fechaInicio: moment(vacaciones.fechaInicio, "DD/MM/YYYY").toDate(),
-          fechaFinal: moment(vacaciones.fechaFinal, "DD/MM/YYYY").toDate(),
+          fechaInicio: DateTime.fromFormat(
+            vacaciones.fechaInicio,
+            "dd/MM/yyyy",
+          ).toJSDate(),
+          fechaFinal: DateTime.fromFormat(
+            vacaciones.fechaFinal,
+            "dd/MM/yyyy",
+          ).toJSDate(),
           idUsuario: vacaciones.idBeneficiario,
           nombre: vacaciones.idBeneficiario,
           tipo: "VACACIONES",
@@ -92,56 +101,6 @@ export class Vacaciones {
       return true;
     } else
       throw Error("No ha sido posible modificar el estado de la solicitud");
-  }
-
-  async ponerEnCuadrante(vacaciones) {
-    if (vacaciones) {
-      await this.cuadrantesInstance.agregarAusencia({
-        arrayParciales: [],
-        comentario: "Vacaciones",
-        fechaInicio: moment(vacaciones.fechaInicio, "DD/MM/YYYY").toDate(),
-        fechaFinal: moment(vacaciones.fechaFinal, "DD/MM/YYYY").toDate(),
-        idUsuario: vacaciones.idBeneficiario,
-        nombre: vacaciones.idBeneficiario,
-        tipo: "VACACIONES",
-      });
-      return { ok: true };
-    }
-  }
-
-  async enviarAlEmail(vacaciones) {
-    const solicitudTrabajador =
-      await this.trabajadorInstance.getTrabajadorBySqlId(
-        Number(vacaciones.idBeneficiario),
-      );
-    this.email.enviarEmail(
-      solicitudTrabajador.emails,
-      `Tu solicitud ha sido enviada con estos datos: <br/> 
-    <table>
-    <tr style="background-color:#0000ff ">
-      <th>Fecha Inicio</th>
-      <th>Fecha Final</th>
-      <th>Fecha Incorporación</th>
-      <th>Creadas el:</th>
-      <th>Observación</th>
-      <th>Total de días</th>
-      <th>Estado</th>
-    </tr>
-    <tr>
-      
-      <td>${vacaciones.fechaInicio}</td>
-      <td>${vacaciones.fechaFinal}</td>
-      <td>${vacaciones.fechaIncorporacion}</td>
-      <td>${vacaciones.fechaCreacion}</td>
-      <td>${vacaciones.observaciones}</td>
-      <td>${vacaciones.dias}</td>
-      <td>${vacaciones.estado}</td>
-    </tr>
-  </table>
-   `,
-      "Solicitud de Vacaciones",
-    );
-    return { ok: true };
   }
 
   async guardarEnHit(vacaciones: {
@@ -210,8 +169,7 @@ export class Vacaciones {
       fechaFinal.diff(fechaInicio, "days") + 1 ===
         resultado.recordset[0].InsertedRows
     ) {
-      await recSoluciones(
-        "soluciones",
+      await recSolucionesNew(
         "UPDATE solicitudVacaciones SET enviado = 1 WHERE idSolicitud = @param0",
         vacaciones.idSolicitud,
       );

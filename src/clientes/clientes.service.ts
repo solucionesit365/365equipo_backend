@@ -185,14 +185,14 @@ export class ClientesService {
   ) {
     // TODO: Create a new Generic pass for the user
 
-    let objectId = `${issuerId}.${idTarjetaCliente}`;
+    const objectId = `${issuerId}.${idTarjetaCliente}`;
 
     const credentials =
       process.env.NODE_ENV === "development"
         ? require(process.env.GOOGLE_APPLICATION_CREDENTIALS)
         : JSON.parse(process.env.WALLET_ACCOUNT);
 
-    let genericObject = {
+    const genericObject = {
       id: `${objectId}`,
       classId: classId,
       genericType: "GENERIC_TYPE_UNSPECIFIED",
@@ -263,7 +263,7 @@ export class ClientesService {
 
     const baseUrl = "https://walletobjects.googleapis.com/walletobjects/v1";
 
-    let genericClass = {
+    const genericClass = {
       id: `${classId}`,
       // classTemplateInfo: {
       //   cardTemplateOverride: {

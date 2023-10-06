@@ -5,6 +5,7 @@ import { Trabajador } from "../trabajadores/trabajadores.class";
 import { TrabajadorCompleto } from "../trabajadores/trabajadores.interface";
 import * as moment from "moment";
 import { WithId } from "mongodb";
+import { DateTime } from "luxon";
 
 @Injectable()
 export class FichajesValidados {
@@ -49,7 +50,7 @@ export class FichajesValidados {
     return await this.schFichajesValidados.getSemanasFichajesPagar(semana);
   }
 
-  async getAllFichajesValidados(fecha:string) {
+  async getAllFichajesValidados(fecha: string) {
     return await this.schFichajesValidados.getAllFichajesValidados(fecha);
   }
 
@@ -61,6 +62,18 @@ export class FichajesValidados {
     );
   }
 
+  // Cuadrantes 2.0
+  async getParaCuadranteNew(
+    lunes: DateTime,
+    domingo: DateTime,
+    idTrabajador: number,
+  ) {
+    return await this.schFichajesValidados.getParaCuadranteNew(
+      lunes,
+      domingo,
+      idTrabajador,
+    );
+  }
   async getTiendaDia(tienda: number, dia: string) {
     return await this.schFichajesValidados.getTiendaDia(tienda, dia);
   }

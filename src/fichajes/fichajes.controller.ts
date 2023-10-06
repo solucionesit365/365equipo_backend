@@ -20,7 +20,7 @@ export class FichajesController {
     private readonly authInstance: AuthService,
     private readonly tokenService: TokenService,
     private readonly fichajesInstance: Fichajes,
-  ) { }
+  ) {}
 
   @Post("entrada")
   @UseGuards(AuthGuard)
@@ -116,7 +116,7 @@ export class FichajesController {
       await this.authInstance.verifyToken(token);
       const validadoBoolean = validado == "true" ? true : false;
 
-      let fichajes = await this.fichajesInstance.getFichajesByIdSql(
+      const fichajes = await this.fichajesInstance.getFichajesByIdSql(
         Number(idSql),
         validadoBoolean,
       );

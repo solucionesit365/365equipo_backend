@@ -8,7 +8,7 @@ export class TarjetaCliente {
 
   private async createQrCode(data: string) {
     try {
-      let url = await QRCode.toDataURL(data);
+      const url = await QRCode.toDataURL(data);
       return url;
     } catch (err) {
       console.log("Error generando QR: ", err);
@@ -17,7 +17,7 @@ export class TarjetaCliente {
   }
 
   async sendQrCodeEmail(codigo: string, toEmail: string, walletUrl: string) {
-    let url = await this.createQrCode(codigo);
+    const url = await this.createQrCode(codigo);
 
     if (url) {
       // const mensaje = `<p>¡Hola! Aquí está tu código QR:</p><img src="${url}"/>`;
@@ -136,7 +136,7 @@ export class TarjetaCliente {
   }
 
   async sendQRInvitation(codigo: string, toEmail: string) {
-    let url = await this.createQrCode(codigo);
+    const url = await this.createQrCode(codigo);
 
     if (url) {
       // const mensaje = `<p>¡Hola! Aquí está tu código QR:</p><img src="${url}"/>`;

@@ -1,7 +1,7 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { FichajesValidadosController } from './fichajes-validados.controller';
+import { Test, TestingModule } from "@nestjs/testing";
+import { FichajesValidadosController } from "./fichajes-validados.controller";
 
-describe('FichajesValidadosController', () => {
+describe("FichajesValidadosController", () => {
   let controller: FichajesValidadosController;
 
   beforeEach(async () => {
@@ -9,10 +9,12 @@ describe('FichajesValidadosController', () => {
       controllers: [FichajesValidadosController],
     }).compile();
 
-    controller = module.get<FichajesValidadosController>(FichajesValidadosController);
+    controller = module.get<FichajesValidadosController>(
+      FichajesValidadosController,
+    );
   });
 
-  it('should be defined', () => {
+  it("should be defined", () => {
     expect(controller).toBeDefined();
   });
 });

@@ -37,8 +37,6 @@ export class AnuncioDto {
   }
 }
 
-
-
 export class UpdateAnuncioDto {
   @IsString()
   _id: string;
