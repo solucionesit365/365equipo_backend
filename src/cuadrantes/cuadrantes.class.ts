@@ -428,7 +428,7 @@ export class Cuadrantes {
 
         subQuery += `
             SELECT @idTurno = NULL;
-            SELECT TOP 1 @idTurno = idTurno from cdpTurnos WHERE horaInicio = '${entrada.toISO()}' AND horaFin = '${salida.toISO()}';
+            SELECT TOP 1 @idTurno = idTurno from cdpTurnos WHERE horaInicio = '${entrada.toSQL()}' AND horaFin = '${salida.toSQL()}';
   
             IF @idTurno IS NOT NULL
               BEGIN
@@ -447,7 +447,7 @@ export class Cuadrantes {
                 ) 
                 VALUES (
                   '${cuadrante.idPlan}', 
-                  '${entrada.toISO()}',
+                  '${entrada.toSQL()}',
                   ${this.tiendasInstance.convertirTiendaToExterno(
                     cuadrante.idTienda,
                     tiendas,
