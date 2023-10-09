@@ -6,7 +6,7 @@ import { ObjectId } from "mongodb";
 
 @Injectable()
 export class AusenciasDatabase {
-  constructor(private readonly mongoDbService: MongoDbService) { }
+  constructor(private readonly mongoDbService: MongoDbService) {}
 
   async nuevaAusencia(ausencia: AusenciaInterface) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
@@ -41,20 +41,17 @@ export class AusenciasDatabase {
       {
         $set: {
           fechaInicio: moment(ausencia.fechaInicio, "DD/MM/YYYY").toDate(),
+          fechaFinal: moment(ausencia.fechaFinal, "DD/MM/YYYY").toDate(),
           tipo: ausencia.tipo,
           comentario: ausencia.comentario,
-          arrayParciales: ausencia.arrayParciales
+          arrayParciales: ausencia.arrayParciales,
         },
       },
     );
-    console.log(ausencia);
 
-
-    if (resUpdate.acknowledged && resUpdate.matchedCount > 0)
-      return true;
+    if (resUpdate.acknowledged && resUpdate.matchedCount > 0) return true;
     throw Error("No se ha podido modificar la ausencia");
   }
-
 
   async updateAusenciaResto(ausencia: AusenciaInterface) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
@@ -70,19 +67,14 @@ export class AusenciasDatabase {
           fechaFinal: moment(ausencia.fechaFinal, "DD/MM/YYYY").toDate(),
           tipo: ausencia.tipo,
           comentario: ausencia.comentario,
-          arrayParciales: ausencia.arrayParciales
+          arrayParciales: ausencia.arrayParciales,
         },
       },
     );
-    console.log(ausencia);
 
-
-    if (resUpdate.acknowledged && resUpdate.matchedCount > 0)
-      return true;
+    if (resUpdate.acknowledged && resUpdate.matchedCount > 0) return true;
     throw Error("No se ha podido modificar la ausencia");
   }
-
-
 
   async getAusencias() {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");

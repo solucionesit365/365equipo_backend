@@ -12,13 +12,13 @@ import { AuthGuard } from "../auth/auth.guard";
 import { TokenService } from "../get-token/get-token.service";
 import { AuthService } from "../firebase/auth";
 
-
 @Controller("ausencias")
 export class AusenciasController {
   constructor(
     private readonly ausenciasInstance: Ausencias,
     private readonly authInstance: AuthService,
-    private readonly tokenService: TokenService,) { }
+    private readonly tokenService: TokenService,
+  ) {}
 
   @Post("nueva")
   // @UseGuards(AuthGuard)
@@ -38,6 +38,7 @@ export class AusenciasController {
       if (
         tipo === "HORAS_JUSTIFICADAS" ||
         tipo === "BAJA" ||
+        tipo === "PERMISO MATERNIDAD/PATERNIDAD" ||
         (tipo === "DIA_PERSONAL" &&
           typeof idUsuario === "number" &&
           typeof fechaInicio === "string" &&
@@ -71,15 +72,18 @@ export class AusenciasController {
   @Post("deleteAusencia")
   async deleteAusencia(
     @Headers("authorization") authHeader: string,
-    @Body() { idAusencia }) {
+    @Body() { idAusencia },
+  ) {
     try {
       const token = this.tokenService.extract(authHeader);
       await this.authInstance.verifyToken(token);
-      const respAusencias = await this.ausenciasInstance.deleteAusencia(idAusencia);
+      const respAusencias = await this.ausenciasInstance.deleteAusencia(
+        idAusencia,
+      );
       if (respAusencias)
         return {
           ok: true,
-          data: respAusencias
+          data: respAusencias,
         };
 
       throw Error("No se ha podido borrar la ausencia");
@@ -97,15 +101,14 @@ export class AusenciasController {
     try {
       const token = this.tokenService.extract(authHeader);
       await this.authInstance.verifyToken(token);
-      const respAusencia = await this.ausenciasInstance.updateAusencia(ausencia);
+      const respAusencia = await this.ausenciasInstance.updateAusencia(
+        ausencia,
+      );
       if (respAusencia)
         return {
           ok: true,
-          data: respAusencia
+          data: respAusencia,
         };
-      console.log(respAusencia);
-      console.log(ausencia);
-
 
       throw Error("No se ha podido modificar la ausencia");
     } catch (err) {
@@ -113,7 +116,6 @@ export class AusenciasController {
       return { ok: false, message: err.message };
     }
   }
-
 
   @Post("updateAusenciaResto")
   async updateAusenciaResto(
@@ -123,15 +125,14 @@ export class AusenciasController {
     try {
       const token = this.tokenService.extract(authHeader);
       await this.authInstance.verifyToken(token);
-      const respAusencia = await this.ausenciasInstance.updateAusenciaResto(ausencia);
+      const respAusencia = await this.ausenciasInstance.updateAusenciaResto(
+        ausencia,
+      );
       if (respAusencia)
         return {
           ok: true,
-          data: respAusencia
+          data: respAusencia,
         };
-      console.log(respAusencia);
-      console.log(ausencia);
-
 
       throw Error("No se ha podido modificar la ausencia");
     } catch (err) {

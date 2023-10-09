@@ -65,6 +65,10 @@ import { ArchivoDigitalDatabase } from "./archivo-digital/archivo-digital.mongod
 import { SolicitudVacacionesController } from "./solicitud-vacaciones/solicitud-vacaciones.controller";
 import { solicitudesVacacionesClass } from "./solicitud-vacaciones/solicitud-vacaciones.class";
 import { SolicitudVacacionesBdd } from "./solicitud-vacaciones/solicitud-vacaciones.mongodb";
+import { EvaluacionesController } from "./evaluaciones/evaluaciones.controller";
+import { EvaluacionesDatabase } from "./evaluaciones/evaluaciones.mongodb";
+import { EvaluacionesClass } from "./evaluaciones/evaluaciones.class";
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -94,6 +98,8 @@ import { SolicitudVacacionesBdd } from "./solicitud-vacaciones/solicitud-vacacio
     CalendarioFestivosController,
     ArchivoDigitalController,
     SolicitudVacacionesController,
+    EvaluacionesController,
+
   ],
   providers: [
     AppService,
@@ -138,6 +144,9 @@ import { SolicitudVacacionesBdd } from "./solicitud-vacaciones/solicitud-vacacio
     ArchivoDigitalDatabase,
     solicitudesVacacionesClass,
     SolicitudVacacionesBdd,
+    EvaluacionesDatabase,
+    EvaluacionesClass,
+
   ],
 })
 export class AppModule {}

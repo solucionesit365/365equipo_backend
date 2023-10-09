@@ -17,6 +17,7 @@ export interface AusenciaInterface {
 
 export type TiposAusencia =
   | "BAJA"
+  | "PERMISO MATERNIDAD/PATERNIDAD"
   | "DIA_PERSONAL"
   | "VACACIONES"
   | "HORAS_JUSTIFICADAS";
