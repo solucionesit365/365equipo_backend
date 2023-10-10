@@ -188,7 +188,7 @@ export class ClientesService {
     const objectId = `${issuerId}.${idTarjetaCliente}`;
 
     const credentials =
-      process.env.NODE_ENV === "development"
+      process.env.ENTORNO === "test"
         ? require(process.env.GOOGLE_APPLICATION_CREDENTIALS)
         : JSON.parse(process.env.WALLET_ACCOUNT);
 
@@ -252,7 +252,7 @@ export class ClientesService {
 
   async createPassClass(classId: string) {
     const credentials =
-      process.env.NODE_ENV === "development"
+      process.env.ENTORNO === "test"
         ? require(process.env.GOOGLE_APPLICATION_CREDENTIALS)
         : JSON.parse(process.env.WALLET_ACCOUNT);
 
