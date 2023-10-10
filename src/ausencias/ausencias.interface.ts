@@ -1,4 +1,5 @@
 import { ObjectId } from "mongodb";
+import { TiposAusencia } from "src/cuadrantes/cuadrantes.interface";
 
 export interface AusenciaInterface {
   _id?: ObjectId;
@@ -12,9 +13,3 @@ export interface AusenciaInterface {
   completa: boolean;
   horas?: number;
 }
-
-export type TiposAusencia =
-  | "BAJA"
-  | "DIA_PERSONAL"
-  | "VACACIONES"
-  | "HORAS_JUSTIFICADAS";

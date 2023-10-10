@@ -400,42 +400,4 @@ export class CuadrantesController {
       );
     }
   }
-
-  // @Post("copiar")//jeje
-  // @UseGuards(AuthGuard)
-  // async copiarSemana(
-  //   @Headers("authorization") authHeader: string,
-  //   @Body() { semanaOrigen, semanaDestino, yearOrigen, yearDestino, idTienda },
-  // ) {
-  //   try {
-  //     if (
-  //       !semanaOrigen ||
-  //       !semanaDestino ||
-  //       (!yearOrigen && !yearDestino && !idTienda)
-  //     )
-  //       throw Error("Faltan parámetros");
-
-  //     const token = this.tokenService.extract(authHeader);
-  //     await this.authInstance.verifyToken(token);
-
-  //     const usuario = await this.authInstance.getUserWithToken(token);
-
-  //     if (await this.trabajadoresInstance.esCoordinadora(usuario.uid)) {
-  //       return {
-  //         ok: true,
-  //         data: await this.cuadrantesInstance.(
-  //           Number(semanaOrigen),
-  //           Number(semanaDestino),
-  //           Number(yearOrigen),
-  //           Number(yearDestino),
-  //           Number(idTienda),
-  //         ),
-  //       };
-  //     }
-  //     throw Error("No tienes permisos para realizar esta acción");
-  //   } catch (err) {
-  //     console.log(err);
-  //     return { ok: false, message: err.message };
-  //   }
-  // }
 }
