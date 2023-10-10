@@ -16,14 +16,12 @@ import { TCuadrante, TRequestCuadrante } from "./cuadrantes.interface";
 import { SchedulerGuard } from "../scheduler/scheduler.guard";
 import { AuthService } from "../firebase/auth";
 import { Trabajador } from "../trabajadores/trabajadores.class";
-import { Notificaciones } from "src/notificaciones/notificaciones.class";
 import { DateTime } from "luxon";
 import { ObjectId } from "mongodb";
 
 @Controller("cuadrantes")
 export class CuadrantesController {
   constructor(
-    private readonly notificaciones: Notificaciones,
     private readonly authInstance: AuthService,
     private readonly tokenService: TokenService,
     private readonly cuadrantesInstance: Cuadrantes,
