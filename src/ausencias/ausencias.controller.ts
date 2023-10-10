@@ -20,6 +20,7 @@ export class AusenciasController {
     private readonly tokenService: TokenService,
   ) {}
 
+  // Cuadrantes 2.0
   @Post("nueva")
   // @UseGuards(AuthGuard)
   async addAusencia(
@@ -30,25 +31,28 @@ export class AusenciasController {
       fechaFinal,
       tipo,
       comentario,
-      arrayParciales,
       nombre,
+      completa,
+      horas,
     },
   ) {
     try {
       if (
-        tipo === "HORAS_JUSTIFICADAS" ||
         tipo === "BAJA" ||
         tipo === "PERMISO MATERNIDAD/PATERNIDAD" ||
+        tipo === "DIA_PERSONAL" ||
+        tipo === "VACACIONES" ||
+        tipo === "HORAS_JUSTIFICADAS" ||
         (tipo === "DIA_PERSONAL" &&
           typeof idUsuario === "number" &&
           typeof fechaInicio === "string" &&
           typeof fechaFinal === "string" &&
-          typeof comentario === "string")
+          typeof comentario === "string" &&
+          typeof completa === "boolean" &&
+          typeof horas === "number")
       ) {
         const inicio = new Date(fechaInicio);
         const final = new Date(fechaFinal);
-
-        arrayParciales.map((fechaIso: string) => new Date(fechaIso));
 
         return {
           ok: true,
@@ -59,7 +63,8 @@ export class AusenciasController {
             inicio,
             final,
             comentario,
-            arrayParciales,
+            completa,
+            horas,
           ),
         };
       } else throw Error("Parámetros incorrectos");
@@ -93,53 +98,53 @@ export class AusenciasController {
     }
   }
 
-  @Post("updateAusencia")
-  async updateAusencia(
-    @Body() ausencia: AusenciaInterface,
-    @Headers("authorization") authHeader: string,
-  ) {
-    try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
-      const respAusencia = await this.ausenciasInstance.updateAusencia(
-        ausencia,
-      );
-      if (respAusencia)
-        return {
-          ok: true,
-          data: respAusencia,
-        };
+  // @Post("updateAusencia")
+  // async updateAusencia(
+  //   @Body() ausencia: AusenciaInterface,
+  //   @Headers("authorization") authHeader: string,
+  // ) {
+  //   try {
+  //     const token = this.tokenService.extract(authHeader);
+  //     await this.authInstance.verifyToken(token);
+  //     const respAusencia = await this.ausenciasInstance.updateAusencia(ausencia);
+  //     if (respAusencia)
+  //       return {
+  //         ok: true,
+  //         data: respAusencia
+  //       };
+  //     console.log(respAusencia);
+  //     console.log(ausencia);
 
-      throw Error("No se ha podido modificar la ausencia");
-    } catch (err) {
-      console.log(err);
-      return { ok: false, message: err.message };
-    }
-  }
+  //     throw Error("No se ha podido modificar la ausencia");
+  //   } catch (err) {
+  //     console.log(err);
+  //     return { ok: false, message: err.message };
+  //   }
+  // }
 
-  @Post("updateAusenciaResto")
-  async updateAusenciaResto(
-    @Body() ausencia: AusenciaInterface,
-    @Headers("authorization") authHeader: string,
-  ) {
-    try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
-      const respAusencia = await this.ausenciasInstance.updateAusenciaResto(
-        ausencia,
-      );
-      if (respAusencia)
-        return {
-          ok: true,
-          data: respAusencia,
-        };
+  // @Post("updateAusenciaResto")
+  // async updateAusenciaResto(
+  //   @Body() ausencia: AusenciaInterface,
+  //   @Headers("authorization") authHeader: string,
+  // ) {
+  //   try {
+  //     const token = this.tokenService.extract(authHeader);
+  //     await this.authInstance.verifyToken(token);
+  //     const respAusencia = await this.ausenciasInstance.updateAusenciaResto(ausencia);
+  //     if (respAusencia)
+  //       return {
+  //         ok: true,
+  //         data: respAusencia
+  //       };
+  //     console.log(respAusencia);
+  //     console.log(ausencia);
 
-      throw Error("No se ha podido modificar la ausencia");
-    } catch (err) {
-      console.log(err);
-      return { ok: false, message: err.message };
-    }
-  }
+  //     throw Error("No se ha podido modificar la ausencia");
+  //   } catch (err) {
+  //     console.log(err);
+  //     return { ok: false, message: err.message };
+  //   }
+  // }
   @Get("getAusencias")
   @UseGuards(AuthGuard)
   async getAusencias(@Headers("authorization") authHeader: string) {

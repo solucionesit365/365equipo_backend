@@ -242,7 +242,6 @@ export class VacacionesController {
           mensaje: `Tus vacaciones han sido ${estado}S`,
           leido: false,
           creador: "SISTEMA",
-          url: "/mis-vacaciones",
         });
 
         this.email.enviarEmail(
@@ -260,31 +259,6 @@ export class VacacionesController {
       console.log(err);
       return { ok: false, message: err.message };
     }
-  }
-
-  @Post("enviarAlEmail")
-  async enviarAlEmail(
-    @Headers("authorization") authHeader: string,
-    @Body() data,
-  ) {
-    try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
-      return this.vacacionesInstance.enviarAlEmail(data);
-    } catch (error) {
-      return error;
-    }
-  }
-
-  //Forzar envio de vacaciones al cuadrante
-  @Post("enviarAlCuadrante")
-  async ponerEnCuadrante(
-    @Headers("authorization") authHeader: string,
-    @Body() data,
-  ) {
-    const token = this.tokenService.extract(authHeader);
-    await this.authInstance.verifyToken(token);
-    return this.vacacionesInstance.ponerEnCuadrante(data);
   }
 
   @Post("nuevaSolicitud")
@@ -323,8 +297,6 @@ export class VacacionesController {
         "Solicitud de Vacaciones",
       );
 
-      console.log(data);
-
       if (
         data.idBeneficiario &&
         data.totalDias &&
@@ -332,7 +304,8 @@ export class VacacionesController {
         data.fechaFinal &&
         data.fechaIncorporacion &&
         data.observaciones &&
-        data.creador
+        data.creador &&
+        data.tienda
       ) {
         return {
           ok: true,

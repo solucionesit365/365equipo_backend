@@ -20,7 +20,7 @@ export class NotificacionesController {
     private readonly notificacionesInstance: Notificaciones,
     private readonly tokenService: TokenService,
     private readonly authInstance: AuthService,
-  ) { }
+  ) {}
 
   @Post("send")
   async sendNotification(@Body("token") token: string) {
@@ -65,18 +65,21 @@ export class NotificacionesController {
 
   @Get("inAppNotificationsPendientes")
   @UseGuards(AuthGuard)
-  async getInAppNotificationsPendientes(@Headers("authorization") authHeader: string) {
+  async getInAppNotificationsPendientes(
+    @Headers("authorization") authHeader: string,
+  ) {
     try {
       const token = this.tokenService.extract(authHeader);
       await this.authInstance.verifyToken(token);
       const usuario = await this.authInstance.getUserWithToken(token);
-      const notificacionesPendientes = await this.notificacionesInstance.getInAppNotificationsPendientes(
-        usuario.uid,
-      );
+      const notificacionesPendientes =
+        await this.notificacionesInstance.getInAppNotificationsPendientes(
+          usuario.uid,
+        );
       return {
         ok: true,
         count: notificacionesPendientes.length, // Devuelve el número de notificaciones pendientes
-      }
+      };
     } catch (err) {
       console.log(err);
       return { ok: false, message: err.message };

@@ -33,7 +33,7 @@ export class EmailClass {
     imagenBase64?: string,
   ) {
     if (to && mensaje && asunto) {
-      let mailOptions = {
+      const mailOptions = {
         from: "noreply@365equipo.com",
         to: to,
         subject: asunto,

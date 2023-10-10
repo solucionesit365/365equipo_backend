@@ -2,6 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { MongoDbService } from "../bbdd/mongodb";
 import { FichajeValidadoDto } from "./fichajes-validados.interface";
 import { ObjectId } from "mongodb";
+import { DateTime } from "luxon";
 
 @Injectable()
 export class FichajesValidadosDatabase {
@@ -80,7 +81,7 @@ export class FichajesValidadosDatabase {
     const fichajesCollection =
       db.collection<FichajeValidadoDto>("fichajesValidados");
 
-    return await fichajesCollection.find({fecha}).toArray();
+    return await fichajesCollection.find({ fecha }).toArray();
   }
 
   async getValidadosSemanaResponsable(
@@ -123,6 +124,25 @@ export class FichajesValidadosDatabase {
       .find({
         year,
         semana,
+        idTrabajador,
+      })
+      .toArray();
+  }
+
+  // Cuadrantes 2.0
+  async getParaCuadranteNew(
+    lunes: DateTime,
+    domingo: DateTime,
+    idTrabajador: number,
+  ) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const fichajesCollection =
+      db.collection<FichajeValidadoDto>("fichajesValidados");
+
+    return await fichajesCollection
+      .find({
+        fechaEntrada: { $gte: lunes.toJSDate() },
+        fechaSalida: { $lte: domingo.toJSDate() },
         idTrabajador,
       })
       .toArray();

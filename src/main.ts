@@ -15,6 +15,7 @@ async function bootstrap() {
       "https://silema.web.app",
       "https://365equipo.com",
       "https://tarjeta-cliente.web.app",
+      "https://silema--test-00qgie73.web.app",
     ],
   });
 

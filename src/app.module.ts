@@ -65,6 +65,7 @@ import { ArchivoDigitalDatabase } from "./archivo-digital/archivo-digital.mongod
 import { EvaluacionesController } from "./evaluaciones/evaluaciones.controller";
 import { EvaluacionesDatabase } from "./evaluaciones/evaluaciones.mongodb";
 import { EvaluacionesClass } from "./evaluaciones/evaluaciones.class";
+import { MantenimientoController } from './mantenimiento/mantenimiento.controller';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -94,6 +95,7 @@ import { EvaluacionesClass } from "./evaluaciones/evaluaciones.class";
     CalendarioFestivosController,
     ArchivoDigitalController,
     EvaluacionesController,
+    MantenimientoController,
   ],
   providers: [
     AppService,

@@ -5,7 +5,7 @@ import * as moment from "moment";
 
 @Injectable()
 export class AnunciosClass {
-  constructor(private readonly anunciosService: AnunciosService) { }
+  constructor(private readonly anunciosService: AnunciosService) {}
 
   async getAnuncios(idTienda?: number) {
     const arrayAnuncios = await this.anunciosService.getAnuncios(idTienda);

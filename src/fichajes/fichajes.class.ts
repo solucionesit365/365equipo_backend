@@ -10,7 +10,7 @@ export class Fichajes {
   constructor(
     private readonly schFichajes: FichajesDatabase,
     private readonly trabajadoresInstance: Trabajador,
-  ) { }
+  ) {}
 
   async nuevaEntrada(uid: string) {
     const hora = new Date();
@@ -52,11 +52,10 @@ export class Fichajes {
     } else if (primerFichaje.tipo === "SALIDA") {
       return "ERROR";
     } else if (ultimoFichaje.tipo === "ENTRADA") {
-
       return {
         estado: "TRABAJANDO",
-        data: ultimoFichaje
-      }
+        data: ultimoFichaje,
+      };
     } else if (ultimoFichaje.tipo === "SALIDA") {
       return "HA_SALIDO";
     } else return "ERROR";

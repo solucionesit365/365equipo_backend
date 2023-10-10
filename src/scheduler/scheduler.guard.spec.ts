@@ -1,7 +1,7 @@
-import { SchedulerGuard } from './scheduler.guard';
+import { SchedulerGuard } from "./scheduler.guard";
 
-describe('SchedulerGuard', () => {
-  it('should be defined', () => {
+describe("SchedulerGuard", () => {
+  it("should be defined", () => {
     expect(new SchedulerGuard()).toBeDefined();
   });
 });

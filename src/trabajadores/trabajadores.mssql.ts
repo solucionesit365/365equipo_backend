@@ -1,6 +1,12 @@
-import { recHit, recSoluciones, recSolucionesClassic } from "../bbdd/mssql";
+import {
+  recHit,
+  recSoluciones,
+  recSolucionesClassic,
+  recSolucionesNew,
+} from "../bbdd/mssql";
 import { TrabajadorCompleto, TrabajadorSql } from "./trabajadores.interface";
 import * as moment from "moment";
+import { DateTime } from "luxon";
 
 const GET_DATOS_TRABAJADOR = `
 tr.id,
@@ -82,8 +88,7 @@ export async function getTrabajadorTokenQR(
 export async function getTrabajadoresByTienda(idTienda: number) {
   const sql = "select * from trabajadores where idTienda = @param0";
   const resTrabajador = await recSoluciones("soluciones", sql, idTienda);
-  if (resTrabajador.recordset.length > 0)
-    return resTrabajador.recordset;
+  if (resTrabajador.recordset.length > 0) return resTrabajador.recordset;
   return null;
 }
 
@@ -278,6 +283,46 @@ export async function getSubordinadosById(
   return [];
 }
 
+export async function getSubordinadosByIdNew(
+  id: number,
+  conFecha?: DateTime,
+): Promise<
+  {
+    id: number;
+    idApp: string;
+    nombreApellidos: string;
+    idTienda: number;
+    antiguedad: string;
+    inicioContrato: string;
+    horasContrato: number;
+  }[]
+> {
+  let sql = `
+    select 
+      tr.id, 
+      tr.idApp, 
+      tr.nombreApellidos, 
+      tr.idTienda, 
+      CONVERT(varchar, tr.antiguedad, 103) as antiguedad, 
+      CONVERT(varchar, tr.inicioContrato, 103) as inicioContrato,
+      (SELECT top 1 horasContrato*40/100 FROM historicoContratos WHERE dni = tr.dni
+  `;
+
+  if (conFecha) {
+    sql += ` AND inicioContrato <= @param1 AND (fechaBaja >= @param1 OR fechaBaja IS NULL)`;
+  }
+
+  sql += `) as horasContrato from trabajadores tr where idResponsable = @param0`;
+
+  const resSubordinados = await recSolucionesNew(
+    sql,
+    id,
+    conFecha ? conFecha.toSQL({ includeOffset: false }) : undefined,
+  );
+  if (resSubordinados.recordset.length > 0) return resSubordinados.recordset;
+  return [];
+}
+
 export async function getHorasContrato(idSql: number, conFecha: moment.Moment) {
   const sql = `
     SELECT top 1 horasContrato*40/100 as horasContrato
@@ -293,6 +338,26 @@ export async function getHorasContrato(idSql: number, conFecha: moment.Moment) {
     sql,
     idSql,
     conFecha ? conFecha.format("YYYY-MM-DD HH:mm:ss") : undefined,
+  );
+
+  return resSubordinados.recordset[0]?.horasContrato;
+}
+
+/* Cuadrantes 2.0 */
+export async function getHorasContratoNew(idSql: number, conFecha: DateTime) {
+  const sql = `
+    SELECT top 1 horasContrato*40/100 as horasContrato
+    FROM historicoContratos 
+    WHERE 
+      dni = (select dni from trabajadores where id = @param0) AND 
+      inicioContrato <= @param1 AND 
+      (fechaBaja >= @param1 OR fechaBaja IS NULL)
+  `;
+
+  const resSubordinados = await recSolucionesNew(
+    sql,
+    idSql,
+    conFecha ? conFecha.toSQL({ includeOffset: false }) : undefined,
   );
 
   return resSubordinados.recordset[0]?.horasContrato;

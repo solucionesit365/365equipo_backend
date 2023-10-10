@@ -1,4 +1,5 @@
 import { ObjectId } from "mongodb";
+import { TiposAusencia } from "src/cuadrantes/cuadrantes.interface";
 
 export interface AusenciaInterface {
   _id?: ObjectId;
@@ -9,15 +10,6 @@ export interface AusenciaInterface {
   fechaFinal: Date;
   comentario: string;
   enviado?: boolean;
-  arrayParciales: {
-    dia: Date;
-    horas: number;
-  }[];
+  completa: boolean;
+  horas?: number;
 }
-
-export type TiposAusencia =
-  | "BAJA"
-  | "PERMISO MATERNIDAD/PATERNIDAD"
-  | "DIA_PERSONAL"
-  | "VACACIONES"
-  | "HORAS_JUSTIFICADAS";

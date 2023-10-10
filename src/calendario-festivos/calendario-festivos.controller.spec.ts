@@ -1,7 +1,7 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { CalendarioFestivosController } from './calendario-festivos.controller';
+import { Test, TestingModule } from "@nestjs/testing";
+import { CalendarioFestivosController } from "./calendario-festivos.controller";
 
-describe('CalendarioFestivosController', () => {
+describe("CalendarioFestivosController", () => {
   let controller: CalendarioFestivosController;
 
   beforeEach(async () => {
@@ -9,10 +9,12 @@ describe('CalendarioFestivosController', () => {
       controllers: [CalendarioFestivosController],
     }).compile();
 
-    controller = module.get<CalendarioFestivosController>(CalendarioFestivosController);
+    controller = module.get<CalendarioFestivosController>(
+      CalendarioFestivosController,
+    );
   });
 
-  it('should be defined', () => {
+  it("should be defined", () => {
     expect(controller).toBeDefined();
   });
 });

@@ -1,26 +1,21 @@
+import { DateTime } from "luxon";
+import { ObjectId } from "mongodb";
+
 export interface TCuadrante {
-  _id?: string;
+  _id: ObjectId;
   idTrabajador: number;
-  nombre: string;
+  idPlan: string;
   idTienda: number;
-  semana: number;
-  year: number;
-  arraySemanalHoras: {
-    bloqueado?: boolean;
-    horaEntrada: string;
-    horaSalida: string;
-    idPlan: string;
-    ausencia?: {
-      tipo: TiposAusencia;
-      parcial: boolean;
-      horasParcial?: number;
-    };
-  }[];
+  inicio: Date;
+  final: Date;
+  nombre: string;
   totalHoras: number;
   enviado: boolean;
   historialPlanes: string[];
-  horasContrato?: number;
-  bolsaHorasInicial?: number;
+  horasContrato: number;
+  ausencia: TAusenciaMin;
+  bolsaHorasInicial: number;
+  borrable?: boolean;
 }
 
 export type TiposAusencia =
@@ -29,3 +24,28 @@ export type TiposAusencia =
   | "DIA_PERSONAL"
   | "VACACIONES"
   | "HORAS_JUSTIFICADAS";
+
+export interface TRequestCuadrante {
+  // nombre: string;
+  idTrabajador: number;
+  arraySemanalHoras: {
+    bloqueado: boolean;
+    horaEntrada: string | DateTime;
+    horaSalida: string | DateTime;
+    idPlan: string;
+    idTienda: number;
+    idCuadrante: string;
+    ausencia: TAusenciaMin;
+    borrable?: boolean;
+  }[];
+  totalHoras: number;
+  idTiendaDefault: number;
+  fecha: string;
+}
+
+type TAusenciaMin = {
+  tipo: TiposAusencia;
+  horas?: number;
+  completa: boolean;
+  idAusencia: ObjectId;
+};

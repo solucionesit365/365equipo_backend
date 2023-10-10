@@ -5,6 +5,7 @@ import { EmailClass } from "../email/email.class";
 import { AuthService, auth } from "../firebase/auth";
 import { TrabajadorCompleto } from "./trabajadores.interface";
 import { PermisosClass } from "../permisos/permisos.class";
+import { DateTime } from "luxon";
 
 @Injectable()
 export class Trabajador {
@@ -57,6 +58,10 @@ export class Trabajador {
 
   async getSubordinadosById(id: number, conFecha?: moment.Moment) {
     return await schTrabajadores.getSubordinadosById(id, conFecha);
+  }
+
+  async getSubordinadosByIdNew(id: number, conFecha?: DateTime) {
+    return await schTrabajadores.getSubordinadosByIdNew(id, conFecha);
   }
 
   async descargarTrabajadoresHit() {
@@ -286,6 +291,11 @@ export class Trabajador {
 
   async getHorasContratoById(idSql: number, fecha: moment.Moment) {
     return await schTrabajadores.getHorasContrato(idSql, fecha);
+  }
+
+  /* Cuadrantes 2.0 */
+  async getHorasContratoByIdNew(idSql: number, fecha: DateTime) {
+    return await schTrabajadores.getHorasContratoNew(idSql, fecha);
   }
 
   async uploadFoto(displayFoto: string, uid: string) {
