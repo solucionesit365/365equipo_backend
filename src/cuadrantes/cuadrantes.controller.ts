@@ -401,7 +401,7 @@ export class CuadrantesController {
     }
   }
 
-  // @Post("copiar")
+  // @Post("copiar")//jeje
   // @UseGuards(AuthGuard)
   // async copiarSemana(
   //   @Headers("authorization") authHeader: string,
