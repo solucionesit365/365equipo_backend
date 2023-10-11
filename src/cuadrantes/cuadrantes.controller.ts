@@ -16,14 +16,12 @@ import { TCuadrante, TRequestCuadrante } from "./cuadrantes.interface";
 import { SchedulerGuard } from "../scheduler/scheduler.guard";
 import { AuthService } from "../firebase/auth";
 import { Trabajador } from "../trabajadores/trabajadores.class";
-import { Notificaciones } from "src/notificaciones/notificaciones.class";
 import { DateTime } from "luxon";
 import { ObjectId } from "mongodb";
 
 @Controller("cuadrantes")
 export class CuadrantesController {
   constructor(
-    private readonly notificaciones: Notificaciones,
     private readonly authInstance: AuthService,
     private readonly tokenService: TokenService,
     private readonly cuadrantesInstance: Cuadrantes,
@@ -400,42 +398,4 @@ export class CuadrantesController {
       );
     }
   }
-
-  // @Post("copiar")
-  // @UseGuards(AuthGuard)
-  // async copiarSemana(
-  //   @Headers("authorization") authHeader: string,
-  //   @Body() { semanaOrigen, semanaDestino, yearOrigen, yearDestino, idTienda },
-  // ) {
-  //   try {
-  //     if (
-  //       !semanaOrigen ||
-  //       !semanaDestino ||
-  //       (!yearOrigen && !yearDestino && !idTienda)
-  //     )
-  //       throw Error("Faltan parámetros");
-
-  //     const token = this.tokenService.extract(authHeader);
-  //     await this.authInstance.verifyToken(token);
-
-  //     const usuario = await this.authInstance.getUserWithToken(token);
-
-  //     if (await this.trabajadoresInstance.esCoordinadora(usuario.uid)) {
-  //       return {
-  //         ok: true,
-  //         data: await this.cuadrantesInstance.(
-  //           Number(semanaOrigen),
-  //           Number(semanaDestino),
-  //           Number(yearOrigen),
-  //           Number(yearDestino),
-  //           Number(idTienda),
-  //         ),
-  //       };
-  //     }
-  //     throw Error("No tienes permisos para realizar esta acción");
-  //   } catch (err) {
-  //     console.log(err);
-  //     return { ok: false, message: err.message };
-  //   }
-  // }
 }

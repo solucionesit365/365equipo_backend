@@ -1,10 +1,10 @@
 import { Injectable } from "@nestjs/common";
-import { TiposAusencia } from "./ausencias.interface";
 import { AusenciasDatabase } from "./ausencias.mongodb";
 import { Cuadrantes } from "../cuadrantes/cuadrantes.class";
 import * as moment from "moment";
 import { recHitBind } from "../bbdd/mssql";
 import { ObjectId } from "mongodb";
+import { TiposAusencia } from "src/cuadrantes/cuadrantes.interface";
 
 @Injectable()
 export class Ausencias {
