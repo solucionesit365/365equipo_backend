@@ -211,3 +211,25 @@ export async function recHitBind(
     await connectionPool.close();
   }
 }
+
+export async function getConnectionPoolHit() {
+  const config = {
+    user: process.env.MSSQL_USER_HIT,
+    password: process.env.MSSQL_PASS_HIT,
+    server: process.env.MSSQL_HOST_HIT,
+    database: "Fac_Tena",
+    options: {
+      encrypt: false,
+      trustServerCertificate: true,
+    },
+    pool: {
+      max: 10,
+      min: 0,
+      idleTimeoutMillis: 10000,
+    },
+    requestTimeout: 10000,
+  };
+
+  const pool = await new sql.ConnectionPool(config).connect();
+  return pool;
+}

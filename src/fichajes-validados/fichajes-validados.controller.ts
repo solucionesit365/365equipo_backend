@@ -14,6 +14,8 @@ import { AuthService } from "../firebase/auth";
 import { Notificaciones } from "src/notificaciones/notificaciones.class";
 import { Trabajador } from "src/trabajadores/trabajadores.class";
 import { AuthGuard } from "../auth/auth.guard";
+import { SchedulerGuard } from "../scheduler/scheduler.guard";
+import { getConnectionPoolHit } from "../bbdd/mssql";
 
 @Controller("fichajes-validados")
 export class FichajesValidadosController {
@@ -25,15 +27,12 @@ export class FichajesValidadosController {
     private readonly fichajesValidadosInstance: FichajesValidados,
   ) {}
 
+  @UseGuards(AuthGuard)
   @Post("addFichajeValidado")
-  async addFichajeValidado(
-    @Body() fichajeValidado: FichajeValidadoDto,
-    @Headers("authorization") authHeader: string,
-  ) {
+  async addFichajeValidado(@Body() fichajeValidado: FichajeValidadoDto) {
     try {
       if (!fichajeValidado.idTrabajador) throw Error("Faltan parametros");
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
+      // const token = this.tokenService.extract(authHeader);
 
       if (
         await this.fichajesValidadosInstance.addFichajesValidados(
@@ -333,6 +332,40 @@ export class FichajesValidadosController {
       };
     } catch (error) {
       return { ok: false, message: error.message };
+    }
+  }
+
+  @Post("sincronizarConHit")
+  @UseGuards(SchedulerGuard)
+  async sincronizarFichajesValidados() {
+    try {
+      const pendientesEnvio =
+        await this.fichajesValidadosInstance.getPendientesEnvio();
+
+      const pool = await getConnectionPoolHit(); // Abre una conexión
+      const fichajesSincronizados: string[] = []; // Para guardar los IDs de fichajes sincronizados correctamente
+
+      for (let fichaje of pendientesEnvio) {
+        const consultaSQL = this.formatoConsultaSQL(fichaje);
+        const resultSQL = await pool.request().query(consultaSQL);
+
+        if (resultSQL && resultSQL.rowsAffected[0] > 0) {
+          fichajesSincronizados.push(fichaje._id!);
+        }
+      }
+
+      // Una vez todos los fichajes están sincronizados, actualiza MongoDB
+      if (fichajesSincronizados.length > 0) {
+        await this.fichajesValidadosInstance.marcarComoEnviado(
+          fichajesSincronizados,
+        );
+      }
+
+      pool.close(); // Cierra la conexión
+      return { ok: true, message: "Sincronización completa." };
+    } catch (err) {
+      console.log(err);
+      return { ok: false, error: err.message };
     }
   }
 }
