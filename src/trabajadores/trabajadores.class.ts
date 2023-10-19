@@ -48,8 +48,16 @@ export class Trabajador {
     return await schTrabajadores.getSubordinadosConTienda(idAppResponsable);
   }
 
+  async getSubordinadosConTiendaPorId(idResponsable: number) {
+    return await schTrabajadores.getSubordinadosConTiendaPorId(idResponsable);
+  }
+
   async esCoordinadora(uid: string): Promise<boolean> {
     return await schTrabajadores.esCoordinadora(uid);
+  }
+
+  async esCoordinadoraPorId(id: number) {
+    return await schTrabajadores.esCoordinadoraPorId(id);
   }
 
   async getSubordinados(uid: string) {
@@ -62,6 +70,10 @@ export class Trabajador {
 
   async getSubordinadosByIdNew(id: number, conFecha?: DateTime) {
     return await schTrabajadores.getSubordinadosByIdNew(id, conFecha);
+  }
+
+  async getSubordinadosByIdsql(id: number) {
+    return await schTrabajadores.getSubordinadosByIdsql(id);
   }
 
   async descargarTrabajadoresHit() {
