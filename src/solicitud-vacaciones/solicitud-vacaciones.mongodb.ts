@@ -113,6 +113,8 @@ export class SolicitudVacacionesBdd {
   async updateSolicitudVacacionesEstado(
     solicitudesVacaciones: SolicitudVacaciones,
   ) {
+    console.log(solicitudesVacaciones);
+
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const solicitudVacacionesCollection = db.collection<SolicitudVacaciones>(
       "solicitudVacaciones",
@@ -124,6 +126,7 @@ export class SolicitudVacacionesBdd {
       },
       {
         $set: {
+          enviado: true,
           estado: solicitudesVacaciones.estado,
           respuestaSolicitud: solicitudesVacaciones.respuestaSolicitud,
         },
@@ -135,19 +138,48 @@ export class SolicitudVacacionesBdd {
     throw Error("No se ha podido modificar el estado");
   }
 
+  async setEnviado(vacaciones: SolicitudVacaciones) {
+    console.log(vacaciones);
+
+    try {
+      const db = (await this.mongoDbService.getConexion()).db("soluciones");
+      const solicitudVacacionesCollection = db.collection<SolicitudVacaciones>(
+        "solicitudVacaciones",
+      );
+      const respSolicitudes = await solicitudVacacionesCollection.updateOne(
+        {
+          _id: vacaciones._id,
+        },
+        {
+          $set: {
+            enviado: true,
+          },
+        },
+      );
+      if (respSolicitudes.acknowledged && respSolicitudes.modifiedCount > 0)
+        return true;
+      throw Error("No se ha podido modificar el estado");
+    } catch (error) {}
+  }
+
   async getSolicitudesParaEnviar(): Promise<
     {
       idBeneficiario: number;
-      dias: number;
+      nombreApellidos: string;
       fechaInicio: string;
       fechaFinal: string;
       fechaIncorporacion: string;
-      observaciones: string;
-      respuestaSolicitud: string;
       fechaCreacion: string;
+      totalDias: number;
+      tienda: string;
+      respuestaSolicitud: string;
+      observaciones: string;
       estado: string;
+      creador: number;
+      creadasPor?: string;
       idSolicitud: number;
       enviado: boolean;
+      idAppResponsable: string;
     }[]
   > {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
@@ -163,6 +195,8 @@ export class SolicitudVacacionesBdd {
       .toArray();
     console.log(respSolicitudes);
 
-    return [];
+    if (respSolicitudes.length > 0) {
+      return respSolicitudes;
+    } else return [];
   }
 }

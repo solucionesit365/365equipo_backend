@@ -6,6 +6,8 @@ import { Trabajador } from "../trabajadores/trabajadores.class";
 import { Cuadrantes } from "../cuadrantes/cuadrantes.class";
 import { recHit } from "../bbdd/mssql";
 import * as moment from "moment";
+import { DateTime } from "luxon";
+import { ObjectId } from "mongodb";
 
 @Injectable()
 export class solicitudesVacacionesClass {
@@ -105,11 +107,12 @@ export class solicitudesVacacionesClass {
 
   async ponerEnCuadrante(vacaciones) {
     if (vacaciones) {
-      await this.cuadrantesInstance.agregarAusencia({
-        arrayParciales: [],
+      await this.cuadrantesInstance.addAusenciaToCuadrantes({
+        completa: true,
+        enviado: false,
         comentario: "Vacaciones",
-        fechaInicio: moment(vacaciones.fechaInicio, "DD/MM/YYYY").toDate(),
-        fechaFinal: moment(vacaciones.fechaFinal, "DD/MM/YYYY").toDate(),
+        fechaInicio: DateTime.fromJSDate(vacaciones.fechaInicio).toJSDate(),
+        fechaFinal: DateTime.fromJSDate(vacaciones.fechaFinal).toJSDate(),
         idUsuario: vacaciones.idBeneficiario,
         nombre: vacaciones.idBeneficiario,
         tipo: "VACACIONES",
@@ -132,13 +135,20 @@ export class solicitudesVacacionesClass {
         const vacaciones = await this.schSolicitudVacaciones.getSolicitudesById(
           solicitudesVacaciones._id.toString(),
         );
-        await this.cuadrantesInstance.agregarAusencia({
-          arrayParciales: [],
+        await this.cuadrantesInstance.addAusenciaToCuadrantes({
+          completa: true,
+          enviado: false,
           comentario: "Vacaciones",
-          fechaInicio: moment(vacaciones.fechaInicio, "DD/MM/YYYY").toDate(),
-          fechaFinal: moment(vacaciones.fechaFinal, "DD/MM/YYYY").toDate(),
+          fechaInicio: DateTime.fromFormat(
+            vacaciones.fechaInicio,
+            "d/M/yyyy",
+          ).toJSDate(),
+          fechaFinal: DateTime.fromFormat(
+            vacaciones.fechaFinal,
+            "d/M/yyyy",
+          ).toJSDate(),
           idUsuario: vacaciones.idBeneficiario,
-          nombre: vacaciones.idBeneficiario.toString(),
+          nombre: vacaciones.nombreApellidos,
           tipo: "VACACIONES",
         });
       }
@@ -147,19 +157,7 @@ export class solicitudesVacacionesClass {
       throw Error("No ha sido posible modificar el estado de la solicitud");
   }
 
-  async guardarEnHit(vacaciones: {
-    idBeneficiario: number;
-    totalDias: number;
-    fechaInicio: string;
-    fechaFinal: string;
-    fechaIncorporacion: string;
-    observaciones: string;
-    respuestaSolicitud: string;
-    fechaCreacion: string;
-    estado: string;
-    idSolicitud: number;
-    enviado: boolean;
-  }) {
+  async guardarEnHit(vacaciones: SolicitudVacaciones) {
     if (!vacaciones.idBeneficiario || vacaciones.estado != "APROBADA")
       return false;
     const fechaInicio = moment(vacaciones.fechaInicio, "DD/MM/YYYY");
@@ -213,17 +211,17 @@ export class solicitudesVacacionesClass {
       fechaFinal.diff(fechaInicio, "days") + 1 ===
         resultado.recordset[0].InsertedRows
     ) {
+      await this.schSolicitudVacaciones.setEnviado(vacaciones);
     }
   }
 
   async sendToHit() {
     const solicitudes =
       await this.schSolicitudVacaciones.getSolicitudesParaEnviar();
-    console.log(solicitudes);
 
-    // for (let i = 0; i < solicitudes.length; i += 1) {
-    //   await this.guardarEnHit(solicitudes[i]);
-    // }
+    for (let i = 0; i < solicitudes.length; i += 1) {
+      await this.guardarEnHit(solicitudes[i]);
+    }
 
     return true;
   }

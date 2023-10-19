@@ -13,7 +13,8 @@ export interface SolicitudVacaciones {
   observaciones: string;
   estado: string;
   creador: number;
-  creadasPor: string;
+  creadasPor?: string;
   idSolicitud: number;
   enviado: boolean;
+  idAppResponsable: string;
 }
