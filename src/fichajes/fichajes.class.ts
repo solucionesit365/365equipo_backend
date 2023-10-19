@@ -1,15 +1,23 @@
 import { Injectable } from "@nestjs/common";
 import { FichajesDatabase } from "./fichajes.mongodb";
 import { Trabajador } from "../trabajadores/trabajadores.class";
-import { TrabajadorSql } from "../trabajadores/trabajadores.interface";
+import {
+  Subordinado,
+  TrabajadorSql,
+} from "../trabajadores/trabajadores.interface";
 import * as moment from "moment";
-import { ObjectId } from "mongodb";
+import { ObjectId, WithId } from "mongodb";
+import { FichajeDto } from "./fichajes.interface";
+import { FichajeValidadoDto } from "../fichajes-validados/fichajes-validados.interface";
+import { Cuadrantes } from "../cuadrantes/cuadrantes.class";
+import { DateTime } from "luxon";
 
 @Injectable()
 export class Fichajes {
   constructor(
     private readonly schFichajes: FichajesDatabase,
     private readonly trabajadoresInstance: Trabajador,
+    private readonly cuadrantesInstance: Cuadrantes,
   ) {}
 
   async nuevaEntrada(uid: string) {
@@ -133,5 +141,141 @@ export class Fichajes {
     if (typeof id === "string") console.log(id + " - " + validado);
 
     return await this.schFichajes.updateFichaje(id, validado);
+  }
+
+  // Precondiciones fichajesTrabajador debe estar ordenado por fecha de forma ascendente.
+  private comprobarParesFichajes(fichajesTrabajador: WithId<FichajeDto>[]) {
+    const primeraEntrada = fichajesTrabajador.findIndex(
+      (fichaje) => fichaje.tipo === "ENTRADA",
+    );
+    const indexList: number[] = [];
+
+    if (typeof primeraEntrada === "undefined") return [];
+
+    for (let i = primeraEntrada; i < fichajesTrabajador.length; i += 1) {
+      if (
+        fichajesTrabajador[i].tipo === "ENTRADA" &&
+        fichajesTrabajador[i + 1]?.tipo === "ENTRADA"
+      ) {
+        indexList.push(i);
+      }
+
+      if (
+        i === fichajesTrabajador.length - 1 &&
+        fichajesTrabajador[i].tipo === "ENTRADA"
+      ) {
+        indexList.push(i);
+      }
+    }
+
+    indexList.sort((a, b) => b - a);
+    return indexList;
+  }
+
+  /* Porque hay gente que se olvida de fichar. No se guarda en BBDD, debería guardarse !!! */
+  private async createFichajeSalidaSistema(
+    diaEntrada: DateTime,
+    idTrabajador: number,
+  ): Promise<WithId<FichajeDto>> {
+    const prediction = await this.getEntradaSalidaPredict(
+      idTrabajador,
+      diaEntrada,
+    );
+    const trabajador = await this.trabajadoresInstance.getTrabajadorBySqlId(
+      idTrabajador,
+    );
+
+    return {
+      _id: new ObjectId(),
+      enviado: true,
+      hora: prediction.salida.toJSDate(),
+      idExterno: null,
+      tipo: "SALIDA",
+      validado: false,
+      idTrabajador: idTrabajador,
+      uid: trabajador.idApp,
+    };
+  }
+
+  private async getEntradaSalidaPredict(
+    idTrabajador: number,
+    diaEntrada: DateTime,
+  ) {
+    const cuadrantes = await this.cuadrantesInstance.getCuadrantesIndividual(
+      idTrabajador,
+      diaEntrada.startOf("day"),
+      diaEntrada.endOf("day"),
+    );
+
+    if (cuadrantes.length > 0)
+      return {
+        entrada: DateTime.fromJSDate(cuadrantes[0].inicio),
+        salida: DateTime.fromJSDate(cuadrantes[0].final),
+      };
+    else
+      return {
+        entrada: diaEntrada.startOf("day"),
+        salida: diaEntrada.endOf("day"),
+      };
+  }
+
+  async getSinValidar(arraySubordinados: Subordinado[]) {
+    const fichajesPdtesDesordenados: WithId<FichajeDto>[] = [];
+
+    for (const subordinado of arraySubordinados) {
+      const susFichajes = await this.getFichajesByIdSql(subordinado.id, false);
+      const susFichajesPlus: WithId<FichajeDto>[] = susFichajes.map(
+        (fichaje) => ({
+          ...fichaje,
+          idTrabajador: subordinado.id,
+        }),
+      );
+
+      const indexList = this.comprobarParesFichajes(susFichajesPlus);
+
+      // Si hay al menos un índice, hay que agregarlo al array de fichajes.
+      for (let j = 0; j < indexList.length; j += 1) {
+        const fichajeSistema = await this.createFichajeSalidaSistema(
+          DateTime.fromJSDate(susFichajesPlus[j].hora),
+          susFichajesPlus[j].idTrabajador,
+        );
+        susFichajesPlus.splice(j + 1, 0, fichajeSistema);
+      }
+
+      fichajesPdtesDesordenados.push(...susFichajesPlus);
+      // Faltaría obtener los pares y no mezclar en la misma dimensión todos los fichajes de entrada y salida de todos los trabajadores.
+      // Así también nos ahorramos en el frontend un paso complejo de más.
+    }
+
+    return fichajesPdtesDesordenados;
+  }
+
+  private async transformarFichajesSinValidar(
+    fichajesPdtesDesordenados: WithId<FichajeDto>[],
+    idResponsable: number,
+  ) {
+    const fichajesTransformados: FichajeValidadoDto[] = [];
+
+    for (const fichaje of fichajesPdtesDesordenados) {
+      const data: FichajeValidadoDto = {
+        aPagar: false,
+        comentario: { entrada: "", salida: "" },
+        enviado: false,
+        horasAprendiz: 0,
+        horasCoordinacion: 0,
+        horasExtra: 0,
+        horasPagar: {
+          comentario: "",
+          estadoValidado: "",
+          respSuper: "",
+          total: 0,
+        },
+        idResponsable,
+        idTrabajador: fichaje.idTrabajador,
+        fecha: fichaje.hora.toISOString(),
+      };
+
+      fichajesTransformados.push();
+    }
   }
 }

@@ -11,8 +11,8 @@ import { AuthGuard } from "../auth/auth.guard";
 import { TokenService } from "../get-token/get-token.service";
 import { Fichajes } from "./fichajes.class";
 import { SchedulerGuard } from "../scheduler/scheduler.guard";
-import * as moment from "moment";
 import { AuthService } from "../firebase/auth";
+import { Trabajador } from "../trabajadores/trabajadores.class";
 
 @Controller("fichajes")
 export class FichajesController {
@@ -20,6 +20,7 @@ export class FichajesController {
     private readonly authInstance: AuthService,
     private readonly tokenService: TokenService,
     private readonly fichajesInstance: Fichajes,
+    private readonly trabajadoresInstance: Trabajador,
   ) {}
 
   @Post("entrada")
@@ -106,14 +107,11 @@ export class FichajesController {
   @Get("fichajesByIdSql")
   @UseGuards(AuthGuard)
   async getFichajesByIdSql(
-    @Headers("authorization") authHeader: string,
     @Query() { idSql, validado }: { idSql: number; validado: string },
   ) {
     try {
       if (!idSql && !validado) throw Error("Faltan parámetros");
 
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
       const validadoBoolean = validado == "true" ? true : false;
 
       const fichajes = await this.fichajesInstance.getFichajesByIdSql(
@@ -179,6 +177,26 @@ export class FichajesController {
           fechaInicio,
           fechaFinal,
         ),
+      };
+    } catch (err) {
+      console.log(err);
+      return { ok: false, message: err.message };
+    }
+  }
+
+  @UseGuards(AuthGuard)
+  @Get("sinValidar")
+  async getSinValidar(@Headers("authorization") authHeader: string) {
+    try {
+      const token = this.tokenService.extract(authHeader);
+      const usuario = await this.authInstance.getUserWithToken(token);
+      const arraySubordinados = await this.trabajadoresInstance.getSubordinados(
+        usuario.idApp,
+      );
+
+      return {
+        ok: true,
+        data: await this.fichajesInstance.getSinValidar(arraySubordinados),
       };
     } catch (err) {
       console.log(err);
