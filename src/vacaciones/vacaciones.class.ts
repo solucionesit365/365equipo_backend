@@ -85,14 +85,8 @@ export class Vacaciones {
           completa: true,
           enviado: false,
           comentario: "Vacaciones",
-          fechaInicio: DateTime.fromFormat(
-            vacaciones.fechaInicio,
-            "dd/MM/yyyy",
-          ).toJSDate(),
-          fechaFinal: DateTime.fromFormat(
-            vacaciones.fechaFinal,
-            "dd/MM/yyyy",
-          ).toJSDate(),
+          fechaInicio: DateTime.fromJSDate(vacaciones.fechaInicio).toJSDate(),
+          fechaFinal: DateTime.fromJSDate(vacaciones.fechaFinal).toJSDate(),
           idUsuario: vacaciones.idBeneficiario,
           nombre: vacaciones.idBeneficiario,
           tipo: "VACACIONES",
