@@ -3,7 +3,7 @@ import { Tienda } from "./tiendas.dto";
 
 export async function getTiendas(): Promise<Tienda[]> {
   const sql =
-    "SELECT id, LOWER(nombre) as nombre, direccion, idExterno FROM tiendas ORDER BY nombre";
+    "SELECT id, (nombre) as nombre, direccion, idExterno FROM tiendas ORDER BY nombre";
   const resTiendas = await recSoluciones("soluciones", sql);
 
   if (resTiendas.recordset.length > 0) return resTiendas.recordset;
