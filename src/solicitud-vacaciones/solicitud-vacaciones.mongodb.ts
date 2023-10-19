@@ -137,6 +137,8 @@ export class SolicitudVacacionesBdd {
   }
 
   async setEnviado(vacaciones: SolicitudVacaciones) {
+    console.log(vacaciones);
+
     try {
       const db = (await this.mongoDbService.getConexion()).db("soluciones");
       const solicitudVacacionesCollection = db.collection<SolicitudVacaciones>(
