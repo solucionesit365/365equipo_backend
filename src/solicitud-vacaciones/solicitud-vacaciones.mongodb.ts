@@ -124,7 +124,6 @@ export class SolicitudVacacionesBdd {
       },
       {
         $set: {
-          enviado: true,
           estado: solicitudesVacaciones.estado,
           respuestaSolicitud: solicitudesVacaciones.respuestaSolicitud,
         },

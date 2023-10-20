@@ -88,7 +88,7 @@ export class Vacaciones {
           fechaInicio: DateTime.fromJSDate(vacaciones.fechaInicio).toJSDate(),
           fechaFinal: DateTime.fromJSDate(vacaciones.fechaFinal).toJSDate(),
           idUsuario: vacaciones.idBeneficiario,
-          nombre: vacaciones.idBeneficiario,
+          nombre: vacaciones.nombreApellidos,
           tipo: "VACACIONES",
         });
       }
