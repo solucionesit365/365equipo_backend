@@ -4,7 +4,11 @@ import {
   recSolucionesClassic,
   recSolucionesNew,
 } from "../bbdd/mssql";
-import { TrabajadorCompleto, TrabajadorSql } from "./trabajadores.interface";
+import {
+  Subordinado,
+  TrabajadorCompleto,
+  TrabajadorSql,
+} from "./trabajadores.interface";
 import * as moment from "moment";
 import { DateTime } from "luxon";
 
@@ -218,18 +222,8 @@ export async function esCoordinadoraPorId(id: number) {
   return false;
 }
 
-export async function getSubordinados(uid: string): Promise<
-  {
-    id: number;
-    idApp: string;
-    nombreApellidos: string;
-    displayName: string;
-    displayfoto: string;
-    idTienda: number;
-    antiguedad: string;
-    inicioContrato: string;
-  }[]
-> {
+export async function getSubordinados(uid: string): Promise<Subordinado[]> {
+
   const sql = `
     select 
       id, 
@@ -309,23 +303,15 @@ export async function getSubordinadosByIdsql(id: number): Promise<
 export async function getSubordinadosById(
   id: number,
   conFecha?: moment.Moment,
-): Promise<
-  {
-    id: number;
-    idApp: string;
-    nombreApellidos: string;
-    idTienda: number;
-    antiguedad: string;
-    inicioContrato: string;
-    horasContrato: number;
-  }[]
-> {
+): Promise<Subordinado[]> {
   let sql = `
     select 
       tr.id, 
       tr.idApp, 
-      tr.nombreApellidos, 
-      tr.idTienda, 
+      tr.nombreApellidos,
+      tr.displayName,
+      tr.displayFoto,
+      tr.idTienda,
       CONVERT(varchar, tr.antiguedad, 103) as antiguedad, 
       CONVERT(varchar, tr.inicioContrato, 103) as inicioContrato,
       (SELECT top 1 horasContrato*40/100 FROM historicoContratos WHERE dni = tr.dni
