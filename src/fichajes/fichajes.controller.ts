@@ -196,7 +196,7 @@ export class FichajesController {
 
       return {
         ok: true,
-        data: await this.fichajesInstance.getSinValidar(arraySubordinados),
+        data: await this.fichajesInstance.getParesSinValidar(arraySubordinados),
       };
     } catch (err) {
       console.log(err);

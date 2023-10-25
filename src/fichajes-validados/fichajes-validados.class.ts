@@ -134,7 +134,7 @@ export class FichajesValidados {
 
     for (let i = 0; i < arrayValidados.length; i += 1) {
       const dayIndex = this.getNumeroSemana(arrayValidados[i].fecha);
-      this.addToSubordinados(subordinados, arrayValidados[i], dayIndex);
+      // this.addToSubordinados(subordinados, arrayValidados[i], dayIndex);
     }
 
     return subordinados; // Hacer map para filtrar datos innecesarios.

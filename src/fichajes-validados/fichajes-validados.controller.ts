@@ -335,33 +335,34 @@ export class FichajesValidadosController {
     }
   }
 
+  // ESTÁ PENDIENTE 25/10/2023
   @Post("sincronizarConHit")
   @UseGuards(SchedulerGuard)
   async sincronizarFichajesValidados() {
     try {
-      const pendientesEnvio =
-        await this.fichajesValidadosInstance.getPendientesEnvio();
+      // const pendientesEnvio =
+      //   await this.fichajesValidadosInstance.getPendientesEnvio();
 
-      const pool = await getConnectionPoolHit(); // Abre una conexión
-      const fichajesSincronizados: string[] = []; // Para guardar los IDs de fichajes sincronizados correctamente
+      // const pool = await getConnectionPoolHit(); // Abre una conexión
+      // const fichajesSincronizados: string[] = []; // Para guardar los IDs de fichajes sincronizados correctamente
 
-      for (let fichaje of pendientesEnvio) {
-        const consultaSQL = this.formatoConsultaSQL(fichaje);
-        const resultSQL = await pool.request().query(consultaSQL);
+      // for (let fichaje of pendientesEnvio) {
+      //   const consultaSQL = this.formatoConsultaSQL(fichaje);
+      //   const resultSQL = await pool.request().query(consultaSQL);
 
-        if (resultSQL && resultSQL.rowsAffected[0] > 0) {
-          fichajesSincronizados.push(fichaje._id!);
-        }
-      }
+      //   if (resultSQL && resultSQL.rowsAffected[0] > 0) {
+      //     fichajesSincronizados.push(fichaje._id!);
+      //   }
+      // }
 
-      // Una vez todos los fichajes están sincronizados, actualiza MongoDB
-      if (fichajesSincronizados.length > 0) {
-        await this.fichajesValidadosInstance.marcarComoEnviado(
-          fichajesSincronizados,
-        );
-      }
+      // // Una vez todos los fichajes están sincronizados, actualiza MongoDB
+      // if (fichajesSincronizados.length > 0) {
+      //   await this.fichajesValidadosInstance.marcarComoEnviado(
+      //     fichajesSincronizados,
+      //   );
+      // }
 
-      pool.close(); // Cierra la conexión
+      // pool.close(); // Cierra la conexión
       return { ok: true, message: "Sincronización completa." };
     } catch (err) {
       console.log(err);

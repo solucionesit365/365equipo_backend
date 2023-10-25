@@ -7,7 +7,7 @@ import {
 } from "../trabajadores/trabajadores.interface";
 import * as moment from "moment";
 import { ObjectId, WithId } from "mongodb";
-import { FichajeDto } from "./fichajes.interface";
+import { FichajeDto, ParFichaje } from "./fichajes.interface";
 import { FichajeValidadoDto } from "../fichajes-validados/fichajes-validados.interface";
 import { Cuadrantes } from "../cuadrantes/cuadrantes.class";
 import { DateTime } from "luxon";
@@ -219,8 +219,10 @@ export class Fichajes {
       };
   }
 
-  async getSinValidar(arraySubordinados: Subordinado[]) {
-    const fichajesPdtesDesordenados: WithId<FichajeDto>[] = [];
+  async getParesSinValidar(
+    arraySubordinados: Subordinado[],
+  ): Promise<ParFichaje[]> {
+    const paresSinValidar: ParFichaje[] = [];
 
     for (const subordinado of arraySubordinados) {
       const susFichajes = await this.getFichajesByIdSql(subordinado.id, false);
@@ -242,40 +244,58 @@ export class Fichajes {
         susFichajesPlus.splice(j + 1, 0, fichajeSistema);
       }
 
-      fichajesPdtesDesordenados.push(...susFichajesPlus);
-      // Faltaría obtener los pares y no mezclar en la misma dimensión todos los fichajes de entrada y salida de todos los trabajadores.
-      // Así también nos ahorramos en el frontend un paso complejo de más.
+      const resPares = this.obtenerParesTrabajador(susFichajesPlus);
+      paresSinValidar.push(...resPares);
     }
 
-    return fichajesPdtesDesordenados;
+    return paresSinValidar;
   }
 
-  private async transformarFichajesSinValidar(
-    fichajesPdtesDesordenados: WithId<FichajeDto>[],
-    idResponsable: number,
-  ) {
-    const fichajesTransformados: FichajeValidadoDto[] = [];
+  private obtenerParesTrabajador(fichajesSimples: WithId<FichajeDto>[]) {
+    const pares: ParFichaje[] = [];
 
-    for (const fichaje of fichajesPdtesDesordenados) {
-      const data: FichajeValidadoDto = {
-        aPagar: false,
-        comentario: { entrada: "", salida: "" },
-        enviado: false,
-        horasAprendiz: 0,
-        horasCoordinacion: 0,
-        horasExtra: 0,
-        horasPagar: {
-          comentario: "",
-          estadoValidado: "",
-          respSuper: "",
-          total: 0,
-        },
-        idResponsable,
-        idTrabajador: fichaje.idTrabajador,
-        fecha: fichaje.hora.toISOString(),
-      };
-
-      fichajesTransformados.push();
-    }
+    if (fichajesSimples.length % 2 === 0) {
+      for (let i = 0; i < fichajesSimples.length; i += 2) {
+        if (
+          fichajesSimples[i].tipo === "ENTRADA" &&
+          fichajesSimples[i + 1].tipo === "SALIDA"
+        ) {
+          pares.push({
+            entrada: fichajesSimples[i],
+            salida: fichajesSimples[i + 1],
+          });
+        }
+      }
+    } else throw Error("No se podrán conseguir los pares de una lista impar");
+    return pares;
   }
+
+  // private async transformarFichajesSinValidar(
+  //   fichajesPdtesDesordenados: WithId<FichajeDto>[],
+  //   idResponsable: number,
+  // ) {
+  //   const fichajesTransformados: FichajeValidadoDto[] = [];
+
+  //   for (const fichaje of fichajesPdtesDesordenados) {
+  //     const data: FichajeValidadoDto = {
+  //       aPagar: false,
+  //       comentario: { entrada: "", salida: "" },
+  //       enviado: false,
+  //       horasAprendiz: 0,
+  //       horasCoordinacion: 0,
+  //       horasExtra: 0,
+  //       horasPagar: {
+  //         comentario: "",
+  //         estadoValidado: "",
+  //         respSuper: "",
+  //         total: 0,
+  //       },
+  //       idResponsable,
+  //       idTrabajador: fichaje.idTrabajador,
+  //       fecha: fichaje.hora.toISOString(),
+  //     };
+
+  //     fichajesTransformados.push();
+  //   }
+  // }
 }
