@@ -30,11 +30,6 @@ export interface TrabajadorSql {
   displayFoto: string;
 }
 
-// export interface TrabajadorCompleto extends TrabajadorSql, UserRecord {
-//   displayName: string;
-//   toJSON: any;
-// }
-
 type UserRecordWithoutToJSON = Omit<UserRecord, "toJSON">;
 
 export interface TrabajadorCompleto
