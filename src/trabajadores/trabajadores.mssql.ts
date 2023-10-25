@@ -173,6 +173,25 @@ export async function getSubordinadosConTienda(
   return [];
 }
 
+export async function getSubordinadosConTiendaPorId(
+  idResponsable: number,
+): Promise<any[]> {
+  const sql = `
+  SELECT 
+    tr.*, 
+    (select count(*) from trabajadores where idResponsable = tr.id) as llevaEquipo,
+    (select idApp from trabajadores where id = tr.idResponsable) as validador,
+    (select nombre from tiendas where id = tr.idTienda) as nombreTienda
+  FROM trabajadores tr
+  WHERE 
+    tr.idResponsable = @param0 
+    AND tr.idTienda is not null
+  `;
+  const resTrabajadores = await recSoluciones("soluciones", sql, idResponsable);
+  if (resTrabajadores.recordset.length > 0) return resTrabajadores.recordset;
+  return [];
+}
+
 export async function esCoordinadora(uid: string) {
   const sql = `
     SELECT 
@@ -188,7 +207,23 @@ export async function esCoordinadora(uid: string) {
   return false;
 }
 
+export async function esCoordinadoraPorId(id: number) {
+  const sql = `
+    SELECT 
+      tr.idTienda,
+      tr.idResponsable,
+      (select idApp from trabajadores where id = tr.idResponsable) as idResponsableApp,
+      (select count(*) from trabajadores where idResponsable = tr.id) as llevaEquipo 
+    from trabajadores tr where id = @param0;
+  `;
+  const resCoordi = await recSoluciones("soluciones", sql, id);
+
+  if (resCoordi.recordset.length > 0) return true;
+  return false;
+}
+
 export async function getSubordinados(uid: string): Promise<Subordinado[]> {
+
   const sql = `
     select 
       id, 
@@ -206,6 +241,64 @@ export async function getSubordinados(uid: string): Promise<Subordinado[]> {
   if (resSubordinados.recordset.length > 0) return resSubordinados.recordset;
   return [];
 }
+
+export async function getSubordinadosByIdsql(id: number): Promise<
+  {
+    id: number;
+    idApp: string;
+    nombreApellidos: string;
+    displayName: string;
+    displayfoto: string;
+    idTienda: number;
+    antiguedad: string;
+    inicioContrato: string;
+  }[]
+> {
+  const sql = `
+    select 
+      id, 
+      idApp, 
+      nombreApellidos, 
+      displayName,
+      displayFoto,
+      idTienda, 
+      CONVERT(varchar, antiguedad, 103) as antiguedad, 
+      CONVERT(varchar, inicioContrato, 103) as inicioContrato 
+    from trabajadores 
+    where idResponsable = @param0
+  `;
+  const resSubordinados = await recSoluciones("soluciones", sql, id);
+  if (resSubordinados.recordset.length > 0) return resSubordinados.recordset;
+  return [];
+}
+
+// export async function getSubordinadosById(id: number, conFecha?: moment.Moment): Promise<
+//   {
+//     id: number;
+//     idApp: string;
+//     nombreApellidos: string;
+//     idTienda: number;
+//     antiguedad: string;
+//     inicioContrato: string;
+//     horasContrato: number;
+//   }[]
+// > {
+//   const sql = `
+//     select
+//       tr.id,
+//       tr.idApp,
+//       tr.nombreApellidos,
+//       tr.idTienda,
+//       CONVERT(varchar, tr.antiguedad, 103) as antiguedad,
+//       CONVERT(varchar, tr.inicioContrato, 103) as inicioContrato,
+//       (SELECT top 1 horasContrato*40/100 FROM historicoContratos WHERE dni = tr.dni)  as horasContrato
+//     from trabajadores tr
+//     where idResponsable = @param0
+//   `;
+//   const resSubordinados = await recSoluciones("soluciones", sql, id);
+//   if (resSubordinados.recordset.length > 0) return resSubordinados.recordset;
+//   return [];
+// }
 
 export async function getSubordinadosById(
   id: number,
