@@ -10,7 +10,7 @@ import { ObjectId, WithId } from "mongodb";
 import { FichajeDto, ParFichaje } from "./fichajes.interface";
 import { FichajeValidadoDto } from "../fichajes-validados/fichajes-validados.interface";
 import { Cuadrantes } from "../cuadrantes/cuadrantes.class";
-import { DateTime } from "luxon";
+import { DateTime, Duration } from "luxon";
 
 @Injectable()
 export class Fichajes {
@@ -148,7 +148,7 @@ export class Fichajes {
     const primeraEntrada = fichajesTrabajador.findIndex(
       (fichaje) => fichaje.tipo === "ENTRADA",
     );
-    const indexList: number[] = [];
+    const fichajeListFaltan: WithId<FichajeDto>[] = [];
 
     if (typeof primeraEntrada === "undefined") return [];
 
@@ -157,19 +157,18 @@ export class Fichajes {
         fichajesTrabajador[i].tipo === "ENTRADA" &&
         fichajesTrabajador[i + 1]?.tipo === "ENTRADA"
       ) {
-        indexList.push(i);
+        fichajeListFaltan.push(fichajesTrabajador[i]);
       }
 
       if (
         i === fichajesTrabajador.length - 1 &&
         fichajesTrabajador[i].tipo === "ENTRADA"
       ) {
-        indexList.push(i);
+        fichajeListFaltan.push(fichajesTrabajador[i]);
       }
     }
 
-    indexList.sort((a, b) => b - a);
-    return indexList;
+    return fichajeListFaltan;
   }
 
   /* Porque hay gente que se olvida de fichar. No se guarda en BBDD, debería guardarse !!! */
@@ -207,16 +206,32 @@ export class Fichajes {
       diaEntrada.endOf("day"),
     );
 
-    if (cuadrantes.length > 0)
+    if (cuadrantes.length > 0) {
+      let entrada = DateTime.fromJSDate(cuadrantes[0].inicio);
+      let salida = DateTime.fromJSDate(cuadrantes[0].final);
+      const diferencia = entrada.diff(salida, "minutes").minutes;
+
+      if (diferencia === 0) {
+        salida = salida.endOf("day");
+      }
+
       return {
-        entrada: DateTime.fromJSDate(cuadrantes[0].inicio),
-        salida: DateTime.fromJSDate(cuadrantes[0].final),
+        entrada: entrada,
+        salida: salida,
       };
-    else
+    } else
       return {
         entrada: diaEntrada.startOf("day"),
         salida: diaEntrada.endOf("day"),
       };
+  }
+
+  ordenarPorHora(arrayFichajes: WithId<FichajeDto>[]) {
+    return arrayFichajes.sort((a, b) => {
+      if (a.hora < b.hora) return -1;
+      if (a.hora > b.hora) return 1;
+      return 0;
+    });
   }
 
   async getParesSinValidar(
@@ -233,17 +248,19 @@ export class Fichajes {
         }),
       );
 
-      const indexList = this.comprobarParesFichajes(susFichajesPlus);
+      const fichajeListFaltan = this.comprobarParesFichajes(susFichajesPlus);
 
       // Si hay al menos un índice, hay que agregarlo al array de fichajes.
-      for (let j = 0; j < indexList.length; j += 1) {
+      for (let j = 0; j < fichajeListFaltan.length; j += 1) {
         const fichajeSistema = await this.createFichajeSalidaSistema(
-          DateTime.fromJSDate(susFichajesPlus[j].hora),
+          DateTime.fromJSDate(fichajeListFaltan[j].hora),
           susFichajesPlus[j].idTrabajador,
         );
-        susFichajesPlus.splice(j + 1, 0, fichajeSistema);
+        // susFichajesPlus.splice(j + 1, 0, fichajeSistema);
+        susFichajesPlus.push(fichajeSistema);
       }
 
+      this.ordenarPorHora(susFichajesPlus);
       const resPares = this.obtenerParesTrabajador(susFichajesPlus);
       paresSinValidar.push(...resPares);
     }
