@@ -288,4 +288,59 @@ export class CuadrantesDatabase {
       }
     }
   }
+
+  async removeAusenciaFromCuadrantes(
+    tipo: string,
+    idUsuario: number,
+    fechaInicio: Date,
+    fechaFinal: Date,
+  ) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const collection = db.collection("cuadrantes2");
+
+    // Elimina los documentos (cuadrantes) que contienen una ausencia del tipo proporcionado, el idTrabajador especificado
+    // y que se encuentran en el rango de fechas proporcionado
+    const result = await collection.deleteMany({
+      "ausencia.tipo": tipo,
+      idTrabajador: idUsuario,
+      inicio: { $gte: fechaInicio },
+      final: { $lte: fechaFinal },
+    });
+
+    if (result.deletedCount === 0) {
+      throw new Error(
+        "No se encontraron cuadrantes con las condiciones especificadas.",
+      );
+    }
+
+    return true;
+  }
+
+  async removeVacacionesFromCuadrantes(
+    idUsuario: number,
+    fechaInicio: Date,
+    fechaFinal: Date,
+  ) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const collection = db.collection("cuadrantes2");
+
+    // Elimina los documentos (cuadrantes2) que contienen vacaciones del tipo proporcionado, el idTrabajador especificado
+    // y que se encuentran en el rango de fechas proporcionado
+    const result = await collection.deleteMany({
+      "ausencia.tipo": "VACACIONES",
+      idTrabajador: idUsuario,
+      inicio: { $gte: fechaInicio },
+      final: { $lte: fechaFinal },
+    });
+
+    console.log(result);
+
+    if (result.deletedCount === 0) {
+      throw new Error(
+        "No se encontraron cuadrantes con las condiciones especificadas.",
+      );
+    }
+
+    return true;
+  }
 }

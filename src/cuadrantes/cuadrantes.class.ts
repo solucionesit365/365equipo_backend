@@ -655,4 +655,32 @@ export class Cuadrantes {
 
     throw Error("Paso no autorizado. No es de ventas.");
   }
+
+  //Borrar las ausencias de cuadrantes2 se llama en ausencias.class
+  async removeAusenciaFromCuadrantes(
+    tipo: string,
+    idUsuario: number,
+    fechaInicio: Date,
+    fechaFinal: Date,
+  ) {
+    return await this.schCuadrantes.removeAusenciaFromCuadrantes(
+      tipo,
+      idUsuario,
+      fechaInicio,
+      fechaFinal,
+    );
+  }
+
+  //Borrar las vacaciones de cuadrantes2 se llama en solicitud-vacaciones.class
+  async removeVacacionesFromCuadrantes(
+    idUsuario: number,
+    fechaInicio: Date,
+    fechaFinal: Date,
+  ) {
+    return await this.schCuadrantes.removeVacacionesFromCuadrantes(
+      idUsuario,
+      fechaInicio,
+      fechaFinal,
+    );
+  }
 }

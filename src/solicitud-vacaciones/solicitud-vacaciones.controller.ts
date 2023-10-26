@@ -243,15 +243,12 @@ export class SolicitudVacacionesController {
 
       console.log("Borrar solicitud:" + _id);
 
-      const respSolicitudes =
-        await this.solicitudVacacionesInstance.borrarSolicitud(_id);
-      if (respSolicitudes)
-        return {
-          ok: true,
-          data: respSolicitudes,
-        };
+      await this.solicitudVacacionesInstance.borrarSolicitud(_id);
 
-      throw Error("No se ha podido borrar la solcitud");
+      return {
+        ok: true,
+        data: "Solicitud borrada con exito",
+      };
     } catch (err) {
       console.log(err);
       return { ok: false, message: err.message };
