@@ -66,7 +66,33 @@ export class solicitudesVacacionesClass {
 
   //Borrar solicitud de vacaciones
   async borrarSolicitud(_id: string) {
-    return await this.schSolicitudVacaciones.borrarSolicitud(_id);
+    // 1.obtener la vacaciones que se van a eliminar
+    const vacacionesToDelete =
+      await this.schSolicitudVacaciones.getSolicitudesById(_id);
+    if (!vacacionesToDelete) {
+      throw new Error("Vacaciones no encontrada");
+    }
+    console.log(_id);
+
+    // 2. Eliminar las vacaciones de schSolicitudVacaciones.
+    await this.schSolicitudVacaciones.borrarSolicitud(_id);
+
+    //Convertir las fechas a el formato string
+    const fechaInicioISO = DateTime.fromFormat(
+      vacacionesToDelete.fechaInicio,
+      "d/M/yyyy",
+    ).toJSDate();
+    const fechaFinalISO = DateTime.fromFormat(
+      vacacionesToDelete.fechaFinal,
+      "d/M/yyyy",
+    ).toJSDate();
+
+    // 3.Eliminar las vacaciones de cuadrantesInstance.
+    await this.cuadrantesInstance.removeVacacionesFromCuadrantes(
+      vacacionesToDelete.idBeneficiario,
+      fechaInicioISO,
+      fechaFinalISO,
+    );
   }
 
   //Enviar email
