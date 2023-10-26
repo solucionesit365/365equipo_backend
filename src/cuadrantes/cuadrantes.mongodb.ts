@@ -193,24 +193,24 @@ export class CuadrantesDatabase {
     return resCuadrantes?.length > 0 ? resCuadrantes : [];
   }
 
-  // // Cuadrantes 2.0
-  // async getCuadranteSemanaTrabajador(
-  //   idTrabajador: number,
-  //   fechaInicioBusqueda: DateTime,
-  //   fechaFinalBusqueda: DateTime,
-  // ) {
-  //   const db = (await this.mongoDbService.getConexion()).db("soluciones");
-  //   const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes2");
-  //   const resCuadrantes = await cuadrantesCollection
-  //     .find({
-  //       idTrabajador: idTrabajador,
-  //       fechaInicio: { $gte: fechaInicioBusqueda.toJSDate() },
-  //       fechaFinal: { $lte: fechaFinalBusqueda.toJSDate() },
-  //     })
-  //     .toArray();
+  // Cuadrantes 2.0
+  async getCuadrantesSubordinados(
+    arrayIdsSubordinados: number[],
+    fechaInicioBusqueda: DateTime,
+    fechaFinalBusqueda: DateTime,
+  ) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes2");
+    const resCuadrantes = await cuadrantesCollection
+      .find({
+        idTrabajador: { $in: arrayIdsSubordinados },
+        inicio: { $gte: fechaInicioBusqueda.toJSDate() },
+        final: { $lte: fechaFinalBusqueda.toJSDate() },
+      })
+      .toArray();
 
-  //   return resCuadrantes?.length > 0 ? resCuadrantes : [];
-  // }
+    return resCuadrantes;
+  }
 
   // Cuadrantes 2.0
   async getPendientesEnvio() {

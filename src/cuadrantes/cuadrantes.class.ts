@@ -231,36 +231,40 @@ export class Cuadrantes {
   ): Promise<TCuadrante[]> {
     const fechaInicioSemana = fechaBusqueda.startOf("week");
     const fechaFinalSemana = fechaBusqueda.endOf("week");
-    const puestosTrabajo = await this.recuentoTiendasSubordinados(
-      arrayIdSubordinados,
+    const cuadrantesSubordinados =
+      await this.schCuadrantes.getCuadrantesSubordinados(
+        arrayIdSubordinados,
+        fechaInicioSemana,
+        fechaFinalSemana,
+      );
+    const cuadrantesPropiosCoordi =
+      await this.schCuadrantes.getCuadrantesIndividual(
+        idTrabajador,
+        fechaInicioSemana,
+        fechaFinalSemana,
+      );
+    const cuadrantesExternosTienda = await this.schCuadrantes.getCuadrantes(
+      idTienda,
       fechaInicioSemana,
       fechaFinalSemana,
     );
-    const cuadrantes: TCuadrante[] = [];
-    const puestosTrabajoIndividual = await this.recuentoTiendasIndividual(
-      idTrabajador,
-      fechaInicioSemana,
-      fechaFinalSemana,
-    );
-    const puestosTotales: number[] = [
-      ...new Set([
-        ...puestosTrabajoIndividual,
-        ...puestosTrabajo,
-        ...[idTienda],
-      ]),
+
+    const allCuadrantes = [
+      ...cuadrantesSubordinados,
+      ...cuadrantesPropiosCoordi,
+      ...cuadrantesExternosTienda,
     ];
 
-    for (let i = 0; i < puestosTotales.length; i += 1) {
-      cuadrantes.push(
-        ...(await this.schCuadrantes.getCuadrantes(
-          puestosTotales[i],
-          fechaInicioSemana,
-          fechaFinalSemana,
-        )),
-      );
-    }
+    const uniqueMap = new Map();
 
-    return cuadrantes;
+    allCuadrantes.forEach((cuadrante) => {
+      const id = cuadrante._id.toString();
+      uniqueMap.set(id, cuadrante);
+    });
+
+    const cuadrantesUnicos = Array.from(uniqueMap.values());
+
+    return cuadrantesUnicos;
   }
 
   async getCuadranteSupervisora(

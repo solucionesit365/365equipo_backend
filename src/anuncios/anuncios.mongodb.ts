@@ -6,7 +6,21 @@ import { AnuncioDto, UpdateAnuncioDto } from "./anuncios.dto";
 
 @Injectable()
 export class AnunciosService {
-  constructor(private readonly mongoDbService: MongoDbService) {}
+  constructor(private readonly mongoDbService: MongoDbService) {
+    // Llamando al método para configurar el índice TTL cuando se instancia el servicio
+    this.deleteAnunciosCaducidad().catch((err) => {
+      console.error("Error setting up TTL index:", err);
+    });
+  }
+
+  //Eliminacion automatica de los anuncios por su caducidad
+  private async deleteAnunciosCaducidad() {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const anuncios = db.collection<AnuncioDto>("anuncios");
+
+    // Creando el índice TTL para la propiedad 'caducidad'
+    await anuncios.createIndex({ "caducidad": 1 }, { expireAfterSeconds: 0 });
+  }
 
   async getAnuncios(idTienda: number) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
