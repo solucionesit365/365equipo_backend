@@ -43,6 +43,7 @@ export class EvaluacionesController {
     }
   }
 
+  //Todas las plantillas segun el tipo
   @Get("getPlantillas")
   @UseGuards(AuthGuard)
   async getPlantillas(
@@ -61,6 +62,48 @@ export class EvaluacionesController {
         };
       }
     } catch (error) {}
+  }
+  
+  //Todas las Plantillas admin
+  @Get("getPlantillasAdmin")
+  @UseGuards(AuthGuard)
+  async getPlantillasAdmin(@Headers("authorization") authHeader: string) {
+    try {
+      const token = this.tokenService.extract(authHeader);
+      await this.authInstance.verifyToken(token);
+
+      const response = await this.evaluacionesclass.getPlantillasAdmin();
+      if (response) {
+        return {
+          ok: true,
+          data: response,
+        };
+      }
+    } catch (error) {}
+  }
+
+  //Eliminar plantillas
+  @Post("deletePlantillaAdmin")
+  @UseGuards(AuthGuard)
+  async deletePlantillaAdmin(
+    @Body() evaluacion: evaluacionesInterface,
+    @Headers("authorization") authHeader: string,
+  ) {
+    try {
+      const response = await this.evaluacionesclass.deletePlantillaAdmin(
+        evaluacion,
+      );
+      if (response) {
+        return {
+          ok: true,
+          data: response,
+        };
+      }
+      throw Error("No se ha podido borrar la evaluacion");
+    } catch (error) {
+      console.log(error);
+      return { ok: false, message: error.message };
+    }
   }
 
   @Post("addEvaluacion")
