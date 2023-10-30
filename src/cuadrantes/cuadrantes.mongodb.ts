@@ -307,25 +307,13 @@ export class CuadrantesDatabase {
       final: { $lte: fechaFinal },
     });
 
-    if (result.deletedCount === 0) {
-      throw new Error(
-        "No se encontraron cuadrantes con las condiciones especificadas.",
-      );
-    }
-
-    return true;
+    return result.deletedCount > 0;
   }
 
-  async removeVacacionesFromCuadrantes(
-    idUsuario: number,
-    fechaInicio: Date,
-    fechaFinal: Date,
-  ) {
+  async removeVacacionesFromCuadrantes(idUsuario, fechaInicio, fechaFinal) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const collection = db.collection("cuadrantes2");
 
-    // Elimina los documentos (cuadrantes2) que contienen vacaciones del tipo proporcionado, el idTrabajador especificado
-    // y que se encuentran en el rango de fechas proporcionado
     const result = await collection.deleteMany({
       "ausencia.tipo": "VACACIONES",
       idTrabajador: idUsuario,
@@ -335,12 +323,7 @@ export class CuadrantesDatabase {
 
     console.log(result);
 
-    if (result.deletedCount === 0) {
-      throw new Error(
-        "No se encontraron cuadrantes con las condiciones especificadas.",
-      );
-    }
-
-    return true;
+    // Si deletedCount es mayor que 0, entonces se borraron documentos, de lo contrario, no
+    return result.deletedCount > 0;
   }
 }

@@ -77,22 +77,30 @@ export class solicitudesVacacionesClass {
     // 2. Eliminar las vacaciones de schSolicitudVacaciones.
     await this.schSolicitudVacaciones.borrarSolicitud(_id);
 
-    //Convertir las fechas a el formato string
-    const fechaInicioISO = DateTime.fromFormat(
-      vacacionesToDelete.fechaInicio,
-      "d/M/yyyy",
-    ).toJSDate();
-    const fechaFinalISO = DateTime.fromFormat(
-      vacacionesToDelete.fechaFinal,
-      "d/M/yyyy",
-    ).toJSDate();
+    try {
+      //Convertir las fechas a el formato string
+      const fechaInicioISO = DateTime.fromFormat(
+        vacacionesToDelete.fechaInicio,
+        "d/M/yyyy",
+      ).toJSDate();
+      const fechaFinalISO = DateTime.fromFormat(
+        vacacionesToDelete.fechaFinal,
+        "d/M/yyyy",
+      ).toJSDate();
 
-    // 3.Eliminar las vacaciones de cuadrantesInstance.
-    await this.cuadrantesInstance.removeVacacionesFromCuadrantes(
-      vacacionesToDelete.idBeneficiario,
-      fechaInicioISO,
-      fechaFinalISO,
-    );
+      // 3.Eliminar las vacaciones de cuadrantesInstance.
+      await this.cuadrantesInstance.removeVacacionesFromCuadrantes(
+        vacacionesToDelete.idBeneficiario,
+        fechaInicioISO,
+        fechaFinalISO,
+      );
+    } catch (error) {
+      throw new Error(
+        `Error al procesar la eliminación de las vacaciones: ${error.message}`,
+      );
+    }
+
+    return true;
   }
 
   //Enviar email
