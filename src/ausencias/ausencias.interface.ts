@@ -8,6 +8,7 @@ export interface AusenciaInterface {
   tipo: TiposAusencia;
   fechaInicio: Date;
   fechaFinal: Date;
+  fechaRevision?:Date;
   comentario: string;
   enviado?: boolean;
   completa: boolean;
