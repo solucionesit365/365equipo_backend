@@ -36,6 +36,16 @@ export class EvaluacionesDatabase {
     return response;
   }
 
+  async getEvalucionAdminRespondidas() {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const evaluacionesCollect = db.collection<evaluacionesInterface>(
+      "evaluacionesRespuestas",
+    );
+    const response = await evaluacionesCollect.find({}).toArray();
+
+    return response;
+  }
+
   async deletePlantillaAdmin(evaluacion: evaluacionesInterface) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const evaluacionesCollect =
@@ -64,6 +74,9 @@ export class EvaluacionesDatabase {
     const evaluacionesCollect = db.collection<evaluacionesInterface>(
       "evaluacionesRespuestas",
     );
+    console.log(idSql);
+    console.log(año);
+
     const query = {
       "encuestado.idSql": idSql,
       "encuestado.año": año,

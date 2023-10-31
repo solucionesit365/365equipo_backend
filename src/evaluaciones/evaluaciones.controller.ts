@@ -63,7 +63,7 @@ export class EvaluacionesController {
       }
     } catch (error) {}
   }
-  
+
   //Todas las Plantillas admin
   @Get("getPlantillasAdmin")
   @UseGuards(AuthGuard)
@@ -73,6 +73,26 @@ export class EvaluacionesController {
       await this.authInstance.verifyToken(token);
 
       const response = await this.evaluacionesclass.getPlantillasAdmin();
+      if (response) {
+        return {
+          ok: true,
+          data: response,
+        };
+      }
+    } catch (error) {}
+  }
+
+  @Get("getEvalucionAdminRespondidas")
+  @UseGuards(AuthGuard)
+  async getEvalucionAdminRespondidas(
+    @Headers("authorization") authHeader: string,
+  ) {
+    try {
+      const token = this.tokenService.extract(authHeader);
+      await this.authInstance.verifyToken(token);
+
+      const response =
+        await this.evaluacionesclass.getEvalucionAdminRespondidas();
       if (response) {
         return {
           ok: true,
@@ -131,6 +151,8 @@ export class EvaluacionesController {
     @Query() request,
   ) {
     try {
+      console.log(request);
+
       const token = this.tokenService.extract(authHeader);
       await this.authInstance.verifyToken(token);
       const response = await this.evaluacionesclass.getEvaluados(

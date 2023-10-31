@@ -29,6 +29,14 @@ export class EvaluacionesClass {
     }
   }
 
+  async getEvalucionAdminRespondidas() {
+    const response = await this.evaluacionesDB.getEvalucionAdminRespondidas();
+
+    if (response) {
+      return response;
+    }
+  }
+
   async deletePlantillaAdmin(evaluacion: evaluacionesInterface) {
     return await this.evaluacionesDB.deletePlantillaAdmin(evaluacion);
   }
