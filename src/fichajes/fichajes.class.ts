@@ -150,7 +150,8 @@ export class Fichajes {
     );
     const fichajeListFaltan: WithId<FichajeDto>[] = [];
 
-    if (typeof primeraEntrada === "undefined") return [];
+    if (typeof primeraEntrada === "undefined" || primeraEntrada === -1)
+      return [];
 
     for (let i = primeraEntrada; i < fichajesTrabajador.length; i += 1) {
       if (
