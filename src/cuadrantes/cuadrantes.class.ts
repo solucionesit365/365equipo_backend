@@ -621,8 +621,8 @@ export class Cuadrantes {
           idTrabajador: ausencia.idUsuario,
           idPlan: new ObjectId().toString(),
           idTienda: trabajador.idTienda,
-          inicio: null,
-          final: null,
+          inicio: auxFecha.toJSDate(),
+          final: auxFecha.toJSDate(),
           nombre: trabajador.nombreApellidos,
           totalHoras: 0,
           enviado: false,
@@ -654,5 +654,33 @@ export class Cuadrantes {
     }
 
     throw Error("Paso no autorizado. No es de ventas.");
+  }
+
+  //Borrar las ausencias de cuadrantes2 se llama en ausencias.class
+  async removeAusenciaFromCuadrantes(
+    tipo: string,
+    idUsuario: number,
+    fechaInicio: Date,
+    fechaFinal: Date,
+  ) {
+    return await this.schCuadrantes.removeAusenciaFromCuadrantes(
+      tipo,
+      idUsuario,
+      fechaInicio,
+      fechaFinal,
+    );
+  }
+
+  //Borrar las vacaciones de cuadrantes2 se llama en solicitud-vacaciones.class
+  async removeVacacionesFromCuadrantes(
+    idUsuario: number,
+    fechaInicio: Date,
+    fechaFinal: Date,
+  ) {
+    return await this.schCuadrantes.removeVacacionesFromCuadrantes(
+      idUsuario,
+      fechaInicio,
+      fechaFinal,
+    );
   }
 }

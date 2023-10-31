@@ -288,4 +288,42 @@ export class CuadrantesDatabase {
       }
     }
   }
+
+  async removeAusenciaFromCuadrantes(
+    tipo: string,
+    idUsuario: number,
+    fechaInicio: Date,
+    fechaFinal: Date,
+  ) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const collection = db.collection("cuadrantes2");
+
+    // Elimina los documentos (cuadrantes) que contienen una ausencia del tipo proporcionado, el idTrabajador especificado
+    // y que se encuentran en el rango de fechas proporcionado
+    const result = await collection.deleteMany({
+      "ausencia.tipo": tipo,
+      idTrabajador: idUsuario,
+      inicio: { $gte: fechaInicio },
+      final: { $lte: fechaFinal },
+    });
+
+    return result.deletedCount > 0;
+  }
+
+  async removeVacacionesFromCuadrantes(idUsuario, fechaInicio, fechaFinal) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const collection = db.collection("cuadrantes2");
+
+    const result = await collection.deleteMany({
+      "ausencia.tipo": "VACACIONES",
+      idTrabajador: idUsuario,
+      inicio: { $gte: fechaInicio },
+      final: { $lte: fechaFinal },
+    });
+
+    console.log(result);
+
+    // Si deletedCount es mayor que 0, entonces se borraron documentos, de lo contrario, no
+    return result.deletedCount > 0;
+  }
 }
