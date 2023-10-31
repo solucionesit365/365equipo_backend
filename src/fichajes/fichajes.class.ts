@@ -261,14 +261,14 @@ export class Fichajes {
       }
 
       this.ordenarPorHora(susFichajesPlus);
-      const resPares = this.obtenerParesTrabajador(susFichajesPlus);
+      const resPares = await this.obtenerParesTrabajador(susFichajesPlus);
       paresSinValidar.push(...resPares);
     }
 
     return paresSinValidar;
   }
 
-  private obtenerParesTrabajador(fichajesSimples: WithId<FichajeDto>[]) {
+  private async obtenerParesTrabajador(fichajesSimples: WithId<FichajeDto>[]) {
     const pares: ParFichaje[] = [];
 
     if (fichajesSimples.length % 2 === 0) {
@@ -280,6 +280,10 @@ export class Fichajes {
           pares.push({
             entrada: fichajesSimples[i],
             salida: fichajesSimples[i + 1],
+            cuadrante: await this.cuadrantesInstance.getTurnoDia(
+              fichajesSimples[i].idTrabajador,
+              DateTime.fromJSDate(fichajesSimples[i].hora),
+            ),
           });
         }
       }

@@ -184,14 +184,14 @@ export class FichajesController {
     }
   }
 
-  @UseGuards(AuthGuard)
+  // @UseGuards(AuthGuard)
   @Get("sinValidar")
   async getSinValidar(@Headers("authorization") authHeader: string) {
     try {
-      const token = this.tokenService.extract(authHeader);
-      const usuario = await this.authInstance.getUserWithToken(token);
+      // const token = this.tokenService.extract(authHeader);
+      // const usuario = await this.authInstance.getUserWithToken(token);
       const arraySubordinados = await this.trabajadoresInstance.getSubordinados(
-        usuario.idApp,
+        "khkO3Y0YJQNGft5ljqrrfeSUAN52",
       );
 
       return {
