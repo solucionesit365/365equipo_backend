@@ -51,7 +51,27 @@ export class Ausencias {
   }
 
   async deleteAusencia(idAusencia: string) {
-    return await this.schAusencias.deleteAusencia(idAusencia);
+    // 1. Primero, obten la ausencia que vas a eliminar para poder usar sus propiedades.
+    const ausenciaToDelete = await this.schAusencias.getAusenciasById(
+      new ObjectId(idAusencia),
+    );
+    if (!ausenciaToDelete) {
+      throw new Error("Ausencia no encontrada");
+    }
+    console.log(idAusencia);
+
+    // 2. Elimina la ausencia de schAusencias.
+    await this.schAusencias.deleteAusencia(idAusencia);
+
+    // 3. Luego, elimina la ausencia de cuadrantesInstance.
+    await this.cuadrantesInstance.removeAusenciaFromCuadrantes(
+      ausenciaToDelete.tipo,
+      ausenciaToDelete.idUsuario,
+      ausenciaToDelete.fechaInicio,
+      ausenciaToDelete.fechaFinal,
+    );
+
+    return true; // Devuelve true o lo que necesites para indicar que la operación fue exitosa.
   }
 
   // async updateAusencia(ausencia: AusenciaInterface) {

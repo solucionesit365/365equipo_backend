@@ -62,10 +62,14 @@ import { CalendarioFestivosDatabase } from "./calendario-festivos/calendario-fes
 import { ArchivoDigitalController } from "./archivo-digital/archivo-digital.controller";
 import { ArchivoDigital } from "./archivo-digital/archivo-digital.class";
 import { ArchivoDigitalDatabase } from "./archivo-digital/archivo-digital.mongodb";
+import { SolicitudVacacionesController } from "./solicitud-vacaciones/solicitud-vacaciones.controller";
+import { solicitudesVacacionesClass } from "./solicitud-vacaciones/solicitud-vacaciones.class";
+import { SolicitudVacacionesBdd } from "./solicitud-vacaciones/solicitud-vacaciones.mongodb";
 import { EvaluacionesController } from "./evaluaciones/evaluaciones.controller";
 import { EvaluacionesDatabase } from "./evaluaciones/evaluaciones.mongodb";
 import { EvaluacionesClass } from "./evaluaciones/evaluaciones.class";
-import { MantenimientoController } from './mantenimiento/mantenimiento.controller';
+import { MantenimientoController } from "./mantenimiento/mantenimiento.controller";
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -94,6 +98,7 @@ import { MantenimientoController } from './mantenimiento/mantenimiento.controlle
     VerificacionmfaController,
     CalendarioFestivosController,
     ArchivoDigitalController,
+    SolicitudVacacionesController,
     EvaluacionesController,
     MantenimientoController,
   ],
@@ -138,6 +143,8 @@ import { MantenimientoController } from './mantenimiento/mantenimiento.controlle
     CalendarioFestivo,
     ArchivoDigital,
     ArchivoDigitalDatabase,
+    solicitudesVacacionesClass,
+    SolicitudVacacionesBdd,
     EvaluacionesDatabase,
     EvaluacionesClass,
   ],
