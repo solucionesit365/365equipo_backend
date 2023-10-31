@@ -86,13 +86,17 @@ export class EvaluacionesController {
   @UseGuards(AuthGuard)
   async getEvalucionAdminRespondidas(
     @Headers("authorization") authHeader: string,
+    @Query() request,
   ) {
     try {
       const token = this.tokenService.extract(authHeader);
       await this.authInstance.verifyToken(token);
 
       const response =
-        await this.evaluacionesclass.getEvalucionAdminRespondidas();
+        await this.evaluacionesclass.getEvalucionAdminRespondidas(
+          Number(request.idSql),
+          Number(request.año),
+        );
       if (response) {
         return {
           ok: true,

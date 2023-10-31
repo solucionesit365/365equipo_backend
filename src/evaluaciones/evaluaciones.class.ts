@@ -29,8 +29,11 @@ export class EvaluacionesClass {
     }
   }
 
-  async getEvalucionAdminRespondidas() {
-    const response = await this.evaluacionesDB.getEvalucionAdminRespondidas();
+  async getEvalucionAdminRespondidas(idSql: number, año: number) {
+    const response = await this.evaluacionesDB.getEvalucionAdminRespondidas(
+      idSql,
+      año,
+    );
 
     if (response) {
       return response;
