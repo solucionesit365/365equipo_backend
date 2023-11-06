@@ -82,9 +82,9 @@ export class EvaluacionesController {
     } catch (error) {}
   }
 
-  @Get("getEvalucionAdminRespondidas")
+  @Get("getEvaluacionAdminRespondidas")
   @UseGuards(AuthGuard)
-  async getEvalucionAdminRespondidas(
+  async getEvaluacionAdminRespondidas(
     @Headers("authorization") authHeader: string,
     @Query() request,
   ) {
@@ -93,7 +93,7 @@ export class EvaluacionesController {
       await this.authInstance.verifyToken(token);
 
       const response =
-        await this.evaluacionesclass.getEvalucionAdminRespondidas(
+        await this.evaluacionesclass.getEvaluacionAdminRespondidas(
           Number(request.idSql),
           Number(request.año),
         );

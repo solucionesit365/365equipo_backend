@@ -36,7 +36,7 @@ export class EvaluacionesDatabase {
     return response;
   }
 
-  async getEvalucionAdminRespondidas(idSql: number, año: number) {
+  async getEvaluacionAdminRespondidas(idSql: number, año: number) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const evaluacionesCollect = db.collection<evaluacionesInterface>(
       "evaluacionesRespuestas",
