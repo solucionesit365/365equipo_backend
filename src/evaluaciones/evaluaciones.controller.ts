@@ -106,6 +106,24 @@ export class EvaluacionesController {
     } catch (error) {}
   }
 
+  @Get("getEvaluaciones")
+  @UseGuards(AuthGuard)
+  async getEvaluaciones(@Headers("authorization") authHeader: string) {
+    try {
+      const token = this.tokenService.extract(authHeader);
+      await this.authInstance.verifyToken(token);
+
+      const response = await this.evaluacionesclass.getEvaluaciones();
+
+      if (response) {
+        return {
+          ok: true,
+          data: response,
+        };
+      }
+    } catch (error) {}
+  }
+
   //Eliminar plantillas
   @Post("deletePlantillaAdmin")
   @UseGuards(AuthGuard)
@@ -155,8 +173,6 @@ export class EvaluacionesController {
     @Query() request,
   ) {
     try {
-      console.log(request);
-
       const token = this.tokenService.extract(authHeader);
       await this.authInstance.verifyToken(token);
       const response = await this.evaluacionesclass.getEvaluados(

@@ -45,9 +45,18 @@ export class EvaluacionesDatabase {
       "encuestado.idSql": idSql,
       "encuestado.año": año,
     };
-    console.log(query);
 
     const response = await evaluacionesCollect.find(query).toArray();
+
+    return response;
+  }
+
+  async getEvaluaciones() {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const evaluacionesCollect = db.collection<evaluacionesInterface>(
+      "evaluacionesRespuestas",
+    );
+    const response = await evaluacionesCollect.find().toArray();
 
     return response;
   }
@@ -59,7 +68,6 @@ export class EvaluacionesDatabase {
     const respEvaluacion = await evaluacionesCollect.deleteOne({
       _id: new ObjectId(evaluacion._id),
     });
-    console.log(respEvaluacion);
 
     return respEvaluacion.acknowledged && respEvaluacion.deletedCount > 0;
   }
