@@ -21,6 +21,36 @@ export class EvaluacionesClass {
       return response;
     }
   }
+  async getPlantillasAdmin() {
+    const response = await this.evaluacionesDB.getPlantillasAdmin();
+
+    if (response) {
+      return response;
+    }
+  }
+
+  async getEvaluacionAdminRespondidas(idSql: number, año: number) {
+    const response = await this.evaluacionesDB.getEvaluacionAdminRespondidas(
+      idSql,
+      año,
+    );
+
+    if (response) {
+      return response;
+    }
+  }
+
+  async getEvaluaciones() {
+    const response = await this.evaluacionesDB.getEvaluaciones();
+
+    if (response) {
+      return response;
+    }
+  }
+
+  async deletePlantillaAdmin(evaluacion: evaluacionesInterface) {
+    return await this.evaluacionesDB.deletePlantillaAdmin(evaluacion);
+  }
 
   async addEvaluacion(evaluacion: evaluacionesInterface) {
     const response = await this.evaluacionesDB.addEvaluacion(evaluacion);
