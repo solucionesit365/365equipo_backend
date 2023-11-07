@@ -180,7 +180,8 @@ export async function esCoordinadora(uid: string) {
   `;
   const resCoordi = await recSoluciones("soluciones", sql, uid);
 
-  if (resCoordi.recordset.length > 0) return true;
+  if (resCoordi.recordset.length > 0 && resCoordi.recordset[0].llevaEquipo > 0)
+    return true;
   return false;
 }
 
@@ -195,7 +196,8 @@ export async function esCoordinadoraPorId(id: number) {
   `;
   const resCoordi = await recSoluciones("soluciones", sql, id);
 
-  if (resCoordi.recordset.length > 0) return true;
+  if (resCoordi.recordset.length > 0 && resCoordi.recordset[0].llevaEquipo > 0)
+    return true;
   return false;
 }
 
