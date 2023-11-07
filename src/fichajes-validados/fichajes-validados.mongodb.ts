@@ -26,6 +26,25 @@ export class FichajesValidadosDatabase {
     return await fichajesCollection.find({ idTrabajador }).toArray();
   }
 
+  async getPendientesEnvio() {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const fichajesCollection =
+      db.collection<FichajeValidadoDto>("fichajesValidados");
+
+    return await fichajesCollection.find({ enviado: { $ne: true } }).toArray();
+  }
+
+  async marcarComoEnviado(ids: string[]) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const fichajesCollection =
+      db.collection<FichajeValidadoDto>("fichajesValidados");
+
+    return await fichajesCollection.updateMany(
+      { _id: { $in: ids } },
+      { $set: { enviado: true } },
+    );
+  }
+
   async updateFichajesValidados(fichajesValidados: FichajeValidadoDto) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const fichajesValidadosCollect =

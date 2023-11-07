@@ -23,6 +23,32 @@ export class FichajesValidados {
   async getFichajesValidados(idTrabajador: number) {
     return await this.schFichajesValidados.getFichajesValidados(idTrabajador);
   }
+
+  async getPendientesEnvio() {
+    return await this.schFichajesValidados.getPendientesEnvio();
+  }
+
+  formatoConsultaSQL(fichaje: FichajeValidadoDto): string {
+    const idPlan = fichaje.cuadrante.idPlan;
+    const horasExtra = fichaje.horasExtra ? fichaje.horasExtra : 0;
+    const horasCoordinacion = fichaje.horasCoordinacion
+      ? fichaje.horasCoordinacion
+      : 0;
+    const horasAprendiz = fichaje.horasAprendiz ? fichaje.horasAprendiz : 0;
+    const idEmpleado = fichaje.idTrabajador;
+    // Convertir a estándard con tipo Date.
+    const fecha = DateTime.fromFormat(fichaje.fecha, "yyyy-MM-dd");
+    const day = fecha.day;
+    const month = fecha.month;
+    const year = fecha.year;
+    const nombreTabla = "";
+    return `
+    DELETE FROM ${nombreTabla} WHERE idEmpleado = ${idEmpleado} AND ${day} = DAY(fecha) AND ${month} = MONTH(fecha) AND ${year} = YEAR(fecha)  AND (idTurno like '%_Extra%' OR AND idTurno like '%_Coordinacion%' OR AND idTurno like '%_Aprendiz%');
+    INSERT INTO ${nombreTabla} (idPlan, fecha, botiga, idTurno, idEmpleado, usuarioModif, fechaModif, activo)
+    VALUES (NEWID(), )
+    `;
+  }
+
   async updateFichajesValidados(fichajesValidados: FichajeValidadoDto) {
     return await this.schFichajesValidados.updateFichajesValidados(
       fichajesValidados,
@@ -108,7 +134,7 @@ export class FichajesValidados {
 
     for (let i = 0; i < arrayValidados.length; i += 1) {
       const dayIndex = this.getNumeroSemana(arrayValidados[i].fecha);
-      this.addToSubordinados(subordinados, arrayValidados[i], dayIndex);
+      // this.addToSubordinados(subordinados, arrayValidados[i], dayIndex);
     }
 
     return subordinados; // Hacer map para filtrar datos innecesarios.
