@@ -302,6 +302,28 @@ export class TrabajadoresController {
     }
   }
 
+  @Get("getSubordinadosByIdsql")
+  async getSubordinadosByIdsql(
+    @Headers("authorization") authHeader: string,
+    @Query() { idSql },
+  ) {
+    try {
+      const token = this.tokenService.extract(authHeader);
+      await this.authInstance.verifyToken(token);
+
+      if (!idSql) throw Error("Faltan datos");
+
+      const resUser = await this.trabajadorInstance.getSubordinadosByIdsql(
+        idSql,
+      );
+
+      return { ok: true, data: resUser };
+    } catch (err) {
+      console.log(err);
+      return { ok: false, message: err.message };
+    }
+  }
+
   @Post("uploadFoto")
   async uploadFoto(
     @Headers("authorization") authHeader: string,
