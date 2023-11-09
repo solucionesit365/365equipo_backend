@@ -65,7 +65,10 @@ import { ArchivoDigitalDatabase } from "./archivo-digital/archivo-digital.mongod
 import { EvaluacionesController } from "./evaluaciones/evaluaciones.controller";
 import { EvaluacionesDatabase } from "./evaluaciones/evaluaciones.mongodb";
 import { EvaluacionesClass } from "./evaluaciones/evaluaciones.class";
-import { MantenimientoController } from './mantenimiento/mantenimiento.controller';
+import { MantenimientoController } from "./mantenimiento/mantenimiento.controller";
+import { MbctokenService } from "./bussinesCentral/services/mbctoken/mbctoken.service";
+import { EmployeesClass } from "./bussinesCentral/employees/employees.class";
+import { EmployeesController } from "./bussinesCentral/employees/employees.controller";
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -96,6 +99,7 @@ import { MantenimientoController } from './mantenimiento/mantenimiento.controlle
     ArchivoDigitalController,
     EvaluacionesController,
     MantenimientoController,
+    EmployeesController,
   ],
   providers: [
     AppService,
@@ -140,6 +144,8 @@ import { MantenimientoController } from './mantenimiento/mantenimiento.controlle
     ArchivoDigitalDatabase,
     EvaluacionesDatabase,
     EvaluacionesClass,
+    MbctokenService,
+    EmployeesClass,
   ],
 })
 export class AppModule {}
