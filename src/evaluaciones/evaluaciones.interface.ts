@@ -1,4 +1,7 @@
+import { ObjectId } from "mongodb";
+
 export interface evaluacionesInterface {
+  _id: ObjectId;
   titulo: string;
   tipo: string;
   foto: string;

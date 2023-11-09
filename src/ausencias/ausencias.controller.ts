@@ -29,6 +29,7 @@ export class AusenciasController {
       idUsuario,
       fechaInicio,
       fechaFinal,
+      fechaRevision,
       tipo,
       comentario,
       nombre,
@@ -47,12 +48,14 @@ export class AusenciasController {
           typeof idUsuario === "number" &&
           typeof fechaInicio === "string" &&
           typeof fechaFinal === "string" &&
+          typeof fechaRevision === "string" &&
           typeof comentario === "string" &&
           typeof completa === "boolean" &&
           typeof horas === "number")
       ) {
         const inicio = new Date(fechaInicio);
         const final = new Date(fechaFinal);
+        const revision = new Date(fechaRevision);
 
         return {
           ok: true,
@@ -62,6 +65,7 @@ export class AusenciasController {
             tipo,
             inicio,
             final,
+            revision,
             comentario,
             completa,
             horas,

@@ -1,4 +1,5 @@
-import { ObjectId } from "mongodb";
+import { ObjectId, WithId } from "mongodb";
+import { TCuadrante } from "../cuadrantes/cuadrantes.interface";
 
 export interface FichajeDto {
   _id?: ObjectId;
@@ -9,4 +10,11 @@ export interface FichajeDto {
   idExterno: number;
   comentario?: string;
   validado: boolean;
+  idTrabajador?: number; //no existe, pero para poder mutar la interface
+}
+
+export interface ParFichaje {
+  entrada: WithId<FichajeDto>;
+  salida: WithId<FichajeDto>;
+  cuadrante: TCuadrante;
 }
