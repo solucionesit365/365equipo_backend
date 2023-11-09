@@ -37,4 +37,5 @@ export interface FichajeValidadoDto {
   horasAprendiz: number;
   horasCoordinacion: number;
   horasCuadrante: number;
+  enviado: boolean;
 }
