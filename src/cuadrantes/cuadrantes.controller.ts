@@ -301,8 +301,12 @@ export class CuadrantesController {
             (reqCuadrante.arraySemanalHoras[i].horaEntrada as DateTime).equals(
               reqCuadrante.arraySemanalHoras[i].horaSalida as DateTime,
             )
-          )
+          ) {
+            await this.cuadrantesInstance.borrarTurno(
+              reqCuadrante.arraySemanalHoras[i].idCuadrante,
+            );
             continue;
+          }
 
           const horasContractuales =
             (await this.trabajadoresInstance.getHorasContratoByIdNew(
