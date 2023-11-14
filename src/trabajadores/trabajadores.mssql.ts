@@ -226,7 +226,7 @@ export async function getSubordinados(uid: string): Promise<
     from trabajadores 
     where idResponsable = (select id from trabajadores where idApp = @param0)
   `;
-  const resSubordinados = await recSoluciones("soluciones", sql, uid);
+  const resSubordinados = await recSolucionesNew(sql, uid);
   if (resSubordinados.recordset.length > 0) return resSubordinados.recordset;
   return [];
 }
