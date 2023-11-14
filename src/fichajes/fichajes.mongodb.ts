@@ -162,6 +162,7 @@ export class FichajesDatabase {
 
     return await fichajesCollection
       .find({ idExterno: idSql, validado: validado })
+      .sort({ hora: 1 })
       .toArray();
   }
 

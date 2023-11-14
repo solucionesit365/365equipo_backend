@@ -42,3 +42,15 @@ export interface TrabajadorCompleto
     UserRecordWithoutToJSON {
   displayName: string;
 }
+
+export interface Subordinado {
+  id: number;
+  idApp: string;
+  nombreApellidos: string;
+  displayName: string;
+  displayfoto: string;
+  idTienda: number;
+  antiguedad: string;
+  inicioContrato: string;
+  horasContrato?: number;
+}

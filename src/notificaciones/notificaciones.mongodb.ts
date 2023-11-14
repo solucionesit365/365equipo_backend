@@ -67,7 +67,7 @@ export class NotificacionsBbdd {
     const inAppNotifications =
       db.collection<InAppNotification>("inAppNotifications");
 
-    return await inAppNotifications.find({ uid, leido: true }).toArray();
+    return await inAppNotifications.find({ uid }).toArray();
   }
 
   async marcarComoLeida(id: string, uid: string) {
