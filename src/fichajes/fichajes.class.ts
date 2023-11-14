@@ -249,17 +249,17 @@ export class Fichajes {
         }),
       );
 
-      const fichajeListFaltan = this.comprobarParesFichajes(susFichajesPlus);
+      // const fichajeListFaltan = this.comprobarParesFichajes(susFichajesPlus);
 
-      // Si hay al menos un índice, hay que agregarlo al array de fichajes.
-      for (let j = 0; j < fichajeListFaltan.length; j += 1) {
-        const fichajeSistema = await this.createFichajeSalidaSistema(
-          DateTime.fromJSDate(fichajeListFaltan[j].hora),
-          susFichajesPlus[j].idTrabajador,
-        );
-        // susFichajesPlus.splice(j + 1, 0, fichajeSistema);
-        susFichajesPlus.push(fichajeSistema);
-      }
+      // // Si hay al menos un índice, hay que agregarlo al array de fichajes.
+      // for (let j = 0; j < fichajeListFaltan.length; j += 1) {
+      //   const fichajeSistema = await this.createFichajeSalidaSistema(
+      //     DateTime.fromJSDate(fichajeListFaltan[j].hora),
+      //     susFichajesPlus[j].idTrabajador,
+      //   );
+      //   // susFichajesPlus.splice(j + 1, 0, fichajeSistema);
+      //   susFichajesPlus.push(fichajeSistema);
+      // }
 
       this.ordenarPorHora(susFichajesPlus);
       const resPares = await this.obtenerParesTrabajador(susFichajesPlus);
@@ -269,18 +269,40 @@ export class Fichajes {
     return paresSinValidar;
   }
 
+  /* De momento comprobará la salida en el mismo día. Más adelante se buscará según el cuadrante. */
+  private async buscarSalida(
+    horaEntrada: DateTime,
+    subFichajesSimples: WithId<FichajeDto>[],
+  ) {
+    for (let i = 0; i < subFichajesSimples.length; i += 1) {
+      if (subFichajesSimples[i].tipo === "SALIDA") {
+        const horaSalida = DateTime.fromJSDate(subFichajesSimples[i].hora);
+        if (
+          horaEntrada.year === horaSalida.year &&
+          horaEntrada.month === horaSalida.month &&
+          horaEntrada.day === horaSalida.day
+        ) {
+          return subFichajesSimples[i];
+        }
+      }
+    }
+    return null;
+  }
+
   private async obtenerParesTrabajador(fichajesSimples: WithId<FichajeDto>[]) {
     const pares: ParFichaje[] = [];
 
-    if (fichajesSimples.length % 2 === 0) {
-      for (let i = 0; i < fichajesSimples.length; i += 2) {
-        if (
-          fichajesSimples[i].tipo === "ENTRADA" &&
-          fichajesSimples[i + 1].tipo === "SALIDA"
-        ) {
+    for (let i = 0; i < fichajesSimples.length; i += 1) {
+      if (fichajesSimples[i].tipo === "ENTRADA") {
+        const dataSalidaEncontrada = await this.buscarSalida(
+          DateTime.fromJSDate(fichajesSimples[i].hora),
+          fichajesSimples,
+        );
+
+        if (dataSalidaEncontrada) {
           pares.push({
             entrada: fichajesSimples[i],
-            salida: fichajesSimples[i + 1],
+            salida: dataSalidaEncontrada,
             cuadrante: await this.cuadrantesInstance.getTurnoDia(
               fichajesSimples[i].idTrabajador,
               DateTime.fromJSDate(fichajesSimples[i].hora),
@@ -288,9 +310,32 @@ export class Fichajes {
           });
         }
       }
-    } else throw Error("No se podrán conseguir los pares de una lista impar");
+    }
     return pares;
   }
+
+  // private async obtenerParesTrabajador(fichajesSimples: WithId<FichajeDto>[]) {
+  //   const pares: ParFichaje[] = [];
+
+  //   if (fichajesSimples.length % 2 === 0) {
+  //     for (let i = 0; i < fichajesSimples.length; i += 2) {
+  //       if (
+  //         fichajesSimples[i].tipo === "ENTRADA" &&
+  //         fichajesSimples[i + 1].tipo === "SALIDA"
+  //       ) {
+  //         pares.push({
+  //           entrada: fichajesSimples[i],
+  //           salida: fichajesSimples[i + 1],
+  //           cuadrante: await this.cuadrantesInstance.getTurnoDia(
+  //             fichajesSimples[i].idTrabajador,
+  //             DateTime.fromJSDate(fichajesSimples[i].hora),
+  //           ),
+  //         });
+  //       }
+  //     }
+  //   } else throw Error("No se podrán conseguir los pares de una lista impar");
+  //   return pares;
+  // }
 
   // private async transformarFichajesSinValidar(
   //   fichajesPdtesDesordenados: WithId<FichajeDto>[],
