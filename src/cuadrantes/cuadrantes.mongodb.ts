@@ -106,12 +106,22 @@ export class CuadrantesDatabase {
     return resCuadrantes;
   }
 
-  async borrarTurno(idTurno) {
+  async borrarTurno(idTurno: string) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes2");
 
     const resCuadrantes = await cuadrantesCollection.deleteOne({
       _id: new ObjectId(idTurno),
+    });
+
+    return resCuadrantes.acknowledged;
+  }
+  async borrarTurnoByPlan(idPlan: string) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes2");
+
+    const resCuadrantes = await cuadrantesCollection.deleteOne({
+      idPlan: idPlan,
     });
 
     return resCuadrantes.acknowledged;
