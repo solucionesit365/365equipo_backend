@@ -61,6 +61,11 @@ export class Cuadrantes {
     return await this.schCuadrantes.borrarTurno(idTurno);
   }
 
+  async borrarTurnoByPlan(idPlan: string) {
+    // FALTA AGREGAR UN TRIGGER PARA MODIFICARLO EN HIT TAMBIÉN !!!
+    return await this.schCuadrantes.borrarTurnoByPlan(idPlan);
+  }
+
   private async addEmptyDays(
     arrayCuadrantes: WithId<TCuadrante>[],
     idTrabajador: number,

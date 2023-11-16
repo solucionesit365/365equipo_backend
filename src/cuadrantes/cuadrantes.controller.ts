@@ -302,8 +302,8 @@ export class CuadrantesController {
               reqCuadrante.arraySemanalHoras[i].horaSalida as DateTime,
             )
           ) {
-            await this.cuadrantesInstance.borrarTurno(
-              reqCuadrante.arraySemanalHoras[i].idCuadrante,
+            await this.cuadrantesInstance.borrarTurnoByPlan(
+              reqCuadrante.arraySemanalHoras[i].idPlan,
             );
             continue;
           }
