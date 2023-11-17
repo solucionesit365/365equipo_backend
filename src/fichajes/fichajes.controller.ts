@@ -78,32 +78,6 @@ export class FichajesController {
     }
   }
 
-  @Post("sincroFichajes")
-  @UseGuards(SchedulerGuard)
-  async sincroFichajes() {
-    try {
-      await this.fichajesInstance.sincroFichajes();
-      return { ok: true };
-    } catch (err) {
-      console.log(err);
-      return { ok: false, message: err.message };
-    }
-  }
-
-  @Post("getFichajesHit")
-  @UseGuards(SchedulerGuard)
-  async getFichajesHit() {
-    try {
-      return {
-        ok: true,
-        data: await this.fichajesInstance.fusionarFichajesHit(),
-      };
-    } catch (err) {
-      console.log(err);
-      return { ok: false, message: err.message };
-    }
-  }
-
   @Get("fichajesByIdSql")
   @UseGuards(AuthGuard)
   async getFichajesByIdSql(
@@ -200,6 +174,43 @@ export class FichajesController {
       };
     } catch (err) {
       console.log(err);
+      return { ok: false, message: err.message };
+    }
+  }
+
+  @Get("getFichajesPendientes")
+  // Guard
+  async getFichajesPendientes() {
+    try {
+      const fichajesPendientes =
+        await this.fichajesInstance.getFichajesPendientes();
+      return {
+        ok: true,
+        data: fichajesPendientes,
+      };
+    } catch (err) {
+      return { ok: false, message: err.message };
+    }
+  }
+
+  @Post("setFichajesEnviados")
+  // Guard
+  async setFichajesEnviados(@Body() { fichajes }) {
+    try {
+      await this.fichajesInstance.setFichajesEnviados(fichajes);
+      return { ok: true };
+    } catch (err) {
+      return { ok: false, message: err.message };
+    }
+  }
+
+  @Post("insertarFichajesDeHit")
+  // Guard
+  async insertarFichajesDeHit(@Body() { fichajes }) {
+    try {
+      await this.fichajesInstance.insertarFichajesHit(fichajes);
+      return { ok: true };
+    } catch (err) {
       return { ok: false, message: err.message };
     }
   }

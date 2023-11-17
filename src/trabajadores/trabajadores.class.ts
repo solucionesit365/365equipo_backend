@@ -76,10 +76,6 @@ export class Trabajador {
     return await schTrabajadores.getSubordinadosByIdNew(id, conFecha);
   }
 
-  async descargarTrabajadoresHit() {
-    return await schTrabajadores.getTrabajadoresSage();
-  }
-
   async getTrabajadorTokenQR(idTrabajador: number, tokenQR: string) {
     const resUser = await schTrabajadores.getTrabajadorTokenQR(
       idTrabajador,
@@ -88,98 +84,6 @@ export class Trabajador {
 
     if (resUser) return resUser;
     throw Error("No se ha podido obtener la información del usuario");
-  }
-
-  async sincronizarConHit() {
-    const usuariosApp = await this.getTrabajadores(true);
-    const usuariosHit = await this.descargarTrabajadoresHit();
-
-    const modificarEnApp = [];
-    const modificarEnHit = [];
-    const usuariosNuevos = [];
-    const arrayEliminar = [];
-
-    usuariosHit.forEach((usuarioHit) => {
-      const usuarioApp = usuariosApp.find(
-        (usuario) => usuario.id === usuarioHit.id,
-      );
-
-      if (usuarioApp) {
-        const camposApp = [
-          "nombreApellidos",
-          "displayName",
-          "direccion",
-          "ciudad",
-          "fechaNacimiento",
-          "nSeguridadSocial",
-          "codigoPostal",
-          "cuentaCorriente",
-        ];
-        const camposHit = [
-          "dni",
-          "inicioContrato",
-          "finalContrato",
-          "antiguedad",
-          "idEmpresa",
-        ];
-
-        let cambiosApp = false;
-        let cambiosHit = false;
-
-        camposApp.forEach((campo) => {
-          if (usuarioApp[campo] !== usuarioHit[campo]) {
-            cambiosApp = true;
-            return;
-          }
-        });
-
-        camposHit.forEach((campo) => {
-          if (usuarioApp[campo] !== usuarioHit[campo]) {
-            cambiosHit = true;
-            return;
-          }
-        });
-
-        if (cambiosApp) {
-          modificarEnHit.push(usuarioApp);
-        }
-
-        if (cambiosHit) {
-          modificarEnApp.push(usuarioHit);
-        }
-      } else {
-        usuariosNuevos.push(usuarioHit);
-      }
-    });
-
-    usuariosApp.forEach((usuarioApp) => {
-      const usuarioHit = usuariosHit.find(
-        (usuario) => usuario.id === usuarioApp.id,
-      );
-
-      if (!usuarioHit) {
-        arrayEliminar.push(usuarioApp);
-      }
-    });
-
-    const totales = await schTrabajadores.actualizarUsuarios(
-      "soluciones",
-      usuariosNuevos,
-      modificarEnApp,
-    );
-
-    // Excluir usuario de test id: 999999
-    await schTrabajadores.eliminarUsuarios(arrayEliminar);
-
-    return {
-      totalModificarApp: modificarEnApp.length,
-      modificarEnApp,
-      // totalModificarHit: modificarEnHit.length,
-      // totalNuevos: usuariosNuevos.length,
-      // totalEliminar: arrayEliminar.length,
-      // usuariosNoActualizadosNuevos: totales.usuariosNoActualizadosNuevos,
-      // usuariosNoActualizadosApp: totales.usuariosNoActualizadosApp,
-    };
   }
 
   async registrarUsuario(dni: string, password: string) {
@@ -291,10 +195,6 @@ export class Trabajador {
     return await schTrabajadores.getCoordinadoras();
   }
 
-  async descargarHistoriaContratos() {
-    return await schTrabajadores.copiarHistoriaContratosHitSoluciones();
-  }
-
   async getHistoricosContratos(dni: string) {
     const resUser = await schTrabajadores.getHistoricoContratos(dni);
     if (resUser) return resUser;
@@ -312,5 +212,21 @@ export class Trabajador {
 
   async uploadFoto(displayFoto: string, uid: string) {
     return await schTrabajadores.uploadFoto(displayFoto, uid);
+  }
+
+  async deleteHistoricoContratos() {
+    await schTrabajadores.deleteHistoricoContratos();
+  }
+
+  async insertQuery(query: string) {
+    await schTrabajadores.insertQuery(query);
+  }
+
+  async actualizarUsuariosApi(usuariosNuevos: any[], modificarEnApp: any[]) {
+    await schTrabajadores.actualizarUsuarios(usuariosNuevos, modificarEnApp);
+  }
+
+  async eliminarUsuariosApi(arrayEliminar: any[]) {
+    await schTrabajadores.eliminarUsuarios(arrayEliminar);
   }
 }

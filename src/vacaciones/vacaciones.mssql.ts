@@ -358,3 +358,10 @@ FROM solicitudVacaciones so INNER JOIN trabajadores ON so.idBeneficiario = traba
     return resVacacionesByEstado.recordset;
   return [];
 }
+
+export async function setEnviadoApi(idSolicitud: number) {
+  await recSolucionesNew(
+    "UPDATE solicitudVacaciones SET enviado = 1 WHERE idSolicitud = @param0",
+    idSolicitud,
+  );
+}

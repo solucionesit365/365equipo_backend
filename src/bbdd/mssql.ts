@@ -32,7 +32,7 @@ export async function recSolucionesClassic(
     user: process.env.MSSQL_USER_SOLUCIONES,
     password: process.env.MSSQL_PASS_SOLUCIONES,
     server: process.env.MSSQL_HOST_SOLUCIONES,
-    database: database,
+    database: process.env.ENTORNO === "test" ? "test_soluciones" : "soluciones",
     options: {
       encrypt: false,
       trustServerCertificate: true,
