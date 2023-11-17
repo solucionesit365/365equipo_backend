@@ -129,7 +129,7 @@ export class solicitudesVacacionesClass {
       <td>${vacaciones.fechaIncorporacion}</td>
       <td>${vacaciones.fechaCreacion}</td>
       <td>${vacaciones.observaciones}</td>
-      <td>${vacaciones.dias}</td>
+      <td>${vacaciones.totalDias}</td>
       <td>${vacaciones.estado}</td>
     </tr>
   </table>
