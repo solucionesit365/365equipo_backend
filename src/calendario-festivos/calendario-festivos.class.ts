@@ -1,5 +1,8 @@
 import { Injectable } from "@nestjs/common";
-import { CalendarioFestivosInterface } from "./calendario-festivos.interface";
+import {
+  CalendarioFestivosInterface,
+  eventoNavideño,
+} from "./calendario-festivos.interface";
 import { CalendarioFestivosDatabase } from "./calendario-festivos.mongodb";
 import * as moment from "moment";
 
@@ -20,5 +23,20 @@ export class CalendarioFestivo {
 
   async getfestivosByTienda(tienda: number) {
     return await this.schCalendario.getFestivosByTienda(tienda);
+  }
+
+  async nuevoEvento(festivo: eventoNavideño) {
+    const insertFestivo = await this.schCalendario.nuevoEvento(festivo);
+    if (insertFestivo) return true;
+
+    throw Error("No se ha podido insertar la auditoria");
+  }
+
+  async verificacionRespuesta(idUsuario: number) {
+    return await this.schCalendario.verificacionRespuesta(idUsuario);
+  }
+
+  async getEventos() {
+    return await this.schCalendario.getEventos();
   }
 }
