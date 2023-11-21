@@ -29,9 +29,7 @@ export class CalendarioFestivosDatabase {
       db.collection<CalendarioFestivosInterface>("calendarioFestivos");
 
     // Filtrar para obtener solo documentos que NO contienen 'idUsuario'
-    const respCalendario = await calendarioCollection
-      .find({ idUsuario: { $exists: false } })
-      .toArray();
+    const respCalendario = await calendarioCollection.find({}).toArray();
 
     return respCalendario;
   }
@@ -46,16 +44,14 @@ export class CalendarioFestivosDatabase {
         .find({ tienda: { $in: [tienda, -1] } })
         .toArray();
     }
-    return await calendarioCollection
-      .find({ idUsuario: { $exists: false } })
-      .toArray();
+    return await calendarioCollection.find({}).toArray();
   }
 
   //Notifcacion navideña
   async nuevoEvento(festivo: eventoNavideño) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const calendarioCollection =
-      db.collection<eventoNavideño>("calendarioFestivos");
+      db.collection<eventoNavideño>("invitacionNavidad");
 
     const resInsert = await calendarioCollection.insertOne(festivo);
 
@@ -67,7 +63,7 @@ export class CalendarioFestivosDatabase {
   async verificacionRespuesta(idUsuario: number) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const calendarioCollection =
-      db.collection<eventoNavideño>("calendarioFestivos");
+      db.collection<eventoNavideño>("invitacionNavidad");
 
     // Verifica si existe al menos una respuesta
     const respuestaExiste = await calendarioCollection.findOne({
@@ -80,13 +76,24 @@ export class CalendarioFestivosDatabase {
   async getEventos() {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const calendarioCollection =
-      db.collection<eventoNavideño>("calendarioFestivos");
-
+      db.collection<eventoNavideño>("invitacionNavidad");
     // Filtrar para obtener solo documentos que contienen 'idUsuario'
-    const respCalendario = await calendarioCollection
-      .find({ idUsuario: { $exists: true } })
-      .toArray();
+    const respCalendario = await calendarioCollection.find({}).toArray();
 
     return respCalendario;
+  }
+
+  async getEventosByAsistirOrNo(asistira: string) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const calendarioCollection =
+      db.collection<eventoNavideño>("invitacionNavidad");
+    const asistiraBoolean = asistira == "true" ? true : false;
+
+    if (asistira) {
+      return await calendarioCollection
+        .find({ asistira: asistiraBoolean })
+        .toArray();
+    }
+    return await calendarioCollection.find({}).toArray();
   }
 }

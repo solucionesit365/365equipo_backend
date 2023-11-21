@@ -25,6 +25,7 @@ export class CalendarioFestivo {
     return await this.schCalendario.getFestivosByTienda(tienda);
   }
 
+  //Notificacion navideña
   async nuevoEvento(festivo: eventoNavideño) {
     const insertFestivo = await this.schCalendario.nuevoEvento(festivo);
     if (insertFestivo) return true;
@@ -38,5 +39,9 @@ export class CalendarioFestivo {
 
   async getEventos() {
     return await this.schCalendario.getEventos();
+  }
+
+  async getEventosByAsistirOrNo(asistira: string) {
+    return await this.schCalendario.getEventosByAsistirOrNo(asistira);
   }
 }

@@ -80,7 +80,7 @@ export class CalendarioFestivosController {
       console.log(error);
     }
   }
-
+  //Notificacion navideña
   @Post("guardarRespuesta")
   @UseGuards(AuthGuard)
   async nuevoEvento(
@@ -134,7 +134,26 @@ export class CalendarioFestivosController {
 
       const respCalendario = await this.calendarioFestivosInstance.getEventos();
       if (respCalendario) return { ok: true, data: respCalendario };
-      else throw Error("No se ha encontrado ningun festivo");
+      else throw Error("No se ha encontrado ninguna invitacion navideña");
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  @Get("getEventosByAsistirOrNo")
+  @UseGuards(AuthGuard)
+  async getEventosByAsistirOrNo(
+    @Headers("authorization") authHeader: string,
+    @Query() { asistira }: { asistira: string },
+  ) {
+    try {
+      const token = this.tokenService.extract(authHeader);
+      await this.authInstance.verifyToken(token);
+
+      const respCalendario =
+        await this.calendarioFestivosInstance.getEventosByAsistirOrNo(asistira);
+      if (respCalendario) return { ok: true, data: respCalendario };
+      else throw Error("No se ha encontrado nadie que asistira ");
     } catch (error) {
       console.log(error);
     }
