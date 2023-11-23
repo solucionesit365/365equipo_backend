@@ -13,7 +13,7 @@ import { FirebaseMessagingService } from "../firebase/firebase-messaging.service
 import { Trabajador } from "./trabajadores.class";
 import { AuthService } from "../firebase/auth";
 import { AdminGuard } from "../auth/admin.guard";
-import { uploadFoto } from "./trabajadores.mssql";
+import { deleteHistoricoContratos, uploadFoto } from "./trabajadores.mssql";
 
 @Controller("trabajadores")
 export class TrabajadoresController {
@@ -31,6 +31,34 @@ export class TrabajadoresController {
       await this.authInstance.verifyToken(token);
 
       const arrayTrabajadores = await this.trabajadorInstance.getTrabajadores();
+
+      return { ok: true, data: arrayTrabajadores };
+    } catch (err) {
+      console.log(err);
+      return { ok: false, message: err.message };
+    }
+  }
+
+  @Get("getTrabajadoresApi")
+  // Guard API
+  async getTrabajadoresApi() {
+    try {
+      const arrayTrabajadores = await this.trabajadorInstance.getTrabajadores();
+
+      return { ok: true, data: arrayTrabajadores };
+    } catch (err) {
+      console.log(err);
+      return { ok: false, message: err.message };
+    }
+  }
+
+  @Get("getTrabajadoresApiTodos")
+  // Guard API
+  async getTrabajadoresApiTodos() {
+    try {
+      const arrayTrabajadores = await this.trabajadorInstance.getTrabajadores(
+        true,
+      );
 
       return { ok: true, data: arrayTrabajadores };
     } catch (err) {
@@ -155,38 +183,11 @@ export class TrabajadoresController {
       const token = this.tokenService.extract(authHeader);
       await this.authInstance.verifyToken(token);
 
-      return {
-        ok: true,
-        data: await this.trabajadorInstance.sincronizarConHit(),
-      };
-    } catch (err) {
-      console.log(err);
-      return { ok: false, message: err.message };
-    }
-  }
-
-  @Get("sincronizarConHit")
-  @UseGuards(SchedulerGuard)
-  async sincronizarConHit() {
-    try {
-      return {
-        ok: true,
-        data: await this.trabajadorInstance.sincronizarConHit(),
-      };
-    } catch (err) {
-      console.log(err);
-      return { ok: false, message: err.message };
-    }
-  }
-
-  @Get("descargarHistoriaContratos")
-  @UseGuards(SchedulerGuard)
-  async descargarHistoriaContratos() {
-    try {
-      return {
-        ok: true,
-        data: await this.trabajadorInstance.descargarHistoriaContratos(),
-      };
+      // return {
+      //   ok: true,
+      //   data: await this.trabajadorInstance.sincronizarConHit(), // cambiar por axios a la API
+      // };
+      throw Error("No implementado");
     } catch (err) {
       console.log(err);
       return { ok: false, message: err.message };
@@ -337,6 +338,71 @@ export class TrabajadoresController {
         ok: true,
         data: await this.trabajadorInstance.uploadFoto(displayFoto, uid),
       };
+    } catch (error) {
+      console.log(error);
+      return { ok: false, message: error.message };
+    }
+  }
+
+  @Post("deleteHistoricoContratos")
+  // Guard
+  async deleteHistoricoContratos() {
+    try {
+      return {
+        ok: true,
+        data: await deleteHistoricoContratos(),
+      };
+    } catch (error) {
+      console.log(error);
+      return { ok: false, message: error.message };
+    }
+  }
+
+  @Post("insertQuery")
+  // Super guard
+  async insertQuery(@Body() { query }) {
+    try {
+      return {
+        ok: true,
+        data: await this.trabajadorInstance.insertQuery(query),
+      };
+    } catch (error) {
+      console.log(error);
+      return { ok: false, message: error.message };
+    }
+  }
+
+  @Post("actualizarTrabajadoresApi")
+  // Guard API
+  async actualizarTrabajadoresApi(@Body() { usuariosNuevos, modificarEnApp }) {
+    try {
+      if (usuariosNuevos && modificarEnApp) {
+        return {
+          ok: true,
+          data: await this.trabajadorInstance.actualizarUsuariosApi(
+            usuariosNuevos,
+            modificarEnApp,
+          ),
+        };
+      } else throw Error("Faltan parámetros");
+    } catch (error) {
+      console.log(error);
+      return { ok: false, message: error.message };
+    }
+  }
+
+  @Post("eliminarUsuariosApi")
+  // Guard API
+  async eliminarUsuariosApi(@Body() { arrayEliminar }) {
+    try {
+      if (arrayEliminar) {
+        return {
+          ok: true,
+          data: await this.trabajadorInstance.eliminarUsuariosApi(
+            arrayEliminar,
+          ),
+        };
+      } else throw Error("Faltan parámetros");
     } catch (error) {
       console.log(error);
       return { ok: false, message: error.message };

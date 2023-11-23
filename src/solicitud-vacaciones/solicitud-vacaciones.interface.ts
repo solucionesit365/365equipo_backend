@@ -14,6 +14,7 @@ export interface SolicitudVacaciones {
   estado: string;
   creador: number;
   creadasPor?: string;
+  creadorReal?: string;
   idSolicitud: number;
   enviado: boolean;
   idAppResponsable: string;

@@ -18,8 +18,8 @@ export class EmailClass {
       port: 587,
       service: "gmail",
       auth: {
-        type: "OAuth2",
         user: "noreply@365equipo.com",
+        pass: process.env.EMAIL_PASS,
         clientId: process.env.CLIENT_ID,
         clientSecret: process.env.CLIENT_SECRET,
         refreshToken: process.env.REFRESH_TOKEN,

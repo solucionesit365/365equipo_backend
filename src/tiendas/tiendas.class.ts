@@ -61,11 +61,4 @@ export class Tienda {
 
     return arrayTiendas;
   }
-
-  convertirTiendaToExterno(idInterno: number, tiendas: any[]) {
-    for (let i = 0; i < tiendas.length; i += 1) {
-      if (tiendas[i].id === idInterno) return tiendas[i].idExterno;
-    }
-    return null;
-  }
 }

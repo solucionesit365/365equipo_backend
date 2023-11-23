@@ -382,24 +382,32 @@ export class CuadrantesController {
     }
   }
 
-  @Post("sincronizarConHit")
-  @UseGuards(SchedulerGuard)
-  async sincronizarConHit() {
+  @Get("getPendientesEnvio")
+  // Guard
+  async getPendientesEnvio() {
     try {
       return {
         ok: true,
-        data: await this.cuadrantesInstance.sincronizarConHit(),
+        data: await this.cuadrantesInstance.getPendientesEnvio(),
       };
     } catch (err) {
       console.log(err);
-      throw new HttpException(
-        {
-          status: HttpStatus.INTERNAL_SERVER_ERROR,
-          error: "Error interno del servidor",
-          message: err.message,
-        },
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      return { ok: false, message: err.message };
+    }
+  }
+
+  @Post("setCuadranteEnviado")
+  // Guard
+  async setCuadranteEnviado(@Body() { idCuadrante }) {
+    try {
+      if (idCuadrante) {
+        return {
+          ok: await this.cuadrantesInstance.setCuadranteEnviado(idCuadrante),
+        };
+      } else throw Error("Faltan parámetros");
+    } catch (err) {
+      console.log(err);
+      return { ok: false, message: err.message };
     }
   }
 }
