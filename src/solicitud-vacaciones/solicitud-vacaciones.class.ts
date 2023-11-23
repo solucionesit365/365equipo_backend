@@ -259,4 +259,12 @@ export class solicitudesVacacionesClass {
 
     return true;
   }
+
+  async setEnviadoApi(id: string) {
+    return await this.schSolicitudVacaciones.setEnviadoApi(id);
+  }
+
+  async getSolicitudesParaEnviar() {
+    return await this.schSolicitudVacaciones.getSolicitudesParaEnviar();
+  }
 }

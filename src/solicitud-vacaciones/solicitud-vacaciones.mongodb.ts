@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { BadRequestException, Injectable } from "@nestjs/common";
 import { MongoDbService } from "../bbdd/mongodb";
 import { SolicitudVacaciones } from "./solicitud-vacaciones.interface";
 import { ObjectId } from "mongodb";
@@ -136,8 +136,6 @@ export class SolicitudVacacionesBdd {
   }
 
   async setEnviado(vacaciones: SolicitudVacaciones) {
-    console.log(vacaciones);
-
     try {
       const db = (await this.mongoDbService.getConexion()).db("soluciones");
       const solicitudVacacionesCollection = db.collection<SolicitudVacaciones>(
@@ -156,7 +154,33 @@ export class SolicitudVacacionesBdd {
       if (respSolicitudes.acknowledged && respSolicitudes.modifiedCount > 0)
         return true;
       throw Error("No se ha podido modificar el estado");
-    } catch (error) {}
+    } catch (error) {
+      return new BadRequestException("No se ha podido modificar el estado");
+    }
+  }
+
+  async setEnviadoApi(id: string) {
+    try {
+      const db = (await this.mongoDbService.getConexion()).db("soluciones");
+      const solicitudVacacionesCollection = db.collection<SolicitudVacaciones>(
+        "solicitudVacaciones",
+      );
+      const respSolicitudes = await solicitudVacacionesCollection.updateOne(
+        {
+          _id: new ObjectId(id),
+        },
+        {
+          $set: {
+            enviado: true,
+          },
+        },
+      );
+      if (respSolicitudes.acknowledged && respSolicitudes.modifiedCount > 0)
+        return true;
+      throw Error("No se ha podido modificar el estado");
+    } catch (error) {
+      return new BadRequestException("No se ha podido modificar el estado");
+    }
   }
 
   async getSolicitudesParaEnviar(): Promise<

@@ -15,7 +15,6 @@ import { SolicitudVacaciones } from "./solicitud-vacaciones.interface";
 import { EmailClass } from "src/email/email.class";
 import { Trabajador } from "../trabajadores/trabajadores.class";
 import { Notificaciones } from "src/notificaciones/notificaciones.class";
-import { ObjectId } from "mongodb";
 
 @Controller("solicitud-vacaciones")
 export class SolicitudVacacionesController {
@@ -336,6 +335,29 @@ export class SolicitudVacacionesController {
           data: "En desarrollo",
         };
       }
+    } catch (err) {
+      console.log(err);
+      return { ok: false, message: err.message };
+    }
+  }
+
+  @Post("setEnviadoApi")
+  // Guard
+  async setEnviadoApi(@Body() { idSolicitud }) {
+    if (!idSolicitud) throw Error("Faltan datos");
+    const res = await this.solicitudVacacionesInstance.setEnviadoApi(
+      idSolicitud,
+    );
+    return { ok: true, data: res };
+  }
+
+  @Get("getSolicitudesParaEnviar")
+  // Guard
+  async getSolicitudesParaEnviar() {
+    try {
+      const solicitudes =
+        await this.solicitudVacacionesInstance.getSolicitudesParaEnviar();
+      return { ok: true, data: solicitudes };
     } catch (err) {
       console.log(err);
       return { ok: false, message: err.message };

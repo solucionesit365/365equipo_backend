@@ -312,29 +312,4 @@ export class VacacionesController {
       return { ok: false, message: err.message };
     }
   }
-
-  @Get("getSolicitudesParaEnviar")
-  // Guard
-  async getSolicitudesParaEnviar() {
-    try {
-      const solicitudes =
-        await this.vacacionesInstance.getSolicitudesParaEnviar();
-      return { ok: true, data: solicitudes };
-    } catch (err) {
-      console.log(err);
-      return { ok: false, message: err.message };
-    }
-  }
-
-  @Post("setEnviadoApi")
-  // Guard
-  async setEnviadoApi(@Body() { idSolicitud }) {
-    try {
-      if (!idSolicitud) throw Error("Faltan datos");
-      const res = await this.vacacionesInstance.setEnviadoApi(idSolicitud);
-      return { ok: true, data: res };
-    } catch (err) {
-      return { ok: false, message: err.message };
-    }
-  }
 }
