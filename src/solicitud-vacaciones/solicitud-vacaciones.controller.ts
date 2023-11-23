@@ -12,7 +12,7 @@ import { TokenService } from "../get-token/get-token.service";
 import { AuthService } from "../firebase/auth";
 import { solicitudesVacacionesClass } from "./solicitud-vacaciones.class";
 import { SolicitudVacaciones } from "./solicitud-vacaciones.interface";
-import { EmailClass } from "src/email/email.class";
+import { EmailClass } from "../email/email.class";
 import { Trabajador } from "../trabajadores/trabajadores.class";
 import { Notificaciones } from "src/notificaciones/notificaciones.class";
 
