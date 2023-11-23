@@ -16,3 +16,12 @@ export interface CalendarioFestivosInterface {
   tienda: number[];
   categoria: string;
 }
+
+export interface eventoNavideño {
+  _id?: ObjectId;
+  idUsuario: number;
+  asistira: boolean;
+  nombreApellidos: string;
+  fechaRespuesta: Date;
+  year: Number;
+}

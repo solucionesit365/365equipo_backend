@@ -33,6 +33,7 @@ tr.idTienda,
 AND inicioContrato <= GETDATE() AND (fechaBaja >= GETDATE() OR fechaBaja IS NULL)
 ) as horasContrato,
 tr1.nombreApellidos as nombreResponsable,
+tr1.idApp as idAppResponsable, 
 ti.nombre as nombreTienda,
 CONVERT(nvarchar, tr.antiguedad, 103) as antiguedad,
 tr.idEmpresa,
@@ -211,6 +212,7 @@ export async function getSubordinados(uid: string): Promise<
     idTienda: number;
     antiguedad: string;
     inicioContrato: string;
+    fechaNacimiento: string;
   }[]
 > {
   const sql = `
@@ -221,6 +223,7 @@ export async function getSubordinados(uid: string): Promise<
       displayName,
       displayFoto,
       idTienda, 
+      fechaNacimiento,
       CONVERT(varchar, antiguedad, 103) as antiguedad, 
       CONVERT(varchar, inicioContrato, 103) as inicioContrato 
     from trabajadores 
