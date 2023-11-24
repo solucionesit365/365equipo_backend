@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, Inject, forwardRef } from "@nestjs/common";
 import { FichajeValidadoDto } from "./fichajes-validados.interface";
 import { FichajesValidadosDatabase } from "./fichajes-validados.mongodb";
 import { Trabajador } from "../trabajadores/trabajadores.class";
@@ -11,6 +11,7 @@ import { DateTime } from "luxon";
 export class FichajesValidados {
   constructor(
     private readonly schFichajesValidados: FichajesValidadosDatabase,
+    @Inject(forwardRef(() => Trabajador))
     private readonly trabajadoresInstance: Trabajador,
   ) {}
 

@@ -135,6 +135,43 @@ export class SolicitudVacacionesBdd {
     throw Error("No se ha podido modificar el estado");
   }
 
+  async haySolicitudesParaBeneficiario(
+    idBeneficiario: number,
+  ): Promise<boolean> {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const solicitudVacacionesCollection = db.collection<SolicitudVacaciones>(
+      "solicitudVacaciones",
+    );
+
+    const cuenta = await solicitudVacacionesCollection.countDocuments({
+      idBeneficiario,
+    });
+    return cuenta > 0;
+  }
+
+  async actualizarIdAppResponsable(
+    idBeneficiario: number,
+    idAppResponsable: string,
+  ) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const solicitudVacacionesCollection = db.collection<SolicitudVacaciones>(
+      "solicitudVacaciones",
+    );
+
+    const resultado = await solicitudVacacionesCollection.updateMany(
+      { idBeneficiario },
+      { $set: { idAppResponsable } },
+    );
+
+    if (resultado.acknowledged && resultado.modifiedCount > 0) {
+      return true;
+    } else {
+      throw new Error(
+        "No se pudo actualizar el idAppResponsable para las solicitudes del beneficiario",
+      );
+    }
+  }
+
   async setEnviado(vacaciones: SolicitudVacaciones) {
     console.log(vacaciones);
 

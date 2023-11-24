@@ -1,11 +1,14 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, Inject, forwardRef } from "@nestjs/common";
 import * as schTiendas from "./tiendas.mssql";
 import { Trabajador } from "../trabajadores/trabajadores.class";
 import { TrabajadorSql } from "../trabajadores/trabajadores.interface";
 
 @Injectable()
 export class Tienda {
-  constructor(private readonly trabajadoresInstance: Trabajador) {}
+  constructor(
+    @Inject(forwardRef(() => Trabajador))
+    private readonly trabajadoresInstance: Trabajador,
+  ) {}
 
   async getTiendas() {
     const arrayTiendas = await schTiendas.getTiendas();
