@@ -6,6 +6,7 @@ import { AuthService, auth } from "../firebase/auth";
 import { TrabajadorCompleto } from "./trabajadores.interface";
 import { PermisosClass } from "../permisos/permisos.class";
 import { DateTime } from "luxon";
+import { solicitudesVacacionesClass } from "../solicitud-vacaciones/solicitud-vacaciones.class";
 
 @Injectable()
 export class Trabajador {
@@ -15,6 +16,8 @@ export class Trabajador {
     private readonly permisosInstance: PermisosClass,
     @Inject(forwardRef(() => EmailClass))
     private readonly emailInstance: EmailClass,
+    @Inject(forwardRef(() => solicitudesVacacionesClass))
+    private readonly solicitudesVacaciones: solicitudesVacacionesClass,
   ) {}
 
   async getTrabajadorByAppId(uid: string) {
@@ -235,6 +238,27 @@ export class Trabajador {
     payload: any,
   ) {
     const cualquieraDe = ["SUPER_ADMIN", "RRHH_ADMIN"];
+
+    if (payload.idResponsable)
+      if (original.idResponsable !== payload.idResponsable) {
+        const nuevoResponsable = await this.getTrabajadorBySqlId(
+          payload.idResponsable,
+        );
+        const nuevoIdAppResponsable = nuevoResponsable.idApp;
+
+        // Actualiza el idAppResponsable en MongoDB para todas las solicitudes del beneficiario y evita que no pueda actualizar
+        const solicitudesExisten =
+          await this.solicitudesVacaciones.haySolicitudesParaBeneficiario(
+            original.id,
+          );
+
+        if (solicitudesExisten) {
+          await this.solicitudesVacaciones.actualizarIdAppResponsable(
+            original.id,
+            nuevoIdAppResponsable,
+          );
+        }
+      }
 
     if (
       this.permisosInstance.pasoPermitidoByClaims(
