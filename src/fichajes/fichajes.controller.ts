@@ -79,7 +79,7 @@ export class FichajesController {
   }
 
   @Post("sincroFichajes")
-  @UseGuards(SchedulerGuard)
+  // @UseGuards(SchedulerGuard)
   async sincroFichajes() {
     try {
       await this.fichajesInstance.sincroFichajes();
@@ -91,7 +91,7 @@ export class FichajesController {
   }
 
   @Post("getFichajesHit")
-  @UseGuards(SchedulerGuard)
+  // @UseGuards(SchedulerGuard)
   async getFichajesHit() {
     try {
       return {

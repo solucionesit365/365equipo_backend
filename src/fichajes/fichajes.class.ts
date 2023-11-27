@@ -85,6 +85,7 @@ export class Fichajes {
 
   async fusionarFichajesHit() {
     const fichajesHit = await this.schFichajes.getFichajesHit();
+
     const trabajadores = await this.trabajadoresInstance.getTrabajadores();
     const fichajesPretty = [];
 
@@ -120,9 +121,10 @@ export class Fichajes {
       }
     }
 
-    await this.schFichajes.insertarFichajesHit(fichajesPretty);
-
-    return true;
+    if (fichajesPretty.length > 0) {
+      await this.schFichajes.insertarFichajesHit(fichajesPretty);
+      return true;
+    } else return "No hay fichajes que extraer";
   }
 
   async getFichajesByIdSql(idSql: number, validado: boolean) {

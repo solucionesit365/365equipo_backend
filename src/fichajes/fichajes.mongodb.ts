@@ -4,12 +4,16 @@ import { FichajeDto } from "./fichajes.interface";
 import { FacTenaMssql } from "../bbdd/mssql.class";
 import * as moment from "moment";
 import { ObjectId } from "mongodb";
+import axios from "axios";
+import { DateTime } from "luxon";
+import { MbctokenService } from "../bussinesCentral/services/mbctoken/mbctoken.service";
 
 @Injectable()
 export class FichajesDatabase {
   constructor(
     private readonly mongoDbService: MongoDbService,
     private readonly hitInstance: FacTenaMssql,
+    private readonly MbctokenService: MbctokenService,
   ) {}
 
   async nuevaEntrada(uid: string, hora: Date, idExterno: number) {
@@ -74,69 +78,109 @@ export class FichajesDatabase {
   }
 
   async enviarHit(fichajes: FichajeDto[]) {
-    let sql = "";
+    let data = null;
+    const token = await this.MbctokenService.getToken();
 
     for (let i = 0; i < fichajes.length; i += 1) {
       const hora = moment(fichajes[0].hora);
 
       if (fichajes[i].tipo === "ENTRADA") {
-        sql += `
-        DELETE FROM cdpDadesFichador WHERE idr = '${fichajes[
-          i
-        ]._id.toString()}';
-        INSERT INTO cdpDadesFichador (id, tmst, accio, usuari, idr, lloc, comentari) 
-        VALUES (0, CONVERT(datetime, '${hora.format(
-          "YYYY-MM-DD HH:mm:ss",
-        )}', 120), 1, ${fichajes[i].idExterno}, '${
-          fichajes[i]._id
-        }', NULL, '365EquipoDeTrabajo')
-        `;
+        data = {
+          tmst: hora.format("YYYY-MM-DD HH:mm:ss"),
+          accio: 1,
+          usuari: fichajes[i].idExterno,
+          idr: fichajes[i]._id.toString(),
+          lloc: null,
+          comentari: "365EquipoDeTrabajo",
+        };
       } else if (fichajes[i].tipo === "SALIDA") {
-        sql += `
-        DELETE FROM cdpDadesFichador WHERE idr = '${fichajes[i]._id}';
-        INSERT INTO cdpDadesFichador (id, tmst, accio, usuari, idr, lloc, comentari) 
-        VALUES (0, CONVERT(datetime, '${hora.format(
-          "YYYY-MM-DD HH:mm:ss",
-        )}', 120), 2, ${fichajes[i].idExterno}, '${fichajes[
-          i
-        ]._id.toString()}', NULL, '365EquipoDeTrabajo')
-        `;
+        data = {
+          tmst: hora.format("YYYY-MM-DD HH:mm:ss"),
+          accio: 2,
+          usuari: fichajes[i].idExterno,
+          idr: fichajes[i]._id.toString(),
+          lloc: null,
+          comentari: "365EquipoDeTrabajo",
+        };
+      }
+
+      if (data != null) {
+        //Envio a Business central
+        const response = await axios.post(
+          `https://api.businesscentral.dynamics.com/v2.0/${process.env.MBC_TOKEN_TENANT}/Production/ODataV4/Company('${process.env.MBC_COMPANY_NAME}')/cdpDadesFichador2`,
+          data,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          },
+        );
+
+        console.log(response);
       }
     }
 
-    if (sql === "") return 0;
+    // const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    // const fichajesCollection = db.collection<FichajeDto>("fichajes");
 
-    await this.hitInstance.recHit(sql);
-
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
-    const fichajesCollection = db.collection<FichajeDto>("fichajes");
-
-    const updatePromises = fichajes.map((item) =>
-      fichajesCollection.updateOne(
-        { _id: item._id },
-        { $set: { enviado: true } },
-      ),
-    );
-    await Promise.all(updatePromises);
+    // const updatePromises = fichajes.map((item) =>
+    //   fichajesCollection.updateOne(
+    //     { _id: item._id },
+    //     { $set: { enviado: true } },
+    //   ),
+    // );
+    // await Promise.all(updatePromises);
   }
 
   async getFichajesHit() {
-    const fechaActual = new Date();
+    // const fechaActual = new Date();
 
-    const day = fechaActual.getDate();
-    const month = fechaActual.getMonth() + 1;
-    const year = fechaActual.getFullYear();
+    // const day = fechaActual.getDate();
+    // const month = fechaActual.getMonth() + 1;
+    // const year = fechaActual.getFullYear();
 
-    const sql = `SELECT accio, usuari, idr, CONVERT(nvarchar, tmst, 126) as tmst, comentari as comentario FROM cdpDadesFichador WHERE day(tmst) = ${day} AND month(tmst) = ${month} AND year(tmst) = ${year} AND comentari <> '365EquipoDeTrabajo'`;
+    // const sql = `SELECT accio, usuari, idr, CONVERT(nvarchar, tmst, 126) as tmst, comentari as comentario FROM cdpDadesFichador WHERE day(tmst) = ${day} AND month(tmst) = ${month} AND year(tmst) = ${year} AND comentari <> '365EquipoDeTrabajo'`;
 
-    const resFichajes = await this.hitInstance.recHit(sql);
+    // const resFichajes = await this.hitInstance.recHit(sql);
 
-    return resFichajes.recordset;
+    // return resFichajes.recordset;
+    try {
+      const token = await this.MbctokenService.getToken();
+
+      // Obtener la fecha y hora actual en UTC
+      const now = DateTime.utc();
+      // Formatear la fecha actual y la fecha del día siguiente en el formato ISO 8601
+      const startDate = now.toISO().split("T")[0] + "T00:00:00Z";
+      const endDate =
+        now.plus({ days: 1 }).toISO().split("T")[0] + "T00:00:00Z";
+
+      let response = await axios.get(
+        `https://api.businesscentral.dynamics.com/v2.0/${process.env.MBC_TOKEN_TENANT}/Production/ODataV4/Company('${process.env.MBC_COMPANY_NAME}')/cdpDadesFichador2?$filter=tmst ge ${startDate} and tmst lt ${endDate} and comentari ne '365EquipoDeTrabajo'&$select=accio, usuari, idr, tmst, comentari`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        },
+      );
+
+      if (response.data.value.length > 0) {
+        return response.data.value;
+      } else {
+        return [];
+      }
+    } catch (error) {
+      return {
+        status: 400,
+        message: error.message,
+      };
+    }
   }
 
   async insertarFichajesHit(fichajes: FichajeDto[]) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
-    const fichajesCollection = db.collection<FichajeDto>("fichajes");
+    const fichajesCollection = db.collection<FichajeDto>("fichajes2");
 
     try {
       await fichajesCollection.insertMany(fichajes, {
