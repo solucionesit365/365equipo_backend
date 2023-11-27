@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, Inject, forwardRef } from "@nestjs/common";
 import { SolicitudVacacionesBdd } from "./solicitud-vacaciones.mongodb";
 import { SolicitudVacaciones } from "./solicitud-vacaciones.interface";
 import { EmailClass } from "../email/email.class";
@@ -14,6 +14,7 @@ export class solicitudesVacacionesClass {
   constructor(
     private readonly schSolicitudVacaciones: SolicitudVacacionesBdd,
     private readonly email: EmailClass,
+    @Inject(forwardRef(() => Trabajador))
     private readonly trabajadorInstance: Trabajador,
     private readonly cuadrantesInstance: Cuadrantes,
   ) {}
@@ -129,7 +130,7 @@ export class solicitudesVacacionesClass {
       <td>${vacaciones.fechaIncorporacion}</td>
       <td>${vacaciones.fechaCreacion}</td>
       <td>${vacaciones.observaciones}</td>
-      <td>${vacaciones.dias}</td>
+      <td>${vacaciones.totalDias}</td>
       <td>${vacaciones.estado}</td>
     </tr>
   </table>
@@ -189,6 +190,22 @@ export class solicitudesVacacionesClass {
       return true;
     } else
       throw Error("No ha sido posible modificar el estado de la solicitud");
+  }
+
+  async actualizarIdAppResponsable(
+    idBeneficiario: number,
+    idAppResponsable: string,
+  ) {
+    return await this.schSolicitudVacaciones.actualizarIdAppResponsable(
+      idBeneficiario,
+      idAppResponsable,
+    );
+  }
+
+  async haySolicitudesParaBeneficiario(idBeneficiario: number) {
+    return await this.schSolicitudVacaciones.haySolicitudesParaBeneficiario(
+      idBeneficiario,
+    );
   }
 
   async guardarEnHit(vacaciones: SolicitudVacaciones) {
