@@ -44,6 +44,8 @@ export class AusenciasController {
         tipo === "DIA_PERSONAL" ||
         tipo === "VACACIONES" ||
         tipo === "HORAS_JUSTIFICADAS" ||
+        tipo === "SANCIÓN" ||
+        tipo === "ABSENTISMO" ||
         (tipo === "DIA_PERSONAL" &&
           typeof idUsuario === "number" &&
           typeof fechaInicio === "string" &&
@@ -55,7 +57,7 @@ export class AusenciasController {
       ) {
         const inicio = new Date(fechaInicio);
         const final = new Date(fechaFinal);
-        const revision = new Date(fechaRevision);
+        const revision = fechaRevision ? new Date(fechaRevision) : null;
 
         return {
           ok: true,
@@ -102,53 +104,53 @@ export class AusenciasController {
     }
   }
 
-  // @Post("updateAusencia")
-  // async updateAusencia(
-  //   @Body() ausencia: AusenciaInterface,
-  //   @Headers("authorization") authHeader: string,
-  // ) {
-  //   try {
-  //     const token = this.tokenService.extract(authHeader);
-  //     await this.authInstance.verifyToken(token);
-  //     const respAusencia = await this.ausenciasInstance.updateAusencia(ausencia);
-  //     if (respAusencia)
-  //       return {
-  //         ok: true,
-  //         data: respAusencia
-  //       };
-  //     console.log(respAusencia);
-  //     console.log(ausencia);
+  @Post("updateAusencia")
+  async updateAusencia(
+    @Body() ausencia: AusenciaInterface,
+    @Headers("authorization") authHeader: string,
+  ) {
+    try {
+      const token = this.tokenService.extract(authHeader);
+      await this.authInstance.verifyToken(token);
+      const respAusencia = await this.ausenciasInstance.updateAusencia(
+        ausencia,
+      );
+      if (respAusencia)
+        return {
+          ok: true,
+          data: respAusencia,
+        };
 
-  //     throw Error("No se ha podido modificar la ausencia");
-  //   } catch (err) {
-  //     console.log(err);
-  //     return { ok: false, message: err.message };
-  //   }
-  // }
+      throw Error("No se ha podido modificar la ausencia");
+    } catch (err) {
+      console.log(err);
+      return { ok: false, message: err.message };
+    }
+  }
 
-  // @Post("updateAusenciaResto")
-  // async updateAusenciaResto(
-  //   @Body() ausencia: AusenciaInterface,
-  //   @Headers("authorization") authHeader: string,
-  // ) {
-  //   try {
-  //     const token = this.tokenService.extract(authHeader);
-  //     await this.authInstance.verifyToken(token);
-  //     const respAusencia = await this.ausenciasInstance.updateAusenciaResto(ausencia);
-  //     if (respAusencia)
-  //       return {
-  //         ok: true,
-  //         data: respAusencia
-  //       };
-  //     console.log(respAusencia);
-  //     console.log(ausencia);
+  @Post("updateAusenciaResto")
+  async updateAusenciaResto(
+    @Body() ausencia: AusenciaInterface,
+    @Headers("authorization") authHeader: string,
+  ) {
+    try {
+      const token = this.tokenService.extract(authHeader);
+      await this.authInstance.verifyToken(token);
+      const respAusencia = await this.ausenciasInstance.updateAusenciaResto(
+        ausencia,
+      );
+      if (respAusencia)
+        return {
+          ok: true,
+          data: respAusencia,
+        };
 
-  //     throw Error("No se ha podido modificar la ausencia");
-  //   } catch (err) {
-  //     console.log(err);
-  //     return { ok: false, message: err.message };
-  //   }
-  // }
+      throw Error("No se ha podido modificar la ausencia");
+    } catch (err) {
+      console.log(err);
+      return { ok: false, message: err.message };
+    }
+  }
   @Get("getAusencias")
   @UseGuards(AuthGuard)
   async getAusencias(@Headers("authorization") authHeader: string) {

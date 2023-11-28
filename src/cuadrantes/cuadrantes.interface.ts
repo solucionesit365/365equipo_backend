@@ -23,6 +23,8 @@ export type TiposAusencia =
   | "PERMISO MATERNIDAD/PATERNIDAD"
   | "DIA_PERSONAL"
   | "VACACIONES"
+  | "SANCIÓN"
+  | "ABSENTISMO"
   | "HORAS_JUSTIFICADAS";
 
 export interface TRequestCuadrante {
