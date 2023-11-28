@@ -62,7 +62,6 @@ export class Ausencias {
     if (!ausenciaToDelete) {
       throw new Error("Ausencia no encontrada");
     }
-    console.log(idAusencia);
 
     // 2. Elimina la ausencia de schAusencias.
     await this.schAusencias.deleteAusencia(idAusencia);

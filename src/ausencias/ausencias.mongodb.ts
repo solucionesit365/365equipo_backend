@@ -48,7 +48,6 @@ export class AusenciasDatabase {
         },
       },
     );
-    console.log(ausencia);
 
     if (resUpdate.acknowledged && resUpdate.matchedCount > 0) return true;
     throw Error("No se ha podido modificar la ausencia");
@@ -76,9 +75,6 @@ export class AusenciasDatabase {
         },
       },
     );
-    console.log(ausencia.fechaRevision);
-
-    console.log(ausencia);
 
     if (resUpdate.acknowledged && resUpdate.matchedCount > 0) return true;
     throw Error("No se ha podido modificar la ausencia");

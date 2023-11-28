@@ -120,8 +120,6 @@ export class AusenciasController {
           ok: true,
           data: respAusencia,
         };
-      console.log(respAusencia);
-      console.log(ausencia);
 
       throw Error("No se ha podido modificar la ausencia");
     } catch (err) {
@@ -146,8 +144,6 @@ export class AusenciasController {
           ok: true,
           data: respAusencia,
         };
-      console.log(respAusencia);
-      console.log(ausencia);
 
       throw Error("No se ha podido modificar la ausencia");
     } catch (err) {
