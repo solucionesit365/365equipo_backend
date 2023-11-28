@@ -342,4 +342,25 @@ export class TrabajadoresController {
       return { ok: false, message: error.message };
     }
   }
+
+  @Post("registroManual")
+  async registroManual(
+    @Headers("authorization") authHeader: string,
+    @Body() { usuariosNuevos },
+  ) {
+    try {
+      console.log(usuariosNuevos);
+
+      const token = this.tokenService.extract(authHeader);
+      await this.authInstance.verifyToken(token);
+
+      return {
+        ok: true,
+        data: await this.trabajadorInstance.registroManual([usuariosNuevos]),
+      };
+    } catch (error) {
+      console.log(error);
+      return { ok: false, message: error.message };
+    }
+  }
 }

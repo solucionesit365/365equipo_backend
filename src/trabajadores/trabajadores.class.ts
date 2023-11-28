@@ -185,6 +185,13 @@ export class Trabajador {
     };
   }
 
+  async registroManual(usuariosNuevos) {
+    return await schTrabajadores.RegistroManual(
+      "test_soluciones",
+      usuariosNuevos,
+    );
+  }
+
   async registrarUsuario(dni: string, password: string) {
     dni = dni.trim().toUpperCase();
     const datosUsuario = await schTrabajadores.getTrabajadorByDni(dni);
