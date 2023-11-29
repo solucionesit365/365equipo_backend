@@ -346,17 +346,22 @@ export class TrabajadoresController {
   @Post("registroManual")
   async registroManual(
     @Headers("authorization") authHeader: string,
-    @Body() { usuariosNuevos },
+    @Body() { usuariosNuevos, empresa },
   ) {
     try {
       console.log(usuariosNuevos);
+
+      console.log(empresa);
 
       const token = this.tokenService.extract(authHeader);
       await this.authInstance.verifyToken(token);
 
       return {
         ok: true,
-        data: await this.trabajadorInstance.registroManual([usuariosNuevos]),
+        data: await this.trabajadorInstance.registroManual(
+          [usuariosNuevos],
+          empresa,
+        ),
       };
     } catch (error) {
       console.log(error);

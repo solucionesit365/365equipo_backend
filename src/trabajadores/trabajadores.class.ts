@@ -185,10 +185,11 @@ export class Trabajador {
     };
   }
 
-  async registroManual(usuariosNuevos) {
+  async registroManual(usuariosNuevos, empresa) {
     return await schTrabajadores.RegistroManual(
       "test_soluciones",
       usuariosNuevos,
+      empresa,
     );
   }
 

@@ -540,6 +540,12 @@ async function executeBatch(database: string, batch, queryBuilder) {
   await recSolucionesClassic(database, query);
 }
 
+async function executeBatch2(database: string, queries) {
+  // Suponiendo que 'queries' es un arreglo de consultas SQL
+  const query = queries.join(";");
+  await recSolucionesClassic(database, query);
+}
+
 // Aqui hace el insert into a trabajadores y tambn el update de ellos
 export async function actualizarUsuarios(
   database: string,
@@ -626,76 +632,32 @@ export async function actualizarUsuarios(
   }
 }
 
-// export async function RegistroManual(database: string, usuariosNuevos) {
-//   try {
-//     const usuariosNoActualizadosNuevos = [];
-//     const usuariosNoActualizadosApp = [];
-
-//     if (!Array.isArray(usuariosNuevos)) {
-//       throw new TypeError("usuariosNuevos debe ser un arreglo");
-//     }
-//     // INSERT
-//     const usuariosNuevosValidos = usuariosNuevos.filter((usuario) => {
-//       const isValid = isValidUsuario(usuario) && !usuario.finalContrato;
-//       if (!isValid) usuariosNoActualizadosNuevos.push(usuario);
-//       return isValid;
-//     });
-
-//     const batchSize = 100; // Ajusta este valor según las necesidades de rendimiento
-
-//     const insertQueryBuilder = (usuario) => `
-//       INSERT INTO dbo.trabajadores (
-//         id, idApp, nombreApellidos, displayName, emails, dni, direccion, ciudad,
-//         telefonos, fechaNacimiento, nacionalidad, nSeguridadSocial, codigoPostal,
-//         cuentaCorriente, tipoTrabajador, inicioContrato, finalContrato, antiguedad, idEmpresa
-//       ) VALUES (
-//         ${usuario.id},
-//         ${usuario.idApp ? `'${usuario.idApp}'` : "NULL"},
-//         ${usuario.nombreApellidos ? `'${usuario.nombreApellidos}'` : "NULL"},
-//         ${usuario.displayName ? `'${usuario.displayName}'` : "NULL"},
-//         ${usuario.emails ? `'${usuario.emails}'` : "NULL"},
-//         ${usuario.dni ? `'${usuario.dni}'` : "NULL"},
-//         ${usuario.direccion ? `'${usuario.direccion}'` : "NULL"},
-//         ${usuario.ciudad ? `'${usuario.ciudad}'` : "NULL"},
-//         ${usuario.telefonos ? `'${usuario.telefonos}'` : "NULL"},
-//         ${convertOrNULL(usuario.fechaNacimiento)},
-//         ${usuario.nacionalidad ? `'${usuario.nacionalidad}'` : "NULL"},
-//         ${usuario.nSeguridadSocial ? `'${usuario.nSeguridadSocial}'` : "NULL"},
-//         ${usuario.codigoPostal ? `'${usuario.codigoPostal}'` : "NULL"},
-//         ${usuario.cuentaCorriente ? `'${usuario.cuentaCorriente}'` : "NULL"},
-//         ${usuario.tipoTrabajador ? `'${usuario.tipoTrabajador}'` : "NULL"},
-//         ${convertOrNULL(usuario.inicioContrato)},
-//         ${convertOrNULL(usuario.finalContrato)},
-//         ${convertOrNULL(usuario.antiguedad)},
-//         ${usuario.idEmpresa ? `'${usuario.idEmpresa}'` : "NULL"}
-//       )`;
-
-//     console.log(insertQueryBuilder);
-
-//     const promises = [];
-
-//     for (let i = 0; i < usuariosNuevosValidos.length; i += batchSize) {
-//       const batch = usuariosNuevosValidos.slice(i, i + batchSize);
-//       promises.push(executeBatch(database, batch, insertQueryBuilder));
-//     }
-//     await Promise.all(promises);
-//     return {
-//       usuariosNoActualizadosNuevos,
-//       usuariosNoActualizadosApp,
-//     };
-//   } catch (error) {
-//     console.error("Error al registrar el usuario:", error);
-//   }
-// }
-
-export async function RegistroManual(database: string, usuariosNuevos) {
+export async function RegistroManual(
+  database: string,
+  usuariosNuevos,
+  empresa,
+) {
   try {
+    console.log("Empresa recibida:", empresa);
+    // if (!empresa || !empresa.nombreEmpresa || !empresa.cif) {
+    //   throw new Error("La información de la empresa no es válida");
+    // }
+    // Construye la consulta de inserción para la empresa
+    const insertEmpresaQuery = `
+       INSERT INTO dbo.empresas (nombreEmpresa, cif) VALUES (
+         '${empresa.nombreEmpresa}',
+         '${empresa.cif}'
+       );
+     `;
+
+    // Ejecuta la consulta de inserción de la empresa
+    await executeBatch2(database, [insertEmpresaQuery]);
     // Asegúrate de que la variable usuariosNuevos sea siempre un arreglo
     if (!Array.isArray(usuariosNuevos)) {
       usuariosNuevos = [usuariosNuevos];
     }
 
-    const insertQueryBuilder = (usuario) => `
+    const insertTrabajadorQuery = (usuario) => `
       INSERT INTO dbo.trabajadores (
         id, idApp, nombreApellidos, displayName, emails, dni, direccion, ciudad,
         telefonos, fechaNacimiento, nacionalidad, nSeguridadSocial, codigoPostal,
@@ -725,13 +687,20 @@ export async function RegistroManual(database: string, usuariosNuevos) {
     // Suponiendo que executeBatch es una función que ejecuta las consultas y maneja la conexión
     await Promise.all(
       usuariosNuevos.map((usuario) =>
-        executeBatch(database, usuario, insertQueryBuilder),
+        executeBatch(database, usuario, insertTrabajadorQuery),
       ),
     );
+    // const trabajadoresQueries = usuariosNuevos.map((usuario) =>
+    //   insertTrabajadorQuery(usuario),
+    // );
+    // await executeBatch2(database, trabajadoresQueries);
 
-    return { ok: true, message: "Todos los usuarios han sido registrados." };
+    return {
+      ok: true,
+      message: "La empresa y todos los usuarios han sido registrados.",
+    };
   } catch (error) {
-    console.error("Error al registrar el usuario:", error);
+    console.error("Error al registrar la empresa o los usuarios:", error);
     return { ok: false, message: error.message };
   }
 }
