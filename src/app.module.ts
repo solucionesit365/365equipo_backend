@@ -69,6 +69,7 @@ import { EvaluacionesController } from "./evaluaciones/evaluaciones.controller";
 import { EvaluacionesDatabase } from "./evaluaciones/evaluaciones.mongodb";
 import { EvaluacionesClass } from "./evaluaciones/evaluaciones.class";
 import { MantenimientoController } from "./mantenimiento/mantenimiento.controller";
+import { tiendasMongodb } from "./tiendas/tiendas.mongodb";
 
 @Module({
   imports: [
@@ -147,6 +148,7 @@ import { MantenimientoController } from "./mantenimiento/mantenimiento.controlle
     SolicitudVacacionesBdd,
     EvaluacionesDatabase,
     EvaluacionesClass,
+    tiendasMongodb,
   ],
 })
 export class AppModule {}

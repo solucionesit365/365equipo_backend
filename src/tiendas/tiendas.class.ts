@@ -1,6 +1,7 @@
 import { Injectable, Inject, forwardRef } from "@nestjs/common";
 import * as schTiendas from "./tiendas.mssql";
 import { Trabajador } from "../trabajadores/trabajadores.class";
+import { tiendasMongodb } from "./tiendas.mongodb";
 import { TrabajadorSql } from "../trabajadores/trabajadores.interface";
 
 @Injectable()
@@ -8,22 +9,44 @@ export class Tienda {
   constructor(
     @Inject(forwardRef(() => Trabajador))
     private readonly trabajadoresInstance: Trabajador,
+    private readonly shTiendasMongo: tiendasMongodb,
   ) {}
 
   async getTiendas() {
-    const arrayTiendas = await schTiendas.getTiendas();
+    const arrayTiendas = await this.shTiendasMongo.getTiendas();
 
     if (arrayTiendas) return arrayTiendas;
     throw Error("No hay tiendas");
   }
 
   async getTiendasHit() {
-    return await schTiendas.getTiendasHit();
+    return await this.shTiendasMongo.getTiendasHitMongoDb();
   }
+
+  // async actualizarTiendas() {
+  //   const arrayTiendasApp = await this.getTiendas();
+  //   const arrayTiendasHit = await this.getTiendasHit();
+
+  //   const tiendasExistentesIds = arrayTiendasApp.map(
+  //     (tiendaApp) => tiendaApp.idExterno,
+  //   );
+  //   const tiendasNuevas = arrayTiendasHit.filter(
+  //     (tiendaExterno) => !tiendasExistentesIds.includes(tiendaExterno.id),
+  //   );
+  //   return schTiendas.addTiendasNuevas(tiendasNuevas);
+  // }
 
   async actualizarTiendas() {
     const arrayTiendasApp = await this.getTiendas();
     const arrayTiendasHit = await this.getTiendasHit();
+
+    console.log(arrayTiendasApp);
+    console.log(arrayTiendasHit);
+
+    if (!Array.isArray(arrayTiendasApp) || !Array.isArray(arrayTiendasHit)) {
+      console.error("Una de las funciones no devolvió un array");
+      return false;
+    }
 
     const tiendasExistentesIds = arrayTiendasApp.map(
       (tiendaApp) => tiendaApp.idExterno,
@@ -31,7 +54,8 @@ export class Tienda {
     const tiendasNuevas = arrayTiendasHit.filter(
       (tiendaExterno) => !tiendasExistentesIds.includes(tiendaExterno.id),
     );
-    return schTiendas.addTiendasNuevas(tiendasNuevas);
+
+    return this.shTiendasMongo.addTiendasNuevasMongoDb(tiendasNuevas);
   }
 
   private checkExists(arrayTiendas: any[], buscar: any) {
