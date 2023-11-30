@@ -166,4 +166,40 @@ export class FichajesValidadosDatabase {
       })
       .toArray();
   }
+
+  async getFichajesValidadosTiendaRango(
+    idTienda: number,
+    fechaInicio: DateTime,
+    fechaFinal: DateTime,
+  ) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const fichajesCollection =
+      db.collection<FichajeValidadoDto>("fichajesValidados");
+    return await fichajesCollection
+      .find({
+        idTienda: idTienda,
+        inicio: { $gte: fechaInicio.toJSDate() },
+        final: { $lte: fechaFinal.toJSDate() },
+      })
+      .toArray();
+  }
+
+  async getFichajesValidadosTrabajadorTiendaRango(
+    idTrabajador: number,
+    idTienda: number,
+    fechaInicio: DateTime,
+    fechaFinal: DateTime,
+  ) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const fichajesCollection =
+      db.collection<FichajeValidadoDto>("fichajesValidados");
+    return await fichajesCollection
+      .find({
+        idTrabajador: idTrabajador,
+        idTienda: idTienda,
+        inicio: { $gte: fechaInicio.toJSDate() },
+        final: { $lte: fechaFinal.toJSDate() },
+      })
+      .toArray();
+  }
 }

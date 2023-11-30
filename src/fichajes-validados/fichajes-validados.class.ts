@@ -25,6 +25,18 @@ export class FichajesValidados {
     return await this.schFichajesValidados.getFichajesValidados(idTrabajador);
   }
 
+  async getFichajesValidadosRango(
+    idTrabajador: number,
+    fechaInicio: DateTime,
+    fechaFinal: DateTime,
+  ) {
+    return await this.schFichajesValidados.getParaCuadranteNew(
+      fechaInicio,
+      fechaFinal,
+      idTrabajador,
+    );
+  }
+
   async getPendientesEnvio() {
     return await this.schFichajesValidados.getPendientesEnvio();
   }
@@ -167,5 +179,31 @@ export class FichajesValidados {
         break;
       }
     }
+  }
+
+  async getFichajesValidadosTiendaRango(
+    idTienda: number,
+    fechaInicio: DateTime,
+    fechaFinal: DateTime,
+  ) {
+    return await this.schFichajesValidados.getFichajesValidadosTiendaRango(
+      idTienda,
+      fechaInicio,
+      fechaFinal,
+    );
+  }
+
+  async getFichajesValidadosTrabajadorTiendaRango(
+    idTrabajador: number,
+    idTienda: number,
+    fechaInicio: DateTime,
+    fechaFinal: DateTime,
+  ) {
+    return await this.schFichajesValidados.getFichajesValidadosTrabajadorTiendaRango(
+      idTrabajador,
+      idTienda,
+      fechaInicio,
+      fechaFinal,
+    );
   }
 }

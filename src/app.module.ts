@@ -69,6 +69,8 @@ import { EvaluacionesController } from "./evaluaciones/evaluaciones.controller";
 import { EvaluacionesDatabase } from "./evaluaciones/evaluaciones.mongodb";
 import { EvaluacionesClass } from "./evaluaciones/evaluaciones.class";
 import { MantenimientoController } from "./mantenimiento/mantenimiento.controller";
+import { PactadoVsRealController } from './pactado-vs-real/pactado-vs-real.controller';
+import { PactadoVsRealService } from './pactado-vs-real/pactado-vs-real.service';
 
 @Module({
   imports: [
@@ -101,6 +103,7 @@ import { MantenimientoController } from "./mantenimiento/mantenimiento.controlle
     SolicitudVacacionesController,
     EvaluacionesController,
     MantenimientoController,
+    PactadoVsRealController,
   ],
   providers: [
     AppService,
@@ -147,6 +150,7 @@ import { MantenimientoController } from "./mantenimiento/mantenimiento.controlle
     SolicitudVacacionesBdd,
     EvaluacionesDatabase,
     EvaluacionesClass,
+    PactadoVsRealService,
   ],
 })
 export class AppModule {}
