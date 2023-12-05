@@ -8,7 +8,6 @@ import {
 import * as moment from "moment";
 import { ObjectId, WithId } from "mongodb";
 import { FichajeDto, ParFichaje } from "./fichajes.interface";
-import { FichajeValidadoDto } from "../fichajes-validados/fichajes-validados.interface";
 import { Cuadrantes } from "../cuadrantes/cuadrantes.class";
 import { DateTime, Duration } from "luxon";
 

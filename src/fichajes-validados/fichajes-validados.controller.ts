@@ -6,16 +6,18 @@ import {
   Headers,
   Query,
   UseGuards,
+  ParseIntPipe,
 } from "@nestjs/common";
 import { TokenService } from "../get-token/get-token.service";
 import { FichajesValidados } from "./fichajes-validados.class";
-import { FichajeValidadoDto } from "./fichajes-validados.interface";
+import { FichajeValidadoDto } from "./fichajes-validados.dto";
 import { AuthService } from "../firebase/auth";
 import { Notificaciones } from "src/notificaciones/notificaciones.class";
 import { Trabajador } from "src/trabajadores/trabajadores.class";
 import { AuthGuard } from "../auth/auth.guard";
 import { SchedulerGuard } from "../scheduler/scheduler.guard";
-import { getConnectionPoolHit } from "../bbdd/mssql";
+import { ParseDatePipe } from "../parse-date/parse-date.pipe";
+import { DateTime } from "luxon";
 
 @Controller("fichajes-validados")
 export class FichajesValidadosController {
@@ -31,9 +33,7 @@ export class FichajesValidadosController {
   @Post("addFichajeValidado")
   async addFichajeValidado(@Body() fichajeValidado: FichajeValidadoDto) {
     try {
-      if (!fichajeValidado.idTrabajador) throw Error("Faltan parametros");
-      // const token = this.tokenService.extract(authHeader);
-
+      console.log(fichajeValidado.fecha.getFullYear());
       if (
         await this.fichajesValidadosInstance.addFichajesValidados(
           fichajeValidado,
@@ -217,8 +217,7 @@ export class FichajesValidadosController {
   @Get("getSemanasFichajesPagar")
   async getSemanasFichajesPagar(
     @Headers("authorization") authHeader: string,
-    @Query()
-    { semana }: { semana: number },
+    @Query("diaEntreSemana", ParseDatePipe) diaEntreSemana: Date,
   ) {
     try {
       const token = this.tokenService.extract(authHeader);
@@ -226,7 +225,7 @@ export class FichajesValidadosController {
 
       const respValidados =
         await this.fichajesValidadosInstance.getSemanasFichajesPagar(
-          Number(semana),
+          DateTime.fromJSDate(diaEntreSemana),
         );
       if (respValidados.length > 0) {
         return {
@@ -248,14 +247,12 @@ export class FichajesValidadosController {
 
   @Get("getAllFichajesValidados")
   async getAllFichajes(
-    @Query()
-    { fecha }: { fecha: string },
     @Headers("authorization") authHeader: string,
+    @Query("fecha", ParseDatePipe) fecha: Date,
   ) {
     try {
       const token = this.tokenService.extract(authHeader);
       await this.authInstance.verifyToken(token);
-      console.log(fecha);
 
       const respAllFichajes =
         await this.fichajesValidadosInstance.getAllFichajesValidados(fecha);
@@ -279,31 +276,29 @@ export class FichajesValidadosController {
   @Get("getTiendaDia")
   async getTiendaDia(
     @Headers("authorization") authHeader: string,
-    @Query()
-    { tienda, dia }: { tienda: number; dia: string },
+    @Query("tienda", ParseIntPipe) tienda: number,
+    @Query("dia", ParseDatePipe) fecha: Date,
   ) {
     try {
+      console.log(fecha, typeof fecha);
       const token = this.tokenService.extract(authHeader);
       await this.authInstance.verifyToken(token);
-      console.log(tienda + " - " + dia);
 
-      if (tienda && dia) {
-        const respFichajesV = await this.fichajesValidadosInstance.getTiendaDia(
-          Number(tienda),
-          dia,
-        );
-        if (respFichajesV.length > 0) {
-          return {
-            ok: true,
-            data: respFichajesV,
-          };
-        } else {
-          return {
-            ok: false,
-            data: [],
-          };
-        }
-      } else throw Error("Faltan datos");
+      const respFichajesV = await this.fichajesValidadosInstance.getTiendaDia(
+        tienda,
+        fecha,
+      );
+      if (respFichajesV.length > 0) {
+        return {
+          ok: true,
+          data: respFichajesV,
+        };
+      } else {
+        return {
+          ok: false,
+          data: [],
+        };
+      }
     } catch (error) {
       return { ok: false, message: error.message };
     }
@@ -312,22 +307,17 @@ export class FichajesValidadosController {
   @Get("getResumen")
   @UseGuards(AuthGuard)
   async getResumen(
-    @Headers("authorization") authHeader: string,
-    @Query() params,
+    @Query("fechaEntreSemana", ParseDatePipe) fechaEntreSemana: Date,
+    @Query("idTienda", ParseIntPipe) idTienda: number,
   ) {
     try {
-      // const token = this.tokenService.extract(authHeader);
-      // await this.authInstance.verifyToken(token);
-
-      if (!params.year || !params.semana || !params.idTienda)
-        throw Error("Faltan parámetros");
+      if (!fechaEntreSemana || !idTienda) throw Error("Faltan parámetros");
 
       return {
         ok: true,
         data: await this.fichajesValidadosInstance.resumenSemana(
-          Number(params.year),
-          Number(params.semana),
-          Number(params.idTienda),
+          fechaEntreSemana,
+          idTienda,
         ),
       };
     } catch (error) {

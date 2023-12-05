@@ -1,8 +1,8 @@
 import { Injectable } from "@nestjs/common";
 import { MongoDbService } from "../bbdd/mongodb";
-import { FichajeValidadoDto } from "./fichajes-validados.interface";
 import { ObjectId } from "mongodb";
 import { DateTime } from "luxon";
+import { FichajeValidadoDto } from "./fichajes-validados.dto";
 
 @Injectable()
 export class FichajesValidadosDatabase {
@@ -87,25 +87,42 @@ export class FichajesValidadosDatabase {
     return await fichajesIdResponsable.find({ idResponsable }).toArray();
   }
 
-  async getSemanasFichajesPagar(semana: number) {
+  async getSemanasFichajesPagar(fechaInicio: DateTime, fechaFinal: DateTime) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const fichajesIdResponsable =
       db.collection<FichajeValidadoDto>("fichajesValidados");
 
-    return await fichajesIdResponsable.find({ semana }).toArray();
+    return await fichajesIdResponsable
+      .find({
+        fecha: {
+          $gte: fechaInicio.toJSDate(),
+          $lte: fechaFinal.toJSDate(),
+        },
+      })
+      .toArray();
   }
 
-  async getAllFichajesValidados(fecha: string) {
+  async getAllFichajesValidados(fecha: DateTime) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const fichajesCollection =
       db.collection<FichajeValidadoDto>("fichajesValidados");
 
-    return await fichajesCollection.find({ fecha }).toArray();
+    const fechaInicio = fecha.startOf("week");
+    const fechaFinal = fecha.endOf("week");
+
+    return await fichajesCollection
+      .find({
+        fecha: {
+          $gte: fechaInicio.toJSDate(),
+          $lte: fechaFinal.toJSDate(),
+        },
+      })
+      .toArray();
   }
 
   async getValidadosSemanaResponsable(
-    year: number,
-    semana: number,
+    fechaInicio: DateTime,
+    fechaFinal: DateTime,
     idResponsable: number,
   ) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
@@ -114,35 +131,49 @@ export class FichajesValidadosDatabase {
 
     return await fichajesCollection
       .find({
-        year,
-        semana,
+        fecha: {
+          $gte: fechaInicio.toJSDate(),
+          $lte: fechaFinal.toJSDate(),
+        },
         idResponsable,
       })
       .toArray();
   }
 
-  async getTiendaDia(tienda: number, dia: string) {
+  async getTiendaDia(tienda: number, dia: DateTime) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const fichajesCollection =
       db.collection<FichajeValidadoDto>("fichajesValidados");
+
+    const fechaInicio = dia.startOf("day");
+    const fechaFinal = dia.endOf("day");
 
     return await fichajesCollection
       .find({
         tienda: tienda,
-        fecha: dia,
+        fecha: {
+          $gte: fechaInicio.toJSDate(),
+          $lte: fechaFinal.toJSDate(),
+        },
       })
       .toArray();
   }
 
-  async getParaCuadrante(year: number, semana: number, idTrabajador: number) {
+  async getParaCuadrante(
+    fechaInicio: DateTime,
+    fechaFinal: DateTime,
+    idTrabajador: number,
+  ) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const fichajesCollection =
       db.collection<FichajeValidadoDto>("fichajesValidados");
 
     return await fichajesCollection
       .find({
-        year,
-        semana,
+        fecha: {
+          $gte: fechaInicio.toJSDate(),
+          $lte: fechaFinal.toJSDate(),
+        },
         idTrabajador,
       })
       .toArray();
@@ -160,8 +191,10 @@ export class FichajesValidadosDatabase {
 
     return await fichajesCollection
       .find({
-        fechaEntrada: { $gte: lunes.toJSDate() },
-        fechaSalida: { $lte: domingo.toJSDate() },
+        fichajes: {
+          entrada: { $gte: lunes.toJSDate() },
+          salida: { $lte: domingo.toJSDate() },
+        },
         idTrabajador,
       })
       .toArray();
@@ -178,8 +211,10 @@ export class FichajesValidadosDatabase {
     return await fichajesCollection
       .find({
         idTienda: idTienda,
-        inicio: { $gte: fechaInicio.toJSDate() },
-        final: { $lte: fechaFinal.toJSDate() },
+        fichajes: {
+          entrada: { $gte: fechaInicio.toJSDate() },
+          salida: { $lte: fechaFinal.toJSDate() },
+        },
       })
       .toArray();
   }
@@ -197,8 +232,10 @@ export class FichajesValidadosDatabase {
       .find({
         idTrabajador: idTrabajador,
         idTienda: idTienda,
-        inicio: { $gte: fechaInicio.toJSDate() },
-        final: { $lte: fechaFinal.toJSDate() },
+        fichajes: {
+          entrada: { $gte: fechaInicio.toJSDate() },
+          salida: { $lte: fechaFinal.toJSDate() },
+        },
       })
       .toArray();
   }
