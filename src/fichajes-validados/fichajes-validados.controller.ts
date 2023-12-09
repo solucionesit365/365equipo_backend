@@ -33,7 +33,6 @@ export class FichajesValidadosController {
   @Post("addFichajeValidado")
   async addFichajeValidado(@Body() fichajeValidado: FichajeValidadoDto) {
     try {
-      console.log(fichajeValidado.fecha.getFullYear());
       if (
         await this.fichajesValidadosInstance.addFichajesValidados(
           fichajeValidado,

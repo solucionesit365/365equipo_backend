@@ -14,12 +14,13 @@ export class PactadoVsRealService {
     private readonly fichajesValidadosService: FichajesValidados,
   ) {}
   async pactadoVsReal(
-    trabajador: TrabajadorCompleto,
+    trabajadorRequest: TrabajadorCompleto,
     fechaInicio: DateTime,
     idTienda: number,
   ) {
+    idTienda = 154;
     const subordinados = await this.trabajadoresInstance.getSubordinados(
-      trabajador.uid,
+      "1pw5qQKb3Dd7pDlfISPuQqwtYX42", //trabajadorRequest.uid,
     );
 
     const idsSubordinados = subordinados.map((s) => s.id);

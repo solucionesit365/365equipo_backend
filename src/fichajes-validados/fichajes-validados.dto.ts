@@ -22,6 +22,9 @@ class TCuadranteMinDto {
 
   @IsNumber()
   idTrabajador: number;
+
+  @IsNumber()
+  totalHoras: number;
 }
 
 class Fichaje {
@@ -78,9 +81,8 @@ export class FichajeValidadoDto {
   @IsString()
   nombre: string;
 
-  @Type(() => Date)
-  @IsDate()
-  fecha: Date;
+  @IsString()
+  dni: string;
 
   @ValidateNested()
   @Type(() => TCuadranteMinDto)

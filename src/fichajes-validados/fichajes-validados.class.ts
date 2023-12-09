@@ -40,6 +40,12 @@ export class FichajesValidados {
     return await this.schFichajesValidados.getPendientesEnvio();
   }
 
+  async insertFichajesValidadosRectificados(data: FichajeValidadoDto[]) {
+    return await this.schFichajesValidados.insertFichajesValidadosRectificados(
+      data,
+    );
+  }
+
   formatoConsultaSQL(fichaje: FichajeValidadoDto): string {
     // const idPlan = fichaje.cuadrante.idPlan;
     // const horasExtra = fichaje.horasExtra ? fichaje.horasExtra : 0;
@@ -49,7 +55,7 @@ export class FichajesValidados {
     // const horasAprendiz = fichaje.horasAprendiz ? fichaje.horasAprendiz : 0;
     const idEmpleado = fichaje.idTrabajador;
     // Convertir a estándard con tipo Date.
-    const fecha = DateTime.fromJSDate(fichaje.fecha);
+    const fecha = DateTime.fromJSDate(fichaje.cuadrante.inicio);
     const day = fecha.day;
     const month = fecha.month;
     const year = fecha.year;
@@ -156,7 +162,7 @@ export class FichajesValidados {
       ];
     }
     for (let i = 0; i < arrayValidados.length; i += 1) {
-      const dayIndex = this.getNumeroSemana(arrayValidados[i].fecha);
+      const dayIndex = this.getNumeroSemana(arrayValidados[i].cuadrante.inicio);
       // this.addToSubordinados(subordinados, arrayValidados[i], dayIndex);
     }
     return subordinados; // Hacer map para filtrar datos innecesarios.
@@ -214,5 +220,10 @@ export class FichajesValidados {
       fechaInicio,
       fechaFinal,
     );
+  }
+
+  // Solo se usa para el test de rectificarFichajesValidados
+  async getTodos() {
+    return await this.schFichajesValidados.getTodos();
   }
 }

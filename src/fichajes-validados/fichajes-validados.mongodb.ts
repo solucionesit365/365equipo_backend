@@ -8,11 +8,26 @@ import { FichajeValidadoDto } from "./fichajes-validados.dto";
 export class FichajesValidadosDatabase {
   constructor(private readonly mongoDbService: MongoDbService) {}
 
+  async getTodos() {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const fichajesCollection = db.collection("fichajesValidados2");
+
+    return await fichajesCollection.find({}).toArray();
+  }
+
+  async insertFichajesValidadosRectificados(data: FichajeValidadoDto[]) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const fichajesCollection =
+      db.collection<FichajeValidadoDto>("fichajesValidados2");
+
+    return await fichajesCollection.insertMany(data);
+  }
+
   async insertarFichajeValidado(fichajeValidado: FichajeValidadoDto) {
     fichajeValidado._id = new ObjectId().toString();
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const cuadrantesCollection =
-      db.collection<FichajeValidadoDto>("fichajesValidados");
+      db.collection<FichajeValidadoDto>("fichajesValidados2");
     const resInsert = await cuadrantesCollection.insertOne(fichajeValidado);
     if (resInsert.acknowledged) return resInsert.insertedId;
     return null;
@@ -21,7 +36,7 @@ export class FichajesValidadosDatabase {
   async getFichajesValidados(idTrabajador: number) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const fichajesCollection =
-      db.collection<FichajeValidadoDto>("fichajesValidados");
+      db.collection<FichajeValidadoDto>("fichajesValidados2");
 
     return await fichajesCollection.find({ idTrabajador }).toArray();
   }
@@ -29,7 +44,7 @@ export class FichajesValidadosDatabase {
   async getPendientesEnvio() {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const fichajesCollection =
-      db.collection<FichajeValidadoDto>("fichajesValidados");
+      db.collection<FichajeValidadoDto>("fichajesValidados2");
 
     return await fichajesCollection.find({ enviado: { $ne: true } }).toArray();
   }
@@ -37,7 +52,7 @@ export class FichajesValidadosDatabase {
   async marcarComoEnviado(ids: string[]) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const fichajesCollection =
-      db.collection<FichajeValidadoDto>("fichajesValidados");
+      db.collection<FichajeValidadoDto>("fichajesValidados2");
 
     return await fichajesCollection.updateMany(
       { _id: { $in: ids } },
@@ -48,7 +63,7 @@ export class FichajesValidadosDatabase {
   async updateFichajesValidados(fichajesValidados: FichajeValidadoDto) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const fichajesValidadosCollect =
-      db.collection<FichajeValidadoDto>("fichajesValidados");
+      db.collection<FichajeValidadoDto>("fichajesValidados2");
     const id = fichajesValidados._id;
     delete fichajesValidados._id;
     const respFichajes = await fichajesValidadosCollect.updateOne(
@@ -64,7 +79,7 @@ export class FichajesValidadosDatabase {
   async getFichajesPagar(idResponsable: number, aPagar: boolean) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const fichajesValidadosCollect =
-      db.collection<FichajeValidadoDto>("fichajesValidados");
+      db.collection<FichajeValidadoDto>("fichajesValidados2");
 
     return await fichajesValidadosCollect
       .find({ idResponsable, aPagar })
@@ -74,7 +89,7 @@ export class FichajesValidadosDatabase {
   async getAllFichajesPagar(aPagar: boolean) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const fichajesValidadosCollect =
-      db.collection<FichajeValidadoDto>("fichajesValidados");
+      db.collection<FichajeValidadoDto>("fichajesValidados2");
 
     return await fichajesValidadosCollect.find({ aPagar }).toArray();
   }
@@ -82,7 +97,7 @@ export class FichajesValidadosDatabase {
   async getAllIdResponsableFichajesPagar(idResponsable: number) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const fichajesIdResponsable =
-      db.collection<FichajeValidadoDto>("fichajesValidados");
+      db.collection<FichajeValidadoDto>("fichajesValidados2");
 
     return await fichajesIdResponsable.find({ idResponsable }).toArray();
   }
@@ -90,7 +105,7 @@ export class FichajesValidadosDatabase {
   async getSemanasFichajesPagar(fechaInicio: DateTime, fechaFinal: DateTime) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const fichajesIdResponsable =
-      db.collection<FichajeValidadoDto>("fichajesValidados");
+      db.collection<FichajeValidadoDto>("fichajesValidados2");
 
     return await fichajesIdResponsable
       .find({
@@ -105,7 +120,7 @@ export class FichajesValidadosDatabase {
   async getAllFichajesValidados(fecha: DateTime) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const fichajesCollection =
-      db.collection<FichajeValidadoDto>("fichajesValidados");
+      db.collection<FichajeValidadoDto>("fichajesValidados2");
 
     const fechaInicio = fecha.startOf("week");
     const fechaFinal = fecha.endOf("week");
@@ -127,7 +142,7 @@ export class FichajesValidadosDatabase {
   ) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const fichajesCollection =
-      db.collection<FichajeValidadoDto>("fichajesValidados");
+      db.collection<FichajeValidadoDto>("fichajesValidados2");
 
     return await fichajesCollection
       .find({
@@ -143,7 +158,7 @@ export class FichajesValidadosDatabase {
   async getTiendaDia(tienda: number, dia: DateTime) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const fichajesCollection =
-      db.collection<FichajeValidadoDto>("fichajesValidados");
+      db.collection<FichajeValidadoDto>("fichajesValidados2");
 
     const fechaInicio = dia.startOf("day");
     const fechaFinal = dia.endOf("day");
@@ -166,7 +181,7 @@ export class FichajesValidadosDatabase {
   ) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const fichajesCollection =
-      db.collection<FichajeValidadoDto>("fichajesValidados");
+      db.collection<FichajeValidadoDto>("fichajesValidados2");
 
     return await fichajesCollection
       .find({
@@ -187,7 +202,7 @@ export class FichajesValidadosDatabase {
   ) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const fichajesCollection =
-      db.collection<FichajeValidadoDto>("fichajesValidados");
+      db.collection<FichajeValidadoDto>("fichajesValidados2");
 
     return await fichajesCollection
       .find({
@@ -207,7 +222,7 @@ export class FichajesValidadosDatabase {
   ) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const fichajesCollection =
-      db.collection<FichajeValidadoDto>("fichajesValidados");
+      db.collection<FichajeValidadoDto>("fichajesValidados2");
     return await fichajesCollection
       .find({
         idTienda: idTienda,
@@ -227,7 +242,7 @@ export class FichajesValidadosDatabase {
   ) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const fichajesCollection =
-      db.collection<FichajeValidadoDto>("fichajesValidados");
+      db.collection<FichajeValidadoDto>("fichajesValidados2");
     return await fichajesCollection
       .find({
         idTrabajador: idTrabajador,

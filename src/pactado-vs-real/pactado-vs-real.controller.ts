@@ -9,6 +9,7 @@ import { DateTime } from "luxon";
 import { TokenService } from "../get-token/get-token.service";
 import { AuthService } from "../firebase/auth";
 import { PactadoVsRealService } from "./pactado-vs-real.service";
+import { ParseDatePipe } from "../parse-date/parse-date.pipe";
 
 @Controller("pactado-vs-real")
 export class PactadoVsRealController {
@@ -20,22 +21,23 @@ export class PactadoVsRealController {
 
   @Get()
   async pactadoVsReal(
-    @Query("fechaInicio") fechaInicio: string,
+    @Query("fechaInicio", ParseDatePipe) fechaInicio: Date,
     @Headers("authorization") authHeader: string,
   ) {
     if (!fechaInicio)
       return new BadRequestException("fechaInicio es requerida");
 
-    const token = this.tokenService.extract(authHeader);
-    const usuarioRequest = await this.authInstance.getUserWithToken(token);
+    console.log("la fecha inicio: ", fechaInicio, typeof fechaInicio);
+    // const token = this.tokenService.extract(authHeader);
+    // const usuarioRequest = await this.authInstance.getUserWithToken(token);
 
-    const inicio = DateTime.fromJSDate(new Date(fechaInicio));
-    const idTiendaNumber = Number(usuarioRequest.idTienda);
+    const inicio = DateTime.fromJSDate(fechaInicio);
+    // const idTiendaNumber = Number(usuarioRequest.idTienda);
 
     return this.pactadoRealService.pactadoVsReal(
-      usuarioRequest,
+      null, //usuarioRequest,
       inicio.startOf("week"),
-      idTiendaNumber,
+      null, //idTiendaNumber,
     );
   }
 }
