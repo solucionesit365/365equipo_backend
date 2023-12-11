@@ -43,6 +43,11 @@ export class TestController {
 
       for (let i = 0; i < fichajesValidados.length; i += 1) {
         try {
+          const trabajadorAux =
+            await this.trabajadoresInstance.getTrabajadorBySqlId(
+              fichajesValidados[i].idTrabajador,
+            );
+
           const fechaFichajeValidado = DateTime.fromFormat(
             fichajesValidados[i].fecha,
             "yyyy-MM-dd",
@@ -100,15 +105,10 @@ export class TestController {
               nombre: fichajesValidados[i].cuadrante.nombre,
               totalHoras: fichajesValidados[i].cuadrante.totalHoras,
             },
-            dni: (
-              await this.trabajadoresInstance.getTrabajadorBySqlId(
-                fichajesValidados[i].idTrabajador,
-              )
-            ).dni,
-            fichajes: {
-              entrada: fichajeEntrada.toJSDate(),
-              salida: fichajeSalida.toJSDate(),
-            },
+            dni: trabajadorAux.dni,
+            idTienda: trabajadorAux.idTienda,
+            fichajeEntrada: fichajeEntrada.toJSDate(),
+            fichajeSalida: fichajeSalida.toJSDate(),
             horasAprendiz: fichajesValidados[i].horasAprendiz,
             horasCoordinacion: fichajesValidados[i].horasCoordinacion,
             horasCuadrante: fichajesValidados[i].horasCuadrante,

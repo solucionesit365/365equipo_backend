@@ -81,6 +81,9 @@ export class FichajeValidadoDto {
   @IsString()
   nombre: string;
 
+  @IsNumber()
+  idTienda: number;
+
   @IsString()
   dni: string;
 
@@ -88,9 +91,17 @@ export class FichajeValidadoDto {
   @Type(() => TCuadranteMinDto)
   cuadrante: TCuadranteMinDto;
 
-  @ValidateNested()
-  @Type(() => Fichaje)
-  fichajes: Fichaje;
+  // @ValidateNested()
+  // @Type(() => Fichaje)
+  // fichajes: Fichaje;
+
+  @Type(() => Date)
+  @IsDate()
+  fichajeEntrada: Date;
+
+  @Type(() => Date)
+  @IsDate()
+  fichajeSalida: Date;
 
   @ValidateNested()
   @Type(() => IdFichajes)

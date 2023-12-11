@@ -214,12 +214,16 @@ export class FichajesValidados {
     fechaInicio: DateTime,
     fechaFinal: DateTime,
   ) {
-    return await this.schFichajesValidados.getFichajesValidadosTrabajadorTiendaRango(
-      idTrabajador,
-      idTienda,
-      fechaInicio,
-      fechaFinal,
-    );
+
+    const resFichajesValidados =
+      await this.schFichajesValidados.getFichajesValidadosTrabajadorTiendaRango(
+        idTrabajador,
+        idTienda,
+        fechaInicio,
+        fechaFinal,
+      );
+
+    return resFichajesValidados;
   }
 
   // Solo se usa para el test de rectificarFichajesValidados

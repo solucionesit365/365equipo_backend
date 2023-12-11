@@ -10,7 +10,7 @@ export class FichajesValidadosDatabase {
 
   async getTodos() {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
-    const fichajesCollection = db.collection("fichajesValidados2");
+    const fichajesCollection = db.collection("fichajesValidados");
 
     return await fichajesCollection.find({}).toArray();
   }
@@ -226,10 +226,10 @@ export class FichajesValidadosDatabase {
     return await fichajesCollection
       .find({
         idTienda: idTienda,
-        fichajes: {
-          entrada: { $gte: fechaInicio.toJSDate() },
-          salida: { $lte: fechaFinal.toJSDate() },
-        },
+        $and: [
+          { fichajeEntrada: { $gte: fechaInicio.toJSDate() } },
+          { fichajeSalida: { $lte: fechaFinal.toJSDate() } },
+        ],
       })
       .toArray();
   }
@@ -240,17 +240,26 @@ export class FichajesValidadosDatabase {
     fechaInicio: DateTime,
     fechaFinal: DateTime,
   ) {
+    if (idTrabajador === 4963) {
+      console.log("llegamos");
+    }
+
+    // Convertir fechas a UTC
+    let fechaInicioUTC = fechaInicio.toUTC();
+    let fechaFinalUTC = fechaFinal.toUTC();
+
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const fichajesCollection =
       db.collection<FichajeValidadoDto>("fichajesValidados2");
+
     return await fichajesCollection
       .find({
         idTrabajador: idTrabajador,
         idTienda: idTienda,
-        fichajes: {
-          entrada: { $gte: fechaInicio.toJSDate() },
-          salida: { $lte: fechaFinal.toJSDate() },
-        },
+        $and: [
+          { fichajeEntrada: { $gte: fechaInicioUTC.toJSDate() } },
+          { fichajeSalida: { $lte: fechaFinalUTC.toJSDate() } },
+        ],
       })
       .toArray();
   }

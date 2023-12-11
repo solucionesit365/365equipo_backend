@@ -18,9 +18,8 @@ export class PactadoVsRealService {
     fechaInicio: DateTime,
     idTienda: number,
   ) {
-    idTienda = 154;
     const subordinados = await this.trabajadoresInstance.getSubordinados(
-      "1pw5qQKb3Dd7pDlfISPuQqwtYX42", //trabajadorRequest.uid,
+      trabajadorRequest.uid,
     );
 
     const idsSubordinados = subordinados.map((s) => s.id);
@@ -64,8 +63,8 @@ export class PactadoVsRealService {
         const fecha = fechaInicio.plus({ days: j });
         const fichajesValidadosDia =
           await this.fichajesValidadosService.getFichajesValidadosTrabajadorTiendaRango(
-            idTienda,
             trabajadoresTienda[i].id,
+            idTienda,
             fecha.startOf("day"),
             fecha.endOf("day"),
           );
