@@ -113,6 +113,7 @@ export class TestController {
             horasCoordinacion: fichajesValidados[i].horasCoordinacion,
             horasCuadrante: fichajesValidados[i].horasCuadrante,
             horasExtra: fichajesValidados[i].horasExtra,
+            horasFichaje: fichajesValidados[i].horasFichaje,
             horasPagar: {
               comentario: fichajesValidados[i].horasPagar.comentario,
               estadoValidado: fichajesValidados[i].horasPagar.estadoValidado,

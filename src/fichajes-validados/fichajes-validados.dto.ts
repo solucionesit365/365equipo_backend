@@ -82,6 +82,9 @@ export class FichajeValidadoDto {
   nombre: string;
 
   @IsNumber()
+  horasFichaje: number;
+
+  @IsNumber()
   idTienda: number;
 
   @IsString()
