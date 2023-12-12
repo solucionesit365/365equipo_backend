@@ -46,9 +46,11 @@ class IdFichajes {
 }
 
 class Comentario {
+  @IsOptional()
   @IsString()
   entrada: string;
 
+  @IsOptional()
   @IsString()
   salida: string;
 }
@@ -57,9 +59,11 @@ class HorasPagar {
   @IsNumber()
   total: number;
 
+  @IsOptional()
   @IsString()
   comentario: string;
 
+  @IsOptional()
   @IsString()
   respSuper: string;
 
@@ -110,6 +114,7 @@ export class FichajeValidadoDto {
   @Type(() => IdFichajes)
   idFichajes: IdFichajes;
 
+  @IsOptional()
   @ValidateNested()
   @Type(() => Comentario)
   comentario: Comentario;
