@@ -71,7 +71,7 @@ export class Fichajes {
 
   async sincroFichajes() {
     const fichajesPendientes = await this.schFichajes.getFichajesSincro();
-    await this.schFichajes.enviarHit(fichajesPendientes);
+    return await this.schFichajes.enviarFichajesBC(fichajesPendientes);
   }
 
   filtrarUidFichajeTrabajador(fichajeHit: any, trabajadores: TrabajadorSql[]) {
@@ -123,7 +123,9 @@ export class Fichajes {
 
     if (fichajesPretty.length > 0) {
       await this.schFichajes.insertarFichajesHit(fichajesPretty);
-      return true;
+      return {
+        message: `${fichajesPretty.length} fichajes sincronizado de BC a la app`,
+      };
     } else return "No hay fichajes que extraer";
   }
 

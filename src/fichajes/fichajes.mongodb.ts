@@ -7,6 +7,7 @@ import { ObjectId } from "mongodb";
 import axios from "axios";
 import { DateTime } from "luxon";
 import { MbctokenService } from "../bussinesCentral/services/mbctoken/mbctoken.service";
+import { response } from "express";
 
 @Injectable()
 export class FichajesDatabase {
@@ -77,74 +78,75 @@ export class FichajesDatabase {
     return await fichajesCollection.find({ enviado: false }).toArray();
   }
 
-  async enviarHit(fichajes: FichajeDto[]) {
-    let data = null;
-    const token = await this.MbctokenService.getToken();
+  async enviarFichajesBC(fichajes: FichajeDto[]) {
+    try {
+      let data = null;
+      const token = await this.MbctokenService.getToken();
 
-    for (let i = 0; i < fichajes.length; i += 1) {
-      const hora = moment(fichajes[0].hora);
+      if (fichajes.length > 0) {
+        for (let i = 0; i < fichajes.length; i += 1) {
+          const hora = moment(fichajes[0].hora);
 
-      if (fichajes[i].tipo === "ENTRADA") {
-        data = {
-          tmst: hora.format("YYYY-MM-DD HH:mm:ss"),
-          accio: 1,
-          usuari: fichajes[i].idExterno,
-          idr: fichajes[i]._id.toString(),
-          lloc: null,
-          comentari: "365EquipoDeTrabajo",
-        };
-      } else if (fichajes[i].tipo === "SALIDA") {
-        data = {
-          tmst: hora.format("YYYY-MM-DD HH:mm:ss"),
-          accio: 2,
-          usuari: fichajes[i].idExterno,
-          idr: fichajes[i]._id.toString(),
-          lloc: null,
-          comentari: "365EquipoDeTrabajo",
-        };
-      }
+          if (fichajes[i].tipo === "ENTRADA") {
+            data = {
+              idr: fichajes[i]._id.toString(),
+              tmst: hora.toISOString(),
+              accio: 1,
+              usuari: fichajes[i].idExterno.toString,
+              editor: "365EquipoDeTrabajo",
+              historial: null,
+              lloc: null,
+              comentari: "365EquipoDeTrabajo",
+              id: 0,
+            };
+          } else if (fichajes[i].tipo === "SALIDA") {
+            data = {
+              idr: fichajes[i]._id.toString(),
+              tmst: hora.toISOString(),
+              accio: 2,
+              usuari: fichajes[i].idExterno.toString(),
+              editor: "365EquipoDeTrabajo",
+              comentari: "365EquipoDeTrabajo",
+              id: 0,
+            };
+          }
+          if (data != null) {
+            const response = await axios.post(
+              `https:api.businesscentral.dynamics.com/v2.0/${process.env.MBC_TOKEN_TENANT}/Production/ODataV4/Company('${process.env.MBC_COMPANY_NAME}')/cdpDadesFichador2`,
+              data,
+              {
+                headers: {
+                  Authorization: "Bearer " + token,
+                  "Content-Type": "application/json",
+                },
+              },
+            );
+            if (response.status == 201) {
+              const db = (await this.mongoDbService.getConexion()).db(
+                "soluciones",
+              );
+              const fichajesCollection = db.collection<FichajeDto>("fichajes");
 
-      if (data != null) {
-        //Envio a Business central
-        const response = await axios.post(
-          `https://api.businesscentral.dynamics.com/v2.0/${process.env.MBC_TOKEN_TENANT}/Production/ODataV4/Company('${process.env.MBC_COMPANY_NAME}')/cdpDadesFichador2`,
-          data,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          },
-        );
-
-        console.log(response);
-      }
+              const updatePromises = fichajes.map((item) =>
+                fichajesCollection.updateOne(
+                  { _id: item._id },
+                  { $set: { enviado: true } },
+                ),
+              );
+              await Promise.all(updatePromises);
+              return { message: "Fichajes sincronizados" };
+            } else {
+              return response;
+            }
+          }
+        }
+      } else return { message: "No hay fichajes para enviar a BC" };
+    } catch (error) {
+      return { Response: error.response.data };
     }
-
-    // const db = (await this.mongoDbService.getConexion()).db("soluciones");
-    // const fichajesCollection = db.collection<FichajeDto>("fichajes");
-
-    // const updatePromises = fichajes.map((item) =>
-    //   fichajesCollection.updateOne(
-    //     { _id: item._id },
-    //     { $set: { enviado: true } },
-    //   ),
-    // );
-    // await Promise.all(updatePromises);
   }
 
   async getFichajesHit() {
-    // const fechaActual = new Date();
-
-    // const day = fechaActual.getDate();
-    // const month = fechaActual.getMonth() + 1;
-    // const year = fechaActual.getFullYear();
-
-    // const sql = `SELECT accio, usuari, idr, CONVERT(nvarchar, tmst, 126) as tmst, comentari as comentario FROM cdpDadesFichador WHERE day(tmst) = ${day} AND month(tmst) = ${month} AND year(tmst) = ${year} AND comentari <> '365EquipoDeTrabajo'`;
-
-    // const resFichajes = await this.hitInstance.recHit(sql);
-
-    // return resFichajes.recordset;
     try {
       const token = await this.MbctokenService.getToken();
 
@@ -181,7 +183,6 @@ export class FichajesDatabase {
   async insertarFichajesHit(fichajes: FichajeDto[]) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const fichajesCollection = db.collection<FichajeDto>("fichajes2");
-
     try {
       await fichajesCollection.insertMany(fichajes, {
         ordered: false,

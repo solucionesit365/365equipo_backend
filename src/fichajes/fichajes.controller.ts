@@ -82,8 +82,8 @@ export class FichajesController {
   // @UseGuards(SchedulerGuard)
   async sincroFichajes() {
     try {
-      await this.fichajesInstance.sincroFichajes();
-      return { ok: true };
+      const response = await this.fichajesInstance.sincroFichajes();
+      return response;
     } catch (err) {
       console.log(err);
       return { ok: false, message: err.message };
@@ -92,7 +92,7 @@ export class FichajesController {
 
   @Post("getFichajesHit")
   // @UseGuards(SchedulerGuard)
-  async getFichajesHit() {
+  async getFichajesBC() {
     try {
       return {
         ok: true,
