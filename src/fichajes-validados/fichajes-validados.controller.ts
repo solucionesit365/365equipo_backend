@@ -33,6 +33,27 @@ export class FichajesValidadosController {
   @Post("addFichajeValidado")
   async addFichajeValidado(@Body() fichajeValidado: FichajeValidadoDto) {
     try {
+      // Convertir fichajeEntrada/ fichajeSalida y cuadrantes.inicio y final a objetos Date, si son strings
+      if (typeof fichajeValidado.fichajeEntrada === "string") {
+        fichajeValidado.fichajeEntrada = new Date(
+          fichajeValidado.fichajeEntrada,
+        );
+      }
+      if (typeof fichajeValidado.fichajeSalida === "string") {
+        fichajeValidado.fichajeSalida = new Date(fichajeValidado.fichajeSalida);
+      }
+
+      if (typeof fichajeValidado.cuadrante.inicio === "string") {
+        fichajeValidado.cuadrante.inicio = new Date(
+          fichajeValidado.cuadrante.inicio,
+        );
+      }
+      if (typeof fichajeValidado.cuadrante.final === "string") {
+        fichajeValidado.cuadrante.final = new Date(
+          fichajeValidado.cuadrante.final,
+        );
+      }
+
       if (
         await this.fichajesValidadosInstance.addFichajesValidados(
           fichajeValidado,
