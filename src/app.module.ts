@@ -71,6 +71,7 @@ import { EvaluacionesClass } from "./evaluaciones/evaluaciones.class";
 import { MantenimientoController } from "./mantenimiento/mantenimiento.controller";
 import { PactadoVsRealController } from './pactado-vs-real/pactado-vs-real.controller';
 import { PactadoVsRealService } from './pactado-vs-real/pactado-vs-real.service';
+import { PrismaService } from './prisma/prisma.service';
 
 @Module({
   imports: [
@@ -151,6 +152,7 @@ import { PactadoVsRealService } from './pactado-vs-real/pactado-vs-real.service'
     EvaluacionesDatabase,
     EvaluacionesClass,
     PactadoVsRealService,
+    PrismaService,
   ],
 })
 export class AppModule {}
