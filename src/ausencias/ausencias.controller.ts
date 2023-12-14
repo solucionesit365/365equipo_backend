@@ -166,12 +166,32 @@ export class AusenciasController {
     }
   }
 
-  @Post("sincroAusenciasHit")
-  // @UseGuards()
-  async sincroAusenciasHit() {
-    await this.ausenciasInstance.sincroAusenciasHit();
-    return {
-      ok: true,
-    };
+  @Get("getAusenciasPendientes")
+  // @UseGuards(AuthGuard) APIGUARD
+  async getAusenciasPendientes() {
+    try {
+      return {
+        ok: true,
+        data: await this.ausenciasInstance.getAusenciasPendientes(),
+      };
+    } catch (error) {
+      return { ok: false, message: error.message };
+    }
+  }
+
+  @Post("marcarComoEnviada")
+  // @UseGuards(AuthGuard) APIGUARD
+  async marcarComoEnviada(@Body() { id }) {
+    try {
+      if (id) {
+        if (await this.ausenciasInstance.marcarComoEnviada(id)) {
+          return {
+            ok: true,
+          };
+        } else throw Error("No se ha podido marcar como enviada");
+      } else throw Error("Parámetros incorrectos");
+    } catch (error) {
+      return { ok: false, message: error.message };
+    }
   }
 }

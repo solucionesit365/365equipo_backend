@@ -1,7 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { MongoDbService } from "../bbdd/mongodb";
 import { AusenciaInterface } from "./ausencias.interface";
-import * as moment from "moment";
 import { ObjectId } from "mongodb";
 
 @Injectable()
@@ -96,7 +95,7 @@ export class AusenciasDatabase {
     return await ausenciasCollection.findOne({ _id: idAusencia });
   }
 
-  async getAusenciasSincro() {
+  async getAusenciasPendientes() {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const ausenciasCollection = db.collection<AusenciaInterface>("ausencias");
 

@@ -104,7 +104,7 @@ export async function getTrabajadorByAppId(uid: string) {
   LEFT JOIN tiendas ti ON tr.idTienda = ti.id
   WHERE tr.idApp = @param0 AND tr.inicioContrato IS NOT NULL AND tr.finalContrato IS NULL ORDER BY nombreApellidos
 `;
-  const resUser = await recSoluciones("soluciones", sql, uid);
+  const resUser = await recSolucionesNew(sql, uid);
 
   if (resUser.recordset.length > 0)
     return resUser.recordset[0] as TrabajadorSql;
@@ -432,82 +432,6 @@ export async function getHorasContratoNew(idSql: number, conFecha: DateTime) {
   return resSubordinados.recordset[0]?.horasContrato;
 }
 
-export async function getTrabajadoresSage(): Promise<
-  {
-    id: number;
-    nombreApellidos: string;
-    displayName: string;
-    emails: string;
-    dni: string;
-    direccion: string;
-    ciudad: string;
-    telefonos: string;
-    fechaNacimiento: string;
-    nacionalidad: string;
-    nSeguridadSocial: string;
-    codigoPostal: string;
-    cuentaCorriente: string;
-    tipoTrabajador: string;
-    inicioContrato: string;
-    finalContrato: string;
-    antiguedad: string;
-    idEmpresa: number;
-  }[]
-> {
-  const sqlQuery = ` 
-	WITH CTE_Resultado AS (
-    SELECT
-      de.CODI as id,
-      de.NOM as nombreApellidos,
-      de.MEMO as displayName,
-    de2.valor as emails,
-      pe.Dni as dni,
-    de3.valor as direccion,
-    de4.valor as ciudad,
-    de5.valor as telefonos,
-    de6.valor as fechaNacimiento,
-    de7.valor as nacionalidad,
-      pe.ProvNumSoe as nSeguridadSocial,
-    de8.valor as codigoPostal,
-      ec.IBANReceptor as cuentaCorriente,
-    de9.valor as tipoTrabajador,
-      CONVERT(nvarchar, en.FechaAlta, 103) as inicioContrato,
-      CONVERT(nvarchar, en.FechaBaja, 103) as finalContrato,
-      CONVERT(nvarchar, en.FechaAntiguedad, 103) as antiguedad,
-      en.CodigoEmpresa as idEmpresa,
-      ROW_NUMBER() OVER (PARTITION BY pe.Dni ORDER BY (SELECT NULL)) AS RowNumber
-    FROM silema_ts.sage.dbo.Personas pe
-    LEFT JOIN silema_ts.sage.dbo.EmpleadoCobro ec ON pe.dni = ec.IDBeneficiario
-    LEFT JOIN silema_ts.sage.dbo.EmpleadoNomina en ON pe.dni = en.Dni
-    LEFT JOIN silema_ts.sage.dbo.Empresas em ON em.CodigoEmpresa = en.CodigoEmpresa
-    LEFT JOIN dependentesExtes de1 ON de1.nom = 'DNI' AND de1.valor COLLATE SQL_Latin1_General_CP1_CI_AS = pe.Dni
-    LEFT JOIN dependentesExtes de2 ON de1.id = de2.id AND de2.nom = 'EMAIL'
-    LEFT JOIN dependentesExtes de3 ON de1.id = de3.id AND de3.nom = 'ADRESA'
-    LEFT JOIN dependentesExtes de4 ON de1.id = de4.id AND de4.nom = 'CIUTAT'
-    LEFT JOIN dependentesExtes de5 ON de1.id = de5.id AND de5.nom = 'TLF_MOBIL'
-    LEFT JOIN dependentesExtes de6 ON de1.id = de6.id AND de6.nom = 'DATA_NAIXEMENT'
-    LEFT JOIN dependentesExtes de7 ON de1.id = de7.id AND de7.nom = 'NACIONALITAT'
-    LEFT JOIN dependentesExtes de8 ON de1.id = de8.id AND de8.nom = 'CODIGO POSTAL'
-    LEFT JOIN dependentesExtes de9 ON de1.id = de9.id AND de9.nom = 'TIPUSTREBALLADOR'
-    LEFT JOIN dependentes de ON de.CODI = de1.id
-    
-  
-    WHERE 
-    en.FechaAlta IS NOT NULL AND en.FechaBaja IS NULL
-    AND en.CodigoEmpresa IN (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 14, 15) 
-    AND de.CODI IS NOT NULL 
-  )
-  SELECT *
-  FROM CTE_Resultado
-  WHERE RowNumber = 1
-  ORDER BY nombreApellidos;
-  
-`;
-  const resTrabajadores = await recHit("Fac_Tena", sqlQuery);
-  if (resTrabajadores.recordset.length > 0) return resTrabajadores.recordset;
-  else throw Error("Error, no hay trabajadores");
-}
-
 export async function setIdApp(idSql: number, uid: string) {
   const sql = "UPDATE trabajadores SET idApp = @param0 WHERE id = @param1";
   await recSoluciones("soluciones", sql, uid, idSql);
@@ -535,16 +459,12 @@ function isValidUsuario(usuario) {
   );
 }
 
-async function executeBatch(database: string, batch, queryBuilder) {
+async function executeBatch(batch, queryBuilder) {
   const query = batch.map(queryBuilder).join(";");
-  await recSolucionesClassic(database, query);
+  await recSolucionesClassic("eliminarEsto", query);
 }
 
-export async function actualizarUsuarios(
-  database: string,
-  usuariosNuevos,
-  modificarEnApp,
-) {
+export async function actualizarUsuarios(usuariosNuevos, modificarEnApp) {
   try {
     const usuariosNoActualizadosNuevos = [];
     const usuariosNoActualizadosApp = [];
@@ -606,12 +526,12 @@ export async function actualizarUsuarios(
 
     for (let i = 0; i < usuariosNuevosValidos.length; i += batchSize) {
       const batch = usuariosNuevosValidos.slice(i, i + batchSize);
-      promises.push(executeBatch(database, batch, insertQueryBuilder));
+      promises.push(executeBatch(batch, insertQueryBuilder));
     }
 
     for (let i = 0; i < modificarEnAppValidos.length; i += batchSize) {
       const batch = modificarEnAppValidos.slice(i, i + batchSize);
-      promises.push(executeBatch(database, batch, updateQueryBuilder));
+      promises.push(executeBatch(batch, updateQueryBuilder));
     }
 
     await Promise.all(promises);
@@ -804,88 +724,6 @@ export async function getCoordinadoras() {
   return recCoordi.recordset;
 }
 
-async function getHistoriaContratos(): Promise<
-  {
-    horasContrato: number;
-    dni: string;
-    inicioContrato: string;
-    finalContrato: string;
-    fechaAlta: string;
-    fechaAntiguedad: string;
-    fechaBaja: string;
-  }[]
-> {
-  const sql = `
-  SELECT 
-    PorJornada as horasContrato, 
-    Dni as dni, 
-    CONVERT(nvarchar, FechaInicioContrato, 103) as inicioContrato, 
-    CONVERT(nvarchar, FechaFinalContrato, 103) as finalContrato, 
-    CONVERT(nvarchar, FechaAlta, 103) as fechaAlta, 
-    CONVERT(nvarchar, FechaAntiguedad, 103) as fechaAntiguedad,
-    CONVERT(nvarchar, FechaBaja, 103) as fechaBaja
-  FROM silema_ts.sage.dbo.EmpleadoNomina`;
-
-  const resHisContratos = await recHit("Fac_Tena", sql);
-
-  if (resHisContratos.recordset.length > 0) return resHisContratos.recordset;
-  return [];
-}
-
-function convertToDate(dateString) {
-  if (!dateString) {
-    return "NULL";
-  }
-
-  const [day, month, year] = dateString.split("/");
-  const sqlDate = `${year}${month}${day}`;
-
-  return `CONVERT(datetime, '${sqlDate}', 112)`;
-}
-
-export async function copiarHistoriaContratosHitSoluciones() {
-  const arrayContratos = await getHistoriaContratos();
-
-  if (arrayContratos.length === 0)
-    throw Error("No hay contratos para traspasar");
-
-  const batchSize = 1000;
-  let batchStart = 0;
-
-  await recSoluciones("soluciones", "DELETE FROM historicoContratos");
-
-  while (batchStart < arrayContratos.length) {
-    // Extrae un lote de filas
-    const batch = arrayContratos.slice(batchStart, batchStart + batchSize);
-
-    // Construye una consulta de inserción para este lote
-    let insertQuery =
-      "INSERT INTO historicoContratos (horasContrato, dni, inicioContrato, finalContrato, fechaAlta, fechaAntiguedad, fechaBaja) VALUES ";
-
-    const rows = batch.map((row) => {
-      return `('${row.horasContrato}', '${row.dni}', ${convertToDate(
-        row.inicioContrato,
-      )}, ${convertToDate(row.finalContrato)}, ${convertToDate(
-        row.fechaAlta,
-      )}, ${convertToDate(row.fechaAntiguedad)}, ${convertToDate(
-        row.fechaBaja,
-      )})`;
-    });
-
-    insertQuery += rows.join(", ");
-
-    try {
-      await recSolucionesClassic("soluciones", insertQuery);
-    } catch (error) {
-      console.log(`Failed to insert rows: ${error}`);
-    }
-
-    // Avanza al siguiente lote
-    batchStart += batchSize;
-  }
-
-  return true;
-}
 export async function getHistoricoContratos(dni: string) {
   const sql = `select * from historicoContratos where dni = @param0`;
 
@@ -900,4 +738,12 @@ export async function uploadFoto(displayFoto: string, uid: string) {
   const resUser = await recSoluciones("soluciones", sql, displayFoto, uid);
   if (resUser.recordset) return resUser.recordset;
   return null;
+}
+
+export async function deleteHistoricoContratos() {
+  await recSoluciones("soluciones", "DELETE FROM historicoContratos");
+}
+
+export async function insertQuery(query: string) {
+  await recSoluciones("soluciones", query);
 }

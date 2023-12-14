@@ -84,20 +84,6 @@ export class VacacionesController {
     }
   }
 
-  @Get("sendToHit")
-  @UseGuards(SchedulerGuard)
-  async pendientesEnvio() {
-    try {
-      return {
-        ok: true,
-        data: await this.vacacionesInstance.sendToHit(),
-      };
-    } catch (err) {
-      console.log(err);
-      return { ok: false, message: err.message };
-    }
-  }
-
   @Get("solicitudesTrabajador")
   async getSolicitudesTrabajador(
     @Headers("authorization") authHeader: string,

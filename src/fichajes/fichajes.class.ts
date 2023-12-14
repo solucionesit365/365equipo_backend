@@ -69,60 +69,16 @@ export class Fichajes {
     } else return "ERROR";
   }
 
-  async sincroFichajes() {
-    const fichajesPendientes = await this.schFichajes.getFichajesSincro();
-    await this.schFichajes.enviarHit(fichajesPendientes);
+  async getFichajesPendientes() {
+    return await this.schFichajes.getFichajesSincro();
   }
 
-  filtrarUidFichajeTrabajador(fichajeHit: any, trabajadores: TrabajadorSql[]) {
-    for (let i = 0; i < trabajadores.length; i += 1) {
-      if (trabajadores[i].id === Number(fichajeHit.usuari))
-        return trabajadores[i].idApp ? trabajadores[i].idApp : "NO_TIENE_APP";
-    }
-
-    return "NO_TIENE_APP";
+  async insertarFichajesHit(fichajes: any[]) {
+    await this.schFichajes.insertarFichajesHit(fichajes);
   }
 
-  async fusionarFichajesHit() {
-    const fichajesHit = await this.schFichajes.getFichajesHit();
-    const trabajadores = await this.trabajadoresInstance.getTrabajadores();
-    const fichajesPretty = [];
-
-    for (let i = 0; i < fichajesHit.length; i += 1) {
-      const idApp = this.filtrarUidFichajeTrabajador(
-        fichajesHit[i],
-        trabajadores,
-      );
-      if (idApp === "NO_TIENE_APP") continue;
-
-      if (fichajesHit[i].accio === 1) {
-        fichajesPretty.push({
-          _id: fichajesHit[i].idr,
-          hora: moment(fichajesHit[i].tmst).toDate(),
-          uid: idApp,
-          tipo: "ENTRADA",
-          enviado: true,
-          idExterno: Number(fichajesHit[i].usuari),
-          comentario: fichajesHit[i].comentario,
-          validado: false,
-        });
-      } else if (fichajesHit[i].accio === 2) {
-        fichajesPretty.push({
-          _id: fichajesHit[i].idr,
-          hora: moment(fichajesHit[i].tmst).toDate(),
-          uid: idApp,
-          tipo: "SALIDA",
-          enviado: true,
-          idExterno: Number(fichajesHit[i].usuari),
-          comentario: fichajesHit[i].comentario,
-          validado: false,
-        });
-      }
-    }
-
-    await this.schFichajes.insertarFichajesHit(fichajesPretty);
-
-    return true;
+  async setFichajesEnviados(fichajes: any[]) {
+    await this.schFichajes.setFichajesEnviados(fichajes);
   }
 
   async getFichajesByIdSql(idSql: number, validado: boolean) {

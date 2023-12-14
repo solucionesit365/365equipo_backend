@@ -106,12 +106,22 @@ export class CuadrantesDatabase {
     return resCuadrantes;
   }
 
-  async borrarTurno(idTurno) {
+  async borrarTurno(idTurno: string) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes2");
 
     const resCuadrantes = await cuadrantesCollection.deleteOne({
       _id: new ObjectId(idTurno),
+    });
+
+    return resCuadrantes.acknowledged;
+  }
+  async borrarTurnoByPlan(idPlan: string) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes2");
+
+    const resCuadrantes = await cuadrantesCollection.deleteOne({
+      idPlan: idPlan,
     });
 
     return resCuadrantes.acknowledged;
@@ -227,30 +237,6 @@ export class CuadrantesDatabase {
   public getMondayMoment(fecha: Date) {
     // Devuelve el lunes
     return DateTime.fromJSDate(fecha).startOf("week");
-  }
-
-  // Cuadrantes 2.0
-  public nombreTablaSqlHit(fecha: Date) {
-    const lunes = DateTime.fromJSDate(fecha).startOf("week");
-    return `cdpPlanificacion_${lunes.toFormat("yyyy_MM_dd")}`;
-  }
-
-  // Cuadrantes 2.0
-  borrarHistorial(cuadrante: TCuadrante) {
-    let sqlBorrar = "";
-
-    for (let j = 0; j < cuadrante.historialPlanes.length; j += 1) {
-      if (cuadrante.historialPlanes[j])
-        sqlBorrar += `
-          DELETE FROM ${this.nombreTablaSqlHit(
-            cuadrante.inicio,
-          )} WHERE idPlan = '${cuadrante.historialPlanes[j]}';
-          `;
-    }
-
-    return sqlBorrar;
-    // console.log("sqlBorrar", sqlBorrar);
-    // await recHit("Fac_Tena", sqlBorrar);
   }
 
   // // NO SE PUEDE TRADUCIR A CUADRANTES 2.0 DE FORMA FÁCIL
