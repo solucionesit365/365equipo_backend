@@ -84,38 +84,39 @@ export class Fichajes {
   }
 
   async fusionarFichajesHit() {
-    const fichajesHit = await this.schFichajes.getFichajesHit();
-
+    const fichajesBC = await this.schFichajes.getFichajesHit();
+    console.log(fichajesBC);
+    
     const trabajadores = await this.trabajadoresInstance.getTrabajadores();
     const fichajesPretty = [];
 
-    for (let i = 0; i < fichajesHit.length; i += 1) {
+    for (let i = 0; i < fichajesBC.length; i += 1) {
       const idApp = this.filtrarUidFichajeTrabajador(
-        fichajesHit[i],
+        fichajesBC[i],
         trabajadores,
       );
       if (idApp === "NO_TIENE_APP") continue;
 
-      if (fichajesHit[i].accio === 1) {
+      if (fichajesBC[i].accio === 1) {
         fichajesPretty.push({
-          _id: fichajesHit[i].idr,
-          hora: moment(fichajesHit[i].tmst).toDate(),
+          _id: fichajesBC[i].idr,
+          hora: moment(fichajesBC[i].tmst).toDate(),
           uid: idApp,
           tipo: "ENTRADA",
           enviado: true,
-          idExterno: Number(fichajesHit[i].usuari),
-          comentario: fichajesHit[i].comentario,
+          idExterno: Number(fichajesBC[i].usuari),
+          comentario: fichajesBC[i].comentari,
           validado: false,
         });
-      } else if (fichajesHit[i].accio === 2) {
+      } else if (fichajesBC[i].accio === 2) {
         fichajesPretty.push({
-          _id: fichajesHit[i].idr,
-          hora: moment(fichajesHit[i].tmst).toDate(),
+          _id: fichajesBC[i].idr,
+          hora: moment(fichajesBC[i].tmst).toDate(),
           uid: idApp,
           tipo: "SALIDA",
           enviado: true,
-          idExterno: Number(fichajesHit[i].usuari),
-          comentario: fichajesHit[i].comentario,
+          idExterno: Number(fichajesBC[i].usuari),
+          comentario: fichajesBC[i].comentari,
           validado: false,
         });
       }
@@ -140,7 +141,6 @@ export class Fichajes {
       fechaFinal,
     );
   }
-
   async updateFichaje(id: string, validado: boolean) {
     if (typeof id === "string") console.log(id + " - " + validado);
 
