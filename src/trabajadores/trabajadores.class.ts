@@ -7,7 +7,7 @@ import { TrabajadorCompleto } from "./trabajadores.interface";
 import { PermisosClass } from "../permisos/permisos.class";
 import { DateTime } from "luxon";
 import { solicitudesVacacionesClass } from "../solicitud-vacaciones/solicitud-vacaciones.class";
-import { PrismaService } from "../prisma/prisma.service";
+// import { PrismaService } from "../prisma/prisma.service";
 
 @Injectable()
 export class Trabajador {
@@ -19,8 +19,8 @@ export class Trabajador {
     private readonly emailInstance: EmailClass,
     @Inject(forwardRef(() => solicitudesVacacionesClass))
     private readonly solicitudesVacaciones: solicitudesVacacionesClass,
-    private readonly prisma: PrismaService,
-  ) {}
+  ) // private readonly prisma: PrismaService,
+  {}
 
   async getTrabajadorByAppId(uid: string) {
     const resUser = await schTrabajadores.getTrabajadorByAppId(uid);
