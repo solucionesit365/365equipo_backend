@@ -4,6 +4,7 @@ import { FichajeDto } from "./fichajes.interface";
 import { FacTenaMssql } from "../bbdd/mssql.class";
 import * as moment from "moment";
 import { ObjectId } from "mongodb";
+import { DateTime } from "luxon";
 
 @Injectable()
 export class FichajesDatabase {
@@ -203,5 +204,18 @@ export class FichajesDatabase {
     );
 
     return resUpdate.acknowledged;
+  }
+
+  async getPendientesTrabajadorDia(idExterno: number, fecha: DateTime) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const fichajes = db.collection<FichajeDto>("fichajes");
+
+    return await fichajes.findOne({
+      idExterno,
+      $and: [
+        { hora: { $gte: fecha.startOf("day").toJSDate() } },
+        { hora: { $lte: fecha.endOf("day").toJSDate() } },
+      ],
+    });
   }
 }
