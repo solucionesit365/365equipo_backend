@@ -5,6 +5,7 @@ import * as moment from "moment";
 import { recHitBind } from "../bbdd/mssql";
 import { ObjectId } from "mongodb";
 import { TiposAusencia } from "src/cuadrantes/cuadrantes.interface";
+import { AusenciaInterface } from "./ausencias.interface";
 
 @Injectable()
 export class Ausencias {
@@ -61,7 +62,6 @@ export class Ausencias {
     if (!ausenciaToDelete) {
       throw new Error("Ausencia no encontrada");
     }
-    console.log(idAusencia);
 
     // 2. Elimina la ausencia de schAusencias.
     await this.schAusencias.deleteAusencia(idAusencia);
@@ -77,13 +77,13 @@ export class Ausencias {
     return true; // Devuelve true o lo que necesites para indicar que la operación fue exitosa.
   }
 
-  // async updateAusencia(ausencia: AusenciaInterface) {
-  //   return await this.schAusencias.updateAusencia(ausencia);
-  // }
+  async updateAusencia(ausencia: AusenciaInterface) {
+    return await this.schAusencias.updateAusencia(ausencia);
+  }
 
-  // async updateAusenciaResto(ausencia: AusenciaInterface) {
-  //   return await this.schAusencias.updateAusenciaResto(ausencia);
-  // }
+  async updateAusenciaResto(ausencia: AusenciaInterface) {
+    return await this.schAusencias.updateAusenciaResto(ausencia);
+  }
 
   async getAusencias() {
     return await this.schAusencias.getAusencias();

@@ -1,16 +1,16 @@
-import { Injectable } from "@nestjs/common";
-import { FichajeValidadoDto } from "./fichajes-validados.interface";
+import { Injectable, Inject, forwardRef } from "@nestjs/common";
 import { FichajesValidadosDatabase } from "./fichajes-validados.mongodb";
 import { Trabajador } from "../trabajadores/trabajadores.class";
-import { TrabajadorCompleto } from "../trabajadores/trabajadores.interface";
-import * as moment from "moment";
 import { WithId } from "mongodb";
 import { DateTime } from "luxon";
+import { FichajeValidadoDto } from "./fichajes-validados.dto";
+import { TrabajadorCompleto } from "../trabajadores/trabajadores.interface";
 
 @Injectable()
 export class FichajesValidados {
   constructor(
     private readonly schFichajesValidados: FichajesValidadosDatabase,
+    @Inject(forwardRef(() => Trabajador))
     private readonly trabajadoresInstance: Trabajador,
   ) {}
 
@@ -24,20 +24,38 @@ export class FichajesValidados {
     return await this.schFichajesValidados.getFichajesValidados(idTrabajador);
   }
 
+  async getFichajesValidadosRango(
+    idTrabajador: number,
+    fechaInicio: DateTime,
+    fechaFinal: DateTime,
+  ) {
+    return await this.schFichajesValidados.getParaCuadranteNew(
+      fechaInicio,
+      fechaFinal,
+      idTrabajador,
+    );
+  }
+
   async getPendientesEnvio() {
     return await this.schFichajesValidados.getPendientesEnvio();
   }
 
+  async insertFichajesValidadosRectificados(data: FichajeValidadoDto[]) {
+    return await this.schFichajesValidados.insertFichajesValidadosRectificados(
+      data,
+    );
+  }
+
   formatoConsultaSQL(fichaje: FichajeValidadoDto): string {
-    const idPlan = fichaje.cuadrante.idPlan;
-    const horasExtra = fichaje.horasExtra ? fichaje.horasExtra : 0;
-    const horasCoordinacion = fichaje.horasCoordinacion
-      ? fichaje.horasCoordinacion
-      : 0;
-    const horasAprendiz = fichaje.horasAprendiz ? fichaje.horasAprendiz : 0;
+    // const idPlan = fichaje.cuadrante.idPlan;
+    // const horasExtra = fichaje.horasExtra ? fichaje.horasExtra : 0;
+    // const horasCoordinacion = fichaje.horasCoordinacion
+    //   ? fichaje.horasCoordinacion
+    //   : 0;
+    // const horasAprendiz = fichaje.horasAprendiz ? fichaje.horasAprendiz : 0;
     const idEmpleado = fichaje.idTrabajador;
     // Convertir a estándard con tipo Date.
-    const fecha = DateTime.fromFormat(fichaje.fecha, "yyyy-MM-dd");
+    const fecha = DateTime.fromJSDate(fichaje.cuadrante.inicio);
     const day = fecha.day;
     const month = fecha.month;
     const year = fecha.year;
@@ -72,18 +90,29 @@ export class FichajesValidados {
     );
   }
 
-  async getSemanasFichajesPagar(semana: number) {
-    return await this.schFichajesValidados.getSemanasFichajesPagar(semana);
+  async getSemanasFichajesPagar(fechaEntreSemana: DateTime) {
+    const fechaInicio = fechaEntreSemana.startOf("week");
+    const fechaFinal = fechaEntreSemana.endOf("week");
+    return await this.schFichajesValidados.getSemanasFichajesPagar(
+      fechaInicio,
+      fechaFinal,
+    );
   }
 
-  async getAllFichajesValidados(fecha: string) {
-    return await this.schFichajesValidados.getAllFichajesValidados(fecha);
+  async getAllFichajesValidados(fecha: Date) {
+    return await this.schFichajesValidados.getAllFichajesValidados(
+      DateTime.fromJSDate(fecha),
+    );
   }
 
-  async getParaCuadrante(year: number, semana: number, idTrabajador: number) {
+  async getParaCuadrante(
+    fechaInicio: DateTime,
+    fechaFinal: DateTime,
+    idTrabajador: number,
+  ) {
     return await this.schFichajesValidados.getParaCuadrante(
-      year,
-      semana,
+      fechaInicio,
+      fechaFinal,
       idTrabajador,
     );
   }
@@ -100,14 +129,16 @@ export class FichajesValidados {
       idTrabajador,
     );
   }
-  async getTiendaDia(tienda: number, dia: string) {
-    return await this.schFichajesValidados.getTiendaDia(tienda, dia);
+  async getTiendaDia(tienda: number, dia: Date) {
+    return await this.schFichajesValidados.getTiendaDia(
+      tienda,
+      DateTime.fromJSDate(dia),
+    );
   }
 
-  async resumenSemana(year: number, semana: number, idTienda: number) {
-    const lunes = moment(
-      year + "-W" + (semana < 10 ? "0" + semana : semana) + "-1",
-    );
+  async resumenSemana(fecha: Date, idTienda: number) {
+    const lunes = DateTime.fromJSDate(fecha).startOf("week");
+    const domingo = DateTime.fromJSDate(fecha).endOf("week");
     const responsable: TrabajadorCompleto =
       await this.trabajadoresInstance.getResponsableTienda(idTienda);
     const subordinados = await this.trabajadoresInstance.getSubordinadosById(
@@ -115,11 +146,10 @@ export class FichajesValidados {
     );
     const arrayValidados =
       await this.schFichajesValidados.getValidadosSemanaResponsable(
-        year,
-        semana,
+        lunes,
+        domingo,
         responsable.id,
       );
-
     for (let i = 0; i < subordinados.length; i += 1) {
       subordinados[i]["fichajeValidado"] = [
         null,
@@ -131,18 +161,16 @@ export class FichajesValidados {
         null,
       ];
     }
-
     for (let i = 0; i < arrayValidados.length; i += 1) {
-      const dayIndex = this.getNumeroSemana(arrayValidados[i].fecha);
+      const dayIndex = this.getNumeroSemana(arrayValidados[i].cuadrante.inicio);
       // this.addToSubordinados(subordinados, arrayValidados[i], dayIndex);
     }
-
     return subordinados; // Hacer map para filtrar datos innecesarios.
   }
 
-  getNumeroSemana(stringDate: string) {
-    const date = moment(stringDate, "YYYY-MM-DD");
-    const dayOfWeek = (date.day() + 6) % 7;
+  getNumeroSemana(fecha: Date) {
+    const date = DateTime.fromJSDate(fecha);
+    const dayOfWeek = (date.weekday + 6) % 7;
     return dayOfWeek;
   }
 
@@ -166,5 +194,40 @@ export class FichajesValidados {
         break;
       }
     }
+  }
+
+  async getFichajesValidadosTiendaRango(
+    idTienda: number,
+    fechaInicio: DateTime,
+    fechaFinal: DateTime,
+  ) {
+    return await this.schFichajesValidados.getFichajesValidadosTiendaRango(
+      idTienda,
+      fechaInicio,
+      fechaFinal,
+    );
+  }
+
+  async getFichajesValidadosTrabajadorTiendaRango(
+    idTrabajador: number,
+    idTienda: number,
+    fechaInicio: DateTime,
+    fechaFinal: DateTime,
+  ) {
+
+    const resFichajesValidados =
+      await this.schFichajesValidados.getFichajesValidadosTrabajadorTiendaRango(
+        idTrabajador,
+        idTienda,
+        fechaInicio,
+        fechaFinal,
+      );
+
+    return resFichajesValidados;
+  }
+
+  // Solo se usa para el test de rectificarFichajesValidados
+  async getTodos() {
+    return await this.schFichajesValidados.getTodos();
   }
 }

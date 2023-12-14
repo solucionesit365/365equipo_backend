@@ -8,7 +8,10 @@ import {
   Query,
 } from "@nestjs/common";
 import { CalendarioFestivo } from "./calendario-festivos.class";
-import { CalendarioFestivosInterface } from "./calendario-festivos.interface";
+import {
+  CalendarioFestivosInterface,
+  eventoNavideño,
+} from "./calendario-festivos.interface";
 import { AuthGuard } from "../auth/auth.guard";
 import { TokenService } from "../get-token/get-token.service";
 import { AuthService } from "../firebase/auth";
@@ -73,6 +76,84 @@ export class CalendarioFestivosController {
         );
       if (respCalendario) return { ok: true, data: respCalendario };
       else throw Error("No se ha encontrado ningun festivo por tienda ");
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  //Notificacion navideña
+  @Post("guardarRespuesta")
+  @UseGuards(AuthGuard)
+  async nuevoEvento(
+    @Headers("authorization") authHeader: string,
+    @Body() festivo: eventoNavideño,
+  ) {
+    try {
+      const token = this.tokenService.extract(authHeader);
+      await this.authInstance.verifyToken(token);
+
+      // Convertir fechaRespuesta de string a Date
+      festivo.fechaRespuesta = new Date(festivo.fechaRespuesta);
+
+      return {
+        ok: true,
+        data: await this.calendarioFestivosInstance.nuevoEvento(festivo),
+      };
+    } catch (err) {
+      console.log(err);
+      return { ok: false, message: err.message };
+    }
+  }
+
+  @Get("verificarRespuesta")
+  @UseGuards(AuthGuard)
+  async verificacionRespuesta(
+    @Headers("authorization") authHeader: string,
+    @Query() { idUsuario }: { idUsuario: number },
+  ) {
+    try {
+      const token = this.tokenService.extract(authHeader);
+      await this.authInstance.verifyToken(token);
+
+      const haRespondido =
+        await this.calendarioFestivosInstance.verificacionRespuesta(
+          Number(idUsuario),
+        );
+
+      return { ok: true, haRespondido: haRespondido }; // Indica si el usuario ha respondido
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  @Get("getEventos")
+  @UseGuards(AuthGuard)
+  async getEventos(@Headers("authorization") authHeader: string) {
+    try {
+      const token = this.tokenService.extract(authHeader);
+      await this.authInstance.verifyToken(token);
+
+      const respCalendario = await this.calendarioFestivosInstance.getEventos();
+      if (respCalendario) return { ok: true, data: respCalendario };
+      else throw Error("No se ha encontrado ninguna invitacion navideña");
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  @Get("getEventosByAsistirOrNo")
+  @UseGuards(AuthGuard)
+  async getEventosByAsistirOrNo(
+    @Headers("authorization") authHeader: string,
+    @Query() { asistira }: { asistira: string },
+  ) {
+    try {
+      const token = this.tokenService.extract(authHeader);
+      await this.authInstance.verifyToken(token);
+
+      const respCalendario =
+        await this.calendarioFestivosInstance.getEventosByAsistirOrNo(asistira);
+      if (respCalendario) return { ok: true, data: respCalendario };
+      else throw Error("No se ha encontrado nadie que asistira ");
     } catch (error) {
       console.log(error);
     }

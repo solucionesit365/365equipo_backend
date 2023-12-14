@@ -1,0 +1,73 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Trabajador {
+  id               Int        @id @default(autoincrement())
+  idApp            String?    @unique
+  nombreApellidos  String
+  displayName      String?
+  emails           String
+  dni              String     @unique
+  direccion        String?
+  ciudad           String?
+  telefonos        String?
+  fechaNacimiento  DateTime?
+  nacionalidad     String?
+  nSeguridadSocial String?
+  codigoPostal     String?
+  cuentaCorriente  String?
+  tipoTrabajador   String
+  inicioContrato   DateTime
+  finalContrato    DateTime?
+  antiguedad       DateTime
+  idResponsable    Int?
+  idTienda         Int?
+  tienda           Tienda?    @relation(fields: [idTienda], references: [id])
+  llevaEquipo      Boolean
+  idEmpresa        Int
+  tokenQR          String?
+  displayFoto      String?
+  contratos        Contrato[]
+}
+
+model Tienda {
+  id           Int          @id @default(autoincrement())
+  nombre       String
+  direccion    String?
+  idExterno    Int?
+  trabajadores Trabajador[]
+}
+
+model Equipo {
+  id        Int    @id @default(autoincrement())
+  nombre    String
+  idExterno Int?
+}
+
+model Empresa {
+  id        Int    @id @default(autoincrement())
+  nombre    String
+  cif       String
+  idExterno Int?
+}
+
+model Contrato {
+  id              Int         @id @default(autoincrement())
+  horasContrato   Int
+  inicioContrato  DateTime
+  finalContrato   DateTime?
+  fechaAlta       DateTime
+  fechaAntiguedad DateTime
+  fechaBaja       DateTime?
+  trabajador      Trabajador? @relation(fields: [dni], references: [dni])
+  dni             String
+}

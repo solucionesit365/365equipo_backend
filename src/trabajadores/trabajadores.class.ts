@@ -6,6 +6,8 @@ import { AuthService, auth } from "../firebase/auth";
 import { TrabajadorCompleto } from "./trabajadores.interface";
 import { PermisosClass } from "../permisos/permisos.class";
 import { DateTime } from "luxon";
+import { solicitudesVacacionesClass } from "../solicitud-vacaciones/solicitud-vacaciones.class";
+// import { PrismaService } from "../prisma/prisma.service";
 
 @Injectable()
 export class Trabajador {
@@ -15,7 +17,10 @@ export class Trabajador {
     private readonly permisosInstance: PermisosClass,
     @Inject(forwardRef(() => EmailClass))
     private readonly emailInstance: EmailClass,
-  ) {}
+    @Inject(forwardRef(() => solicitudesVacacionesClass))
+    private readonly solicitudesVacaciones: solicitudesVacacionesClass,
+  ) // private readonly prisma: PrismaService,
+  {}
 
   async getTrabajadorByAppId(uid: string) {
     const resUser = await schTrabajadores.getTrabajadorByAppId(uid);
@@ -236,6 +241,27 @@ export class Trabajador {
   ) {
     const cualquieraDe = ["SUPER_ADMIN", "RRHH_ADMIN"];
 
+    if (payload.idResponsable)
+      if (original.idResponsable !== payload.idResponsable) {
+        const nuevoResponsable = await this.getTrabajadorBySqlId(
+          payload.idResponsable,
+        );
+        const nuevoIdAppResponsable = nuevoResponsable.idApp;
+
+        // Actualiza el idAppResponsable en MongoDB para todas las solicitudes del beneficiario y evita que no pueda actualizar
+        const solicitudesExisten =
+          await this.solicitudesVacaciones.haySolicitudesParaBeneficiario(
+            original.id,
+          );
+
+        if (solicitudesExisten) {
+          await this.solicitudesVacaciones.actualizarIdAppResponsable(
+            original.id,
+            nuevoIdAppResponsable,
+          );
+        }
+      }
+
     if (
       this.permisosInstance.pasoPermitidoByClaims(
         usuarioGestor.customClaims?.arrayPermisos,
@@ -313,4 +339,12 @@ export class Trabajador {
   async uploadFoto(displayFoto: string, uid: string) {
     return await schTrabajadores.uploadFoto(displayFoto, uid);
   }
+
+  // async testInsert() {
+  //   this.prisma.trabajador.create({
+  //     data: {
+
+  //     }
+  //   })
+  // }
 }

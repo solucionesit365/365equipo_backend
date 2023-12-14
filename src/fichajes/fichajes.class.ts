@@ -3,12 +3,12 @@ import { FichajesDatabase } from "./fichajes.mongodb";
 import { Trabajador } from "../trabajadores/trabajadores.class";
 import {
   Subordinado,
+  TrabajadorCompleto,
   TrabajadorSql,
 } from "../trabajadores/trabajadores.interface";
 import * as moment from "moment";
 import { ObjectId, WithId } from "mongodb";
 import { FichajeDto, ParFichaje } from "./fichajes.interface";
-import { FichajeValidadoDto } from "../fichajes-validados/fichajes-validados.interface";
 import { Cuadrantes } from "../cuadrantes/cuadrantes.class";
 import { DateTime, Duration } from "luxon";
 
@@ -365,4 +365,28 @@ export class Fichajes {
   //     fichajesTransformados.push();
   //   }
   // }
+
+  async hayFichajesPendientes(ids: number[], fecha: DateTime) {
+    const lunes = fecha.startOf("week");
+    // const ids: number[] = [3608, 5740, 975];
+
+    // const subordinados = await this.trabajadoresInstance.getSubordinadosByIdsql(usuarioRequest.id);
+    const arrayCaritas: boolean[] = [true, true, true, true, true, true, true];
+
+    for (let i = 0; i < ids.length; i += 1) {
+      for (let j = 0; j < 7; j += 1) {
+        const resultado = await this.schFichajes.getPendientesTrabajadorDia(
+          ids[i],
+          lunes.plus({ days: j }),
+        );
+
+        if (resultado) {
+          arrayCaritas[j] = false;
+          break;
+        }
+      }
+    }
+
+    return arrayCaritas;
+  }
 }
