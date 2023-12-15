@@ -104,7 +104,7 @@ export async function getTrabajadorByAppId(uid: string) {
   LEFT JOIN tiendas ti ON tr.idTienda = ti.id
   WHERE tr.idApp = @param0 AND tr.inicioContrato IS NOT NULL AND tr.finalContrato IS NULL ORDER BY nombreApellidos
 `;
-  const resUser = await recSoluciones("soluciones", sql, uid);
+  const resUser = await recSolucionesNew(sql, uid);
 
   if (resUser.recordset.length > 0)
     return resUser.recordset[0] as TrabajadorSql;

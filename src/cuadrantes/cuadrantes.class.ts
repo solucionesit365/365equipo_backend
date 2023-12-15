@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, Inject, forwardRef  } from "@nestjs/common";
 import * as moment from "moment";
 import { CuadrantesDatabase } from "./cuadrantes.mongodb";
 import { ObjectId, WithId } from "mongodb";
@@ -24,6 +24,7 @@ export class Cuadrantes {
     private readonly schCuadrantes: CuadrantesDatabase,
     private readonly tiendasInstance: Tienda,
     private readonly hitInstance: FacTenaMssql,
+    @Inject(forwardRef(() => Trabajador))
     private readonly trabajadoresInstance: Trabajador,
     private readonly fichajesValidadosInstance: FichajesValidados,
   ) {}
@@ -59,6 +60,11 @@ export class Cuadrantes {
   async borrarTurno(idTurno: string) {
     // FALTA AGREGAR UN TRIGGER PARA MODIFICARLO EN HIT TAMBIÉN !!!
     return await this.schCuadrantes.borrarTurno(idTurno);
+  }
+
+  async borrarTurnoByPlan(idPlan: string) {
+    // FALTA AGREGAR UN TRIGGER PARA MODIFICARLO EN HIT TAMBIÉN !!!
+    return await this.schCuadrantes.borrarTurnoByPlan(idPlan);
   }
 
   private async addEmptyDays(
