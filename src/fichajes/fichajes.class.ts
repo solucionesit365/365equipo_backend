@@ -86,7 +86,7 @@ export class Fichajes {
   async fusionarFichajesHit() {
     const fichajesBC = await this.schFichajes.getFichajesHit();
     console.log(fichajesBC);
-    
+
     const trabajadores = await this.trabajadoresInstance.getTrabajadores();
     const fichajesPretty = [];
 
@@ -307,6 +307,20 @@ export class Fichajes {
           pares.push({
             entrada: fichajesSimples[i],
             salida: dataSalidaEncontrada,
+            cuadrante: await this.cuadrantesInstance.getTurnoDia(
+              fichajesSimples[i].idTrabajador,
+              DateTime.fromJSDate(fichajesSimples[i].hora),
+            ),
+          });
+        } else {
+          const salidaHipotetica = await this.createFichajeSalidaSistema(
+            DateTime.fromJSDate(fichajesSimples[i].hora),
+            fichajesSimples[i].idTrabajador,
+          );
+
+          pares.push({
+            entrada: fichajesSimples[i],
+            salida: salidaHipotetica,
             cuadrante: await this.cuadrantesInstance.getTurnoDia(
               fichajesSimples[i].idTrabajador,
               DateTime.fromJSDate(fichajesSimples[i].hora),
