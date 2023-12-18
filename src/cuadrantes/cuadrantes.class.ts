@@ -1,4 +1,4 @@
-import { Injectable, Inject, forwardRef  } from "@nestjs/common";
+import { Injectable, Inject, forwardRef } from "@nestjs/common";
 import * as moment from "moment";
 import { CuadrantesDatabase } from "./cuadrantes.mongodb";
 import { ObjectId, WithId } from "mongodb";
@@ -131,13 +131,15 @@ export class Cuadrantes {
       fecha,
     );
 
-    return horasContrato - (horasCuadranteTotal + horasMasMenos);
+    return horasContrato + ( horasMasMenos);
   }
 
   // Cuadrantes 2.0
   async getBolsaInicial(idTrabajador: number, lunesActual: DateTime) {
+    console.log("entra aqui");
+
     const lunesAnterior = lunesActual.minus({ days: 7 }).startOf("week");
-    const domingoAnterior = lunesAnterior.minus({ days: 1 });
+    const domingoAnterior = lunesActual.minus({ days: 1 }).endOf("week");
 
     const fichajesValidados =
       await this.fichajesValidadosInstance.getParaCuadranteNew(
@@ -145,7 +147,6 @@ export class Cuadrantes {
         domingoAnterior,
         idTrabajador,
       );
-
     let horasCuadranteTotal = 0;
     let horasMasMenos = 0;
 
@@ -154,8 +155,10 @@ export class Cuadrantes {
         fichajesValidados[i].horasExtra +
         fichajesValidados[i].horasAprendiz +
         fichajesValidados[i].horasCoordinacion;
-      horasCuadranteTotal += fichajesValidados[i].horasCuadrante;
+      horasCuadranteTotal = horasMasMenos;
     }
+
+    console.log(horasMasMenos);
 
     return {
       horasCuadranteTotal,
