@@ -204,15 +204,18 @@ export class FichajesValidadosDatabase {
     const fichajesCollection =
       db.collection<FichajeValidadoDto>("fichajesValidados2");
 
-    return await fichajesCollection
+    const response = await fichajesCollection
       .find({
-        fichajes: {
-          entrada: { $gte: lunes.toJSDate() },
-          salida: { $lte: domingo.toJSDate() },
-        },
         idTrabajador,
+        $and: [
+          {
+            fichajeEntrada: { $gte: lunes.toJSDate() },
+            fichajeSalida: { $lte: domingo.toJSDate() },
+          },
+        ],
       })
       .toArray();
+    return response;
   }
 
   async getFichajesValidadosTiendaRango(

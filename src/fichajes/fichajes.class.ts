@@ -381,6 +381,8 @@ export class Fichajes {
   // }
 
   async hayFichajesPendientes(ids: number[], fecha: DateTime) {
+    console.log("Entro causa");
+
     const lunes = fecha.startOf("week");
     // const ids: number[] = [3608, 5740, 975];
 
@@ -393,14 +395,14 @@ export class Fichajes {
           ids[i],
           lunes.plus({ days: j }),
         );
-
         if (resultado) {
-          arrayCaritas[j] = false;
-          break;
+          if (!resultado.validado) {
+            arrayCaritas[j] = false;
+            break;
+          }
         }
       }
     }
-
     return arrayCaritas;
   }
 }
