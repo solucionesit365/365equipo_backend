@@ -71,6 +71,7 @@ export class PactadoVsRealService {
         pactadoReal[i].arrayValidados.push(fichajesValidadosDia);
       }
     }
+    console.log(pactadoReal);
     return pactadoReal;
   }
 }

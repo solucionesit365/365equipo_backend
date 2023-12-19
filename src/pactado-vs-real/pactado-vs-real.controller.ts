@@ -30,7 +30,6 @@ export class PactadoVsRealController {
     if (!fechaInicio)
       return new BadRequestException("fechaInicio es requerida");
 
-    console.log("la fecha inicio: ", fechaInicio, typeof fechaInicio);
     const token = this.tokenService.extract(authHeader);
     const usuarioRequest = await this.authInstance.getUserWithToken(token);
 
