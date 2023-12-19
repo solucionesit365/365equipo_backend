@@ -109,7 +109,7 @@ export class FichajesValidadosDatabase {
 
     return await fichajesIdResponsable
       .find({
-        fecha: {
+        fichajeEntrada: {
           $gte: fechaInicio.toJSDate(),
           $lte: fechaFinal.toJSDate(),
         },
@@ -127,7 +127,7 @@ export class FichajesValidadosDatabase {
 
     return await fichajesCollection
       .find({
-        fecha: {
+        fichajeEntrada: {
           $gte: fechaInicio.toJSDate(),
           $lte: fechaFinal.toJSDate(),
         },
@@ -146,7 +146,7 @@ export class FichajesValidadosDatabase {
 
     return await fichajesCollection
       .find({
-        fecha: {
+        fichajeEntrada: {
           $gte: fechaInicio.toJSDate(),
           $lte: fechaFinal.toJSDate(),
         },
@@ -166,7 +166,7 @@ export class FichajesValidadosDatabase {
     return await fichajesCollection
       .find({
         tienda: tienda,
-        fecha: {
+        fichajeEntrada: {
           $gte: fechaInicio.toJSDate(),
           $lte: fechaFinal.toJSDate(),
         },
@@ -185,7 +185,7 @@ export class FichajesValidadosDatabase {
 
     return await fichajesCollection
       .find({
-        fecha: {
+        fichajeEntrada: {
           $gte: fechaInicio.toJSDate(),
           $lte: fechaFinal.toJSDate(),
         },
