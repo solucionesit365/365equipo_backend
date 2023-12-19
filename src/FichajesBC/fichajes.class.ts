@@ -71,7 +71,7 @@ export class Fichajes {
 
   async sincroFichajes() {
     const fichajesPendientes = await this.schFichajes.getFichajesSincro();
-    await this.schFichajes.enviarHit(fichajesPendientes);
+    return await this.schFichajes.enviarFichajesBC(fichajesPendientes);
   }
 
   filtrarUidFichajeTrabajador(fichajeHit: any, trabajadores: TrabajadorSql[]) {
@@ -84,45 +84,50 @@ export class Fichajes {
   }
 
   async fusionarFichajesHit() {
-    const fichajesHit = await this.schFichajes.getFichajesHit();
+    const fichajesBC = await this.schFichajes.getFichajesHit();
+    console.log(fichajesBC);
+
     const trabajadores = await this.trabajadoresInstance.getTrabajadores();
     const fichajesPretty = [];
 
-    for (let i = 0; i < fichajesHit.length; i += 1) {
+    for (let i = 0; i < fichajesBC.length; i += 1) {
       const idApp = this.filtrarUidFichajeTrabajador(
-        fichajesHit[i],
+        fichajesBC[i],
         trabajadores,
       );
       if (idApp === "NO_TIENE_APP") continue;
 
-      if (fichajesHit[i].accio === 1) {
+      if (fichajesBC[i].accio === 1) {
         fichajesPretty.push({
-          _id: fichajesHit[i].idr,
-          hora: moment(fichajesHit[i].tmst).toDate(),
+          _id: fichajesBC[i].idr,
+          hora: moment(fichajesBC[i].tmst).toDate(),
           uid: idApp,
           tipo: "ENTRADA",
           enviado: true,
-          idExterno: Number(fichajesHit[i].usuari),
-          comentario: fichajesHit[i].comentario,
+          idExterno: Number(fichajesBC[i].usuari),
+          comentario: fichajesBC[i].comentari,
           validado: false,
         });
-      } else if (fichajesHit[i].accio === 2) {
+      } else if (fichajesBC[i].accio === 2) {
         fichajesPretty.push({
-          _id: fichajesHit[i].idr,
-          hora: moment(fichajesHit[i].tmst).toDate(),
+          _id: fichajesBC[i].idr,
+          hora: moment(fichajesBC[i].tmst).toDate(),
           uid: idApp,
           tipo: "SALIDA",
           enviado: true,
-          idExterno: Number(fichajesHit[i].usuari),
-          comentario: fichajesHit[i].comentario,
+          idExterno: Number(fichajesBC[i].usuari),
+          comentario: fichajesBC[i].comentari,
           validado: false,
         });
       }
     }
 
-    await this.schFichajes.insertarFichajesHit(fichajesPretty);
-
-    return true;
+    if (fichajesPretty.length > 0) {
+      await this.schFichajes.insertarFichajesHit(fichajesPretty);
+      return {
+        message: `${fichajesPretty.length} fichajes sincronizado de BC a la app`,
+      };
+    } else return "No hay fichajes que extraer";
   }
 
   async getFichajesByIdSql(idSql: number, validado: boolean) {
@@ -136,7 +141,6 @@ export class Fichajes {
       fechaFinal,
     );
   }
-
   async updateFichaje(id: string, validado: boolean) {
     if (typeof id === "string") console.log(id + " - " + validado);
 
@@ -381,8 +385,6 @@ export class Fichajes {
   // }
 
   async hayFichajesPendientes(ids: number[], fecha: DateTime) {
-    console.log("Entro causa");
-
     const lunes = fecha.startOf("week");
     // const ids: number[] = [3608, 5740, 975];
 
@@ -395,14 +397,14 @@ export class Fichajes {
           ids[i],
           lunes.plus({ days: j }),
         );
+
         if (resultado) {
-          if (!resultado.validado) {
-            arrayCaritas[j] = false;
-            break;
-          }
+          arrayCaritas[j] = false;
+          break;
         }
       }
     }
+
     return arrayCaritas;
   }
 }
