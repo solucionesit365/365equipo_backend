@@ -18,6 +18,7 @@ export class Ausencias {
   async nuevaAusencia(
     idUsuario: number,
     nombre: string,
+    dni: string,
     tipo: TiposAusencia,
     fechaInicio: Date,
     fechaFinal: Date,
@@ -29,6 +30,7 @@ export class Ausencias {
     const resInsert = await this.schAusencias.nuevaAusencia({
       idUsuario,
       nombre,
+      dni,
       tipo,
       fechaInicio,
       fechaFinal,
@@ -47,6 +49,7 @@ export class Ausencias {
         fechaRevision,
         idUsuario,
         nombre,
+        dni,
         horas,
         tipo,
       });
