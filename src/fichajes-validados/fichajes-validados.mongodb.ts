@@ -122,17 +122,19 @@ export class FichajesValidadosDatabase {
     const fichajesCollection =
       db.collection<FichajeValidadoDto>("fichajesValidados2");
 
-    const fechaInicio = fecha.startOf("week");
-    const fechaFinal = fecha.endOf("week");
+    const fechaInicio = fecha.startOf("day").toJSDate();
+    const fechaFinal = fecha.plus({ days: 1 }).startOf("day").toJSDate();
 
-    return await fichajesCollection
+    // Realizar la consulta
+    const fichajes = await fichajesCollection
       .find({
         fichajeEntrada: {
-          $gte: fechaInicio.toJSDate(),
-          $lte: fechaFinal.toJSDate(),
+          $gte: fechaInicio,
+          $lt: fechaFinal,
         },
       })
       .toArray();
+    return fichajes;
   }
 
   async getValidadosSemanaResponsable(
@@ -160,15 +162,15 @@ export class FichajesValidadosDatabase {
     const fichajesCollection =
       db.collection<FichajeValidadoDto>("fichajesValidados2");
 
-    const fechaInicio = dia.startOf("day");
-    const fechaFinal = dia.endOf("day");
+    const fechaInicio = dia.startOf("day").toJSDate();
+    const fechaFinal = dia.plus({ days: 1 }).startOf("day").toJSDate();
 
     return await fichajesCollection
       .find({
-        tienda: tienda,
+        idTienda: tienda,
         fichajeEntrada: {
-          $gte: fechaInicio.toJSDate(),
-          $lte: fechaFinal.toJSDate(),
+          $gte: fechaInicio,
+          $lte: fechaFinal,
         },
       })
       .toArray();
