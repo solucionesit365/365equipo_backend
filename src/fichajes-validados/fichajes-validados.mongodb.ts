@@ -122,16 +122,8 @@ export class FichajesValidadosDatabase {
     const fichajesCollection =
       db.collection<FichajeValidadoDto>("fichajesValidados2");
 
-    // Convertir la fecha a un objeto Date de JavaScript
-    const fechaJS = fecha.toJSDate();
-    // Crear fecha de inicio y fin para abarcar todo el día
-    const fechaInicio = new Date(
-      fechaJS.getFullYear(),
-      fechaJS.getMonth(),
-      fechaJS.getDate(),
-    );
-    const fechaFinal = new Date(fechaInicio);
-    fechaFinal.setDate(fechaInicio.getDate() + 1);
+    const fechaInicio = fecha.startOf("day").toJSDate();
+    const fechaFinal = fecha.plus({ days: 1 }).startOf("day").toJSDate();
 
     // Realizar la consulta
     const fichajes = await fichajesCollection
@@ -170,16 +162,8 @@ export class FichajesValidadosDatabase {
     const fichajesCollection =
       db.collection<FichajeValidadoDto>("fichajesValidados2");
 
-    // Convertir la fecha a un objeto Date de JavaScript
-    const fechaJS = dia.toJSDate();
-    // Crear fecha de inicio y fin para abarcar todo el día
-    const fechaInicio = new Date(
-      fechaJS.getFullYear(),
-      fechaJS.getMonth(),
-      fechaJS.getDate(),
-    );
-    const fechaFinal = new Date(fechaInicio);
-    fechaFinal.setDate(fechaInicio.getDate() + 1);
+    const fechaInicio = dia.startOf("day").toJSDate();
+    const fechaFinal = dia.plus({ days: 1 }).startOf("day").toJSDate();
 
     return await fichajesCollection
       .find({
