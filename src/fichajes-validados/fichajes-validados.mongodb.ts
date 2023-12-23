@@ -109,7 +109,7 @@ export class FichajesValidadosDatabase {
 
     return await fichajesIdResponsable
       .find({
-        fecha: {
+        fichajeEntrada: {
           $gte: fechaInicio.toJSDate(),
           $lte: fechaFinal.toJSDate(),
         },
@@ -122,17 +122,19 @@ export class FichajesValidadosDatabase {
     const fichajesCollection =
       db.collection<FichajeValidadoDto>("fichajesValidados2");
 
-    const fechaInicio = fecha.startOf("week");
-    const fechaFinal = fecha.endOf("week");
+    const fechaInicio = fecha.startOf("day").toJSDate();
+    const fechaFinal = fecha.plus({ days: 1 }).startOf("day").toJSDate();
 
-    return await fichajesCollection
+    // Realizar la consulta
+    const fichajes = await fichajesCollection
       .find({
-        fecha: {
-          $gte: fechaInicio.toJSDate(),
-          $lte: fechaFinal.toJSDate(),
+        fichajeEntrada: {
+          $gte: fechaInicio,
+          $lt: fechaFinal,
         },
       })
       .toArray();
+    return fichajes;
   }
 
   async getValidadosSemanaResponsable(
@@ -146,7 +148,7 @@ export class FichajesValidadosDatabase {
 
     return await fichajesCollection
       .find({
-        fecha: {
+        fichajeEntrada: {
           $gte: fechaInicio.toJSDate(),
           $lte: fechaFinal.toJSDate(),
         },
@@ -160,15 +162,15 @@ export class FichajesValidadosDatabase {
     const fichajesCollection =
       db.collection<FichajeValidadoDto>("fichajesValidados2");
 
-    const fechaInicio = dia.startOf("day");
-    const fechaFinal = dia.endOf("day");
+    const fechaInicio = dia.startOf("day").toJSDate();
+    const fechaFinal = dia.plus({ days: 1 }).startOf("day").toJSDate();
 
     return await fichajesCollection
       .find({
-        tienda: tienda,
-        fecha: {
-          $gte: fechaInicio.toJSDate(),
-          $lte: fechaFinal.toJSDate(),
+        idTienda: tienda,
+        fichajeEntrada: {
+          $gte: fechaInicio,
+          $lte: fechaFinal,
         },
       })
       .toArray();
@@ -185,7 +187,7 @@ export class FichajesValidadosDatabase {
 
     return await fichajesCollection
       .find({
-        fecha: {
+        fichajeEntrada: {
           $gte: fechaInicio.toJSDate(),
           $lte: fechaFinal.toJSDate(),
         },

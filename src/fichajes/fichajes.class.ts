@@ -398,7 +398,6 @@ export class Fichajes {
         if (resultado) {
           if (!resultado.validado) {
             arrayCaritas[j] = false;
-            break;
           }
         }
       }

@@ -21,6 +21,9 @@ class TCuadranteMinDto {
   nombre: string;
 
   @IsNumber()
+  idTienda: number;
+
+  @IsNumber()
   idTrabajador: number;
 
   @IsNumber()

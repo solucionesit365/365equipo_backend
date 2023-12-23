@@ -104,6 +104,7 @@ export class TestController {
               idTrabajador: fichajesValidados[i].cuadrante.idTrabajador,
               nombre: fichajesValidados[i].cuadrante.nombre,
               totalHoras: fichajesValidados[i].cuadrante.totalHoras,
+              idTienda: fichajesValidados[i].cuadrante.idTienda,
             },
             dni: trabajadorAux.dni,
             idTienda: trabajadorAux.idTienda,
