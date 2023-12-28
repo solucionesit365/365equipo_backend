@@ -47,6 +47,31 @@ export class CalendarioFestivosDatabase {
     return await calendarioCollection.find({}).toArray();
   }
 
+  async updateFestivo(festivo: CalendarioFestivosInterface) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const calendarioCollection =
+      db.collection<CalendarioFestivosInterface>("calendarioFestivos");
+
+    const resUpdate = await calendarioCollection.updateOne(
+      {
+        _id: new ObjectId(festivo._id),
+      },
+      {
+        $set: {
+          titulo: festivo.titulo,
+          descripcion: festivo.descripcion,
+          fechaInicio: festivo.fechaInicio,
+          fechaFinal: festivo.fechaFinal,
+          categoria: festivo.categoria,
+          color: festivo.color,
+          tienda: festivo.tienda,
+        },
+      },
+    );
+    if (resUpdate.acknowledged && resUpdate.matchedCount > 0) return true;
+    throw Error("No se ha podido modificar el evento");
+  }
+
   //Notifcacion navideña
   async nuevoEvento(festivo: eventoNavideño) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");

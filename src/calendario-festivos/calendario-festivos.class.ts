@@ -25,6 +25,10 @@ export class CalendarioFestivo {
     return await this.schCalendario.getFestivosByTienda(tienda);
   }
 
+  async updateFestivo(festivo: CalendarioFestivosInterface) {
+    return await this.schCalendario.updateFestivo(festivo);
+  }
+
   async nuevoEvento(festivo: eventoNavideño) {
     const insertFestivo = await this.schCalendario.nuevoEvento(festivo);
     if (insertFestivo) return true;
