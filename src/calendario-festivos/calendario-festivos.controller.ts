@@ -92,8 +92,6 @@ export class CalendarioFestivosController {
       const respCalendario =
         await this.calendarioFestivosInstance.updateFestivo(festivo);
 
-      console.log(festivo);
-
       if (respCalendario)
         return {
           ok: true,
@@ -101,6 +99,29 @@ export class CalendarioFestivosController {
         };
 
       throw Error("No se ha podido modificar el evento");
+    } catch (err) {
+      console.log(err);
+      return { ok: false, message: err.message };
+    }
+  }
+
+  @Post("deleteFestivo")
+  async deleteFestivo(
+    @Headers("authorization") authHeader: string,
+    @Body() { idFestivo },
+  ) {
+    try {
+      const token = this.tokenService.extract(authHeader);
+      await this.authInstance.verifyToken(token);
+      const respCalendario =
+        await this.calendarioFestivosInstance.deleteFestivo(idFestivo);
+      if (respCalendario)
+        return {
+          ok: true,
+          data: respCalendario,
+        };
+
+      throw Error("No se ha podido borrar el festivo");
     } catch (err) {
       console.log(err);
       return { ok: false, message: err.message };

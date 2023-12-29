@@ -4,7 +4,6 @@ import {
   eventoNavideño,
 } from "./calendario-festivos.interface";
 import { CalendarioFestivosDatabase } from "./calendario-festivos.mongodb";
-import * as moment from "moment";
 
 @Injectable()
 export class CalendarioFestivo {
@@ -27,6 +26,10 @@ export class CalendarioFestivo {
 
   async updateFestivo(festivo: CalendarioFestivosInterface) {
     return await this.schCalendario.updateFestivo(festivo);
+  }
+
+  async deleteFestivo(idFestivo: string) {
+    return await this.schCalendario.deleteFestivo(idFestivo);
   }
 
   async nuevoEvento(festivo: eventoNavideño) {
