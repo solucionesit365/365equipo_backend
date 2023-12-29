@@ -31,8 +31,10 @@ export class FichajesValidadosController {
 
   @UseGuards(AuthGuard)
   @Post("addFichajeValidado")
-  async addFichajeValidado(@Body() fichajeValidado: FichajeValidadoDto) {
+  async addFichajeValidado(@Body() fichajeValidado) {
     try {
+      console.log(fichajeValidado);
+
       // Convertir fichajeEntrada/ fichajeSalida y cuadrantes.inicio y final a objetos Date, si son strings
       if (typeof fichajeValidado.fichajeEntrada === "string") {
         fichajeValidado.fichajeEntrada = new Date(
@@ -72,16 +74,27 @@ export class FichajesValidadosController {
   @Get("getFichajesValidados")
   async getFichajesValidados(
     @Headers("authorization") authHeader: string,
-    @Query() { idTrabajador }: { idTrabajador: number },
+    @Query()
+    {
+      idTrabajador,
+      semana,
+      año,
+    }: { idTrabajador: number; semana: number; año: number },
   ) {
     try {
       const token = this.tokenService.extract(authHeader);
       await this.authInstance.verifyToken(token);
+      console.log(semana);
+      console.log(año);
 
       const respValidados =
         await this.fichajesValidadosInstance.getFichajesValidados(
           Number(idTrabajador),
+          Number(semana),
+          Number(año),
         );
+      console.log(respValidados);
+
       if (respValidados.length > 0) {
         return {
           ok: true,

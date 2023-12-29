@@ -218,4 +218,10 @@ export class FichajesController {
       DateTime.fromJSDate(fecha),
     );
   }
+
+  @Post("validarFichajesAntiguos")
+  // @UseGuards(SchedulerGuard)
+  async validarFichajesAntiguos() {
+    return await this.fichajesInstance.validarFichajesAntiguos();
+  }
 }
