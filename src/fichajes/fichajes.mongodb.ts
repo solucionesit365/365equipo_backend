@@ -218,4 +218,18 @@ export class FichajesDatabase {
       ],
     });
   }
+
+  async validarFichajesAntiguos(inicioSemanaAnterior: DateTime): Promise<any> {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const fichajes = db.collection<FichajeDto>("fichajes");
+
+    const response = fichajes.updateMany(
+      {
+        hora: { $lt: inicioSemanaAnterior.toJSDate() },
+        validado: false,
+      },
+      { $set: { validado: true } },
+    );
+    return response;
+  }
 }

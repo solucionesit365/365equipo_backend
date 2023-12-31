@@ -20,8 +20,16 @@ export class FichajesValidados {
     );
   }
 
-  async getFichajesValidados(idTrabajador: number) {
-    return await this.schFichajesValidados.getFichajesValidados(idTrabajador);
+  async getFichajesValidados(
+    idTrabajador: number,
+    semana: number,
+    año: number,
+  ) {
+    return await this.schFichajesValidados.getFichajesValidados(
+      idTrabajador,
+      semana,
+      año,
+    );
   }
 
   async getFichajesValidadosRango(
@@ -214,7 +222,6 @@ export class FichajesValidados {
     fechaInicio: DateTime,
     fechaFinal: DateTime,
   ) {
-
     const resFichajesValidados =
       await this.schFichajesValidados.getFichajesValidadosTrabajadorTiendaRango(
         idTrabajador,

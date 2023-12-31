@@ -33,12 +33,54 @@ export class FichajesValidadosDatabase {
     return null;
   }
 
-  async getFichajesValidados(idTrabajador: number) {
+  async getFichajesValidados(
+    idTrabajador: number,
+    semana: number,
+    año: number,
+  ) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const fichajesCollection =
       db.collection<FichajeValidadoDto>("fichajesValidados2");
 
-    return await fichajesCollection.find({ idTrabajador }).toArray();
+    // Calcula las fechas de inicio y fin de la semana
+    const { fechaInicio, fechaFin } = await this.calcularFechasSemana(
+      semana,
+      año,
+    );
+
+    // Filtra por idTrabajador y rango de fechas
+    return await fichajesCollection
+      .find({
+        idTrabajador,
+        fichajeEntrada: {
+          $gte: new Date(fechaInicio),
+          $lte: new Date(fechaFin),
+        },
+      })
+      .toArray();
+  }
+
+  async calcularFechasSemana(semana: number, año: number) {
+    // Encontrar el primer día del año
+    let fechaInicioAño = DateTime.local(año, 1, 1);
+
+    // Ajustar al inicio de la semana según ISO (semana comienza en lunes)
+    if (fechaInicioAño.weekday !== 1) {
+      fechaInicioAño = fechaInicioAño.plus({
+        days: 8 - fechaInicioAño.weekday,
+      });
+    }
+
+    // Calcular el inicio de la semana deseada
+    let fechaInicio = fechaInicioAño.plus({ weeks: semana - 1 });
+
+    // Calcular el fin de la semana (6 días después del inicio)
+    let fechaFin = fechaInicio.plus({ days: 6 });
+
+    return {
+      fechaInicio: fechaInicio.toISODate(),
+      fechaFin: fechaFin.toISODate(),
+    };
   }
 
   async getPendientesEnvio() {
