@@ -26,14 +26,13 @@ model Trabajador {
   codigoPostal     String?
   cuentaCorriente  String?
   tipoTrabajador   String
-  inicioContrato   DateTime
-  finalContrato    DateTime?
-  antiguedad       DateTime
+  // inicioContrato   DateTime
+  // finalContrato    DateTime?
+  // antiguedad       DateTime
   idResponsable    Int?
   idTienda         Int?
   tienda           Tienda?    @relation(fields: [idTienda], references: [id])
   llevaEquipo      Boolean
-  idEmpresa        Int
   tokenQR          String?
   displayFoto      String?
   contratos        Contrato[]
@@ -62,7 +61,7 @@ model Empresa {
 
 model Contrato {
   id              Int         @id @default(autoincrement())
-  horasContrato   Int
+  horasContrato   Decimal
   inicioContrato  DateTime
   finalContrato   DateTime?
   fechaAlta       DateTime
