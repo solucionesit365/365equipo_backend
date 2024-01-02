@@ -1,9 +1,7 @@
 import {
   recHit,
-  recSoluciones,
-  recSolucionesClassic,
-  recSolucionesNew,
 } from "../bbdd/mssql";
+import { Prisma } from "@prisma/client";
 import { TrabajadorCompleto, TrabajadorSql } from "./trabajadores.interface";
 import * as moment from "moment";
 import { DateTime } from "luxon";
@@ -93,59 +91,59 @@ export async function getTrabajadoresByTienda(idTienda: number) {
   return null;
 }
 
-/* Individual x uid */
-export async function getTrabajadorByAppId(uid: string) {
-  const sql = `
+// /* Individual x uid */
+// export async function getTrabajadorByAppId(uid: string) {
+//   const sql = `
 
-  SELECT 
-    ${GET_DATOS_TRABAJADOR}
-  FROM trabajadores tr
-  LEFT JOIN trabajadores tr1 ON tr.idResponsable = tr1.id
-  LEFT JOIN tiendas ti ON tr.idTienda = ti.id
-  WHERE tr.idApp = @param0 AND tr.inicioContrato IS NOT NULL AND tr.finalContrato IS NULL ORDER BY nombreApellidos
-`;
-  const resUser = await recSolucionesNew(sql, uid);
+//   SELECT 
+//     ${GET_DATOS_TRABAJADOR}
+//   FROM trabajadores tr
+//   LEFT JOIN trabajadores tr1 ON tr.idResponsable = tr1.id
+//   LEFT JOIN tiendas ti ON tr.idTienda = ti.id
+//   WHERE tr.idApp = @param0 AND tr.inicioContrato IS NOT NULL AND tr.finalContrato IS NULL ORDER BY nombreApellidos
+// `;
+//   const resUser = await recSolucionesNew(sql, uid);
 
-  if (resUser.recordset.length > 0)
-    return resUser.recordset[0] as TrabajadorSql;
-  return null;
-}
+//   if (resUser.recordset.length > 0)
+//     return resUser.recordset[0] as TrabajadorSql;
+//   return null;
+// }
 
-/* Individual x sqlId, la consulta debe ser igual a getTrabajadorByAppId pero con el id*/
-export async function getTrabajadorBySqlId(id: number) {
-  const sql = `
+// /* Individual x sqlId, la consulta debe ser igual a getTrabajadorByAppId pero con el id*/
+// export async function getTrabajadorBySqlId(id: number) {
+//   const sql = `
 
-  SELECT 
-    ${GET_DATOS_TRABAJADOR}
-  FROM trabajadores tr
-  LEFT JOIN trabajadores tr1 ON tr.idResponsable = tr1.id
-  LEFT JOIN tiendas ti ON tr.idTienda = ti.id
-  WHERE tr.id = @param0 AND tr.inicioContrato IS NOT NULL AND tr.finalContrato IS NULL ORDER BY nombreApellidos
-`;
-  const resUser = await recSoluciones("soluciones", sql, id);
+//   SELECT 
+//     ${GET_DATOS_TRABAJADOR}
+//   FROM trabajadores tr
+//   LEFT JOIN trabajadores tr1 ON tr.idResponsable = tr1.id
+//   LEFT JOIN tiendas ti ON tr.idTienda = ti.id
+//   WHERE tr.id = @param0 AND tr.inicioContrato IS NOT NULL AND tr.finalContrato IS NULL ORDER BY nombreApellidos
+// `;
+//   const resUser = await recSoluciones("soluciones", sql, id);
 
-  if (resUser.recordset.length > 0)
-    return resUser.recordset[0] as TrabajadorSql;
-  return null;
-}
+//   if (resUser.recordset.length > 0)
+//     return resUser.recordset[0] as TrabajadorSql;
+//   return null;
+// }
 
-export async function getTrabajadorByDni(dni: string) {
-  const sql = `
+// export async function getTrabajadorByDni(dni: string) {
+//   const sql = `
 
-  SELECT 
-    ${GET_DATOS_TRABAJADOR}
-  FROM trabajadores tr
-  LEFT JOIN trabajadores tr1 ON tr.idResponsable = tr1.id
-  LEFT JOIN tiendas ti ON tr.idTienda = ti.id
-  WHERE tr.dni = @param0 AND tr.inicioContrato IS NOT NULL AND tr.finalContrato IS NULL 
-  ORDER BY nombreApellidos
-`;
-  const resUser = await recSoluciones("soluciones", sql, dni);
+//   SELECT 
+//     ${GET_DATOS_TRABAJADOR}
+//   FROM trabajadores tr
+//   LEFT JOIN trabajadores tr1 ON tr.idResponsable = tr1.id
+//   LEFT JOIN tiendas ti ON tr.idTienda = ti.id
+//   WHERE tr.dni = @param0 AND tr.inicioContrato IS NOT NULL AND tr.finalContrato IS NULL 
+//   ORDER BY nombreApellidos
+// `;
+//   const resUser = await recSoluciones("soluciones", sql, dni);
 
-  if (resUser.recordset.length > 0)
-    return resUser.recordset[0] as TrabajadorSql;
-  return null;
-}
+//   if (resUser.recordset.length > 0)
+//     return resUser.recordset[0] as TrabajadorSql;
+//   return null;
+// }
 
 export async function getSubordinadosConTienda(
   idAppResponsable: string,

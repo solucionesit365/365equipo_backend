@@ -128,7 +128,7 @@ export class TrabajadoresController {
       return { ok: false, message: err.message };
     }
   }
-
+  
   @Get("getSubordinados")
   async getSubordinados(
     @Headers("authorization") authHeader: string,
