@@ -77,7 +77,8 @@ import { EmployeesClass } from "./bussinesCentral/employees/employees.class";
 import { EmployeesController } from "./bussinesCentral/employees/employees.controller";
 import { MigracionesController } from "./migraciones/migraciones.controller";
 import { MigracionesService } from "./migraciones/migraciones.service";
-
+import { TiendaDatabaseService } from "./tiendas/tiendas.database";
+import { TrabajadorDatabaseService } from "./trabajadores/trabajadores.database";
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -163,6 +164,8 @@ import { MigracionesService } from "./migraciones/migraciones.service";
     MbctokenService,
     EmployeesClass,
     MigracionesService,
+    TiendaDatabaseService,
+    TrabajadorDatabaseService,
   ],
 })
 export class AppModule {}

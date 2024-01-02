@@ -1,5 +1,4 @@
 import { Injectable, Inject, forwardRef } from "@nestjs/common";
-import * as schTrabajadores from "./trabajadores.mssql";
 import * as moment from "moment";
 import { EmailClass } from "../email/email.class";
 import { AuthService, auth } from "../firebase/auth";
@@ -7,6 +6,7 @@ import { TrabajadorCompleto } from "./trabajadores.interface";
 import { PermisosClass } from "../permisos/permisos.class";
 import { DateTime } from "luxon";
 import { solicitudesVacacionesClass } from "../solicitud-vacaciones/solicitud-vacaciones.class";
+import { TrabajadorDatabaseService } from "./trabajadores.database";
 // import { PrismaService } from "../prisma/prisma.service";
 
 @Injectable()
@@ -19,17 +19,19 @@ export class Trabajador {
     private readonly emailInstance: EmailClass,
     @Inject(forwardRef(() => solicitudesVacacionesClass))
     private readonly solicitudesVacaciones: solicitudesVacacionesClass,
-  ) // private readonly prisma: PrismaService,
-  {}
+    private readonly schTrabajadores: TrabajadorDatabaseService, // private readonly prisma: PrismaService,
+  ) {}
 
   async getTrabajadorByAppId(uid: string) {
-    const resUser = await schTrabajadores.getTrabajadorByAppId(uid);
+    const resUser = await this.schTrabajadores.getTrabajadorByAppId(uid);
     if (resUser) return resUser;
     throw Error("No se ha podido obtener la información del usuario");
   }
 
   async getTrabajadoresByTienda(idTienda: number) {
-    const resUser = await schTrabajadores.getTrabajadoresByTienda(idTienda);
+    const resUser = await this.schTrabajadores.getTrabajadoresByTienda(
+      idTienda,
+    );
     if (resUser) return resUser;
     throw Error(
       `No se ha podido obtener los trabajadores de la tienda ${idTienda} `,
@@ -37,56 +39,60 @@ export class Trabajador {
   }
 
   async getTrabajadorBySqlId(id: number) {
-    const resUser = await schTrabajadores.getTrabajadorBySqlId(id);
+    const resUser = await this.schTrabajadores.getTrabajadorBySqlId(id);
     if (resUser) return resUser;
     throw Error("No se ha podido obtener la información del usuario");
   }
 
   async getTrabajadores(todos = false) {
-    const arrayTrabajadores = await schTrabajadores.getTrabajadores(todos);
+    const arrayTrabajadores = await this.schTrabajadores.getTrabajadores(todos);
 
     if (arrayTrabajadores) return arrayTrabajadores;
     return [];
   }
 
   async getSubordinadosConTienda(idAppResponsable: string) {
-    return await schTrabajadores.getSubordinadosConTienda(idAppResponsable);
+    return await this.schTrabajadores.getSubordinadosConTienda(
+      idAppResponsable,
+    );
   }
 
   async getSubordinadosConTiendaPorId(idResponsable: number) {
-    return await schTrabajadores.getSubordinadosConTiendaPorId(idResponsable);
+    return await this.schTrabajadores.getSubordinadosConTiendaPorId(
+      idResponsable,
+    );
   }
 
   async esCoordinadoraPorId(id: number) {
-    return await schTrabajadores.esCoordinadoraPorId(id);
+    return await this.schTrabajadores.esCoordinadoraPorId(id);
   }
 
   async getSubordinadosByIdsql(id: number) {
-    return await schTrabajadores.getSubordinadosByIdsql(id);
+    return await this.schTrabajadores.getSubordinadosByIdsql(id);
   }
 
   async esCoordinadora(uid: string): Promise<boolean> {
-    return await schTrabajadores.esCoordinadora(uid);
+    return await this.schTrabajadores.esCoordinadora(uid);
   }
 
   async getSubordinados(uid: string) {
-    return await schTrabajadores.getSubordinados(uid);
+    return await this.schTrabajadores.getSubordinados(uid);
   }
 
   async getSubordinadosById(id: number, conFecha?: moment.Moment) {
-    return await schTrabajadores.getSubordinadosById(id, conFecha);
+    return await this.schTrabajadores.getSubordinadosById(id, conFecha);
   }
 
   async getSubordinadosByIdNew(id: number, conFecha?: DateTime) {
-    return await schTrabajadores.getSubordinadosByIdNew(id, conFecha);
+    return await this.schTrabajadores.getSubordinadosByIdNew(id, conFecha);
   }
 
   async descargarTrabajadoresHit() {
-    return await schTrabajadores.getTrabajadoresSage();
+    return await this.schTrabajadores.getTrabajadoresSage();
   }
 
   async getTrabajadorTokenQR(idTrabajador: number, tokenQR: string) {
-    const resUser = await schTrabajadores.getTrabajadorTokenQR(
+    const resUser = await this.schTrabajadores.getTrabajadorTokenQR(
       idTrabajador,
       tokenQR,
     );
@@ -167,14 +173,14 @@ export class Trabajador {
       }
     });
 
-    const totales = await schTrabajadores.actualizarUsuarios(
+    const totales = await this.schTrabajadores.actualizarUsuarios(
       "soluciones",
       usuariosNuevos,
       modificarEnApp,
     );
 
     // Excluir usuario de test id: 999999
-    await schTrabajadores.eliminarUsuarios(arrayEliminar);
+    await this.schTrabajadores.eliminarUsuarios(arrayEliminar);
 
     return {
       totalModificarApp: modificarEnApp.length,
@@ -189,7 +195,7 @@ export class Trabajador {
 
   async registrarUsuario(dni: string, password: string) {
     dni = dni.trim().toUpperCase();
-    const datosUsuario = await schTrabajadores.getTrabajadorByDni(dni);
+    const datosUsuario = await this.schTrabajadores.getTrabajadorByDni(dni);
 
     if (!moment(datosUsuario.inicioContrato, "DD/MM/YYYY").isValid())
       throw Error("Fecha de inicio de contrato incorrecta");
@@ -210,7 +216,7 @@ export class Trabajador {
       disabled: false,
     });
 
-    await schTrabajadores.setIdApp(datosUsuario.id, usuarioCreado.uid);
+    await this.schTrabajadores.setIdApp(datosUsuario.id, usuarioCreado.uid);
 
     const link = await auth.generateEmailVerificationLink(usuarioCreado.email);
     const body = ` Haz click en el siguiente enlace para verificar tu email:<br>
@@ -231,7 +237,7 @@ export class Trabajador {
   }
 
   async getResponsableTienda(idTienda: number) {
-    return await schTrabajadores.getResponsableTienda(idTienda);
+    return await this.schTrabajadores.getResponsableTienda(idTienda);
   }
 
   async guardarCambiosForm(
@@ -268,20 +274,20 @@ export class Trabajador {
         cualquieraDe,
       )
     ) {
-      return await schTrabajadores.guardarCambiosForm(payload, original);
+      return await this.schTrabajadores.guardarCambiosForm(payload, original);
     } else throw Error("No tienes permisos para realizar esta acción");
   }
 
   async getNivelMenosUno(idSql: number) {
-    return await schTrabajadores.getNivelMenosUno(idSql);
+    return await this.schTrabajadores.getNivelMenosUno(idSql);
   }
 
   async getNivelCero(idSql: number) {
-    return await schTrabajadores.getNivelCero(idSql);
+    return await this.schTrabajadores.getNivelCero(idSql);
   }
 
   async getNivelUno(idSql: number) {
-    return await schTrabajadores.getNivelUno(idSql);
+    return await this.schTrabajadores.getNivelUno(idSql);
   }
 
   async getArbolById(idSql: number) {
@@ -301,7 +307,7 @@ export class Trabajador {
   }
 
   private async borrarTrabajadorDeSql(idSql: number) {
-    await schTrabajadores.borrarTrabajador(idSql);
+    await this.schTrabajadores.borrarTrabajador(idSql);
   }
 
   public async borrarTrabajador(idSql: number) {
@@ -314,30 +320,30 @@ export class Trabajador {
   }
 
   async getCoordis() {
-    return await schTrabajadores.getCoordinadoras();
+    return await this.schTrabajadores.getCoordinadoras();
   }
 
   async descargarHistoriaContratos() {
-    return await schTrabajadores.copiarHistoriaContratosHitSoluciones();
+    return await this.schTrabajadores.copiarHistoriaContratosHitSoluciones();
   }
 
   async getHistoricosContratos(dni: string) {
-    const resUser = await schTrabajadores.getHistoricoContratos(dni);
+    const resUser = await this.schTrabajadores.getHistoricoContratos(dni);
     if (resUser) return resUser;
     throw Error("No se ha podido obtener la información del usuario");
   }
 
   async getHorasContratoById(idSql: number, fecha: moment.Moment) {
-    return await schTrabajadores.getHorasContrato(idSql, fecha);
+    return await this.schTrabajadores.getHorasContrato(idSql, fecha);
   }
 
   /* Cuadrantes 2.0 */
   async getHorasContratoByIdNew(idSql: number, fecha: DateTime) {
-    return await schTrabajadores.getHorasContratoNew(idSql, fecha);
+    return await this.schTrabajadores.getHorasContratoNew(idSql, fecha);
   }
 
   async uploadFoto(displayFoto: string, uid: string) {
-    return await schTrabajadores.uploadFoto(displayFoto, uid);
+    return await this.schTrabajadores.uploadFoto(displayFoto, uid);
   }
 
   // async testInsert() {

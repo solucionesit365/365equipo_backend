@@ -1,24 +1,26 @@
 import { Injectable, Inject, forwardRef } from "@nestjs/common";
-import * as schTiendas from "./tiendas.mssql";
+
 import { Trabajador } from "../trabajadores/trabajadores.class";
 import { TrabajadorSql } from "../trabajadores/trabajadores.interface";
+import { TiendaDatabaseService } from "./tiendas.database";
 
 @Injectable()
 export class Tienda {
   constructor(
     @Inject(forwardRef(() => Trabajador))
     private readonly trabajadoresInstance: Trabajador,
+    private readonly schTiendas: TiendaDatabaseService,
   ) {}
 
   async getTiendas() {
-    const arrayTiendas = await schTiendas.getTiendas();
+    const arrayTiendas = await this.schTiendas.getTiendas();
 
     if (arrayTiendas) return arrayTiendas;
     throw Error("No hay tiendas");
   }
 
   async getTiendasHit() {
-    return await schTiendas.getTiendasHit();
+    return await this.schTiendas.getTiendasHit();
   }
 
   async actualizarTiendas() {
@@ -29,9 +31,10 @@ export class Tienda {
       (tiendaApp) => tiendaApp.idExterno,
     );
     const tiendasNuevas = arrayTiendasHit.filter(
-      (tiendaExterno) => !tiendasExistentesIds.includes(tiendaExterno.id),
+      (tiendaExterno) =>
+        !tiendasExistentesIds.includes(tiendaExterno.idExterno),
     );
-    return schTiendas.addTiendasNuevas(tiendasNuevas);
+    return this.schTiendas.addTiendasNuevas(tiendasNuevas);
   }
 
   private checkExists(arrayTiendas: any[], buscar: any) {
