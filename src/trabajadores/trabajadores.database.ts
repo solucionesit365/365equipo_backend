@@ -92,4 +92,88 @@ export class TrabajadorDatabaseService {
 
     return subordinados;
   }
+
+  async getTrabajadores() {
+    // Esta función tenía el todos = false)
+    const trabajadores = await this.prisma.trabajador.findMany({
+      where: {
+        // Filtra para incluir solo trabajadores con al menos un contrato vigente
+        contratos: {
+          some: {
+            fechaBaja: null, // Contrato aún vigente
+          },
+        },
+      },
+      include: {
+        contratos: {
+          where: {
+            fechaBaja: null, // Para contratos aún vigentes
+          },
+          orderBy: {
+            fechaAlta: "desc", // Ordena por la fecha más reciente
+          },
+          take: 1, // Toma solo el contrato más reciente
+        },
+      },
+    });
+
+    return trabajadores;
+  }
+
+  async getTrabajadorTokenQR(idTrabajador: number, tokenQR: string) {
+    const trabajador = await this.prisma.trabajador.findUnique({
+      where: {
+        id: idTrabajador,
+        tokenQR: tokenQR,
+        contratos: {
+          some: {
+            fechaBaja: null,
+          },
+        },
+      },
+      include: {
+        contratos: {
+          where: {
+            fechaBaja: null,
+          },
+          orderBy: {
+            fechaAlta: "desc",
+          },
+          take: 1,
+        },
+      },
+    });
+
+    if (trabajador.tokenQR === tokenQR) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  async getTrabajadoresByTienda(idTienda: number) {
+    const trabajadores = await this.prisma.trabajador.findMany({
+      where: {
+        idTienda: idTienda,
+        contratos: {
+          some: {
+            fechaBaja: null,
+          },
+        },
+      },
+      include: {
+        contratos: {
+          where: {
+            fechaBaja: null,
+          },
+          orderBy: {
+            fechaAlta: "desc",
+          },
+          take: 1,
+        },
+      },
+    });
+
+    return trabajadores;
+  }
 }

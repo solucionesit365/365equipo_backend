@@ -39,57 +39,57 @@ tr.tokenQR,
 tr.displayFoto
 `;
 
-/* Todos */
-export async function getTrabajadores(todos = false) {
-  const sql = `
-    SELECT 
-        ${GET_DATOS_TRABAJADOR}
-    FROM trabajadores tr
-    LEFT JOIN trabajadores tr1 ON tr.idResponsable = tr1.id
-    LEFT JOIN tiendas ti ON tr.idTienda = ti.id
-    ${
-      !todos
-        ? "WHERE tr.inicioContrato IS NOT NULL AND tr.finalContrato IS NULL"
-        : ""
-    } ORDER BY nombreApellidos
-    `;
-  const resUsuarios = await recSoluciones("soluciones", sql);
+// /* Todos */
+// export async function getTrabajadores(todos = false) {
+//   const sql = `
+//     SELECT 
+//         ${GET_DATOS_TRABAJADOR}
+//     FROM trabajadores tr
+//     LEFT JOIN trabajadores tr1 ON tr.idResponsable = tr1.id
+//     LEFT JOIN tiendas ti ON tr.idTienda = ti.id
+//     ${
+//       !todos
+//         ? "WHERE tr.inicioContrato IS NOT NULL AND tr.finalContrato IS NULL"
+//         : ""
+//     } ORDER BY nombreApellidos
+//     `;
+//   const resUsuarios = await recSoluciones("soluciones", sql);
 
-  if (resUsuarios.recordset.length > 0)
-    return resUsuarios.recordset as TrabajadorSql[];
-  return null;
-}
+//   if (resUsuarios.recordset.length > 0)
+//     return resUsuarios.recordset as TrabajadorSql[];
+//   return null;
+// }
 
 // Identificar usuario QR
 
-export async function getTrabajadorTokenQR(
-  idTrabajador: number,
-  tokenQR: string,
-) {
-  const sql = `
-  SELECT 
-  tr.nombreApellidos,
-  tr.tipoTrabajador
-  FROM trabajadores tr
-  WHERE tr.id = @param0 AND tr.tokenQR = @param1
-  `;
-  const resTrabajador = await recSoluciones(
-    "soluciones",
-    sql,
-    idTrabajador,
-    tokenQR,
-  );
-  if (resTrabajador.recordset.length > 0)
-    return resTrabajador.recordset[0] as TrabajadorSql;
-  return null;
-}
+// export async function getTrabajadorTokenQR(
+//   idTrabajador: number,
+//   tokenQR: string,
+// ) {
+//   const sql = `
+//   SELECT 
+//   tr.nombreApellidos,
+//   tr.tipoTrabajador
+//   FROM trabajadores tr
+//   WHERE tr.id = @param0 AND tr.tokenQR = @param1
+//   `;
+//   const resTrabajador = await recSoluciones(
+//     "soluciones",
+//     sql,
+//     idTrabajador,
+//     tokenQR,
+//   );
+//   if (resTrabajador.recordset.length > 0)
+//     return resTrabajador.recordset[0] as TrabajadorSql;
+//   return null;
+// }
 
-export async function getTrabajadoresByTienda(idTienda: number) {
-  const sql = "select * from trabajadores where idTienda = @param0";
-  const resTrabajador = await recSoluciones("soluciones", sql, idTienda);
-  if (resTrabajador.recordset.length > 0) return resTrabajador.recordset;
-  return null;
-}
+// export async function getTrabajadoresByTienda(idTienda: number) {
+//   const sql = "select * from trabajadores where idTienda = @param0";
+//   const resTrabajador = await recSoluciones("soluciones", sql, idTienda);
+//   if (resTrabajador.recordset.length > 0) return resTrabajador.recordset;
+//   return null;
+// }
 
 // /* Individual x uid */
 // export async function getTrabajadorByAppId(uid: string) {
