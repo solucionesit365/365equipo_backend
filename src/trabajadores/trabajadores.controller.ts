@@ -14,6 +14,7 @@ import { Trabajador } from "./trabajadores.class";
 import { AuthService } from "../firebase/auth";
 import { AdminGuard } from "../auth/admin.guard";
 import { uploadFoto } from "./trabajadores.mssql";
+import { AuthGuard } from "src/auth/auth.guard";
 
 @Controller("trabajadores")
 export class TrabajadoresController {
@@ -40,6 +41,7 @@ export class TrabajadoresController {
   }
 
   @Get("getTrabajadorByAppId")
+  @UseGuards(AuthGuard)
   async getTrabajadorByAppId(
     @Headers("authorization") authHeader: string,
     @Query() { uid },
