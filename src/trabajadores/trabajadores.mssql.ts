@@ -145,60 +145,60 @@ tr.displayFoto
 //   return null;
 // }
 
-export async function getSubordinadosConTienda(
-  idAppResponsable: string,
-): Promise<any[]> {
-  const sql = `
-  SELECT 
-    tr.*, 
-    (select count(*) from trabajadores where idResponsable = tr.id) as llevaEquipo,
-    (select idApp from trabajadores where id = tr.idResponsable) as validador,
-    (select nombre from tiendas where id = tr.idTienda) as nombreTienda
-  FROM trabajadores tr
-  WHERE 
-    tr.idResponsable = (select id from trabajadores where idApp = @param0) 
-    AND tr.idTienda is not null
-    `;
-  const resTrabajadores = await recSoluciones(
-    "soluciones",
-    sql,
-    idAppResponsable,
-  );
-  if (resTrabajadores.recordset.length > 0) return resTrabajadores.recordset;
-  return [];
-}
+// export async function getSubordinadosConTienda(
+//   idAppResponsable: string,
+// ): Promise<any[]> {
+//   const sql = `
+//   SELECT 
+//     tr.*, 
+//     (select count(*) from trabajadores where idResponsable = tr.id) as llevaEquipo,
+//     (select idApp from trabajadores where id = tr.idResponsable) as validador,
+//     (select nombre from tiendas where id = tr.idTienda) as nombreTienda
+//   FROM trabajadores tr
+//   WHERE 
+//     tr.idResponsable = (select id from trabajadores where idApp = @param0) 
+//     AND tr.idTienda is not null
+//     `;
+//   const resTrabajadores = await recSoluciones(
+//     "soluciones",
+//     sql,
+//     idAppResponsable,
+//   );
+//   if (resTrabajadores.recordset.length > 0) return resTrabajadores.recordset;
+//   return [];
+// }
 
-export async function esCoordinadora(uid: string) {
-  const sql = `
-    SELECT 
-      tr.idTienda,
-      tr.idResponsable,
-      (select idApp from trabajadores where id = tr.idResponsable) as idResponsableApp,
-      (select count(*) from trabajadores where idResponsable = tr.id) as llevaEquipo 
-    from trabajadores tr where idApp = @param0;
-  `;
-  const resCoordi = await recSoluciones("soluciones", sql, uid);
+// export async function esCoordinadora(uid: string) {
+//   const sql = `
+//     SELECT 
+//       tr.idTienda,
+//       tr.idResponsable,
+//       (select idApp from trabajadores where id = tr.idResponsable) as idResponsableApp,
+//       (select count(*) from trabajadores where idResponsable = tr.id) as llevaEquipo 
+//     from trabajadores tr where idApp = @param0;
+//   `;
+//   const resCoordi = await recSoluciones("soluciones", sql, uid);
 
-  if (resCoordi.recordset.length > 0 && resCoordi.recordset[0].llevaEquipo > 0)
-    return true;
-  return false;
-}
+//   if (resCoordi.recordset.length > 0 && resCoordi.recordset[0].llevaEquipo > 0)
+//     return true;
+//   return false;
+// }
 
-export async function esCoordinadoraPorId(id: number) {
-  const sql = `
-    SELECT 
-      tr.idTienda,
-      tr.idResponsable,
-      (select idApp from trabajadores where id = tr.idResponsable) as idResponsableApp,
-      (select count(*) from trabajadores where idResponsable = tr.id) as llevaEquipo 
-    from trabajadores tr where id = @param0;
-  `;
-  const resCoordi = await recSoluciones("soluciones", sql, id);
+// export async function esCoordinadoraPorId(id: number) {
+//   const sql = `
+//     SELECT 
+//       tr.idTienda,
+//       tr.idResponsable,
+//       (select idApp from trabajadores where id = tr.idResponsable) as idResponsableApp,
+//       (select count(*) from trabajadores where idResponsable = tr.id) as llevaEquipo 
+//     from trabajadores tr where id = @param0;
+//   `;
+//   const resCoordi = await recSoluciones("soluciones", sql, id);
 
-  if (resCoordi.recordset.length > 0 && resCoordi.recordset[0].llevaEquipo > 0)
-    return true;
-  return false;
-}
+//   if (resCoordi.recordset.length > 0 && resCoordi.recordset[0].llevaEquipo > 0)
+//     return true;
+//   return false;
+// }
 
 export async function getSubordinados(uid: string): Promise<
   {

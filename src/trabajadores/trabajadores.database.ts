@@ -70,29 +70,6 @@ export class TrabajadorDatabaseService {
     return trabajador;
   }
 
-  async getSubordinadosConTienda(idAppResponsable: string) {
-    const responsable = await this.getTrabajadorByAppId(idAppResponsable);
-
-    const subordinados = await this.prisma.trabajador.findMany({
-      where: {
-        idResponsable: responsable.id,
-        idTienda: {
-          not: null,
-        },
-      },
-      include: {
-        tienda: {
-          select: { nombre: true },
-        },
-        responsable: {
-          select: { idApp: true },
-        },
-      },
-    });
-
-    return subordinados;
-  }
-
   async getTrabajadores() {
     // Esta función tenía el todos = false)
     const trabajadores = await this.prisma.trabajador.findMany({
@@ -175,5 +152,122 @@ export class TrabajadorDatabaseService {
     });
 
     return trabajadores;
+  }
+
+  async getSubordinadosConTienda(idAppResponsable: string) {
+    // Encuentra el id del responsable usando idApp
+    const responsable = await this.prisma.trabajador.findUnique({
+      where: {
+        idApp: idAppResponsable,
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    if (!responsable) return [];
+
+    // Obtén los trabajadores subordinados
+    const trabajadores = await this.prisma.trabajador.findMany({
+      where: {
+        idResponsable: responsable.id,
+        idTienda: {
+          not: null,
+        },
+      },
+      include: {
+        tienda: true,
+        responsable: {
+          select: {
+            idApp: true,
+          },
+        },
+      },
+    });
+
+    // Calcula llevaEquipo para cada trabajador
+    const trabajadoresConLlevaEquipo = await Promise.all(
+      trabajadores.map(async (trabajador) => {
+        const conteo = await this.prisma.trabajador.count({
+          where: {
+            idResponsable: trabajador.id,
+          },
+        });
+
+        return {
+          ...trabajador,
+          llevaEquipo: conteo > 0,
+          nombreTienda: trabajador.tienda?.nombre,
+          validador: trabajador.responsable?.idApp,
+        };
+      }),
+    );
+
+    return trabajadoresConLlevaEquipo;
+  }
+
+  async esCoordinadora(uid: string) {
+    // Ahora no tiene en cuenta el campo "llevaEquipo"
+
+    const trabajador = await this.prisma.trabajador.findUnique({
+      where: {
+        idApp: uid,
+      },
+      // Incluye información relacionada
+      include: {
+        responsable: {
+          select: {
+            id: true,
+          },
+        },
+        subordinados: {
+          select: {
+            id: true,
+          },
+        },
+      },
+    });
+
+    // Verifica si el trabajador existe y si tiene subordinados
+    if (
+      trabajador &&
+      trabajador.subordinados &&
+      trabajador.subordinados.length > 0
+    ) {
+      return true;
+    }
+    return false;
+  }
+  async esCoordinadoraPorId(id: number) {
+    // Ahora no tiene en cuenta el campo "llevaEquipo"
+
+    const trabajador = await this.prisma.trabajador.findUnique({
+      where: {
+        id: id,
+      },
+      // Incluye información relacionada
+      include: {
+        responsable: {
+          select: {
+            id: true,
+          },
+        },
+        subordinados: {
+          select: {
+            id: true,
+          },
+        },
+      },
+    });
+
+    // Verifica si el trabajador existe y si tiene subordinados
+    if (
+      trabajador &&
+      trabajador.subordinados &&
+      trabajador.subordinados.length > 0
+    ) {
+      return true;
+    }
+    return false;
   }
 }
