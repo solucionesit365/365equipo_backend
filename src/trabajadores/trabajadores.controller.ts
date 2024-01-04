@@ -131,6 +131,7 @@ export class TrabajadoresController {
     }
   }
 
+  @UseGuards(AuthGuard)
   @Get("getSubordinados")
   async getSubordinados(
     @Headers("authorization") authHeader: string,
