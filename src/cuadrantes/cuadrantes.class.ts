@@ -131,7 +131,7 @@ export class Cuadrantes {
       fecha,
     );
 
-    return horasContrato + ( horasMasMenos);
+    return horasContrato + horasMasMenos;
   }
 
   // Cuadrantes 2.0
@@ -699,14 +699,23 @@ export class Cuadrantes {
   async getTurnoDia(idTrabajador: number, fecha: DateTime) {
     const fechaInicio = fecha.startOf("day");
     const fechaFinal = fecha.endOf("day");
-
+    const trabajador = await this.trabajadoresInstance.getTrabajadorBySqlId(
+      idTrabajador,
+    );
     const resTurno = await this.schCuadrantes.getCuadrantesIndividual(
       idTrabajador,
       fechaInicio,
       fechaFinal,
     );
 
-    if (resTurno.length > 0) return resTurno[0];
+    const resTurnos2: WithId<TCuadrante>[] = resTurno.map((turno) => {
+      return {
+        ...turno,
+        dni: trabajador.dni,
+      };
+    });
+
+    if (resTurno.length > 0) return resTurnos2[0];
     return null;
   }
 }

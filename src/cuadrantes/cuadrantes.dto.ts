@@ -79,4 +79,8 @@ export class TCuadranteDto {
   @IsOptional()
   @IsBoolean()
   borrable?: boolean;
+
+  @IsOptional()
+  @IsString()
+  dni: string;
 }
