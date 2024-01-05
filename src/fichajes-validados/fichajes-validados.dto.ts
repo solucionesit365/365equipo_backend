@@ -21,7 +21,7 @@ class TCuadranteMinDto {
   nombre: string;
 
   @IsNumber()
-  idTienda: number;
+  idTienda?: number;
 
   @IsNumber()
   idTrabajador: number;
@@ -92,7 +92,7 @@ export class FichajeValidadoDto {
   horasFichaje: number;
 
   @IsNumber()
-  idTienda: number;
+  idTienda?: number;
 
   @IsString()
   dni: string;

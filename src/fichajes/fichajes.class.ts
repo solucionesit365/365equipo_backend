@@ -404,4 +404,21 @@ export class Fichajes {
     }
     return arrayCaritas;
   }
+
+  async validarFichajesAntiguos() {
+    //Fechas a reiniciar
+    const ahora = DateTime.now();
+    const inicioSemanaActual = ahora.startOf("week");
+    const inicioSemanaAnterior = inicioSemanaActual.minus({ weeks: 1 });
+
+    console.log(inicioSemanaActual);
+    console.log(inicioSemanaAnterior);
+
+    const response =
+      this.schFichajes.validarFichajesAntiguos(inicioSemanaAnterior);
+
+    console.log(response);
+
+    return response;
+  }
 }

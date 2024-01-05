@@ -142,7 +142,7 @@ export class SolicitudVacacionesController {
   @Get("solicitudesTrabajador")
   async getSolicitudesTrabajadorSqlId(
     @Headers("authorization") authHeader: string,
-    @Query() { idBeneficiario },
+    @Query() { idBeneficiario, year },
   ) {
     try {
       const token = this.tokenService.extract(authHeader);
@@ -153,6 +153,7 @@ export class SolicitudVacacionesController {
           ok: true,
           data: await this.solicitudVacacionesInstance.getSolicitudesTrabajadorSqlId(
             Number(idBeneficiario),
+            Number(year),
           ),
         };
       } else throw Error("Faltan datos. id");

@@ -2,6 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { MongoDbService } from "../bbdd/mongodb";
 import { SolicitudVacaciones } from "./solicitud-vacaciones.interface";
 import { ObjectId } from "mongodb";
+import { DateTime } from "luxon";
 
 @Injectable()
 export class SolicitudVacacionesBdd {
@@ -35,13 +36,41 @@ export class SolicitudVacacionesBdd {
   }
 
   //Mostrar Solicitudes de las vacaciones de el trabajador por idSql
-  async getSolicitudesTrabajadorSqlId(idBeneficiario: number) {
+  async getSolicitudesTrabajadorSqlId(idBeneficiario: number, year: number) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const solicitudVacacionesCollection = db.collection<SolicitudVacaciones>(
       "solicitudVacaciones",
     );
+
+    const startDate = DateTime.local(year, 1, 1).toFormat("dd/MM/yyyy");
+    const endDate = DateTime.local(year + 1, 1, 1).toFormat("dd/MM/yyyy");
+
     const respSolicitudes = await solicitudVacacionesCollection
-      .find({ idBeneficiario })
+      .aggregate([
+        {
+          $match: {
+            idBeneficiario: idBeneficiario,
+          },
+        },
+        {
+          $addFields: {
+            convertedFechaCreacion: {
+              $dateFromString: {
+                dateString: "$fechaCreacion",
+                format: "%d/%m/%Y", // Asegúrate de que este formato coincida con el de tus datos
+              },
+            },
+          },
+        },
+        {
+          $match: {
+            convertedFechaCreacion: {
+              $gte: new Date(startDate),
+              $lt: new Date(endDate),
+            },
+          },
+        },
+      ])
       .toArray();
 
     return respSolicitudes;
