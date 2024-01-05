@@ -13,7 +13,13 @@ export class FichajesDatabase {
     private readonly hitInstance: FacTenaMssql,
   ) {}
 
-  async nuevaEntrada(uid: string, hora: Date, idExterno: number) {
+  async nuevaEntrada(
+    uid: string,
+    hora: Date,
+    idExterno: number,
+    nombre: string,
+    dni: string,
+  ) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const fichajesCollection = db.collection<FichajeDto>("fichajes");
     const resInsert = await fichajesCollection.insertOne({
@@ -23,13 +29,21 @@ export class FichajesDatabase {
       uid,
       idExterno,
       validado: false,
+      nombre,
+      dni,
     });
 
     if (resInsert.acknowledged) return resInsert.insertedId;
     return null;
   }
 
-  async nuevaSalida(uid: string, hora: Date, idExterno: number) {
+  async nuevaSalida(
+    uid: string,
+    hora: Date,
+    idExterno: number,
+    nombre: string,
+    dni: string,
+  ) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const fichajesCollection = db.collection<FichajeDto>("fichajes");
     const resInsert = await fichajesCollection.insertOne({
@@ -39,6 +53,8 @@ export class FichajesDatabase {
       uid,
       idExterno,
       validado: false,
+      nombre,
+      dni,
     });
 
     if (resInsert.acknowledged) return resInsert.insertedId;
@@ -217,5 +233,29 @@ export class FichajesDatabase {
         { hora: { $lte: fecha.endOf("day").toJSDate() } },
       ],
     });
+  }
+
+  // Solo para propósitos de rectificación general
+  async getAllFichajes() {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const fichajes = db.collection<FichajeDto>("fichajes");
+
+    // Solo el último mes (campo "hora")
+    return await fichajes
+      .find({
+        hora: {
+          $gte: DateTime.now().minus({ months: 3 }).toJSDate(),
+        },
+      })
+      .toArray();
+  }
+
+  // Solo para propósitos de rectificación general. (Borrar primero todo y luego insertar)
+  async setAllFichajes(fichajes: FichajeDto[]) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const fichajesCollection = db.collection<FichajeDto>("fichajes");
+
+    await fichajesCollection.deleteMany({});
+    await fichajesCollection.insertMany(fichajes);
   }
 }

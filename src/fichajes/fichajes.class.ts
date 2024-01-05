@@ -10,7 +10,7 @@ import * as moment from "moment";
 import { ObjectId, WithId } from "mongodb";
 import { FichajeDto, ParFichaje } from "./fichajes.interface";
 import { Cuadrantes } from "../cuadrantes/cuadrantes.class";
-import { DateTime, Duration } from "luxon";
+import { DateTime } from "luxon";
 
 @Injectable()
 export class Fichajes {
@@ -20,14 +20,15 @@ export class Fichajes {
     private readonly cuadrantesInstance: Cuadrantes,
   ) {}
 
-  async nuevaEntrada(uid: string) {
+  async nuevaEntrada(trabajador: TrabajadorCompleto) {
     const hora = new Date();
-    const trabajadorCompleto =
-      await this.trabajadoresInstance.getTrabajadorByAppId(uid);
+
     const insert = await this.schFichajes.nuevaEntrada(
-      uid,
+      trabajador.uid,
       hora,
-      trabajadorCompleto.id,
+      trabajador.id,
+      trabajador.nombreApellidos,
+      trabajador.dni,
     );
 
     if (insert) return true;
@@ -35,14 +36,15 @@ export class Fichajes {
     throw Error("No se ha podido registrar la entrada");
   }
 
-  async nuevaSalida(uid: string) {
+  async nuevaSalida(trabajador: TrabajadorCompleto) {
     const hora = new Date();
-    const trabajadorCompleto =
-      await this.trabajadoresInstance.getTrabajadorByAppId(uid);
+
     const insert = await this.schFichajes.nuevaSalida(
-      uid,
+      trabajador.uid,
       hora,
-      trabajadorCompleto.id,
+      trabajador.id,
+      trabajador.nombreApellidos,
+      trabajador.dni,
     );
 
     if (insert) return true;
@@ -194,6 +196,8 @@ export class Fichajes {
       validado: false,
       idTrabajador: idTrabajador,
       uid: trabajador.idApp,
+      nombre: trabajador.nombreApellidos,
+      dni: trabajador.dni,
     };
   }
 
@@ -403,5 +407,14 @@ export class Fichajes {
       }
     }
     return arrayCaritas;
+  }
+
+  // Solo para propósito de rectificación general
+  async getAllFichajes() {
+    return await this.schFichajes.getAllFichajes();
+  }
+  // Solo para propósito de rectificación general
+  async setAllFichajes(fichajes: WithId<FichajeDto>[]) {
+    return await this.schFichajes.setAllFichajes(fichajes);
   }
 }
