@@ -253,18 +253,6 @@ export class Fichajes {
         }),
       );
 
-      // const fichajeListFaltan = this.comprobarParesFichajes(susFichajesPlus);
-
-      // // Si hay al menos un índice, hay que agregarlo al array de fichajes.
-      // for (let j = 0; j < fichajeListFaltan.length; j += 1) {
-      //   const fichajeSistema = await this.createFichajeSalidaSistema(
-      //     DateTime.fromJSDate(fichajeListFaltan[j].hora),
-      //     susFichajesPlus[j].idTrabajador,
-      //   );
-      //   // susFichajesPlus.splice(j + 1, 0, fichajeSistema);
-      //   susFichajesPlus.push(fichajeSistema);
-      // }
-
       this.ordenarPorHora(susFichajesPlus);
       const resPares = await this.obtenerParesTrabajador(susFichajesPlus);
       paresSinValidar.push(...resPares);

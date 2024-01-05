@@ -106,6 +106,28 @@ export class CuadrantesDatabase {
     return resCuadrantes;
   }
 
+  // Cuadrantes 2.0
+  async getTurnoDia(
+    idTrabajador: number,
+    fechaInicioBusqueda: DateTime,
+    fechaFinalBusqueda: DateTime,
+  ) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes2");
+
+    const resCuadrantes = await cuadrantesCollection.findOne({
+      idTrabajador,
+      inicio: {
+        $gte: fechaInicioBusqueda.toJSDate(),
+      },
+      final: {
+        $lt: fechaFinalBusqueda.toJSDate(),
+      },
+    });
+
+    return resCuadrantes;
+  }
+
   async borrarTurno(idTurno: string) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes2");
