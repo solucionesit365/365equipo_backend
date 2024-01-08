@@ -80,14 +80,19 @@ export class SolicitudVacacionesController {
 
   //Mostrar todas las solicitudes de las vacaciones de los trabajadores
   @Get("getSolicitudes")
-  async getSolicitudes(@Headers("authorization") authHeader: string) {
+  async getSolicitudes(
+    @Headers("authorization") authHeader: string,
+    @Query() { year },
+  ) {
     try {
       const token = this.tokenService.extract(authHeader);
       await this.authInstance.verifyToken(token);
 
       return {
         ok: true,
-        data: await this.solicitudVacacionesInstance.getSolicitudes(),
+        data: await this.solicitudVacacionesInstance.getSolicitudes(
+          Number(year),
+        ),
       };
     } catch (err) {
       console.log(err);

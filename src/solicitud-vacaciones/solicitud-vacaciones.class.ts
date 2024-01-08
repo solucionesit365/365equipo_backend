@@ -31,8 +31,8 @@ export class solicitudesVacacionesClass {
   }
 
   //Mostrar todas las solicitudes de las vacaciones de los trabajadores
-  async getSolicitudes() {
-    return await this.schSolicitudVacaciones.getSolicitudes();
+  async getSolicitudes(year: number) {
+    return await this.schSolicitudVacaciones.getSolicitudes(year);
   }
 
   //Mostrar Solicitudes de las vacaciones de el trabajador por idSql
