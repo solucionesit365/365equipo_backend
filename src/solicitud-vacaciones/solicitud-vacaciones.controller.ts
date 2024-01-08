@@ -142,7 +142,7 @@ export class SolicitudVacacionesController {
   @Get("solicitudesTrabajador")
   async getSolicitudesTrabajadorSqlId(
     @Headers("authorization") authHeader: string,
-    @Query() { idBeneficiario },
+    @Query() { idBeneficiario, year },
   ) {
     try {
       const token = this.tokenService.extract(authHeader);
@@ -153,6 +153,7 @@ export class SolicitudVacacionesController {
           ok: true,
           data: await this.solicitudVacacionesInstance.getSolicitudesTrabajadorSqlId(
             Number(idBeneficiario),
+            Number(year),
           ),
         };
       } else throw Error("Faltan datos. id");
@@ -166,7 +167,7 @@ export class SolicitudVacacionesController {
   @Get("solicitudesSubordinados")
   async solicitudesSubordinados(
     @Headers("authorization") authHeader: string,
-    @Query() { idAppResponsable },
+    @Query() { idAppResponsable, year },
   ) {
     try {
       if (!idAppResponsable) throw Error("Faltan datos");
@@ -176,6 +177,7 @@ export class SolicitudVacacionesController {
       const solicitudesEmpleadosDirectos =
         await this.solicitudVacacionesInstance.getsolicitudesSubordinados(
           idAppResponsable,
+          Number(year),
         );
       const empleadosTipoCoordi =
         await this.trabajadorInstance.getSubordinadosConTienda(
@@ -192,6 +194,7 @@ export class SolicitudVacacionesController {
             const solicitudesSubordinadosCoordinadora =
               await this.solicitudVacacionesInstance.getsolicitudesSubordinados(
                 empleadosTipoCoordi[i].idApp,
+                Number(year),
               );
 
             if (solicitudesSubordinadosCoordinadora.length > 0) {

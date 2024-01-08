@@ -36,16 +36,18 @@ export class solicitudesVacacionesClass {
   }
 
   //Mostrar Solicitudes de las vacaciones de el trabajador por idSql
-  async getSolicitudesTrabajadorSqlId(idBeneficiario: number) {
+  async getSolicitudesTrabajadorSqlId(idBeneficiario: number, year: number) {
     return await this.schSolicitudVacaciones.getSolicitudesTrabajadorSqlId(
       idBeneficiario,
+      year,
     );
   }
 
   //Mostrar Solicitudes de las vacaciones de los trabajadores a cargo
-  async getsolicitudesSubordinados(idAppResponsable: string) {
+  async getsolicitudesSubordinados(idAppResponsable: string, year: number) {
     return await this.schSolicitudVacaciones.getsolicitudesSubordinados(
       idAppResponsable,
+      year,
     );
   }
 
