@@ -167,7 +167,7 @@ export class SolicitudVacacionesController {
   @Get("solicitudesSubordinados")
   async solicitudesSubordinados(
     @Headers("authorization") authHeader: string,
-    @Query() { idAppResponsable },
+    @Query() { idAppResponsable, year },
   ) {
     try {
       if (!idAppResponsable) throw Error("Faltan datos");
@@ -177,7 +177,11 @@ export class SolicitudVacacionesController {
       const solicitudesEmpleadosDirectos =
         await this.solicitudVacacionesInstance.getsolicitudesSubordinados(
           idAppResponsable,
+          Number(year),
         );
+
+
+
       const empleadosTipoCoordi =
         await this.trabajadorInstance.getSubordinadosConTienda(
           idAppResponsable,
@@ -193,6 +197,7 @@ export class SolicitudVacacionesController {
             const solicitudesSubordinadosCoordinadora =
               await this.solicitudVacacionesInstance.getsolicitudesSubordinados(
                 empleadosTipoCoordi[i].idApp,
+                Number(year),
               );
 
             if (solicitudesSubordinadosCoordinadora.length > 0) {

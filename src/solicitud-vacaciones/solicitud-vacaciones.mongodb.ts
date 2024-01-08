@@ -45,33 +45,40 @@ export class SolicitudVacacionesBdd {
     const startDate = DateTime.local(year, 1, 1).toFormat("dd/MM/yyyy");
     const endDate = DateTime.local(year + 1, 1, 1).toFormat("dd/MM/yyyy");
 
+    // .aggregate([
+    //   {
+    //     $match: {
+    //       idBeneficiario: idBeneficiario,
+    //     },
+    //   },
+    //   {
+    //     $addFields: {
+    //       convertedFechaCreacion: {
+    //         $dateFromString: {
+    //           dateString: "$fechaCreacion",
+    //           format: "%d/%m/%Y", // Asegúrate de que este formato coincida con el de tus datos
+    //         },
+    //       },
+    //     },
+    //   },
+    //   {
+    //     $match: {
+    //       convertedFechaCreacion: {
+    //         $gte: new Date(startDate),
+    //         $lt: new Date(endDate),
+    //       },
+    //       year: year,
+    //     },
+    //   },
+    // ])
     const respSolicitudes = await solicitudVacacionesCollection
-      .aggregate([
-        {
-          $match: {
-            idBeneficiario: idBeneficiario,
-          },
-        },
-        {
-          $addFields: {
-            convertedFechaCreacion: {
-              $dateFromString: {
-                dateString: "$fechaCreacion",
-                format: "%d/%m/%Y", // Asegúrate de que este formato coincida con el de tus datos
-              },
-            },
-          },
-        },
-        {
-          $match: {
-            convertedFechaCreacion: {
-              $gte: new Date(startDate),
-              $lt: new Date(endDate),
-            },
-          },
-        },
-      ])
+      .find({
+        idBeneficiario: idBeneficiario,
+        year: year,
+      })
       .toArray();
+
+    console.log(respSolicitudes);
 
     return respSolicitudes;
   }
@@ -88,13 +95,13 @@ export class SolicitudVacacionesBdd {
     return respSolicitudes;
   }
 
-  async getsolicitudesSubordinados(idAppResponsable: string) {
+  async getsolicitudesSubordinados(idAppResponsable: string, year: number) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const solicitudVacacionesCollection = db.collection<SolicitudVacaciones>(
       "solicitudVacaciones",
     );
     const respSolicitudes = await solicitudVacacionesCollection
-      .find({ idAppResponsable })
+      .find({ idAppResponsable: idAppResponsable, year: year })
       .toArray();
 
     return respSolicitudes;
