@@ -107,6 +107,8 @@ export class Fichajes {
           idExterno: Number(fichajesHit[i].usuari),
           comentario: fichajesHit[i].comentario,
           validado: false,
+          dni: fichajesHit[i].dni,
+          nombre: fichajesHit[i].nombre,
         });
       } else if (fichajesHit[i].accio === 2) {
         fichajesPretty.push({
@@ -118,6 +120,8 @@ export class Fichajes {
           idExterno: Number(fichajesHit[i].usuari),
           comentario: fichajesHit[i].comentario,
           validado: false,
+          dni: fichajesHit[i].dni,
+          nombre: fichajesHit[i].nombre,
         });
       }
     }
