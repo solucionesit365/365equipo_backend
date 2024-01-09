@@ -23,13 +23,13 @@ export class SolicitudVacacionesBdd {
   }
 
   //Mostrar todas las solicitudes de las vacaciones de los trabajadores
-  async getSolicitudes() {
+  async getSolicitudes(year: number) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const solicitudVacacionesCollection = db.collection<SolicitudVacaciones>(
       "solicitudVacaciones",
     );
     const respSolicitudes = await solicitudVacacionesCollection
-      .find({})
+      .find({ year })
       .toArray();
 
     return respSolicitudes;
