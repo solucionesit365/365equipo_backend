@@ -270,4 +270,35 @@ export class TrabajadorDatabaseService {
     }
     return false;
   }
+
+  async getSubordinados(idApp: string) {
+    const trabajador = await this.prisma.trabajador.findUnique({
+      where: {
+        idApp: idApp,
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    if (!trabajador) return [];
+
+    const subordinados = await this.prisma.trabajador.findMany({
+      where: {
+        idResponsable: trabajador.id,
+      },
+    });
+
+    return subordinados;
+  }
+
+  async getSubordinadosById(id: number) {
+    const subordinados = await this.prisma.trabajador.findMany({
+      where: {
+        idResponsable: id,
+      },
+    });
+
+    return subordinados;
+  }
 }

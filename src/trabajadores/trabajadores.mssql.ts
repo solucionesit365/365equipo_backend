@@ -1,6 +1,4 @@
-import {
-  recHit,
-} from "../bbdd/mssql";
+import { recHit } from "../bbdd/mssql";
 import { Prisma } from "@prisma/client";
 import { TrabajadorCompleto, TrabajadorSql } from "./trabajadores.interface";
 import * as moment from "moment";
@@ -42,7 +40,7 @@ tr.displayFoto
 // /* Todos */
 // export async function getTrabajadores(todos = false) {
 //   const sql = `
-//     SELECT 
+//     SELECT
 //         ${GET_DATOS_TRABAJADOR}
 //     FROM trabajadores tr
 //     LEFT JOIN trabajadores tr1 ON tr.idResponsable = tr1.id
@@ -67,7 +65,7 @@ tr.displayFoto
 //   tokenQR: string,
 // ) {
 //   const sql = `
-//   SELECT 
+//   SELECT
 //   tr.nombreApellidos,
 //   tr.tipoTrabajador
 //   FROM trabajadores tr
@@ -95,7 +93,7 @@ tr.displayFoto
 // export async function getTrabajadorByAppId(uid: string) {
 //   const sql = `
 
-//   SELECT 
+//   SELECT
 //     ${GET_DATOS_TRABAJADOR}
 //   FROM trabajadores tr
 //   LEFT JOIN trabajadores tr1 ON tr.idResponsable = tr1.id
@@ -113,7 +111,7 @@ tr.displayFoto
 // export async function getTrabajadorBySqlId(id: number) {
 //   const sql = `
 
-//   SELECT 
+//   SELECT
 //     ${GET_DATOS_TRABAJADOR}
 //   FROM trabajadores tr
 //   LEFT JOIN trabajadores tr1 ON tr.idResponsable = tr1.id
@@ -130,12 +128,12 @@ tr.displayFoto
 // export async function getTrabajadorByDni(dni: string) {
 //   const sql = `
 
-//   SELECT 
+//   SELECT
 //     ${GET_DATOS_TRABAJADOR}
 //   FROM trabajadores tr
 //   LEFT JOIN trabajadores tr1 ON tr.idResponsable = tr1.id
 //   LEFT JOIN tiendas ti ON tr.idTienda = ti.id
-//   WHERE tr.dni = @param0 AND tr.inicioContrato IS NOT NULL AND tr.finalContrato IS NULL 
+//   WHERE tr.dni = @param0 AND tr.inicioContrato IS NOT NULL AND tr.finalContrato IS NULL
 //   ORDER BY nombreApellidos
 // `;
 //   const resUser = await recSoluciones("soluciones", sql, dni);
@@ -149,14 +147,14 @@ tr.displayFoto
 //   idAppResponsable: string,
 // ): Promise<any[]> {
 //   const sql = `
-//   SELECT 
-//     tr.*, 
+//   SELECT
+//     tr.*,
 //     (select count(*) from trabajadores where idResponsable = tr.id) as llevaEquipo,
 //     (select idApp from trabajadores where id = tr.idResponsable) as validador,
 //     (select nombre from tiendas where id = tr.idTienda) as nombreTienda
 //   FROM trabajadores tr
-//   WHERE 
-//     tr.idResponsable = (select id from trabajadores where idApp = @param0) 
+//   WHERE
+//     tr.idResponsable = (select id from trabajadores where idApp = @param0)
 //     AND tr.idTienda is not null
 //     `;
 //   const resTrabajadores = await recSoluciones(
@@ -170,11 +168,11 @@ tr.displayFoto
 
 // export async function esCoordinadora(uid: string) {
 //   const sql = `
-//     SELECT 
+//     SELECT
 //       tr.idTienda,
 //       tr.idResponsable,
 //       (select idApp from trabajadores where id = tr.idResponsable) as idResponsableApp,
-//       (select count(*) from trabajadores where idResponsable = tr.id) as llevaEquipo 
+//       (select count(*) from trabajadores where idResponsable = tr.id) as llevaEquipo
 //     from trabajadores tr where idApp = @param0;
 //   `;
 //   const resCoordi = await recSoluciones("soluciones", sql, uid);
@@ -186,11 +184,11 @@ tr.displayFoto
 
 // export async function esCoordinadoraPorId(id: number) {
 //   const sql = `
-//     SELECT 
+//     SELECT
 //       tr.idTienda,
 //       tr.idResponsable,
 //       (select idApp from trabajadores where id = tr.idResponsable) as idResponsableApp,
-//       (select count(*) from trabajadores where idResponsable = tr.id) as llevaEquipo 
+//       (select count(*) from trabajadores where idResponsable = tr.id) as llevaEquipo
 //     from trabajadores tr where id = @param0;
 //   `;
 //   const resCoordi = await recSoluciones("soluciones", sql, id);
@@ -200,39 +198,39 @@ tr.displayFoto
 //   return false;
 // }
 
-export async function getSubordinados(uid: string): Promise<
-  {
-    id: number;
-    idApp: string;
-    nombreApellidos: string;
-    displayName: string;
-    displayfoto: string;
-    idTienda: number;
-    antiguedad: string;
-    inicioContrato: string;
-    fechaNacimiento: string;
-    dni: string;
-  }[]
-> {
-  const sql = `
-    select 
-      id, 
-      idApp, 
-      nombreApellidos, 
-      displayName,
-      displayFoto,
-      idTienda, 
-      fechaNacimiento,
-      dni,
-      CONVERT(varchar, antiguedad, 103) as antiguedad, 
-      CONVERT(varchar, inicioContrato, 103) as inicioContrato 
-    from trabajadores 
-    where idResponsable = (select id from trabajadores where idApp = @param0)
-  `;
-  const resSubordinados = await recSolucionesNew(sql, uid);
-  if (resSubordinados.recordset.length > 0) return resSubordinados.recordset;
-  return [];
-}
+// export async function getSubordinados(uid: string): Promise<
+//   {
+//     id: number;
+//     idApp: string;
+//     nombreApellidos: string;
+//     displayName: string;
+//     displayfoto: string;
+//     idTienda: number;
+//     antiguedad: string;
+//     inicioContrato: string;
+//     fechaNacimiento: string;
+//     dni: string;
+//   }[]
+// > {
+//   const sql = `
+//     select
+//       id,
+//       idApp,
+//       nombreApellidos,
+//       displayName,
+//       displayFoto,
+//       idTienda,
+//       fechaNacimiento,
+//       dni,
+//       CONVERT(varchar, antiguedad, 103) as antiguedad,
+//       CONVERT(varchar, inicioContrato, 103) as inicioContrato
+//     from trabajadores
+//     where idResponsable = (select id from trabajadores where idApp = @param0)
+//   `;
+//   const resSubordinados = await recSolucionesNew(sql, uid);
+//   if (resSubordinados.recordset.length > 0) return resSubordinados.recordset;
+//   return [];
+// }
 
 // export async function getSubordinadosById(id: number, conFecha?: moment.Moment): Promise<
 //   {
