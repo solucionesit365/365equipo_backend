@@ -35,7 +35,7 @@ export class FichajesController {
 
       return {
         ok: true,
-        data: await this.fichajesInstance.nuevaEntrada(usuario.uid),
+        data: await this.fichajesInstance.nuevaEntrada(usuario),
       };
     } catch (err) {
       console.log(err);
@@ -52,7 +52,7 @@ export class FichajesController {
 
       return {
         ok: true,
-        data: await this.fichajesInstance.nuevaSalida(usuario.uid),
+        data: await this.fichajesInstance.nuevaSalida(usuario),
       };
     } catch (err) {
       console.log(err);
