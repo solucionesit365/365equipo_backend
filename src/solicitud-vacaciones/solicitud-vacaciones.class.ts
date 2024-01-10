@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, Inject, forwardRef } from "@nestjs/common";
 import { SolicitudVacacionesBdd } from "./solicitud-vacaciones.mongodb";
 import { SolicitudVacaciones } from "./solicitud-vacaciones.interface";
 import { EmailClass } from "../email/email.class";
@@ -14,6 +14,7 @@ export class solicitudesVacacionesClass {
   constructor(
     private readonly schSolicitudVacaciones: SolicitudVacacionesBdd,
     private readonly email: EmailClass,
+    @Inject(forwardRef(() => Trabajador))
     private readonly trabajadorInstance: Trabajador,
     private readonly cuadrantesInstance: Cuadrantes,
   ) {}
@@ -30,21 +31,23 @@ export class solicitudesVacacionesClass {
   }
 
   //Mostrar todas las solicitudes de las vacaciones de los trabajadores
-  async getSolicitudes() {
-    return await this.schSolicitudVacaciones.getSolicitudes();
+  async getSolicitudes(year: number) {
+    return await this.schSolicitudVacaciones.getSolicitudes(year);
   }
 
   //Mostrar Solicitudes de las vacaciones de el trabajador por idSql
-  async getSolicitudesTrabajadorSqlId(idBeneficiario: number) {
+  async getSolicitudesTrabajadorSqlId(idBeneficiario: number, year: number) {
     return await this.schSolicitudVacaciones.getSolicitudesTrabajadorSqlId(
       idBeneficiario,
+      year,
     );
   }
 
   //Mostrar Solicitudes de las vacaciones de los trabajadores a cargo
-  async getsolicitudesSubordinados(idAppResponsable: string) {
+  async getsolicitudesSubordinados(idAppResponsable: string, year: number) {
     return await this.schSolicitudVacaciones.getsolicitudesSubordinados(
       idAppResponsable,
+      year,
     );
   }
 
@@ -129,7 +132,7 @@ export class solicitudesVacacionesClass {
       <td>${vacaciones.fechaIncorporacion}</td>
       <td>${vacaciones.fechaCreacion}</td>
       <td>${vacaciones.observaciones}</td>
-      <td>${vacaciones.dias}</td>
+      <td>${vacaciones.totalDias}</td>
       <td>${vacaciones.estado}</td>
     </tr>
   </table>
@@ -189,6 +192,22 @@ export class solicitudesVacacionesClass {
       return true;
     } else
       throw Error("No ha sido posible modificar el estado de la solicitud");
+  }
+
+  async actualizarIdAppResponsable(
+    idBeneficiario: number,
+    idAppResponsable: string,
+  ) {
+    return await this.schSolicitudVacaciones.actualizarIdAppResponsable(
+      idBeneficiario,
+      idAppResponsable,
+    );
+  }
+
+  async haySolicitudesParaBeneficiario(idBeneficiario: number) {
+    return await this.schSolicitudVacaciones.haySolicitudesParaBeneficiario(
+      idBeneficiario,
+    );
   }
 
   async guardarEnHit(vacaciones: SolicitudVacaciones) {

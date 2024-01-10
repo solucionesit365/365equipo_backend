@@ -3,14 +3,14 @@ import { FichajesDatabase } from "./fichajes.mongodb";
 import { Trabajador } from "../trabajadores/trabajadores.class";
 import {
   Subordinado,
+  TrabajadorCompleto,
   TrabajadorSql,
 } from "../trabajadores/trabajadores.interface";
 import * as moment from "moment";
 import { ObjectId, WithId } from "mongodb";
 import { FichajeDto, ParFichaje } from "./fichajes.interface";
-import { FichajeValidadoDto } from "../fichajes-validados/fichajes-validados.interface";
 import { Cuadrantes } from "../cuadrantes/cuadrantes.class";
-import { DateTime, Duration } from "luxon";
+import { DateTime } from "luxon";
 
 @Injectable()
 export class Fichajes {
@@ -20,14 +20,15 @@ export class Fichajes {
     private readonly cuadrantesInstance: Cuadrantes,
   ) {}
 
-  async nuevaEntrada(uid: string) {
+  async nuevaEntrada(trabajador: TrabajadorCompleto) {
     const hora = new Date();
-    const trabajadorCompleto =
-      await this.trabajadoresInstance.getTrabajadorByAppId(uid);
+
     const insert = await this.schFichajes.nuevaEntrada(
-      uid,
+      trabajador.uid,
       hora,
-      trabajadorCompleto.id,
+      trabajador.id,
+      trabajador.nombreApellidos,
+      trabajador.dni,
     );
 
     if (insert) return true;
@@ -35,14 +36,15 @@ export class Fichajes {
     throw Error("No se ha podido registrar la entrada");
   }
 
-  async nuevaSalida(uid: string) {
+  async nuevaSalida(trabajador: TrabajadorCompleto) {
     const hora = new Date();
-    const trabajadorCompleto =
-      await this.trabajadoresInstance.getTrabajadorByAppId(uid);
+
     const insert = await this.schFichajes.nuevaSalida(
-      uid,
+      trabajador.uid,
       hora,
-      trabajadorCompleto.id,
+      trabajador.id,
+      trabajador.nombreApellidos,
+      trabajador.dni,
     );
 
     if (insert) return true;
@@ -105,6 +107,8 @@ export class Fichajes {
           idExterno: Number(fichajesHit[i].usuari),
           comentario: fichajesHit[i].comentario,
           validado: false,
+          dni: fichajesHit[i].dni,
+          nombre: fichajesHit[i].nombre,
         });
       } else if (fichajesHit[i].accio === 2) {
         fichajesPretty.push({
@@ -116,6 +120,8 @@ export class Fichajes {
           idExterno: Number(fichajesHit[i].usuari),
           comentario: fichajesHit[i].comentario,
           validado: false,
+          dni: fichajesHit[i].dni,
+          nombre: fichajesHit[i].nombre,
         });
       }
     }
@@ -194,6 +200,8 @@ export class Fichajes {
       validado: false,
       idTrabajador: idTrabajador,
       uid: trabajador.idApp,
+      nombre: trabajador.nombreApellidos,
+      dni: trabajador.dni,
     };
   }
 
@@ -249,18 +257,6 @@ export class Fichajes {
         }),
       );
 
-      // const fichajeListFaltan = this.comprobarParesFichajes(susFichajesPlus);
-
-      // // Si hay al menos un índice, hay que agregarlo al array de fichajes.
-      // for (let j = 0; j < fichajeListFaltan.length; j += 1) {
-      //   const fichajeSistema = await this.createFichajeSalidaSistema(
-      //     DateTime.fromJSDate(fichajeListFaltan[j].hora),
-      //     susFichajesPlus[j].idTrabajador,
-      //   );
-      //   // susFichajesPlus.splice(j + 1, 0, fichajeSistema);
-      //   susFichajesPlus.push(fichajeSistema);
-      // }
-
       this.ordenarPorHora(susFichajesPlus);
       const resPares = await this.obtenerParesTrabajador(susFichajesPlus);
       paresSinValidar.push(...resPares);
@@ -303,6 +299,20 @@ export class Fichajes {
           pares.push({
             entrada: fichajesSimples[i],
             salida: dataSalidaEncontrada,
+            cuadrante: await this.cuadrantesInstance.getTurnoDia(
+              fichajesSimples[i].idTrabajador,
+              DateTime.fromJSDate(fichajesSimples[i].hora),
+            ),
+          });
+        } else {
+          const salidaHipotetica = await this.createFichajeSalidaSistema(
+            DateTime.fromJSDate(fichajesSimples[i].hora),
+            fichajesSimples[i].idTrabajador,
+          );
+
+          pares.push({
+            entrada: fichajesSimples[i],
+            salida: salidaHipotetica,
             cuadrante: await this.cuadrantesInstance.getTurnoDia(
               fichajesSimples[i].idTrabajador,
               DateTime.fromJSDate(fichajesSimples[i].hora),
@@ -365,4 +375,38 @@ export class Fichajes {
   //     fichajesTransformados.push();
   //   }
   // }
+
+  async hayFichajesPendientes(ids: number[], fecha: DateTime) {
+    console.log("Entro causa");
+
+    const lunes = fecha.startOf("week");
+    // const ids: number[] = [3608, 5740, 975];
+
+    // const subordinados = await this.trabajadoresInstance.getSubordinadosByIdsql(usuarioRequest.id);
+    const arrayCaritas: boolean[] = [true, true, true, true, true, true, true];
+
+    for (let i = 0; i < ids.length; i += 1) {
+      for (let j = 0; j < 7; j += 1) {
+        const resultado = await this.schFichajes.getPendientesTrabajadorDia(
+          ids[i],
+          lunes.plus({ days: j }),
+        );
+        if (resultado) {
+          if (!resultado.validado) {
+            arrayCaritas[j] = false;
+          }
+        }
+      }
+    }
+    return arrayCaritas;
+  }
+
+  // Solo para propósito de rectificación general
+  async getAllFichajes() {
+    return await this.schFichajes.getAllFichajes();
+  }
+  // Solo para propósito de rectificación general
+  async setAllFichajes(fichajes: WithId<FichajeDto>[]) {
+    return await this.schFichajes.setAllFichajes(fichajes);
+  }
 }

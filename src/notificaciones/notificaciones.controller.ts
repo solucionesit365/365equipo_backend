@@ -78,7 +78,8 @@ export class NotificacionesController {
         );
       return {
         ok: true,
-        count: notificacionesPendientes.length, // Devuelve el número de notificaciones pendientes
+        count: notificacionesPendientes.length,
+        notificaciones: notificacionesPendientes,
       };
     } catch (err) {
       console.log(err);
