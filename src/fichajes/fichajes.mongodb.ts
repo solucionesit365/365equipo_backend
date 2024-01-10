@@ -147,7 +147,7 @@ export class FichajesDatabase {
     const sql = `SELECT df.accio, df.usuari, df.idr, CONVERT(nvarchar, df.tmst, 126) as tmst, df.comentari as comentario, (select nom from dependentes where codi = df.usuari) as nombre, (SELECT valor FROM dependentesExtes WHERE id = df.usuari AND nom = 'DNI') as dni FROM cdpDadesFichador df WHERE day(df.tmst) = ${day} AND month(df.tmst) = ${month} AND year(df.tmst) = ${year} AND df.comentari <> '365EquipoDeTrabajo'`;
 
     const resFichajes = await this.hitInstance.recHit(sql);
-    
+
     return resFichajes.recordset;
   }
 
@@ -257,5 +257,19 @@ export class FichajesDatabase {
 
     await fichajesCollection.deleteMany({});
     await fichajesCollection.insertMany(fichajes);
+  }
+
+  async validarFichajesAntiguos(inicioSemanaAnterior: DateTime): Promise<any> {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const fichajes = db.collection<FichajeDto>("fichajes");
+
+    const response = fichajes.updateMany(
+      {
+        hora: { $lt: inicioSemanaAnterior.toJSDate() },
+        validado: false,
+      },
+      { $set: { validado: true } },
+    );
+    return response;
   }
 }
