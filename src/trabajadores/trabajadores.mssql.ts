@@ -260,135 +260,135 @@ tr.displayFoto
 //   return [];
 // }
 
-export async function getSubordinadosById(
-  id: number,
-  conFecha?: moment.Moment,
-): Promise<
-  {
-    id: number;
-    idApp: string;
-    nombreApellidos: string;
-    idTienda: number;
-    antiguedad: string;
-    inicioContrato: string;
-    horasContrato: number;
-  }[]
-> {
-  let sql = `
-    select 
-      tr.id, 
-      tr.idApp, 
-      tr.nombreApellidos, 
-      tr.idTienda, 
-      CONVERT(varchar, tr.antiguedad, 103) as antiguedad, 
-      CONVERT(varchar, tr.inicioContrato, 103) as inicioContrato,
-      (SELECT top 1 horasContrato*40/100 FROM historicoContratos WHERE dni = tr.dni
-  `;
+// export async function getSubordinadosById(
+//   id: number,
+//   conFecha?: moment.Moment,
+// ): Promise<
+//   {
+//     id: number;
+//     idApp: string;
+//     nombreApellidos: string;
+//     idTienda: number;
+//     antiguedad: string;
+//     inicioContrato: string;
+//     horasContrato: number;
+//   }[]
+// > {
+//   let sql = `
+//     select 
+//       tr.id, 
+//       tr.idApp, 
+//       tr.nombreApellidos, 
+//       tr.idTienda, 
+//       CONVERT(varchar, tr.antiguedad, 103) as antiguedad, 
+//       CONVERT(varchar, tr.inicioContrato, 103) as inicioContrato,
+//       (SELECT top 1 horasContrato*40/100 FROM historicoContratos WHERE dni = tr.dni
+//   `;
 
-  if (conFecha) {
-    sql += ` AND inicioContrato <= @param1 AND (fechaBaja >= @param1 OR fechaBaja IS NULL)`;
-  }
+//   if (conFecha) {
+//     sql += ` AND inicioContrato <= @param1 AND (fechaBaja >= @param1 OR fechaBaja IS NULL)`;
+//   }
 
-  sql += `) as horasContrato from trabajadores tr where idResponsable = @param0`;
+//   sql += `) as horasContrato from trabajadores tr where idResponsable = @param0`;
 
-  const resSubordinados = await recSoluciones(
-    "soluciones",
-    sql,
-    id,
-    conFecha ? conFecha.format("YYYY-MM-DD HH:mm:ss") : undefined,
-  );
-  if (resSubordinados.recordset.length > 0) return resSubordinados.recordset;
-  return [];
-}
+//   const resSubordinados = await recSoluciones(
+//     "soluciones",
+//     sql,
+//     id,
+//     conFecha ? conFecha.format("YYYY-MM-DD HH:mm:ss") : undefined,
+//   );
+//   if (resSubordinados.recordset.length > 0) return resSubordinados.recordset;
+//   return [];
+// }
 
-export async function getSubordinadosConTiendaPorId(
-  idResponsable: number,
-): Promise<any[]> {
-  const sql = `
-  SELECT 
-    tr.*, 
-    (select count(*) from trabajadores where idResponsable = tr.id) as llevaEquipo,
-    (select idApp from trabajadores where id = tr.idResponsable) as validador,
-    (select nombre from tiendas where id = tr.idTienda) as nombreTienda
-  FROM trabajadores tr
-  WHERE 
-    tr.idResponsable = @param0 
-    AND tr.idTienda is not null
-  `;
-  const resTrabajadores = await recSoluciones("soluciones", sql, idResponsable);
-  if (resTrabajadores.recordset.length > 0) return resTrabajadores.recordset;
-  return [];
-}
+// export async function getSubordinadosConTiendaPorId(
+//   idResponsable: number,
+// ): Promise<any[]> {
+//   const sql = `
+//   SELECT 
+//     tr.*, 
+//     (select count(*) from trabajadores where idResponsable = tr.id) as llevaEquipo,
+//     (select idApp from trabajadores where id = tr.idResponsable) as validador,
+//     (select nombre from tiendas where id = tr.idTienda) as nombreTienda
+//   FROM trabajadores tr
+//   WHERE 
+//     tr.idResponsable = @param0 
+//     AND tr.idTienda is not null
+//   `;
+//   const resTrabajadores = await recSoluciones("soluciones", sql, idResponsable);
+//   if (resTrabajadores.recordset.length > 0) return resTrabajadores.recordset;
+//   return [];
+// }
 
-export async function getSubordinadosByIdsql(id: number): Promise<
-  {
-    id: number;
-    idApp: string;
-    nombreApellidos: string;
-    displayName: string;
-    displayfoto: string;
-    idTienda: number;
-    antiguedad: string;
-    inicioContrato: string;
-  }[]
-> {
-  const sql = `
-    select 
-      id, 
-      idApp, 
-      nombreApellidos, 
-      displayName,
-      displayFoto,
-      idTienda, 
-      CONVERT(varchar, antiguedad, 103) as antiguedad, 
-      CONVERT(varchar, inicioContrato, 103) as inicioContrato 
-    from trabajadores 
-    where idResponsable = @param0
-  `;
-  const resSubordinados = await recSoluciones("soluciones", sql, id);
-  if (resSubordinados.recordset.length > 0) return resSubordinados.recordset;
-  return [];
-}
+// export async function getSubordinadosByIdsql(id: number): Promise<
+//   {
+//     id: number;
+//     idApp: string;
+//     nombreApellidos: string;
+//     displayName: string;
+//     displayfoto: string;
+//     idTienda: number;
+//     antiguedad: string;
+//     inicioContrato: string;
+//   }[]
+// > {
+//   const sql = `
+//     select 
+//       id, 
+//       idApp, 
+//       nombreApellidos, 
+//       displayName,
+//       displayFoto,
+//       idTienda, 
+//       CONVERT(varchar, antiguedad, 103) as antiguedad, 
+//       CONVERT(varchar, inicioContrato, 103) as inicioContrato 
+//     from trabajadores 
+//     where idResponsable = @param0
+//   `;
+//   const resSubordinados = await recSoluciones("soluciones", sql, id);
+//   if (resSubordinados.recordset.length > 0) return resSubordinados.recordset;
+//   return [];
+// }
 
-export async function getSubordinadosByIdNew(
-  id: number,
-  conFecha?: DateTime,
-): Promise<
-  {
-    id: number;
-    idApp: string;
-    nombreApellidos: string;
-    idTienda: number;
-    antiguedad: string;
-    inicioContrato: string;
-    horasContrato: number;
-  }[]
-> {
-  let sql = `
-    select 
-      tr.id, 
-      tr.idApp, 
-      tr.nombreApellidos, 
-      tr.idTienda, 
-      CONVERT(varchar, tr.antiguedad, 103) as antiguedad, 
-      CONVERT(varchar, tr.inicioContrato, 103) as inicioContrato,
-      (SELECT top 1 horasContrato*40/100 FROM historicoContratos WHERE dni = tr.dni
-  `;
+// export async function getSubordinadosByIdNew(
+//   id: number,
+//   conFecha?: DateTime,
+// ): Promise<
+//   {
+//     id: number;
+//     idApp: string;
+//     nombreApellidos: string;
+//     idTienda: number;
+//     antiguedad: string;
+//     inicioContrato: string;
+//     horasContrato: number;
+//   }[]
+// > {
+//   let sql = `
+//     select 
+//       tr.id, 
+//       tr.idApp, 
+//       tr.nombreApellidos, 
+//       tr.idTienda, 
+//       CONVERT(varchar, tr.antiguedad, 103) as antiguedad, 
+//       CONVERT(varchar, tr.inicioContrato, 103) as inicioContrato,
+//       (SELECT top 1 horasContrato*40/100 FROM historicoContratos WHERE dni = tr.dni
+//   `;
 
-  if (conFecha) {
-    sql += ` AND inicioContrato <= @param1 AND (fechaBaja >= @param1 OR fechaBaja IS NULL)`;
-  }
+//   if (conFecha) {
+//     sql += ` AND inicioContrato <= @param1 AND (fechaBaja >= @param1 OR fechaBaja IS NULL)`;
+//   }
 
-  sql += `) as horasContrato from trabajadores tr where idResponsable = @param0`;
+//   sql += `) as horasContrato from trabajadores tr where idResponsable = @param0`;
 
-  const resSubordinados = await recSolucionesNew(
-    sql,
-    id,
-    conFecha ? conFecha.toSQL({ includeOffset: false }) : undefined,
-  );
-  if (resSubordinados.recordset.length > 0) return resSubordinados.recordset;
-  return [];
-}
+//   const resSubordinados = await recSolucionesNew(
+//     sql,
+//     id,
+//     conFecha ? conFecha.toSQL({ includeOffset: false }) : undefined,
+//   );
+//   if (resSubordinados.recordset.length > 0) return resSubordinados.recordset;
+//   return [];
+// }
 
 export async function getHorasContrato(idSql: number, conFecha: moment.Moment) {
   const sql = `

@@ -2,6 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { recHit } from "../bbdd/mssql";
 import { Prisma } from "@prisma/client";
 import { PrismaService } from "../prisma/prisma.service";
+import { DateTime } from "luxon";
 
 @Injectable()
 export class TrabajadorDatabaseService {
@@ -292,7 +293,84 @@ export class TrabajadorDatabaseService {
     return subordinados;
   }
 
-  async getSubordinadosById(id: number) {
+  async getSubordinadosById(id: number, conFecha?: DateTime) {
+    if (!conFecha) {
+      conFecha = DateTime.now();
+    }
+
+    const subordinados = await this.prisma.trabajador.findMany({
+      where: {
+        idResponsable: id,
+        contratos: {
+          some: {
+            AND: [
+              {
+                fechaAlta: {
+                  lte: conFecha.toJSDate(),
+                },
+              },
+              {
+                OR: [
+                  {
+                    fechaBaja: {
+                      gte: conFecha.toJSDate(),
+                    },
+                  },
+                  {
+                    fechaBaja: null,
+                  },
+                ],
+              },
+            ],
+          },
+        },
+      },
+    });
+
+    return subordinados;
+  }
+
+  async getSubordinadosConTiendaPorId(idResponsable: number) {
+    // Obtén los trabajadores subordinados
+    const trabajadores = await this.prisma.trabajador.findMany({
+      where: {
+        idResponsable: idResponsable,
+        idTienda: {
+          not: null,
+        },
+      },
+      include: {
+        tienda: true,
+        responsable: {
+          select: {
+            idApp: true,
+          },
+        },
+      },
+    });
+
+    // Calcula llevaEquipo para cada trabajador
+    const trabajadoresConLlevaEquipo = await Promise.all(
+      trabajadores.map(async (trabajador) => {
+        const conteo = await this.prisma.trabajador.count({
+          where: {
+            idResponsable: trabajador.id,
+          },
+        });
+
+        return {
+          ...trabajador,
+          llevaEquipo: conteo,
+          nombreTienda: trabajador.tienda?.nombre,
+          validador: trabajador.responsable?.idApp,
+        };
+      }),
+    );
+
+    return trabajadoresConLlevaEquipo;
+  }
+
+  async getSubordinadosByIdsql(id: number) {
     const subordinados = await this.prisma.trabajador.findMany({
       where: {
         idResponsable: id,
@@ -300,5 +378,36 @@ export class TrabajadorDatabaseService {
     });
 
     return subordinados;
+  }
+
+  async getSubordinadosByIdNew(id: number, conFecha?: DateTime) {
+    await this.getSubordinadosById(id, conFecha);
+  }
+
+  async getHorasContrato(idSql: number, conFecha: DateTime) {
+    const horasContrato = await this.prisma.contrato.findFirst({
+      where: {
+        id: idSql,
+        fechaAlta: {
+          lte: conFecha.toJSDate(),
+        },
+        fechaBaja: {
+          gte: conFecha.toJSDate(),
+        }
+        OR: [ // INCOMPLETO
+          {
+            fechaBaja: {
+              gte: conFecha.toJSDate(),
+            },
+          },
+          {
+            fechaBaja: null,
+          },
+        ],
+      },
+      select: {
+        horasContrato: true,
+      },
+    });
   }
 }
