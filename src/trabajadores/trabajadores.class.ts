@@ -39,7 +39,7 @@ export class Trabajador {
   async getTrabajadorBySqlId(id: number) {
     const resUser = await schTrabajadores.getTrabajadorBySqlId(id);
     if (resUser) return resUser;
-    throw Error("No se ha podido obtener la información del usuario");
+    throw Error("No se ha podido obtener la información del usuario. id: " + id);
   }
 
   async getTrabajadores(todos = false) {

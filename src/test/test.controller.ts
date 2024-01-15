@@ -1,10 +1,11 @@
-import { Controller, Get } from "@nestjs/common";
+import { Controller, Get, Post } from "@nestjs/common";
 import axios from "axios";
 import { EmailClass } from "../email/email.class";
 import { FichajesValidados } from "../fichajes-validados/fichajes-validados.class";
 import { FichajeValidadoDto } from "../fichajes-validados/fichajes-validados.dto";
 import { DateTime } from "luxon";
 import { Trabajador } from "../trabajadores/trabajadores.class";
+import { Fichajes } from "../fichajes/fichajes.class";
 
 @Controller("test")
 export class TestController {
@@ -12,6 +13,7 @@ export class TestController {
     private readonly emailInstance: EmailClass,
     private readonly fichajesValidadosInstance: FichajesValidados,
     private readonly trabajadoresInstance: Trabajador,
+    private readonly fichajesInstance: Fichajes,
   ) {}
   @Get()
   test() {
@@ -146,4 +148,37 @@ export class TestController {
       return err.message;
     }
   }
+
+  // @Post("rectificarFichajes")
+  // async reactificarFichajes() {
+  //   const fichajes = await this.fichajesInstance.getAllFichajes();
+
+  //   // Recorrer y añadir dos campos nuevos a la interfaz de fichajes, desde getTrabajadorBySqlId (this.trabajadoresInstance.getTrabajadorByAppId(fichajes.uid))
+
+  //   const cache = [];
+
+  //   for (let i = 0; i < fichajes.length; i += 1) {
+  //     const index = cache.findIndex(
+  //       (cachedItem) => cachedItem.idExterno === fichajes[i].idExterno,
+  //     );
+  //     try {
+  //       if (index === -1) {
+  //         const trabajadorAux =
+  //           await this.trabajadoresInstance.getTrabajadorBySqlId(
+  //             fichajes[i].idExterno,
+  //           );
+  //         fichajes[i].nombre = trabajadorAux.nombreApellidos;
+  //         fichajes[i].dni = trabajadorAux.dni;
+  //         cache.push(fichajes[i]);
+  //       } else {
+  //         fichajes[i].nombre = cache[index].nombre;
+  //         fichajes[i].dni = cache[index].dni;
+  //       }
+  //     } catch (err) {
+  //       console.log(err.message);
+  //     }
+  //   }
+  //   await this.fichajesInstance.setAllFichajes(fichajes);
+  //   return "OK";
+  // }
 }

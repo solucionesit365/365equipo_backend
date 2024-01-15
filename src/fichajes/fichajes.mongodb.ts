@@ -13,7 +13,13 @@ export class FichajesDatabase {
     private readonly hitInstance: FacTenaMssql,
   ) {}
 
-  async nuevaEntrada(uid: string, hora: Date, idExterno: number) {
+  async nuevaEntrada(
+    uid: string,
+    hora: Date,
+    idExterno: number,
+    nombre: string,
+    dni: string,
+  ) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const fichajesCollection = db.collection<FichajeDto>("fichajes");
     const resInsert = await fichajesCollection.insertOne({
@@ -23,13 +29,21 @@ export class FichajesDatabase {
       uid,
       idExterno,
       validado: false,
+      nombre,
+      dni,
     });
 
     if (resInsert.acknowledged) return resInsert.insertedId;
     return null;
   }
 
-  async nuevaSalida(uid: string, hora: Date, idExterno: number) {
+  async nuevaSalida(
+    uid: string,
+    hora: Date,
+    idExterno: number,
+    nombre: string,
+    dni: string,
+  ) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const fichajesCollection = db.collection<FichajeDto>("fichajes");
     const resInsert = await fichajesCollection.insertOne({
@@ -39,6 +53,8 @@ export class FichajesDatabase {
       uid,
       idExterno,
       validado: false,
+      nombre,
+      dni,
     });
 
     if (resInsert.acknowledged) return resInsert.insertedId;
@@ -128,7 +144,7 @@ export class FichajesDatabase {
     const month = fechaActual.getMonth() + 1;
     const year = fechaActual.getFullYear();
 
-    const sql = `SELECT accio, usuari, idr, CONVERT(nvarchar, tmst, 126) as tmst, comentari as comentario FROM cdpDadesFichador WHERE day(tmst) = ${day} AND month(tmst) = ${month} AND year(tmst) = ${year} AND comentari <> '365EquipoDeTrabajo'`;
+    const sql = `SELECT df.accio, df.usuari, df.idr, CONVERT(nvarchar, df.tmst, 126) as tmst, df.comentari as comentario, (select nom from dependentes where codi = df.usuari) as nombre, (SELECT valor FROM dependentesExtes WHERE id = df.usuari AND nom = 'DNI') as dni FROM cdpDadesFichador df WHERE day(df.tmst) = ${day} AND month(df.tmst) = ${month} AND year(df.tmst) = ${year} AND df.comentari <> '365EquipoDeTrabajo'`;
 
     const resFichajes = await this.hitInstance.recHit(sql);
 
@@ -217,5 +233,43 @@ export class FichajesDatabase {
         { hora: { $lte: fecha.endOf("day").toJSDate() } },
       ],
     });
+  }
+
+  // Solo para propósitos de rectificación general
+  async getAllFichajes() {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const fichajes = db.collection<FichajeDto>("fichajes");
+
+    // Solo el último mes (campo "hora")
+    return await fichajes
+      .find({
+        hora: {
+          $gte: DateTime.now().minus({ months: 3 }).toJSDate(),
+        },
+      })
+      .toArray();
+  }
+
+  // Solo para propósitos de rectificación general. (Borrar primero todo y luego insertar)
+  async setAllFichajes(fichajes: FichajeDto[]) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const fichajesCollection = db.collection<FichajeDto>("fichajes");
+
+    await fichajesCollection.deleteMany({});
+    await fichajesCollection.insertMany(fichajes);
+  }
+
+  async validarFichajesAntiguos(inicioSemanaAnterior: DateTime): Promise<any> {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const fichajes = db.collection<FichajeDto>("fichajes");
+
+    const response = fichajes.updateMany(
+      {
+        hora: { $lt: inicioSemanaAnterior.toJSDate() },
+        validado: false,
+      },
+      { $set: { validado: true } },
+    );
+    return response;
   }
 }
