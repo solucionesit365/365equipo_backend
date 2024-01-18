@@ -162,6 +162,12 @@ export class AuditoriaDatabase {
           tituloAuditoria: auditoria.tituloAuditoria,
           caducidad: auditoria.caducidad,
           descripcion: auditoria.descripcion,
+          tienda: auditoria.tienda,
+          categoria: auditoria.categoria,
+          preguntas: auditoria.preguntas,
+          preguntasDependientaA: auditoria.preguntasDependientaA,
+          preguntasDependientaB_C: auditoria.preguntasDependientaB_C,
+          preguntasResponsable: auditoria.preguntasResponsable,
         },
       },
     );
