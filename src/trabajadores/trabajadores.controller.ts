@@ -47,9 +47,6 @@ export class TrabajadoresController {
     @Query() { uid },
   ) {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
-
       const resUser = await this.trabajadorInstance.getTrabajadorByAppId(uid);
       // console.log(resUser);
       return { ok: true, data: resUser };
@@ -60,14 +57,12 @@ export class TrabajadoresController {
   }
 
   @Get("getTrabajadorBySqlId")
+  @UseGuards(AuthGuard)
   async getTrabajadorBySqlId(
     @Headers("authorization") authHeader: string,
     @Query() { id },
   ) {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
-
       const resUser = await this.trabajadorInstance.getTrabajadorBySqlId(id);
 
       return { ok: true, data: resUser };
@@ -78,14 +73,12 @@ export class TrabajadoresController {
   }
 
   @Get("getTrabajadoresByTienda")
+  @UseGuards(AuthGuard)
   async getTrabajadoresByTienda(
     @Headers("authorization") authHeader: string,
     @Query() { idTienda },
   ) {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
-
       const resUser = await this.trabajadorInstance.getTrabajadoresByTienda(
         Number(idTienda),
       );
@@ -131,8 +124,8 @@ export class TrabajadoresController {
     }
   }
 
-  @UseGuards(AuthGuard)
   @Get("getSubordinados")
+  @UseGuards(AuthGuard)
   async getSubordinados(
     @Headers("authorization") authHeader: string,
     @Query() { uid },
@@ -303,14 +296,12 @@ export class TrabajadoresController {
   }
 
   @Get("getSubordinadosByIdsql")
+  @UseGuards(AuthGuard)
   async getSubordinadosByIdsql(
     @Headers("authorization") authHeader: string,
     @Query() { idSql },
   ) {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
-
       if (!idSql) throw Error("Faltan datos");
 
       const resUser = await this.trabajadorInstance.getSubordinadosByIdsql(
