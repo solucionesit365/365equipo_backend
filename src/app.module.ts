@@ -75,6 +75,9 @@ import { PactadoVsRealService } from "./pactado-vs-real/pactado-vs-real.service"
 import { MbctokenService } from "./bussinesCentral/services/mbctoken/mbctoken.service";
 import { EmployeesClass } from "./bussinesCentral/employees/employees.class";
 import { EmployeesController } from "./bussinesCentral/employees/employees.controller";
+import { Cultura365Controller } from "./cultura365/cultura365.controller";
+import { cultura365Class } from "./cultura365/cultura365.class";
+import { cultura365Mongo } from "./cultura365/cultura365.mongodb";
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -108,6 +111,7 @@ import { EmployeesController } from "./bussinesCentral/employees/employees.contr
     MantenimientoController,
     PactadoVsRealController,
     EmployeesController,
+    Cultura365Controller,
   ],
   providers: [
     AppService,
@@ -158,6 +162,8 @@ import { EmployeesController } from "./bussinesCentral/employees/employees.contr
     // PrismaService,
     MbctokenService,
     EmployeesClass,
+    cultura365Class,
+    cultura365Mongo,
   ],
 })
 export class AppModule {}
