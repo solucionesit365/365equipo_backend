@@ -69,7 +69,12 @@ import { EvaluacionesController } from "./evaluaciones/evaluaciones.controller";
 import { EvaluacionesDatabase } from "./evaluaciones/evaluaciones.mongodb";
 import { EvaluacionesClass } from "./evaluaciones/evaluaciones.class";
 import { MantenimientoController } from "./mantenimiento/mantenimiento.controller";
-
+import { PactadoVsRealController } from "./pactado-vs-real/pactado-vs-real.controller";
+import { PactadoVsRealService } from "./pactado-vs-real/pactado-vs-real.service";
+// import { PrismaService } from './prisma/prisma.service';
+import { MbctokenService } from "./bussinesCentral/services/mbctoken/mbctoken.service";
+import { EmployeesClass } from "./bussinesCentral/employees/employees.class";
+import { EmployeesController } from "./bussinesCentral/employees/employees.controller";
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -101,6 +106,8 @@ import { MantenimientoController } from "./mantenimiento/mantenimiento.controlle
     SolicitudVacacionesController,
     EvaluacionesController,
     MantenimientoController,
+    PactadoVsRealController,
+    EmployeesController,
   ],
   providers: [
     AppService,
@@ -147,6 +154,10 @@ import { MantenimientoController } from "./mantenimiento/mantenimiento.controlle
     SolicitudVacacionesBdd,
     EvaluacionesDatabase,
     EvaluacionesClass,
+    PactadoVsRealService,
+    // PrismaService,
+    MbctokenService,
+    EmployeesClass,
   ],
 })
 export class AppModule {}

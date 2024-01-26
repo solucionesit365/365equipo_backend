@@ -4,7 +4,6 @@ import {
   CalendarioFestivosInterface,
   eventoNavideño,
 } from "./calendario-festivos.interface";
-import * as moment from "moment";
 import { ObjectId } from "mongodb";
 
 @Injectable()
@@ -28,7 +27,6 @@ export class CalendarioFestivosDatabase {
     const calendarioCollection =
       db.collection<CalendarioFestivosInterface>("calendarioFestivos");
 
-    // Filtrar para obtener solo documentos que NO contienen 'idUsuario'
     const respCalendario = await calendarioCollection.find({}).toArray();
 
     return respCalendario;
@@ -39,12 +37,52 @@ export class CalendarioFestivosDatabase {
     const calendarioCollection =
       db.collection<CalendarioFestivosInterface>("calendarioFestivos");
 
-    if (tienda) {
+    if (tienda !== null && tienda !== undefined) {
       return await calendarioCollection
         .find({ tienda: { $in: [tienda, -1] } })
         .toArray();
+    } else {
+      return await calendarioCollection
+        .find({ tienda: { $in: [0, -1] } })
+        .toArray();
     }
-    return await calendarioCollection.find({}).toArray();
+  }
+
+  async updateFestivo(festivo: CalendarioFestivosInterface) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const calendarioCollection =
+      db.collection<CalendarioFestivosInterface>("calendarioFestivos");
+
+    const resUpdate = await calendarioCollection.updateOne(
+      {
+        _id: new ObjectId(festivo._id),
+      },
+      {
+        $set: {
+          titulo: festivo.titulo,
+          descripcion: festivo.descripcion,
+          fechaInicio: festivo.fechaInicio,
+          fechaFinal: festivo.fechaFinal,
+          categoria: festivo.categoria,
+          color: festivo.color,
+          tienda: festivo.tienda,
+        },
+      },
+    );
+    if (resUpdate.acknowledged && resUpdate.matchedCount > 0) return true;
+    throw Error("No se ha podido modificar el evento");
+  }
+
+  async deleteFestivo(idFestivo: string) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const ausenciasCollection =
+      db.collection<CalendarioFestivosInterface>("calendarioFestivos");
+
+    const resDelete = await ausenciasCollection.deleteOne({
+      _id: new ObjectId(idFestivo),
+    });
+
+    return resDelete.acknowledged && resDelete.deletedCount > 0;
   }
 
   //Notifcacion navideña

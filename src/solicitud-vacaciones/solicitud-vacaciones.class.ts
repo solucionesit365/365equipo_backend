@@ -8,6 +8,7 @@ import { recHit } from "../bbdd/mssql";
 import * as moment from "moment";
 import { DateTime } from "luxon";
 import { ObjectId } from "mongodb";
+import { Vacaciones } from "src/vacaciones/vacaciones.class";
 
 @Injectable()
 export class solicitudesVacacionesClass {
@@ -21,31 +22,45 @@ export class solicitudesVacacionesClass {
 
   //Nueva solicitud de vacaciones
   async nuevaSolicitudVacaciones(solicitudVacaciones: SolicitudVacaciones) {
-    const insertSolicitudVacaciones =
-      await this.schSolicitudVacaciones.nuevaSolicitudVacaciones(
-        solicitudVacaciones,
-      );
-    if (insertSolicitudVacaciones) return true;
+    try {
+      const horasContrato =
+        await this.trabajadorInstance.getHorasContratoByIdNew(
+          solicitudVacaciones.idBeneficiario,
+          DateTime.now(),
+        );
 
-    throw Error("No se ha podido insertar la nueva solicitud de vacaciones");
+      solicitudVacaciones.horasContrato = horasContrato;
+
+      const insertSolicitudVacaciones =
+        await this.schSolicitudVacaciones.nuevaSolicitudVacaciones(
+          solicitudVacaciones,
+        );
+      if (insertSolicitudVacaciones) return true;
+
+      throw Error("No se ha podido insertar la nueva solicitud de vacaciones");
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   //Mostrar todas las solicitudes de las vacaciones de los trabajadores
-  async getSolicitudes() {
-    return await this.schSolicitudVacaciones.getSolicitudes();
+  async getSolicitudes(year: number) {
+    return await this.schSolicitudVacaciones.getSolicitudes(year);
   }
 
   //Mostrar Solicitudes de las vacaciones de el trabajador por idSql
-  async getSolicitudesTrabajadorSqlId(idBeneficiario: number) {
+  async getSolicitudesTrabajadorSqlId(idBeneficiario: number, year: number) {
     return await this.schSolicitudVacaciones.getSolicitudesTrabajadorSqlId(
       idBeneficiario,
+      year,
     );
   }
 
   //Mostrar Solicitudes de las vacaciones de los trabajadores a cargo
-  async getsolicitudesSubordinados(idAppResponsable: string) {
+  async getsolicitudesSubordinados(idAppResponsable: string, year: number) {
     return await this.schSolicitudVacaciones.getsolicitudesSubordinados(
       idAppResponsable,
+      year,
     );
   }
 

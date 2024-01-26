@@ -1,4 +1,4 @@
-import { Injectable, Inject, forwardRef  } from "@nestjs/common";
+import { Injectable, Inject, forwardRef } from "@nestjs/common";
 import * as moment from "moment";
 import { CuadrantesDatabase } from "./cuadrantes.mongodb";
 import { ObjectId, WithId } from "mongodb";
@@ -60,6 +60,11 @@ export class Cuadrantes {
   async borrarTurno(idTurno: string) {
     // FALTA AGREGAR UN TRIGGER PARA MODIFICARLO EN HIT TAMBIÉN !!!
     return await this.schCuadrantes.borrarTurno(idTurno);
+  }
+
+  async borrarTurnoByPlan(idPlan: string) {
+    // FALTA AGREGAR UN TRIGGER PARA MODIFICARLO EN HIT TAMBIÉN !!!
+    return await this.schCuadrantes.borrarTurnoByPlan(idPlan);
   }
 
   private async addEmptyDays(
@@ -126,13 +131,15 @@ export class Cuadrantes {
       fecha,
     );
 
-    return horasContrato - (horasCuadranteTotal + horasMasMenos);
+    return horasContrato + horasMasMenos;
   }
 
   // Cuadrantes 2.0
   async getBolsaInicial(idTrabajador: number, lunesActual: DateTime) {
+    console.log("entra aqui");
+
     const lunesAnterior = lunesActual.minus({ days: 7 }).startOf("week");
-    const domingoAnterior = lunesAnterior.minus({ days: 1 });
+    const domingoAnterior = lunesActual.minus({ days: 1 }).endOf("week");
 
     const fichajesValidados =
       await this.fichajesValidadosInstance.getParaCuadranteNew(
@@ -140,7 +147,6 @@ export class Cuadrantes {
         domingoAnterior,
         idTrabajador,
       );
-
     let horasCuadranteTotal = 0;
     let horasMasMenos = 0;
 
@@ -149,8 +155,10 @@ export class Cuadrantes {
         fichajesValidados[i].horasExtra +
         fichajesValidados[i].horasAprendiz +
         fichajesValidados[i].horasCoordinacion;
-      horasCuadranteTotal += fichajesValidados[i].horasCuadrante;
+      horasCuadranteTotal = horasMasMenos;
     }
+
+    console.log(horasMasMenos);
 
     return {
       horasCuadranteTotal,
@@ -692,13 +700,13 @@ export class Cuadrantes {
     const fechaInicio = fecha.startOf("day");
     const fechaFinal = fecha.endOf("day");
 
-    const resTurno = await this.schCuadrantes.getCuadrantesIndividual(
+    const resTurno = await this.schCuadrantes.getTurnoDia(
       idTrabajador,
       fechaInicio,
       fechaFinal,
     );
 
-    if (resTurno.length > 0) return resTurno[0];
+    if (resTurno) return resTurno;
     return null;
   }
 }

@@ -33,6 +33,7 @@ export async function recSolucionesClassic(
     password: process.env.MSSQL_PASS_SOLUCIONES,
     server: process.env.MSSQL_HOST_SOLUCIONES,
     database: database,
+    connectionTimeout: 50000,
     options: {
       encrypt: false,
       trustServerCertificate: true,
@@ -57,6 +58,7 @@ export async function recSolucionesClassicNew(consultaSQL: string) {
     user: process.env.MSSQL_USER_SOLUCIONES,
     password: process.env.MSSQL_PASS_SOLUCIONES,
     server: process.env.MSSQL_HOST_SOLUCIONES,
+    connectionTimeout: 50000,
     database: process.env.ENTORNO === "test" ? "test_soluciones" : "soluciones",
     options: {
       encrypt: false,
@@ -86,6 +88,7 @@ export async function recSoluciones(
     user: process.env.MSSQL_USER_SOLUCIONES,
     password: process.env.MSSQL_PASS_SOLUCIONES,
     server: process.env.MSSQL_HOST_SOLUCIONES,
+    connectionTimeout: 50000,
     database: database,
     options: {
       encrypt: false,
@@ -129,6 +132,7 @@ export async function recSolucionesNew(query: string, ...args: any[]) {
     user: process.env.MSSQL_USER_SOLUCIONES,
     password: process.env.MSSQL_PASS_SOLUCIONES,
     server: process.env.MSSQL_HOST_SOLUCIONES,
+    connectionTimeout: 50000,
     database: process.env.ENTORNO === "test" ? "test_soluciones" : "soluciones",
     options: {
       encrypt: false,

@@ -7,6 +7,7 @@ import { TrabajadorCompleto } from "./trabajadores.interface";
 import { PermisosClass } from "../permisos/permisos.class";
 import { DateTime } from "luxon";
 import { solicitudesVacacionesClass } from "../solicitud-vacaciones/solicitud-vacaciones.class";
+// import { PrismaService } from "../prisma/prisma.service";
 
 @Injectable()
 export class Trabajador {
@@ -18,7 +19,8 @@ export class Trabajador {
     private readonly emailInstance: EmailClass,
     @Inject(forwardRef(() => solicitudesVacacionesClass))
     private readonly solicitudesVacaciones: solicitudesVacacionesClass,
-  ) {}
+  ) // private readonly prisma: PrismaService,
+  {}
 
   async getTrabajadorByAppId(uid: string) {
     const resUser = await schTrabajadores.getTrabajadorByAppId(uid);
@@ -37,7 +39,7 @@ export class Trabajador {
   async getTrabajadorBySqlId(id: number) {
     const resUser = await schTrabajadores.getTrabajadorBySqlId(id);
     if (resUser) return resUser;
-    throw Error("No se ha podido obtener la información del usuario");
+    throw Error("No se ha podido obtener la información del usuario. id: " + id);
   }
 
   async getTrabajadores(todos = false) {
@@ -345,4 +347,12 @@ export class Trabajador {
   async uploadFoto(displayFoto: string, uid: string) {
     return await schTrabajadores.uploadFoto(displayFoto, uid);
   }
+
+  // async testInsert() {
+  //   this.prisma.trabajador.create({
+  //     data: {
+
+  //     }
+  //   })
+  // }
 }

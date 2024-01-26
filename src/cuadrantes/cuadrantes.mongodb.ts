@@ -106,7 +106,29 @@ export class CuadrantesDatabase {
     return resCuadrantes;
   }
 
-  async borrarTurno(idTurno) {
+  // Cuadrantes 2.0
+  async getTurnoDia(
+    idTrabajador: number,
+    fechaInicioBusqueda: DateTime,
+    fechaFinalBusqueda: DateTime,
+  ) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes2");
+
+    const resCuadrantes = await cuadrantesCollection.findOne({
+      idTrabajador,
+      inicio: {
+        $gte: fechaInicioBusqueda.toJSDate(),
+      },
+      final: {
+        $lt: fechaFinalBusqueda.toJSDate(),
+      },
+    });
+
+    return resCuadrantes;
+  }
+
+  async borrarTurno(idTurno: string) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes2");
 
@@ -114,6 +136,30 @@ export class CuadrantesDatabase {
       _id: new ObjectId(idTurno),
     });
 
+    return resCuadrantes.acknowledged;
+  }
+  async borrarTurnoByPlan(idPlan: string) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes2");
+
+    // Verificar si el turno tiene una ausencia asociada
+    const turnoConAusencia = await cuadrantesCollection.findOne({
+      idPlan: idPlan,
+      "ausencia.tipo": { $exists: true }, // Verifica si existe el campo ausencia.tipo
+    });
+
+    if (turnoConAusencia) {
+      console.log(
+        `No se puede borrar el turno ya que tiene una ausencia asociada con el idPlan: ${idPlan}`,
+      );
+      return false;
+    }
+
+    // Si no tiene ausencia, proceder a borrar
+    const resCuadrantes = await cuadrantesCollection.deleteOne({
+      idPlan: idPlan,
+    });
+    console.log(resCuadrantes);
     return resCuadrantes.acknowledged;
   }
 

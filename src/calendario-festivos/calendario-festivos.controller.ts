@@ -80,6 +80,54 @@ export class CalendarioFestivosController {
       console.log(error);
     }
   }
+
+  @Post("updateFestivo")
+  async updateFestivo(
+    @Body() festivo: CalendarioFestivosInterface,
+    @Headers("authorization") authHeader: string,
+  ) {
+    try {
+      const token = this.tokenService.extract(authHeader);
+      await this.authInstance.verifyToken(token);
+      const respCalendario =
+        await this.calendarioFestivosInstance.updateFestivo(festivo);
+
+      if (respCalendario)
+        return {
+          ok: true,
+          data: respCalendario,
+        };
+
+      throw Error("No se ha podido modificar el evento");
+    } catch (err) {
+      console.log(err);
+      return { ok: false, message: err.message };
+    }
+  }
+
+  @Post("deleteFestivo")
+  async deleteFestivo(
+    @Headers("authorization") authHeader: string,
+    @Body() { idFestivo },
+  ) {
+    try {
+      const token = this.tokenService.extract(authHeader);
+      await this.authInstance.verifyToken(token);
+      const respCalendario =
+        await this.calendarioFestivosInstance.deleteFestivo(idFestivo);
+      if (respCalendario)
+        return {
+          ok: true,
+          data: respCalendario,
+        };
+
+      throw Error("No se ha podido borrar el festivo");
+    } catch (err) {
+      console.log(err);
+      return { ok: false, message: err.message };
+    }
+  }
+
   //Notificacion navideña
   @Post("guardarRespuesta")
   @UseGuards(AuthGuard)
