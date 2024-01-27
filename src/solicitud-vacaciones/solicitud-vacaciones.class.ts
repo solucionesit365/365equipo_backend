@@ -8,6 +8,7 @@ import { recHit } from "../bbdd/mssql";
 import * as moment from "moment";
 import { DateTime } from "luxon";
 import { ObjectId } from "mongodb";
+import { Vacaciones } from "src/vacaciones/vacaciones.class";
 
 @Injectable()
 export class solicitudesVacacionesClass {
@@ -21,13 +22,25 @@ export class solicitudesVacacionesClass {
 
   //Nueva solicitud de vacaciones
   async nuevaSolicitudVacaciones(solicitudVacaciones: SolicitudVacaciones) {
-    const insertSolicitudVacaciones =
-      await this.schSolicitudVacaciones.nuevaSolicitudVacaciones(
-        solicitudVacaciones,
-      );
-    if (insertSolicitudVacaciones) return true;
+    try {
+      const horasContrato =
+        await this.trabajadorInstance.getHorasContratoByIdNew(
+          solicitudVacaciones.idBeneficiario,
+          DateTime.now(),
+        );
 
-    throw Error("No se ha podido insertar la nueva solicitud de vacaciones");
+      solicitudVacaciones.horasContrato = horasContrato;
+
+      const insertSolicitudVacaciones =
+        await this.schSolicitudVacaciones.nuevaSolicitudVacaciones(
+          solicitudVacaciones,
+        );
+      if (insertSolicitudVacaciones) return true;
+
+      throw Error("No se ha podido insertar la nueva solicitud de vacaciones");
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   //Mostrar todas las solicitudes de las vacaciones de los trabajadores
