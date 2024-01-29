@@ -10,16 +10,10 @@ import {
 import { AuthGuard } from "../auth/auth.guard";
 import { cultura365Class } from "./cultura365.class";
 import { cultura365Interface } from "./cultura365.interface";
-import { Trabajador } from "../trabajadores/trabajadores.class";
-import { Notificaciones } from "src/notificaciones/notificaciones.class";
 
 @Controller("cultura365")
 export class Cultura365Controller {
-  constructor(
-    private readonly culturaInstance: cultura365Class,
-    private readonly trabajadores: Trabajador,
-    private readonly notificaciones: Notificaciones,
-  ) {}
+  constructor(private readonly culturaInstance: cultura365Class) {}
 
   @Post("nuevoVideo")
   @UseGuards(AuthGuard)
@@ -39,31 +33,29 @@ export class Cultura365Controller {
     }
   }
 
-  private notificacionesEnviadas = false;
-
   @Get("getVideos")
   @UseGuards(AuthGuard)
   async getVideos(@Headers("authorization") authHeader: string) {
     try {
       const respvideo = await this.culturaInstance.getVideos();
-      // Verifica si las notificaciones ya se enviaron
-      if (!this.notificacionesEnviadas) {
-        const arrayTrabajador = await this.trabajadores.getTrabajadores();
-        arrayTrabajador.forEach((trabajador) => {
-          if (trabajador.idApp != null) {
-            this.notificaciones.newInAppNotification({
-              uid: trabajador.idApp,
-              titulo: "Nuevo Apartado",
-              mensaje: "¡Estrenamos nuevo apartado de Cultura en la APP!",
-              leido: false,
-              creador: "SISTEMA",
-              url: "/videoCultura",
-            });
-          }
-        });
-        // Marca las notificaciones como enviadas
-        this.notificacionesEnviadas = true;
-      }
+      // // Verifica si las notificaciones ya se enviaron
+      // if (!this.notificacionesEnviadas) {
+      //   const arrayTrabajador = await this.trabajadores.getTrabajadores();
+      //   arrayTrabajador.forEach((trabajador) => {
+      //     if (trabajador.idApp != null) {
+      //       this.notificaciones.newInAppNotification({
+      //         uid: trabajador.idApp,
+      //         titulo: "Nuevo Apartado",
+      //         mensaje: "¡Estrenamos nuevo apartado de Cultura en la APP!",
+      //         leido: false,
+      //         creador: "SISTEMA",
+      //         url: "/videoCultura",
+      //       });
+      //     }
+      //   });
+      //   // Marca las notificaciones como enviadas
+      //   this.notificacionesEnviadas = true;
+      // }
 
       if (respvideo) return { ok: true, data: respvideo };
       else throw Error("No se ha encontrado ningun video");
