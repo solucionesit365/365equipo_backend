@@ -71,13 +71,9 @@ export class Cultura365Controller {
     @Headers("authorization") authHeader: string,
   ) {
     try {
-      console.log(videoId);
-
       const respvideo = await this.culturaInstance.incrementarContadorViews(
         videoId,
       );
-
-      console.log(respvideo);
 
       return { mensaje: "Contador incrementado con éxito", respvideo };
     } catch (error) {
@@ -91,8 +87,6 @@ export class Cultura365Controller {
   async views(@Headers("authorization") authHeader: string) {
     try {
       const respvideo = await this.culturaInstance.views();
-
-      console.log(respvideo);
 
       return { mensaje: "se muestran los views", respvideo };
     } catch (error) {
