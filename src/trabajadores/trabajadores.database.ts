@@ -3,6 +3,7 @@ import { recHit } from "../bbdd/mssql";
 import { Prisma } from "@prisma/client";
 import { PrismaService } from "../prisma/prisma.service";
 import { DateTime } from "luxon";
+import { TrabajadorCompleto } from "./trabajadores.interface";
 
 @Injectable()
 export class TrabajadorDatabaseService {
@@ -384,30 +385,333 @@ export class TrabajadorDatabaseService {
     await this.getSubordinadosById(id, conFecha);
   }
 
+  // Recuerda: la zona horario es clave (en el servidor y el motor de MySQL).
   async getHorasContrato(idSql: number, conFecha: DateTime) {
-    const horasContrato = await this.prisma.contrato.findFirst({
+    const fecha = conFecha.endOf("day");
+
+    const response = await this.prisma.contrato.findFirst({
       where: {
-        id: idSql,
-        fechaAlta: {
-          lte: conFecha.toJSDate(),
+        trabajador: {
+          id: idSql,
         },
-        fechaBaja: {
-          gte: conFecha.toJSDate(),
-        }
-        OR: [ // INCOMPLETO
+        fechaAlta: {
+          lte: fecha.toJSDate(),
+        },
+        OR: [
+          { fechaBaja: null },
           {
             fechaBaja: {
-              gte: conFecha.toJSDate(),
+              gte: fecha.toJSDate(),
             },
-          },
-          {
-            fechaBaja: null,
           },
         ],
       },
-      select: {
-        horasContrato: true,
+    });
+
+    if (response) return (Number(response.horasContrato) * 40) / 100;
+
+    return null;
+  }
+
+  async getHorasContratoNew(idSql: number, conFecha: DateTime) {
+    await this.getHorasContrato(idSql, conFecha);
+  }
+
+  isValidDate(value) {
+    return DateTime.fromFormat(value, "DD/MM/YYYY").isValid;
+  }
+
+  isValidUsuario(usuario) {
+    return (
+      this.isValidDate(usuario.inicioContrato) &&
+      this.isValidDate(usuario.antiguedad) &&
+      usuario.dni &&
+      usuario.dni !== "" &&
+      usuario.telefonos &&
+      usuario.telefonos !== ""
+    );
+  }
+
+  async setIdApp(idSql: number, uid: string) {
+    const trabajador = await this.prisma.trabajador.update({
+      where: {
+        id: idSql,
+      },
+      data: {
+        idApp: uid,
       },
     });
+  }
+
+  async actualizarUsuarios(usuariosNuevos: any[], modificarEnApp: any[]) {
+    const usuariosNoActualizadosNuevos = [];
+    const usuariosNoActualizadosApp = [];
+
+    // INSERT
+    const usuariosNuevosValidos = usuariosNuevos.filter((usuario) => {
+      const isValid = this.isValidUsuario(usuario) && !usuario.finalContrato;
+      if (!isValid) usuariosNoActualizadosNuevos.push(usuario);
+      return isValid;
+    });
+
+    // UPDATE
+    const modificarEnAppValidos = modificarEnApp.filter((usuario) => {
+      const isValid = this.isValidUsuario(usuario);
+      if (!isValid) usuariosNoActualizadosApp.push(usuario);
+      return isValid;
+    });
+
+    await this.prisma.trabajador.createMany({
+      data: usuariosNuevosValidos.map((usuario) => {
+        return {
+          id: usuario.id,
+          idApp: usuario.idApp,
+          nombreApellidos: usuario.nombreApellidos,
+          displayName: usuario.displayName,
+          emails: usuario.emails,
+          dni: usuario.dni,
+          direccion: usuario.direccion,
+          ciudad: usuario.ciudad,
+          telefonos: usuario.telefonos,
+          fechaNacimiento: DateTime.fromFormat(
+            usuario.fechaNacimiento,
+            "dd/MM/yyyy",
+          ).toJSDate(),
+          nacionalidad: usuario.nacionalidad,
+          nSeguridadSocial: usuario.nSeguridadSocial,
+          codigoPostal: usuario.codigoPostal,
+          cuentaCorriente: usuario.cuentaCorriente,
+          tipoTrabajador: usuario.tipoTrabajador,
+          llevaEquipo: false,
+        };
+      }),
+      skipDuplicates: true,
+    });
+
+    await this.prisma.trabajador.updateMany({
+      where: {
+        id: {
+          in: modificarEnAppValidos.map((usuario) => usuario.id),
+        },
+      },
+      data: modificarEnAppValidos.map((usuario) => {
+        return {
+          nombreApellidos: usuario.nombreApellidos,
+          dni: usuario.dni,
+        };
+      }),
+    });
+
+    return {
+      usuariosNoActualizadosNuevos,
+      usuariosNoActualizadosApp,
+    };
+  }
+
+  async eliminarUsuarios(usuariosAEliminar: any[]) {
+    await this.prisma.trabajador.deleteMany({
+      where: {
+        id: {
+          in: usuariosAEliminar.map((usuario) => usuario.id),
+        },
+      },
+    });
+  }
+
+  async getResponsableTienda(idTienda: number) {
+    const responsable = await this.prisma.trabajador.findFirst({
+      where: {
+        idTienda: idTienda,
+        llevaEquipo: true,
+      },
+    });
+
+    return responsable;
+  }
+
+  async sqlHandleCambios(
+    modificado: TrabajadorCompleto,
+    original: TrabajadorCompleto,
+  ) {
+    if (modificado.idResponsable != original.idResponsable) {
+      if (modificado.idTienda != original.idTienda)
+        throw Error(
+          "No es posible cambiar el responsable y la tienda a la vez",
+        );
+
+      if (original.coordinadora && !modificado.coordinadora) {
+        await this.prisma.trabajador.updateMany({
+          where: {
+            responsable: {
+              id: modificado.id,
+            },
+          },
+          data: {
+            idResponsable: null,
+          },
+        });
+      } else if (modificado.coordinadora && modificado.idTienda) {
+        await this.prisma.trabajador.update({
+          where: {
+            idTienda: modificado.idTienda,
+            id: modificado.id,
+            llevaEquipo: false,
+          },
+          data: {
+            idResponsable: modificado.id,
+          },
+        });
+      }
+    } else if (modificado.idTienda != original.idTienda) {
+      if (modificado.coordinadora && original.coordinadora) {
+        await this.prisma.trabajador.updateMany({
+          where: {
+            responsable: {
+              id: modificado.id,
+            },
+          },
+          data: {
+            idResponsable: null,
+          },
+        });
+
+        await this.prisma.trabajador.update({
+          where: {
+            idTienda: modificado.idTienda,
+            id: modificado.id,
+            llevaEquipo: false,
+          },
+
+          data: {
+            idResponsable: modificado.id,
+          },
+        });
+
+        // Falta 'C'
+      }
+    } else if (modificado.coordinadora && modificado.idTienda) {
+      await this.prisma.trabajador.update({
+        where: {
+          idTienda: modificado.idTienda,
+          id: modificado.id,
+          llevaEquipo: false,
+        },
+        data: {
+          idResponsable: modificado.id,
+        },
+      });
+    } else if (!modificado.coordinadora && original.coordinadora) {
+      await this.prisma.trabajador.updateMany({
+        where: {
+          responsable: {
+            id: modificado.id,
+          },
+        },
+        data: {
+          idResponsable: null,
+        },
+      });
+    }
+  }
+
+  async guardarCambiosForm(
+    trabajador: TrabajadorCompleto,
+    original: TrabajadorCompleto,
+  ) {
+    await this.sqlHandleCambios(trabajador, original);
+
+    const response = await this.prisma.trabajador.update({
+      where: {
+        id: trabajador.id,
+      },
+      data: {
+        nombreApellidos: trabajador.nombreApellidos,
+        displayName: trabajador.displayName,
+        emails: trabajador.emails,
+        dni: trabajador.dni,
+        direccion: trabajador.direccion,
+        ciudad: trabajador.ciudad,
+        telefonos: trabajador.telefonos,
+        fechaNacimiento: trabajador.fechaNacimiento,
+        nacionalidad: trabajador.nacionalidad,
+        nSeguridadSocial: trabajador.nSeguridadSocial,
+        codigoPostal: trabajador.codigoPostal,
+        cuentaCorriente: trabajador.cuentaCorriente,
+        tipoTrabajador: trabajador.tipoTrabajador,
+        idResponsable: trabajador.idResponsable,
+        idTienda: trabajador.idTienda,
+        llevaEquipo: trabajador.coordinadora ? true : false,
+        tokenQR: trabajador.tokenQR,
+      },
+    });
+
+    return true;
+  }
+
+  async getNivelMenosUno(idSql: number) {
+    const resResponsable = await this.prisma.trabajador.findFirst({
+      where: {
+        id: idSql,
+      },
+      select: {
+        idResponsable: true,
+      },
+    });
+
+    if (!resResponsable.idResponsable) return null;
+
+    const responsable = await this.prisma.trabajador.findUnique({
+      where: {
+        id: resResponsable.idResponsable,
+      },
+    });
+
+    return responsable;
+  }
+
+  async getNivelUno(idSql: number) {
+    return await this.prisma.trabajador.findMany({
+      where: {
+        idResponsable: idSql,
+      },
+    });
+  }
+
+  async getNivelCero(idSql: number) {
+    return await this.getTrabajadorBySqlId(idSql);
+  }
+
+  async borrarTrabajador(idSql: number) {
+    await this.prisma.trabajador.delete({
+      where: {
+        id: idSql,
+      },
+    });
+    return true;
+  }
+
+  async getCoordinadoras() {
+    return await this.prisma.trabajador.findMany({
+      where: {
+        llevaEquipo: true,
+        idTienda: {
+          not: null,
+        },
+      },
+    });
+  }
+
+  async uploadFoto(displayFoto: string, uid: string) {
+    const resUpdate = await this.prisma.trabajador.update({
+      where: {
+        idApp: uid,
+      },
+      data: {
+        displayFoto: displayFoto,
+      },
+    });
+
+    if (resUpdate) return resUpdate;
+    return null;
   }
 }

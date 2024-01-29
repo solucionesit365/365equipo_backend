@@ -390,45 +390,45 @@ tr.displayFoto
 //   return [];
 // }
 
-export async function getHorasContrato(idSql: number, conFecha: moment.Moment) {
-  const sql = `
-    SELECT top 1 horasContrato*40/100 as horasContrato
-    FROM historicoContratos 
-    WHERE 
-      dni = (select dni from trabajadores where id = @param0) AND 
-      inicioContrato <= @param1 AND 
-      (fechaBaja >= @param1 OR fechaBaja IS NULL)
-  `;
+// export async function getHorasContrato(idSql: number, conFecha: moment.Moment) {
+//   const sql = `
+//     SELECT top 1 horasContrato*40/100 as horasContrato
+//     FROM historicoContratos 
+//     WHERE 
+//       dni = (select dni from trabajadores where id = @param0) AND 
+//       inicioContrato <= @param1 AND 
+//       (fechaBaja >= @param1 OR fechaBaja IS NULL)
+//   `;
 
-  const resSubordinados = await recSoluciones(
-    "soluciones",
-    sql,
-    idSql,
-    conFecha ? conFecha.format("YYYY-MM-DD HH:mm:ss") : undefined,
-  );
+//   const resSubordinados = await recSoluciones(
+//     "soluciones",
+//     sql,
+//     idSql,
+//     conFecha ? conFecha.format("YYYY-MM-DD HH:mm:ss") : undefined,
+//   );
 
-  return resSubordinados.recordset[0]?.horasContrato;
-}
+//   return resSubordinados.recordset[0]?.horasContrato;
+// }
 
 /* Cuadrantes 2.0 */
-export async function getHorasContratoNew(idSql: number, conFecha: DateTime) {
-  const sql = `
-    SELECT top 1 horasContrato*40/100 as horasContrato
-    FROM historicoContratos 
-    WHERE 
-      dni = (select dni from trabajadores where id = @param0) AND 
-      inicioContrato <= @param1 AND 
-      (fechaBaja >= @param1 OR fechaBaja IS NULL)
-  `;
+// export async function getHorasContratoNew(idSql: number, conFecha: DateTime) {
+//   const sql = `
+//     SELECT top 1 horasContrato*40/100 as horasContrato
+//     FROM historicoContratos 
+//     WHERE 
+//       dni = (select dni from trabajadores where id = @param0) AND 
+//       inicioContrato <= @param1 AND 
+//       (fechaBaja >= @param1 OR fechaBaja IS NULL)
+//   `;
 
-  const resSubordinados = await recSolucionesNew(
-    sql,
-    idSql,
-    conFecha ? conFecha.toSQL({ includeOffset: false }) : undefined,
-  );
+//   const resSubordinados = await recSolucionesNew(
+//     sql,
+//     idSql,
+//     conFecha ? conFecha.toSQL({ includeOffset: false }) : undefined,
+//   );
 
-  return resSubordinados.recordset[0]?.horasContrato;
-}
+//   return resSubordinados.recordset[0]?.horasContrato;
+// }
 
 export async function getTrabajadoresSage(): Promise<
   {
@@ -506,301 +506,288 @@ export async function getTrabajadoresSage(): Promise<
   else throw Error("Error, no hay trabajadores");
 }
 
-export async function setIdApp(idSql: number, uid: string) {
-  const sql = "UPDATE trabajadores SET idApp = @param0 WHERE id = @param1";
-  await recSoluciones("soluciones", sql, uid, idSql);
-}
+// export async function setIdApp(idSql: number, uid: string) {
+//   const sql = "UPDATE trabajadores SET idApp = @param0 WHERE id = @param1";
+//   await recSoluciones("soluciones", sql, uid, idSql);
+// }
 
-function convertOrNULL(value) {
-  if (value === null || value === undefined) {
-    return "NULL";
-  }
-  return `CONVERT(datetime, '${value}', 103)`;
-}
+// function convertOrNULL(value) {
+//   if (value === null || value === undefined) {
+//     return "NULL";
+//   }
+//   return `CONVERT(datetime, '${value}', 103)`;
+// }
 
-function isValidDate(value) {
-  return moment(value, "DD/MM/YYYY").isValid();
-}
 
-function isValidUsuario(usuario) {
-  return (
-    isValidDate(usuario.inicioContrato) &&
-    isValidDate(usuario.antiguedad) &&
-    usuario.dni &&
-    usuario.dni !== "" &&
-    usuario.telefonos &&
-    usuario.telefonos !== ""
-  );
-}
 
-async function executeBatch(database: string, batch, queryBuilder) {
-  const query = batch.map(queryBuilder).join(";");
-  await recSolucionesClassic(database, query);
-}
+// async function executeBatch(database: string, batch, queryBuilder) {
+//   const query = batch.map(queryBuilder).join(";");
+//   await recSolucionesClassic(database, query);
+// }
 
-export async function actualizarUsuarios(
-  database: string,
-  usuariosNuevos,
-  modificarEnApp,
-) {
-  try {
-    const usuariosNoActualizadosNuevos = [];
-    const usuariosNoActualizadosApp = [];
+// export async function actualizarUsuarios(
+//   database: string,
+//   usuariosNuevos,
+//   modificarEnApp,
+// ) {
+//   try {
+//     const usuariosNoActualizadosNuevos = [];
+//     const usuariosNoActualizadosApp = [];
 
-    // INSERT
-    const usuariosNuevosValidos = usuariosNuevos.filter((usuario) => {
-      const isValid = isValidUsuario(usuario) && !usuario.finalContrato;
-      if (!isValid) usuariosNoActualizadosNuevos.push(usuario);
-      return isValid;
-    });
+//     // INSERT
+//     const usuariosNuevosValidos = usuariosNuevos.filter((usuario) => {
+//       const isValid = isValidUsuario(usuario) && !usuario.finalContrato;
+//       if (!isValid) usuariosNoActualizadosNuevos.push(usuario);
+//       return isValid;
+//     });
 
-    // UPDATE
-    const modificarEnAppValidos = modificarEnApp.filter((usuario) => {
-      const isValid = isValidUsuario(usuario);
-      if (!isValid) usuariosNoActualizadosApp.push(usuario);
-      return isValid;
-    });
+//     // UPDATE
+//     const modificarEnAppValidos = modificarEnApp.filter((usuario) => {
+//       const isValid = isValidUsuario(usuario);
+//       if (!isValid) usuariosNoActualizadosApp.push(usuario);
+//       return isValid;
+//     });
 
-    const batchSize = 100; // Ajusta este valor según las necesidades de rendimiento
+//     const batchSize = 100; // Ajusta este valor según las necesidades de rendimiento
 
-    const insertQueryBuilder = (usuario) => `
-      INSERT INTO dbo.trabajadores (
-        id, idApp, nombreApellidos, displayName, emails, dni, direccion, ciudad,
-        telefonos, fechaNacimiento, nacionalidad, nSeguridadSocial, codigoPostal,
-        cuentaCorriente, tipoTrabajador, inicioContrato, finalContrato, antiguedad, idEmpresa
-      ) VALUES (
-        ${usuario.id},
-        ${usuario.idApp ? `'${usuario.idApp}'` : "NULL"},
-        ${usuario.nombreApellidos ? `'${usuario.nombreApellidos}'` : "NULL"},
-        ${usuario.displayName ? `'${usuario.displayName}'` : "NULL"},
-        ${usuario.emails ? `'${usuario.emails}'` : "NULL"},
-        ${usuario.dni ? `'${usuario.dni}'` : "NULL"},
-        ${usuario.direccion ? `'${usuario.direccion}'` : "NULL"},
-        ${usuario.ciudad ? `'${usuario.ciudad}'` : "NULL"},
-        ${usuario.telefonos ? `'${usuario.telefonos}'` : "NULL"},
-        ${convertOrNULL(usuario.fechaNacimiento)},
-        ${usuario.nacionalidad ? `'${usuario.nacionalidad}'` : "NULL"},
-        ${usuario.nSeguridadSocial ? `'${usuario.nSeguridadSocial}'` : "NULL"},
-        ${usuario.codigoPostal ? `'${usuario.codigoPostal}'` : "NULL"},
-        ${usuario.cuentaCorriente ? `'${usuario.cuentaCorriente}'` : "NULL"},
-        ${usuario.tipoTrabajador ? `'${usuario.tipoTrabajador}'` : "NULL"},
-        ${convertOrNULL(usuario.inicioContrato)},
-        ${convertOrNULL(usuario.finalContrato)},
-        ${convertOrNULL(usuario.antiguedad)},
-        ${usuario.idEmpresa ? `'${usuario.idEmpresa}'` : "NULL"}
-      )`;
+//     const insertQueryBuilder = (usuario) => `
+//       INSERT INTO dbo.trabajadores (
+//         id, idApp, nombreApellidos, displayName, emails, dni, direccion, ciudad,
+//         telefonos, fechaNacimiento, nacionalidad, nSeguridadSocial, codigoPostal,
+//         cuentaCorriente, tipoTrabajador, inicioContrato, finalContrato, antiguedad, idEmpresa
+//       ) VALUES (
+//         ${usuario.id},
+//         ${usuario.idApp ? `'${usuario.idApp}'` : "NULL"},
+//         ${usuario.nombreApellidos ? `'${usuario.nombreApellidos}'` : "NULL"},
+//         ${usuario.displayName ? `'${usuario.displayName}'` : "NULL"},
+//         ${usuario.emails ? `'${usuario.emails}'` : "NULL"},
+//         ${usuario.dni ? `'${usuario.dni}'` : "NULL"},
+//         ${usuario.direccion ? `'${usuario.direccion}'` : "NULL"},
+//         ${usuario.ciudad ? `'${usuario.ciudad}'` : "NULL"},
+//         ${usuario.telefonos ? `'${usuario.telefonos}'` : "NULL"},
+//         ${convertOrNULL(usuario.fechaNacimiento)},
+//         ${usuario.nacionalidad ? `'${usuario.nacionalidad}'` : "NULL"},
+//         ${usuario.nSeguridadSocial ? `'${usuario.nSeguridadSocial}'` : "NULL"},
+//         ${usuario.codigoPostal ? `'${usuario.codigoPostal}'` : "NULL"},
+//         ${usuario.cuentaCorriente ? `'${usuario.cuentaCorriente}'` : "NULL"},
+//         ${usuario.tipoTrabajador ? `'${usuario.tipoTrabajador}'` : "NULL"},
+//         ${convertOrNULL(usuario.inicioContrato)},
+//         ${convertOrNULL(usuario.finalContrato)},
+//         ${convertOrNULL(usuario.antiguedad)},
+//         ${usuario.idEmpresa ? `'${usuario.idEmpresa}'` : "NULL"}
+//       )`;
 
-    const updateQueryBuilder = (usuario) => `
-      UPDATE dbo.trabajadores
-      SET
-        dni = ${usuario.dni ? `'${usuario.dni}'` : "NULL"},
-        inicioContrato = ${convertOrNULL(usuario.inicioContrato)},
-        finalContrato = ${convertOrNULL(usuario.finalContrato)},
-        antiguedad = ${convertOrNULL(usuario.antiguedad)},
-        idEmpresa = ${usuario.idEmpresa ? `'${usuario.idEmpresa}'` : "NULL"}
-      WHERE id = ${usuario.id}`;
+//     const updateQueryBuilder = (usuario) => `
+//       UPDATE dbo.trabajadores
+//       SET
+//         dni = ${usuario.dni ? `'${usuario.dni}'` : "NULL"},
+//         inicioContrato = ${convertOrNULL(usuario.inicioContrato)},
+//         finalContrato = ${convertOrNULL(usuario.finalContrato)},
+//         antiguedad = ${convertOrNULL(usuario.antiguedad)},
+//         idEmpresa = ${usuario.idEmpresa ? `'${usuario.idEmpresa}'` : "NULL"}
+//       WHERE id = ${usuario.id}`;
 
-    const promises = [];
+//     const promises = [];
 
-    for (let i = 0; i < usuariosNuevosValidos.length; i += batchSize) {
-      const batch = usuariosNuevosValidos.slice(i, i + batchSize);
-      promises.push(executeBatch(database, batch, insertQueryBuilder));
-    }
+//     for (let i = 0; i < usuariosNuevosValidos.length; i += batchSize) {
+//       const batch = usuariosNuevosValidos.slice(i, i + batchSize);
+//       promises.push(executeBatch(database, batch, insertQueryBuilder));
+//     }
 
-    for (let i = 0; i < modificarEnAppValidos.length; i += batchSize) {
-      const batch = modificarEnAppValidos.slice(i, i + batchSize);
-      promises.push(executeBatch(database, batch, updateQueryBuilder));
-    }
+//     for (let i = 0; i < modificarEnAppValidos.length; i += batchSize) {
+//       const batch = modificarEnAppValidos.slice(i, i + batchSize);
+//       promises.push(executeBatch(database, batch, updateQueryBuilder));
+//     }
 
-    await Promise.all(promises);
+//     await Promise.all(promises);
 
-    return {
-      usuariosNoActualizadosNuevos,
-      usuariosNoActualizadosApp,
-    };
-  } catch (error) {
-    console.error("Error al actualizar usuarios:", error);
-  }
-}
+//     return {
+//       usuariosNoActualizadosNuevos,
+//       usuariosNoActualizadosApp,
+//     };
+//   } catch (error) {
+//     console.error("Error al actualizar usuarios:", error);
+//   }
+// }
 
-export async function eliminarUsuarios(arrayUsuarios) {
-  let sql = "";
+// export async function eliminarUsuarios(arrayUsuarios) {
+//   let sql = "";
 
-  for (let i = 0; i < arrayUsuarios.length; i += 1) {
-    if (arrayUsuarios[i].id && arrayUsuarios[i].id != 999999)
-      sql += `DELETE FROM trabajadores WHERE id = ${arrayUsuarios[i].id};`;
-  }
+//   for (let i = 0; i < arrayUsuarios.length; i += 1) {
+//     if (arrayUsuarios[i].id && arrayUsuarios[i].id != 999999)
+//       sql += `DELETE FROM trabajadores WHERE id = ${arrayUsuarios[i].id};`;
+//   }
 
-  await recSolucionesClassic("soluciones", sql);
-}
+//   await recSolucionesClassic("soluciones", sql);
+// }
 
-export async function getResponsableTienda(idTienda: number) {
-  const sql = `
-    SELECT top 1 tr1.* FROM trabajadores tr1 WHERE tr1.idTienda = @param0 AND (SELECT count(*) FROM trabajadores tr2 WHERE tr1.id = tr2.idResponsable) > 0
-  `;
+// export async function getResponsableTienda(idTienda: number) {
+//   const sql = `
+//     SELECT top 1 tr1.* FROM trabajadores tr1 WHERE tr1.idTienda = @param0 AND (SELECT count(*) FROM trabajadores tr2 WHERE tr1.id = tr2.idResponsable) > 0
+//   `;
 
-  const resResponsable = await recSoluciones("soluciones", sql, idTienda);
+//   const resResponsable = await recSoluciones("soluciones", sql, idTienda);
 
-  if (resResponsable.recordset.length > 0) return resResponsable.recordset[0];
-  return null;
-}
+//   if (resResponsable.recordset.length > 0) return resResponsable.recordset[0];
+//   return null;
+// }
 
-export function sqlHandleCambios(
-  modificado: TrabajadorCompleto,
-  original: TrabajadorCompleto,
-) {
-  let sql = "";
+// export function sqlHandleCambios(
+//   modificado: TrabajadorCompleto,
+//   original: TrabajadorCompleto,
+// ) {
+//   let sql = "";
 
-  if (modificado.idResponsable != original.idResponsable) {
-    if (modificado.idTienda != original.idTienda)
-      throw Error("No es posible cambiar el responsable y la tienda a la vez");
+//   if (modificado.idResponsable != original.idResponsable) {
+//     if (modificado.idTienda != original.idTienda)
+//       throw Error("No es posible cambiar el responsable y la tienda a la vez");
 
-    if (original.coordinadora && !modificado.coordinadora) {
-      sql += `
-        UPDATE trabajadores SET idResponsable = null WHERE idResponsable = ${modificado.id};
-      `;
-    } else if (modificado.coordinadora && modificado.idTienda) {
-      sql += `
-      UPDATE trabajadores SET idResponsable = ${modificado.id} WHERE idTienda = ${modificado.idTienda} AND id <> ${modificado.id} AND (coordinadora IS NULL OR coordinadora = 0);
-      `;
-    }
-  } else if (modificado.idTienda != original.idTienda) {
-    if (modificado.coordinadora && original.coordinadora) {
-      sql += `
-        UPDATE trabajadores SET idResponsable = null WHERE idResponsable = ${modificado.id};
-        UPDATE trabajadores SET idResponsable = ${modificado.id} WHERE idTienda = ${modificado.idTienda} AND id <> ${modificado.id} AND (coordinadora IS NULL OR coordinadora = 0);
-        -- FALTA (C)
-      `;
-    }
-  } else if (modificado.coordinadora && modificado.idTienda) {
-    sql += `
-    UPDATE trabajadores SET idResponsable = ${modificado.id} WHERE idTienda = ${modificado.idTienda} AND id <> ${modificado.id} AND (coordinadora IS NULL OR coordinadora = 0);
-  `;
-  } else if (!modificado.coordinadora && original.coordinadora) {
-    sql += `
-      UPDATE trabajadores SET idResponsable = null WHERE idResponsable = ${modificado.id};
-  `;
-  }
+//     if (original.coordinadora && !modificado.coordinadora) {
+//       sql += `
+//         UPDATE trabajadores SET idResponsable = null WHERE idResponsable = ${modificado.id};
+//       `;
+//     } else if (modificado.coordinadora && modificado.idTienda) {
+//       sql += `
+//       UPDATE trabajadores SET idResponsable = ${modificado.id} WHERE idTienda = ${modificado.idTienda} AND id <> ${modificado.id} AND (coordinadora IS NULL OR coordinadora = 0);
+//       `;
+//     }
+//   } else if (modificado.idTienda != original.idTienda) {
+//     if (modificado.coordinadora && original.coordinadora) {
+//       sql += `
+//         UPDATE trabajadores SET idResponsable = null WHERE idResponsable = ${modificado.id};
+//         UPDATE trabajadores SET idResponsable = ${modificado.id} WHERE idTienda = ${modificado.idTienda} AND id <> ${modificado.id} AND (coordinadora IS NULL OR coordinadora = 0);
+//         -- FALTA (C)
+//       `;
+//     }
+//   } else if (modificado.coordinadora && modificado.idTienda) {
+//     sql += `
+//     UPDATE trabajadores SET idResponsable = ${modificado.id} WHERE idTienda = ${modificado.idTienda} AND id <> ${modificado.id} AND (coordinadora IS NULL OR coordinadora = 0);
+//   `;
+//   } else if (!modificado.coordinadora && original.coordinadora) {
+//     sql += `
+//       UPDATE trabajadores SET idResponsable = null WHERE idResponsable = ${modificado.id};
+//   `;
+//   }
 
-  return sql;
-}
+//   return sql;
+// }
 
-export async function guardarCambiosForm(
-  trabajador: TrabajadorCompleto,
-  original: TrabajadorCompleto,
-) {
-  let sql = "";
-  sql += sqlHandleCambios(trabajador, original);
-  sql += `
-    UPDATE trabajadores SET
-    nombreApellidos = ${
-      trabajador.nombreApellidos ? `'${trabajador.nombreApellidos}'` : "NULL"
-    },
-    displayName = ${
-      trabajador.displayName ? `'${trabajador.displayName}'` : "NULL"
-    },
-    emails = ${trabajador.emails ? `'${trabajador.emails}'` : "NULL"},
-    dni = ${trabajador.dni ? `'${trabajador.dni}'` : "NULL"},
-    direccion = ${trabajador.direccion ? `'${trabajador.direccion}'` : "NULL"},
-    ciudad = ${trabajador.ciudad ? `'${trabajador.ciudad}'` : "NULL"},
-    telefonos = ${trabajador.telefonos ? `'${trabajador.telefonos}'` : "NULL"},
-    fechaNacimiento = convert(datetime, ${
-      trabajador.fechaNacimiento ? "'" + trabajador.fechaNacimiento + "'" : null
-    }, 103),
-    nacionalidad = ${
-      trabajador.nacionalidad ? `'${trabajador.nacionalidad}'` : "NULL"
-    },
-    nSeguridadSocial = ${
-      trabajador.nSeguridadSocial ? `'${trabajador.nSeguridadSocial}'` : "NULL"
-    },
-    codigoPostal = ${
-      trabajador.codigoPostal ? `'${trabajador.codigoPostal}'` : "NULL"
-    },
-    cuentaCorriente = ${
-      trabajador.cuentaCorriente ? `'${trabajador.cuentaCorriente}'` : "NULL"
-    },
-    tipoTrabajador = ${
-      trabajador.tipoTrabajador ? `'${trabajador.tipoTrabajador}'` : "NULL"
-    },
-    idResponsable = ${
-      trabajador.idResponsable ? `'${trabajador.idResponsable}'` : "NULL"
-    },
-    idTienda = ${trabajador.idTienda ? `'${trabajador.idTienda}'` : "NULL"},
-    coordinadora = ${trabajador.coordinadora ? 1 : 0},
-    tokenQR = ${trabajador.tokenQR ? `'${trabajador.tokenQR}'` : "NULL"}
-    WHERE id = ${trabajador.id}
-  `;
+// export async function guardarCambiosForm(
+//   trabajador: TrabajadorCompleto,
+//   original: TrabajadorCompleto,
+// ) {
+//   let sql = "";
+//   sql += sqlHandleCambios(trabajador, original);
+//   sql += `
+//     UPDATE trabajadores SET
+//     nombreApellidos = ${
+//       trabajador.nombreApellidos ? `'${trabajador.nombreApellidos}'` : "NULL"
+//     },
+//     displayName = ${
+//       trabajador.displayName ? `'${trabajador.displayName}'` : "NULL"
+//     },
+//     emails = ${trabajador.emails ? `'${trabajador.emails}'` : "NULL"},
+//     dni = ${trabajador.dni ? `'${trabajador.dni}'` : "NULL"},
+//     direccion = ${trabajador.direccion ? `'${trabajador.direccion}'` : "NULL"},
+//     ciudad = ${trabajador.ciudad ? `'${trabajador.ciudad}'` : "NULL"},
+//     telefonos = ${trabajador.telefonos ? `'${trabajador.telefonos}'` : "NULL"},
+//     fechaNacimiento = convert(datetime, ${
+//       trabajador.fechaNacimiento ? "'" + trabajador.fechaNacimiento + "'" : null
+//     }, 103),
+//     nacionalidad = ${
+//       trabajador.nacionalidad ? `'${trabajador.nacionalidad}'` : "NULL"
+//     },
+//     nSeguridadSocial = ${
+//       trabajador.nSeguridadSocial ? `'${trabajador.nSeguridadSocial}'` : "NULL"
+//     },
+//     codigoPostal = ${
+//       trabajador.codigoPostal ? `'${trabajador.codigoPostal}'` : "NULL"
+//     },
+//     cuentaCorriente = ${
+//       trabajador.cuentaCorriente ? `'${trabajador.cuentaCorriente}'` : "NULL"
+//     },
+//     tipoTrabajador = ${
+//       trabajador.tipoTrabajador ? `'${trabajador.tipoTrabajador}'` : "NULL"
+//     },
+//     idResponsable = ${
+//       trabajador.idResponsable ? `'${trabajador.idResponsable}'` : "NULL"
+//     },
+//     idTienda = ${trabajador.idTienda ? `'${trabajador.idTienda}'` : "NULL"},
+//     coordinadora = ${trabajador.coordinadora ? 1 : 0},
+//     tokenQR = ${trabajador.tokenQR ? `'${trabajador.tokenQR}'` : "NULL"}
+//     WHERE id = ${trabajador.id}
+//   `;
 
-  await recSolucionesClassic("soluciones", sql);
-  return true;
-}
+//   await recSolucionesClassic("soluciones", sql);
+//   return true;
+// }
 
-export async function getNivelMenosUno(idSql: number) {
-  const sqlSuResponsable = `
-  IF EXISTS (SELECT * from trabajadores where id = (select idResponsable from trabajadores where id = @param0))
-      BEGIN
-          SELECT * from trabajadores where id = (select idResponsable from trabajadores where id = @param0)
-      END
-  ELSE
-      BEGIN
-          SELECT 'Sin responsable' as resultado
-      END
-  `;
-  const resSuResponsable = await recSoluciones(
-    "soluciones",
-    sqlSuResponsable,
-    idSql,
-  );
+// export async function getNivelMenosUno(idSql: number) {
+//   const sqlSuResponsable = `
+//   IF EXISTS (SELECT * from trabajadores where id = (select idResponsable from trabajadores where id = @param0))
+//       BEGIN
+//           SELECT * from trabajadores where id = (select idResponsable from trabajadores where id = @param0)
+//       END
+//   ELSE
+//       BEGIN
+//           SELECT 'Sin responsable' as resultado
+//       END
+//   `;
+//   const resSuResponsable = await recSoluciones(
+//     "soluciones",
+//     sqlSuResponsable,
+//     idSql,
+//   );
 
-  if (
-    resSuResponsable.recordset?.length > 0 &&
-    resSuResponsable.recordset[0]?.resultado != "Sin responsable"
-  ) {
-    return resSuResponsable.recordset[0];
-  } else return null;
-}
+//   if (
+//     resSuResponsable.recordset?.length > 0 &&
+//     resSuResponsable.recordset[0]?.resultado != "Sin responsable"
+//   ) {
+//     return resSuResponsable.recordset[0];
+//   } else return null;
+// }
 
-export async function getNivelUno(idSql: number) {
-  const sql = `
-    SELECT tr.*, ti.nombre as nombreTienda FROM trabajadores tr 
-    LEFT JOIN tiendas ti ON tr.idTienda = ti.id
-    WHERE tr.idResponsable = @param0
-  `;
-  const resNivelUno = await recSoluciones("soluciones", sql, idSql);
+// export async function getNivelUno(idSql: number) {
+//   const sql = `
+//     SELECT tr.*, ti.nombre as nombreTienda FROM trabajadores tr 
+//     LEFT JOIN tiendas ti ON tr.idTienda = ti.id
+//     WHERE tr.idResponsable = @param0
+//   `;
+//   const resNivelUno = await recSoluciones("soluciones", sql, idSql);
 
-  if (resNivelUno.recordset?.length > 0) return resNivelUno.recordset;
-  return null;
-}
+//   if (resNivelUno.recordset?.length > 0) return resNivelUno.recordset;
+//   return null;
+// }
 
-export async function getNivelCero(idSql: number) {
-  const sql = `
-    SELECT tr.*, ti.nombre as nombreTienda FROM trabajadores tr
-    LEFT JOIN tiendas ti ON tr.idTienda = ti.id
-    WHERE tr.id = @param0
-  `;
+// export async function getNivelCero(idSql: number) {
+//   const sql = `
+//     SELECT tr.*, ti.nombre as nombreTienda FROM trabajadores tr
+//     LEFT JOIN tiendas ti ON tr.idTienda = ti.id
+//     WHERE tr.id = @param0
+//   `;
 
-  const resNivelCero = await recSoluciones("soluciones", sql, idSql);
+//   const resNivelCero = await recSoluciones("soluciones", sql, idSql);
 
-  if (resNivelCero.recordset?.length > 0) return resNivelCero.recordset[0];
-  return null;
-}
+//   if (resNivelCero.recordset?.length > 0) return resNivelCero.recordset[0];
+//   return null;
+// }
 
-export async function borrarTrabajador(idSql: number) {
-  const sql = "DELETE FROM trabajadores WHERE id = @param0";
+// export async function borrarTrabajador(idSql: number) {
+//   const sql = "DELETE FROM trabajadores WHERE id = @param0";
 
-  await recSoluciones("soluciones", sql, idSql);
+//   await recSoluciones("soluciones", sql, idSql);
 
-  return true;
-}
+//   return true;
+// }
 
-export async function getCoordinadoras() {
-  const sql = `select * from trabajadores where coordinadora = 1 AND idTienda IS NOT NULL`;
+// export async function getCoordinadoras() {
+//   const sql = `select * from trabajadores where coordinadora = 1 AND idTienda IS NOT NULL`;
 
-  const recCoordi = await recSoluciones("soluciones", sql);
-  console.log(recCoordi);
+//   const recCoordi = await recSoluciones("soluciones", sql);
+//   console.log(recCoordi);
 
-  return recCoordi.recordset;
-}
+//   return recCoordi.recordset;
+// }
 
 async function getHistoriaContratos(): Promise<
   {
@@ -841,6 +828,7 @@ function convertToDate(dateString) {
   return `CONVERT(datetime, '${sqlDate}', 112)`;
 }
 
+// No lo he pasado aún porque debería estar en "contrato" y no en trabajadores
 export async function copiarHistoriaContratosHitSoluciones() {
   const arrayContratos = await getHistoriaContratos();
 
@@ -884,6 +872,8 @@ export async function copiarHistoriaContratosHitSoluciones() {
 
   return true;
 }
+
+// No lo he pasado aún porque debería estar en "contrato" y no en trabajadores
 export async function getHistoricoContratos(dni: string) {
   const sql = `select * from historicoContratos where dni = @param0`;
 
@@ -893,9 +883,9 @@ export async function getHistoricoContratos(dni: string) {
   return null;
 }
 
-export async function uploadFoto(displayFoto: string, uid: string) {
-  const sql = `update trabajadores set displayFoto=@param0 where idApp=@param1`;
-  const resUser = await recSoluciones("soluciones", sql, displayFoto, uid);
-  if (resUser.recordset) return resUser.recordset;
-  return null;
-}
+// export async function uploadFoto(displayFoto: string, uid: string) {
+//   const sql = `update trabajadores set displayFoto=@param0 where idApp=@param1`;
+//   const resUser = await recSoluciones("soluciones", sql, displayFoto, uid);
+//   if (resUser.recordset) return resUser.recordset;
+//   return null;
+// }
