@@ -64,6 +64,42 @@ export class Cultura365Controller {
     }
   }
 
+  @Post("updateVideo")
+  @UseGuards(AuthGuard)
+  async updateVideo(
+    @Body() videoModificado: cultura365Interface,
+    @Headers("authorization") authHeader: string,
+  ) {
+    try {
+      if (await this.culturaInstance.updateVideo(videoModificado))
+        return {
+          ok: true,
+        };
+      throw Error("No se ha podido modificar el video");
+    } catch (err) {
+      console.log(err);
+      return { ok: false, message: err.message };
+    }
+  }
+
+  @Post("deleteVideo")
+  @UseGuards(AuthGuard)
+  async deleteVideo(
+    @Body() { _id }: { _id: string },
+    @Headers("authorization") authHeader: string,
+  ) {
+    try {
+      if (await this.culturaInstance.deleteVideo(_id))
+        return {
+          ok: true,
+        };
+      throw Error("No se ha podido borrar el video");
+    } catch (err) {
+      console.log(err);
+      return { ok: false, message: err.message };
+    }
+  }
+
   @Post("contadorViews")
   @UseGuards(AuthGuard)
   async incrementarContadorViews(

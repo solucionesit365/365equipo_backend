@@ -26,6 +26,37 @@ export class cultura365Mongo {
     return response;
   }
 
+  async updatevideo(video: cultura365Interface) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const videosCollect = db.collection<cultura365Interface>("videosCultura");
+
+    const resUpdate = await videosCollect.updateOne(
+      {
+        _id: new ObjectId(video._id),
+      },
+      {
+        $set: {
+          titulo: video.titulo,
+          descripcion: video.descripcion,
+          urlVideo: video.urlVideo,
+        },
+      },
+    );
+
+    return resUpdate.acknowledged;
+  }
+
+  async deleteVideo(_id: string) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const videosCollect = db.collection<cultura365Interface>("videosCultura");
+
+    const resDelete = await videosCollect.deleteOne({
+      _id: new ObjectId(_id),
+    });
+
+    return resDelete.acknowledged && resDelete.deletedCount > 0;
+  }
+
   async incrementarContadorViews(videoId: string) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const videosCollect = db.collection<cultura365Interface>("videosCultura");
