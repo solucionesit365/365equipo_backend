@@ -8,7 +8,7 @@ import {
 } from "@nestjs/common";
 import { DateTime } from "luxon";
 import { TokenService } from "../get-token/get-token.service";
-import { AuthService } from "../firebase/auth";
+import { FirebaseService } from "../firebase/auth";
 import { PactadoVsRealService } from "./pactado-vs-real.service";
 import { ParseDatePipe } from "../parse-date/parse-date.pipe";
 import { AuthGuard } from "../auth/auth.guard";
@@ -17,7 +17,7 @@ import { AuthGuard } from "../auth/auth.guard";
 export class PactadoVsRealController {
   constructor(
     private readonly tokenService: TokenService,
-    private readonly authInstance: AuthService,
+    private readonly authInstance: FirebaseService,
     private readonly pactadoRealService: PactadoVsRealService,
   ) {}
 

@@ -1,17 +1,17 @@
 import { Injectable, Inject, forwardRef } from "@nestjs/common";
 import * as nodemailer from "nodemailer";
-import { AuthService } from "../firebase/auth";
-import { Trabajador } from "../trabajadores/trabajadores.class";
+import { FirebaseService } from "../firebase/auth";
+import { TrabajadorService } from "../trabajadores/trabajadores.class";
 
 @Injectable()
 export class EmailClass {
   private transporter: any;
 
   constructor(
-    @Inject(forwardRef(() => AuthService))
-    private readonly authInstance: AuthService,
-    @Inject(forwardRef(() => Trabajador))
-    private readonly trabajadorInstance: Trabajador,
+    @Inject(forwardRef(() => FirebaseService))
+    private readonly authInstance: FirebaseService,
+    @Inject(forwardRef(() => TrabajadorService))
+    private readonly trabajadorInstance: TrabajadorService,
   ) {
     this.transporter = nodemailer.createTransport({
       host: "smtp.gmail.com",

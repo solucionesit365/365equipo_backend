@@ -2,20 +2,17 @@ import { Injectable, Inject, forwardRef } from "@nestjs/common";
 import { getAuth, UserRecord } from "firebase-admin/auth";
 import { TrabajadorCompleto } from "../trabajadores/trabajadores.interface";
 import { app } from "./app";
-import { Trabajador } from "../trabajadores/trabajadores.class";
-import { EmailClass } from "../email/email.class";
+import { TrabajadorService } from "../trabajadores/trabajadores.class";
 
 export const auth = getAuth(app);
 
 @Injectable()
-export class AuthService {
+export class FirebaseService {
   public auth = auth;
 
   constructor(
-    @Inject(forwardRef(() => Trabajador))
-    private trabajadorInstance: Trabajador,
-    @Inject(forwardRef(() => EmailClass))
-    private readonly emailInstance: EmailClass,
+    @Inject(forwardRef(() => TrabajadorService))
+    private trabajadorInstance: TrabajadorService,
   ) {}
 
   async verifyToken(token: string) {

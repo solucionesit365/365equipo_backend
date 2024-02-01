@@ -11,9 +11,9 @@ import {
 import { TokenService } from "../get-token/get-token.service";
 import { FichajesValidados } from "./fichajes-validados.class";
 import { FichajeValidadoDto } from "./fichajes-validados.dto";
-import { AuthService } from "../firebase/auth";
-import { Notificaciones } from "src/notificaciones/notificaciones.class";
-import { Trabajador } from "src/trabajadores/trabajadores.class";
+import { FirebaseService } from "../firebase/auth";
+import { Notificaciones } from "../notificaciones/notificaciones.class";
+import { TrabajadorService } from "../trabajadores/trabajadores.class";
 import { AuthGuard } from "../auth/auth.guard";
 import { SchedulerGuard } from "../scheduler/scheduler.guard";
 import { ParseDatePipe } from "../parse-date/parse-date.pipe";
@@ -22,9 +22,9 @@ import { DateTime } from "luxon";
 @Controller("fichajes-validados")
 export class FichajesValidadosController {
   constructor(
-    private readonly trabajador: Trabajador,
+    private readonly trabajador: TrabajadorService,
     private readonly notificaciones: Notificaciones,
-    private readonly authInstance: AuthService,
+    private readonly authInstance: FirebaseService,
     private readonly tokenService: TokenService,
     private readonly fichajesValidadosInstance: FichajesValidados,
   ) {}

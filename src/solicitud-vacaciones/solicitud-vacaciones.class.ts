@@ -2,32 +2,31 @@ import { Injectable, Inject, forwardRef } from "@nestjs/common";
 import { SolicitudVacacionesBdd } from "./solicitud-vacaciones.mongodb";
 import { SolicitudVacaciones } from "./solicitud-vacaciones.interface";
 import { EmailClass } from "../email/email.class";
-import { Trabajador } from "../trabajadores/trabajadores.class";
+import { TrabajadorService } from "../trabajadores/trabajadores.class";
 import { Cuadrantes } from "../cuadrantes/cuadrantes.class";
 import { recHit } from "../bbdd/mssql";
 import * as moment from "moment";
 import { DateTime } from "luxon";
-import { ObjectId } from "mongodb";
-import { Vacaciones } from "src/vacaciones/vacaciones.class";
+import { ContratoService } from "../contrato/contrato.service";
 
 @Injectable()
 export class solicitudesVacacionesClass {
   constructor(
     private readonly schSolicitudVacaciones: SolicitudVacacionesBdd,
     private readonly email: EmailClass,
-    @Inject(forwardRef(() => Trabajador))
-    private readonly trabajadorInstance: Trabajador,
+    @Inject(forwardRef(() => TrabajadorService))
+    private readonly trabajadorInstance: TrabajadorService,
+    private readonly contratoService: ContratoService,
     private readonly cuadrantesInstance: Cuadrantes,
   ) {}
 
   //Nueva solicitud de vacaciones
   async nuevaSolicitudVacaciones(solicitudVacaciones: SolicitudVacaciones) {
     try {
-      const horasContrato =
-        await this.trabajadorInstance.getHorasContratoByIdNew(
-          solicitudVacaciones.idBeneficiario,
-          DateTime.now(),
-        );
+      const horasContrato = await this.contratoService.getHorasContratoByIdNew(
+        solicitudVacaciones.idBeneficiario,
+        DateTime.now(),
+      );
 
       solicitudVacaciones.horasContrato = horasContrato;
 

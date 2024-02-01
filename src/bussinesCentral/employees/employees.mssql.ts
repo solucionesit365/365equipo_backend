@@ -1,5 +1,3 @@
-import { recSoluciones } from "../../bbdd/mssql";
-
 export async function addEmployees(employees: any[]) {
   let sql = "";
 
@@ -13,8 +11,8 @@ export async function addEmployees(employees: any[]) {
   if (sql != "") {
     console.log("guardando.....");
 
-    const resNuevas = await recSoluciones("test_soluciones", sql);
-    if (resNuevas.rowsAffected[0] > 0) return true;
+    // const resNuevas = await recSoluciones("test_soluciones", sql);
+    // if (resNuevas.rowsAffected[0] > 0) return true;
   }
   return false;
 }

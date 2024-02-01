@@ -4,16 +4,14 @@ import { EmailClass } from "../email/email.class";
 import { FichajesValidados } from "../fichajes-validados/fichajes-validados.class";
 import { FichajeValidadoDto } from "../fichajes-validados/fichajes-validados.dto";
 import { DateTime } from "luxon";
-import { Trabajador } from "../trabajadores/trabajadores.class";
-import { Fichajes } from "../fichajes/fichajes.class";
+import { TrabajadorService } from "../trabajadores/trabajadores.class";
 
 @Controller("test")
 export class TestController {
   constructor(
     private readonly emailInstance: EmailClass,
     private readonly fichajesValidadosInstance: FichajesValidados,
-    private readonly trabajadoresInstance: Trabajador,
-    private readonly fichajesInstance: Fichajes,
+    private readonly trabajadoresInstance: TrabajadorService,
   ) {}
   @Get()
   test() {

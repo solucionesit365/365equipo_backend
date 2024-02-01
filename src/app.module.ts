@@ -1,5 +1,4 @@
 import { Module } from "@nestjs/common";
-// import { APP_PIPE } from "@nestjs/core";
 import { AppController } from "./app.controller";
 import { ConfigModule } from "@nestjs/config";
 import { AppService } from "./app.service";
@@ -7,21 +6,19 @@ import { AnunciosController } from "./anuncios/anuncios.controller";
 import { TrabajadoresController } from "./trabajadores/trabajadores.controller";
 import { TokenService } from "./get-token/get-token.service";
 import { TiendasController } from "./tiendas/tiendas.controller";
-import { VacacionesController } from "./vacaciones/vacaciones.controller";
-import { Vacaciones } from "./vacaciones/vacaciones.class";
 import { TestController } from "./test/test.controller";
 import { AnunciosService } from "./anuncios/anuncios.mongodb";
 import { AnunciosClass } from "./anuncios/anuncios.class";
-import { MongoDbService } from "./bbdd/mongodb";
+import { MongoDbService } from "./bbdd/mongodb.service";
 import { CuadrantesController } from "./cuadrantes/cuadrantes.controller";
 import { Cuadrantes } from "./cuadrantes/cuadrantes.class";
 import { CuadrantesDatabase } from "./cuadrantes/cuadrantes.mongodb";
 import { Tienda } from "./tiendas/tiendas.class";
-import { FacTenaMssql } from "./bbdd/mssql.class";
+import { FacTenaMssql } from "./bbdd/factenamssql.service";
 import { FichajesController } from "./fichajes/fichajes.controller";
 import { FichajesDatabase } from "./fichajes/fichajes.mongodb";
 import { Fichajes } from "./fichajes/fichajes.class";
-import { Trabajador } from "./trabajadores/trabajadores.class";
+import { TrabajadorService } from "./trabajadores/trabajadores.class";
 import { AusenciasController } from "./ausencias/ausencias.controller";
 import { Ausencias } from "./ausencias/ausencias.class";
 import { AusenciasDatabase } from "./ausencias/ausencias.mongodb";
@@ -38,7 +35,7 @@ import { FichajesValidadosController } from "./fichajes-validados/fichajes-valid
 import { FichajesValidados } from "./fichajes-validados/fichajes-validados.class";
 import { FichajesValidadosDatabase } from "./fichajes-validados/fichajes-validados.mongodb";
 import { EmailClass } from "./email/email.class";
-import { AuthService } from "./firebase/auth";
+import { FirebaseService } from "./firebase/auth";
 import { PermisosController } from "./permisos/permisos.controller";
 import { PermisosClass } from "./permisos/permisos.class";
 import { TarjetaCliente } from "./tarjeta-cliente/tarjeta-cliente.class";
@@ -79,18 +76,50 @@ import { MigracionesController } from "./migraciones/migraciones.controller";
 import { MigracionesService } from "./migraciones/migraciones.service";
 import { TiendaDatabaseService } from "./tiendas/tiendas.database";
 import { TrabajadorDatabaseService } from "./trabajadores/trabajadores.database";
+import { ContratoModule } from "./contrato/contrato.module";
+import { AdminModule } from "./admin/admin.module";
+import { AnunciosModule } from "./anuncios/anuncios.module";
+import { ArchivoDigitalModule } from "./archivo-digital/archivo-digital.module";
+import { AuditoriasModule } from "./auditorias/auditorias.module";
+import { AusenciasModule } from "./ausencias/ausencias.module";
+import { BbddModule } from "./bbdd/bbdd.module";
+import { CalendarioFestivosModule } from "./calendario-festivos/calendario-festivos.module";
+import { ClientesModule } from "./clientes/clientes.module";
+import { CryptoModule } from "./crypto/crypto.module";
+import { CuadrantesModule } from "./cuadrantes/cuadrantes.module";
+import { EmailModule } from "./email/email.module";
+import { EvaluacionesModule } from "./evaluaciones/evaluaciones.module";
+import { FichajesModule } from "./fichajes/fichajes.module";
+import { FichajesValidadosModule } from "./fichajes-validados/fichajes-validados.module";
+import { FichajesBcModule } from "./fichajes-bc/fichajes-bc.module";
+
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    ContratoModule,
+    AdminModule,
+    AnunciosModule,
+    ArchivoDigitalModule,
+    AuditoriasModule,
+    AusenciasModule,
+    BbddModule,
+    CalendarioFestivosModule,
+    ClientesModule,
+    CryptoModule,
+    CuadrantesModule,
+    EmailModule,
+    EvaluacionesModule,
+    FichajesModule,
+    FichajesValidadosModule,
+    FichajesBcModule,
   ],
   controllers: [
     AppController,
     AnunciosController,
     TrabajadoresController,
     TiendasController,
-    VacacionesController,
     TestController,
     CuadrantesController,
     FichajesController,
@@ -127,10 +156,9 @@ import { TrabajadorDatabaseService } from "./trabajadores/trabajadores.database"
     FichajesDatabase,
     Fichajes,
     EmailClass,
-    Trabajador,
+    TrabajadorService,
     Ausencias,
     AusenciasDatabase,
-    Vacaciones,
     FirebaseMessagingService,
     Notificaciones,
     NotificacionsBbdd,
@@ -139,7 +167,7 @@ import { TrabajadorDatabaseService } from "./trabajadores/trabajadores.database"
     FichajesValidados,
     Admin,
     FichajesValidadosDatabase,
-    AuthService,
+    FirebaseService,
     PermisosClass,
     TarjetaCliente,
     CryptoClass,
@@ -167,5 +195,6 @@ import { TrabajadorDatabaseService } from "./trabajadores/trabajadores.database"
     TiendaDatabaseService,
     TrabajadorDatabaseService,
   ],
+  exports: [PrismaService, FacTenaMssql],
 })
 export class AppModule {}

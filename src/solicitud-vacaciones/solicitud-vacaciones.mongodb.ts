@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { MongoDbService } from "../bbdd/mongodb";
+import { MongoDbService } from "../bbdd/mongodb.service";
 import { SolicitudVacaciones } from "./solicitud-vacaciones.interface";
 import { ObjectId } from "mongodb";
 import { DateTime } from "luxon";

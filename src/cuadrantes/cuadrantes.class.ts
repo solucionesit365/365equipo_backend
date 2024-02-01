@@ -4,13 +4,13 @@ import { CuadrantesDatabase } from "./cuadrantes.mongodb";
 import { ObjectId, WithId } from "mongodb";
 import { TCuadrante, TRequestCuadrante } from "./cuadrantes.interface";
 import { Tienda } from "../tiendas/tiendas.class";
-import { FacTenaMssql } from "../bbdd/mssql.class";
+import { FacTenaMssql } from "../bbdd/factenamssql.service";
 import { AusenciaInterface } from "../ausencias/ausencias.interface";
-import { Trabajador } from "../trabajadores/trabajadores.class";
-
+import { TrabajadorService } from "../trabajadores/trabajadores.class";
 import { FichajesValidados } from "../fichajes-validados/fichajes-validados.class";
 import { DateTime } from "luxon";
 import { TrabajadorCompleto } from "../trabajadores/trabajadores.interface";
+import { ContratoService } from "../contrato/contrato.service";
 
 moment.locale("custom", {
   week: {
@@ -22,10 +22,11 @@ moment.locale("custom", {
 export class Cuadrantes {
   constructor(
     private readonly schCuadrantes: CuadrantesDatabase,
+    private readonly contratoService: ContratoService,
     private readonly tiendasInstance: Tienda,
     private readonly hitInstance: FacTenaMssql,
-    @Inject(forwardRef(() => Trabajador))
-    private readonly trabajadoresInstance: Trabajador,
+    @Inject(forwardRef(() => TrabajadorService))
+    private readonly trabajadoresInstance: TrabajadorService,
     private readonly fichajesValidadosInstance: FichajesValidados,
   ) {}
 
@@ -77,11 +78,10 @@ export class Cuadrantes {
     let diaActual = inicioSemana;
     const diasCompletos: WithId<TCuadrante>[] = [];
 
-    const horasContrato =
-      await this.trabajadoresInstance.getHorasContratoByIdNew(
-        idTrabajador,
-        inicioSemana,
-      );
+    const horasContrato = await this.contratoService.getHorasContratoByIdNew(
+      idTrabajador,
+      inicioSemana,
+    );
 
     while (diaActual <= finalSemana) {
       // Cuenta cuántas veces el día actual aparece en arrayCuadrantes
@@ -311,12 +311,13 @@ export class Cuadrantes {
       const usuarioActual =
         await this.trabajadoresInstance.getTrabajadorBySqlId(idSql);
       const horasContratoCurrentUser =
-        await this.trabajadoresInstance.getHorasContratoByIdNew(
+        await this.contratoService.getHorasContratoByIdNew(
           idSql,
           fechaInicioSemana,
         );
-      usuarioActual.horasContrato = horasContratoCurrentUser;
-      equipoCompleto.push(usuarioActual);
+      (usuarioActual.contratos[0].horasContrato =
+        (horasContratoCurrentUser * 100) / 40),
+        equipoCompleto.push(usuarioActual);
     }
 
     const cuadrantes: TCuadrante[] = await this.schCuadrantes.getCuadrantes(
@@ -332,7 +333,8 @@ export class Cuadrantes {
       for (let j = 0; j < cuadrantes.length; j += 1) {
         if (equipoCompleto[i].id === cuadrantes[j].idTrabajador) {
           hayUno = true;
-          cuadrantes[j]["horasContrato"] = equipoCompleto[i].horasContrato;
+          cuadrantes[j]["horasContrato"] =
+            (equipoCompleto[i].contratos[0].horasContrato * 40) / 100;
 
           break;
         }
@@ -347,7 +349,8 @@ export class Cuadrantes {
           totalHoras: 0,
           enviado: false,
           historialPlanes: [],
-          horasContrato: equipoCompleto[i].horasContrato,
+          horasContrato:
+            (equipoCompleto[i].contratos[0].horasContrato * 40) / 100,
           idPlan: null,
           inicio: undefined,
           final: undefined,
@@ -377,7 +380,8 @@ export class Cuadrantes {
           await this.trabajadoresInstance.getTrabajadorBySqlId(
             cuadrantes[i].idTrabajador,
           );
-        cuadrantes[i].horasContrato = trabajadorCuadrante.horasContrato;
+        cuadrantes[i].horasContrato =
+          (Number(trabajadorCuadrante.contratos[0].horasContrato) * 40) / 100;
       }
     }
 
@@ -636,7 +640,8 @@ export class Cuadrantes {
           totalHoras: 0,
           enviado: false,
           historialPlanes: [],
-          horasContrato: trabajador.horasContrato,
+          horasContrato:
+            (Number(trabajador.contratos[0].horasContrato) * 40) / 100,
           bolsaHorasInicial: null, // OJO, MIRAR ESTO BIEN 3.0
           ausencia: {
             tipo: ausencia.tipo,
@@ -656,7 +661,7 @@ export class Cuadrantes {
   getRole(
     usuario: TrabajadorCompleto,
   ): "DEPENDIENTA" | "COORDINADORA" | "SUPERVISORA" {
-    if (usuario.coordinadora) {
+    if (usuario.llevaEquipo) {
       return usuario.idTienda ? "COORDINADORA" : "SUPERVISORA";
     } else if (usuario.idTienda) {
       return "DEPENDIENTA";

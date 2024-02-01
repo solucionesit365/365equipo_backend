@@ -1,17 +1,17 @@
 import { Injectable, Inject, forwardRef } from "@nestjs/common";
 import { FichajesValidadosDatabase } from "./fichajes-validados.mongodb";
-import { Trabajador } from "../trabajadores/trabajadores.class";
+import { TrabajadorService } from "../trabajadores/trabajadores.class";
 import { WithId } from "mongodb";
 import { DateTime } from "luxon";
 import { FichajeValidadoDto } from "./fichajes-validados.dto";
-import { TrabajadorCompleto } from "../trabajadores/trabajadores.interface";
+import { Trabajador } from "@prisma/client";
 
 @Injectable()
 export class FichajesValidados {
   constructor(
     private readonly schFichajesValidados: FichajesValidadosDatabase,
-    @Inject(forwardRef(() => Trabajador))
-    private readonly trabajadoresInstance: Trabajador,
+    @Inject(forwardRef(() => TrabajadorService))
+    private readonly trabajadoresInstance: TrabajadorService,
   ) {}
 
   async addFichajesValidados(fichajeValidado: FichajeValidadoDto) {
@@ -139,7 +139,7 @@ export class FichajesValidados {
   async resumenSemana(fecha: Date, idTienda: number) {
     const lunes = DateTime.fromJSDate(fecha).startOf("week");
     const domingo = DateTime.fromJSDate(fecha).endOf("week");
-    const responsable: TrabajadorCompleto =
+    const responsable: Trabajador =
       await this.trabajadoresInstance.getResponsableTienda(idTienda);
     const subordinados = await this.trabajadoresInstance.getSubordinadosById(
       responsable.id,
@@ -214,7 +214,6 @@ export class FichajesValidados {
     fechaInicio: DateTime,
     fechaFinal: DateTime,
   ) {
-
     const resFichajesValidados =
       await this.schFichajesValidados.getFichajesValidadosTrabajadorTiendaRango(
         idTrabajador,

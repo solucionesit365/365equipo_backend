@@ -5,12 +5,12 @@ import {
   UnauthorizedException,
 } from "@nestjs/common";
 import { TokenService } from "../get-token/get-token.service";
-import { AuthService } from "../firebase/auth";
+import { FirebaseService } from "../firebase/auth";
 
 @Injectable()
 export class AdminGuard implements CanActivate {
   constructor(
-    private readonly authInstance: AuthService,
+    private readonly authInstance: FirebaseService,
     private readonly tokenService: TokenService,
   ) {}
 

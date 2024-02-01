@@ -10,17 +10,16 @@ import {
 import { SchedulerGuard } from "../scheduler/scheduler.guard";
 import { TokenService } from "../get-token/get-token.service";
 import { FirebaseMessagingService } from "../firebase/firebase-messaging.service";
-import { Trabajador } from "./trabajadores.class";
-import { AuthService } from "../firebase/auth";
+import { TrabajadorService } from "./trabajadores.class";
+import { FirebaseService } from "../firebase/auth";
 import { AdminGuard } from "../auth/admin.guard";
-import { uploadFoto } from "./trabajadores.mssql";
 import { AuthGuard } from "src/auth/auth.guard";
 
 @Controller("trabajadores")
 export class TrabajadoresController {
   constructor(
-    private readonly authInstance: AuthService,
-    private readonly trabajadorInstance: Trabajador,
+    private readonly authInstance: FirebaseService,
+    private readonly trabajadorInstance: TrabajadorService,
     private readonly tokenService: TokenService,
     private readonly messagingService: FirebaseMessagingService,
   ) {}
@@ -90,24 +89,6 @@ export class TrabajadoresController {
     }
   }
 
-  @Get("getHistoricoContratos")
-  async getHistoricoContratos(
-    @Headers("authorization") authHeader: string,
-    @Query() { dni },
-  ) {
-    try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
-
-      const resUser = await this.trabajadorInstance.getHistoricosContratos(dni);
-
-      return { ok: true, data: resUser };
-    } catch (error) {
-      console.log(error);
-      return { ok: false, message: error.message };
-    }
-  }
-
   @Get("validarQR")
   async validarQRTrabajador(@Query() { idTrabajador, tokenQR }) {
     try {
@@ -165,20 +146,6 @@ export class TrabajadoresController {
       return {
         ok: true,
         data: await this.trabajadorInstance.sincronizarConHit(),
-      };
-    } catch (err) {
-      console.log(err);
-      return { ok: false, message: err.message };
-    }
-  }
-
-  @Get("descargarHistoriaContratos")
-  @UseGuards(SchedulerGuard)
-  async descargarHistoriaContratos() {
-    try {
-      return {
-        ok: true,
-        data: await this.trabajadorInstance.descargarHistoriaContratos(),
       };
     } catch (err) {
       console.log(err);

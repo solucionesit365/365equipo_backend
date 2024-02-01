@@ -1,12 +1,12 @@
 import { Controller, Get, Headers, Query } from "@nestjs/common";
 import { TokenService } from "../get-token/get-token.service";
 import { Nominas } from "./nominas.class";
-import { AuthService } from "../firebase/auth";
+import { FirebaseService } from "../firebase/auth";
 
 @Controller("nominas")
 export class NominasController {
   constructor(
-    private readonly authInstance: AuthService,
+    private readonly authInstance: FirebaseService,
     private readonly tokenService: TokenService,
     private readonly nominaInstance: Nominas,
   ) {}

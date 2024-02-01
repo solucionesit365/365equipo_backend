@@ -12,13 +12,13 @@ import { VerificacionMFA } from "./verificacionmfa.interface";
 import { VerificacionClass } from "./verificacionmfa.class";
 import { AuthGuard } from "../auth/auth.guard";
 import { EmailClass } from "src/email/email.class";
-import { AuthService } from "../firebase/auth";
+import { FirebaseService } from "../firebase/auth";
 
 @Controller("verificacionmfa")
 export class VerificacionmfaController {
   constructor(
     private readonly verificacionInstance: VerificacionClass,
-    private readonly authInstance: AuthService,
+    private readonly authInstance: FirebaseService,
     private readonly email: EmailClass,
   ) {}
 

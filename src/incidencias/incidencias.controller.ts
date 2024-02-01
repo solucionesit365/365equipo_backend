@@ -9,20 +9,20 @@ import {
 } from "@nestjs/common";
 import { AuthGuard } from "../auth/auth.guard";
 import { TokenService } from "../get-token/get-token.service";
-import { AuthService } from "../firebase/auth";
+import { FirebaseService } from "../firebase/auth";
 import { Incidencia } from "./incidencias.class";
 import { Incidencias, IncidenciasInvitado } from "./incidencias.interface";
-import { Notificaciones } from "src/notificaciones/notificaciones.class";
-import { Trabajador } from "../trabajadores/trabajadores.class";
+import { Notificaciones } from "../notificaciones/notificaciones.class";
+import { TrabajadorService } from "../trabajadores/trabajadores.class";
 
 @Controller("incidencias")
 export class IncidenciasController {
   constructor(
-    private readonly authInstance: AuthService,
+    private readonly authInstance: FirebaseService,
     private readonly tokenService: TokenService,
     private readonly incidenciaInstance: Incidencia,
     private readonly notificaciones: Notificaciones,
-    private readonly trabajadores: Trabajador,
+    private readonly trabajadores: TrabajadorService,
   ) {}
 
   @Post("nuevaIncidencia")

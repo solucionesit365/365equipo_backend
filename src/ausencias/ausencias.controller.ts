@@ -10,13 +10,13 @@ import { Ausencias } from "./ausencias.class";
 import { AusenciaInterface } from "./ausencias.interface";
 import { AuthGuard } from "../auth/auth.guard";
 import { TokenService } from "../get-token/get-token.service";
-import { AuthService } from "../firebase/auth";
+import { FirebaseService } from "../firebase/auth";
 
 @Controller("ausencias")
 export class AusenciasController {
   constructor(
     private readonly ausenciasInstance: Ausencias,
-    private readonly authInstance: AuthService,
+    private readonly authInstance: FirebaseService,
     private readonly tokenService: TokenService,
   ) {}
 

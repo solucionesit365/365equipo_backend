@@ -1,14 +1,13 @@
 import { Injectable, Inject, forwardRef } from "@nestjs/common";
-
-import { Trabajador } from "../trabajadores/trabajadores.class";
-import { TrabajadorSql } from "../trabajadores/trabajadores.interface";
+import { Trabajador } from "@prisma/client";
+import { TrabajadorService } from "../trabajadores/trabajadores.class";
 import { TiendaDatabaseService } from "./tiendas.database";
 
 @Injectable()
 export class Tienda {
   constructor(
-    @Inject(forwardRef(() => Trabajador))
-    private readonly trabajadoresInstance: Trabajador,
+    @Inject(forwardRef(() => TrabajadorService))
+    private readonly trabajadoresInstance: TrabajadorService,
     private readonly schTiendas: TiendaDatabaseService,
   ) {}
 
@@ -44,7 +43,7 @@ export class Tienda {
     return false;
   }
 
-  async getTiendasResponsable(trabajador: TrabajadorSql) {
+  async getTiendasResponsable(trabajador: Trabajador) {
     const arrayTrabajadores =
       await this.trabajadoresInstance.getSubordinadosConTienda(
         trabajador.idApp,

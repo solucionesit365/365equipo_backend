@@ -14,18 +14,20 @@ import { TokenService } from "../get-token/get-token.service";
 import { Cuadrantes } from "./cuadrantes.class";
 import { TCuadrante, TRequestCuadrante } from "./cuadrantes.interface";
 import { SchedulerGuard } from "../scheduler/scheduler.guard";
-import { AuthService } from "../firebase/auth";
-import { Trabajador } from "../trabajadores/trabajadores.class";
+import { FirebaseService } from "../firebase/auth";
+import { TrabajadorService } from "../trabajadores/trabajadores.class";
 import { DateTime } from "luxon";
 import { ObjectId } from "mongodb";
+import { ContratoService } from "../contrato/contrato.service";
 
 @Controller("cuadrantes")
 export class CuadrantesController {
   constructor(
-    private readonly authInstance: AuthService,
+    private readonly authInstance: FirebaseService,
     private readonly tokenService: TokenService,
     private readonly cuadrantesInstance: Cuadrantes,
-    private readonly trabajadoresInstance: Trabajador,
+    private readonly contratoService: ContratoService,
+    private readonly trabajadoresInstance: TrabajadorService,
   ) {}
 
   @Get()
@@ -96,7 +98,7 @@ export class CuadrantesController {
 
       if (!fecha || !idTrabajador) throw Error("Faltan datos");
 
-      if (usuario.coordinadora && usuario.idTienda) {
+      if (usuario.llevaEquipo && usuario.idTienda) {
         const fechaInicio = DateTime.fromJSDate(new Date(fecha)).startOf(
           "week",
         );
@@ -271,7 +273,7 @@ export class CuadrantesController {
           reqCuadrante.idTrabajador,
         );
 
-      if (usuario.coordinadora && usuario.idTienda) {
+      if (usuario.llevaEquipo && usuario.idTienda) {
         const fechaInicio = DateTime.fromJSDate(
           new Date(reqCuadrante.fecha),
         ).startOf("week");
@@ -309,7 +311,7 @@ export class CuadrantesController {
           }
 
           const horasContractuales =
-            (await this.trabajadoresInstance.getHorasContratoByIdNew(
+            (await this.contratoService.getHorasContratoByIdNew(
               reqCuadrante.idTrabajador,
               fechaInicio,
             )) as number;

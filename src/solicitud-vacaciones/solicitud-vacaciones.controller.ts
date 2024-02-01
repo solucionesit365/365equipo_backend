@@ -9,23 +9,22 @@ import {
 } from "@nestjs/common";
 import { AuthGuard } from "../auth/auth.guard";
 import { TokenService } from "../get-token/get-token.service";
-import { AuthService } from "../firebase/auth";
+import { FirebaseService } from "../firebase/auth";
 import { solicitudesVacacionesClass } from "./solicitud-vacaciones.class";
 import { SolicitudVacaciones } from "./solicitud-vacaciones.interface";
 import { EmailClass } from "src/email/email.class";
-import { Trabajador } from "../trabajadores/trabajadores.class";
+import { TrabajadorService } from "../trabajadores/trabajadores.class";
 import { Notificaciones } from "src/notificaciones/notificaciones.class";
-import { ObjectId } from "mongodb";
 
 @Controller("solicitud-vacaciones")
 export class SolicitudVacacionesController {
   constructor(
-    private readonly authInstance: AuthService,
+    private readonly authInstance: FirebaseService,
     private readonly tokenService: TokenService,
     private readonly solicitudVacacionesInstance: solicitudesVacacionesClass,
     private readonly notificaciones: Notificaciones,
     private readonly email: EmailClass,
-    private readonly trabajadorInstance: Trabajador,
+    private readonly trabajadorInstance: TrabajadorService,
   ) {}
 
   //Nueva solicitud de vacaciones
@@ -194,7 +193,7 @@ export class SolicitudVacacionesController {
 
       if (empleadosTipoCoordi.length > 0) {
         for (let i = 0; i < empleadosTipoCoordi.length; i++) {
-          if (empleadosTipoCoordi[i].llevaEquipo > 0) {
+          if (empleadosTipoCoordi[i].llevaEquipo) {
             // Caso coordinadora
             const solicitudesSubordinadosCoordinadora =
               await this.solicitudVacacionesInstance.getsolicitudesSubordinados(

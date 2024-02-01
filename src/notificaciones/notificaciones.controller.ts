@@ -10,7 +10,7 @@ import { FirebaseMessagingService } from "../firebase/firebase-messaging.service
 import { Notificaciones } from "./notificaciones.class";
 import { AuthGuard } from "../auth/auth.guard";
 import { TokenService } from "../get-token/get-token.service";
-import { AuthService } from "../firebase/auth";
+import { FirebaseService } from "../firebase/auth";
 import { log } from "console";
 
 @Controller("notificaciones")
@@ -19,7 +19,7 @@ export class NotificacionesController {
     private readonly messagingService: FirebaseMessagingService,
     private readonly notificacionesInstance: Notificaciones,
     private readonly tokenService: TokenService,
-    private readonly authInstance: AuthService,
+    private readonly authInstance: FirebaseService,
   ) {}
 
   @Post("send")

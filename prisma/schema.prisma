@@ -61,7 +61,7 @@ model Empresa {
 
 model Contrato {
   id              Int         @id @default(autoincrement())
-  horasContrato   Decimal
+  horasContrato   Float
   inicioContrato  DateTime
   finalContrato   DateTime?
   fechaAlta       DateTime

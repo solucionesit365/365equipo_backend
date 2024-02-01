@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import * as moment from "moment";
 import { ObjectId } from "mongodb";
-import { MongoDbService } from "../bbdd/mongodb";
+import { MongoDbService } from "../bbdd/mongodb.service";
 import { AnuncioDto, UpdateAnuncioDto } from "./anuncios.dto";
 
 @Injectable()

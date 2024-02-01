@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
-import { MongoDbService } from "../bbdd/mongodb";
-import { FacTenaMssql } from "../bbdd/mssql.class";
+import { MongoDbService } from "../bbdd/mongodb.service";
+import { FacTenaMssql } from "../bbdd/factenamssql.service";
 
 @Injectable()
 export class NominasDatabase {

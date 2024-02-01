@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
-import { MongoDbService } from "../bbdd/mongodb";
+import { MongoDbService } from "../bbdd/mongodb.service";
 import { FichajeDto } from "./fichajes.interface";
-import { FacTenaMssql } from "../bbdd/mssql.class";
+import { FacTenaMssql } from "../bbdd/factenamssql.service";
 import * as moment from "moment";
 import { ObjectId } from "mongodb";
 import { DateTime } from "luxon";

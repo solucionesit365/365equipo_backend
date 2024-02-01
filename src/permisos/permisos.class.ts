@@ -1,11 +1,11 @@
 import { Injectable, Inject, forwardRef } from "@nestjs/common";
-import { AuthService, auth } from "../firebase/auth";
+import { FirebaseService, auth } from "../firebase/auth";
 
 @Injectable()
 export class PermisosClass {
   constructor(
-    @Inject(forwardRef(() => AuthService))
-    private readonly authInstance: AuthService,
+    @Inject(forwardRef(() => FirebaseService))
+    private readonly authInstance: FirebaseService,
   ) {}
 
   /* Eliminar esta función y dejar solo la del AdminGuard */

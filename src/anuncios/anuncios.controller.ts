@@ -2,16 +2,16 @@ import { Controller, Post, Get, Body, Headers } from "@nestjs/common";
 import { TokenService } from "../get-token/get-token.service";
 import { AnunciosClass } from "./anuncios.class";
 import { AnuncioDto, UpdateAnuncioDto } from "./anuncios.dto";
-import { AuthService } from "../firebase/auth";
-import { Trabajador } from "../trabajadores/trabajadores.class";
+import { FirebaseService } from "../firebase/auth";
+import { TrabajadorService } from "../trabajadores/trabajadores.class";
 import { Notificaciones } from "src/notificaciones/notificaciones.class";
 
 @Controller("anuncios")
 export class AnunciosController {
   constructor(
     private readonly notificaciones: Notificaciones,
-    private readonly trabajadores: Trabajador,
-    private readonly authInstance: AuthService,
+    private readonly trabajadores: TrabajadorService,
+    private readonly authInstance: FirebaseService,
     private readonly tokenService: TokenService,
     private readonly anunciosInstance: AnunciosClass,
   ) {}
@@ -24,7 +24,7 @@ export class AnunciosController {
 
       const usuario = await this.authInstance.getUserWithToken(token);
 
-      if (usuario.coordinadora && !usuario.idTienda) {
+      if (usuario.llevaEquipo && !usuario.idTienda) {
         return {
           ok: true,
           data: await this.anunciosInstance.getAnuncios(),

@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { MongoDbService } from "../bbdd/mongodb";
+import { MongoDbService } from "../bbdd/mongodb.service";
 import { VerificacionMFA } from "./verificacionmfa.interface";
 import { ObjectId } from "mongodb";
 @Injectable()

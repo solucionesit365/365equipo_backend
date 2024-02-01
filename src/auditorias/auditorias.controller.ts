@@ -9,7 +9,7 @@ import {
 } from "@nestjs/common";
 import { AuthGuard } from "../auth/auth.guard";
 import { TokenService } from "../get-token/get-token.service";
-import { AuthService } from "../firebase/auth";
+import { FirebaseService } from "../firebase/auth";
 import {
   AuditoriasInterface,
   AuditoriaRespuestas,
@@ -20,7 +20,7 @@ import { Tienda } from "src/tiendas/tiendas.class";
 @Controller("auditorias")
 export class AuditoriasController {
   constructor(
-    private readonly authInstance: AuthService,
+    private readonly authInstance: FirebaseService,
     private readonly tokenService: TokenService,
     private readonly auditoriaInstance: Auditorias,
     private readonly tiendasInstance: Tienda,

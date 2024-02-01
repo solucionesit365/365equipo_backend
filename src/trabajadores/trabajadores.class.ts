@@ -1,19 +1,17 @@
 import { Injectable, Inject, forwardRef } from "@nestjs/common";
-import * as moment from "moment";
 import { EmailClass } from "../email/email.class";
-import { AuthService, auth } from "../firebase/auth";
+import { FirebaseService, auth } from "../firebase/auth";
 import { TrabajadorCompleto } from "./trabajadores.interface";
 import { PermisosClass } from "../permisos/permisos.class";
 import { DateTime } from "luxon";
 import { solicitudesVacacionesClass } from "../solicitud-vacaciones/solicitud-vacaciones.class";
 import { TrabajadorDatabaseService } from "./trabajadores.database";
-// import { PrismaService } from "../prisma/prisma.service";
 
 @Injectable()
-export class Trabajador {
+export class TrabajadorService {
   constructor(
-    @Inject(forwardRef(() => AuthService))
-    private readonly authInstance: AuthService,
+    @Inject(forwardRef(() => FirebaseService))
+    private readonly authInstance: FirebaseService,
     private readonly permisosInstance: PermisosClass,
     @Inject(forwardRef(() => EmailClass))
     private readonly emailInstance: EmailClass,
@@ -41,11 +39,13 @@ export class Trabajador {
   async getTrabajadorBySqlId(id: number) {
     const resUser = await this.schTrabajadores.getTrabajadorBySqlId(id);
     if (resUser) return resUser;
-    throw Error("No se ha podido obtener la información del usuario. id: " + id);
+    throw Error(
+      "No se ha podido obtener la información del usuario. id: " + id,
+    );
   }
 
-  async getTrabajadores(todos = false) {
-    const arrayTrabajadores = await this.schTrabajadores.getTrabajadores(todos);
+  async getTrabajadores() {
+    const arrayTrabajadores = await this.schTrabajadores.getTrabajadores();
 
     if (arrayTrabajadores) return arrayTrabajadores;
     return [];
@@ -79,7 +79,7 @@ export class Trabajador {
     return await this.schTrabajadores.getSubordinados(uid);
   }
 
-  async getSubordinadosById(id: number, conFecha?: moment.Moment) {
+  async getSubordinadosById(id: number, conFecha?: DateTime) {
     return await this.schTrabajadores.getSubordinadosById(id, conFecha);
   }
 
@@ -102,7 +102,7 @@ export class Trabajador {
   }
 
   async sincronizarConHit() {
-    const usuariosApp = await this.getTrabajadores(true);
+    const usuariosApp = await this.getTrabajadores();
     const usuariosHit = await this.descargarTrabajadoresHit();
 
     const modificarEnApp = [];
@@ -174,7 +174,6 @@ export class Trabajador {
     });
 
     const totales = await this.schTrabajadores.actualizarUsuarios(
-      "soluciones",
       usuariosNuevos,
       modificarEnApp,
     );
@@ -197,7 +196,7 @@ export class Trabajador {
     dni = dni.trim().toUpperCase();
     const datosUsuario = await this.schTrabajadores.getTrabajadorByDni(dni);
 
-    if (!moment(datosUsuario.inicioContrato, "DD/MM/YYYY").isValid())
+    if (!DateTime.fromJSDate(datosUsuario.contratos[0].inicioContrato).isValid)
       throw Error("Fecha de inicio de contrato incorrecta");
 
     const arrayEmails = datosUsuario.emails.split(";");
@@ -323,34 +322,7 @@ export class Trabajador {
     return await this.schTrabajadores.getCoordinadoras();
   }
 
-  async descargarHistoriaContratos() {
-    return await this.schTrabajadores.copiarHistoriaContratosHitSoluciones();
-  }
-
-  async getHistoricosContratos(dni: string) {
-    const resUser = await this.schTrabajadores.getHistoricoContratos(dni);
-    if (resUser) return resUser;
-    throw Error("No se ha podido obtener la información del usuario");
-  }
-
-  async getHorasContratoById(idSql: number, fecha: moment.Moment) {
-    return await this.schTrabajadores.getHorasContrato(idSql, fecha);
-  }
-
-  /* Cuadrantes 2.0 */
-  async getHorasContratoByIdNew(idSql: number, fecha: DateTime) {
-    return await this.schTrabajadores.getHorasContratoNew(idSql, fecha);
-  }
-
   async uploadFoto(displayFoto: string, uid: string) {
     return await this.schTrabajadores.uploadFoto(displayFoto, uid);
   }
-
-  // async testInsert() {
-  //   this.prisma.trabajador.create({
-  //     data: {
-
-  //     }
-  //   })
-  // }
 }

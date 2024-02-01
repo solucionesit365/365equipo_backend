@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { MongoDbService } from "../bbdd/mongodb";
+import { MongoDbService } from "../bbdd/mongodb.service";
 import { ObjectId } from "mongodb";
 import { DateTime } from "luxon";
 import { FichajeValidadoDto } from "./fichajes-validados.dto";

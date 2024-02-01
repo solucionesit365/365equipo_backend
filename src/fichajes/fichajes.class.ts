@@ -1,11 +1,8 @@
 import { Injectable } from "@nestjs/common";
 import { FichajesDatabase } from "./fichajes.mongodb";
-import { Trabajador } from "../trabajadores/trabajadores.class";
-import {
-  Subordinado,
-  TrabajadorCompleto,
-  TrabajadorSql,
-} from "../trabajadores/trabajadores.interface";
+import { TrabajadorService } from "../trabajadores/trabajadores.class";
+import { TrabajadorCompleto } from "../trabajadores/trabajadores.interface";
+import { Trabajador } from "@prisma/client";
 import * as moment from "moment";
 import { ObjectId, WithId } from "mongodb";
 import { FichajeDto, ParFichaje } from "./fichajes.interface";
@@ -16,7 +13,7 @@ import { DateTime } from "luxon";
 export class Fichajes {
   constructor(
     private readonly schFichajes: FichajesDatabase,
-    private readonly trabajadoresInstance: Trabajador,
+    private readonly trabajadoresInstance: TrabajadorService,
     private readonly cuadrantesInstance: Cuadrantes,
   ) {}
 
@@ -76,7 +73,7 @@ export class Fichajes {
     await this.schFichajes.enviarHit(fichajesPendientes);
   }
 
-  filtrarUidFichajeTrabajador(fichajeHit: any, trabajadores: TrabajadorSql[]) {
+  filtrarUidFichajeTrabajador(fichajeHit: any, trabajadores: Trabajador[]) {
     for (let i = 0; i < trabajadores.length; i += 1) {
       if (trabajadores[i].id === Number(fichajeHit.usuari))
         return trabajadores[i].idApp ? trabajadores[i].idApp : "NO_TIENE_APP";
@@ -244,7 +241,7 @@ export class Fichajes {
   }
 
   async getParesSinValidar(
-    arraySubordinados: Subordinado[],
+    arraySubordinados: Trabajador[],
   ): Promise<ParFichaje[]> {
     const paresSinValidar: ParFichaje[] = [];
 

@@ -14,13 +14,13 @@ import {
 } from "./calendario-festivos.interface";
 import { AuthGuard } from "../auth/auth.guard";
 import { TokenService } from "../get-token/get-token.service";
-import { AuthService } from "../firebase/auth";
+import { FirebaseService } from "../firebase/auth";
 
 @Controller("calendario-festivos")
 export class CalendarioFestivosController {
   constructor(
     private readonly calendarioFestivosInstance: CalendarioFestivo,
-    private readonly authInstance: AuthService,
+    private readonly authInstance: FirebaseService,
     private readonly tokenService: TokenService,
   ) {}
 

@@ -11,14 +11,14 @@ import { ArchivoDigital } from "./archivo-digital.class";
 import { ArchivoDigitalInterface } from "./archivo-digital.interface";
 import { AuthGuard } from "../auth/auth.guard";
 import { TokenService } from "../get-token/get-token.service";
-import { AuthService } from "../firebase/auth";
+import { FirebaseService } from "../firebase/auth";
 import moment from "moment";
 
 @Controller("archivo-digital")
 export class ArchivoDigitalController {
   constructor(
     private readonly archivoDigitalInstance: ArchivoDigital,
-    private readonly authInstance: AuthService,
+    private readonly authInstance: FirebaseService,
     private readonly tokenService: TokenService,
   ) {}
 

@@ -1,16 +1,14 @@
 import { Injectable } from "@nestjs/common";
 import { DateTime } from "luxon";
-import { Trabajador } from "../trabajadores/trabajadores.class";
+import { TrabajadorService } from "../trabajadores/trabajadores.class";
 import { FichajesValidados } from "../fichajes-validados/fichajes-validados.class";
-import {
-  TrabajadorCompleto,
-  TrabajadorSql,
-} from "../trabajadores/trabajadores.interface";
+import { TrabajadorCompleto } from "../trabajadores/trabajadores.interface";
+import { Trabajador } from "@prisma/client";
 
 @Injectable()
 export class PactadoVsRealService {
   constructor(
-    private readonly trabajadoresInstance: Trabajador,
+    private readonly trabajadoresInstance: TrabajadorService,
     private readonly fichajesValidadosService: FichajesValidados,
   ) {}
   async pactadoVsReal(
@@ -41,7 +39,7 @@ export class PactadoVsRealService {
       }
     }
 
-    const trabajadoresTienda: TrabajadorSql[] = [];
+    const trabajadoresTienda: Trabajador[] = [];
 
     for (let i = 0; i < idsSubordinados.length; i += 1) {
       const trabajador = await this.trabajadoresInstance.getTrabajadorBySqlId(

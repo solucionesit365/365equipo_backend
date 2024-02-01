@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { MongoDbService } from "../bbdd/mongodb";
+import { MongoDbService } from "../bbdd/mongodb.service";
 import { AusenciaInterface } from "./ausencias.interface";
 import * as moment from "moment";
 import { ObjectId } from "mongodb";

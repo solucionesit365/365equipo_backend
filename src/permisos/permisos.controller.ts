@@ -9,15 +9,14 @@ import {
 } from "@nestjs/common";
 import { AuthGuard } from "../auth/auth.guard";
 import { TokenService } from "../get-token/get-token.service";
-import { AuthService } from "../firebase/auth";
-import { Trabajador } from "../trabajadores/trabajadores.class";
+import { FirebaseService } from "../firebase/auth";
 import { PermisosClass } from "./permisos.class";
 
 @Controller("permisos")
 export class PermisosController {
   constructor(
     private readonly tokenService: TokenService,
-    private readonly authInstance: AuthService,
+    private readonly authInstance: FirebaseService,
     private readonly permisosInstance: PermisosClass,
   ) {}
   @Get("listaCompleta")

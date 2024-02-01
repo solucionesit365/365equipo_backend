@@ -1,5 +1,5 @@
 import { Controller, Post, UseGuards } from "@nestjs/common";
-import { MongoDbService } from "../bbdd/mongodb";
+import { MongoDbService } from "../bbdd/mongodb.service";
 import { MantenimientoDto } from "./mantenimiento.interface";
 import { SchedulerGuard } from "../scheduler/scheduler.guard";
 
