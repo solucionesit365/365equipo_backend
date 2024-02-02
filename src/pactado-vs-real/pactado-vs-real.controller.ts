@@ -36,10 +36,15 @@ export class PactadoVsRealController {
     const inicio = DateTime.fromJSDate(fechaInicio);
     const idTiendaNumber = Number(usuarioRequest.idTienda);
 
-    return this.pactadoRealService.pactadoVsReal(
+    const result = await this.pactadoRealService.pactadoVsReal(
       usuarioRequest,
       inicio.startOf("week"),
       idTiendaNumber,
     );
+
+    return { ok: true, data: result };
+  }
+  catch(error) {
+    return { ok: false, message: error.message };
   }
 }
