@@ -19,6 +19,14 @@ export class cultura365Class {
     return response;
   }
 
+  async updateVideo(video: cultura365Interface) {
+    return await this.videosDB.updatevideo(video);
+  }
+
+  async deleteVideo(_id: string) {
+    return await this.videosDB.deleteVideo(_id);
+  }
+
   async incrementarContadorViews(videoId: string) {
     return await this.videosDB.incrementarContadorViews(videoId);
   }
