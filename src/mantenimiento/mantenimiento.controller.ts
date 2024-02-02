@@ -1,11 +1,11 @@
 import { Controller, Post, UseGuards } from "@nestjs/common";
-import { MongoDbService } from "../bbdd/mongodb.service";
+import { MongoService } from "../mongo/mongo.service";
 import { MantenimientoDto } from "./mantenimiento.interface";
 import { SchedulerGuard } from "../guards/scheduler.guard";
 
 @Controller("mantenimiento")
 export class MantenimientoController {
-  constructor(private readonly mongoDbService: MongoDbService) {}
+  constructor(private readonly mongoDbService: MongoService) {}
 
   @Post("getEstado")
   async getEstado() {

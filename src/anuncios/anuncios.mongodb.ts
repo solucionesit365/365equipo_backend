@@ -1,12 +1,12 @@
 import { Injectable } from "@nestjs/common";
 import * as moment from "moment";
 import { ObjectId } from "mongodb";
-import { MongoDbService } from "../bbdd/mongodb.service";
+import { MongoService } from "../mongo/mongo.service";
 import { AnuncioDto, UpdateAnuncioDto } from "./anuncios.dto";
 
 @Injectable()
 export class AnunciosService {
-  constructor(private readonly mongoDbService: MongoDbService) {
+  constructor(private readonly mongoDbService: MongoService) {
     // Llamando al método para configurar el índice TTL cuando se instancia el servicio
     this.deleteAnunciosCaducidad().catch((err) => {
       console.error("Error setting up TTL index:", err);
@@ -19,7 +19,7 @@ export class AnunciosService {
     const anuncios = db.collection<AnuncioDto>("anuncios");
 
     // Creando el índice TTL para la propiedad 'caducidad'
-    await anuncios.createIndex({ "caducidad": 1 }, { expireAfterSeconds: 0 });
+    await anuncios.createIndex({ caducidad: 1 }, { expireAfterSeconds: 0 });
   }
 
   async getAnuncios(idTienda: number) {

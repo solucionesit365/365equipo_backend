@@ -1,12 +1,12 @@
 import { Injectable } from "@nestjs/common";
-import { MongoDbService } from "../bbdd/mongodb.service";
+import { MongoService } from "../mongo/mongo.service";
 import { SolicitudVacaciones } from "./solicitud-vacaciones.interface";
 import { ObjectId } from "mongodb";
 import { DateTime } from "luxon";
 
 @Injectable()
 export class SolicitudVacacionesBdd {
-  constructor(private readonly mongoDbService: MongoDbService) {}
+  constructor(private readonly mongoDbService: MongoService) {}
 
   //Nueva solicitud de vacaciones
   async nuevaSolicitudVacaciones(solicitudVacaciones: SolicitudVacaciones) {

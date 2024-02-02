@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { MongoDbService } from "../bbdd/mongodb.service";
+import { MongoService } from "../mongo/mongo.service";
 import { TCuadrante } from "./cuadrantes.interface";
 import * as moment from "moment";
 import { ObjectId } from "mongodb";
@@ -16,7 +16,7 @@ moment.locale("es", {
 
 @Injectable()
 export class CuadrantesDatabase {
-  constructor(private readonly mongoDbService: MongoDbService) {}
+  constructor(private readonly mongoDbService: MongoService) {}
 
   // Cuadrantes 2.0
   async insertCuadrante(cuadrante: TCuadrante) {

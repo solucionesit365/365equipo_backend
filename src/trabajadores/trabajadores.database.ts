@@ -2,13 +2,13 @@ import { Injectable } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { DateTime } from "luxon";
 import { TrabajadorCompleto } from "./trabajadores.interface";
-import { FacTenaMssql } from "../bbdd/factenamssql.service";
+import { HitMssqlService } from "../hit-mssql/hit-mssql.service";
 
 @Injectable()
 export class TrabajadorDatabaseService {
   constructor(
     private prisma: PrismaService,
-    private readonly mssql: FacTenaMssql,
+    private readonly mssql: HitMssqlService,
   ) {}
 
   async getTrabajadorByAppId(uid: string) {

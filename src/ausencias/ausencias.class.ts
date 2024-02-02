@@ -5,14 +5,15 @@ import * as moment from "moment";
 import { ObjectId } from "mongodb";
 import { TiposAusencia } from "../cuadrantes/cuadrantes.interface";
 import { AusenciaInterface } from "./ausencias.interface";
-import { FacTenaMssql } from "../bbdd/factenamssql.service";
+import { HitMssqlService } from "../hit-mssql/hit-mssql.service";
+HitMssqlService;
 
 @Injectable()
 export class Ausencias {
   constructor(
     private readonly schAusencias: AusenciasDatabase,
     private readonly cuadrantesInstance: Cuadrantes,
-    private readonly facTenaService: FacTenaMssql,
+    private readonly facTenaService: HitMssqlService,
   ) {}
 
   // Cuadrantes 2.0

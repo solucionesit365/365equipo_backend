@@ -1,12 +1,12 @@
 import { Injectable } from "@nestjs/common";
-import { MongoDbService } from "../bbdd/mongodb.service";
+import { MongoService } from "../mongo/mongo.service";
 import { AusenciaInterface } from "./ausencias.interface";
 import * as moment from "moment";
 import { ObjectId } from "mongodb";
 
 @Injectable()
 export class AusenciasDatabase {
-  constructor(private readonly mongoDbService: MongoDbService) {}
+  constructor(private readonly mongoDbService: MongoService) {}
 
   async nuevaAusencia(ausencia: AusenciaInterface) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");

@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { MongoDbService } from "../bbdd/mongodb.service";
+import { MongoService } from "../mongo/mongo.service";
 import {
   CalendarioFestivosInterface,
   eventoNavideño,
@@ -8,7 +8,7 @@ import { ObjectId } from "mongodb";
 
 @Injectable()
 export class CalendarioFestivosDatabase {
-  constructor(private readonly mongoDbService: MongoDbService) {}
+  constructor(private readonly mongoDbService: MongoService) {}
 
   async nuevoFestivo(festivo: CalendarioFestivosInterface) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");

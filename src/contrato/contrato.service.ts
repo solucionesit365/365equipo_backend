@@ -1,13 +1,13 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
-import { FacTenaMssql } from "../bbdd/factenamssql.service";
+import { HitMssqlService } from "../hit-mssql/hit-mssql.service";
 import { DateTime } from "luxon";
 
 @Injectable()
 export class ContratoService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly mssql: FacTenaMssql,
+    private readonly mssql: HitMssqlService,
   ) {}
 
   async getHistoriaContratos(): Promise<

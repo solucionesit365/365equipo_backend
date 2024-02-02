@@ -3,7 +3,7 @@ import { ConfigService } from "@nestjs/config";
 import { Injectable } from "@nestjs/common";
 
 @Injectable()
-export class MongoDbService {
+export class MongoService {
   private conexion: Promise<MongoClient>;
   //Nueva direccion de base de datos
   constructor(private configService: ConfigService) {

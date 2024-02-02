@@ -1,12 +1,12 @@
 import { Injectable } from "@nestjs/common";
-import { MongoDbService } from "../bbdd/mongodb.service";
-import { FacTenaMssql } from "../bbdd/factenamssql.service";
+import { MongoService } from "../mongo/mongo.service";
+import { HitMssqlService } from "../hit-mssql/hit-mssql.service";
 
 @Injectable()
 export class NominasDatabase {
   constructor(
-    private readonly mongoDbService: MongoDbService,
-    private readonly hitInstance: FacTenaMssql,
+    private readonly mongoDbService: MongoService,
+    private readonly hitInstance: HitMssqlService,
   ) {}
 
   async getNomina(dni: string, idArchivo: string) {

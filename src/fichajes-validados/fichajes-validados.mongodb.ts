@@ -1,12 +1,12 @@
 import { Injectable } from "@nestjs/common";
-import { MongoDbService } from "../bbdd/mongodb.service";
+import { MongoService } from "../mongo/mongo.service";
 import { ObjectId } from "mongodb";
 import { DateTime } from "luxon";
 import { FichajeValidadoDto } from "./fichajes-validados.dto";
 
 @Injectable()
 export class FichajesValidadosDatabase {
-  constructor(private readonly mongoDbService: MongoDbService) {}
+  constructor(private readonly mongoDbService: MongoService) {}
 
   async getTodos() {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");

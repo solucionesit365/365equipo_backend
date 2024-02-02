@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
-import { MongoDbService } from "../bbdd/mongodb.service";
+import { MongoService } from "../mongo/mongo.service";
 import { FichajeDto } from "./fichajes.interface";
-import { FacTenaMssql } from "../bbdd/factenamssql.service";
+import { HitMssqlService } from "../hit-mssql/hit-mssql.service";
 import * as moment from "moment";
 import { ObjectId } from "mongodb";
 import { DateTime } from "luxon";
@@ -13,8 +13,8 @@ import { response } from "express";
 @Injectable()
 export class FichajesDatabase {
   constructor(
-    private readonly mongoDbService: MongoDbService,
-    private readonly hitInstance: FacTenaMssql,
+    private readonly mongoDbService: MongoService,
+    private readonly hitInstance: HitMssqlService,
     private readonly MbctokenService: MbctokenService,
   ) {}
 

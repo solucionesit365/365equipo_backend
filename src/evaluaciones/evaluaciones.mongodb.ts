@@ -1,11 +1,11 @@
 import { Injectable } from "@nestjs/common";
-import { MongoDbService } from "../bbdd/mongodb.service";
+import { MongoService } from "../mongo/mongo.service";
 import { evaluacionesInterface } from "./evaluaciones.interface";
 import { ObjectId } from "mongodb";
 
 @Injectable()
 export class EvaluacionesDatabase {
-  constructor(private readonly mongoDbService: MongoDbService) {}
+  constructor(private readonly mongoDbService: MongoService) {}
 
   async addplantilla(plantilla: evaluacionesInterface) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");

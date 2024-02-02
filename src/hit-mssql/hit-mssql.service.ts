@@ -1,9 +1,8 @@
-// database.service.ts
 import { Injectable, OnModuleInit, OnModuleDestroy } from "@nestjs/common";
 import { ConnectionPool, Request, config as SQLConfig, TYPES } from "mssql";
 
 @Injectable()
-export class FacTenaMssql implements OnModuleInit, OnModuleDestroy {
+export class HitMssqlService implements OnModuleInit, OnModuleDestroy {
   private pool: ConnectionPool;
 
   constructor() {

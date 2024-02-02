@@ -1,12 +1,12 @@
 import { Injectable } from "@nestjs/common";
-import { MongoDbService } from "../bbdd/mongodb.service";
+import { MongoService } from "../mongo/mongo.service";
 import { Incidencias, IncidenciasInvitado } from "./incidencias.interface";
 import { ObjectId } from "mongodb";
 import { toArray } from "rxjs";
 
 @Injectable()
 export class IncidenciasClass {
-  constructor(private readonly mongoDbService: MongoDbService) {}
+  constructor(private readonly mongoDbService: MongoService) {}
 
   async nuevaIncidencia(incidencias: Incidencias) {
     incidencias._id = new ObjectId();

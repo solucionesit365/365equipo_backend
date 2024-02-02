@@ -1,13 +1,13 @@
 import { Injectable } from "@nestjs/common";
 import { Prisma } from "@prisma/client";
 import { PrismaService } from "../prisma/prisma.service";
-import { FacTenaMssql } from "../bbdd/factenamssql.service";
+import { HitMssqlService } from "../hit-mssql/hit-mssql.service";
 
 @Injectable()
 export class TiendaDatabaseService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly FacTenaService: FacTenaMssql,
+    private readonly FacTenaService: HitMssqlService,
   ) {}
   async getTiendas() {
     return await this.prisma.tienda.findMany();

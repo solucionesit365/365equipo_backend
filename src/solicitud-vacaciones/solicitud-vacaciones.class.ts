@@ -6,13 +6,13 @@ import { TrabajadorService } from "../trabajadores/trabajadores.class";
 import { Cuadrantes } from "../cuadrantes/cuadrantes.class";
 import { DateTime } from "luxon";
 import { ContratoService } from "../contrato/contrato.service";
-import { FacTenaMssql } from "../bbdd/factenamssql.service";
+import { HitMssqlService } from "../hit-mssql/hit-mssql.service";
 
 @Injectable()
 export class solicitudesVacacionesClass {
   constructor(
     private readonly schSolicitudVacaciones: SolicitudVacacionesBdd,
-    private readonly facTenaService: FacTenaMssql,
+    private readonly facTenaService: HitMssqlService,
     private readonly email: EmailClass,
     @Inject(forwardRef(() => TrabajadorService))
     private readonly trabajadorInstance: TrabajadorService,

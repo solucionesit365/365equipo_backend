@@ -7,7 +7,7 @@ import { EmailClass } from "../email/email.class";
 import { TarjetaCliente } from "../tarjeta-cliente/tarjeta-cliente.class";
 import * as jwt from "jsonwebtoken";
 import { GoogleAuth } from "google-auth-library";
-import { FacTenaMssql } from "../bbdd/factenamssql.service";
+import { HitMssqlService } from "../hit-mssql/hit-mssql.service";
 
 @Injectable()
 export class ClientesService {
@@ -15,7 +15,7 @@ export class ClientesService {
     private readonly schSolicitudesCliente: SolicitudNuevoClienteBbdd,
     private readonly emailInstance: EmailClass,
     private readonly tarjetaClienteInstance: TarjetaCliente,
-    private readonly facTenaService: FacTenaMssql,
+    private readonly facTenaService: HitMssqlService,
   ) {}
   async handleForm(
     nuevoCliente: boolean,

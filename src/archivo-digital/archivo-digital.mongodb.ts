@@ -1,11 +1,11 @@
 import { Injectable } from "@nestjs/common";
-import { MongoDbService } from "../bbdd/mongodb.service";
+import { MongoService } from "../mongo/mongo.service";
 import { ArchivoDigitalInterface } from "./archivo-digital.interface";
 import { ObjectId } from "mongodb";
 
 @Injectable()
 export class ArchivoDigitalDatabase {
-  constructor(private readonly mongoDbService: MongoDbService) {}
+  constructor(private readonly mongoDbService: MongoService) {}
 
   async nuevoArchivo(archivo: ArchivoDigitalInterface) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");

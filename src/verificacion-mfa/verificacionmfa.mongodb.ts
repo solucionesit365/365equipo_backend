@@ -1,10 +1,10 @@
 import { Injectable } from "@nestjs/common";
-import { MongoDbService } from "../bbdd/mongodb.service";
+import { MongoService } from "../mongo/mongo.service";
 import { VerificacionMFA } from "./verificacionmfa.interface";
 import { ObjectId } from "mongodb";
 @Injectable()
 export class VerifiacacionDatabase {
-  constructor(private readonly mongoDbService: MongoDbService) {}
+  constructor(private readonly mongoDbService: MongoService) {}
 
   async nuevaVerificacionMFA(verificacion: VerificacionMFA) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");

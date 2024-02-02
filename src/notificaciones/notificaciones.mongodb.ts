@@ -1,11 +1,11 @@
 import { Injectable } from "@nestjs/common";
-import { MongoDbService } from "../bbdd/mongodb.service";
+import { MongoService } from "../mongo/mongo.service";
 import { InAppNotification, NotificacionDto } from "./notificaciones.interface";
 import { ObjectId } from "mongodb";
 
 @Injectable()
 export class NotificacionsBbdd {
-  constructor(private readonly mongoDbService: MongoDbService) {}
+  constructor(private readonly mongoDbService: MongoService) {}
 
   async saveToken(uid: string, token: string) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");

@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { MongoDbService } from "../bbdd/mongodb.service";
+import { MongoService } from "../mongo/mongo.service";
 import {
   AuditoriasInterface,
   AuditoriaRespuestas,
@@ -9,7 +9,7 @@ import { ObjectId } from "mongodb";
 
 @Injectable()
 export class AuditoriaDatabase {
-  constructor(private readonly mongoDbService: MongoDbService) {}
+  constructor(private readonly mongoDbService: MongoService) {}
 
   async nuevaAuditoria(auditorias: AuditoriasInterface) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");

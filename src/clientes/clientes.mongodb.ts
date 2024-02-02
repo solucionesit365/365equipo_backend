@@ -1,10 +1,10 @@
 import { Injectable } from "@nestjs/common";
-import { MongoDbService } from "../bbdd/mongodb.service";
+import { MongoService } from "../mongo/mongo.service";
 import { SolicitudCliente } from "./clientes.interface";
 
 @Injectable()
 export class SolicitudNuevoClienteBbdd {
-  constructor(private readonly mongoDbService: MongoDbService) {}
+  constructor(private readonly mongoDbService: MongoService) {}
 
   async nuevaSolicitud(solicitud: SolicitudCliente) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
