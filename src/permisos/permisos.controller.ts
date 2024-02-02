@@ -1,24 +1,14 @@
-import {
-  Controller,
-  Get,
-  Post,
-  UseGuards,
-  Headers,
-  Body,
-  Query,
-} from "@nestjs/common";
-import { AuthGuard } from "../auth/auth.guard";
-import { TokenService } from "../get-token/get-token.service";
-import { FirebaseService } from "../firebase/auth";
+import { Controller, Get, Post, UseGuards, Body, Query } from "@nestjs/common";
+import { AuthGuard } from "../guards/auth.guard";
 import { PermisosClass } from "./permisos.class";
+import { User } from "../decorators/get-user.decorator";
+import { DecodedIdToken } from "firebase-admin/auth";
 
 @Controller("permisos")
 export class PermisosController {
-  constructor(
-    private readonly tokenService: TokenService,
-    private readonly authInstance: FirebaseService,
-    private readonly permisosInstance: PermisosClass,
-  ) {}
+  constructor(private readonly permisosInstance: PermisosClass) {}
+
+  @UseGuards(AuthGuard)
   @Get("listaCompleta")
   async listaCompleta() {
     try {
@@ -29,11 +19,11 @@ export class PermisosController {
     }
   }
 
-  @Post("setCustomClaims")
   @UseGuards(AuthGuard)
+  @Post("setCustomClaims")
   async setCustomsClaims(
-    @Headers("authorization") authHeader: string,
     @Body() { uidUsuarioDestino, arrayPermisos },
+    @User() user: DecodedIdToken,
   ) {
     try {
       if (
@@ -41,14 +31,10 @@ export class PermisosController {
         typeof uidUsuarioDestino === "string" &&
         arrayPermisos
       ) {
-        const token = this.tokenService.extract(authHeader);
-        await this.authInstance.verifyToken(token);
-        const usuarioGestor = await this.authInstance.getUserWithToken(token);
-
         return {
           ok: true,
           data: await this.permisosInstance.setCustomClaims(
-            usuarioGestor.customClaims,
+            user.customClaims,
             uidUsuarioDestino,
             arrayPermisos,
           ),
@@ -60,21 +46,17 @@ export class PermisosController {
     }
   }
 
+  @UseGuards(AuthGuard)
   @Get("customClaims")
   async getCustomClaims(
-    @Headers("authorization") authHeader: string,
     @Query() { idApp }: { idApp: string },
+    @User() user: DecodedIdToken,
   ) {
     try {
-      // Esta función no debe fallar si no encuentra los claims
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
-      const usuarioGestor = await this.authInstance.getUserWithToken(token);
-
       return {
         ok: true,
         data: await this.permisosInstance.getCustomClaims(
-          usuarioGestor.customClaims,
+          user.customClaims,
           idApp,
         ),
       };

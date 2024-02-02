@@ -4,7 +4,6 @@ import { ConfigModule } from "@nestjs/config";
 import { AppService } from "./app.service";
 import { AnunciosController } from "./anuncios/anuncios.controller";
 import { TrabajadoresController } from "./trabajadores/trabajadores.controller";
-import { TokenService } from "./get-token/get-token.service";
 import { TiendasController } from "./tiendas/tiendas.controller";
 import { TestController } from "./test/test.controller";
 import { AnunciosService } from "./anuncios/anuncios.mongodb";
@@ -22,7 +21,6 @@ import { TrabajadorService } from "./trabajadores/trabajadores.class";
 import { AusenciasController } from "./ausencias/ausencias.controller";
 import { Ausencias } from "./ausencias/ausencias.class";
 import { AusenciasDatabase } from "./ausencias/ausencias.mongodb";
-import { FirebaseMessagingService } from "./firebase/firebase-messaging.service";
 import { NotificacionesController } from "./notificaciones/notificaciones.controller";
 import { Notificaciones } from "./notificaciones/notificaciones.class";
 import { NotificacionsBbdd } from "./notificaciones/notificaciones.mongodb";
@@ -35,7 +33,7 @@ import { FichajesValidadosController } from "./fichajes-validados/fichajes-valid
 import { FichajesValidados } from "./fichajes-validados/fichajes-validados.class";
 import { FichajesValidadosDatabase } from "./fichajes-validados/fichajes-validados.mongodb";
 import { EmailClass } from "./email/email.class";
-import { FirebaseService } from "./firebase/auth";
+import { FirebaseService } from "./firebase/firebase.service";
 import { PermisosController } from "./permisos/permisos.controller";
 import { PermisosClass } from "./permisos/permisos.class";
 import { TarjetaCliente } from "./tarjeta-cliente/tarjeta-cliente.class";
@@ -47,9 +45,9 @@ import { SolicitudNuevoClienteBbdd } from "./clientes/clientes.mongodb";
 import { IncidenciasController } from "./incidencias/incidencias.controller";
 import { IncidenciasClass } from "./incidencias/incidencias.mongodb";
 import { Incidencia } from "./incidencias/incidencias.class";
-import { VerificacionmfaController } from "./verificacionMFA/verificacionmfa.controller";
-import { VerifiacacionDatabase } from "./verificacionMFA/verificacionmfa.mongodb";
-import { VerificacionClass } from "./verificacionMFA/verificacionmfa.class";
+import { VerificacionmfaController } from "./verificacion-mfa/verificacionmfa.controller";
+import { VerifiacacionDatabase } from "./verificacion-mfa/verificacionmfa.mongodb";
+import { VerificacionClass } from "./verificacion-mfa/verificacionmfa.class";
 import { AuditoriasController } from "./auditorias/auditorias.controller";
 import { AuditoriaDatabase } from "./auditorias/auditorias.mongodb";
 import { Auditorias } from "./auditorias/auditorias.class";
@@ -92,6 +90,21 @@ import { EvaluacionesModule } from "./evaluaciones/evaluaciones.module";
 import { FichajesModule } from "./fichajes/fichajes.module";
 import { FichajesValidadosModule } from "./fichajes-validados/fichajes-validados.module";
 import { FichajesBcModule } from "./fichajes-bc/fichajes-bc.module";
+import { FirebaseModule } from "./firebase/firebase.module";
+import { IncidenciasModule } from "./incidencias/incidencias.module";
+import { MantenimientoModule } from "./mantenimiento/mantenimiento.module";
+import { MigracionesModule } from "./migraciones/migraciones.module";
+import { NominasModule } from "./nominas/nominas.module";
+import { NotificacionesModule } from "./notificaciones/notificaciones.module";
+import { PactadoVsRealModule } from "./pactado-vs-real/pactado-vs-real.module";
+import { PermisosModule } from "./permisos/permisos.module";
+import { PrismaModule } from "./prisma/prisma.module";
+import { SolicitudVacacionesModule } from "./solicitud-vacaciones/solicitud-vacaciones.module";
+import { TarjetaClienteModule } from "./tarjeta-cliente/tarjeta-cliente.module";
+import { TestModule } from "./test/test.module";
+import { TiendasModule } from "./tiendas/tiendas.module";
+import { TrabajadoresModule } from "./trabajadores/trabajadores.module";
+import { VerificacionMfaModule } from './verificacion-mfa/verificacion-mfa.module';
 
 @Module({
   imports: [
@@ -114,6 +127,21 @@ import { FichajesBcModule } from "./fichajes-bc/fichajes-bc.module";
     FichajesModule,
     FichajesValidadosModule,
     FichajesBcModule,
+    FirebaseModule,
+    IncidenciasModule,
+    MantenimientoModule,
+    MigracionesModule,
+    NominasModule,
+    NotificacionesModule,
+    PactadoVsRealModule,
+    PermisosModule,
+    PrismaModule,
+    SolicitudVacacionesModule,
+    TarjetaClienteModule,
+    TestModule,
+    TiendasModule,
+    TrabajadoresModule,
+    VerificacionMfaModule,
   ],
   controllers: [
     AppController,
@@ -145,7 +173,6 @@ import { FichajesBcModule } from "./fichajes-bc/fichajes-bc.module";
   ],
   providers: [
     AppService,
-    TokenService,
     AnunciosService,
     AnunciosClass,
     MongoDbService,
@@ -159,7 +186,6 @@ import { FichajesBcModule } from "./fichajes-bc/fichajes-bc.module";
     TrabajadorService,
     Ausencias,
     AusenciasDatabase,
-    FirebaseMessagingService,
     Notificaciones,
     NotificacionsBbdd,
     Nominas,

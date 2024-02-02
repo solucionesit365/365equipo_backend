@@ -4,15 +4,15 @@ import { SolicitudVacaciones } from "./solicitud-vacaciones.interface";
 import { EmailClass } from "../email/email.class";
 import { TrabajadorService } from "../trabajadores/trabajadores.class";
 import { Cuadrantes } from "../cuadrantes/cuadrantes.class";
-import { recHit } from "../bbdd/mssql";
-import * as moment from "moment";
 import { DateTime } from "luxon";
 import { ContratoService } from "../contrato/contrato.service";
+import { FacTenaMssql } from "../bbdd/factenamssql.service";
 
 @Injectable()
 export class solicitudesVacacionesClass {
   constructor(
     private readonly schSolicitudVacaciones: SolicitudVacacionesBdd,
+    private readonly facTenaService: FacTenaMssql,
     private readonly email: EmailClass,
     @Inject(forwardRef(() => TrabajadorService))
     private readonly trabajadorInstance: TrabajadorService,
@@ -225,25 +225,28 @@ export class solicitudesVacacionesClass {
   async guardarEnHit(vacaciones: SolicitudVacaciones) {
     if (!vacaciones.idBeneficiario || vacaciones.estado != "APROBADA")
       return false;
-    const fechaInicio = moment(vacaciones.fechaInicio, "DD/MM/YYYY");
-    const fechaFinal = moment(vacaciones.fechaFinal, "DD/MM/YYYY");
-    const nombreTabla = `cdpCalendariLaboral_${moment().format("YYYY")}`;
+    const fechaInicio = DateTime.fromFormat(
+      vacaciones.fechaInicio,
+      "dd/MM/yyyy",
+    );
+    const fechaFinal = DateTime.fromFormat(vacaciones.fechaFinal, "dd/MM/yyyy");
+    const nombreTabla = `cdpCalendariLaboral_${fechaInicio.toFormat("yyyy")}`;
 
-    if (!fechaInicio.isValid() || !fechaFinal.isValid()) return false;
+    if (!fechaInicio.isValid || !fechaFinal.isValid) return false;
 
     const sql = `
       DECLARE @InsertedRows INT;
       DECLARE @UpdatedRows INT;
 
       WITH Dates AS (
-        SELECT CONVERT(datetime, '${fechaInicio.format(
-          "YYYY-MM-DD",
+        SELECT CONVERT(datetime, '${fechaInicio.toFormat(
+          "yyyy-MM-dd",
         )}', 126) AS Date
         UNION ALL
         SELECT DATEADD(day, 1, Date)
         FROM Dates
-        WHERE DATEADD(day, 1, Date) <= CONVERT(datetime, '${fechaFinal.format(
-          "YYYY-MM-DD",
+        WHERE DATEADD(day, 1, Date) <= CONVERT(datetime, '${fechaFinal.toFormat(
+          "yyyy-MM-dd",
         )}', 126)
       )
       MERGE ${nombreTabla} AS Target
@@ -269,11 +272,11 @@ export class solicitudesVacacionesClass {
       -- Retorna el número de filas insertadas
       SELECT @InsertedRows AS InsertedRows;
     `;
-    const resultado = await recHit("Fac_Tena", sql);
+    const resultado = await this.facTenaService.recHit(sql);
 
     if (
       resultado.recordset.length > 0 &&
-      fechaFinal.diff(fechaInicio, "days") + 1 ===
+      fechaFinal.diff(fechaInicio, "days").days + 1 ===
         resultado.recordset[0].InsertedRows
     ) {
       await this.schSolicitudVacaciones.setEnviado(vacaciones);

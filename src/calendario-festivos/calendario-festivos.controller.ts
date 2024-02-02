@@ -1,39 +1,23 @@
-import {
-  Body,
-  Controller,
-  Post,
-  UseGuards,
-  Headers,
-  Get,
-  Query,
-} from "@nestjs/common";
+import { Body, Controller, Post, UseGuards, Get, Query } from "@nestjs/common";
 import { CalendarioFestivo } from "./calendario-festivos.class";
 import {
   CalendarioFestivosInterface,
   eventoNavideño,
 } from "./calendario-festivos.interface";
-import { AuthGuard } from "../auth/auth.guard";
-import { TokenService } from "../get-token/get-token.service";
-import { FirebaseService } from "../firebase/auth";
+import { AuthGuard } from "../guards/auth.guard";
+import { FirebaseService } from "../firebase/firebase.service";
 
 @Controller("calendario-festivos")
 export class CalendarioFestivosController {
   constructor(
     private readonly calendarioFestivosInstance: CalendarioFestivo,
     private readonly authInstance: FirebaseService,
-    private readonly tokenService: TokenService,
   ) {}
 
-  @Post("nuevoFestivo")
   @UseGuards(AuthGuard)
-  async nuevoFestivo(
-    @Headers("authorization") authHeader: string,
-    @Body() festivo: CalendarioFestivosInterface,
-  ) {
+  @Post("nuevoFestivo")
+  async nuevoFestivo(@Body() festivo: CalendarioFestivosInterface) {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
-
       return {
         ok: true,
         data: await this.calendarioFestivosInstance.nuevoFestivo(festivo),
@@ -44,13 +28,10 @@ export class CalendarioFestivosController {
     }
   }
 
-  @Get("getFestivos")
   @UseGuards(AuthGuard)
-  async getFestivos(@Headers("authorization") authHeader: string) {
+  @Get("getFestivos")
+  async getFestivos() {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
-
       const respCalendario =
         await this.calendarioFestivosInstance.getfestivos();
       if (respCalendario) return { ok: true, data: respCalendario };
@@ -60,16 +41,10 @@ export class CalendarioFestivosController {
     }
   }
 
-  @Get("getFestivosByTienda")
   @UseGuards(AuthGuard)
-  async getFestivosByTienda(
-    @Headers("authorization") authHeader: string,
-    @Query() { tienda }: { tienda: number },
-  ) {
+  @Get("getFestivosByTienda")
+  async getFestivosByTienda(@Query() { tienda }: { tienda: number }) {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
-
       const respCalendario =
         await this.calendarioFestivosInstance.getfestivosByTienda(
           Number(tienda),
@@ -81,14 +56,10 @@ export class CalendarioFestivosController {
     }
   }
 
+  @UseGuards(AuthGuard)
   @Post("updateFestivo")
-  async updateFestivo(
-    @Body() festivo: CalendarioFestivosInterface,
-    @Headers("authorization") authHeader: string,
-  ) {
+  async updateFestivo(@Body() festivo: CalendarioFestivosInterface) {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
       const respCalendario =
         await this.calendarioFestivosInstance.updateFestivo(festivo);
 
@@ -105,14 +76,10 @@ export class CalendarioFestivosController {
     }
   }
 
+  @UseGuards(AuthGuard)
   @Post("deleteFestivo")
-  async deleteFestivo(
-    @Headers("authorization") authHeader: string,
-    @Body() { idFestivo },
-  ) {
+  async deleteFestivo(@Body() { idFestivo }) {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
       const respCalendario =
         await this.calendarioFestivosInstance.deleteFestivo(idFestivo);
       if (respCalendario)
@@ -129,16 +96,10 @@ export class CalendarioFestivosController {
   }
 
   //Notificacion navideña
-  @Post("guardarRespuesta")
   @UseGuards(AuthGuard)
-  async nuevoEvento(
-    @Headers("authorization") authHeader: string,
-    @Body() festivo: eventoNavideño,
-  ) {
+  @Post("guardarRespuesta")
+  async nuevoEvento(@Body() festivo: eventoNavideño) {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
-
       // Convertir fechaRespuesta de string a Date
       festivo.fechaRespuesta = new Date(festivo.fechaRespuesta);
 
@@ -152,16 +113,10 @@ export class CalendarioFestivosController {
     }
   }
 
-  @Get("verificarRespuesta")
   @UseGuards(AuthGuard)
-  async verificacionRespuesta(
-    @Headers("authorization") authHeader: string,
-    @Query() { idUsuario }: { idUsuario: number },
-  ) {
+  @Get("verificarRespuesta")
+  async verificacionRespuesta(@Query() { idUsuario }: { idUsuario: number }) {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
-
       const haRespondido =
         await this.calendarioFestivosInstance.verificacionRespuesta(
           Number(idUsuario),
@@ -173,13 +128,10 @@ export class CalendarioFestivosController {
     }
   }
 
-  @Get("getEventos")
   @UseGuards(AuthGuard)
-  async getEventos(@Headers("authorization") authHeader: string) {
+  @Get("getEventos")
+  async getEventos() {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
-
       const respCalendario = await this.calendarioFestivosInstance.getEventos();
       if (respCalendario) return { ok: true, data: respCalendario };
       else throw Error("No se ha encontrado ninguna invitacion navideña");
@@ -188,16 +140,10 @@ export class CalendarioFestivosController {
     }
   }
 
-  @Get("getEventosByAsistirOrNo")
   @UseGuards(AuthGuard)
-  async getEventosByAsistirOrNo(
-    @Headers("authorization") authHeader: string,
-    @Query() { asistira }: { asistira: string },
-  ) {
+  @Get("getEventosByAsistirOrNo")
+  async getEventosByAsistirOrNo(@Query() { asistira }: { asistira: string }) {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
-
       const respCalendario =
         await this.calendarioFestivosInstance.getEventosByAsistirOrNo(asistira);
       if (respCalendario) return { ok: true, data: respCalendario };

@@ -6,56 +6,26 @@ import {
   Get,
   Headers,
 } from "@nestjs/common";
-import { FirebaseMessagingService } from "../firebase/firebase-messaging.service";
 import { Notificaciones } from "./notificaciones.class";
-import { AuthGuard } from "../auth/auth.guard";
-import { TokenService } from "../get-token/get-token.service";
-import { FirebaseService } from "../firebase/auth";
-import { log } from "console";
+import { AuthGuard } from "../guards/auth.guard";
+import { FirebaseService } from "../firebase/firebase.service";
+import { DecodedIdToken } from "firebase-admin/auth";
+import { User } from "../decorators/get-user.decorator";
 
 @Controller("notificaciones")
 export class NotificacionesController {
   constructor(
-    private readonly messagingService: FirebaseMessagingService,
     private readonly notificacionesInstance: Notificaciones,
-    private readonly tokenService: TokenService,
     private readonly authInstance: FirebaseService,
   ) {}
 
-  @Post("send")
-  async sendNotification(@Body("token") token: string) {
-    await this.messagingService.sendNotification(token);
-    return 0;
-  }
-
-  @Post("saveTokenFCM")
-  // @UseGuards(AuthGuard)
-  async saveToken(@Body("token") token: string, @Body("uid") uid: string) {
-    try {
-      if (!token || !uid) throw Error("Faltan parámetros");
-
-      return {
-        ok: true,
-        data: await this.notificacionesInstance.saveToken(uid, token),
-      };
-    } catch (err) {
-      console.log(err);
-      return { ok: false, message: err.message };
-    }
-  }
-
+  @UseGuards(AuthGuard)
   @Get("inAppNotifications")
-  @UseGuards(AuthGuard)
-  async getInAppNotifications(@Headers("authorization") authHeader: string) {
+  async getInAppNotifications(@User() user: DecodedIdToken) {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
-      const usuario = await this.authInstance.getUserWithToken(token);
       return {
         ok: true,
-        data: await this.notificacionesInstance.getInAppNotifications(
-          usuario.uid,
-        ),
+        data: await this.notificacionesInstance.getInAppNotifications(user.uid),
       };
     } catch (err) {
       console.log(err);
@@ -63,18 +33,13 @@ export class NotificacionesController {
     }
   }
 
-  @Get("inAppNotificationsPendientes")
   @UseGuards(AuthGuard)
-  async getInAppNotificationsPendientes(
-    @Headers("authorization") authHeader: string,
-  ) {
+  @Get("inAppNotificationsPendientes")
+  async getInAppNotificationsPendientes(@User() user: DecodedIdToken) {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
-      const usuario = await this.authInstance.getUserWithToken(token);
       const notificacionesPendientes =
         await this.notificacionesInstance.getInAppNotificationsPendientes(
-          usuario.uid,
+          user.uid,
         );
       return {
         ok: true,
@@ -87,17 +52,14 @@ export class NotificacionesController {
     }
   }
 
-  @Get("getAllInAppNotifications")
   @UseGuards(AuthGuard)
-  async getAllInAppNotifications(@Headers("authorization") authHeader: string) {
+  @Get("getAllInAppNotifications")
+  async getAllInAppNotifications(@User() user: DecodedIdToken) {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
-      const usuario = await this.authInstance.getUserWithToken(token);
       return {
         ok: true,
         data: await this.notificacionesInstance.getAllInAppNotifications(
-          usuario.uid,
+          user.uid,
         ),
       };
     } catch (err) {
@@ -106,21 +68,13 @@ export class NotificacionesController {
     }
   }
 
+  @UseGuards(AuthGuard)
   @Post("marcarComoLeida")
-  async marcarComoLeida(
-    @Headers("authorization") authHeader: string,
-    @Body("id") id,
-  ) {
+  async marcarComoLeida(@User() user: DecodedIdToken, @Body("id") id) {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
-      const usuario = await this.authInstance.getUserWithToken(token);
       return {
         ok: true,
-        data: await this.notificacionesInstance.marcarComoLeida(
-          id,
-          usuario.uid,
-        ),
+        data: await this.notificacionesInstance.marcarComoLeida(id, user.uid),
       };
     } catch (err) {
       console.log(err);
@@ -128,21 +82,13 @@ export class NotificacionesController {
     }
   }
 
+  @UseGuards(AuthGuard)
   @Post("marcarComoNoLeida")
-  async marcarComoNoLeida(
-    @Headers("authorization") authHeader: string,
-    @Body("id") id,
-  ) {
+  async marcarComoNoLeida(@User() user: DecodedIdToken, @Body("id") id) {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
-      const usuario = await this.authInstance.getUserWithToken(token);
       return {
         ok: true,
-        data: await this.notificacionesInstance.marcarComoNoLeida(
-          id,
-          usuario.uid,
-        ),
+        data: await this.notificacionesInstance.marcarComoNoLeida(id, user.uid),
       };
     } catch (err) {
       console.log(err);

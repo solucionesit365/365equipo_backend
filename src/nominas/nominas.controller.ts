@@ -1,30 +1,36 @@
-import { Controller, Get, Headers, Query } from "@nestjs/common";
-import { TokenService } from "../get-token/get-token.service";
+import { Controller, Get, Query, UseGuards } from "@nestjs/common";
 import { Nominas } from "./nominas.class";
-import { FirebaseService } from "../firebase/auth";
+import { AuthGuard } from "../guards/auth.guard";
+import { User } from "../decorators/get-user.decorator";
+import { DecodedIdToken } from "firebase-admin/auth";
+import { TrabajadorService } from "../trabajadores/trabajadores.class";
 
 @Controller("nominas")
 export class NominasController {
   constructor(
-    private readonly authInstance: FirebaseService,
-    private readonly tokenService: TokenService,
+    private readonly trabajadorService: TrabajadorService,
     private readonly nominaInstance: Nominas,
   ) {}
+
+  @UseGuards(AuthGuard)
   @Get("nomina")
   async getNominas(
-    @Headers("authorization") authHeader: string,
+    @User() user: DecodedIdToken,
     @Query() { idArchivo }: { idArchivo: string },
   ) {
     try {
       if (typeof idArchivo !== "string") throw Error("Parámetros incorrectos");
 
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
-      const usuario = await this.authInstance.getUserWithToken(token);
+      const usuarioCompleto = await this.trabajadorService.getTrabajadorByAppId(
+        user.uid,
+      );
 
       return {
         ok: true,
-        data: await this.nominaInstance.getNomina(usuario.dni, idArchivo),
+        data: await this.nominaInstance.getNomina(
+          usuarioCompleto.dni,
+          idArchivo,
+        ),
       };
     } catch (err) {
       console.log(err);
@@ -32,16 +38,17 @@ export class NominasController {
     }
   }
 
+  @UseGuards(AuthGuard)
   @Get("getListadoNominas")
-  async getListadoNominas(@Headers("authorization") authHeader: string) {
+  async getListadoNominas(@User() user: DecodedIdToken) {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
-      const usuario = await this.authInstance.getUserWithToken(token);
+      const usuarioCompleto = await this.trabajadorService.getTrabajadorByAppId(
+        user.uid,
+      );
 
       return {
         ok: true,
-        data: await this.nominaInstance.getListadoNominas(usuario.dni),
+        data: await this.nominaInstance.getListadoNominas(usuarioCompleto.dni),
       };
     } catch (err) {
       console.log(err);

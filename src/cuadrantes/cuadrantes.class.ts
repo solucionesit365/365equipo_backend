@@ -11,6 +11,7 @@ import { FichajesValidados } from "../fichajes-validados/fichajes-validados.clas
 import { DateTime } from "luxon";
 import { TrabajadorCompleto } from "../trabajadores/trabajadores.interface";
 import { ContratoService } from "../contrato/contrato.service";
+import { Trabajador } from "@prisma/client";
 
 moment.locale("custom", {
   week: {
@@ -658,9 +659,7 @@ export class Cuadrantes {
     await this.schCuadrantes.updateOrInsertManyCuadrantes(cuadrantesFinal);
   }
 
-  getRole(
-    usuario: TrabajadorCompleto,
-  ): "DEPENDIENTA" | "COORDINADORA" | "SUPERVISORA" {
+  getRole(usuario: Trabajador): "DEPENDIENTA" | "COORDINADORA" | "SUPERVISORA" {
     if (usuario.llevaEquipo) {
       return usuario.idTienda ? "COORDINADORA" : "SUPERVISORA";
     } else if (usuario.idTienda) {

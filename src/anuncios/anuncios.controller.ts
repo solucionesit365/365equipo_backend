@@ -1,38 +1,39 @@
-import { Controller, Post, Get, Body, Headers } from "@nestjs/common";
-import { TokenService } from "../get-token/get-token.service";
+import { Controller, Post, Get, Body, UseGuards } from "@nestjs/common";
 import { AnunciosClass } from "./anuncios.class";
 import { AnuncioDto, UpdateAnuncioDto } from "./anuncios.dto";
-import { FirebaseService } from "../firebase/auth";
 import { TrabajadorService } from "../trabajadores/trabajadores.class";
-import { Notificaciones } from "src/notificaciones/notificaciones.class";
+import { Notificaciones } from "../notificaciones/notificaciones.class";
+import { AuthGuard } from "../guards/auth.guard";
+import { User } from "../decorators/get-user.decorator";
+import { DecodedIdToken } from "firebase-admin/auth";
 
 @Controller("anuncios")
 export class AnunciosController {
   constructor(
     private readonly notificaciones: Notificaciones,
     private readonly trabajadores: TrabajadorService,
-    private readonly authInstance: FirebaseService,
-    private readonly tokenService: TokenService,
     private readonly anunciosInstance: AnunciosClass,
   ) {}
 
+  @UseGuards(AuthGuard)
   @Get()
-  async getAnuncios(@Headers("authorization") authHeader: string) {
+  async getAnuncios(@User() user: DecodedIdToken) {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
+      const usuarioCompleto = await this.trabajadores.getTrabajadorByAppId(
+        user.uid,
+      );
 
-      const usuario = await this.authInstance.getUserWithToken(token);
-
-      if (usuario.llevaEquipo && !usuario.idTienda) {
+      if (usuarioCompleto.llevaEquipo && !usuarioCompleto.idTienda) {
         return {
           ok: true,
           data: await this.anunciosInstance.getAnuncios(),
         };
-      } else if (usuario.idTienda) {
+      } else if (usuarioCompleto.idTienda) {
         return {
           ok: true,
-          data: await this.anunciosInstance.getAnuncios(usuario.idTienda),
+          data: await this.anunciosInstance.getAnuncios(
+            usuarioCompleto.idTienda,
+          ),
         };
       } else
         return {
@@ -45,15 +46,10 @@ export class AnunciosController {
     }
   }
 
+  @UseGuards(AuthGuard)
   @Post("addAnuncio")
-  async addAnuncio(
-    @Body() anuncio: AnuncioDto,
-    @Headers("authorization") authHeader: string,
-  ) {
+  async addAnuncio(@Body() anuncio: AnuncioDto) {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
-
       // Falta comprobación de quién puede enviar un anuncio, ahora
       // mismo cualquiera lo puede hacer.
 
@@ -85,15 +81,10 @@ export class AnunciosController {
     }
   }
 
+  @UseGuards(AuthGuard)
   @Post("updateAnuncio")
-  async updateAnuncio(
-    @Body() anuncioModificado: UpdateAnuncioDto,
-    @Headers("authorization") authHeader: string,
-  ) {
+  async updateAnuncio(@Body() anuncioModificado: UpdateAnuncioDto) {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
-
       // Falta comprobación de quién puede enviar un anuncio, ahora
       // mismo cualquiera lo puede hacer.
       if (await this.anunciosInstance.updateAnuncio(anuncioModificado))
@@ -107,15 +98,10 @@ export class AnunciosController {
     }
   }
 
+  @UseGuards(AuthGuard)
   @Post("deleteAnuncio")
-  async deleteAnuncio(
-    @Body() { _id }: { _id: string },
-    @Headers("authorization") authHeader: string,
-  ) {
+  async deleteAnuncio(@Body() { _id }: { _id: string }) {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
-
       // Falta comprobación de quién puede enviar un anuncio, ahora
       // mismo cualquiera lo puede hacer.
       if (await this.anunciosInstance.deleteAnuncio(_id))
@@ -128,24 +114,4 @@ export class AnunciosController {
       return { ok: false, message: err.message };
     }
   }
-
-  // @Post("guardarOfertaAnuncio")
-  // async guardarOfertaAnuncio(
-  //   @Body() oferta: OfertasAnuncios,
-  //   @Headers("authorization") authHeader: string,
-  // ) {
-  //   try {
-  //     const token = this.tokenService.extract(authHeader);
-  //     await this.authInstance.verifyToken(token);
-  //     if (await this.anunciosInstance.guardarOfertaAnuncio(oferta))
-  //       return {
-  //         ok: true,
-  //       };
-  //     throw Error("No se ha podido guardar el anuncio");
-
-  //   } catch (err) {
-  //     console.log(err);
-  //     return { ok: false, message: err.message };
-  //   }
-  // }
 }

@@ -7,9 +7,8 @@ import {
   Get,
   Query,
 } from "@nestjs/common";
-import { AuthGuard } from "../auth/auth.guard";
-import { TokenService } from "../get-token/get-token.service";
-import { FirebaseService } from "../firebase/auth";
+import { AuthGuard } from "../guards/auth.guard";
+import { FirebaseService } from "../firebase/firebase.service";
 import { Incidencia } from "./incidencias.class";
 import { Incidencias, IncidenciasInvitado } from "./incidencias.interface";
 import { Notificaciones } from "../notificaciones/notificaciones.class";
@@ -19,22 +18,15 @@ import { TrabajadorService } from "../trabajadores/trabajadores.class";
 export class IncidenciasController {
   constructor(
     private readonly authInstance: FirebaseService,
-    private readonly tokenService: TokenService,
     private readonly incidenciaInstance: Incidencia,
     private readonly notificaciones: Notificaciones,
     private readonly trabajadores: TrabajadorService,
   ) {}
 
-  @Post("nuevaIncidencia")
   @UseGuards(AuthGuard)
-  async nuevaIncidencia(
-    @Headers("authorization") authHeader: string,
-    @Body() incidencia: Incidencias,
-  ) {
+  @Post("nuevaIncidencia")
+  async nuevaIncidencia(@Body() incidencia: Incidencias) {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
-
       return {
         ok: true,
         data: await this.incidenciaInstance.nuevaIncidencia(incidencia),
@@ -46,12 +38,8 @@ export class IncidenciasController {
   }
 
   //Incidencia invitado
-
   @Post("nuevaIncidenciaInvitado")
-  async nuevaIncidenciaInvitado(
-    @Headers("authorization") authHeader: string,
-    @Body() incidencia: IncidenciasInvitado,
-  ) {
+  async nuevaIncidenciaInvitado(@Body() incidencia: IncidenciasInvitado) {
     try {
       return {
         ok: true,
@@ -63,12 +51,10 @@ export class IncidenciasController {
     }
   }
 
-  @Get("getIncidencias")
   @UseGuards(AuthGuard)
-  async getIncidencia(@Headers("authorization") authHeader: string) {
+  @Get("getIncidencias")
+  async getIncidencia() {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
       const respIncidencias = await this.incidenciaInstance.getIncidencias();
       if (respIncidencias) {
         // Filtrar las incidencias por destinatario
@@ -84,12 +70,10 @@ export class IncidenciasController {
     }
   }
 
-  @Get("getIncidenciasRrhh")
   @UseGuards(AuthGuard)
-  async getIncidenciasRrhh(@Headers("authorization") authHeader: string) {
+  @Get("getIncidenciasRrhh")
+  async getIncidenciasRrhh() {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
       const respIncidencias = await this.incidenciaInstance.getIncidencias();
       if (respIncidencias) {
         // Filtrar las incidencias por destinatario
@@ -105,15 +89,10 @@ export class IncidenciasController {
     }
   }
 
-  @Get("getIncidenciasEstado")
   @UseGuards(AuthGuard)
-  async getIncidenciasEstado(
-    @Headers("authorization") authHeader: string,
-    @Query() { estado }: { estado: string },
-  ) {
+  @Get("getIncidenciasEstado")
+  async getIncidenciasEstado(@Query() { estado }: { estado: string }) {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
       const respIncidencias =
         await this.incidenciaInstance.getIncidenciasByEstado(estado);
       // Filtrar las incidencias por destinatario
@@ -127,15 +106,10 @@ export class IncidenciasController {
     }
   }
 
-  @Get("getIncidenciasEstadoRrhh")
   @UseGuards(AuthGuard)
-  async getIncidenciasEstadoRrhh(
-    @Headers("authorization") authHeader: string,
-    @Query() { estado }: { estado: string },
-  ) {
+  @Get("getIncidenciasEstadoRrhh")
+  async getIncidenciasEstadoRrhh(@Query() { estado }: { estado: string }) {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
       const respIncidencias =
         await this.incidenciaInstance.getIncidenciasEstadoRrhh(estado);
       // Filtrar las incidencias por destinatario
@@ -149,15 +123,12 @@ export class IncidenciasController {
     }
   }
 
-  @Get("getIncidenciasByCategoria")
   @UseGuards(AuthGuard)
+  @Get("getIncidenciasByCategoria")
   async getIncidenciasByCategoria(
-    @Headers("authorization") authHeader: string,
     @Query() { categoria }: { categoria: string },
   ) {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
       const respIncidencias =
         await this.incidenciaInstance.getIncidenciasByCategoria(categoria);
       // Filtrar las incidencias por destinatario
@@ -171,15 +142,12 @@ export class IncidenciasController {
     }
   }
 
-  @Get("getIncidenciasByCategoriaRrhh")
   @UseGuards(AuthGuard)
+  @Get("getIncidenciasByCategoriaRrhh")
   async getIncidenciasByCategoriaRrhh(
-    @Headers("authorization") authHeader: string,
     @Query() { categoria }: { categoria: string },
   ) {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
       const respIncidencias =
         await this.incidenciaInstance.getIncidenciasByCategoriaRrhh(categoria);
       // Filtrar las incidencias por destinatario
@@ -193,15 +161,12 @@ export class IncidenciasController {
     }
   }
 
-  @Get("getIncidenciasByPrioridad")
   @UseGuards(AuthGuard)
+  @Get("getIncidenciasByPrioridad")
   async getIncidenciasByPrioridad(
-    @Headers("authorization") authHeader: string,
     @Query() { prioridad }: { prioridad: string },
   ) {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
       const respIncidencias =
         await this.incidenciaInstance.getIncidenciasByPrioridad(prioridad);
       // Filtrar las incidencias por destinatario
@@ -215,15 +180,12 @@ export class IncidenciasController {
     }
   }
 
-  @Get("getIncidenciasByPrioridadRrhh")
   @UseGuards(AuthGuard)
+  @Get("getIncidenciasByPrioridadRrhh")
   async getIncidenciasByPrioridadRrhh(
-    @Headers("authorization") authHeader: string,
     @Query() { prioridad }: { prioridad: string },
   ) {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
       const respIncidencias =
         await this.incidenciaInstance.getIncidenciasByPrioridadRrhh(prioridad);
 
@@ -238,15 +200,10 @@ export class IncidenciasController {
     }
   }
 
+  @UseGuards(AuthGuard)
   @Post("updateIncidenciaEstado")
-  async updateIncidenciaEstado(
-    @Headers("authorization") authHeader: string,
-    @Body() incidencia: Incidencias,
-  ) {
+  async updateIncidenciaEstado(@Body() incidencia: Incidencias) {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
-
       if (await this.incidenciaInstance.updateIncidenciaEstado(incidencia)) {
         const arrayTrabajador = await this.trabajadores.getTrabajadorByAppId(
           incidencia.uid,
@@ -272,16 +229,10 @@ export class IncidenciasController {
     }
   }
 
-  // updateIncidenciaMensajes
-
+  @UseGuards(AuthGuard)
   @Post("updateIncidenciaMensajes")
-  async updateIncidenciaMensajes(
-    @Headers("authorization") authHeader: string,
-    @Body() incidencia: Incidencias,
-  ) {
+  async updateIncidenciaMensajes(@Body() incidencia: Incidencias) {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
       if (await this.incidenciaInstance.updateIncidenciaMensajes(incidencia)) {
         const arrayTrabajador = await this.trabajadores.getTrabajadorByAppId(
           incidencia.uid,
@@ -307,15 +258,10 @@ export class IncidenciasController {
     }
   }
 
-  @Get("getIncidenciasByUid")
   @UseGuards(AuthGuard)
-  async getIncidenciasByUid(
-    @Headers("authorization") authHeader: string,
-    @Query() { uid }: { uid: string },
-  ) {
+  @Get("getIncidenciasByUid")
+  async getIncidenciasByUid(@Query() { uid }: { uid: string }) {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
       const respIncidencias = await this.incidenciaInstance.getIncidenciasByUid(
         uid,
       );
@@ -330,14 +276,10 @@ export class IncidenciasController {
     }
   }
 
+  @UseGuards(AuthGuard)
   @Post("updateIncidenciaDestinatario")
-  async updateIncidenciaDestinatario(
-    @Headers("authorization") authHeader: string,
-    @Body() incidencia: Incidencias,
-  ) {
+  async updateIncidenciaDestinatario(@Body() incidencia: Incidencias) {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
       return {
         ok: true,
         data: await this.incidenciaInstance.updateIncidenciaDestinatario(
@@ -350,14 +292,10 @@ export class IncidenciasController {
     }
   }
 
+  @UseGuards(AuthGuard)
   @Post("deleteIncidencia")
-  async deleteIncidencias(
-    @Headers("authorization") authHeader: string,
-    @Body() { _id }: { _id: string },
-  ) {
+  async deleteIncidencias(@Body() { _id }: { _id: string }) {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
       const respAusencias = await this.incidenciaInstance.deleteIncidencias(
         _id,
       );

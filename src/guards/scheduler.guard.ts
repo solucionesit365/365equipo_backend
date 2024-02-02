@@ -4,11 +4,10 @@ import {
   Injectable,
   UnauthorizedException,
 } from "@nestjs/common";
-import { TokenService } from "../get-token/get-token.service";
 
 @Injectable()
 export class SchedulerGuard implements CanActivate {
-  constructor(private readonly tokenService: TokenService) {}
+  constructor() {}
 
   canActivate(context: ExecutionContext): boolean {
     const request = context.switchToHttp().getRequest();
@@ -20,9 +19,7 @@ export class SchedulerGuard implements CanActivate {
       );
     }
 
-    const token = this.tokenService.extract(authHeader);
-
-    if (token !== process.env.SINCRO_TOKEN) {
+    if (authHeader !== "Bearer " + process.env.SINCRO_TOKEN) {
       throw new UnauthorizedException(
         "No tienes permiso para completar esta acción",
       );

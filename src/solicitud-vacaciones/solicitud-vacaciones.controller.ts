@@ -1,15 +1,7 @@
-import {
-  Controller,
-  Get,
-  Query,
-  Headers,
-  Post,
-  Body,
-  UseGuards,
-} from "@nestjs/common";
-import { AuthGuard } from "../auth/auth.guard";
-import { TokenService } from "../get-token/get-token.service";
-import { FirebaseService } from "../firebase/auth";
+import { Controller, Get, Query, Post, Body, UseGuards } from "@nestjs/common";
+import { AuthGuard } from "../guards/auth.guard";
+
+import { FirebaseService } from "../firebase/firebase.service";
 import { solicitudesVacacionesClass } from "./solicitud-vacaciones.class";
 import { SolicitudVacaciones } from "./solicitud-vacaciones.interface";
 import { EmailClass } from "src/email/email.class";
@@ -20,7 +12,6 @@ import { Notificaciones } from "src/notificaciones/notificaciones.class";
 export class SolicitudVacacionesController {
   constructor(
     private readonly authInstance: FirebaseService,
-    private readonly tokenService: TokenService,
     private readonly solicitudVacacionesInstance: solicitudesVacacionesClass,
     private readonly notificaciones: Notificaciones,
     private readonly email: EmailClass,
@@ -28,15 +19,12 @@ export class SolicitudVacacionesController {
   ) {}
 
   //Nueva solicitud de vacaciones
-  @Post("nuevaSolicitud")
   @UseGuards(AuthGuard)
+  @Post("nuevaSolicitud")
   async nuevaSolicitudVacaciones(
-    @Headers("authorization") authHeader: string,
     @Body() solicitudesVacaciones: SolicitudVacaciones,
   ) {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
       const solicitudTrabajador =
         await this.trabajadorInstance.getTrabajadorBySqlId(
           Number(solicitudesVacaciones.idBeneficiario),
@@ -78,15 +66,10 @@ export class SolicitudVacacionesController {
   }
 
   //Mostrar todas las solicitudes de las vacaciones de los trabajadores
+  @UseGuards(AuthGuard)
   @Get("getSolicitudes")
-  async getSolicitudes(
-    @Headers("authorization") authHeader: string,
-    @Query() { year },
-  ) {
+  async getSolicitudes(@Query() { year }) {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
-
       return {
         ok: true,
         data: await this.solicitudVacacionesInstance.getSolicitudes(
@@ -99,15 +82,10 @@ export class SolicitudVacacionesController {
     }
   }
   //Mostrar todas las solciitudes de vacaciones por tiendas
+  @UseGuards(AuthGuard)
   @Get("getVacacionesByTiendas")
-  async getVacacionesByTiendas(
-    @Headers("authorization") authHeader: string,
-    @Query() { tienda },
-  ) {
+  async getVacacionesByTiendas(@Query() { tienda }) {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
-
       const resVacacionesByTienda =
         await this.solicitudVacacionesInstance.getVacacionesByTiendas(tienda);
       return {
@@ -121,15 +99,10 @@ export class SolicitudVacacionesController {
   }
 
   //Mostrar todas las solcitudes de vacaciones por estados
+  @UseGuards(AuthGuard)
   @Get("getVacacionesByEstado")
-  async getVacacionesByEstado(
-    @Headers("authorization") authHeader: string,
-    @Query() { estado },
-  ) {
+  async getVacacionesByEstado(@Query() { estado }) {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
-
       const resVacacionesByEstado =
         await this.solicitudVacacionesInstance.getVacacionesByEstado(estado);
       return {
@@ -143,15 +116,10 @@ export class SolicitudVacacionesController {
   }
 
   //Mostrar Solicitudes de las vacaciones de el trabajador por idSql
+  @UseGuards(AuthGuard)
   @Get("solicitudesTrabajador")
-  async getSolicitudesTrabajadorSqlId(
-    @Headers("authorization") authHeader: string,
-    @Query() { idBeneficiario, year },
-  ) {
+  async getSolicitudesTrabajadorSqlId(@Query() { idBeneficiario, year }) {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
-
       if (idBeneficiario) {
         return {
           ok: true,
@@ -168,15 +136,11 @@ export class SolicitudVacacionesController {
   }
 
   //Mostrar solicitudes de vacaciones de los subordinados
+  @UseGuards(AuthGuard)
   @Get("solicitudesSubordinados")
-  async solicitudesSubordinados(
-    @Headers("authorization") authHeader: string,
-    @Query() { idAppResponsable, year },
-  ) {
+  async solicitudesSubordinados(@Query() { idAppResponsable, year }) {
     try {
       if (!idAppResponsable) throw Error("Faltan datos");
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
 
       const solicitudesEmpleadosDirectos =
         await this.solicitudVacacionesInstance.getsolicitudesSubordinados(
@@ -239,17 +203,10 @@ export class SolicitudVacacionesController {
   }
 
   //Borrar solicitud de vacaciones
+  @UseGuards(AuthGuard)
   @Post("borrarSolicitud")
-  async borrarSolicitud(
-    @Headers("authorization") authHeader: string,
-    @Body() { _id }: { _id: string },
-  ) {
+  async borrarSolicitud(@Body() { _id }: { _id: string }) {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
-
-      console.log("Borrar solicitud:" + _id);
-
       await this.solicitudVacacionesInstance.borrarSolicitud(_id);
 
       return {
@@ -262,14 +219,10 @@ export class SolicitudVacacionesController {
     }
   }
   //Enviar emmail
+  @UseGuards(AuthGuard)
   @Post("enviarAlEmail")
-  async enviarAlEmail(
-    @Headers("authorization") authHeader: string,
-    @Body() data,
-  ) {
+  async enviarAlEmail(@Body() data) {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
       return this.solicitudVacacionesInstance.enviarAlEmail(data);
     } catch (error) {
       return error;
@@ -277,25 +230,19 @@ export class SolicitudVacacionesController {
   }
 
   //Forzar envio de vacaciones al cuadrante
+  @UseGuards(AuthGuard)
   @Post("enviarAlCuadrante")
-  async ponerEnCuadrante(
-    @Headers("authorization") authHeader: string,
-    @Body() data,
-  ) {
-    const token = this.tokenService.extract(authHeader);
-    await this.authInstance.verifyToken(token);
+  async ponerEnCuadrante(@Body() data) {
     return this.solicitudVacacionesInstance.ponerEnCuadrante(data);
   }
 
   //Actualizar estado de la solicitud de Vacaciones
+  @UseGuards(AuthGuard)
   @Post("setEstadoSolicitud")
   async updateSolicitudVacacionesEstado(
-    @Headers("authorization") authHeader: string,
     @Body() solicitudesVacaciones: SolicitudVacaciones,
   ) {
     try {
-      console.log("Actualizar Solicitud:" + solicitudesVacaciones);
-
       if (!solicitudesVacaciones.estado || !solicitudesVacaciones._id)
         throw Error("Faltan datos");
 
@@ -306,8 +253,6 @@ export class SolicitudVacacionesController {
         )
       )
         throw Error("Estado de solicitud incorrecto");
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
 
       const resEstado =
         await this.solicitudVacacionesInstance.updateSolicitudVacacionesEstado(
@@ -349,8 +294,8 @@ export class SolicitudVacacionesController {
     }
   }
 
+  @UseGuards(AuthGuard)
   @Get("sendToHit")
-  // @UseGuards(SchedulerGuard)
   async pendientesEnvio() {
     try {
       return {

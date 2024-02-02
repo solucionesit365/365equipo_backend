@@ -7,39 +7,39 @@ import {
   UseGuards,
 } from "@nestjs/common";
 import { DateTime } from "luxon";
-import { TokenService } from "../get-token/get-token.service";
-import { FirebaseService } from "../firebase/auth";
+import { FirebaseService } from "../firebase/firebase.service";
 import { PactadoVsRealService } from "./pactado-vs-real.service";
 import { ParseDatePipe } from "../parse-date/parse-date.pipe";
-import { AuthGuard } from "../auth/auth.guard";
+import { AuthGuard } from "../guards/auth.guard";
+import { User } from "../decorators/get-user.decorator";
+import { DecodedIdToken } from "firebase-admin/auth";
+import { TrabajadorService } from "../trabajadores/trabajadores.class";
 
 @Controller("pactado-vs-real")
 export class PactadoVsRealController {
   constructor(
-    private readonly tokenService: TokenService,
-    private readonly authInstance: FirebaseService,
+    private readonly trabajadorService: TrabajadorService,
     private readonly pactadoRealService: PactadoVsRealService,
   ) {}
 
-  @Get()
   @UseGuards(AuthGuard)
+  @Get()
   async pactadoVsReal(
     @Query("fechaInicio", ParseDatePipe) fechaInicio: Date,
-    @Headers("authorization") authHeader: string,
+    @User() user: DecodedIdToken,
   ) {
     if (!fechaInicio)
       return new BadRequestException("fechaInicio es requerida");
 
-    const token = this.tokenService.extract(authHeader);
-    const usuarioRequest = await this.authInstance.getUserWithToken(token);
-
     const inicio = DateTime.fromJSDate(fechaInicio);
-    const idTiendaNumber = Number(usuarioRequest.idTienda);
+    const usuarioCompleto = await this.trabajadorService.getTrabajadorByAppId(
+      user.uid,
+    );
 
     return this.pactadoRealService.pactadoVsReal(
-      usuarioRequest,
+      user,
       inicio.startOf("week"),
-      idTiendaNumber,
+      usuarioCompleto.idTienda,
     );
   }
 }

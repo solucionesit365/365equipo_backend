@@ -1,11 +1,14 @@
 import { Injectable } from "@nestjs/common";
-import { recHit } from "../bbdd/mssql";
 import { Prisma } from "@prisma/client";
 import { PrismaService } from "../prisma/prisma.service";
+import { FacTenaMssql } from "../bbdd/factenamssql.service";
 
 @Injectable()
 export class TiendaDatabaseService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly FacTenaService: FacTenaMssql,
+  ) {}
   async getTiendas() {
     return await this.prisma.tienda.findMany();
   }
@@ -18,8 +21,7 @@ export class TiendaDatabaseService {
       direccion: string;
     }[]
   > {
-    const tiendas = await recHit(
-      "Fac_Tena",
+    const tiendas = await this.FacTenaService.recHit(
       `
     SELECT 
       cli.Codi as idExterno, 

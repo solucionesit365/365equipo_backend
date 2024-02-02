@@ -1,19 +1,21 @@
 import { Injectable, Inject, forwardRef } from "@nestjs/common";
-import { getAuth, UserRecord } from "firebase-admin/auth";
+import { Auth, getAuth, UserRecord } from "firebase-admin/auth";
 import { TrabajadorCompleto } from "../trabajadores/trabajadores.interface";
-import { app } from "./app";
 import { TrabajadorService } from "../trabajadores/trabajadores.class";
-
-export const auth = getAuth(app);
+import { App, initializeApp } from "firebase-admin/app";
 
 @Injectable()
 export class FirebaseService {
-  public auth = auth;
+  public auth: Auth = null;
+  public app: App = null;
 
   constructor(
     @Inject(forwardRef(() => TrabajadorService))
     private trabajadorInstance: TrabajadorService,
-  ) {}
+  ) {
+    this.app = initializeApp();
+    this.auth = getAuth(this.app);
+  }
 
   async verifyToken(token: string) {
     await this.auth.verifyIdToken(token, true);

@@ -1,40 +1,27 @@
-import {
-  Controller,
-  Post,
-  UseGuards,
-  Headers,
-  Get,
-  Query,
-  Body,
-  ParseIntPipe,
-} from "@nestjs/common";
-import { AuthGuard } from "../auth/auth.guard";
-import { TokenService } from "../get-token/get-token.service";
+import { Controller, Post, UseGuards, Get, Query, Body } from "@nestjs/common";
+import { AuthGuard } from "../guards/auth.guard";
 import { Fichajes } from "./fichajes.class";
-import { FirebaseService } from "../firebase/auth";
 import { TrabajadorService } from "../trabajadores/trabajadores.class";
 import { ParseDatePipe } from "../parse-date/parse-date.pipe";
 import { DateTime } from "luxon";
+import { User } from "../decorators/get-user.decorator";
+import { DecodedIdToken } from "firebase-admin/auth";
+import { SchedulerGuard } from "../guards/scheduler.guard";
 
 @Controller("fichajes")
 export class FichajesController {
   constructor(
-    private readonly authInstance: FirebaseService,
-    private readonly tokenService: TokenService,
     private readonly fichajesInstance: Fichajes,
     private readonly trabajadoresInstance: TrabajadorService,
   ) {}
 
+  @UseGuards(AuthGuard)
   @Post("entrada")
-  @UseGuards(AuthGuard)
-  async entrada(@Headers("authorization") authHeader: string) {
+  async entrada(@User() user: DecodedIdToken) {
     try {
-      const token = this.tokenService.extract(authHeader);
-      const usuario = await this.authInstance.getUserWithToken(token);
-
       return {
         ok: true,
-        data: await this.fichajesInstance.nuevaEntrada(usuario.uid),
+        data: await this.fichajesInstance.nuevaEntrada(user.uid),
       };
     } catch (err) {
       console.log(err);
@@ -42,16 +29,13 @@ export class FichajesController {
     }
   }
 
+  @UseGuards(AuthGuard)
   @Post("salida")
-  @UseGuards(AuthGuard)
-  async salida(@Headers("authorization") authHeader: string) {
+  async salida(@User() user: DecodedIdToken) {
     try {
-      const token = this.tokenService.extract(authHeader);
-      const usuario = await this.authInstance.getUserWithToken(token);
-
       return {
         ok: true,
-        data: await this.fichajesInstance.nuevaSalida(usuario.uid),
+        data: await this.fichajesInstance.nuevaSalida(user.uid),
       };
     } catch (err) {
       console.log(err);
@@ -59,20 +43,18 @@ export class FichajesController {
     }
   }
 
-  @Get("estado")
   @UseGuards(AuthGuard)
+  @Get("estado")
   async getEstado(
-    @Headers("authorization") authHeader: string,
     @Query("date") dateString: string,
+    @User() user: DecodedIdToken,
   ) {
     try {
       const date = new Date(dateString);
-      const token = this.tokenService.extract(authHeader);
-      const usuario = await this.authInstance.getUserWithToken(token);
 
       return {
         ok: true,
-        data: await this.fichajesInstance.getEstado(usuario.uid, date),
+        data: await this.fichajesInstance.getEstado(user.uid, date),
       };
     } catch (err) {
       console.log(err);
@@ -80,8 +62,8 @@ export class FichajesController {
     }
   }
 
+  @UseGuards(SchedulerGuard)
   @Post("sincroFichajes")
-  // @UseGuards(SchedulerGuard)
   async sincroFichajes() {
     try {
       const response = await this.fichajesInstance.sincroFichajes();
@@ -92,8 +74,8 @@ export class FichajesController {
     }
   }
 
+  @UseGuards(SchedulerGuard)
   @Post("getFichajesHit")
-  // @UseGuards(SchedulerGuard)
   async getFichajesBC() {
     try {
       return {
@@ -106,8 +88,8 @@ export class FichajesController {
     }
   }
 
-  @Get("fichajesByIdSql")
   @UseGuards(AuthGuard)
+  @Get("fichajesByIdSql")
   async getFichajesByIdSql(
     @Query() { idSql, validado }: { idSql: number; validado: string },
   ) {
@@ -131,14 +113,10 @@ export class FichajesController {
     }
   }
 
+  @UseGuards(AuthGuard)
   @Post("updateFichaje")
-  async updateFichaje(
-    @Headers("authorization") authHeader: string,
-    @Body() { id, validado },
-  ) {
+  async updateFichaje(@Body() { id, validado }) {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
       // const validadoBoolean = validado == 'true' ? true : false;
       // Falta comprobación de quién puede enviar un anuncio, ahora
       // mismo cualquiera lo puede hacer.
@@ -157,17 +135,14 @@ export class FichajesController {
     }
   }
 
+  @UseGuards(AuthGuard)
   @Get("misFichajes")
   async getMisFichajes(
-    @Headers("authorization") authHeader: string,
+    @User() user: DecodedIdToken,
     @Query() { fechaInicio, fechaFinal },
   ) {
     try {
       if (!fechaInicio || !fechaFinal) throw Error("Faltan parámetros");
-
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
-      const usuario = await this.authInstance.getUserWithToken(token);
 
       fechaInicio = new Date(fechaInicio);
       fechaFinal = new Date(fechaFinal);
@@ -175,7 +150,7 @@ export class FichajesController {
       return {
         ok: true,
         data: await this.fichajesInstance.getFichajesByUid(
-          usuario.uid,
+          user.uid,
           fechaInicio,
           fechaFinal,
         ),
@@ -188,12 +163,10 @@ export class FichajesController {
 
   @UseGuards(AuthGuard)
   @Get("sinValidar")
-  async getSinValidar(@Headers("authorization") authHeader: string) {
+  async getSinValidar(@User() user: DecodedIdToken) {
     try {
-      const token = this.tokenService.extract(authHeader);
-      const usuario = await this.authInstance.getUserWithToken(token);
       const arraySubordinados = await this.trabajadoresInstance.getSubordinados(
-        usuario.idApp,
+        user.uid,
       );
 
       return {
@@ -206,8 +179,8 @@ export class FichajesController {
     }
   }
 
-  @Post("hayFichajesPendientes")
   @UseGuards(AuthGuard)
+  @Post("hayFichajesPendientes")
   async hayFichajesPendientes(
     @Body("arrayIds") arrayIds: number[],
     @Body("fecha", ParseDatePipe) fecha: Date,

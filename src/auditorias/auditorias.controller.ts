@@ -1,15 +1,6 @@
-import {
-  Controller,
-  Post,
-  UseGuards,
-  Headers,
-  Body,
-  Get,
-  Query,
-} from "@nestjs/common";
-import { AuthGuard } from "../auth/auth.guard";
-import { TokenService } from "../get-token/get-token.service";
-import { FirebaseService } from "../firebase/auth";
+import { Controller, Post, UseGuards, Body, Get, Query } from "@nestjs/common";
+import { AuthGuard } from "../guards/auth.guard";
+
 import {
   AuditoriasInterface,
   AuditoriaRespuestas,
@@ -20,18 +11,13 @@ import { Tienda } from "src/tiendas/tiendas.class";
 @Controller("auditorias")
 export class AuditoriasController {
   constructor(
-    private readonly authInstance: FirebaseService,
-    private readonly tokenService: TokenService,
     private readonly auditoriaInstance: Auditorias,
     private readonly tiendasInstance: Tienda,
   ) {}
 
-  @Post("nuevaAuditoria")
   @UseGuards(AuthGuard)
-  async nuevaIncidencia(
-    @Headers("authorization") authHeader: string,
-    @Body() auditoria: AuditoriasInterface,
-  ) {
+  @Post("nuevaAuditoria")
+  async nuevaIncidencia(@Body() auditoria: AuditoriasInterface) {
     try {
       if (typeof auditoria.caducidad === "string") {
         auditoria.caducidad = new Date(auditoria.caducidad);
@@ -46,9 +32,9 @@ export class AuditoriasController {
     }
   }
 
-  @Get("getAuditorias")
   @UseGuards(AuthGuard)
-  async getAuditorias(@Headers("authorization") authHeader: string) {
+  @Get("getAuditorias")
+  async getAuditorias() {
     try {
       const respAuditoria = await this.auditoriaInstance.getAuditorias();
       if (respAuditoria) return { ok: true, data: respAuditoria };
@@ -58,10 +44,9 @@ export class AuditoriasController {
     }
   }
 
-  @Get("getAuditoriasHabilitado")
   @UseGuards(AuthGuard)
+  @Get("getAuditoriasHabilitado")
   async getAuditoriasHabilitado(
-    @Headers("authorization") authHeader: string,
     @Query() { habilitado }: { habilitado: string },
   ) {
     try {
@@ -76,14 +61,10 @@ export class AuditoriasController {
     }
   }
 
+  @UseGuards(AuthGuard)
   @Post("updateHabilitarAuditoria")
-  async updateHabilitarAuditoria(
-    @Body() auditoria: AuditoriasInterface,
-    @Headers("authorization") authHeader: string,
-  ) {
+  async updateHabilitarAuditoria(@Body() auditoria: AuditoriasInterface) {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
       const respAuditoria =
         await this.auditoriaInstance.updateHabilitarAuditoria(auditoria);
       if (respAuditoria)
@@ -100,14 +81,10 @@ export class AuditoriasController {
     }
   }
 
+  @UseGuards(AuthGuard)
   @Post("updateDeshabilitarAuditoria")
-  async updateDeshabilitarAuditoria(
-    @Body() auditoria: AuditoriasInterface,
-    @Headers("authorization") authHeader: string,
-  ) {
+  async updateDeshabilitarAuditoria(@Body() auditoria: AuditoriasInterface) {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
       const respAuditoria =
         await this.auditoriaInstance.updateDeshabilitarAuditoria(auditoria);
       if (respAuditoria)
@@ -123,12 +100,9 @@ export class AuditoriasController {
     }
   }
   //Respuestas auditorias
-  @Post("respuestasAuditorias")
   @UseGuards(AuthGuard)
-  async respuestasAuditorias(
-    @Headers("authorization") authHeader: string,
-    @Body() auditoria: AuditoriaRespuestas,
-  ) {
+  @Post("respuestasAuditorias")
+  async respuestasAuditorias(@Body() auditoria: AuditoriaRespuestas) {
     try {
       return {
         ok: true,
@@ -141,10 +115,9 @@ export class AuditoriasController {
   }
 
   //Ver Respuestas Auditorias
-  @Get("getRespuestaAuditorias")
   @UseGuards(AuthGuard)
+  @Get("getRespuestaAuditorias")
   async getRespuestaAuditoria(
-    @Headers("authorization") authHeader: string,
     @Query() { idAuditoria }: { idAuditoria: string },
   ) {
     try {
@@ -167,9 +140,9 @@ export class AuditoriasController {
   }
 
   //Mostrar todas las tiendas
-  @Get("tiendasAuditoria")
   @UseGuards(AuthGuard)
-  async tiendasAuditoria(@Headers("authorization") authHeader: string) {
+  @Get("tiendasAuditoria")
+  async tiendasAuditoria() {
     try {
       const resptiendas = await this.tiendasInstance.getTiendas();
       if (resptiendas) return { ok: true, data: resptiendas };
@@ -180,10 +153,10 @@ export class AuditoriasController {
   }
 
   //Mostrar auditorias por idTienda
-  @Get("getAuditoriasTienda")
+
   @UseGuards(AuthGuard)
+  @Get("getAuditoriasTienda")
   async getAuditoriasTienda(
-    @Headers("authorization") authHeader: string,
     @Query() { tienda, habilitado }: { tienda: number; habilitado: boolean },
   ) {
     try {
@@ -200,12 +173,9 @@ export class AuditoriasController {
     }
   }
 
-  @Get("getAuditoriasTiendas")
   @UseGuards(AuthGuard)
-  async getAuditoriasTiendas(
-    @Headers("authorization") authHeader: string,
-    @Query() { tienda }: { tienda: number },
-  ) {
+  @Get("getAuditoriasTiendas")
+  async getAuditoriasTiendas(@Query() { tienda }: { tienda: number }) {
     try {
       const respAuditoria = await this.auditoriaInstance.getAuditoriasTiendas(
         Number(tienda),
@@ -217,14 +187,10 @@ export class AuditoriasController {
     }
   }
   //Borrar auditoria
+  @UseGuards(AuthGuard)
   @Post("deleteAuditoria")
-  async deleteAuditoria(
-    @Body() auditoria: AuditoriasInterface,
-    @Headers("authorization") authHeader: string,
-  ) {
+  async deleteAuditoria(@Body() auditoria: AuditoriasInterface) {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
       const respAuditoria = await this.auditoriaInstance.deleteAuditoria(
         auditoria,
       );
@@ -242,17 +208,13 @@ export class AuditoriasController {
   }
 
   //Update Auditoria
+  @UseGuards(AuthGuard)
   @Post("updateAuditoria")
-  async updateAuditoria(
-    @Body() auditoria: AuditoriasInterface,
-    @Headers("authorization") authHeader: string,
-  ) {
+  async updateAuditoria(@Body() auditoria: AuditoriasInterface) {
     try {
       if (typeof auditoria.caducidad === "string") {
         auditoria.caducidad = new Date(auditoria.caducidad);
       }
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
 
       if (await this.auditoriaInstance.updateAuditoria(auditoria))
         return {
@@ -266,15 +228,10 @@ export class AuditoriasController {
   }
 
   //Update Auditoria
+  @UseGuards(AuthGuard)
   @Post("updateAuditoriaRespuestas")
-  async updateAuditoriaRespuestas(
-    @Body() auditoria: AuditoriaRespuestas,
-    @Headers("authorization") authHeader: string,
-  ) {
+  async updateAuditoriaRespuestas(@Body() auditoria: AuditoriaRespuestas) {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
-
       if (await this.auditoriaInstance.updateAuditoriaRespuestas(auditoria))
         return {
           ok: true,

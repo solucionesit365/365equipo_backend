@@ -4,15 +4,11 @@ import {
   Injectable,
   UnauthorizedException,
 } from "@nestjs/common";
-import { TokenService } from "../get-token/get-token.service";
-import { FirebaseService } from "../firebase/auth";
+import { FirebaseService } from "../firebase/firebase.service";
 
 @Injectable()
 export class AdminGuard implements CanActivate {
-  constructor(
-    private readonly authInstance: FirebaseService,
-    private readonly tokenService: TokenService,
-  ) {}
+  constructor(private readonly authInstance: FirebaseService) {}
 
   pasoPermitidoByClaims(arrayPermisos: any[], cualquieraDe: any[]) {
     if (arrayPermisos) {
@@ -39,11 +35,11 @@ export class AdminGuard implements CanActivate {
         "No se proporcionó el token de autorización",
       );
     }
-    const token = this.tokenService.extract(authHeader);
+    const tokenLimpio = authHeader.replace("Bearer ", "");
 
     try {
-      await this.authInstance.verifyToken(token);
-      const usuario = await this.authInstance.getUserWithToken(token);
+      await this.authInstance.verifyToken(tokenLimpio);
+      const usuario = await this.authInstance.getUserWithToken(tokenLimpio);
       const cualquieraDe = ["RRHH_ADMIN"];
 
       if (

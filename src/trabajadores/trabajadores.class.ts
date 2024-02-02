@@ -1,17 +1,17 @@
 import { Injectable, Inject, forwardRef } from "@nestjs/common";
 import { EmailClass } from "../email/email.class";
-import { FirebaseService, auth } from "../firebase/auth";
-import { TrabajadorCompleto } from "./trabajadores.interface";
+import { FirebaseService } from "../firebase/firebase.service";
 import { PermisosClass } from "../permisos/permisos.class";
 import { DateTime } from "luxon";
 import { solicitudesVacacionesClass } from "../solicitud-vacaciones/solicitud-vacaciones.class";
 import { TrabajadorDatabaseService } from "./trabajadores.database";
+import { DecodedIdToken } from "firebase-admin/auth";
 
 @Injectable()
 export class TrabajadorService {
   constructor(
     @Inject(forwardRef(() => FirebaseService))
-    private readonly authInstance: FirebaseService,
+    private readonly firebaseService: FirebaseService,
     private readonly permisosInstance: PermisosClass,
     @Inject(forwardRef(() => EmailClass))
     private readonly emailInstance: EmailClass,
@@ -206,7 +206,7 @@ export class TrabajadorService {
 
     if (!arrayEmails[0].trim()) throw Error("Email no registrado en la ficha");
 
-    const usuarioCreado = await auth.createUser({
+    const usuarioCreado = await this.firebaseService.auth.createUser({
       email: arrayEmails[0].trim(),
       emailVerified: false,
       phoneNumber: "+34" + datosUsuario.telefonos,
@@ -217,7 +217,9 @@ export class TrabajadorService {
 
     await this.schTrabajadores.setIdApp(datosUsuario.id, usuarioCreado.uid);
 
-    const link = await auth.generateEmailVerificationLink(usuarioCreado.email);
+    const link = await this.firebaseService.auth.generateEmailVerificationLink(
+      usuarioCreado.email,
+    );
     const body = ` Haz click en el siguiente enlace para verificar tu email:<br>
       ${link}
     `;
@@ -241,7 +243,7 @@ export class TrabajadorService {
 
   async guardarCambiosForm(
     original: any,
-    usuarioGestor: TrabajadorCompleto,
+    usuarioGestor: DecodedIdToken,
     payload: any,
   ) {
     const cualquieraDe = ["SUPER_ADMIN", "RRHH_ADMIN"];
@@ -302,7 +304,7 @@ export class TrabajadorService {
   }
 
   private async borrarTrabajadorDeGoogle(uid: string) {
-    await this.authInstance.auth.deleteUser(uid);
+    await this.firebaseService.auth.deleteUser(uid);
   }
 
   private async borrarTrabajadorDeSql(idSql: number) {

@@ -1,11 +1,11 @@
 import { Injectable, Inject, forwardRef } from "@nestjs/common";
-import { FirebaseService, auth } from "../firebase/auth";
+import { FirebaseService } from "../firebase/firebase.service";
 
 @Injectable()
 export class PermisosClass {
   constructor(
     @Inject(forwardRef(() => FirebaseService))
-    private readonly authInstance: FirebaseService,
+    private readonly firebaseService: FirebaseService,
   ) {}
 
   /* Eliminar esta función y dejar solo la del AdminGuard */
@@ -35,7 +35,7 @@ export class PermisosClass {
     if (this.pasoPermitidoByClaims(claimsGestor?.arrayPermisos, cualquieraDe)) {
       if (payload?.length === 1 && payload[0] === "") payload = [];
 
-      await auth.setCustomUserClaims(uidUsuarioDestino, {
+      await this.firebaseService.auth.setCustomUserClaims(uidUsuarioDestino, {
         arrayPermisos: payload,
       });
       return true;
@@ -46,7 +46,7 @@ export class PermisosClass {
     const cualquieraDe = ["SUPER_ADMIN", "RRHH_ADMIN"];
 
     if (this.pasoPermitidoByClaims(claimsGestor?.arrayPermisos, cualquieraDe)) {
-      const usuarioModificado = await this.authInstance.getUserByUid(
+      const usuarioModificado = await this.firebaseService.getUserByUid(
         uidModificado,
       );
       return usuarioModificado.customClaims;

@@ -1,28 +1,15 @@
-import {
-  Body,
-  Controller,
-  Post,
-  UseGuards,
-  Headers,
-  Get,
-} from "@nestjs/common";
+import { Body, Controller, Post, UseGuards, Get } from "@nestjs/common";
 import { Ausencias } from "./ausencias.class";
 import { AusenciaInterface } from "./ausencias.interface";
-import { AuthGuard } from "../auth/auth.guard";
-import { TokenService } from "../get-token/get-token.service";
-import { FirebaseService } from "../firebase/auth";
+import { AuthGuard } from "../guards/auth.guard";
+import { SchedulerGuard } from "../guards/scheduler.guard";
 
 @Controller("ausencias")
 export class AusenciasController {
-  constructor(
-    private readonly ausenciasInstance: Ausencias,
-    private readonly authInstance: FirebaseService,
-    private readonly tokenService: TokenService,
-  ) {}
+  constructor(private readonly ausenciasInstance: Ausencias) {}
 
-  // Cuadrantes 2.0
+  @UseGuards(AuthGuard)
   @Post("nueva")
-  // @UseGuards(AuthGuard)
   async addAusencia(
     @Body()
     {
@@ -82,14 +69,10 @@ export class AusenciasController {
     }
   }
 
+  @UseGuards(AuthGuard)
   @Post("deleteAusencia")
-  async deleteAusencia(
-    @Headers("authorization") authHeader: string,
-    @Body() { idAusencia },
-  ) {
+  async deleteAusencia(@Body() { idAusencia }) {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
       const respAusencias = await this.ausenciasInstance.deleteAusencia(
         idAusencia,
       );
@@ -106,14 +89,10 @@ export class AusenciasController {
     }
   }
 
+  @UseGuards(AuthGuard)
   @Post("updateAusencia")
-  async updateAusencia(
-    @Body() ausencia: AusenciaInterface,
-    @Headers("authorization") authHeader: string,
-  ) {
+  async updateAusencia(@Body() ausencia: AusenciaInterface) {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
       const respAusencia = await this.ausenciasInstance.updateAusencia(
         ausencia,
       );
@@ -130,14 +109,10 @@ export class AusenciasController {
     }
   }
 
+  @UseGuards(AuthGuard)
   @Post("updateAusenciaResto")
-  async updateAusenciaResto(
-    @Body() ausencia: AusenciaInterface,
-    @Headers("authorization") authHeader: string,
-  ) {
+  async updateAusenciaResto(@Body() ausencia: AusenciaInterface) {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
       const respAusencia = await this.ausenciasInstance.updateAusenciaResto(
         ausencia,
       );
@@ -153,13 +128,10 @@ export class AusenciasController {
       return { ok: false, message: err.message };
     }
   }
-  @Get("getAusencias")
   @UseGuards(AuthGuard)
-  async getAusencias(@Headers("authorization") authHeader: string) {
+  @Get("getAusencias")
+  async getAusencias() {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
-
       const respAusencias = await this.ausenciasInstance.getAusencias();
       if (respAusencias) return { ok: true, data: respAusencias };
       else throw Error("No se ha encontrado ninguna ausencia");
@@ -168,8 +140,8 @@ export class AusenciasController {
     }
   }
 
+  @UseGuards(SchedulerGuard)
   @Post("sincroAusenciasHit")
-  // @UseGuards()
   async sincroAusenciasHit() {
     await this.ausenciasInstance.sincroAusenciasHit();
     return {

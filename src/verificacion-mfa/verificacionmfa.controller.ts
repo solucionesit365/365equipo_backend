@@ -10,9 +10,9 @@ import {
 } from "@nestjs/common";
 import { VerificacionMFA } from "./verificacionmfa.interface";
 import { VerificacionClass } from "./verificacionmfa.class";
-import { AuthGuard } from "../auth/auth.guard";
+import { AuthGuard } from "../guards/auth.guard";
 import { EmailClass } from "src/email/email.class";
-import { FirebaseService } from "../firebase/auth";
+import { FirebaseService } from "../firebase/firebase.service";
 
 @Controller("verificacionmfa")
 export class VerificacionmfaController {

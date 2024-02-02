@@ -1,25 +1,21 @@
-import { Controller, Get, Headers, Query, UseGuards } from "@nestjs/common";
-import { TokenService } from "../get-token/get-token.service";
+import { Controller, Get, Query, UseGuards } from "@nestjs/common";
 import { Tienda } from "./tiendas.class";
-import { AuthGuard } from "../auth/auth.guard";
+import { AuthGuard } from "../guards/auth.guard";
 import { TrabajadorService } from "../trabajadores/trabajadores.class";
-import { FirebaseService } from "../firebase/auth";
+import { FirebaseService } from "../firebase/firebase.service";
 
 @Controller("tiendas")
 export class TiendasController {
   constructor(
     private readonly authInstance: FirebaseService,
-    private readonly tokenService: TokenService,
     private readonly tiendasInstance: Tienda,
     private readonly trabajadorInstance: TrabajadorService,
   ) {}
 
+  @UseGuards(AuthGuard)
   @Get()
-  async getTiendas(@Headers("authorization") authHeader: string) {
+  async getTiendas() {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
-
       return {
         ok: true,
         data: await this.tiendasInstance.getTiendas(),
@@ -30,12 +26,10 @@ export class TiendasController {
     }
   }
 
+  @UseGuards(AuthGuard)
   @Get("actualizarTiendas")
-  async actualizarTiendas(@Headers("authorization") authHeader: string) {
+  async actualizarTiendas() {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
-
       return {
         ok: true,
         data: await this.tiendasInstance.actualizarTiendas(),
@@ -46,8 +40,8 @@ export class TiendasController {
     }
   }
 
-  @Get("responsable")
   @UseGuards(AuthGuard)
+  @Get("responsable")
   async getTiendasResponsable(@Query() { idApp }) {
     try {
       const usuario = await this.trabajadorInstance.getTrabajadorByAppId(idApp);

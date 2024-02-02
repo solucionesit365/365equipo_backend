@@ -4,67 +4,66 @@ import {
   Get,
   Post,
   UseGuards,
-  Headers,
   Query,
   HttpException,
   HttpStatus,
 } from "@nestjs/common";
-import { AuthGuard } from "../auth/auth.guard";
-import { TokenService } from "../get-token/get-token.service";
+import { AuthGuard } from "../guards/auth.guard";
 import { Cuadrantes } from "./cuadrantes.class";
 import { TCuadrante, TRequestCuadrante } from "./cuadrantes.interface";
-import { SchedulerGuard } from "../scheduler/scheduler.guard";
-import { FirebaseService } from "../firebase/auth";
+import { SchedulerGuard } from "../guards/scheduler.guard";
+import { FirebaseService } from "../firebase/firebase.service";
 import { TrabajadorService } from "../trabajadores/trabajadores.class";
 import { DateTime } from "luxon";
 import { ObjectId } from "mongodb";
 import { ContratoService } from "../contrato/contrato.service";
+import { User } from "../decorators/get-user.decorator";
+import { DecodedIdToken } from "firebase-admin/auth";
 
 @Controller("cuadrantes")
 export class CuadrantesController {
   constructor(
     private readonly authInstance: FirebaseService,
-    private readonly tokenService: TokenService,
     private readonly cuadrantesInstance: Cuadrantes,
     private readonly contratoService: ContratoService,
     private readonly trabajadoresInstance: TrabajadorService,
   ) {}
 
-  @Get()
   @UseGuards(AuthGuard)
+  @Get()
   async getCuadrantes(
     @Query() { fecha, idTienda }: { fecha: string; idTienda?: string },
-    @Headers("authorization") authHeader: string,
+    @User() user: DecodedIdToken,
   ) {
     try {
-      const token = this.tokenService.extract(authHeader);
-      const usuario = await this.authInstance.getUserWithToken(token);
+      const usuarioCompleto =
+        await this.trabajadoresInstance.getTrabajadorByAppId(user.uid);
 
       if (!fecha) throw Error("Faltan datos");
 
-      const tipoEmpleado = this.cuadrantesInstance.getRole(usuario);
+      const tipoEmpleado = this.cuadrantesInstance.getRole(usuarioCompleto);
       let cuadrantes: TCuadrante[] = [];
 
       if (tipoEmpleado === "DEPENDIENTA") {
         cuadrantes = await this.cuadrantesInstance.getCuadranteDependienta(
-          usuario.id,
+          usuarioCompleto.id,
           DateTime.fromJSDate(new Date(fecha)),
         );
       }
 
       if (tipoEmpleado === "COORDINADORA") {
         const arrayEquipo = await this.trabajadoresInstance.getSubordinadosById(
-          usuario.id,
+          usuarioCompleto.id,
         );
         const arrayIdEquipo = arrayEquipo.map(
           (trabajadorSubordinado) => trabajadorSubordinado.id,
         );
 
         cuadrantes = await this.cuadrantesInstance.getCuadranteCoordinadora(
-          usuario.id,
+          usuarioCompleto.id,
           arrayIdEquipo,
           DateTime.fromJSDate(new Date(fecha)),
-          usuario.idTienda,
+          usuarioCompleto.idTienda,
         );
       }
 
@@ -85,20 +84,20 @@ export class CuadrantesController {
     }
   }
 
-  @Get("individual")
   @UseGuards(AuthGuard)
+  @Get("individual")
   async getCuadrantesIndividual(
     @Query()
     { idTrabajador, fecha }: { fecha: string; idTrabajador: string },
-    @Headers("authorization") authHeader: string,
+    @User() user: DecodedIdToken,
   ) {
     try {
-      const token = this.tokenService.extract(authHeader);
-      const usuario = await this.authInstance.getUserWithToken(token);
+      const usuarioCompleto =
+        await this.trabajadoresInstance.getTrabajadorByAppId(user.uid);
 
       if (!fecha || !idTrabajador) throw Error("Faltan datos");
 
-      if (usuario.llevaEquipo && usuario.idTienda) {
+      if (usuarioCompleto.llevaEquipo && usuarioCompleto.idTienda) {
         const fechaInicio = DateTime.fromJSDate(new Date(fecha)).startOf(
           "week",
         );
@@ -120,14 +119,14 @@ export class CuadrantesController {
     }
   }
 
-  @Get("getNewId")
   @UseGuards(AuthGuard)
+  @Get("getNewId")
   getNewId() {
     return new ObjectId();
   }
 
-  @Post("borrarTurno")
   @UseGuards(AuthGuard)
+  @Post("borrarTurno")
   async borrarTurno(@Body() { idTurno }) {
     try {
       if (idTurno) {
@@ -141,9 +140,9 @@ export class CuadrantesController {
     }
   }
 
-  @Get("getTodos")
   @UseGuards(AuthGuard)
-  async getAllCuadrantes(@Headers("authorization") authHeader: string) {
+  @Get("getTodos")
+  async getAllCuadrantes() {
     try {
       return {
         ok: true,
@@ -156,8 +155,8 @@ export class CuadrantesController {
   }
 
   //Todas las tiendas 1 semana
-  @Get("getTiendasUnaSemana")
   @UseGuards(AuthGuard)
+  @Get("getTiendasUnaSemana")
   async getTiendas1Semana(@Query() { fecha }: { fecha: string }) {
     try {
       if (!fecha) throw Error("Faltan datos");
@@ -174,8 +173,8 @@ export class CuadrantesController {
   }
 
   //Todas las semanas 1 tienda
-  @Get("getTiendaTodasSemanas")
   @UseGuards(AuthGuard)
+  @Get("getTiendaTodasSemanas")
   async getSemanas1Tienda(@Query() { idTienda }: { idTienda: number }) {
     try {
       if (!idTienda) throw Error("Faltan datos");
@@ -189,42 +188,12 @@ export class CuadrantesController {
     }
   }
 
-  // //1Tienda 1 Semana
-  // @Get("getTiendaSemana")
-  // @UseGuards(AuthGuard)
-  // async getTiendaSemana(
-  //   @Query()
-  //   { idTienda, fecha }: { idTienda: number; fecha: string },
-  // ) {
-  //   try {
-  //     if (!idTienda && !fecha) throw Error("Faltan datos");
-  //     return {
-  //       ok: true,
-  //       data: await this.cuadrantesInstance.getCuadrantes(
-  //         Number(idTienda),
-  //         DateTime.fromJSDate(new Date(fecha)),
-
-  //       ),
-  //     };
-  //   } catch (error) {
-  //     console.log(error);
-  //     return { ok: false, message: error.message };
-  //   }
-  // }
-
   //obtener cuadrantes por semana y trabajador:
-  @Get("cuadranteSemanaTrabajador")
   @UseGuards(AuthGuard)
+  @Get("cuadranteSemanaTrabajador")
   async getCuadranteSemanaTrabajador(
     @Query()
-    {
-      idTrabajador,
-      fecha,
-    }: {
-      idTrabajador: number;
-      fecha: string;
-    },
-    @Headers("authorization") authHeader: string,
+    { idTrabajador, fecha }: { idTrabajador: number; fecha: string },
   ) {
     try {
       if (!idTrabajador && !fecha) throw Error("Faltan datos");
@@ -258,22 +227,22 @@ export class CuadrantesController {
     return DateTime.fromJSDate(new Date(hourString));
   };
 
-  @Post("saveCuadrante")
   @UseGuards(AuthGuard)
+  @Post("saveCuadrante")
   async saveCuadrante(
     @Body() reqCuadrante: TRequestCuadrante,
-    @Headers("authorization") authHeader: string,
+    @User() user: DecodedIdToken,
   ) {
     try {
       if (!reqCuadrante) throw Error("Faltan datos");
-      const token = this.tokenService.extract(authHeader);
-      const usuario = await this.authInstance.getUserWithToken(token);
+      const usuarioCompleto =
+        await this.trabajadoresInstance.getTrabajadorByAppId(user.uid);
       const trabajadorEditado =
         await this.trabajadoresInstance.getTrabajadorBySqlId(
           reqCuadrante.idTrabajador,
         );
 
-      if (usuario.llevaEquipo && usuario.idTienda) {
+      if (usuarioCompleto.llevaEquipo && usuarioCompleto.idTienda) {
         const fechaInicio = DateTime.fromJSDate(
           new Date(reqCuadrante.fecha),
         ).startOf("week");
@@ -384,8 +353,8 @@ export class CuadrantesController {
     }
   }
 
-  @Post("sincronizarConHit")
   @UseGuards(SchedulerGuard)
+  @Post("sincronizarConHit")
   async sincronizarConHit() {
     try {
       return {

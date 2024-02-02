@@ -1,7 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { FichajesDatabase } from "./fichajes.mongodb";
 import { TrabajadorService } from "../trabajadores/trabajadores.class";
-import { TrabajadorCompleto } from "../trabajadores/trabajadores.interface";
 import { Trabajador } from "@prisma/client";
 import * as moment from "moment";
 import { ObjectId, WithId } from "mongodb";
@@ -17,11 +16,11 @@ export class Fichajes {
     private readonly cuadrantesInstance: Cuadrantes,
   ) {}
 
-  async nuevaEntrada(trabajador: TrabajadorCompleto) {
+  async nuevaEntrada(trabajador: Trabajador) {
     const hora = new Date();
 
     const insert = await this.schFichajes.nuevaEntrada(
-      trabajador.uid,
+      trabajador.idApp,
       hora,
       trabajador.id,
       trabajador.nombreApellidos,
@@ -33,11 +32,11 @@ export class Fichajes {
     throw Error("No se ha podido registrar la entrada");
   }
 
-  async nuevaSalida(trabajador: TrabajadorCompleto) {
+  async nuevaSalida(trabajador: Trabajador) {
     const hora = new Date();
 
     const insert = await this.schFichajes.nuevaSalida(
-      trabajador.uid,
+      trabajador.idApp,
       hora,
       trabajador.id,
       trabajador.nombreApellidos,

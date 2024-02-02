@@ -3,19 +3,16 @@ import {
   Post,
   Get,
   Body,
-  Headers,
   Query,
   UseGuards,
   ParseIntPipe,
 } from "@nestjs/common";
-import { TokenService } from "../get-token/get-token.service";
 import { FichajesValidados } from "./fichajes-validados.class";
 import { FichajeValidadoDto } from "./fichajes-validados.dto";
-import { FirebaseService } from "../firebase/auth";
 import { Notificaciones } from "../notificaciones/notificaciones.class";
 import { TrabajadorService } from "../trabajadores/trabajadores.class";
-import { AuthGuard } from "../auth/auth.guard";
-import { SchedulerGuard } from "../scheduler/scheduler.guard";
+import { AuthGuard } from "../guards/auth.guard";
+import { SchedulerGuard } from "../guards/scheduler.guard";
 import { ParseDatePipe } from "../parse-date/parse-date.pipe";
 import { DateTime } from "luxon";
 
@@ -24,8 +21,6 @@ export class FichajesValidadosController {
   constructor(
     private readonly trabajador: TrabajadorService,
     private readonly notificaciones: Notificaciones,
-    private readonly authInstance: FirebaseService,
-    private readonly tokenService: TokenService,
     private readonly fichajesValidadosInstance: FichajesValidados,
   ) {}
 
@@ -69,15 +64,12 @@ export class FichajesValidadosController {
     }
   }
 
+  @UseGuards(AuthGuard)
   @Get("getFichajesValidados")
   async getFichajesValidados(
-    @Headers("authorization") authHeader: string,
     @Query() { idTrabajador }: { idTrabajador: number },
   ) {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
-
       const respValidados =
         await this.fichajesValidadosInstance.getFichajesValidados(
           Number(idTrabajador),
@@ -94,15 +86,10 @@ export class FichajesValidadosController {
     }
   }
 
+  @UseGuards(AuthGuard)
   @Post("actualizarValidados")
-  async updateFichajesValidados(
-    @Headers("authorization") authHeader: string,
-    @Body() FichajesValidados: FichajeValidadoDto,
-  ) {
+  async updateFichajesValidados(@Body() FichajesValidados: FichajeValidadoDto) {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
-
       if (
         await this.fichajesValidadosInstance.updateFichajesValidados(
           FichajesValidados,
@@ -147,16 +134,13 @@ export class FichajesValidadosController {
     }
   }
 
+  @UseGuards(AuthGuard)
   @Get("getFichajesPagar")
   async getFichajesPagar(
-    @Headers("authorization") authHeader: string,
     @Query()
     { idResponsable, aPagar }: { idResponsable: number; aPagar: string },
   ) {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
-
       const aPagarBoolean = aPagar == "true" ? true : false;
 
       const respValidados =
@@ -176,16 +160,13 @@ export class FichajesValidadosController {
     }
   }
 
+  @UseGuards(AuthGuard)
   @Get("getAllFichajesPagar")
   async getAllFichajesPagar(
-    @Headers("authorization") authHeader: string,
     @Query()
     { aPagar }: { aPagar: string },
   ) {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
-
       const aPagarBoolean = aPagar == "true" ? true : false;
 
       const respValidados =
@@ -202,16 +183,13 @@ export class FichajesValidadosController {
     }
   }
 
+  @UseGuards(AuthGuard)
   @Get("getAllIdResponsableFichajesPagar")
   async getAllIdResponsableFichajesPagar(
-    @Headers("authorization") authHeader: string,
     @Query()
     { idResponsable }: { idResponsable: number },
   ) {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
-
       const respValidados =
         await this.fichajesValidadosInstance.getAllIdResponsable(
           Number(idResponsable),
@@ -234,15 +212,12 @@ export class FichajesValidadosController {
     }
   }
 
+  @UseGuards(AuthGuard)
   @Get("getSemanasFichajesPagar")
   async getSemanasFichajesPagar(
-    @Headers("authorization") authHeader: string,
     @Query("diaEntreSemana", ParseDatePipe) diaEntreSemana: Date,
   ) {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
-
       const respValidados =
         await this.fichajesValidadosInstance.getSemanasFichajesPagar(
           DateTime.fromJSDate(diaEntreSemana),
@@ -265,15 +240,10 @@ export class FichajesValidadosController {
     }
   }
 
+  @UseGuards(AuthGuard)
   @Get("getAllFichajesValidados")
-  async getAllFichajes(
-    @Headers("authorization") authHeader: string,
-    @Query("fecha", ParseDatePipe) fecha: Date,
-  ) {
+  async getAllFichajes(@Query("fecha", ParseDatePipe) fecha: Date) {
     try {
-      // const token = this.tokenService.extract(authHeader);
-      // await this.authInstance.verifyToken(token);
-
       const respAllFichajes =
         await this.fichajesValidadosInstance.getAllFichajesValidados(fecha);
 
@@ -293,17 +263,13 @@ export class FichajesValidadosController {
     }
   }
 
+  @UseGuards(AuthGuard)
   @Get("getTiendaDia")
   async getTiendaDia(
-    @Headers("authorization") authHeader: string,
     @Query("tienda", ParseIntPipe) tienda: number,
     @Query("dia", ParseDatePipe) fecha: Date,
   ) {
     try {
-      console.log(fecha, typeof fecha);
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
-
       const respFichajesV = await this.fichajesValidadosInstance.getTiendaDia(
         tienda,
         fecha,
@@ -324,8 +290,8 @@ export class FichajesValidadosController {
     }
   }
 
-  @Get("getResumen")
   @UseGuards(AuthGuard)
+  @Get("getResumen")
   async getResumen(
     @Query("fechaEntreSemana", ParseDatePipe) fechaEntreSemana: Date,
     @Query("idTienda", ParseIntPipe) idTienda: number,
@@ -346,8 +312,8 @@ export class FichajesValidadosController {
   }
 
   // ESTÁ PENDIENTE 25/10/2023
-  @Post("sincronizarConHit")
   @UseGuards(SchedulerGuard)
+  @Post("sincronizarConHit")
   async sincronizarFichajesValidados() {
     try {
       // const pendientesEnvio =

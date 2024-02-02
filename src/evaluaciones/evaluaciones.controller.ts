@@ -1,36 +1,16 @@
-import {
-  Controller,
-  Post,
-  UseGuards,
-  Headers,
-  Body,
-  Get,
-  Query,
-} from "@nestjs/common";
-import { AuthGuard } from "../auth/auth.guard";
-import { TokenService } from "../get-token/get-token.service";
-import { FirebaseService } from "../firebase/auth";
+import { Controller, Post, UseGuards, Body, Get, Query } from "@nestjs/common";
+import { AuthGuard } from "../guards/auth.guard";
 import { EvaluacionesClass } from "./evaluaciones.class";
 import { evaluacionesInterface } from "./evaluaciones.interface";
-import { database } from "firebase-admin";
+
 @Controller("evaluaciones")
 export class EvaluacionesController {
-  constructor(
-    private readonly authInstance: FirebaseService,
-    private readonly tokenService: TokenService,
-    private readonly evaluacionesclass: EvaluacionesClass,
-  ) {}
+  constructor(private readonly evaluacionesclass: EvaluacionesClass) {}
 
-  @Post("addPlantilla")
   @UseGuards(AuthGuard)
-  async addPlantilla(
-    @Headers("authorization") authHeader: string,
-    @Body() evaluacion: evaluacionesInterface,
-  ) {
+  @Post("addPlantilla")
+  async addPlantilla(@Body() evaluacion: evaluacionesInterface) {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
-
       const response = await this.evaluacionesclass.addPlantilla(evaluacion);
       if (response) {
         return {
@@ -44,16 +24,10 @@ export class EvaluacionesController {
   }
 
   //Todas las plantillas segun el tipo
-  @Get("getPlantillas")
   @UseGuards(AuthGuard)
-  async getPlantillas(
-    @Headers("authorization") authHeader: string,
-    @Query("tipo") tipo: string,
-  ) {
+  @Get("getPlantillas")
+  async getPlantillas(@Query("tipo") tipo: string) {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
-
       const response = await this.evaluacionesclass.getPlantillas(tipo);
       if (response) {
         return {
@@ -65,13 +39,10 @@ export class EvaluacionesController {
   }
 
   //Todas las Plantillas admin
-  @Get("getPlantillasAdmin")
   @UseGuards(AuthGuard)
-  async getPlantillasAdmin(@Headers("authorization") authHeader: string) {
+  @Get("getPlantillasAdmin")
+  async getPlantillasAdmin() {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
-
       const response = await this.evaluacionesclass.getPlantillasAdmin();
       if (response) {
         return {
@@ -82,16 +53,10 @@ export class EvaluacionesController {
     } catch (error) {}
   }
 
-  @Get("getEvaluacionAdminRespondidas")
   @UseGuards(AuthGuard)
-  async getEvaluacionAdminRespondidas(
-    @Headers("authorization") authHeader: string,
-    @Query() request,
-  ) {
+  @Get("getEvaluacionAdminRespondidas")
+  async getEvaluacionAdminRespondidas(@Query() request) {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
-
       const response =
         await this.evaluacionesclass.getEvaluacionAdminRespondidas(
           Number(request.idSql),
@@ -106,13 +71,10 @@ export class EvaluacionesController {
     } catch (error) {}
   }
 
-  @Get("getEvaluaciones")
   @UseGuards(AuthGuard)
-  async getEvaluaciones(@Headers("authorization") authHeader: string) {
+  @Get("getEvaluaciones")
+  async getEvaluaciones() {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
-
       const response = await this.evaluacionesclass.getEvaluaciones();
 
       if (response) {
@@ -125,12 +87,9 @@ export class EvaluacionesController {
   }
 
   //Eliminar plantillas
-  @Post("deletePlantillaAdmin")
   @UseGuards(AuthGuard)
-  async deletePlantillaAdmin(
-    @Body() evaluacion: evaluacionesInterface,
-    @Headers("authorization") authHeader: string,
-  ) {
+  @Post("deletePlantillaAdmin")
+  async deletePlantillaAdmin(@Body() evaluacion: evaluacionesInterface) {
     try {
       const response = await this.evaluacionesclass.deletePlantillaAdmin(
         evaluacion,
@@ -148,15 +107,9 @@ export class EvaluacionesController {
     }
   }
 
-  @Post("addEvaluacion")
   @UseGuards(AuthGuard)
-  async addEvaluacion(
-    @Headers("authorization") authHeader: string,
-    @Body() evaluacion: evaluacionesInterface,
-  ) {
-    const token = this.tokenService.extract(authHeader);
-    await this.authInstance.verifyToken(token);
-
+  @Post("addEvaluacion")
+  async addEvaluacion(@Body() evaluacion: evaluacionesInterface) {
     const response = await this.evaluacionesclass.addEvaluacion(evaluacion);
     if (response) {
       return {
@@ -166,15 +119,10 @@ export class EvaluacionesController {
     }
   }
 
-  @Get("getEvaluados")
   @UseGuards(AuthGuard)
-  async getEvaluados(
-    @Headers("authorization") authHeader: string,
-    @Query() request,
-  ) {
+  @Get("getEvaluados")
+  async getEvaluados(@Query() request) {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
       const response = await this.evaluacionesclass.getEvaluados(
         Number(request.idSql),
         Number(request.año),

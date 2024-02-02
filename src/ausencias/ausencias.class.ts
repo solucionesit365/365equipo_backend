@@ -2,16 +2,17 @@ import { Injectable } from "@nestjs/common";
 import { AusenciasDatabase } from "./ausencias.mongodb";
 import { Cuadrantes } from "../cuadrantes/cuadrantes.class";
 import * as moment from "moment";
-import { recHitBind } from "../bbdd/mssql";
 import { ObjectId } from "mongodb";
-import { TiposAusencia } from "src/cuadrantes/cuadrantes.interface";
+import { TiposAusencia } from "../cuadrantes/cuadrantes.interface";
 import { AusenciaInterface } from "./ausencias.interface";
+import { FacTenaMssql } from "../bbdd/factenamssql.service";
 
 @Injectable()
 export class Ausencias {
   constructor(
     private readonly schAusencias: AusenciasDatabase,
     private readonly cuadrantesInstance: Cuadrantes,
+    private readonly facTenaService: FacTenaMssql,
   ) {}
 
   // Cuadrantes 2.0
@@ -136,8 +137,7 @@ export class Ausencias {
           observaciones = ausenciasPendientes[i].tipo + `[Horas:8]`;
         }
 
-        await recHitBind(
-          "Fac_Tena",
+        await this.facTenaService.recHitBind(
           sql,
           fechaInicial.format("DD/MM/YYYY"),
           ausenciasPendientes[i].idUsuario,

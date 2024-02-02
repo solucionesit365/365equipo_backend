@@ -1,18 +1,14 @@
 import { Controller, Get, UseGuards, Query } from "@nestjs/common";
-import { SchedulerGuard } from "../scheduler/scheduler.guard";
+import { SchedulerGuard } from "../guards/scheduler.guard";
 import { ContratoService } from "./contrato.service";
-import { TokenService } from "../get-token/get-token.service";
-import { AuthGuard } from "../auth/auth.guard";
+import { AuthGuard } from "../guards/auth.guard";
 
 @Controller("contrato")
 export class ContratoController {
-  constructor(
-    private readonly contratoService: ContratoService,
-    private readonly tokenService: TokenService,
-  ) {}
+  constructor(private readonly contratoService: ContratoService) {}
 
-  @Get("descargarHistoriaContratos")
   @UseGuards(SchedulerGuard)
+  @Get("descargarHistoriaContratos")
   async descargarHistoriaContratos() {
     try {
       return {

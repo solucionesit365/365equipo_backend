@@ -1,35 +1,19 @@
-import {
-  Controller,
-  Get,
-  Headers,
-  Query,
-  UseGuards,
-  Post,
-  Body,
-} from "@nestjs/common";
-import { SchedulerGuard } from "../scheduler/scheduler.guard";
-import { TokenService } from "../get-token/get-token.service";
-import { FirebaseMessagingService } from "../firebase/firebase-messaging.service";
+import { Controller, Get, Query, UseGuards, Post, Body } from "@nestjs/common";
+import { SchedulerGuard } from "../guards/scheduler.guard";
 import { TrabajadorService } from "./trabajadores.class";
-import { FirebaseService } from "../firebase/auth";
-import { AdminGuard } from "../auth/admin.guard";
-import { AuthGuard } from "src/auth/auth.guard";
+import { AdminGuard } from "../guards/admin.guard";
+import { AuthGuard } from "../guards/auth.guard";
+import { User } from "../decorators/get-user.decorator";
+import { DecodedIdToken } from "firebase-admin/auth";
 
 @Controller("trabajadores")
 export class TrabajadoresController {
-  constructor(
-    private readonly authInstance: FirebaseService,
-    private readonly trabajadorInstance: TrabajadorService,
-    private readonly tokenService: TokenService,
-    private readonly messagingService: FirebaseMessagingService,
-  ) {}
+  constructor(private readonly trabajadorInstance: TrabajadorService) {}
 
+  @UseGuards(AuthGuard)
   @Get()
-  async getTrabajadores(@Headers("authorization") authHeader: string) {
+  async getTrabajadores() {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
-
       const arrayTrabajadores = await this.trabajadorInstance.getTrabajadores();
 
       return { ok: true, data: arrayTrabajadores };
@@ -39,12 +23,9 @@ export class TrabajadoresController {
     }
   }
 
-  @Get("getTrabajadorByAppId")
   @UseGuards(AuthGuard)
-  async getTrabajadorByAppId(
-    @Headers("authorization") authHeader: string,
-    @Query() { uid },
-  ) {
+  @Get("getTrabajadorByAppId")
+  async getTrabajadorByAppId(@Query() { uid }) {
     try {
       const resUser = await this.trabajadorInstance.getTrabajadorByAppId(uid);
       // console.log(resUser);
@@ -55,12 +36,9 @@ export class TrabajadoresController {
     }
   }
 
-  @Get("getTrabajadorBySqlId")
   @UseGuards(AuthGuard)
-  async getTrabajadorBySqlId(
-    @Headers("authorization") authHeader: string,
-    @Query() { id },
-  ) {
+  @Get("getTrabajadorBySqlId")
+  async getTrabajadorBySqlId(@Query() { id }) {
     try {
       const resUser = await this.trabajadorInstance.getTrabajadorBySqlId(id);
 
@@ -71,12 +49,9 @@ export class TrabajadoresController {
     }
   }
 
-  @Get("getTrabajadoresByTienda")
   @UseGuards(AuthGuard)
-  async getTrabajadoresByTienda(
-    @Headers("authorization") authHeader: string,
-    @Query() { idTienda },
-  ) {
+  @Get("getTrabajadoresByTienda")
+  async getTrabajadoresByTienda(@Query() { idTienda }) {
     try {
       const resUser = await this.trabajadorInstance.getTrabajadoresByTienda(
         Number(idTienda),
@@ -105,12 +80,9 @@ export class TrabajadoresController {
     }
   }
 
-  @Get("getSubordinados")
   @UseGuards(AuthGuard)
-  async getSubordinados(
-    @Headers("authorization") authHeader: string,
-    @Query() { uid },
-  ) {
+  @Get("getSubordinados")
+  async getSubordinados(@Query() { uid }) {
     try {
       if (!uid) throw Error("Faltan datos");
 
@@ -123,12 +95,10 @@ export class TrabajadoresController {
     }
   }
 
+  @UseGuards(AuthGuard)
   @Get("actualizarTrabajadores")
-  async actualizarTrabajadores(@Headers("authorization") authHeader: string) {
+  async actualizarTrabajadores() {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
-
       return {
         ok: true,
         data: await this.trabajadorInstance.sincronizarConHit(),
@@ -139,27 +109,13 @@ export class TrabajadoresController {
     }
   }
 
-  @Get("sincronizarConHit")
   @UseGuards(SchedulerGuard)
+  @Get("sincronizarConHit")
   async sincronizarConHit() {
     try {
       return {
         ok: true,
         data: await this.trabajadorInstance.sincronizarConHit(),
-      };
-    } catch (err) {
-      console.log(err);
-      return { ok: false, message: err.message };
-    }
-  }
-
-  @Post("suscribirseMessaging")
-  async suscribirseMessaging(@Body() { token }) {
-    try {
-      if (!token) throw Error("Faltan parámetros");
-      return {
-        ok: true,
-        data: await this.messagingService.subscribeToTopic(token),
       };
     } catch (err) {
       console.log(err);
@@ -183,23 +139,19 @@ export class TrabajadoresController {
     }
   }
 
+  @UseGuards(AuthGuard)
   @Post("guardarCambios")
   async guardarCambiosForm(
-    @Headers("authorization") authHeader: string,
     @Body()
     { modificado, original },
+    @User() firebaseUser: DecodedIdToken,
   ) {
     try {
-      // Falta comprobar parámetros de entrada
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
-
-      const usuario = await this.authInstance.getUserWithToken(token);
       return {
         ok: true,
         data: await this.trabajadorInstance.guardarCambiosForm(
           original,
-          usuario,
+          firebaseUser,
           modificado,
         ),
       };
@@ -209,16 +161,11 @@ export class TrabajadoresController {
     }
   }
 
+  @UseGuards(AuthGuard)
   @Get("arbolById")
-  async getArbolById(
-    @Headers("authorization") authHeader: string,
-    @Query() { idSql }: { idSql: string },
-  ) {
+  async getArbolById(@Query() { idSql }: { idSql: string }) {
     try {
       if (!idSql) throw Error("Faltan parámetros");
-
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
 
       return {
         ok: true,
@@ -230,8 +177,8 @@ export class TrabajadoresController {
     }
   }
 
-  @Post("borrarTrabajador")
   @UseGuards(AdminGuard)
+  @Post("borrarTrabajador")
   async borrarTrabajador(@Body() { idSql }) {
     try {
       if (!idSql) throw Error("Faltan parámetros");
@@ -246,12 +193,10 @@ export class TrabajadoresController {
     }
   }
 
+  @UseGuards(AuthGuard)
   @Get("getAllCoordis")
-  async getAllCoordis(@Headers("authorization") authHeader: string) {
+  async getAllCoordis() {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
-
       return {
         ok: true,
         data: await this.trabajadorInstance.getCoordis(),
@@ -262,12 +207,9 @@ export class TrabajadoresController {
     }
   }
 
-  @Get("getSubordinadosByIdsql")
   @UseGuards(AuthGuard)
-  async getSubordinadosByIdsql(
-    @Headers("authorization") authHeader: string,
-    @Query() { idSql },
-  ) {
+  @Get("getSubordinadosByIdsql")
+  async getSubordinadosByIdsql(@Query() { idSql }) {
     try {
       if (!idSql) throw Error("Faltan datos");
 
@@ -282,15 +224,10 @@ export class TrabajadoresController {
     }
   }
 
+  @UseGuards(AuthGuard)
   @Post("uploadFoto")
-  async uploadFoto(
-    @Headers("authorization") authHeader: string,
-    @Body() { displayFoto, uid },
-  ) {
+  async uploadFoto(@Body() { displayFoto, uid }) {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
-
       return {
         ok: true,
         data: await this.trabajadorInstance.uploadFoto(displayFoto, uid),

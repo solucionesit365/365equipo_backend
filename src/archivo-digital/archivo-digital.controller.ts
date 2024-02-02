@@ -1,37 +1,16 @@
-import {
-  Body,
-  Controller,
-  Post,
-  UseGuards,
-  Headers,
-  Get,
-  Query,
-} from "@nestjs/common";
+import { Body, Controller, Post, UseGuards, Get, Query } from "@nestjs/common";
 import { ArchivoDigital } from "./archivo-digital.class";
 import { ArchivoDigitalInterface } from "./archivo-digital.interface";
-import { AuthGuard } from "../auth/auth.guard";
-import { TokenService } from "../get-token/get-token.service";
-import { FirebaseService } from "../firebase/auth";
-import moment from "moment";
+import { AuthGuard } from "../guards/auth.guard";
 
 @Controller("archivo-digital")
 export class ArchivoDigitalController {
-  constructor(
-    private readonly archivoDigitalInstance: ArchivoDigital,
-    private readonly authInstance: FirebaseService,
-    private readonly tokenService: TokenService,
-  ) {}
+  constructor(private readonly archivoDigitalInstance: ArchivoDigital) {}
 
-  @Post("nuevoArchivo")
   @UseGuards(AuthGuard)
-  async nuevoArchivo(
-    @Headers("authorization") authHeader: string,
-    @Body() archivo: ArchivoDigitalInterface,
-  ) {
+  @Post("nuevoArchivo")
+  async nuevoArchivo(@Body() archivo: ArchivoDigitalInterface) {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
-
       return {
         ok: true,
         data: await this.archivoDigitalInstance.nuevoArchivo(archivo),
@@ -42,13 +21,10 @@ export class ArchivoDigitalController {
     }
   }
 
-  @Get("getArchivos")
   @UseGuards(AuthGuard)
-  async getArchivos(@Headers("authorization") authHeader: string) {
+  @Get("getArchivos")
+  async getArchivos() {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
-
       const respArchivos = await this.archivoDigitalInstance.getarchivos();
       if (respArchivos) return { ok: true, data: respArchivos };
       else throw Error("No se ha encontrado ningun archivo ");
@@ -59,15 +35,10 @@ export class ArchivoDigitalController {
 
   //Eliminar
 
+  @UseGuards(AuthGuard)
   @Post("deleteArchivo")
-  async deleteArchivo(
-    @Headers("authorization") authHeader: string,
-    @Body() { _id },
-  ) {
+  async deleteArchivo(@Body() { _id }) {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
-
       const respArchivos = await this.archivoDigitalInstance.deleteArchivo(_id);
       if (respArchivos)
         return {
@@ -83,16 +54,12 @@ export class ArchivoDigitalController {
   }
 
   //Filtros
-  @Get("getArchivosByPropietario")
   @UseGuards(AuthGuard)
+  @Get("getArchivosByPropietario")
   async getArchivosByPropietario(
-    @Headers("authorization") authHeader: string,
     @Query() { propietario }: { propietario: number },
   ) {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
-
       const respArchivos =
         await this.archivoDigitalInstance.getArchivosByPropietario(
           Number(propietario),
@@ -105,16 +72,10 @@ export class ArchivoDigitalController {
     }
   }
 
-  @Get("getArchivosByTipo")
   @UseGuards(AuthGuard)
-  async getArchivosByTipo(
-    @Headers("authorization") authHeader: string,
-    @Query() { tipo }: { tipo: string },
-  ) {
+  @Get("getArchivosByTipo")
+  async getArchivosByTipo(@Query() { tipo }: { tipo: string }) {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
-
       const respArchivos = await this.archivoDigitalInstance.getArchivosByTipo(
         tipo,
       );
@@ -126,16 +87,10 @@ export class ArchivoDigitalController {
     }
   }
 
-  @Get("getArchivosByCreacion")
   @UseGuards(AuthGuard)
-  async getArchivosByCreacion(
-    @Headers("authorization") authHeader: string,
-    @Query() { creacion }: { creacion: Date },
-  ) {
+  @Get("getArchivosByCreacion")
+  async getArchivosByCreacion(@Query() { creacion }: { creacion: Date }) {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
-
       const respArchivos =
         await this.archivoDigitalInstance.getArchivosByCreación(creacion);
 
@@ -146,16 +101,12 @@ export class ArchivoDigitalController {
     }
   }
 
-  @Get("getArchivosByPropietarioAndTipo")
   @UseGuards(AuthGuard)
+  @Get("getArchivosByPropietarioAndTipo")
   async getArchivosByPropietarioAndTipo(
-    @Headers("authorization") authHeader: string,
     @Query() { propietario, tipo }: { propietario: number; tipo: string },
   ) {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
-
       const respArchivos =
         await this.archivoDigitalInstance.getArchivosByPropietarioAndTipo(
           Number(propietario),
