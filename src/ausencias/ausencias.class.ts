@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { AusenciasDatabase } from "./ausencias.mongodb";
 import { Cuadrantes } from "../cuadrantes/cuadrantes.class";
 import * as moment from "moment";
-import { recHitBind } from "../bbdd/mssql";
+// import { recHitBind } from "../bbdd/mssql";
 import { ObjectId } from "mongodb";
 import { TiposAusencia } from "src/cuadrantes/cuadrantes.interface";
 import { AusenciaInterface } from "./ausencias.interface";
@@ -93,62 +93,62 @@ export class Ausencias {
   }
 
   async sincroAusenciasHit() {
-    const ausenciasPendientes = await this.schAusencias.getAusenciasSincro();
+    // const ausenciasPendientes = await this.schAusencias.getAusenciasSincro();
 
-    // param0 = diaAusencia
-    // param1 = idEmpleado
-    // param2 = ${tipoAusencia}[Horas:${horas}]
+    // // param0 = diaAusencia
+    // // param1 = idEmpleado
+    // // param2 = ${tipoAusencia}[Horas:${horas}]
 
-    for (let i = 0; i < ausenciasPendientes.length; i += 1) {
-      const fechaInicial = moment(ausenciasPendientes[i].fechaInicio);
-      const fechaFinal = moment(ausenciasPendientes[i].fechaFinal);
+    // for (let i = 0; i < ausenciasPendientes.length; i += 1) {
+    //   const fechaInicial = moment(ausenciasPendientes[i].fechaInicio);
+    //   const fechaFinal = moment(ausenciasPendientes[i].fechaFinal);
 
-      while (fechaInicial.isSameOrBefore(fechaFinal)) {
-        let sql = "";
-        const nombreTabla = `cdpCalendariLaboral_${fechaInicial.year()}`;
-        sql += `
-            INSERT INTO ${nombreTabla} (id, fecha, idEmpleado, estado, observaciones, TimeStamp, usuarioModif)
-            VALUES (
-              NEWID(),
-              CONVERT(datetime, @param0, 103),
-              @param1,
-              'JUSTIFICADAS',
-              @param2,
-              getdate(),
-              '365Equipo'
-            )
-      `;
-        let observaciones = "";
-        // const esParcial = this.esParcial(
-        //   ausenciasPendientes[i].arrayParciales,
-        //   fechaInicial.toDate(),
-        // );
+    //   while (fechaInicial.isSameOrBefore(fechaFinal)) {
+    //     let sql = "";
+    //     const nombreTabla = `cdpCalendariLaboral_${fechaInicial.year()}`;
+    //     sql += `
+    //         INSERT INTO ${nombreTabla} (id, fecha, idEmpleado, estado, observaciones, TimeStamp, usuarioModif)
+    //         VALUES (
+    //           NEWID(),
+    //           CONVERT(datetime, @param0, 103),
+    //           @param1,
+    //           'JUSTIFICADAS',
+    //           @param2,
+    //           getdate(),
+    //           '365Equipo'
+    //         )
+    //   `;
+    //     let observaciones = "";
+    //     // const esParcial = this.esParcial(
+    //     //   ausenciasPendientes[i].arrayParciales,
+    //     //   fechaInicial.toDate(),
+    //     // );
 
-        // Tratamiento diferente para las parciales
-        if (
-          !ausenciasPendientes[i].completa &&
-          ausenciasPendientes[i].horas > 0
-        ) {
-          observaciones =
-            ausenciasPendientes[i].tipo +
-            `[Horas:${ausenciasPendientes[i].horas}]`;
-        } else {
-          observaciones = ausenciasPendientes[i].tipo + `[Horas:8]`;
-        }
+    //     // Tratamiento diferente para las parciales
+    //     if (
+    //       !ausenciasPendientes[i].completa &&
+    //       ausenciasPendientes[i].horas > 0
+    //     ) {
+    //       observaciones =
+    //         ausenciasPendientes[i].tipo +
+    //         `[Horas:${ausenciasPendientes[i].horas}]`;
+    //     } else {
+    //       observaciones = ausenciasPendientes[i].tipo + `[Horas:8]`;
+    //     }
 
-        await recHitBind(
-          "Fac_Tena",
-          sql,
-          fechaInicial.format("DD/MM/YYYY"),
-          ausenciasPendientes[i].idUsuario,
-          observaciones,
-        );
+    //     await recHitBind(
+    //       "Fac_Tena",
+    //       sql,
+    //       fechaInicial.format("DD/MM/YYYY"),
+    //       ausenciasPendientes[i].idUsuario,
+    //       observaciones,
+    //     );
 
-        fechaInicial.add(1, "days");
-      }
-      if (!this.schAusencias.marcarComoEnviada(ausenciasPendientes[i]._id))
-        throw Error("No se ha podido guardar el estado enviado de la ausencia");
-    }
+    //     fechaInicial.add(1, "days");
+    //   }
+    //   if (!this.schAusencias.marcarComoEnviada(ausenciasPendientes[i]._id))
+    //     throw Error("No se ha podido guardar el estado enviado de la ausencia");
+    // }
   }
 
   async getAusenciaById(idAusencia: ObjectId) {

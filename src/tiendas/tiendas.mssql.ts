@@ -1,4 +1,4 @@
-import { recHit, recSoluciones, recSolucionesClassic } from "../bbdd/mssql";
+import { recSoluciones, recSolucionesClassic } from "../bbdd/mssql";
 import { Tienda } from "./tiendas.dto";
 
 export async function getTiendas(): Promise<Tienda[]> {
@@ -18,25 +18,25 @@ export async function getTiendasHit(): Promise<
     direccion: string;
   }[]
 > {
-  const tiendas = await recHit(
-    "Fac_Tena",
-    `
-      select 
-        cli.Codi as id, 
-        LOWER(cli.nom) as nombre, 
-        cli.adresa as direccion 
-      from paramsHw ph 
-      left join clients cli ON cli.Codi = ph.Valor1 
-      where 
-        cli.nom NOT LIKE '%antigua%' AND 
-        cli.nom NOT LIKE '%vieja%' AND 
-        cli.nom NOT LIKE '%no%' AND 
-        cli.codi IS NOT NULL 
-      order by cli.nom
-    `,
-  );
+  // const tiendas = await recHit(
+  //   "Fac_Tena",
+  //   `
+  //     select 
+  //       cli.Codi as id, 
+  //       LOWER(cli.nom) as nombre, 
+  //       cli.adresa as direccion 
+  //     from paramsHw ph 
+  //     left join clients cli ON cli.Codi = ph.Valor1 
+  //     where 
+  //       cli.nom NOT LIKE '%antigua%' AND 
+  //       cli.nom NOT LIKE '%vieja%' AND 
+  //       cli.nom NOT LIKE '%no%' AND 
+  //       cli.codi IS NOT NULL 
+  //     order by cli.nom
+  //   `,
+  // );
 
-  if (tiendas.recordset.length > 0) return tiendas.recordset;
+  // if (tiendas.recordset.length > 0) return tiendas.recordset;
   return [];
 }
 

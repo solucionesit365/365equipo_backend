@@ -1,5 +1,5 @@
 import {
-  recHit,
+  // recHit,
   recSoluciones,
   recSolucionesClassic,
   recSolucionesNew,
@@ -505,9 +505,10 @@ export async function getTrabajadoresSage(): Promise<
   ORDER BY nombreApellidos;
   
 `;
-  const resTrabajadores = await recHit("Fac_Tena", sqlQuery);
-  if (resTrabajadores.recordset.length > 0) return resTrabajadores.recordset;
-  else throw Error("Error, no hay trabajadores");
+  const resTrabajadores = []; //await recHit("Fac_Tena", sqlQuery);
+  return [];
+  // if (resTrabajadores.recordset.length > 0) return resTrabajadores.recordset;
+  // else throw Error("Error, no hay trabajadores");
 }
 
 export async function setIdApp(idSql: number, uid: string) {
@@ -817,20 +818,20 @@ async function getHistoriaContratos(): Promise<
     fechaBaja: string;
   }[]
 > {
-  const sql = `
-  SELECT 
-    PorJornada as horasContrato, 
-    Dni as dni, 
-    CONVERT(nvarchar, FechaInicioContrato, 103) as inicioContrato, 
-    CONVERT(nvarchar, FechaFinalContrato, 103) as finalContrato, 
-    CONVERT(nvarchar, FechaAlta, 103) as fechaAlta, 
-    CONVERT(nvarchar, FechaAntiguedad, 103) as fechaAntiguedad,
-    CONVERT(nvarchar, FechaBaja, 103) as fechaBaja
-  FROM silema_ts.sage.dbo.EmpleadoNomina`;
+  // const sql = `
+  // SELECT 
+  //   PorJornada as horasContrato, 
+  //   Dni as dni, 
+  //   CONVERT(nvarchar, FechaInicioContrato, 103) as inicioContrato, 
+  //   CONVERT(nvarchar, FechaFinalContrato, 103) as finalContrato, 
+  //   CONVERT(nvarchar, FechaAlta, 103) as fechaAlta, 
+  //   CONVERT(nvarchar, FechaAntiguedad, 103) as fechaAntiguedad,
+  //   CONVERT(nvarchar, FechaBaja, 103) as fechaBaja
+  // FROM silema_ts.sage.dbo.EmpleadoNomina`;
 
-  const resHisContratos = await recHit("Fac_Tena", sql);
+  // const resHisContratos = await recHit("Fac_Tena", sql);
 
-  if (resHisContratos.recordset.length > 0) return resHisContratos.recordset;
+  // if (resHisContratos.recordset.length > 0) return resHisContratos.recordset;
   return [];
 }
 

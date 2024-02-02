@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { MongoDbService } from "../bbdd/mongodb";
 import { FichajeDto } from "./fichajes.interface";
-import { FacTenaMssql } from "../bbdd/mssql.class";
+// import { FacTenaMssql } from "../bbdd/mssql.class";
 import * as moment from "moment";
 import { ObjectId } from "mongodb";
 import { DateTime } from "luxon";
@@ -10,8 +10,8 @@ import { DateTime } from "luxon";
 export class FichajesDatabase {
   constructor(
     private readonly mongoDbService: MongoDbService,
-    private readonly hitInstance: FacTenaMssql,
-  ) {}
+  ) // private readonly hitInstance: FacTenaMssql,
+  {}
 
   async nuevaEntrada(
     uid: string,
@@ -91,64 +91,66 @@ export class FichajesDatabase {
   }
 
   async enviarHit(fichajes: FichajeDto[]) {
-    let sql = "";
+    // let sql = "";
 
-    for (let i = 0; i < fichajes.length; i += 1) {
-      const hora = moment(fichajes[0].hora);
+    // for (let i = 0; i < fichajes.length; i += 1) {
+    //   const hora = moment(fichajes[0].hora);
 
-      if (fichajes[i].tipo === "ENTRADA") {
-        sql += `
-        DELETE FROM cdpDadesFichador WHERE idr = '${fichajes[
-          i
-        ]._id.toString()}';
-        INSERT INTO cdpDadesFichador (id, tmst, accio, usuari, idr, lloc, comentari) 
-        VALUES (0, CONVERT(datetime, '${hora.format(
-          "YYYY-MM-DD HH:mm:ss",
-        )}', 120), 1, ${fichajes[i].idExterno}, '${
-          fichajes[i]._id
-        }', NULL, '365EquipoDeTrabajo')
-        `;
-      } else if (fichajes[i].tipo === "SALIDA") {
-        sql += `
-        DELETE FROM cdpDadesFichador WHERE idr = '${fichajes[i]._id}';
-        INSERT INTO cdpDadesFichador (id, tmst, accio, usuari, idr, lloc, comentari) 
-        VALUES (0, CONVERT(datetime, '${hora.format(
-          "YYYY-MM-DD HH:mm:ss",
-        )}', 120), 2, ${fichajes[i].idExterno}, '${fichajes[
-          i
-        ]._id.toString()}', NULL, '365EquipoDeTrabajo')
-        `;
-      }
-    }
+    //   if (fichajes[i].tipo === "ENTRADA") {
+    //     sql += `
+    //     DELETE FROM cdpDadesFichador WHERE idr = '${fichajes[
+    //       i
+    //     ]._id.toString()}';
+    //     INSERT INTO cdpDadesFichador (id, tmst, accio, usuari, idr, lloc, comentari)
+    //     VALUES (0, CONVERT(datetime, '${hora.format(
+    //       "YYYY-MM-DD HH:mm:ss",
+    //     )}', 120), 1, ${fichajes[i].idExterno}, '${
+    //       fichajes[i]._id
+    //     }', NULL, '365EquipoDeTrabajo')
+    //     `;
+    //   } else if (fichajes[i].tipo === "SALIDA") {
+    //     sql += `
+    //     DELETE FROM cdpDadesFichador WHERE idr = '${fichajes[i]._id}';
+    //     INSERT INTO cdpDadesFichador (id, tmst, accio, usuari, idr, lloc, comentari)
+    //     VALUES (0, CONVERT(datetime, '${hora.format(
+    //       "YYYY-MM-DD HH:mm:ss",
+    //     )}', 120), 2, ${fichajes[i].idExterno}, '${fichajes[
+    //       i
+    //     ]._id.toString()}', NULL, '365EquipoDeTrabajo')
+    //     `;
+    //   }
+    // }
 
-    if (sql === "") return 0;
+    // if (sql === "") return 0;
 
-    await this.hitInstance.recHit(sql);
+    // await this.hitInstance.recHit(sql);
 
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
-    const fichajesCollection = db.collection<FichajeDto>("fichajes");
+    // const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    // const fichajesCollection = db.collection<FichajeDto>("fichajes");
 
-    const updatePromises = fichajes.map((item) =>
-      fichajesCollection.updateOne(
-        { _id: item._id },
-        { $set: { enviado: true } },
-      ),
-    );
-    await Promise.all(updatePromises);
+    // const updatePromises = fichajes.map((item) =>
+    //   fichajesCollection.updateOne(
+    //     { _id: item._id },
+    //     { $set: { enviado: true } },
+    //   ),
+    // );
+    // await Promise.all(updatePromises);
+    return 0;
   }
 
   async getFichajesHit() {
-    const fechaActual = new Date();
+    // const fechaActual = new Date();
 
-    const day = fechaActual.getDate();
-    const month = fechaActual.getMonth() + 1;
-    const year = fechaActual.getFullYear();
+    // const day = fechaActual.getDate();
+    // const month = fechaActual.getMonth() + 1;
+    // const year = fechaActual.getFullYear();
 
-    const sql = `SELECT df.accio, df.usuari, df.idr, CONVERT(nvarchar, df.tmst, 126) as tmst, df.comentari as comentario, (select nom from dependentes where codi = df.usuari) as nombre, (SELECT valor FROM dependentesExtes WHERE id = df.usuari AND nom = 'DNI') as dni FROM cdpDadesFichador df WHERE day(df.tmst) = ${day} AND month(df.tmst) = ${month} AND year(df.tmst) = ${year} AND df.comentari <> '365EquipoDeTrabajo'`;
+    // const sql = `SELECT df.accio, df.usuari, df.idr, CONVERT(nvarchar, df.tmst, 126) as tmst, df.comentari as comentario, (select nom from dependentes where codi = df.usuari) as nombre, (SELECT valor FROM dependentesExtes WHERE id = df.usuari AND nom = 'DNI') as dni FROM cdpDadesFichador df WHERE day(df.tmst) = ${day} AND month(df.tmst) = ${month} AND year(df.tmst) = ${year} AND df.comentari <> '365EquipoDeTrabajo'`;
 
-    const resFichajes = await this.hitInstance.recHit(sql);
+    // const resFichajes = await this.hitInstance.recHit(sql);
 
-    return resFichajes.recordset;
+    // return resFichajes.recordset;
+    return [];
   }
 
   async insertarFichajesHit(fichajes: FichajeDto[]) {

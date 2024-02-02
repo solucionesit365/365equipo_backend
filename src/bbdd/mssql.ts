@@ -1,28 +1,28 @@
 import * as sql from "mssql";
 
-export async function recHit(database: string, consultaSQL: string) {
-  const config = {
-    user: process.env.MSSQL_USER_HIT,
-    password: process.env.MSSQL_PASS_HIT,
-    server: process.env.MSSQL_HOST_HIT,
-    database: database,
-    options: {
-      encrypt: false,
-      trustServerCertificate: true,
-    },
-    pool: {
-      max: 10,
-      min: 0,
-      idleTimeoutMillis: 10000,
-    },
-    requestTimeout: 10000,
-  };
+// export async function recHit(database: string, consultaSQL: string) {
+//   const config = {
+//     user: process.env.MSSQL_USER_HIT,
+//     password: process.env.MSSQL_PASS_HIT,
+//     server: process.env.MSSQL_HOST_HIT,
+//     database: database,
+//     options: {
+//       encrypt: false,
+//       trustServerCertificate: true,
+//     },
+//     pool: {
+//       max: 10,
+//       min: 0,
+//       idleTimeoutMillis: 10000,
+//     },
+//     requestTimeout: 10000,
+//   };
 
-  const pool = await new sql.ConnectionPool(config).connect();
-  const result = await pool.request().query(consultaSQL);
-  pool.close();
-  return result;
-}
+//   const pool = await new sql.ConnectionPool(config).connect();
+//   const result = await pool.request().query(consultaSQL);
+//   pool.close();
+//   return result;
+// }
 
 export async function recSolucionesClassic(
   database: string,
@@ -170,70 +170,70 @@ export async function recSolucionesNew(query: string, ...args: any[]) {
   }
 }
 
-export async function recHitBind(
-  database: string,
-  query: string,
-  ...args: any[]
-) {
-  const config = {
-    user: process.env.MSSQL_USER_HIT,
-    password: process.env.MSSQL_PASS_HIT,
-    server: process.env.MSSQL_HOST_HIT,
-    database: database,
-    options: {
-      encrypt: false,
-      trustServerCertificate: true,
-    },
-    pool: {
-      max: 10,
-      min: 0,
-      idleTimeoutMillis: 10000,
-    },
-    requestTimeout: 10000,
-  };
+// export async function recHitBind(
+//   database: string,
+//   query: string,
+//   ...args: any[]
+// ) {
+//   const config = {
+//     user: process.env.MSSQL_USER_HIT,
+//     password: process.env.MSSQL_PASS_HIT,
+//     server: process.env.MSSQL_HOST_HIT,
+//     database: database,
+//     options: {
+//       encrypt: false,
+//       trustServerCertificate: true,
+//     },
+//     pool: {
+//       max: 10,
+//       min: 0,
+//       idleTimeoutMillis: 10000,
+//     },
+//     requestTimeout: 10000,
+//   };
 
-  const connectionPool = new sql.ConnectionPool(config);
+//   const connectionPool = new sql.ConnectionPool(config);
 
-  try {
-    if (typeof query !== "string") {
-      throw new Error("El argumento query debe ser de tipo string");
-    }
+//   try {
+//     if (typeof query !== "string") {
+//       throw new Error("El argumento query debe ser de tipo string");
+//     }
 
-    await connectionPool.connect();
-    const request = new sql.Request(connectionPool);
+//     await connectionPool.connect();
+//     const request = new sql.Request(connectionPool);
 
-    for (let i = 0; i < args.length; i++) {
-      request.input(`param${i}`, args[i]);
-    }
+//     for (let i = 0; i < args.length; i++) {
+//       request.input(`param${i}`, args[i]);
+//     }
 
-    return await request.query(query);
-  } catch (error) {
-    console.error("Error al ejecutar la consulta:", error);
-    console.log(query);
-    throw error;
-  } finally {
-    await connectionPool.close();
-  }
-}
+//     return await request.query(query);
+//   } catch (error) {
+//     console.error("Error al ejecutar la consulta:", error);
+//     console.log(query);
+//     throw error;
+//   } finally {
+//     await connectionPool.close();
+//   }
+// }
 
-export async function getConnectionPoolHit() {
-  const config = {
-    user: process.env.MSSQL_USER_HIT,
-    password: process.env.MSSQL_PASS_HIT,
-    server: process.env.MSSQL_HOST_HIT,
-    database: "Fac_Tena",
-    options: {
-      encrypt: false,
-      trustServerCertificate: true,
-    },
-    pool: {
-      max: 10,
-      min: 0,
-      idleTimeoutMillis: 10000,
-    },
-    requestTimeout: 10000,
-  };
+// export async function getConnectionPoolHit() {
+//   const config = {
+//     user: process.env.MSSQL_USER_HIT,
+//     password: process.env.MSSQL_PASS_HIT,
+//     server: process.env.MSSQL_HOST_HIT,
+//     database: "Fac_Tena",
+//     options: {
+//       encrypt: false,
+//       trustServerCertificate: true,
+//     },
+//     pool: {
+//       max: 10,
+//       min: 0,
+//       idleTimeoutMillis: 10000,
+//     },
+//     requestTimeout: 10000,
+//   };
 
-  const pool = await new sql.ConnectionPool(config).connect();
-  return pool;
-}
+//   const pool = await new sql.ConnectionPool(config).connect();
+//   return pool;
+// }

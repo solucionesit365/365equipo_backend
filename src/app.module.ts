@@ -17,7 +17,7 @@ import { CuadrantesController } from "./cuadrantes/cuadrantes.controller";
 import { Cuadrantes } from "./cuadrantes/cuadrantes.class";
 import { CuadrantesDatabase } from "./cuadrantes/cuadrantes.mongodb";
 import { Tienda } from "./tiendas/tiendas.class";
-import { FacTenaMssql } from "./bbdd/mssql.class";
+// import { FacTenaMssql } from "./bbdd/mssql.class";
 import { FichajesController } from "./fichajes/fichajes.controller";
 import { FichajesDatabase } from "./fichajes/fichajes.mongodb";
 import { Fichajes } from "./fichajes/fichajes.class";
@@ -122,7 +122,7 @@ import { cultura365Mongo } from "./cultura365/cultura365.mongodb";
     Cuadrantes,
     CuadrantesDatabase,
     Tienda,
-    FacTenaMssql,
+    // FacTenaMssql,
     FichajesDatabase,
     Fichajes,
     EmailClass,
