@@ -2,9 +2,9 @@ import { Controller, Get, Query, Post, Body, UseGuards } from "@nestjs/common";
 import { AuthGuard } from "../guards/auth.guard";
 
 import { FirebaseService } from "../firebase/firebase.service";
-import { solicitudesVacacionesClass } from "./solicitud-vacaciones.class";
+import { SolicitudesVacacionesService } from "./solicitud-vacaciones.class";
 import { SolicitudVacaciones } from "./solicitud-vacaciones.interface";
-import { EmailClass } from "src/email/email.class";
+import { EmailService } from "src/email/email.class";
 import { TrabajadorService } from "../trabajadores/trabajadores.class";
 import { Notificaciones } from "src/notificaciones/notificaciones.class";
 
@@ -12,9 +12,9 @@ import { Notificaciones } from "src/notificaciones/notificaciones.class";
 export class SolicitudVacacionesController {
   constructor(
     private readonly authInstance: FirebaseService,
-    private readonly solicitudVacacionesInstance: solicitudesVacacionesClass,
+    private readonly solicitudVacacionesInstance: SolicitudesVacacionesService,
     private readonly notificaciones: Notificaciones,
-    private readonly email: EmailClass,
+    private readonly email: EmailService,
     private readonly trabajadorInstance: TrabajadorService,
   ) {}
 

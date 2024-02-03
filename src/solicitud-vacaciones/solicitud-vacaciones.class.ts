@@ -1,7 +1,7 @@
 import { Injectable, Inject, forwardRef } from "@nestjs/common";
-import { SolicitudVacacionesBdd } from "./solicitud-vacaciones.mongodb";
+import { SolicitudVacacionesDatabase } from "./solicitud-vacaciones.mongodb";
 import { SolicitudVacaciones } from "./solicitud-vacaciones.interface";
-import { EmailClass } from "../email/email.class";
+import { EmailService } from "../email/email.class";
 import { TrabajadorService } from "../trabajadores/trabajadores.class";
 import { Cuadrantes } from "../cuadrantes/cuadrantes.class";
 import { DateTime } from "luxon";
@@ -9,11 +9,11 @@ import { ContratoService } from "../contrato/contrato.service";
 import { HitMssqlService } from "../hit-mssql/hit-mssql.service";
 
 @Injectable()
-export class solicitudesVacacionesClass {
+export class SolicitudesVacacionesService {
   constructor(
-    private readonly schSolicitudVacaciones: SolicitudVacacionesBdd,
-    private readonly facTenaService: HitMssqlService,
-    private readonly email: EmailClass,
+    private readonly schSolicitudVacaciones: SolicitudVacacionesDatabase,
+    private readonly hitMssqlService: HitMssqlService,
+    private readonly email: EmailService,
     @Inject(forwardRef(() => TrabajadorService))
     private readonly trabajadorInstance: TrabajadorService,
     private readonly contratoService: ContratoService,
@@ -272,7 +272,7 @@ export class solicitudesVacacionesClass {
       -- Retorna el número de filas insertadas
       SELECT @InsertedRows AS InsertedRows;
     `;
-    const resultado = await this.facTenaService.recHit(sql);
+    const resultado = await this.hitMssqlService.recHit(sql);
 
     if (
       resultado.recordset.length > 0 &&

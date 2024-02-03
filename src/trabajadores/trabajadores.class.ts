@@ -1,9 +1,9 @@
 import { Injectable, Inject, forwardRef } from "@nestjs/common";
-import { EmailClass } from "../email/email.class";
+import { EmailService } from "../email/email.class";
 import { FirebaseService } from "../firebase/firebase.service";
-import { PermisosClass } from "../permisos/permisos.class";
+import { PermisosService } from "../permisos/permisos.class";
 import { DateTime } from "luxon";
-import { solicitudesVacacionesClass } from "../solicitud-vacaciones/solicitud-vacaciones.class";
+import { SolicitudesVacacionesService } from "../solicitud-vacaciones/solicitud-vacaciones.class";
 import { TrabajadorDatabaseService } from "./trabajadores.database";
 import { DecodedIdToken } from "firebase-admin/auth";
 
@@ -12,12 +12,12 @@ export class TrabajadorService {
   constructor(
     @Inject(forwardRef(() => FirebaseService))
     private readonly firebaseService: FirebaseService,
-    private readonly permisosInstance: PermisosClass,
-    @Inject(forwardRef(() => EmailClass))
-    private readonly emailInstance: EmailClass,
-    @Inject(forwardRef(() => solicitudesVacacionesClass))
-    private readonly solicitudesVacaciones: solicitudesVacacionesClass,
-    private readonly schTrabajadores: TrabajadorDatabaseService, // private readonly prisma: PrismaService,
+    private readonly permisosInstance: PermisosService,
+    @Inject(forwardRef(() => EmailService))
+    private readonly emailInstance: EmailService,
+    @Inject(forwardRef(() => SolicitudesVacacionesService))
+    private readonly solicitudesVacaciones: SolicitudesVacacionesService,
+    private readonly schTrabajadores: TrabajadorDatabaseService,
   ) {}
 
   async getTrabajadorByAppId(uid: string) {

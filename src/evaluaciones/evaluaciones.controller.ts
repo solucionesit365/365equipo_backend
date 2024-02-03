@@ -1,11 +1,11 @@
 import { Controller, Post, UseGuards, Body, Get, Query } from "@nestjs/common";
 import { AuthGuard } from "../guards/auth.guard";
-import { EvaluacionesClass } from "./evaluaciones.class";
+import { EvaluacionesService } from "./evaluaciones.class";
 import { evaluacionesInterface } from "./evaluaciones.interface";
 
 @Controller("evaluaciones")
 export class EvaluacionesController {
-  constructor(private readonly evaluacionesclass: EvaluacionesClass) {}
+  constructor(private readonly evaluacionesclass: EvaluacionesService) {}
 
   @UseGuards(AuthGuard)
   @Post("addPlantilla")

@@ -1,12 +1,16 @@
 import { Injectable } from "@nestjs/common";
 import { MongoService } from "../mongo/mongo.service";
 import { AusenciaInterface } from "./ausencias.interface";
-import * as moment from "moment";
 import { ObjectId } from "mongodb";
+import { HitMssqlService } from "../hit-mssql/hit-mssql.service";
+import { DateTime } from "luxon";
 
 @Injectable()
 export class AusenciasDatabase {
-  constructor(private readonly mongoDbService: MongoService) {}
+  constructor(
+    private readonly mongoDbService: MongoService,
+    private readonly hitMssqlService: HitMssqlService,
+  ) {}
 
   async nuevaAusencia(ausencia: AusenciaInterface) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
@@ -40,7 +44,7 @@ export class AusenciasDatabase {
       },
       {
         $set: {
-          fechaInicio: moment(ausencia.fechaInicio, "DD/MM/YYYY").toDate(),
+          fechaInicio: ausencia.fechaInicio,
           tipo: ausencia.tipo,
           comentario: ausencia.comentario,
           completa: ausencia.completa,
@@ -63,11 +67,9 @@ export class AusenciasDatabase {
       },
       {
         $set: {
-          fechaInicio: moment(ausencia.fechaInicio, "DD/MM/YYYY").toDate(),
-          fechaFinal: moment(ausencia.fechaFinal, "DD/MM/YYYY").toDate(),
-          fechaRevision: ausencia.fechaRevision
-            ? moment(ausencia.fechaRevision, "DD/MM/YYYY").toDate()
-            : null,
+          fechaInicio: ausencia.fechaInicio,
+          fechaFinal: ausencia.fechaFinal,
+          fechaRevision: ausencia.fechaRevision ? ausencia.fechaRevision : null,
           tipo: ausencia.tipo,
           comentario: ausencia.comentario,
           completa: ausencia.completa,
@@ -121,5 +123,65 @@ export class AusenciasDatabase {
     );
 
     return respAusencia.acknowledged;
+  }
+
+  async sincroAusenciasHit() {
+    const ausenciasPendientes = await this.getAusenciasSincro();
+
+    // param0 = diaAusencia
+    // param1 = idEmpleado
+    // param2 = ${tipoAusencia}[Horas:${horas}]
+
+    for (let i = 0; i < ausenciasPendientes.length; i += 1) {
+      let fechaInicial = DateTime.fromJSDate(
+        ausenciasPendientes[i].fechaInicio,
+      ); //moment(ausenciasPendientes[i].fechaInicio);
+      const fechaFinal = DateTime.fromJSDate(ausenciasPendientes[i].fechaFinal); //moment(ausenciasPendientes[i].fechaFinal);
+
+      while (fechaInicial <= fechaFinal) {
+        let sql = "";
+        const nombreTabla = `cdpCalendariLaboral_${fechaInicial.year}`;
+        sql += `
+            INSERT INTO ${nombreTabla} (id, fecha, idEmpleado, estado, observaciones, TimeStamp, usuarioModif)
+            VALUES (
+              NEWID(),
+              CONVERT(datetime, @param0, 103),
+              @param1,
+              'JUSTIFICADAS',
+              @param2,
+              getdate(),
+              '365Equipo'
+            )
+      `;
+        let observaciones = "";
+        // const esParcial = this.esParcial(
+        //   ausenciasPendientes[i].arrayParciales,
+        //   fechaInicial.toDate(),
+        // );
+
+        // Tratamiento diferente para las parciales
+        if (
+          !ausenciasPendientes[i].completa &&
+          ausenciasPendientes[i].horas > 0
+        ) {
+          observaciones =
+            ausenciasPendientes[i].tipo +
+            `[Horas:${ausenciasPendientes[i].horas}]`;
+        } else {
+          observaciones = ausenciasPendientes[i].tipo + `[Horas:8]`;
+        }
+
+        await this.hitMssqlService.recHitBind(
+          sql,
+          fechaInicial.toFormat("dd/MM/yyyy"),
+          ausenciasPendientes[i].idUsuario,
+          observaciones,
+        );
+
+        fechaInicial = fechaInicial.plus({ days: 1 });
+      }
+      if (!this.marcarComoEnviada(ausenciasPendientes[i]._id))
+        throw Error("No se ha podido guardar el estado enviado de la ausencia");
+    }
   }
 }

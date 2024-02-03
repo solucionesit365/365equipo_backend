@@ -1,4 +1,9 @@
-import { Module } from '@nestjs/common';
+import { Module } from "@nestjs/common";
+import { AuditoriasService } from "./auditorias.class";
+import { AuditoriaDatabase } from "./auditorias.mongodb";
 
-@Module({})
+@Module({
+  providers: [AuditoriasService, AuditoriaDatabase],
+  exports: [AuditoriasService],
+})
 export class AuditoriasModule {}

@@ -1,10 +1,10 @@
 import { Injectable } from "@nestjs/common";
 import * as QRCode from "qrcode";
-import { EmailClass } from "../email/email.class";
+import { EmailService } from "../email/email.class";
 
 @Injectable()
-export class TarjetaCliente {
-  constructor(private readonly emailInstance: EmailClass) {}
+export class TarjetaClienteService {
+  constructor(private readonly emailInstance: EmailService) {}
 
   private async createQrCode(data: string) {
     try {

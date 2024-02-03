@@ -6,7 +6,7 @@ import {
 import { CalendarioFestivosDatabase } from "./calendario-festivos.mongodb";
 
 @Injectable()
-export class CalendarioFestivo {
+export class CalendarioFestivoService {
   constructor(private readonly schCalendario: CalendarioFestivosDatabase) {}
 
   async nuevoFestivo(festivo: CalendarioFestivosInterface) {

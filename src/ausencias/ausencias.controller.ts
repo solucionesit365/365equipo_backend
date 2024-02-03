@@ -1,12 +1,12 @@
 import { Body, Controller, Post, UseGuards, Get } from "@nestjs/common";
-import { Ausencias } from "./ausencias.class";
+import { AusenciasService } from "./ausencias.class";
 import { AusenciaInterface } from "./ausencias.interface";
 import { AuthGuard } from "../guards/auth.guard";
 import { SchedulerGuard } from "../guards/scheduler.guard";
 
 @Controller("ausencias")
 export class AusenciasController {
-  constructor(private readonly ausenciasInstance: Ausencias) {}
+  constructor(private readonly ausenciasInstance: AusenciasService) {}
 
   @UseGuards(AuthGuard)
   @Post("nueva")

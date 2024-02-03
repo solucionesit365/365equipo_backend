@@ -7,7 +7,7 @@ import { Tienda } from "../tiendas/tiendas.class";
 import { HitMssqlService } from "../hit-mssql/hit-mssql.service";
 import { AusenciaInterface } from "../ausencias/ausencias.interface";
 import { TrabajadorService } from "../trabajadores/trabajadores.class";
-import { FichajesValidados } from "../fichajes-validados/fichajes-validados.class";
+import { FichajesValidadosService } from "../fichajes-validados/fichajes-validados.class";
 import { DateTime } from "luxon";
 import { ContratoService } from "../contrato/contrato.service";
 import { Trabajador } from "@prisma/client";
@@ -24,10 +24,10 @@ export class Cuadrantes {
     private readonly schCuadrantes: CuadrantesDatabase,
     private readonly contratoService: ContratoService,
     private readonly tiendasInstance: Tienda,
-    private readonly hitInstance: HitMssqlService,
+    private readonly hitMssqlService: HitMssqlService,
     @Inject(forwardRef(() => TrabajadorService))
     private readonly trabajadoresInstance: TrabajadorService,
-    private readonly fichajesValidadosInstance: FichajesValidados,
+    private readonly fichajesValidadosInstance: FichajesValidadosService,
   ) {}
 
   // Cuadrante 2.0
@@ -529,7 +529,7 @@ export class Cuadrantes {
           `;
       }
 
-      const resPlanes = await this.hitInstance.recHit(
+      const resPlanes = await this.hitMssqlService.recHit(
         sqlBorrar + query + subQuery,
       );
 

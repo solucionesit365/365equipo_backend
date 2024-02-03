@@ -3,7 +3,6 @@ import { MongoService } from "../mongo/mongo.service";
 import { TCuadrante } from "./cuadrantes.interface";
 import * as moment from "moment";
 import { ObjectId } from "mongodb";
-import { AusenciaInterface } from "../ausencias/ausencias.interface";
 import { DateTime } from "luxon";
 
 moment.locale("es", {

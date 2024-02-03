@@ -7,7 +7,7 @@ import {
   UseGuards,
   ParseIntPipe,
 } from "@nestjs/common";
-import { FichajesValidados } from "./fichajes-validados.class";
+import { FichajesValidadosService } from "./fichajes-validados.class";
 import { FichajeValidadoDto } from "./fichajes-validados.dto";
 import { Notificaciones } from "../notificaciones/notificaciones.class";
 import { TrabajadorService } from "../trabajadores/trabajadores.class";
@@ -21,7 +21,7 @@ export class FichajesValidadosController {
   constructor(
     private readonly trabajador: TrabajadorService,
     private readonly notificaciones: Notificaciones,
-    private readonly fichajesValidadosInstance: FichajesValidados,
+    private readonly fichajesValidadosInstance: FichajesValidadosService,
   ) {}
 
   @UseGuards(AuthGuard)
@@ -88,35 +88,35 @@ export class FichajesValidadosController {
 
   @UseGuards(AuthGuard)
   @Post("actualizarValidados")
-  async updateFichajesValidados(@Body() FichajesValidados: FichajeValidadoDto) {
+  async updateFichajesValidados(@Body() FichajesValidadosService: FichajeValidadoDto) {
     try {
       if (
         await this.fichajesValidadosInstance.updateFichajesValidados(
-          FichajesValidados,
+          FichajesValidadosService,
         )
       ) {
         const fichajeTrabajador = await this.trabajador.getTrabajadorBySqlId(
-          FichajesValidados.idTrabajador,
+          FichajesValidadosService.idTrabajador,
         );
         if (
-          FichajesValidados.aPagar &&
-          FichajesValidados.horasPagar.estadoValidado == "PENDIENTE"
+          FichajesValidadosService.aPagar &&
+          FichajesValidadosService.horasPagar.estadoValidado == "PENDIENTE"
         ) {
           this.notificaciones.newInAppNotification({
             uid: fichajeTrabajador.idApp,
             titulo: "Solicitud Horas a Pagar",
-            mensaje: `Se ha solicitado ${FichajesValidados.horasPagar.total}h a pagar`,
+            mensaje: `Se ha solicitado ${FichajesValidadosService.horasPagar.total}h a pagar`,
             leido: false,
             creador: "SISTEMA",
             url: "",
           });
         }
-        if (FichajesValidados.horasPagar.estadoValidado != "PENDIENTE") {
+        if (FichajesValidadosService.horasPagar.estadoValidado != "PENDIENTE") {
           {
             this.notificaciones.newInAppNotification({
               uid: fichajeTrabajador.idApp,
               titulo: "Pago de horas",
-              mensaje: `${FichajesValidados.horasPagar.estadoValidado} ${FichajesValidados.horasPagar.total}h `,
+              mensaje: `${FichajesValidadosService.horasPagar.estadoValidado} ${FichajesValidadosService.horasPagar.total}h `,
               leido: false,
               creador: "SISTEMA",
               url: "",

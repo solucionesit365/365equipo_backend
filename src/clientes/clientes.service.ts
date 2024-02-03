@@ -3,19 +3,17 @@ import { v4 as uuidv4 } from "uuid";
 import { SolicitudNuevoClienteBbdd } from "./clientes.mongodb";
 import { SolicitudCliente } from "./clientes.interface";
 import { ObjectId } from "mongodb";
-import { EmailClass } from "../email/email.class";
-import { TarjetaCliente } from "../tarjeta-cliente/tarjeta-cliente.class";
+import { EmailService } from "../email/email.class";
+import { TarjetaClienteService } from "../tarjeta-cliente/tarjeta-cliente.class";
 import * as jwt from "jsonwebtoken";
 import { GoogleAuth } from "google-auth-library";
-import { HitMssqlService } from "../hit-mssql/hit-mssql.service";
 
 @Injectable()
 export class ClientesService {
   constructor(
     private readonly schSolicitudesCliente: SolicitudNuevoClienteBbdd,
-    private readonly emailInstance: EmailClass,
-    private readonly tarjetaClienteInstance: TarjetaCliente,
-    private readonly facTenaService: HitMssqlService,
+    private readonly emailInstance: EmailService,
+    private readonly tarjetaClienteInstance: TarjetaClienteService,
   ) {}
   async handleForm(
     nuevoCliente: boolean,
@@ -400,30 +398,11 @@ export class ClientesService {
     idExterna: string,
     email: string,
   ) {
-    // @param0 = id
-    // @param1 = nombre + apellidos
-    // @param2 = telefono
-    // @param3 = codigoPostal
-    // @param4 = idExterna
-    // @param5 = email
-    const sql = `
-    IF EXISTS (SELECT * FROM ClientsFinals WHERE Id = @param0 OR emili = @param5) 
-      BEGIN
-        SELECT 'YA_EXISTE' as resultado
-      END
-    ELSE
-      BEGIN
-        INSERT INTO ClientsFinals VALUES (@param0, @param1, @param2, '', @param5, '', @param3, '', @param4);
-        INSERT INTO Punts (IdClient, Punts, data, Punts2, data2) VALUES (@param0, 2500, GETDATE(), NULL, NULL);
-        SELECT 'CREADO' as resultado;
-      END
-    `;
-
-    await this.facTenaService.recHitBind(
-      sql,
-      id,
-      nombre + " " + apellidos,
+    await this.schSolicitudesCliente.nuevoCliente(
+      nombre,
+      apellidos,
       telefono,
+      id,
       codigoPostal,
       idExterna,
       email,

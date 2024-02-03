@@ -4,10 +4,9 @@ import {
   AuditoriaRespuestas,
 } from "./auditorias.interface";
 import { AuditoriaDatabase } from "./auditorias.mongodb";
-import * as moment from "moment";
 
 @Injectable()
-export class Auditorias {
+export class AuditoriasService {
   constructor(private readonly schAuditorias: AuditoriaDatabase) {}
 
   async nuevaAuditoria(auditoria: AuditoriasInterface) {
@@ -42,7 +41,7 @@ export class Auditorias {
     throw Error("No se ha podido guardar la respuesta de la auditoria");
   }
 
-  //Ver Respuestas Auditorias
+  //Ver Respuestas AuditoriasService
   async getRespuestasAuditorias(idAuditoria: string) {
     return await this.schAuditorias.getRespuestasAuditorias(idAuditoria);
   }

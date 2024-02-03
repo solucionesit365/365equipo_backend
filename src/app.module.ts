@@ -15,7 +15,6 @@ import { EmailModule } from "./email/email.module";
 import { EvaluacionesModule } from "./evaluaciones/evaluaciones.module";
 import { FichajesModule } from "./fichajes/fichajes.module";
 import { FichajesValidadosModule } from "./fichajes-validados/fichajes-validados.module";
-import { FichajesBcModule } from "./fichajes-bc/fichajes-bc.module";
 import { FirebaseModule } from "./firebase/firebase.module";
 import { IncidenciasModule } from "./incidencias/incidencias.module";
 import { MantenimientoModule } from "./mantenimiento/mantenimiento.module";
@@ -53,7 +52,6 @@ import { MongoModule } from "./mongo/mongo.module";
     EvaluacionesModule,
     FichajesModule,
     FichajesValidadosModule,
-    FichajesBcModule,
     FirebaseModule,
     IncidenciasModule,
     MantenimientoModule,

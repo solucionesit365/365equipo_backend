@@ -3,7 +3,7 @@ import { ArchivoDigitalInterface } from "./archivo-digital.interface";
 import { ArchivoDigitalDatabase } from "./archivo-digital.mongodb";
 
 @Injectable()
-export class ArchivoDigital {
+export class ArchivoDigitalService {
   constructor(private readonly scharchivoDigital: ArchivoDigitalDatabase) {}
 
   async nuevoArchivo(archivo: ArchivoDigitalInterface) {

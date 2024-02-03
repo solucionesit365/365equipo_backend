@@ -5,7 +5,7 @@ import { ObjectId } from "mongodb";
 import { DateTime } from "luxon";
 
 @Injectable()
-export class SolicitudVacacionesBdd {
+export class SolicitudVacacionesDatabase {
   constructor(private readonly mongoDbService: MongoService) {}
 
   //Nueva solicitud de vacaciones

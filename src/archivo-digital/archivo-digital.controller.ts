@@ -1,11 +1,11 @@
 import { Body, Controller, Post, UseGuards, Get, Query } from "@nestjs/common";
-import { ArchivoDigital } from "./archivo-digital.class";
+import { ArchivoDigitalService } from "./archivo-digital.class";
 import { ArchivoDigitalInterface } from "./archivo-digital.interface";
 import { AuthGuard } from "../guards/auth.guard";
 
 @Controller("archivo-digital")
 export class ArchivoDigitalController {
-  constructor(private readonly archivoDigitalInstance: ArchivoDigital) {}
+  constructor(private readonly archivoDigitalInstance: ArchivoDigitalService) {}
 
   @UseGuards(AuthGuard)
   @Post("nuevoArchivo")

@@ -2,7 +2,7 @@ import { Injectable, Inject, forwardRef } from "@nestjs/common";
 import { FirebaseService } from "../firebase/firebase.service";
 
 @Injectable()
-export class PermisosClass {
+export class PermisosService {
   constructor(
     @Inject(forwardRef(() => FirebaseService))
     private readonly firebaseService: FirebaseService,

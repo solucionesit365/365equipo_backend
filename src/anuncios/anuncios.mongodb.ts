@@ -5,7 +5,7 @@ import { MongoService } from "../mongo/mongo.service";
 import { AnuncioDto, UpdateAnuncioDto } from "./anuncios.dto";
 
 @Injectable()
-export class AnunciosService {
+export class AnunciosDatabaseService {
   constructor(private readonly mongoDbService: MongoService) {
     // Llamando al método para configurar el índice TTL cuando se instancia el servicio
     this.deleteAnunciosCaducidad().catch((err) => {

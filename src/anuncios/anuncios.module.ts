@@ -1,4 +1,9 @@
-import { Module } from '@nestjs/common';
+import { Module } from "@nestjs/common";
+import { AnunciosService } from "./anuncios.class";
+import { AnunciosDatabaseService } from "./anuncios.mongodb";
 
-@Module({})
+@Module({
+  providers: [AnunciosService, AnunciosDatabaseService],
+  exports: [AnunciosService],
+})
 export class AnunciosModule {}

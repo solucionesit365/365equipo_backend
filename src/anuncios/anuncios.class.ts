@@ -1,14 +1,14 @@
+import { DateTime } from "luxon";
 import { AnuncioDto, UpdateAnuncioDto } from "./anuncios.dto";
-import { AnunciosService } from "./anuncios.mongodb";
+import { AnunciosDatabaseService } from "./anuncios.mongodb";
 import { Injectable } from "@nestjs/common";
-import * as moment from "moment";
 
 @Injectable()
-export class AnunciosClass {
-  constructor(private readonly anunciosService: AnunciosService) {}
+export class AnunciosService {
+  constructor(private readonly schAnuncios: AnunciosDatabaseService) {}
 
   async getAnuncios(idTienda?: number) {
-    const arrayAnuncios = await this.anunciosService.getAnuncios(idTienda);
+    const arrayAnuncios = await this.schAnuncios.getAnuncios(idTienda);
 
     if (arrayAnuncios.length > 0) return arrayAnuncios;
     return null;
@@ -16,18 +16,24 @@ export class AnunciosClass {
 
   async addAnuncio(anuncio: AnuncioDto) {
     if (typeof anuncio.caducidad === "string" && anuncio.caducidad != "")
-      anuncio.caducidad = moment(anuncio.caducidad, "DD/MM/YYYY").toDate();
-    return await this.anunciosService.addAnuncio(anuncio);
+      anuncio.caducidad = DateTime.fromFormat(
+        anuncio.caducidad,
+        "dd/MM/yyyy",
+      ).toJSDate();
+    return await this.schAnuncios.addAnuncio(anuncio);
   }
 
   async updateAnuncio(anuncio: UpdateAnuncioDto) {
     if (typeof anuncio.caducidad === "string" && anuncio.caducidad != "")
-      anuncio.caducidad = moment(anuncio.caducidad, "DD/MM/YYYY").toDate();
-    return await this.anunciosService.updateAnuncio(anuncio);
+      anuncio.caducidad = DateTime.fromFormat(
+        anuncio.caducidad,
+        "dd/MM/yyyy",
+      ).toJSDate();
+    return await this.schAnuncios.updateAnuncio(anuncio);
   }
 
   async deleteAnuncio(_id: string) {
-    return await this.anunciosService.deleteAnuncio(_id);
+    return await this.schAnuncios.deleteAnuncio(_id);
   }
 
   // async guardarOfertaAnuncio(ofertas: OfertasAnuncios) {

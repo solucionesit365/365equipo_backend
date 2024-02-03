@@ -3,7 +3,7 @@ import { EvaluacionesDatabase } from "./evaluaciones.mongodb";
 import { evaluacionesInterface } from "./evaluaciones.interface";
 
 @Injectable()
-export class EvaluacionesClass {
+export class EvaluacionesService {
   constructor(private readonly evaluacionesDB: EvaluacionesDatabase) {}
 
   async addPlantilla(evaluacion: evaluacionesInterface) {

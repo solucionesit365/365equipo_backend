@@ -4,7 +4,6 @@ import {
   AuditoriasInterface,
   AuditoriaRespuestas,
 } from "./auditorias.interface";
-import * as moment from "moment";
 import { ObjectId } from "mongodb";
 
 @Injectable()
@@ -98,7 +97,7 @@ export class AuditoriaDatabase {
     throw Error("No se ha podido guardar la respuesta de la auditoria");
   }
 
-  //Ver Respuestas Auditorias
+  //Ver Respuestas AuditoriasService
   async getRespuestasAuditorias(idAuditoria: string) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const auditoriasCollection = db.collection<AuditoriaRespuestas>(

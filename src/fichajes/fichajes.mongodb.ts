@@ -10,7 +10,7 @@ import { DateTime } from "luxon";
 export class FichajesDatabase {
   constructor(
     private readonly mongoDbService: MongoService,
-    private readonly hitInstance: HitMssqlService,
+    private readonly hitMssqlService: HitMssqlService,
   ) {}
 
   async nuevaEntrada(
@@ -123,7 +123,7 @@ export class FichajesDatabase {
 
     if (sql === "") return 0;
 
-    await this.hitInstance.recHit(sql);
+    await this.hitMssqlService.recHit(sql);
 
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const fichajesCollection = db.collection<FichajeDto>("fichajes");
@@ -146,7 +146,7 @@ export class FichajesDatabase {
 
     const sql = `SELECT df.accio, df.usuari, df.idr, CONVERT(nvarchar, df.tmst, 126) as tmst, df.comentari as comentario, (select nom from dependentes where codi = df.usuari) as nombre, (SELECT valor FROM dependentesExtes WHERE id = df.usuari AND nom = 'DNI') as dni FROM cdpDadesFichador df WHERE day(df.tmst) = ${day} AND month(df.tmst) = ${month} AND year(df.tmst) = ${year} AND df.comentari <> '365EquipoDeTrabajo'`;
 
-    const resFichajes = await this.hitInstance.recHit(sql);
+    const resFichajes = await this.hitMssqlService.recHit(sql);
 
     return resFichajes.recordset;
   }

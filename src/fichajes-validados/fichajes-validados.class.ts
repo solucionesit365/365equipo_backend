@@ -7,7 +7,7 @@ import { FichajeValidadoDto } from "./fichajes-validados.dto";
 import { Trabajador } from "@prisma/client";
 
 @Injectable()
-export class FichajesValidados {
+export class FichajesValidadosService {
   constructor(
     private readonly schFichajesValidados: FichajesValidadosDatabase,
     @Inject(forwardRef(() => TrabajadorService))

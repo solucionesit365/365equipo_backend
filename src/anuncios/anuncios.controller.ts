@@ -1,5 +1,5 @@
 import { Controller, Post, Get, Body, UseGuards } from "@nestjs/common";
-import { AnunciosClass } from "./anuncios.class";
+import { AnunciosService } from "./anuncios.class";
 import { AnuncioDto, UpdateAnuncioDto } from "./anuncios.dto";
 import { TrabajadorService } from "../trabajadores/trabajadores.class";
 import { Notificaciones } from "../notificaciones/notificaciones.class";
@@ -12,7 +12,7 @@ export class AnunciosController {
   constructor(
     private readonly notificaciones: Notificaciones,
     private readonly trabajadores: TrabajadorService,
-    private readonly anunciosInstance: AnunciosClass,
+    private readonly anunciosInstance: AnunciosService,
   ) {}
 
   @UseGuards(AuthGuard)

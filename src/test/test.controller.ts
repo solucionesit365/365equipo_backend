@@ -1,7 +1,7 @@
 import { Controller, Get, Post } from "@nestjs/common";
 import axios from "axios";
-import { EmailClass } from "../email/email.class";
-import { FichajesValidados } from "../fichajes-validados/fichajes-validados.class";
+import { EmailService } from "../email/email.class";
+import { FichajesValidadosService } from "../fichajes-validados/fichajes-validados.class";
 import { FichajeValidadoDto } from "../fichajes-validados/fichajes-validados.dto";
 import { DateTime } from "luxon";
 import { TrabajadorService } from "../trabajadores/trabajadores.class";
@@ -9,8 +9,8 @@ import { TrabajadorService } from "../trabajadores/trabajadores.class";
 @Controller("test")
 export class TestController {
   constructor(
-    private readonly emailInstance: EmailClass,
-    private readonly fichajesValidadosInstance: FichajesValidados,
+    private readonly emailInstance: EmailService,
+    private readonly fichajesValidadosInstance: FichajesValidadosService,
     private readonly trabajadoresInstance: TrabajadorService,
   ) {}
   @Get()

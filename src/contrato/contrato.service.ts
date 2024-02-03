@@ -7,7 +7,7 @@ import { DateTime } from "luxon";
 export class ContratoService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly mssql: HitMssqlService,
+    private readonly hitMssqlService: HitMssqlService,
   ) {}
 
   async getHistoriaContratos(): Promise<
@@ -32,7 +32,7 @@ export class ContratoService {
     CONVERT(nvarchar, FechaBaja, 103) as fechaBaja
   FROM silema_ts.sage.dbo.EmpleadoNomina`;
 
-    const resHisContratos = await this.mssql.recHit(sql);
+    const resHisContratos = await this.hitMssqlService.recHit(sql);
 
     if (resHisContratos.recordset.length > 0) return resHisContratos.recordset;
     return [];

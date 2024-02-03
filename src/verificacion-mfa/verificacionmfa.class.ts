@@ -3,7 +3,7 @@ import { VerificacionMFA } from "./verificacionmfa.interface";
 import { VerifiacacionDatabase } from "./verificacionmfa.mongodb";
 
 @Injectable()
-export class VerificacionClass {
+export class VerificacionService {
   constructor(private readonly schVerificacion: VerifiacacionDatabase) {}
 
   async nuevaVerificacionMFA(verificacion: VerificacionMFA) {

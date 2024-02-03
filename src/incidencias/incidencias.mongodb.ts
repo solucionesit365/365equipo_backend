@@ -5,7 +5,7 @@ import { ObjectId } from "mongodb";
 import { toArray } from "rxjs";
 
 @Injectable()
-export class IncidenciasClass {
+export class IncidenciasDatabase {
   constructor(private readonly mongoDbService: MongoService) {}
 
   async nuevaIncidencia(incidencias: Incidencias) {

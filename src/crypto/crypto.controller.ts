@@ -1,10 +1,10 @@
 import { Body, Controller, Post, UseGuards } from "@nestjs/common";
 import { AuthGuard } from "../guards/auth.guard";
-import { CryptoClass } from "./crypto.class";
+import { CryptoService } from "./crypto.class";
 
 @Controller("crypto")
 export class CryptoController {
-  constructor(private readonly cryptoInstance: CryptoClass) {}
+  constructor(private readonly cryptoInstance: CryptoService) {}
 
   // Endpoint de ejemplo, no se debe usar en producción
   @Post("cifrar")

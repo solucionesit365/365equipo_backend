@@ -4,7 +4,7 @@ import { InAppNotification, NotificacionDto } from "./notificaciones.interface";
 import { ObjectId } from "mongodb";
 
 @Injectable()
-export class NotificacionsBbdd {
+export class NotificacionsDatabase {
   constructor(private readonly mongoDbService: MongoService) {}
 
   async saveToken(uid: string, token: string) {

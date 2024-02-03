@@ -1,10 +1,10 @@
 import { Injectable } from "@nestjs/common";
-import { IncidenciasClass } from "./incidencias.mongodb";
+import { IncidenciasDatabase } from "./incidencias.mongodb";
 import { Incidencias, IncidenciasInvitado } from "./incidencias.interface";
 
 @Injectable()
 export class Incidencia {
-  constructor(private readonly schIncidencias: IncidenciasClass) {}
+  constructor(private readonly schIncidencias: IncidenciasDatabase) {}
 
   async nuevaIncidencia(incidencia: Incidencias) {
     const insertIncidencia = await this.schIncidencias.nuevaIncidencia(

@@ -5,13 +5,13 @@ import {
   AuditoriasInterface,
   AuditoriaRespuestas,
 } from "./auditorias.interface";
-import { Auditorias } from "./auditorias.class";
+import { AuditoriasService } from "./auditorias.class";
 import { Tienda } from "src/tiendas/tiendas.class";
 
 @Controller("auditorias")
 export class AuditoriasController {
   constructor(
-    private readonly auditoriaInstance: Auditorias,
+    private readonly auditoriaInstance: AuditoriasService,
     private readonly tiendasInstance: Tienda,
   ) {}
 
@@ -114,7 +114,7 @@ export class AuditoriasController {
     }
   }
 
-  //Ver Respuestas Auditorias
+  //Ver Respuestas AuditoriasService
   @UseGuards(AuthGuard)
   @Get("getRespuestaAuditorias")
   async getRespuestaAuditoria(

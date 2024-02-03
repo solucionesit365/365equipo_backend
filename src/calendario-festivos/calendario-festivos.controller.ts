@@ -1,5 +1,5 @@
 import { Body, Controller, Post, UseGuards, Get, Query } from "@nestjs/common";
-import { CalendarioFestivo } from "./calendario-festivos.class";
+import { CalendarioFestivoService } from "./calendario-festivos.class";
 import {
   CalendarioFestivosInterface,
   eventoNavideño,
@@ -10,7 +10,7 @@ import { FirebaseService } from "../firebase/firebase.service";
 @Controller("calendario-festivos")
 export class CalendarioFestivosController {
   constructor(
-    private readonly calendarioFestivosInstance: CalendarioFestivo,
+    private readonly calendarioFestivosInstance: CalendarioFestivoService,
     private readonly authInstance: FirebaseService,
   ) {}
 

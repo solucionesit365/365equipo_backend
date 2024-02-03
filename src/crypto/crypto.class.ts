@@ -7,7 +7,7 @@ import {
 } from "crypto";
 
 @Injectable()
-export class CryptoClass {
+export class CryptoService {
   private curve: string;
   private ecdh = createECDH("secp521r1");
 

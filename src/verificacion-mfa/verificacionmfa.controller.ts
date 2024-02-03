@@ -9,17 +9,17 @@ import {
   VersioningType,
 } from "@nestjs/common";
 import { VerificacionMFA } from "./verificacionmfa.interface";
-import { VerificacionClass } from "./verificacionmfa.class";
+import { VerificacionService } from "./verificacionmfa.class";
 import { AuthGuard } from "../guards/auth.guard";
-import { EmailClass } from "src/email/email.class";
+import { EmailService } from "src/email/email.class";
 import { FirebaseService } from "../firebase/firebase.service";
 
 @Controller("verificacionmfa")
 export class VerificacionmfaController {
   constructor(
-    private readonly verificacionInstance: VerificacionClass,
+    private readonly verificacionInstance: VerificacionService,
     private readonly authInstance: FirebaseService,
-    private readonly email: EmailClass,
+    private readonly email: EmailService,
   ) {}
 
   @Post("nuevaVerificacionMFA")

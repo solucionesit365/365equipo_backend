@@ -8,7 +8,7 @@ import { HitMssqlService } from "../hit-mssql/hit-mssql.service";
 export class TrabajadorDatabaseService {
   constructor(
     private prisma: PrismaService,
-    private readonly mssql: HitMssqlService,
+    private readonly hitMssqlService: HitMssqlService,
   ) {}
 
   async getTrabajadorByAppId(uid: string) {
@@ -767,7 +767,7 @@ export class TrabajadorDatabaseService {
   ORDER BY nombreApellidos;
   
 `;
-    const resTrabajadores = await this.mssql.recHit(sqlQuery);
+    const resTrabajadores = await this.hitMssqlService.recHit(sqlQuery);
     if (resTrabajadores.recordset.length > 0) return resTrabajadores.recordset;
     else throw Error("Error, no hay trabajadores");
   }

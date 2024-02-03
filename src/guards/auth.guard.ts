@@ -8,7 +8,7 @@ import { FirebaseService } from "../firebase/firebase.service";
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-  constructor(private readonly authInstance: FirebaseService) {}
+  constructor(private readonly firebaseService: FirebaseService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
@@ -23,7 +23,7 @@ export class AuthGuard implements CanActivate {
     const tokenLimpio = authHeader.replace("Bearer ", "");
 
     try {
-      await this.authInstance.verifyToken(tokenLimpio);
+      await this.firebaseService.verifyToken(tokenLimpio);
     } catch (err) {
       throw new UnauthorizedException("No estás autorizado/a");
     }

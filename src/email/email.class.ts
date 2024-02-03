@@ -4,7 +4,7 @@ import { FirebaseService } from "../firebase/firebase.service";
 import { TrabajadorService } from "../trabajadores/trabajadores.class";
 
 @Injectable()
-export class EmailClass {
+export class EmailService {
   private transporter: any;
 
   constructor(

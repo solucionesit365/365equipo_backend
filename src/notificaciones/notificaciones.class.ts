@@ -1,11 +1,11 @@
 import { Injectable } from "@nestjs/common";
-import { NotificacionsBbdd } from "./notificaciones.mongodb";
+import { NotificacionsDatabase } from "./notificaciones.mongodb";
 import axios from "axios";
 import { InAppNotification } from "./notificaciones.interface";
 
 @Injectable()
 export class Notificaciones {
-  constructor(private readonly schNotificaciones: NotificacionsBbdd) {}
+  constructor(private readonly schNotificaciones: NotificacionsDatabase) {}
   async saveToken(uid: string, token: string) {
     return await this.schNotificaciones.saveToken(uid, token);
   }

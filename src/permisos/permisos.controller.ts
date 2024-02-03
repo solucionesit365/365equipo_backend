@@ -1,12 +1,12 @@
 import { Controller, Get, Post, UseGuards, Body, Query } from "@nestjs/common";
 import { AuthGuard } from "../guards/auth.guard";
-import { PermisosClass } from "./permisos.class";
+import { PermisosService } from "./permisos.class";
 import { User } from "../decorators/get-user.decorator";
 import { DecodedIdToken } from "firebase-admin/auth";
 
 @Controller("permisos")
 export class PermisosController {
-  constructor(private readonly permisosInstance: PermisosClass) {}
+  constructor(private readonly permisosInstance: PermisosService) {}
 
   @UseGuards(AuthGuard)
   @Get("listaCompleta")
