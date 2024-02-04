@@ -1,7 +1,5 @@
 import { Controller, Get, Query, Post, Body, UseGuards } from "@nestjs/common";
 import { AuthGuard } from "../guards/auth.guard";
-
-import { FirebaseService } from "../firebase/firebase.service";
 import { SolicitudesVacacionesService } from "./solicitud-vacaciones.class";
 import { SolicitudVacaciones } from "./solicitud-vacaciones.interface";
 import { EmailService } from "src/email/email.class";
@@ -11,7 +9,6 @@ import { Notificaciones } from "src/notificaciones/notificaciones.class";
 @Controller("solicitud-vacaciones")
 export class SolicitudVacacionesController {
   constructor(
-    private readonly authInstance: FirebaseService,
     private readonly solicitudVacacionesInstance: SolicitudesVacacionesService,
     private readonly notificaciones: Notificaciones,
     private readonly email: EmailService,

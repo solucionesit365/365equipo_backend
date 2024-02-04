@@ -17,6 +17,7 @@ export class SolicitudesVacacionesService {
     @Inject(forwardRef(() => TrabajadorService))
     private readonly trabajadorInstance: TrabajadorService,
     private readonly contratoService: ContratoService,
+    @Inject(forwardRef(() => Cuadrantes))
     private readonly cuadrantesInstance: Cuadrantes,
   ) {}
 

@@ -8,7 +8,6 @@ import {
   Query,
 } from "@nestjs/common";
 import { AuthGuard } from "../guards/auth.guard";
-import { FirebaseService } from "../firebase/firebase.service";
 import { Incidencia } from "./incidencias.class";
 import { Incidencias, IncidenciasInvitado } from "./incidencias.interface";
 import { Notificaciones } from "../notificaciones/notificaciones.class";
@@ -17,7 +16,6 @@ import { TrabajadorService } from "../trabajadores/trabajadores.class";
 @Controller("incidencias")
 export class IncidenciasController {
   constructor(
-    private readonly authInstance: FirebaseService,
     private readonly incidenciaInstance: Incidencia,
     private readonly notificaciones: Notificaciones,
     private readonly trabajadores: TrabajadorService,

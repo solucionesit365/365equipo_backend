@@ -7,12 +7,7 @@ import { TrabajadorService } from "../trabajadores/trabajadores.class";
 export class EmailService {
   private transporter: any;
 
-  constructor(
-    @Inject(forwardRef(() => FirebaseService))
-    private readonly authInstance: FirebaseService,
-    @Inject(forwardRef(() => TrabajadorService))
-    private readonly trabajadorInstance: TrabajadorService,
-  ) {
+  constructor(private readonly authInstance: FirebaseService) {
     this.transporter = nodemailer.createTransport({
       host: "smtp.gmail.com",
       port: 587,
@@ -62,9 +57,9 @@ export class EmailService {
     this.enviarEmail(usuario.email, mensaje, asunto);
   }
 
-  async sendMailById(id: number, mensaje: string, asunto: string) {
-    const usuario = await this.trabajadorInstance.getTrabajadorBySqlId(id);
+  // async sendMailById(id: number, mensaje: string, asunto: string) {
+  //   const usuario = await this.trabajadorInstance.getTrabajadorBySqlId(id);
 
-    this.enviarEmail(usuario.emails, mensaje, asunto);
-  }
+  //   this.enviarEmail(usuario.emails, mensaje, asunto);
+  // }
 }

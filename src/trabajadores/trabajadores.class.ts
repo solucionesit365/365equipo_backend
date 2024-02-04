@@ -13,7 +13,6 @@ export class TrabajadorService {
     @Inject(forwardRef(() => FirebaseService))
     private readonly firebaseService: FirebaseService,
     private readonly permisosInstance: PermisosService,
-    @Inject(forwardRef(() => EmailService))
     private readonly emailInstance: EmailService,
     @Inject(forwardRef(() => SolicitudesVacacionesService))
     private readonly solicitudesVacaciones: SolicitudesVacacionesService,
