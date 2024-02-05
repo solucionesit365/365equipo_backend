@@ -18,9 +18,8 @@ export class Trabajador {
     @Inject(forwardRef(() => EmailClass))
     private readonly emailInstance: EmailClass,
     @Inject(forwardRef(() => solicitudesVacacionesClass))
-    private readonly solicitudesVacaciones: solicitudesVacacionesClass,
-  ) // private readonly prisma: PrismaService,
-  {}
+    private readonly solicitudesVacaciones: solicitudesVacacionesClass, // private readonly prisma: PrismaService,
+  ) {}
 
   async getTrabajadorByAppId(uid: string) {
     const resUser = await schTrabajadores.getTrabajadorByAppId(uid);
@@ -39,7 +38,9 @@ export class Trabajador {
   async getTrabajadorBySqlId(id: number) {
     const resUser = await schTrabajadores.getTrabajadorBySqlId(id);
     if (resUser) return resUser;
-    throw Error("No se ha podido obtener la información del usuario. id: " + id);
+    throw Error(
+      "No se ha podido obtener la información del usuario. id: " + id,
+    );
   }
 
   async getTrabajadores(todos = false) {
@@ -187,51 +188,58 @@ export class Trabajador {
     };
   }
 
-  async registroManual(usuariosNuevos, empresa) {
-    return await schTrabajadores.RegistroManual(
-      "test_soluciones",
-      usuariosNuevos,
-      empresa,
-    );
+  async registroManual(usuariosNuevos) {
+    return await schTrabajadores.RegistroManual("soluciones", usuariosNuevos);
   }
 
   async registrarUsuario(dni: string, password: string) {
     dni = dni.trim().toUpperCase();
+    console.log(dni);
+
     const datosUsuario = await schTrabajadores.getTrabajadorByDni(dni);
+    console.log(datosUsuario);
 
-    if (!moment(datosUsuario.inicioContrato, "DD/MM/YYYY").isValid())
-      throw Error("Fecha de inicio de contrato incorrecta");
+    if (datosUsuario) {
+      if (!moment(datosUsuario.inicioContrato, "DD/MM/YYYY").isValid())
+        throw Error("Fecha de inicio de contrato incorrecta");
 
-    const arrayEmails = datosUsuario.emails.split(";");
+      const arrayEmails = datosUsuario.emails.split(";");
 
-    if (!datosUsuario.telefonos)
-      throw Error("Teléfono no registrado en la ficha");
+      if (!datosUsuario.telefonos)
+        throw Error("Teléfono no registrado en la ficha");
 
-    if (!arrayEmails[0].trim()) throw Error("Email no registrado en la ficha");
+      if (!arrayEmails[0].trim())
+        throw Error("Email no registrado en la ficha");
 
-    const usuarioCreado = await auth.createUser({
-      email: arrayEmails[0].trim(),
-      emailVerified: false,
-      phoneNumber: "+34" + datosUsuario.telefonos,
-      password: password,
-      displayName: datosUsuario.displayName,
-      disabled: false,
-    });
+      const usuarioCreado = await auth.createUser({
+        email: arrayEmails[0].trim(),
+        emailVerified: false,
+        phoneNumber: "+34" + datosUsuario.telefonos,
+        password: password,
+        displayName: datosUsuario.displayName,
+        disabled: false,
+      });
 
-    await schTrabajadores.setIdApp(datosUsuario.id, usuarioCreado.uid);
+      await schTrabajadores.setIdApp(datosUsuario.id, usuarioCreado.uid);
 
-    const link = await auth.generateEmailVerificationLink(usuarioCreado.email);
-    const body = ` Haz click en el siguiente enlace para verificar tu email:<br>
+      const link = await auth.generateEmailVerificationLink(
+        usuarioCreado.email,
+      );
+      const body = ` Haz click en el siguiente enlace para verificar tu email:<br>
       ${link}
     `;
 
-    await this.emailInstance.enviarEmail(
-      usuarioCreado.email,
-      body,
-      "365 Equipo - Verificar email",
-    );
-
-    return true;
+      await this.emailInstance.enviarEmail(
+        usuarioCreado.email,
+        body,
+        "365 Equipo - Verificar email",
+      );
+      return true;
+    } else {
+      throw Error(
+        "No hay ningún usuario con este DNI en nuestra base de datos. Pon una incidencia ",
+      );
+    }
   }
 
   async resolverCaptcha(): Promise<boolean> {
@@ -347,12 +355,7 @@ export class Trabajador {
   async uploadFoto(displayFoto: string, uid: string) {
     return await schTrabajadores.uploadFoto(displayFoto, uid);
   }
-
-  // async testInsert() {
-  //   this.prisma.trabajador.create({
-  //     data: {
-
-  //     }
-  //   })
-  // }
+  async getEmpresas() {
+    return await schTrabajadores.getEmpresas();
+  }
 }

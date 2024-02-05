@@ -634,26 +634,8 @@ export async function actualizarUsuarios(
   }
 }
 
-export async function RegistroManual(
-  database: string,
-  usuariosNuevos,
-  empresa,
-) {
+export async function RegistroManual(database: string, usuariosNuevos) {
   try {
-    console.log("Empresa recibida:", empresa);
-    // if (!empresa || !empresa.nombreEmpresa || !empresa.cif) {
-    //   throw new Error("La información de la empresa no es válida");
-    // }
-    // Construye la consulta de inserción para la empresa
-    const insertEmpresaQuery = `
-       INSERT INTO dbo.empresas (nombreEmpresa, cif) VALUES (
-         '${empresa.nombreEmpresa}',
-         '${empresa.cif}'
-       );
-     `;
-
-    // Ejecuta la consulta de inserción de la empresa
-    await executeBatch2(database, [insertEmpresaQuery]);
     // Asegúrate de que la variable usuariosNuevos sea siempre un arreglo
     if (!Array.isArray(usuariosNuevos)) {
       usuariosNuevos = [usuariosNuevos];
@@ -982,4 +964,12 @@ export async function uploadFoto(displayFoto: string, uid: string) {
   const resUser = await recSoluciones("soluciones", sql, displayFoto, uid);
   if (resUser.recordset) return resUser.recordset;
   return null;
+}
+
+export async function getEmpresas() {
+  const sql = "SELECT * FROM empresas";
+  const resEmpresas = await recSoluciones("soluciones", sql);
+  if (resEmpresas.recordset) {
+    return resEmpresas.recordset;
+  } else null;
 }

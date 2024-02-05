@@ -346,12 +346,10 @@ export class TrabajadoresController {
   @Post("registroManual")
   async registroManual(
     @Headers("authorization") authHeader: string,
-    @Body() { usuariosNuevos, empresa },
+    @Body() { usuariosNuevos },
   ) {
     try {
       console.log(usuariosNuevos);
-
-      console.log(empresa);
 
       const token = this.tokenService.extract(authHeader);
       await this.authInstance.verifyToken(token);
@@ -359,13 +357,25 @@ export class TrabajadoresController {
       return {
         ok: true,
         data: await this.trabajadorInstance.registroManual(
-          [usuariosNuevos],
-          empresa,
+          [usuariosNuevos]
         ),
       };
     } catch (error) {
       console.log(error);
       return { ok: false, message: error.message };
     }
+  }
+
+  @Get("getEmpresas")
+  async getEmpresas(@Headers("authorization") authHeader: string) {
+    try {
+      const token = this.tokenService.extract(authHeader);
+      await this.authInstance.verifyToken(token);
+
+      return {
+        ok: true,
+        data: await this.trabajadorInstance.getEmpresas(),
+      };
+    } catch (error) {}
   }
 }
