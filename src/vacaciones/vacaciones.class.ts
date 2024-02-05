@@ -1,10 +1,9 @@
 import * as moment from "moment";
-import { recHit, recSoluciones, recSolucionesNew } from "../bbdd/mssql";
+import { recSolucionesNew } from "../bbdd/mssql";
 import * as schVacaciones from "./vacaciones.mssql";
 import { Injectable } from "@nestjs/common";
 import { Cuadrantes } from "../cuadrantes/cuadrantes.class";
 import { SolicitudVacaciones } from "./vacaciones.interface";
-import { EmailClass } from "../email/email.class";
 import { Trabajador } from "../trabajadores/trabajadores.class";
 import { DateTime } from "luxon";
 
@@ -12,7 +11,6 @@ import { DateTime } from "luxon";
 export class Vacaciones {
   constructor(
     private readonly cuadrantesInstance: Cuadrantes,
-    private readonly emailInstance: EmailClass,
     private readonly trabajadorInstance: Trabajador,
   ) {}
   async getSolicitudById(idSolicitud: number) {
@@ -116,64 +114,65 @@ export class Vacaciones {
     idSolicitud: number;
     enviado: boolean;
   }) {
-    if (!vacaciones.idBeneficiario || vacaciones.estado != "APROBADA")
-      return false;
-    const fechaInicio = moment(vacaciones.fechaInicio, "DD/MM/YYYY");
-    const fechaFinal = moment(vacaciones.fechaFinal, "DD/MM/YYYY");
-    const nombreTabla = `cdpCalendariLaboral_${moment().format("YYYY")}`;
+    return true;
+    // if (!vacaciones.idBeneficiario || vacaciones.estado != "APROBADA")
+    //   return false;
+    // const fechaInicio = moment(vacaciones.fechaInicio, "DD/MM/YYYY");
+    // const fechaFinal = moment(vacaciones.fechaFinal, "DD/MM/YYYY");
+    // const nombreTabla = `cdpCalendariLaboral_${moment().format("YYYY")}`;
 
-    if (!fechaInicio.isValid() || !fechaFinal.isValid()) return false;
+    // if (!fechaInicio.isValid() || !fechaFinal.isValid()) return false;
 
-    const sql = `
-      DECLARE @InsertedRows INT;
-      DECLARE @UpdatedRows INT;
+    // const sql = `
+    //   DECLARE @InsertedRows INT;
+    //   DECLARE @UpdatedRows INT;
 
-      WITH Dates AS (
-        SELECT CONVERT(datetime, '${fechaInicio.format(
-          "YYYY-MM-DD",
-        )}', 126) AS Date
-        UNION ALL
-        SELECT DATEADD(day, 1, Date)
-        FROM Dates
-        WHERE DATEADD(day, 1, Date) <= CONVERT(datetime, '${fechaFinal.format(
-          "YYYY-MM-DD",
-        )}', 126)
-      )
-      MERGE ${nombreTabla} AS Target
-      USING (SELECT * FROM Dates) AS Source
-      ON Target.idEmpleado = ${vacaciones.idBeneficiario}
-        AND MONTH(Target.fecha) = MONTH(Source.Date)
-        AND YEAR(Target.fecha) = YEAR(Source.Date)
-        AND DAY(Target.fecha) = DAY(Source.Date)
-      WHEN MATCHED THEN
-        UPDATE SET
-          Target.estado = 'VACANCES',
-          Target.observaciones = '[Horas:24]',
-          Target.TimeStamp = GETDATE(),
-          Target.usuarioModif = '365Equipo'
-      WHEN NOT MATCHED THEN
-        INSERT (id, fecha, idEmpleado, estado, observaciones, TimeStamp, usuarioModif)
-        VALUES (NEWID(), Source.Date, ${
-          vacaciones.idBeneficiario
-        }, 'VACANCES', '[Horas:24]', GETDATE(), '365Equipo');
+    //   WITH Dates AS (
+    //     SELECT CONVERT(datetime, '${fechaInicio.format(
+    //       "YYYY-MM-DD",
+    //     )}', 126) AS Date
+    //     UNION ALL
+    //     SELECT DATEADD(day, 1, Date)
+    //     FROM Dates
+    //     WHERE DATEADD(day, 1, Date) <= CONVERT(datetime, '${fechaFinal.format(
+    //       "YYYY-MM-DD",
+    //     )}', 126)
+    //   )
+    //   MERGE ${nombreTabla} AS Target
+    //   USING (SELECT * FROM Dates) AS Source
+    //   ON Target.idEmpleado = ${vacaciones.idBeneficiario}
+    //     AND MONTH(Target.fecha) = MONTH(Source.Date)
+    //     AND YEAR(Target.fecha) = YEAR(Source.Date)
+    //     AND DAY(Target.fecha) = DAY(Source.Date)
+    //   WHEN MATCHED THEN
+    //     UPDATE SET
+    //       Target.estado = 'VACANCES',
+    //       Target.observaciones = '[Horas:24]',
+    //       Target.TimeStamp = GETDATE(),
+    //       Target.usuarioModif = '365Equipo'
+    //   WHEN NOT MATCHED THEN
+    //     INSERT (id, fecha, idEmpleado, estado, observaciones, TimeStamp, usuarioModif)
+    //     VALUES (NEWID(), Source.Date, ${
+    //       vacaciones.idBeneficiario
+    //     }, 'VACANCES', '[Horas:24]', GETDATE(), '365Equipo');
 
-      SET @InsertedRows = @@ROWCOUNT;
+    //   SET @InsertedRows = @@ROWCOUNT;
 
-      -- Retorna el número de filas insertadas
-      SELECT @InsertedRows AS InsertedRows;
-    `;
-    const resultado = await recHit("Fac_Tena", sql);
+    //   -- Retorna el número de filas insertadas
+    //   SELECT @InsertedRows AS InsertedRows;
+    // `;
+    // const resultado = await recHit("Fac_Tena", sql);
 
-    if (
-      resultado.recordset.length > 0 &&
-      fechaFinal.diff(fechaInicio, "days") + 1 ===
-        resultado.recordset[0].InsertedRows
-    ) {
-      await recSolucionesNew(
-        "UPDATE solicitudVacaciones SET enviado = 1 WHERE idSolicitud = @param0",
-        vacaciones.idSolicitud,
-      );
-    }
+    // if (
+    //   resultado.recordset.length > 0 &&
+    //   fechaFinal.diff(fechaInicio, "days") + 1 ===
+    //     resultado.recordset[0].InsertedRows
+    // ) {
+    //   await recSolucionesNew(
+    //     "UPDATE solicitudVacaciones SET enviado = 1 WHERE idSolicitud = @param0",
+    //     vacaciones.idSolicitud,
+    //   );
+    // }
   }
 
   async sendToHit() {

@@ -271,8 +271,8 @@ export class FichajesValidadosController {
     @Query("fecha", ParseDatePipe) fecha: Date,
   ) {
     try {
-      const token = this.tokenService.extract(authHeader);
-      await this.authInstance.verifyToken(token);
+      // const token = this.tokenService.extract(authHeader);
+      // await this.authInstance.verifyToken(token);
 
       const respAllFichajes =
         await this.fichajesValidadosInstance.getAllFichajesValidados(fecha);

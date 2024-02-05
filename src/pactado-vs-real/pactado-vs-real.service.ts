@@ -56,6 +56,7 @@ export class PactadoVsRealService {
       pactadoReal.push({
         nombre: trabajadoresTienda[i].nombreApellidos,
         idTrabajador: trabajadoresTienda[i].id,
+        contrato: trabajadoresTienda[i].horasContrato,
         arrayValidados: [],
       });
 
@@ -71,6 +72,7 @@ export class PactadoVsRealService {
         pactadoReal[i].arrayValidados.push(fichajesValidadosDia);
       }
     }
+    console.log(pactadoReal);
     return pactadoReal;
   }
 }

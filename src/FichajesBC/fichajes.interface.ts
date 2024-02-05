@@ -10,8 +10,6 @@ export interface FichajeDto {
   idExterno: number;
   comentario?: string;
   validado: boolean;
-  nombre: string;
-  dni: string;
   idTrabajador?: number; //no existe, pero para poder mutar la interface
 }
 

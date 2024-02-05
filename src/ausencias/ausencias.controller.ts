@@ -33,6 +33,7 @@ export class AusenciasController {
       tipo,
       comentario,
       nombre,
+      dni,
       completa,
       horas,
     },
@@ -64,6 +65,7 @@ export class AusenciasController {
           data: await this.ausenciasInstance.nuevaAusencia(
             idUsuario,
             nombre,
+            dni,
             tipo,
             inicio,
             final,

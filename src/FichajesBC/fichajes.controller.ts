@@ -35,7 +35,7 @@ export class FichajesController {
 
       return {
         ok: true,
-        data: await this.fichajesInstance.nuevaEntrada(usuario),
+        data: await this.fichajesInstance.nuevaEntrada(usuario.uid),
       };
     } catch (err) {
       console.log(err);
@@ -52,7 +52,7 @@ export class FichajesController {
 
       return {
         ok: true,
-        data: await this.fichajesInstance.nuevaSalida(usuario),
+        data: await this.fichajesInstance.nuevaSalida(usuario.uid),
       };
     } catch (err) {
       console.log(err);
@@ -82,11 +82,11 @@ export class FichajesController {
   }
 
   @Post("sincroFichajes")
-  @UseGuards(SchedulerGuard)
+  // @UseGuards(SchedulerGuard)
   async sincroFichajes() {
     try {
-      await this.fichajesInstance.sincroFichajes();
-      return { ok: true };
+      const response = await this.fichajesInstance.sincroFichajes();
+      return response;
     } catch (err) {
       console.log(err);
       return { ok: false, message: err.message };
@@ -94,8 +94,8 @@ export class FichajesController {
   }
 
   @Post("getFichajesHit")
-  @UseGuards(SchedulerGuard)
-  async getFichajesHit() {
+  // @UseGuards(SchedulerGuard)
+  async getFichajesBC() {
     try {
       return {
         ok: true,
@@ -217,11 +217,5 @@ export class FichajesController {
       arrayIds,
       DateTime.fromJSDate(fecha),
     );
-  }
-
-  @Post("validarFichajesAntiguos")
-  // @UseGuards(SchedulerGuard)
-  async validarFichajesAntiguos() {
-    return await this.fichajesInstance.validarFichajesAntiguos();
   }
 }

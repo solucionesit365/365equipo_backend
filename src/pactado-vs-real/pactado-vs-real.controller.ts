@@ -30,17 +30,21 @@ export class PactadoVsRealController {
     if (!fechaInicio)
       return new BadRequestException("fechaInicio es requerida");
 
-    console.log("la fecha inicio: ", fechaInicio, typeof fechaInicio);
     const token = this.tokenService.extract(authHeader);
     const usuarioRequest = await this.authInstance.getUserWithToken(token);
 
     const inicio = DateTime.fromJSDate(fechaInicio);
     const idTiendaNumber = Number(usuarioRequest.idTienda);
 
-    return this.pactadoRealService.pactadoVsReal(
+    const result = await this.pactadoRealService.pactadoVsReal(
       usuarioRequest,
       inicio.startOf("week"),
       idTiendaNumber,
     );
+
+    return { ok: true, data: result };
+  }
+  catch(error) {
+    return { ok: false, message: error.message };
   }
 }

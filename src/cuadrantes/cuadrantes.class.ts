@@ -1,10 +1,10 @@
-import { Injectable, Inject, forwardRef  } from "@nestjs/common";
+import { Injectable, Inject, forwardRef } from "@nestjs/common";
 import * as moment from "moment";
 import { CuadrantesDatabase } from "./cuadrantes.mongodb";
 import { ObjectId, WithId } from "mongodb";
 import { TCuadrante, TRequestCuadrante } from "./cuadrantes.interface";
 import { Tienda } from "../tiendas/tiendas.class";
-import { FacTenaMssql } from "../bbdd/mssql.class";
+// import { FacTenaMssql } from "../bbdd/mssql.class";
 import { AusenciaInterface } from "../ausencias/ausencias.interface";
 import { Trabajador } from "../trabajadores/trabajadores.class";
 
@@ -23,7 +23,7 @@ export class Cuadrantes {
   constructor(
     private readonly schCuadrantes: CuadrantesDatabase,
     private readonly tiendasInstance: Tienda,
-    private readonly hitInstance: FacTenaMssql,
+    // private readonly hitInstance: FacTenaMssql,
     @Inject(forwardRef(() => Trabajador))
     private readonly trabajadoresInstance: Trabajador,
     private readonly fichajesValidadosInstance: FichajesValidados,
@@ -131,13 +131,15 @@ export class Cuadrantes {
       fecha,
     );
 
-    return horasContrato - (horasCuadranteTotal + horasMasMenos);
+    return horasContrato + horasMasMenos;
   }
 
   // Cuadrantes 2.0
   async getBolsaInicial(idTrabajador: number, lunesActual: DateTime) {
+    console.log("entra aqui");
+
     const lunesAnterior = lunesActual.minus({ days: 7 }).startOf("week");
-    const domingoAnterior = lunesAnterior.minus({ days: 1 });
+    const domingoAnterior = lunesActual.minus({ days: 1 }).endOf("week");
 
     const fichajesValidados =
       await this.fichajesValidadosInstance.getParaCuadranteNew(
@@ -145,7 +147,6 @@ export class Cuadrantes {
         domingoAnterior,
         idTrabajador,
       );
-
     let horasCuadranteTotal = 0;
     let horasMasMenos = 0;
 
@@ -154,8 +155,10 @@ export class Cuadrantes {
         fichajesValidados[i].horasExtra +
         fichajesValidados[i].horasAprendiz +
         fichajesValidados[i].horasCoordinacion;
-      horasCuadranteTotal += fichajesValidados[i].horasCuadrante;
+      horasCuadranteTotal = horasMasMenos;
     }
+
+    console.log(horasMasMenos);
 
     return {
       horasCuadranteTotal,
@@ -418,127 +421,127 @@ export class Cuadrantes {
 
   // Cuadrantes 2.0 (faltaría optimizar la velocidad de las consultas batch)
   public async sincronizarConHit() {
-    const cuadrantes = await this.getPendientesEnvio();
-    const tiendas = await this.tiendasInstance.getTiendas();
+    // const cuadrantes = await this.getPendientesEnvio();
+    // const tiendas = await this.tiendasInstance.getTiendas();
 
-    // Crear una función asíncrona para manejar la sincronización de cada cuadrante
-    const sincronizarCuadrante = async (cuadrante: TCuadrante) => {
-      const query = "DECLARE @idTurno VARCHAR(255) = NULL";
-      let subQuery = "";
+    // // Crear una función asíncrona para manejar la sincronización de cada cuadrante
+    // const sincronizarCuadrante = async (cuadrante: TCuadrante) => {
+    //   const query = "DECLARE @idTurno VARCHAR(255) = NULL";
+    //   let subQuery = "";
 
-      const sqlBorrar = this.schCuadrantes.borrarHistorial(cuadrante);
-      const nombreTablaPlanificacion = this.schCuadrantes.nombreTablaSqlHit(
-        cuadrante.inicio,
-      );
+    //   const sqlBorrar = this.schCuadrantes.borrarHistorial(cuadrante);
+    //   const nombreTablaPlanificacion = this.schCuadrantes.nombreTablaSqlHit(
+    //     cuadrante.inicio,
+    //   );
 
-      if (cuadrante && !cuadrante.ausencia) {
-        const entrada = DateTime.fromJSDate(cuadrante.inicio);
-        const salida = DateTime.fromJSDate(cuadrante.final);
-        const tipoTurno = entrada.hour < 12 ? "M" : "T";
+    //   if (cuadrante && !cuadrante.ausencia) {
+    //     const entrada = DateTime.fromJSDate(cuadrante.inicio);
+    //     const salida = DateTime.fromJSDate(cuadrante.final);
+    //     const tipoTurno = entrada.hour < 12 ? "M" : "T";
 
-        subQuery += `
-            SELECT @idTurno = NULL;
-            SELECT TOP 1 @idTurno = idTurno from cdpTurnos WHERE horaInicio = '${entrada.toFormat(
-              "yyyy-MM-dd HH:mm:ss",
-            )}' AND horaFin = '${salida.toFormat("yyyy-MM-dd HH:mm:ss")}';
-  
-            IF @idTurno IS NOT NULL
-              BEGIN
-                DELETE FROM ${nombreTablaPlanificacion} WHERE idPlan = '${
-          cuadrante.idPlan
-        }';
-                INSERT INTO ${nombreTablaPlanificacion} (
-                  idPlan, 
-                  fecha, 
-                  botiga, 
-                  periode, 
-                  idTurno, 
-                  usuarioModif, 
-                  fechaModif, 
-                  activo
-                ) 
-                VALUES (
-                  '${cuadrante.idPlan}', 
-                  '${entrada.toFormat("yyyy-MM-dd HH:mm:ss")}',
-                  ${this.tiendasInstance.convertirTiendaToExterno(
-                    cuadrante.idTienda,
-                    tiendas,
-                  )}, 
-                  '${tipoTurno}', 
-                  @idTurno, 
-                  '365EquipoDeTrabajo', 
-                  GETDATE(), 
-                  1
-                );
-              END
-            ELSE
-              BEGIN
-                SELECT @idTurno = NEWID()
-                INSERT INTO cdpTurnos (
-                  nombre, 
-                  horaInicio, 
-                  horaFin, 
-                  idTurno, 
-                  color, 
-                  tipoEmpleado
-                ) 
-                VALUES (
-                  'De ${entrada.toFormat("HH:mm")} a ${salida.toFormat(
-          "HH:mm",
-        )}', 
-                  '${entrada.toFormat("HH:mm")}', 
-                  '${salida.toFormat("HH:mm")}', 
-                  @idTurno, 
-                  '#DDDDDD', 
-                  'RESPONSABLE/DEPENDENTA
-                  ');
-                  DELETE FROM ${nombreTablaPlanificacion} WHERE idPlan = '${
-          cuadrante.idPlan
-        }';
-                  INSERT INTO ${nombreTablaPlanificacion} (
-                    idPlan, 
-                    fecha, 
-                    botiga, 
-                    periode, 
-                    idTurno, 
-                    usuarioModif, 
-                    fechaModif, 
-                    activo
-                  ) 
-                  VALUES (
-                    '${cuadrante.idPlan}', 
-                    '${entrada.toFormat("yyyy-MM-dd HH:mm:ss")}',
-                    ${this.tiendasInstance.convertirTiendaToExterno(
-                      cuadrante.idTienda,
-                      tiendas,
-                    )}, 
-                    '${tipoTurno}', 
-                    @idTurno, 
-                    '365EquipoDeTrabajo', 
-                    GETDATE(), 
-                    1
-                  );
-              END
-          `;
-      }
+    //     subQuery += `
+    //         SELECT @idTurno = NULL;
+    //         SELECT TOP 1 @idTurno = idTurno from cdpTurnos WHERE horaInicio = '${entrada.toFormat(
+    //           "yyyy-MM-dd HH:mm:ss",
+    //         )}' AND horaFin = '${salida.toFormat("yyyy-MM-dd HH:mm:ss")}';
 
-      const resPlanes = await this.hitInstance.recHit(
-        sqlBorrar + query + subQuery,
-      );
+    //         IF @idTurno IS NOT NULL
+    //           BEGIN
+    //             DELETE FROM ${nombreTablaPlanificacion} WHERE idPlan = '${
+    //       cuadrante.idPlan
+    //     }';
+    //             INSERT INTO ${nombreTablaPlanificacion} (
+    //               idPlan,
+    //               fecha,
+    //               botiga,
+    //               periode,
+    //               idTurno,
+    //               usuarioModif,
+    //               fechaModif,
+    //               activo
+    //             )
+    //             VALUES (
+    //               '${cuadrante.idPlan}',
+    //               '${entrada.toFormat("yyyy-MM-dd HH:mm:ss")}',
+    //               ${this.tiendasInstance.convertirTiendaToExterno(
+    //                 cuadrante.idTienda,
+    //                 tiendas,
+    //               )},
+    //               '${tipoTurno}',
+    //               @idTurno,
+    //               '365EquipoDeTrabajo',
+    //               GETDATE(),
+    //               1
+    //             );
+    //           END
+    //         ELSE
+    //           BEGIN
+    //             SELECT @idTurno = NEWID()
+    //             INSERT INTO cdpTurnos (
+    //               nombre,
+    //               horaInicio,
+    //               horaFin,
+    //               idTurno,
+    //               color,
+    //               tipoEmpleado
+    //             )
+    //             VALUES (
+    //               'De ${entrada.toFormat("HH:mm")} a ${salida.toFormat(
+    //       "HH:mm",
+    //     )}',
+    //               '${entrada.toFormat("HH:mm")}',
+    //               '${salida.toFormat("HH:mm")}',
+    //               @idTurno,
+    //               '#DDDDDD',
+    //               'RESPONSABLE/DEPENDENTA
+    //               ');
+    //               DELETE FROM ${nombreTablaPlanificacion} WHERE idPlan = '${
+    //       cuadrante.idPlan
+    //     }';
+    //               INSERT INTO ${nombreTablaPlanificacion} (
+    //                 idPlan,
+    //                 fecha,
+    //                 botiga,
+    //                 periode,
+    //                 idTurno,
+    //                 usuarioModif,
+    //                 fechaModif,
+    //                 activo
+    //               )
+    //               VALUES (
+    //                 '${cuadrante.idPlan}',
+    //                 '${entrada.toFormat("yyyy-MM-dd HH:mm:ss")}',
+    //                 ${this.tiendasInstance.convertirTiendaToExterno(
+    //                   cuadrante.idTienda,
+    //                   tiendas,
+    //                 )},
+    //                 '${tipoTurno}',
+    //                 @idTurno,
+    //                 '365EquipoDeTrabajo',
+    //                 GETDATE(),
+    //                 1
+    //               );
+    //           END
+    //       `;
+    //   }
 
-      if (resPlanes.rowsAffected.includes(1)) {
-        await this.schCuadrantes.setCuadranteEnviado(cuadrante._id);
-      } else {
-        throw Error("Fallo en la consulta");
-      }
-    };
-    // Dividir los cuadrantes en lotes y procesarlos en paralelo con Promise.all
+    //   const resPlanes = await this.hitInstance.recHit(
+    //     sqlBorrar + query + subQuery,
+    //   );
 
-    const batchSize = 60; // Ajusta este valor según sea necesario
-    for (let i = 0; i < cuadrantes.length; i += batchSize) {
-      const batch = cuadrantes.slice(i, i + batchSize);
-      await Promise.all(batch.map(sincronizarCuadrante));
-    }
+    //   if (resPlanes.rowsAffected.includes(1)) {
+    //     await this.schCuadrantes.setCuadranteEnviado(cuadrante._id);
+    //   } else {
+    //     throw Error("Fallo en la consulta");
+    //   }
+    // };
+    // // Dividir los cuadrantes en lotes y procesarlos en paralelo con Promise.all
+
+    // const batchSize = 60; // Ajusta este valor según sea necesario
+    // for (let i = 0; i < cuadrantes.length; i += batchSize) {
+    //   const batch = cuadrantes.slice(i, i + batchSize);
+    //   await Promise.all(batch.map(sincronizarCuadrante));
+    // }
 
     return true;
   }
@@ -697,13 +700,13 @@ export class Cuadrantes {
     const fechaInicio = fecha.startOf("day");
     const fechaFinal = fecha.endOf("day");
 
-    const resTurno = await this.schCuadrantes.getCuadrantesIndividual(
+    const resTurno = await this.schCuadrantes.getTurnoDia(
       idTrabajador,
       fechaInicio,
       fechaFinal,
     );
 
-    if (resTurno.length > 0) return resTurno[0];
+    if (resTurno) return resTurno;
     return null;
   }
 }

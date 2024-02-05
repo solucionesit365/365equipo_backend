@@ -10,7 +10,7 @@ import * as moment from "moment";
 import { ObjectId, WithId } from "mongodb";
 import { FichajeDto, ParFichaje } from "./fichajes.interface";
 import { Cuadrantes } from "../cuadrantes/cuadrantes.class";
-import { DateTime } from "luxon";
+import { DateTime, Duration } from "luxon";
 
 @Injectable()
 export class Fichajes {
@@ -20,15 +20,14 @@ export class Fichajes {
     private readonly cuadrantesInstance: Cuadrantes,
   ) {}
 
-  async nuevaEntrada(trabajador: TrabajadorCompleto) {
+  async nuevaEntrada(uid: string) {
     const hora = new Date();
-
+    const trabajadorCompleto =
+      await this.trabajadoresInstance.getTrabajadorByAppId(uid);
     const insert = await this.schFichajes.nuevaEntrada(
-      trabajador.uid,
+      uid,
       hora,
-      trabajador.id,
-      trabajador.nombreApellidos,
-      trabajador.dni,
+      trabajadorCompleto.id,
     );
 
     if (insert) return true;
@@ -36,15 +35,14 @@ export class Fichajes {
     throw Error("No se ha podido registrar la entrada");
   }
 
-  async nuevaSalida(trabajador: TrabajadorCompleto) {
+  async nuevaSalida(uid: string) {
     const hora = new Date();
-
+    const trabajadorCompleto =
+      await this.trabajadoresInstance.getTrabajadorByAppId(uid);
     const insert = await this.schFichajes.nuevaSalida(
-      trabajador.uid,
+      uid,
       hora,
-      trabajador.id,
-      trabajador.nombreApellidos,
-      trabajador.dni,
+      trabajadorCompleto.id,
     );
 
     if (insert) return true;
@@ -73,7 +71,7 @@ export class Fichajes {
 
   async sincroFichajes() {
     const fichajesPendientes = await this.schFichajes.getFichajesSincro();
-    await this.schFichajes.enviarHit(fichajesPendientes);
+    return await this.schFichajes.enviarFichajesBC(fichajesPendientes);
   }
 
   filtrarUidFichajeTrabajador(fichajeHit: any, trabajadores: TrabajadorSql[]) {
@@ -86,49 +84,50 @@ export class Fichajes {
   }
 
   async fusionarFichajesHit() {
-    const fichajesHit = await this.schFichajes.getFichajesHit();
+    const fichajesBC = await this.schFichajes.getFichajesHit();
+    console.log(fichajesBC);
+
     const trabajadores = await this.trabajadoresInstance.getTrabajadores();
     const fichajesPretty = [];
 
-    for (let i = 0; i < fichajesHit.length; i += 1) {
+    for (let i = 0; i < fichajesBC.length; i += 1) {
       const idApp = this.filtrarUidFichajeTrabajador(
-        fichajesHit[i],
+        fichajesBC[i],
         trabajadores,
       );
       if (idApp === "NO_TIENE_APP") continue;
 
-      if (fichajesHit[i].accio === 1) {
+      if (fichajesBC[i].accio === 1) {
         fichajesPretty.push({
-          _id: fichajesHit[i].idr,
-          hora: moment(fichajesHit[i].tmst).toDate(),
+          _id: fichajesBC[i].idr,
+          hora: moment(fichajesBC[i].tmst).toDate(),
           uid: idApp,
           tipo: "ENTRADA",
           enviado: true,
-          idExterno: Number(fichajesHit[i].usuari),
-          comentario: fichajesHit[i].comentario,
+          idExterno: Number(fichajesBC[i].usuari),
+          comentario: fichajesBC[i].comentari,
           validado: false,
-          dni: fichajesHit[i].dni,
-          nombre: fichajesHit[i].nombre,
         });
-      } else if (fichajesHit[i].accio === 2) {
+      } else if (fichajesBC[i].accio === 2) {
         fichajesPretty.push({
-          _id: fichajesHit[i].idr,
-          hora: moment(fichajesHit[i].tmst).toDate(),
+          _id: fichajesBC[i].idr,
+          hora: moment(fichajesBC[i].tmst).toDate(),
           uid: idApp,
           tipo: "SALIDA",
           enviado: true,
-          idExterno: Number(fichajesHit[i].usuari),
-          comentario: fichajesHit[i].comentario,
+          idExterno: Number(fichajesBC[i].usuari),
+          comentario: fichajesBC[i].comentari,
           validado: false,
-          dni: fichajesHit[i].dni,
-          nombre: fichajesHit[i].nombre,
         });
       }
     }
 
-    await this.schFichajes.insertarFichajesHit(fichajesPretty);
-
-    return true;
+    if (fichajesPretty.length > 0) {
+      await this.schFichajes.insertarFichajesHit(fichajesPretty);
+      return {
+        message: `${fichajesPretty.length} fichajes sincronizado de BC a la app`,
+      };
+    } else return "No hay fichajes que extraer";
   }
 
   async getFichajesByIdSql(idSql: number, validado: boolean) {
@@ -142,7 +141,6 @@ export class Fichajes {
       fechaFinal,
     );
   }
-
   async updateFichaje(id: string, validado: boolean) {
     if (typeof id === "string") console.log(id + " - " + validado);
 
@@ -200,8 +198,6 @@ export class Fichajes {
       validado: false,
       idTrabajador: idTrabajador,
       uid: trabajador.idApp,
-      nombre: trabajador.nombreApellidos,
-      dni: trabajador.dni,
     };
   }
 
@@ -256,6 +252,18 @@ export class Fichajes {
           idTrabajador: subordinado.id,
         }),
       );
+
+      // const fichajeListFaltan = this.comprobarParesFichajes(susFichajesPlus);
+
+      // // Si hay al menos un índice, hay que agregarlo al array de fichajes.
+      // for (let j = 0; j < fichajeListFaltan.length; j += 1) {
+      //   const fichajeSistema = await this.createFichajeSalidaSistema(
+      //     DateTime.fromJSDate(fichajeListFaltan[j].hora),
+      //     susFichajesPlus[j].idTrabajador,
+      //   );
+      //   // susFichajesPlus.splice(j + 1, 0, fichajeSistema);
+      //   susFichajesPlus.push(fichajeSistema);
+      // }
 
       this.ordenarPorHora(susFichajesPlus);
       const resPares = await this.obtenerParesTrabajador(susFichajesPlus);
@@ -377,8 +385,6 @@ export class Fichajes {
   // }
 
   async hayFichajesPendientes(ids: number[], fecha: DateTime) {
-    console.log("Entro causa");
-
     const lunes = fecha.startOf("week");
     // const ids: number[] = [3608, 5740, 975];
 
@@ -391,39 +397,14 @@ export class Fichajes {
           ids[i],
           lunes.plus({ days: j }),
         );
+
         if (resultado) {
-          if (!resultado.validado) {
-            arrayCaritas[j] = false;
-          }
+          arrayCaritas[j] = false;
+          break;
         }
       }
     }
+
     return arrayCaritas;
-  }
-
-  // Solo para propósito de rectificación general
-  async getAllFichajes() {
-    return await this.schFichajes.getAllFichajes();
-  }
-  // Solo para propósito de rectificación general
-  async setAllFichajes(fichajes: WithId<FichajeDto>[]) {
-    return await this.schFichajes.setAllFichajes(fichajes);
-  }
-
-  async validarFichajesAntiguos() {
-    //Fechas a reiniciar
-    const ahora = DateTime.now();
-    const inicioSemanaActual = ahora.startOf("week");
-    const inicioSemanaAnterior = inicioSemanaActual.minus({ weeks: 1 });
-
-    console.log(inicioSemanaActual);
-    console.log(inicioSemanaAnterior);
-
-    const response =
-      this.schFichajes.validarFichajesAntiguos(inicioSemanaAnterior);
-
-    console.log(response);
-
-    return response;
   }
 }

@@ -4,10 +4,9 @@ import { SolicitudVacaciones } from "./solicitud-vacaciones.interface";
 import { EmailClass } from "../email/email.class";
 import { Trabajador } from "../trabajadores/trabajadores.class";
 import { Cuadrantes } from "../cuadrantes/cuadrantes.class";
-import { recHit } from "../bbdd/mssql";
+// import { recHit } from "../bbdd/mssql";
 import * as moment from "moment";
 import { DateTime } from "luxon";
-import { ObjectId } from "mongodb";
 
 @Injectable()
 export class solicitudesVacacionesClass {
@@ -21,31 +20,45 @@ export class solicitudesVacacionesClass {
 
   //Nueva solicitud de vacaciones
   async nuevaSolicitudVacaciones(solicitudVacaciones: SolicitudVacaciones) {
-    const insertSolicitudVacaciones =
-      await this.schSolicitudVacaciones.nuevaSolicitudVacaciones(
-        solicitudVacaciones,
-      );
-    if (insertSolicitudVacaciones) return true;
+    try {
+      const horasContrato =
+        await this.trabajadorInstance.getHorasContratoByIdNew(
+          solicitudVacaciones.idBeneficiario,
+          DateTime.now(),
+        );
 
-    throw Error("No se ha podido insertar la nueva solicitud de vacaciones");
+      solicitudVacaciones.horasContrato = horasContrato;
+
+      const insertSolicitudVacaciones =
+        await this.schSolicitudVacaciones.nuevaSolicitudVacaciones(
+          solicitudVacaciones,
+        );
+      if (insertSolicitudVacaciones) return true;
+
+      throw Error("No se ha podido insertar la nueva solicitud de vacaciones");
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   //Mostrar todas las solicitudes de las vacaciones de los trabajadores
-  async getSolicitudes() {
-    return await this.schSolicitudVacaciones.getSolicitudes();
+  async getSolicitudes(year: number) {
+    return await this.schSolicitudVacaciones.getSolicitudes(year);
   }
 
   //Mostrar Solicitudes de las vacaciones de el trabajador por idSql
-  async getSolicitudesTrabajadorSqlId(idBeneficiario: number) {
+  async getSolicitudesTrabajadorSqlId(idBeneficiario: number, year: number) {
     return await this.schSolicitudVacaciones.getSolicitudesTrabajadorSqlId(
       idBeneficiario,
+      year,
     );
   }
 
   //Mostrar Solicitudes de las vacaciones de los trabajadores a cargo
-  async getsolicitudesSubordinados(idAppResponsable: string) {
+  async getsolicitudesSubordinados(idAppResponsable: string, year: number) {
     return await this.schSolicitudVacaciones.getsolicitudesSubordinados(
       idAppResponsable,
+      year,
     );
   }
 
@@ -209,61 +222,61 @@ export class solicitudesVacacionesClass {
   }
 
   async guardarEnHit(vacaciones: SolicitudVacaciones) {
-    if (!vacaciones.idBeneficiario || vacaciones.estado != "APROBADA")
-      return false;
-    const fechaInicio = moment(vacaciones.fechaInicio, "DD/MM/YYYY");
-    const fechaFinal = moment(vacaciones.fechaFinal, "DD/MM/YYYY");
-    const nombreTabla = `cdpCalendariLaboral_${moment().format("YYYY")}`;
+    // if (!vacaciones.idBeneficiario || vacaciones.estado != "APROBADA")
+    //   return false;
+    // const fechaInicio = moment(vacaciones.fechaInicio, "DD/MM/YYYY");
+    // const fechaFinal = moment(vacaciones.fechaFinal, "DD/MM/YYYY");
+    // const nombreTabla = `cdpCalendariLaboral_${moment().format("YYYY")}`;
 
-    if (!fechaInicio.isValid() || !fechaFinal.isValid()) return false;
+    // if (!fechaInicio.isValid() || !fechaFinal.isValid()) return false;
 
-    const sql = `
-      DECLARE @InsertedRows INT;
-      DECLARE @UpdatedRows INT;
+    // const sql = `
+    //   DECLARE @InsertedRows INT;
+    //   DECLARE @UpdatedRows INT;
 
-      WITH Dates AS (
-        SELECT CONVERT(datetime, '${fechaInicio.format(
-          "YYYY-MM-DD",
-        )}', 126) AS Date
-        UNION ALL
-        SELECT DATEADD(day, 1, Date)
-        FROM Dates
-        WHERE DATEADD(day, 1, Date) <= CONVERT(datetime, '${fechaFinal.format(
-          "YYYY-MM-DD",
-        )}', 126)
-      )
-      MERGE ${nombreTabla} AS Target
-      USING (SELECT * FROM Dates) AS Source
-      ON Target.idEmpleado = ${vacaciones.idBeneficiario}
-        AND MONTH(Target.fecha) = MONTH(Source.Date)
-        AND YEAR(Target.fecha) = YEAR(Source.Date)
-        AND DAY(Target.fecha) = DAY(Source.Date)
-      WHEN MATCHED THEN
-        UPDATE SET
-          Target.estado = 'VACANCES',
-          Target.observaciones = '[Horas:24]',
-          Target.TimeStamp = GETDATE(),
-          Target.usuarioModif = '365Equipo'
-      WHEN NOT MATCHED THEN
-        INSERT (id, fecha, idEmpleado, estado, observaciones, TimeStamp, usuarioModif)
-        VALUES (NEWID(), Source.Date, ${
-          vacaciones.idBeneficiario
-        }, 'VACANCES', '[Horas:24]', GETDATE(), '365Equipo');
+    //   WITH Dates AS (
+    //     SELECT CONVERT(datetime, '${fechaInicio.format(
+    //       "YYYY-MM-DD",
+    //     )}', 126) AS Date
+    //     UNION ALL
+    //     SELECT DATEADD(day, 1, Date)
+    //     FROM Dates
+    //     WHERE DATEADD(day, 1, Date) <= CONVERT(datetime, '${fechaFinal.format(
+    //       "YYYY-MM-DD",
+    //     )}', 126)
+    //   )
+    //   MERGE ${nombreTabla} AS Target
+    //   USING (SELECT * FROM Dates) AS Source
+    //   ON Target.idEmpleado = ${vacaciones.idBeneficiario}
+    //     AND MONTH(Target.fecha) = MONTH(Source.Date)
+    //     AND YEAR(Target.fecha) = YEAR(Source.Date)
+    //     AND DAY(Target.fecha) = DAY(Source.Date)
+    //   WHEN MATCHED THEN
+    //     UPDATE SET
+    //       Target.estado = 'VACANCES',
+    //       Target.observaciones = '[Horas:24]',
+    //       Target.TimeStamp = GETDATE(),
+    //       Target.usuarioModif = '365Equipo'
+    //   WHEN NOT MATCHED THEN
+    //     INSERT (id, fecha, idEmpleado, estado, observaciones, TimeStamp, usuarioModif)
+    //     VALUES (NEWID(), Source.Date, ${
+    //       vacaciones.idBeneficiario
+    //     }, 'VACANCES', '[Horas:24]', GETDATE(), '365Equipo');
 
-      SET @InsertedRows = @@ROWCOUNT;
+    //   SET @InsertedRows = @@ROWCOUNT;
 
-      -- Retorna el número de filas insertadas
-      SELECT @InsertedRows AS InsertedRows;
-    `;
-    const resultado = await recHit("Fac_Tena", sql);
+    //   -- Retorna el número de filas insertadas
+    //   SELECT @InsertedRows AS InsertedRows;
+    // `;
+    // const resultado = await recHit("Fac_Tena", sql);
 
-    if (
-      resultado.recordset.length > 0 &&
-      fechaFinal.diff(fechaInicio, "days") + 1 ===
-        resultado.recordset[0].InsertedRows
-    ) {
-      await this.schSolicitudVacaciones.setEnviado(vacaciones);
-    }
+    // if (
+    //   resultado.recordset.length > 0 &&
+    //   fechaFinal.diff(fechaInicio, "days") + 1 ===
+    //     resultado.recordset[0].InsertedRows
+    // ) {
+    //   await this.schSolicitudVacaciones.setEnviado(vacaciones);
+    // }
   }
 
   async sendToHit() {

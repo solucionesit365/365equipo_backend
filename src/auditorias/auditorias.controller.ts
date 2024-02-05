@@ -33,6 +33,9 @@ export class AuditoriasController {
     @Body() auditoria: AuditoriasInterface,
   ) {
     try {
+      if (typeof auditoria.caducidad === "string") {
+        auditoria.caducidad = new Date(auditoria.caducidad);
+      }
       return {
         ok: true,
         data: await this.auditoriaInstance.nuevaAuditoria(auditoria),
@@ -112,7 +115,6 @@ export class AuditoriasController {
           ok: true,
           data: respAuditoria,
         };
-      console.log(respAuditoria);
 
       throw Error("No se ha podido deshabilitar la auditoria");
     } catch (err) {
@@ -231,7 +233,6 @@ export class AuditoriasController {
           ok: true,
           data: respAuditoria,
         };
-      console.log(respAuditoria);
 
       throw Error("No se ha podido borrar la auditoria");
     } catch (err) {
@@ -247,8 +248,9 @@ export class AuditoriasController {
     @Headers("authorization") authHeader: string,
   ) {
     try {
-      console.log(auditoria);
-
+      if (typeof auditoria.caducidad === "string") {
+        auditoria.caducidad = new Date(auditoria.caducidad);
+      }
       const token = this.tokenService.extract(authHeader);
       await this.authInstance.verifyToken(token);
 
@@ -270,8 +272,6 @@ export class AuditoriasController {
     @Headers("authorization") authHeader: string,
   ) {
     try {
-      console.log(auditoria);
-
       const token = this.tokenService.extract(authHeader);
       await this.authInstance.verifyToken(token);
 
