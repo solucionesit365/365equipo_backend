@@ -15,13 +15,9 @@ CREATE TABLE `Trabajador` (
     `codigoPostal` VARCHAR(191) NULL,
     `cuentaCorriente` VARCHAR(191) NULL,
     `tipoTrabajador` VARCHAR(191) NOT NULL,
-    `inicioContrato` DATETIME(3) NOT NULL,
-    `finalContrato` DATETIME(3) NULL,
-    `antiguedad` DATETIME(3) NOT NULL,
     `idResponsable` INTEGER NULL,
     `idTienda` INTEGER NULL,
     `llevaEquipo` BOOLEAN NOT NULL,
-    `idEmpresa` INTEGER NOT NULL,
     `tokenQR` VARCHAR(191) NULL,
     `displayFoto` VARCHAR(191) NULL,
 
@@ -62,7 +58,7 @@ CREATE TABLE `Empresa` (
 -- CreateTable
 CREATE TABLE `Contrato` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
-    `horasContrato` INTEGER NOT NULL,
+    `horasContrato` DOUBLE NOT NULL,
     `inicioContrato` DATETIME(3) NOT NULL,
     `finalContrato` DATETIME(3) NULL,
     `fechaAlta` DATETIME(3) NOT NULL,
@@ -75,6 +71,9 @@ CREATE TABLE `Contrato` (
 
 -- AddForeignKey
 ALTER TABLE `Trabajador` ADD CONSTRAINT `Trabajador_idTienda_fkey` FOREIGN KEY (`idTienda`) REFERENCES `Tienda`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Trabajador` ADD CONSTRAINT `Trabajador_idResponsable_fkey` FOREIGN KEY (`idResponsable`) REFERENCES `Trabajador`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `Contrato` ADD CONSTRAINT `Contrato_dni_fkey` FOREIGN KEY (`dni`) REFERENCES `Trabajador`(`dni`) ON DELETE RESTRICT ON UPDATE CASCADE;
