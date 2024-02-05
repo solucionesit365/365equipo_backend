@@ -7,6 +7,7 @@ WORKDIR /app
 COPY package*.json tsconfig.json ./
 
 RUN npm ci
+COPY prisma ./prisma
 RUN npm run prisma:generar
 COPY . .
 
