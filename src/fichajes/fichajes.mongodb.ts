@@ -148,7 +148,7 @@ export class FichajesDatabase {
 
     const resFichajes = await this.hitMssqlService.recHit(sql);
 
-    return resFichajes.recordset;
+    return []; //resFichajes.recordset;
   }
 
   async insertarFichajesHit(fichajes: FichajeDto[]) {

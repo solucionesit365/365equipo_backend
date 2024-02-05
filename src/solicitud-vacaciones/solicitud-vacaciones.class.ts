@@ -275,13 +275,13 @@ export class SolicitudesVacacionesService {
     `;
     const resultado = await this.hitMssqlService.recHit(sql);
 
-    if (
-      resultado.recordset.length > 0 &&
-      fechaFinal.diff(fechaInicio, "days").days + 1 ===
-        resultado.recordset[0].InsertedRows
-    ) {
-      await this.schSolicitudVacaciones.setEnviado(vacaciones);
-    }
+    // if (
+    //   resultado.recordset.length > 0 &&
+    //   fechaFinal.diff(fechaInicio, "days").days + 1 ===
+    //     resultado.recordset[0].InsertedRows
+    // ) {
+    //   await this.schSolicitudVacaciones.setEnviado(vacaciones);
+    // }
   }
 
   async sendToHit() {

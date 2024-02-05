@@ -38,7 +38,7 @@ export class TiendaDatabaseService {
   `,
     );
 
-    if (tiendas.recordset.length > 0) return tiendas.recordset;
+    // if (tiendas.recordset.length > 0) return tiendas.recordset;
     return [];
   }
 

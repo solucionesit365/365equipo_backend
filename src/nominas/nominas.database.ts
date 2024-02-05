@@ -13,9 +13,9 @@ export class NominasDatabase {
         `;
     const resNomina = await this.hitMssqlService.recHit(sql);
 
-    if (resNomina.recordset.length > 0) {
-      return resNomina.recordset[0].archivo.toString("base64");
-    }
+    // if (resNomina.recordset.length > 0) {
+    //   return resNomina.recordset[0].archivo.toString("base64");
+    // }
     throw Error("No ha podido obtener esta nómina");
   }
 
@@ -28,6 +28,6 @@ export class NominasDatabase {
 
     const resListado = await this.hitMssqlService.recHit(sql);
 
-    return resListado.recordset;
+    return []; //resListado.recordset;
   }
 }

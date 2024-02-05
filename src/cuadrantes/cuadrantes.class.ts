@@ -533,11 +533,11 @@ export class Cuadrantes {
         sqlBorrar + query + subQuery,
       );
 
-      if (resPlanes.rowsAffected.includes(1)) {
-        await this.schCuadrantes.setCuadranteEnviado(cuadrante._id);
-      } else {
+      // if (resPlanes.rowsAffected.includes(1)) {
+        // await this.schCuadrantes.setCuadranteEnviado(cuadrante._id);
+      // } else {
         throw Error("Fallo en la consulta");
-      }
+      // }
     };
     // Dividir los cuadrantes en lotes y procesarlos en paralelo con Promise.all
 

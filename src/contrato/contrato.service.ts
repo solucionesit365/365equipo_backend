@@ -34,7 +34,7 @@ export class ContratoService {
 
     const resHisContratos = await this.hitMssqlService.recHit(sql);
 
-    if (resHisContratos.recordset.length > 0) return resHisContratos.recordset;
+    // if (resHisContratos.recordset.length > 0) return resHisContratos.recordset;
     return [];
   }
 
