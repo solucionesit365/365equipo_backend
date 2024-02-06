@@ -95,6 +95,8 @@ export class TrabajadorDatabaseService {
           },
           take: 1, // Toma solo el contrato más reciente
         },
+        responsable: true,
+        tienda: true,
       },
     });
 
@@ -769,7 +771,7 @@ export class TrabajadorDatabaseService {
 `;
     const resTrabajadores = await this.hitMssqlService.recHit(sqlQuery);
     // if (resTrabajadores.recordset.length > 0) return resTrabajadores.recordset;
-    // else 
+    // else
     throw Error("Error, no hay trabajadores");
   }
 }
