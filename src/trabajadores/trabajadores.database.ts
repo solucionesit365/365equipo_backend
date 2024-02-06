@@ -98,6 +98,9 @@ export class TrabajadorDatabaseService {
         responsable: true,
         tienda: true,
       },
+      orderBy: {
+        nombreApellidos: "asc",
+      },
     });
 
     return trabajadores;
