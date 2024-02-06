@@ -11,7 +11,7 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe());
   app.enableCors({
     origin: [
-      // "http://localhost:8080",
+      "http://localhost:8080",
       "https://silema.web.app",
       "https://365equipo.com",
       "https://tarjeta-cliente.web.app",

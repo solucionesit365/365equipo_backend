@@ -13,7 +13,7 @@ export class FirebaseService {
   }
 
   async verifyToken(token: string) {
-    await this.auth.verifyIdToken(token, true);
+    return await this.auth.verifyIdToken(token, true);
   }
 
   async getUidByEmail(email: string) {
