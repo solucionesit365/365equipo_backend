@@ -16,7 +16,16 @@ export class TrabajadoresController {
     try {
       const arrayTrabajadores = await this.trabajadorInstance.getTrabajadores();
 
-      return { ok: true, data: arrayTrabajadores };
+      return {
+        ok: true,
+        data: arrayTrabajadores.map((trabajador) => {
+          return {
+            ...trabajador,
+            inicioContrato:
+              trabajador.contratos[0].inicioContrato.toLocaleDateString(),
+          };
+        }),
+      };
     } catch (err) {
       console.log(err);
       return { ok: false, message: err.message };
