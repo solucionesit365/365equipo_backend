@@ -47,9 +47,14 @@ export class TrabajadoresController {
 
   @UseGuards(AuthGuard)
   @Get("getTrabajadorBySqlId")
-  async getTrabajadorBySqlId(@Query() { id }) {
+  async getTrabajadorBySqlId(@User() user: DecodedIdToken) {
     try {
-      const resUser = await this.trabajadorInstance.getTrabajadorBySqlId(id);
+      const usuarioCompleto =
+        await this.trabajadorInstance.getTrabajadorByAppId(user.uid);
+
+      const resUser = await this.trabajadorInstance.getTrabajadorBySqlId(
+        usuarioCompleto.id,
+      );
 
       return { ok: true, data: resUser };
     } catch (err) {

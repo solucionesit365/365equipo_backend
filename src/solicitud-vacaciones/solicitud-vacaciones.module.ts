@@ -12,7 +12,7 @@ import { NotificacionesModule } from "../notificaciones/notificaciones.module";
   imports: [
     EmailModule,
     forwardRef(() => TrabajadoresModule),
-    ContratoModule,
+    forwardRef(() => ContratoModule),
     forwardRef(() => CuadrantesModule),
     NotificacionesModule,
   ],

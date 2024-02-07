@@ -9,7 +9,7 @@ import { CuadrantesController } from "./cuadrantes.controller";
 
 @Module({
   imports: [
-    ContratoModule,
+    forwardRef(() => ContratoModule),
     forwardRef(() => TiendasModule),
     forwardRef(() => TrabajadoresModule),
     FichajesValidadosModule,
