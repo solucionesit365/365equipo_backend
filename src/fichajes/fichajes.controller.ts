@@ -172,7 +172,7 @@ export class FichajesController {
   async getSinValidar(@User() user: DecodedIdToken) {
     try {
       const arraySubordinados = await this.trabajadoresInstance.getSubordinados(
-        user.idApp,
+        user.uid,
       );
 
       return {

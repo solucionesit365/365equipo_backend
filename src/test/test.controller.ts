@@ -1,10 +1,16 @@
-import { Controller, Get, Post } from "@nestjs/common";
+import {
+  Controller,
+  Get,
+  InternalServerErrorException,
+  Post,
+} from "@nestjs/common";
 import axios from "axios";
 import { EmailService } from "../email/email.class";
 import { FichajesValidadosService } from "../fichajes-validados/fichajes-validados.class";
 import { FichajeValidadoDto } from "../fichajes-validados/fichajes-validados.dto";
 import { DateTime } from "luxon";
 import { TrabajadorService } from "../trabajadores/trabajadores.class";
+import { Prisma, Trabajador } from "@prisma/client";
 
 @Controller("test")
 export class TestController {
@@ -143,6 +149,57 @@ export class TestController {
     } catch (err) {
       console.log(err);
       return err.message;
+    }
+  }
+
+  @Post("crearUsuarioPruebas")
+  async crearUsuarioPruebas() {
+    const trabajador: Prisma.TrabajadorCreateInput = {
+      tienda: {
+        connect: {
+          id: 261,
+        },
+      },
+      idApp: "3GpJyMuUCBdjmMeCllK7mR4cjnf1",
+      responsable: {
+        connect: {
+          id: 3608,
+        },
+      },
+      contratos: {
+        create: {
+          fechaAlta: DateTime.fromFormat("01/01/2023", "dd/MM/yyyy").toJSDate(),
+          fechaAntiguedad: DateTime.fromFormat(
+            "01/01/2023",
+            "dd/MM/yyyy",
+          ).toJSDate(),
+          horasContrato: 100,
+          inicioContrato: DateTime.fromFormat(
+            "01/01/2023",
+            "dd/MM/yyyy",
+          ).toJSDate(),
+        },
+      },
+      dni: "465798163A",
+      ciudad: "Buenos Aires",
+      codigoPostal: "56465",
+      direccion: "Villa Fiorito",
+      cuentaCorriente: "ES123456464654654654654654",
+      emails: "diegomaradona@gmail.com",
+      llevaEquipo: false,
+      telefonos: "123456789",
+      nacionalidad: "Argentina",
+      nombreApellidos: "Diego Armando Maradona",
+      nSeguridadSocial: "123456789",
+      tipoTrabajador: "Leyenda",
+      fechaNacimiento: new Date("1960-10-30T00:00:00.000Z"),
+      displayName: "Maradona",
+    };
+    try {
+      return await this.trabajadoresInstance.crearUsuarioInterno(trabajador);
+    } catch (err) {
+      console.log(err);
+      new InternalServerErrorException("Error al crear el usuario de pruebas");
     }
   }
 

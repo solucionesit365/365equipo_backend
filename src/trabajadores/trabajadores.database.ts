@@ -3,6 +3,7 @@ import { PrismaService } from "../prisma/prisma.service";
 import { DateTime } from "luxon";
 import { TrabajadorCompleto } from "./trabajadores.interface";
 import { HitMssqlService } from "../hit-mssql/hit-mssql.service";
+import { Prisma } from "@prisma/client";
 
 @Injectable()
 export class TrabajadorDatabaseService {
@@ -30,6 +31,12 @@ export class TrabajadorDatabaseService {
     });
 
     return trabajador;
+  }
+
+  async crearTrabajadorInterno(trabajador: Prisma.TrabajadorCreateInput) {
+    return await this.prisma.trabajador.create({
+      data: trabajador,
+    });
   }
 
   async getTrabajadorBySqlId(id: number) {
@@ -283,7 +290,7 @@ export class TrabajadorDatabaseService {
   async getSubordinados(idApp: string) {
     const trabajador = await this.prisma.trabajador.findUnique({
       where: {
-        idApp: idApp,
+        idApp,
       },
       select: {
         id: true,

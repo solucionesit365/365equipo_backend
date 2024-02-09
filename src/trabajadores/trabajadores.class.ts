@@ -6,6 +6,7 @@ import { DateTime } from "luxon";
 import { SolicitudesVacacionesService } from "../solicitud-vacaciones/solicitud-vacaciones.class";
 import { TrabajadorDatabaseService } from "./trabajadores.database";
 import { DecodedIdToken } from "firebase-admin/auth";
+import { Prisma } from "@prisma/client";
 
 @Injectable()
 export class TrabajadorService {
@@ -41,6 +42,11 @@ export class TrabajadorService {
     throw Error(
       "No se ha podido obtener la información del usuario. id: " + id,
     );
+  }
+
+  /* Usuarios que no vienen de HIT */
+  async crearUsuarioInterno(trabajador: Prisma.TrabajadorCreateInput) {
+    return await this.schTrabajadores.crearTrabajadorInterno(trabajador);
   }
 
   async getTrabajadores() {
