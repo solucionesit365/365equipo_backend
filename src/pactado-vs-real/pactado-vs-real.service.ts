@@ -39,7 +39,7 @@ export class PactadoVsRealService {
       }
     }
 
-    const trabajadoresTienda: Trabajador[] = [];
+    const trabajadoresTienda: any[] = [];
 
     for (let i = 0; i < idsSubordinados.length; i += 1) {
       const trabajador = await this.trabajadoresInstance.getTrabajadorBySqlId(
@@ -54,6 +54,7 @@ export class PactadoVsRealService {
       pactadoReal.push({
         nombre: trabajadoresTienda[i].nombreApellidos,
         idTrabajador: trabajadoresTienda[i].id,
+        contrato: trabajadoresTienda[i].horasContrato,
         arrayValidados: [],
       });
 

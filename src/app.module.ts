@@ -32,6 +32,7 @@ import { TrabajadoresModule } from "./trabajadores/trabajadores.module";
 import { VerificacionMfaModule } from "./verificacion-mfa/verificacion-mfa.module";
 import { HitMssqlModule } from "./hit-mssql/hit-mssql.module";
 import { MongoModule } from "./mongo/mongo.module";
+import { Cultura365Module } from './cultura365/cultura365.module';
 
 @Module({
   imports: [
@@ -69,6 +70,7 @@ import { MongoModule } from "./mongo/mongo.module";
     VerificacionMfaModule,
     HitMssqlModule,
     MongoModule,
+    Cultura365Module,
   ],
   controllers: [AppController],
 })
