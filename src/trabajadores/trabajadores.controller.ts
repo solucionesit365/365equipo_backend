@@ -51,8 +51,9 @@ export class TrabajadoresController {
     try {
       // Fallo de seguridad grave, se introduce el uid desde el frontend
 
-      const resUser = await this.trabajadorInstance.getTrabajadorBySqlId(Number(id));
-      console.log(resUser);
+      const resUser = await this.trabajadorInstance.getTrabajadorBySqlId(
+        Number(id),
+      );
 
       return { ok: true, data: resUser };
     } catch (err) {
