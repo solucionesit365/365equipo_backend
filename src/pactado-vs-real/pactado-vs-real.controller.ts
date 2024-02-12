@@ -36,10 +36,15 @@ export class PactadoVsRealController {
       user.uid,
     );
 
-    return this.pactadoRealService.pactadoVsReal(
+    const data = await this.pactadoRealService.pactadoVsReal(
       user,
       inicio.startOf("week"),
       usuarioCompleto.idTienda,
     );
+
+    return {
+      ok: true,
+      data,
+    };
   }
 }
