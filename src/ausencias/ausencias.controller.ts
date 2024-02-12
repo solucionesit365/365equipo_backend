@@ -3,6 +3,7 @@ import { AusenciasService } from "./ausencias.class";
 import { AusenciaInterface } from "./ausencias.interface";
 import { AuthGuard } from "../guards/auth.guard";
 import { SchedulerGuard } from "../guards/scheduler.guard";
+import { DateTime } from "luxon";
 
 @Controller("ausencias")
 export class AusenciasController {
@@ -111,8 +112,22 @@ export class AusenciasController {
 
   @UseGuards(AuthGuard)
   @Post("updateAusenciaResto")
-  async updateAusenciaResto(@Body() ausencia: AusenciaInterface) {
+  async updateAusenciaResto(@Body() ausencia: any) {
     try {
+      ausencia.fechaInicio = DateTime.fromFormat(
+        ausencia.fechaInicio,
+        "dd/MM/yyyy",
+      ).toJSDate();
+      ausencia.fechaFinal = DateTime.fromFormat(
+        ausencia.fechaFinal,
+        "dd/MM/yyyy",
+      ).toJSDate();
+      if (ausencia.fechaRevision)
+        ausencia.fechaRevision = DateTime.fromFormat(
+          ausencia.fechaRevision,
+          "dd/MM/yyyy",
+        ).toJSDate();
+
       const respAusencia = await this.ausenciasInstance.updateAusenciaResto(
         ausencia,
       );
