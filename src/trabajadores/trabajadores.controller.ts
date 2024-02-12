@@ -223,12 +223,12 @@ export class TrabajadoresController {
 
   @UseGuards(AuthGuard)
   @Get("getSubordinadosByIdsql")
-  async getSubordinadosByIdsql(@Query() { idSql }) {
+  async getSubordinadosByIdsql(@Query() { idSql }: { idSql: string }) {
     try {
       if (!idSql) throw Error("Faltan datos");
 
       const resUser = await this.trabajadorInstance.getSubordinadosByIdsql(
-        idSql,
+        Number(idSql),
       );
 
       return { ok: true, data: resUser };
