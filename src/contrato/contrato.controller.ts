@@ -2,7 +2,7 @@ import { Controller, Get, UseGuards, Query } from "@nestjs/common";
 import { SchedulerGuard } from "../guards/scheduler.guard";
 import { ContratoService } from "./contrato.service";
 import { AuthGuard } from "../guards/auth.guard";
-import { DecodedIdToken } from "firebase-admin/auth";
+import { UserRecord } from "firebase-admin/auth";
 import { User } from "../decorators/get-user.decorator";
 import { TrabajadorService } from "../trabajadores/trabajadores.class";
 
@@ -29,7 +29,7 @@ export class ContratoController {
 
   @UseGuards(AuthGuard)
   @Get("getHistoricoContratos")
-  async getHistoricoContratos(@User() user: DecodedIdToken) {
+  async getHistoricoContratos(@User() user: UserRecord) {
     try {
       const trabajadorCompleto =
         await this.trabajadoresService.getTrabajadorByAppId(user.uid);

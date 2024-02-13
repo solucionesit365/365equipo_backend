@@ -9,7 +9,7 @@ import {
 import { Notificaciones } from "./notificaciones.class";
 import { AuthGuard } from "../guards/auth.guard";
 import { FirebaseService } from "../firebase/firebase.service";
-import { DecodedIdToken } from "firebase-admin/auth";
+import { UserRecord } from "firebase-admin/auth";
 import { User } from "../decorators/get-user.decorator";
 
 @Controller("notificaciones")
@@ -21,7 +21,7 @@ export class NotificacionesController {
 
   @UseGuards(AuthGuard)
   @Get("inAppNotifications")
-  async getInAppNotifications(@User() user: DecodedIdToken) {
+  async getInAppNotifications(@User() user: UserRecord) {
     try {
       return {
         ok: true,
@@ -35,7 +35,7 @@ export class NotificacionesController {
 
   @UseGuards(AuthGuard)
   @Get("inAppNotificationsPendientes")
-  async getInAppNotificationsPendientes(@User() user: DecodedIdToken) {
+  async getInAppNotificationsPendientes(@User() user: UserRecord) {
     try {
       const notificacionesPendientes =
         await this.notificacionesInstance.getInAppNotificationsPendientes(
@@ -54,7 +54,7 @@ export class NotificacionesController {
 
   @UseGuards(AuthGuard)
   @Get("getAllInAppNotifications")
-  async getAllInAppNotifications(@User() user: DecodedIdToken) {
+  async getAllInAppNotifications(@User() user: UserRecord) {
     try {
       return {
         ok: true,
@@ -70,7 +70,7 @@ export class NotificacionesController {
 
   @UseGuards(AuthGuard)
   @Post("marcarComoLeida")
-  async marcarComoLeida(@User() user: DecodedIdToken, @Body("id") id) {
+  async marcarComoLeida(@User() user: UserRecord, @Body("id") id) {
     try {
       return {
         ok: true,
@@ -84,7 +84,7 @@ export class NotificacionesController {
 
   @UseGuards(AuthGuard)
   @Post("marcarComoNoLeida")
-  async marcarComoNoLeida(@User() user: DecodedIdToken, @Body("id") id) {
+  async marcarComoNoLeida(@User() user: UserRecord, @Body("id") id) {
     try {
       return {
         ok: true,

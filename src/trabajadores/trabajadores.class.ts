@@ -5,8 +5,9 @@ import { PermisosService } from "../permisos/permisos.class";
 import { DateTime } from "luxon";
 import { SolicitudesVacacionesService } from "../solicitud-vacaciones/solicitud-vacaciones.class";
 import { TrabajadorDatabaseService } from "./trabajadores.database";
-import { DecodedIdToken } from "firebase-admin/auth";
+import { UserRecord } from "firebase-admin/auth";
 import { Prisma } from "@prisma/client";
+import { TrabajadorFormRequest } from "./trabajadores.dto";
 
 @Injectable()
 export class TrabajadorService {
@@ -247,9 +248,9 @@ export class TrabajadorService {
   }
 
   async guardarCambiosForm(
-    original: any,
-    usuarioGestor: DecodedIdToken,
-    payload: any,
+    original: TrabajadorFormRequest,
+    usuarioGestor: UserRecord,
+    payload: TrabajadorFormRequest,
   ) {
     const cualquieraDe = ["SUPER_ADMIN", "RRHH_ADMIN"];
 
