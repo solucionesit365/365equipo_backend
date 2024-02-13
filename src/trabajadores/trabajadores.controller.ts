@@ -47,17 +47,12 @@ export class TrabajadoresController {
 
   @UseGuards(AuthGuard)
   @Get("getTrabajadorBySqlId")
-  async getTrabajadorBySqlId(
-    @User() user: DecodedIdToken,
-    @Query() { uid }: { uid: string },
-  ) {
+  async getTrabajadorBySqlId(@User() user: DecodedIdToken, @Query() { id }) {
     try {
       // Fallo de seguridad grave, se introduce el uid desde el frontend
-      const usuarioCompleto =
-        await this.trabajadorInstance.getTrabajadorByAppId(uid);
 
       const resUser = await this.trabajadorInstance.getTrabajadorBySqlId(
-        usuarioCompleto.id,
+        Number(id),
       );
 
       return { ok: true, data: resUser };
