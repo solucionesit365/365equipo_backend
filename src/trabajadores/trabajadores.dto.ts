@@ -136,11 +136,11 @@ export class TrabajadorFormRequest {
   @IsArray()
   arrayPermisos: string[];
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsNumber()
   idResponsable: number | null;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsNumber()
   idTienda: number | null;
 
@@ -148,6 +148,7 @@ export class TrabajadorFormRequest {
   @IsBoolean()
   llevaEquipo: boolean;
 
+  @IsOptional()
   @IsString()
   tokenQR: string;
 }
