@@ -13,7 +13,7 @@ import { CryptoModule } from "./crypto/crypto.module";
 import { CuadrantesModule } from "./cuadrantes/cuadrantes.module";
 import { EmailModule } from "./email/email.module";
 import { EvaluacionesModule } from "./evaluaciones/evaluaciones.module";
-import { FichajesModule } from "./fichajesBC/fichajes.module";
+import { FichajesModule } from "./fichajes-bc/fichajes.module";
 import { FichajesValidadosModule } from "./fichajes-validados/fichajes-validados.module";
 import { FirebaseModule } from "./firebase/firebase.module";
 import { IncidenciasModule } from "./incidencias/incidencias.module";
