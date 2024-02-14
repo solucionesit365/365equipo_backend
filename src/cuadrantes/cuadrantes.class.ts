@@ -534,9 +534,9 @@ export class Cuadrantes {
       );
 
       // if (resPlanes.rowsAffected.includes(1)) {
-        // await this.schCuadrantes.setCuadranteEnviado(cuadrante._id);
+      // await this.schCuadrantes.setCuadranteEnviado(cuadrante._id);
       // } else {
-        throw Error("Fallo en la consulta");
+      throw Error("Fallo en la consulta");
       // }
     };
     // Dividir los cuadrantes en lotes y procesarlos en paralelo con Promise.all
@@ -712,4 +712,14 @@ export class Cuadrantes {
     if (resTurno) return resTurno;
     return null;
   }
+
+  // // Solo para migraciones
+  // async getAllCuadrantes() {
+  //   return await this.schCuadrantes.getAllCuadrantes();
+  // }
+
+  // async rectificarAllCuadrantes(cuadrantes: TCuadrante[]) {
+  //   return await this.schCuadrantes.rectificarAllCuadrantes(cuadrantes);
+  // }
+  // final de migraciones
 }

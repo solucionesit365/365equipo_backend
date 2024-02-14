@@ -26,6 +26,24 @@ export class CuadrantesDatabase {
     return null;
   }
 
+  // Solo para migraciones
+  // async getAllCuadrantes() {
+  //   const db = (await this.mongoDbService.getConexion()).db("soluciones");
+  //   const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes2");
+  //   const resCuadrantes = await cuadrantesCollection.find({}).toArray();
+  //   return resCuadrantes;
+  // }
+
+  // async rectificarAllCuadrantes(cuadrantes: TCuadrante[]) {
+  //   const db = (await this.mongoDbService.getConexion()).db("soluciones");
+  //   const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes2");
+
+  //   await cuadrantesCollection.deleteMany({});
+
+  //   await cuadrantesCollection.insertMany(cuadrantes);
+  // }
+  // Final de migraciones
+
   // Guardado nuevo (insert or update)
   async guardarCuadrantes(
     cuadrantesModificables: TCuadrante[],
