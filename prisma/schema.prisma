@@ -36,6 +36,8 @@ model Trabajador {
   // Autorelación
   responsable      Trabajador?  @relation("Responsable", fields: [idResponsable], references: [id], onDelete: SetNull)
   subordinados     Trabajador[] @relation("Responsable")
+  roles            Role[]
+  permisos         Permiso[]
 }
 
 model Tienda {
@@ -69,4 +71,18 @@ model Contrato {
   fechaBaja       DateTime?
   trabajador      Trabajador? @relation(fields: [dni], references: [dni])
   dni             String
+}
+
+model Role {
+  id          String       @id @default(uuid())
+  name        String
+  permissions Permiso[]
+  users       Trabajador[]
+}
+
+model Permiso {
+  id    String       @id @default(uuid())
+  name  String
+  roles Role[]
+  users Trabajador[]
 }
