@@ -2,7 +2,7 @@ import { Controller, Get, Query, UseGuards } from "@nestjs/common";
 import { Nominas } from "./nominas.class";
 import { AuthGuard } from "../guards/auth.guard";
 import { User } from "../decorators/get-user.decorator";
-import { DecodedIdToken } from "firebase-admin/auth";
+import { UserRecord } from "firebase-admin/auth";
 import { TrabajadorService } from "../trabajadores/trabajadores.class";
 
 @Controller("nominas")
@@ -15,7 +15,7 @@ export class NominasController {
   @UseGuards(AuthGuard)
   @Get("nomina")
   async getNominas(
-    @User() user: DecodedIdToken,
+    @User() user: UserRecord,
     @Query() { idArchivo }: { idArchivo: string },
   ) {
     try {
@@ -40,7 +40,7 @@ export class NominasController {
 
   @UseGuards(AuthGuard)
   @Get("getListadoNominas")
-  async getListadoNominas(@User() user: DecodedIdToken) {
+  async getListadoNominas(@User() user: UserRecord) {
     try {
       const usuarioCompleto = await this.trabajadorService.getTrabajadorByAppId(
         user.uid,

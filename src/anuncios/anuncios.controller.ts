@@ -5,7 +5,7 @@ import { TrabajadorService } from "../trabajadores/trabajadores.class";
 import { Notificaciones } from "../notificaciones/notificaciones.class";
 import { AuthGuard } from "../guards/auth.guard";
 import { User } from "../decorators/get-user.decorator";
-import { DecodedIdToken } from "firebase-admin/auth";
+import { UserRecord } from "firebase-admin/auth";
 
 @Controller("anuncios")
 export class AnunciosController {
@@ -17,7 +17,7 @@ export class AnunciosController {
 
   @UseGuards(AuthGuard)
   @Get()
-  async getAnuncios(@User() user: DecodedIdToken) {
+  async getAnuncios(@User() user: UserRecord) {
     try {
       const usuarioCompleto = await this.trabajadores.getTrabajadorByAppId(
         user.uid,

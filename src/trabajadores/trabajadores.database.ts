@@ -4,6 +4,7 @@ import { DateTime } from "luxon";
 import { TrabajadorCompleto } from "./trabajadores.interface";
 import { HitMssqlService } from "../hit-mssql/hit-mssql.service";
 import { Prisma } from "@prisma/client";
+import { TrabajadorFormRequest } from "./trabajadores.dto";
 
 @Injectable()
 export class TrabajadorDatabaseService {
@@ -27,6 +28,7 @@ export class TrabajadorDatabaseService {
           },
           take: 1, // Toma solo el contrato más reciente
         },
+        tienda: true,
       },
     });
 
@@ -54,6 +56,8 @@ export class TrabajadorDatabaseService {
           },
           take: 1, // Toma solo el contrato más reciente
         },
+        responsable: true,
+        tienda: true,
       },
     });
 
@@ -534,77 +538,18 @@ export class TrabajadorDatabaseService {
   }
 
   async sqlHandleCambios(
-    modificado: TrabajadorCompleto,
-    original: TrabajadorCompleto,
+    modificado: TrabajadorFormRequest,
+    original: TrabajadorFormRequest,
   ) {
     if (modificado.idResponsable != original.idResponsable) {
       if (modificado.idTienda != original.idTienda)
         throw Error(
           "No es posible cambiar el responsable y la tienda a la vez",
         );
+    }
 
-      if (original.llevaEquipo && !modificado.llevaEquipo) {
-        await this.prisma.trabajador.updateMany({
-          where: {
-            responsable: {
-              id: modificado.id,
-            },
-          },
-          data: {
-            idResponsable: null,
-          },
-        });
-      } else if (modificado.llevaEquipo && modificado.idTienda) {
-        await this.prisma.trabajador.update({
-          where: {
-            idTienda: modificado.idTienda,
-            id: modificado.id,
-            llevaEquipo: false,
-          },
-          data: {
-            idResponsable: modificado.id,
-          },
-        });
-      }
-    } else if (modificado.idTienda != original.idTienda) {
-      if (modificado.llevaEquipo && original.llevaEquipo) {
-        await this.prisma.trabajador.updateMany({
-          where: {
-            responsable: {
-              id: modificado.id,
-            },
-          },
-          data: {
-            idResponsable: null,
-          },
-        });
-
-        await this.prisma.trabajador.update({
-          where: {
-            idTienda: modificado.idTienda,
-            id: modificado.id,
-            llevaEquipo: false,
-          },
-
-          data: {
-            idResponsable: modificado.id,
-          },
-        });
-
-        // Falta 'C'
-      }
-    } else if (modificado.llevaEquipo && modificado.idTienda) {
-      await this.prisma.trabajador.update({
-        where: {
-          idTienda: modificado.idTienda,
-          id: modificado.id,
-          llevaEquipo: false,
-        },
-        data: {
-          idResponsable: modificado.id,
-        },
-      });
-    } else if (!modificado.llevaEquipo && original.llevaEquipo) {
+    if (original.llevaEquipo && !modificado.llevaEquipo) {
+      // Establecer en este caso el idResponsable a null de los subordinados primero y luego  modificar el llevaEquipo
       await this.prisma.trabajador.updateMany({
         where: {
           responsable: {
@@ -616,11 +561,127 @@ export class TrabajadorDatabaseService {
         },
       });
     }
+
+    if (modificado.llevaEquipo && modificado.idTienda) {
+      await this.prisma.trabajador.update({
+        where: {
+          idTienda: modificado.idTienda,
+          id: modificado.id,
+          llevaEquipo: true,
+        },
+        data: {
+          idResponsable: modificado.id,
+        },
+      });
+    }
+
+    if (modificado.idTienda != original.idTienda) {
+      // Si se cambia la tienda
+      if (modificado.llevaEquipo && original.llevaEquipo) {
+        // Si antes llevaba equipo y ahora también
+        await this.prisma.trabajador.updateMany({
+          where: {
+            responsable: {
+              id: modificado.id,
+            },
+          },
+          data: {
+            idResponsable: null,
+          },
+        });
+        // Falta 'C'
+      }
+    }
   }
 
+  // async sqlHandleCambios(
+  //   modificado: TrabajadorCompleto,
+  //   original: TrabajadorCompleto,
+  // ) {
+  //   if (modificado.idResponsable != original.idResponsable) {
+  //     if (modificado.idTienda != original.idTienda)
+  //       throw Error(
+  //         "No es posible cambiar el responsable y la tienda a la vez",
+  //       );
+
+  //     if (original.llevaEquipo && !modificado.llevaEquipo) {
+  //       await this.prisma.trabajador.updateMany({
+  //         where: {
+  //           responsable: {
+  //             id: modificado.id,
+  //           },
+  //         },
+  //         data: {
+  //           idResponsable: null,
+  //         },
+  //       });
+  //     } else if (modificado.llevaEquipo && modificado.idTienda) {
+  //       await this.prisma.trabajador.update({
+  //         where: {
+  //           idTienda: modificado.idTienda,
+  //           id: modificado.id,
+  //           llevaEquipo: false,
+  //         },
+  //         data: {
+  //           idResponsable: modificado.id,
+  //         },
+  //       });
+  //     }
+  //   } else if (modificado.idTienda != original.idTienda) {
+  //     if (modificado.llevaEquipo && original.llevaEquipo) {
+  //       await this.prisma.trabajador.updateMany({
+  //         where: {
+  //           responsable: {
+  //             id: modificado.id,
+  //           },
+  //         },
+  //         data: {
+  //           idResponsable: null,
+  //         },
+  //       });
+
+  //       await this.prisma.trabajador.update({
+  //         where: {
+  //           idTienda: modificado.idTienda,
+  //           id: modificado.id,
+  //           llevaEquipo: false,
+  //         },
+
+  //         data: {
+  //           idResponsable: modificado.id,
+  //         },
+  //       });
+
+  //       // Falta 'C'
+  //     }
+  //   } else if (modificado.llevaEquipo && modificado.idTienda) {
+  //     await this.prisma.trabajador.update({
+  //       where: {
+  //         idTienda: modificado.idTienda,
+  //         id: modificado.id,
+  //         llevaEquipo: false,
+  //       },
+  //       data: {
+  //         idResponsable: modificado.id,
+  //       },
+  //     });
+  //   } else if (!modificado.llevaEquipo && original.llevaEquipo) {
+  //     await this.prisma.trabajador.updateMany({
+  //       where: {
+  //         responsable: {
+  //           id: modificado.id,
+  //         },
+  //       },
+  //       data: {
+  //         idResponsable: null,
+  //       },
+  //     });
+  //   }
+  // }
+
   async guardarCambiosForm(
-    trabajador: TrabajadorCompleto,
-    original: TrabajadorCompleto,
+    trabajador: TrabajadorFormRequest,
+    original: TrabajadorFormRequest,
   ) {
     await this.sqlHandleCambios(trabajador, original);
 
@@ -641,7 +702,6 @@ export class TrabajadorDatabaseService {
         nSeguridadSocial: trabajador.nSeguridadSocial,
         codigoPostal: trabajador.codigoPostal,
         cuentaCorriente: trabajador.cuentaCorriente,
-        tipoTrabajador: trabajador.tipoTrabajador,
         idResponsable: trabajador.idResponsable,
         idTienda: trabajador.idTienda,
         llevaEquipo: trabajador.llevaEquipo ? true : false,

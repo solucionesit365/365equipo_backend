@@ -3,16 +3,14 @@ import {
   Controller,
   Get,
   Query,
-  Headers,
   UseGuards,
 } from "@nestjs/common";
 import { DateTime } from "luxon";
-import { FirebaseService } from "../firebase/firebase.service";
 import { PactadoVsRealService } from "./pactado-vs-real.service";
 import { ParseDatePipe } from "../parse-date/parse-date.pipe";
 import { AuthGuard } from "../guards/auth.guard";
 import { User } from "../decorators/get-user.decorator";
-import { DecodedIdToken } from "firebase-admin/auth";
+import { UserRecord } from "firebase-admin/auth";
 import { TrabajadorService } from "../trabajadores/trabajadores.class";
 
 @Controller("pactado-vs-real")
@@ -26,7 +24,7 @@ export class PactadoVsRealController {
   @Get()
   async pactadoVsReal(
     @Query("fechaInicio", ParseDatePipe) fechaInicio: Date,
-    @User() user: DecodedIdToken,
+    @User() user: UserRecord,
   ) {
     if (!fechaInicio)
       return new BadRequestException("fechaInicio es requerida");
