@@ -563,11 +563,12 @@ export class TrabajadorDatabaseService {
     }
 
     if (modificado.llevaEquipo && modificado.idTienda) {
-      await this.prisma.trabajador.update({
+      await this.prisma.trabajador.updateMany({
         where: {
           idTienda: modificado.idTienda,
-          id: modificado.id,
-          llevaEquipo: true,
+          NOT: {
+            id: modificado.id,
+          },
         },
         data: {
           idResponsable: modificado.id,
