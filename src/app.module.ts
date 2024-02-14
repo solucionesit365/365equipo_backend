@@ -13,7 +13,7 @@ import { CryptoModule } from "./crypto/crypto.module";
 import { CuadrantesModule } from "./cuadrantes/cuadrantes.module";
 import { EmailModule } from "./email/email.module";
 import { EvaluacionesModule } from "./evaluaciones/evaluaciones.module";
-import { FichajesModule } from "./fichajes/fichajes.module";
+import { FichajesModule } from "./fichajesBC/fichajes.module";
 import { FichajesValidadosModule } from "./fichajes-validados/fichajes-validados.module";
 import { FirebaseModule } from "./firebase/firebase.module";
 import { IncidenciasModule } from "./incidencias/incidencias.module";
@@ -32,7 +32,8 @@ import { TrabajadoresModule } from "./trabajadores/trabajadores.module";
 import { VerificacionMfaModule } from "./verificacion-mfa/verificacion-mfa.module";
 import { HitMssqlModule } from "./hit-mssql/hit-mssql.module";
 import { MongoModule } from "./mongo/mongo.module";
-import { Cultura365Module } from './cultura365/cultura365.module';
+import { Cultura365Module } from "./cultura365/cultura365.module";
+import { MBCTokenModule } from "./bussinesCentral/services/mbctoken/mbctoken.service.module";
 
 @Module({
   imports: [
@@ -71,6 +72,7 @@ import { Cultura365Module } from './cultura365/cultura365.module';
     HitMssqlModule,
     MongoModule,
     Cultura365Module,
+    MBCTokenModule,
   ],
   controllers: [AppController],
 })

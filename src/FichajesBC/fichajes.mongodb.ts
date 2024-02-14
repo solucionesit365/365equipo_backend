@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { MongoDbService } from "../bbdd/mongodb";
+import { MongoService } from "../mongo/mongo.service";
 import { FichajeDto } from "./fichajes.interface";
 // import { FacTenaMssql } from "../bbdd/mssql.class";
 import * as moment from "moment";
@@ -11,7 +11,7 @@ import { MbctokenService } from "../bussinesCentral/services/mbctoken/mbctoken.s
 @Injectable()
 export class FichajesDatabase {
   constructor(
-    private readonly mongoDbService: MongoDbService,
+    private readonly mongoDbService: MongoService,
     private readonly MbctokenService: MbctokenService, // private readonly hitInstance: FacTenaMssql,
   ) {}
 
@@ -87,7 +87,7 @@ export class FichajesDatabase {
 
   async getFichajesSincro() {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
-    const fichajesCollection = db.collection<FichajeDto>("fichajes");
+    const fichajesCollection = db.collection<FichajeDto>("fichajes2");
 
     return await fichajesCollection.find({ enviado: false }).toArray();
   }
@@ -192,6 +192,33 @@ export class FichajesDatabase {
         message: error.message,
       };
     }
+  }
+
+  async getNominas() {
+    const token = await this.MbctokenService.getToken();
+    console.log(token);
+
+    let response = await axios.get(
+      `https://api.businesscentral.dynamics.com/v2.0/${process.env.MBC_TOKEN_TENANT}/Production/ODataV4/Company('${process.env.MBC_COMPANY_NAME}')/archivo`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      },
+    );
+
+    if (response.data.value.length > 0) {
+      return response.data.value;
+    } else {
+      return [];
+    }
+  }
+  catch(error) {
+    return {
+      status: 400,
+      message: error.message,
+    };
   }
 
   async insertarFichajesHit(fichajes: FichajeDto[]) {

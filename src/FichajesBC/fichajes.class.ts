@@ -1,11 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { FichajesDatabase } from "./fichajes.mongodb";
-import { Trabajador } from "../trabajadores/trabajadores.class";
-import {
-  Subordinado,
-  TrabajadorCompleto,
-  TrabajadorSql,
-} from "../trabajadores/trabajadores.interface";
+import { TrabajadorService } from "../trabajadores/trabajadores.class";
+import { Trabajador } from "@prisma/client";
 import * as moment from "moment";
 import { ObjectId, WithId } from "mongodb";
 import { FichajeDto, ParFichaje } from "./fichajes.interface";
@@ -16,15 +12,15 @@ import { DateTime } from "luxon";
 export class Fichajes {
   constructor(
     private readonly schFichajes: FichajesDatabase,
-    private readonly trabajadoresInstance: Trabajador,
+    private readonly trabajadoresInstance: TrabajadorService,
     private readonly cuadrantesInstance: Cuadrantes,
   ) {}
 
-  async nuevaEntrada(trabajador: TrabajadorCompleto) {
+  async nuevaEntrada(trabajador: Trabajador) {
     const hora = new Date();
 
     const insert = await this.schFichajes.nuevaEntrada(
-      trabajador.uid,
+      trabajador.idApp,
       hora,
       trabajador.id,
       trabajador.nombreApellidos,
@@ -36,11 +32,11 @@ export class Fichajes {
     throw Error("No se ha podido registrar la entrada");
   }
 
-  async nuevaSalida(trabajador: TrabajadorCompleto) {
+  async nuevaSalida(trabajador: Trabajador) {
     const hora = new Date();
 
     const insert = await this.schFichajes.nuevaSalida(
-      trabajador.uid,
+      trabajador.idApp,
       hora,
       trabajador.id,
       trabajador.nombreApellidos,
@@ -76,7 +72,7 @@ export class Fichajes {
     return await this.schFichajes.enviarFichajesBC(fichajesPendientes);
   }
 
-  filtrarUidFichajeTrabajador(fichajeHit: any, trabajadores: TrabajadorSql[]) {
+  filtrarUidFichajeTrabajador(fichajeHit: any, trabajadores: Trabajador[]) {
     for (let i = 0; i < trabajadores.length; i += 1) {
       if (trabajadores[i].id === Number(fichajeHit.usuari))
         return trabajadores[i].idApp ? trabajadores[i].idApp : "NO_TIENE_APP";
@@ -134,6 +130,10 @@ export class Fichajes {
         message: `${fichajesPretty.length} fichajes sincronizado de BC a la app`,
       };
     } else return "No hay fichajes que extraer";
+  }
+
+  async getNominas() {
+    return await this.schFichajes.getNominas();
   }
 
   async getFichajesByIdSql(idSql: number, validado: boolean) {
@@ -249,7 +249,7 @@ export class Fichajes {
   }
 
   async getParesSinValidar(
-    arraySubordinados: Subordinado[],
+    arraySubordinados: Trabajador[],
   ): Promise<ParFichaje[]> {
     const paresSinValidar: ParFichaje[] = [];
 
