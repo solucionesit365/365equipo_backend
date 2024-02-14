@@ -87,7 +87,7 @@ export class FichajesDatabase {
 
   async getFichajesSincro() {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
-    const fichajesCollection = db.collection<FichajeDto>("fichajes2");
+    const fichajesCollection = db.collection<FichajeDto>("fichajes");
 
     return await fichajesCollection.find({ enviado: false }).toArray();
   }
@@ -96,6 +96,8 @@ export class FichajesDatabase {
     try {
       let data = null;
       const token = await this.MbctokenService.getToken();
+
+      console.log(fichajes);
 
       if (fichajes.length > 0) {
         for (let i = 0; i < fichajes.length; i += 1) {
@@ -163,6 +165,7 @@ export class FichajesDatabase {
   async getFichajesBC() {
     try {
       const token = await this.MbctokenService.getToken();
+      console.log(token);
 
       // Obtener la fecha y hora actual en UTC
       const now = DateTime.utc();
@@ -172,7 +175,7 @@ export class FichajesDatabase {
         now.plus({ days: 1 }).toISO().split("T")[0] + "T00:00:00Z";
 
       let response = await axios.get(
-        `https://api.businesscentral.dynamics.com/v2.0/${process.env.MBC_TOKEN_TENANT}/Production/ODataV4/Company('${process.env.MBC_COMPANY_NAME}')/cdpDadesFichador2?$filter=tmst ge ${startDate} and tmst lt ${endDate} and comentari ne '365EquipoDeTrabajo'&$select=accio, usuari, idr, tmst, comentari`,
+        `https://api.businesscentral.dynamics.com/v2.0/${process.env.MBC_TOKEN_TENANT}/Production/ODataV4/Company('${process.env.MBC_COMPANY_NAME}')/cdpDadesFichador2?$filter=tmst ge ${startDate} and tmst lt ${endDate} and comentari ne '365EquipoDeTrabajo' and dni ne null&$select=accio, usuari, idr, tmst, comentari, nombre, dni`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -223,7 +226,7 @@ export class FichajesDatabase {
 
   async insertarFichajesHit(fichajes: FichajeDto[]) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
-    const fichajesCollection = db.collection<FichajeDto>("fichajes2");
+    const fichajesCollection = db.collection<FichajeDto>("fichajes");
 
     try {
       await fichajesCollection.insertMany(fichajes, {
@@ -341,5 +344,14 @@ export class FichajesDatabase {
       { $set: { validado: true } },
     );
     return response;
+  }
+  async getFichajes(idSql: number) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const fichajesCollection = db.collection<FichajeDto>("fichajes");
+
+    return await fichajesCollection
+      .find({ idExterno: idSql })
+      .sort({ hora: 1 })
+      .toArray();
   }
 }

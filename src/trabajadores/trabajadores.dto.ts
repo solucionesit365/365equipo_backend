@@ -1,4 +1,14 @@
-import { IsBoolean, IsNumber, IsString } from "class-validator";
+import { Type } from "class-transformer";
+import {
+  IsArray,
+  IsBoolean,
+  IsDate,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  ValidateNested,
+} from "class-validator";
 
 export class TrabajadorDto {
   @IsNumber()
@@ -66,4 +76,86 @@ export class TrabajadorDto {
 
   @IsString()
   antiguedad: string;
+}
+
+export class TrabajadorFormRequest {
+  @IsNotEmpty()
+  @IsNumber()
+  id: number;
+
+  @IsNotEmpty()
+  @IsString()
+  emails: string;
+
+  @IsNotEmpty()
+  @IsString()
+  telefonos: string;
+
+  @IsNotEmpty()
+  @IsString()
+  nombreApellidos: string;
+
+  @IsNotEmpty()
+  @IsString()
+  displayName: string;
+
+  @IsNotEmpty()
+  @Type(() => Date)
+  @IsDate()
+  fechaNacimiento: Date;
+
+  @IsNotEmpty()
+  @IsString()
+  dni: string;
+
+  @IsOptional()
+  @IsString()
+  direccion: string;
+
+  @IsOptional()
+  @IsString()
+  ciudad: string;
+
+  @IsOptional()
+  @IsString()
+  codigoPostal: string;
+
+  @IsOptional()
+  @IsString()
+  nacionalidad: string;
+
+  @IsNotEmpty()
+  @IsString()
+  nSeguridadSocial: string;
+
+  @IsNotEmpty()
+  @IsString()
+  cuentaCorriente: string;
+
+  @IsNotEmpty()
+  @IsArray()
+  arrayPermisos: string[];
+
+  @IsNotEmpty()
+  @IsNumber()
+  idResponsable: number | null;
+
+  @IsNotEmpty()
+  @IsNumber()
+  idTienda: number | null;
+
+  @IsNotEmpty()
+  @IsBoolean()
+  llevaEquipo: boolean;
+
+  @IsString()
+  tokenQR: string;
+}
+
+export class EditTrabajadorRequest {
+  @ValidateNested()
+  original: TrabajadorFormRequest;
+
+  @ValidateNested()
+  modificado: TrabajadorFormRequest;
 }

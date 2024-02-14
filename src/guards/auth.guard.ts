@@ -24,7 +24,10 @@ export class AuthGuard implements CanActivate {
 
     try {
       const userInfo = await this.firebaseService.verifyToken(tokenLimpio);
-      request.user = userInfo;
+      const usuarioCompleto = await this.firebaseService.auth.getUser(
+        userInfo.uid,
+      );
+      request.user = usuarioCompleto;
     } catch (err) {
       console.log(err);
       throw new UnauthorizedException("No estás autorizado/a");

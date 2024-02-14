@@ -2,7 +2,8 @@ import { Controller, Get, Post, UseGuards, Body, Query } from "@nestjs/common";
 import { AuthGuard } from "../guards/auth.guard";
 import { PermisosService } from "./permisos.class";
 import { User } from "../decorators/get-user.decorator";
-import { DecodedIdToken } from "firebase-admin/auth";
+import { UserRecord } from "firebase-admin/auth";
+import { GetCustomClaimsRequestDto } from "./permisos.dto";
 
 @Controller("permisos")
 export class PermisosController {
@@ -23,7 +24,7 @@ export class PermisosController {
   @Post("setCustomClaims")
   async setCustomsClaims(
     @Body() { uidUsuarioDestino, arrayPermisos },
-    @User() user: DecodedIdToken,
+    @User() user: UserRecord,
   ) {
     try {
       if (
@@ -49,15 +50,15 @@ export class PermisosController {
   @UseGuards(AuthGuard)
   @Get("customClaims")
   async getCustomClaims(
-    @Query() { idApp }: { idApp: string },
-    @User() user: DecodedIdToken,
+    @Query() req: GetCustomClaimsRequestDto,
+    @User() usuarioGestor: UserRecord,
   ) {
     try {
       return {
         ok: true,
         data: await this.permisosInstance.getCustomClaims(
-          user.customClaims,
-          idApp,
+          usuarioGestor.customClaims,
+          req.idApp,
         ),
       };
     } catch (err) {

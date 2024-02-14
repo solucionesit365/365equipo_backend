@@ -6,7 +6,7 @@
 // import { ParseDatePipe } from "../parse-date/parse-date.pipe";
 // import { DateTime } from "luxon";
 // import { User } from "../decorators/get-user.decorator";
-// import { DecodedIdToken } from "firebase-admin/auth";
+// import { UserRecord } from "firebase-admin/auth";
 
 // @Controller("fichajes")
 // export class FichajesController {
@@ -15,12 +15,12 @@
 //     private readonly trabajadoresInstance: TrabajadorService,
 //   ) {}
 
-//   @UseGuards(AuthGuard)
-//   @Post("entrada")
-//   async entrada(@User() user: DecodedIdToken) {
-//     try {
-//       const usuarioCompleto =
-//         await this.trabajadoresInstance.getTrabajadorByAppId(user.uid);
+  // @UseGuards(AuthGuard)
+  // @Post("entrada")
+  // async entrada(@User() user: UserRecord) {
+  //   try {
+  //     const usuarioCompleto =
+  //       await this.trabajadoresInstance.getTrabajadorByAppId(user.uid);
 
 //       return {
 //         ok: true,
@@ -32,12 +32,12 @@
 //     }
 //   }
 
-//   @UseGuards(AuthGuard)
-//   @Post("salida")
-//   async salida(@User() user: DecodedIdToken) {
-//     try {
-//       const usuarioCompleto =
-//         await this.trabajadoresInstance.getTrabajadorByAppId(user.uid);
+  // @UseGuards(AuthGuard)
+  // @Post("salida")
+  // async salida(@User() user: UserRecord) {
+  //   try {
+  //     const usuarioCompleto =
+  //       await this.trabajadoresInstance.getTrabajadorByAppId(user.uid);
 
 //       return {
 //         ok: true,
@@ -49,14 +49,11 @@
 //     }
 //   }
 
-//   @UseGuards(AuthGuard)
-//   @Get("estado")
-//   async getEstado(
-//     @Query("date") dateString: string,
-//     @User() user: DecodedIdToken,
-//   ) {
-//     try {
-//       const date = new Date(dateString);
+  // @UseGuards(AuthGuard)
+  // @Get("estado")
+  // async getEstado(@Query("date") dateString: string, @User() user: UserRecord) {
+  //   try {
+  //     const date = new Date(dateString);
 
 //       return {
 //         ok: true,
@@ -141,14 +138,14 @@
 //     }
 //   }
 
-//   @UseGuards(AuthGuard)
-//   @Get("misFichajes")
-//   async getMisFichajes(
-//     @Query() { fechaInicio, fechaFinal },
-//     @User() user: DecodedIdToken,
-//   ) {
-//     try {
-//       if (!fechaInicio || !fechaFinal) throw Error("Faltan parámetros");
+  // @UseGuards(AuthGuard)
+  // @Get("misFichajes")
+  // async getMisFichajes(
+  //   @Query() { fechaInicio, fechaFinal },
+  //   @User() user: UserRecord,
+  // ) {
+  //   try {
+  //     if (!fechaInicio || !fechaFinal) throw Error("Faltan parámetros");
 
 //       fechaInicio = new Date(fechaInicio);
 //       fechaFinal = new Date(fechaFinal);
@@ -167,13 +164,13 @@
 //     }
 //   }
 
-//   @UseGuards(AuthGuard)
-//   @Get("sinValidar")
-//   async getSinValidar(@User() user: DecodedIdToken) {
-//     try {
-//       const arraySubordinados = await this.trabajadoresInstance.getSubordinados(
-//         user.uid,
-//       );
+  // @UseGuards(AuthGuard)
+  // @Get("sinValidar")
+  // async getSinValidar(@User() user: UserRecord) {
+  //   try {
+  //     const arraySubordinados = await this.trabajadoresInstance.getSubordinados(
+  //       user.uid,
+  //     );
 
 //       return {
 //         ok: true,

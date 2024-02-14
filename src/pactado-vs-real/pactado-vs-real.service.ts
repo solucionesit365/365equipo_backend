@@ -2,8 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { DateTime } from "luxon";
 import { TrabajadorService } from "../trabajadores/trabajadores.class";
 import { FichajesValidadosService } from "../fichajes-validados/fichajes-validados.class";
-import { Trabajador } from "@prisma/client";
-import { DecodedIdToken } from "firebase-admin/auth";
+import { UserRecord } from "firebase-admin/auth";
 
 @Injectable()
 export class PactadoVsRealService {
@@ -12,7 +11,7 @@ export class PactadoVsRealService {
     private readonly fichajesValidadosService: FichajesValidadosService,
   ) {}
   async pactadoVsReal(
-    trabajadorRequest: DecodedIdToken,
+    trabajadorRequest: UserRecord,
     fechaInicio: DateTime,
     idTienda: number,
   ) {

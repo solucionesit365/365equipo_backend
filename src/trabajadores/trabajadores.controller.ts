@@ -4,7 +4,11 @@ import { TrabajadorService } from "./trabajadores.class";
 import { AdminGuard } from "../guards/admin.guard";
 import { AuthGuard } from "../guards/auth.guard";
 import { User } from "../decorators/get-user.decorator";
-import { DecodedIdToken } from "firebase-admin/auth";
+import { UserRecord } from "firebase-admin/auth";
+import {
+  EditTrabajadorRequest,
+  TrabajadorFormRequest,
+} from "./trabajadores.dto";
 
 @Controller("trabajadores")
 export class TrabajadoresController {
@@ -47,7 +51,7 @@ export class TrabajadoresController {
 
   @UseGuards(AuthGuard)
   @Get("getTrabajadorBySqlId")
-  async getTrabajadorBySqlId(@User() user: DecodedIdToken, @Query() { id }) {
+  async getTrabajadorBySqlId(@User() user: UserRecord, @Query() { id }) {
     try {
       // Fallo de seguridad grave, se introduce el uid desde el frontend
 
@@ -155,9 +159,11 @@ export class TrabajadoresController {
   @UseGuards(AuthGuard)
   @Post("guardarCambios")
   async guardarCambiosForm(
-    @Body()
-    { modificado, original },
-    @User() firebaseUser: DecodedIdToken,
+    @Body("original")
+    original: TrabajadorFormRequest,
+    @Body("modificado")
+    modificado: TrabajadorFormRequest,
+    @User() firebaseUser: UserRecord,
   ) {
     try {
       return {

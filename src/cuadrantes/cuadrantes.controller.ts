@@ -18,7 +18,7 @@ import { DateTime } from "luxon";
 import { ObjectId } from "mongodb";
 import { ContratoService } from "../contrato/contrato.service";
 import { User } from "../decorators/get-user.decorator";
-import { DecodedIdToken } from "firebase-admin/auth";
+import { UserRecord } from "firebase-admin/auth";
 
 @Controller("cuadrantes")
 export class CuadrantesController {
@@ -33,7 +33,7 @@ export class CuadrantesController {
   @Get()
   async getCuadrantes(
     @Query() { fecha, idTienda }: { fecha: string; idTienda?: string },
-    @User() user: DecodedIdToken,
+    @User() user: UserRecord,
   ) {
     try {
       const usuarioCompleto =
@@ -89,7 +89,7 @@ export class CuadrantesController {
   async getCuadrantesIndividual(
     @Query()
     { idTrabajador, fecha }: { fecha: string; idTrabajador: string },
-    @User() user: DecodedIdToken,
+    @User() user: UserRecord,
   ) {
     try {
       const usuarioCompleto =
@@ -231,7 +231,7 @@ export class CuadrantesController {
   @Post("saveCuadrante")
   async saveCuadrante(
     @Body() reqCuadrante: TRequestCuadrante,
-    @User() user: DecodedIdToken,
+    @User() user: UserRecord,
   ) {
     try {
       if (!reqCuadrante) throw Error("Faltan datos");

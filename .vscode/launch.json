@@ -4,10 +4,19 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "NestJS Debug",
+      "name": "Debug Nest Framework",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "start:debug"],
-      "attachSimplePort": 9229
+      "runtimeArgs": [
+        "run",
+        "start:debug",
+        "--",
+        "--inspect-brk"
+      ],
+      "autoAttachChildProcesses": true,
+      "restart": true,
+      "sourceMaps": true,
+      "stopOnEntry": false,
+      "console": "integratedTerminal",
     }
   ]
 }

@@ -6,7 +6,7 @@ import { TrabajadorService } from "../trabajadores/trabajadores.class";
 import { ParseDatePipe } from "../parse-date/parse-date.pipe";
 import { DateTime } from "luxon";
 import { User } from "../decorators/get-user.decorator";
-import { DecodedIdToken } from "firebase-admin/auth";
+import { UserRecord } from "firebase-admin/auth";
 
 @Controller("fichajes")
 export class FichajesController {
@@ -17,7 +17,7 @@ export class FichajesController {
 
   @UseGuards(AuthGuard)
   @Post("entrada")
-  async entrada(@User() user: DecodedIdToken) {
+  async entrada(@User() user: UserRecord) {
     try {
       const usuarioCompleto =
         await this.trabajadoresInstance.getTrabajadorByAppId(user.uid);
@@ -34,7 +34,7 @@ export class FichajesController {
 
   @UseGuards(AuthGuard)
   @Post("salida")
-  async salida(@User() user: DecodedIdToken) {
+  async salida(@User() user: UserRecord) {
     try {
       const usuarioCompleto =
         await this.trabajadoresInstance.getTrabajadorByAppId(user.uid);
@@ -51,10 +51,7 @@ export class FichajesController {
 
   @UseGuards(AuthGuard)
   @Get("estado")
-  async getEstado(
-    @Query("date") dateString: string,
-    @User() user: DecodedIdToken,
-  ) {
+  async getEstado(@Query("date") dateString: string, @User() user: UserRecord) {
     try {
       const date = new Date(dateString);
 
@@ -84,6 +81,8 @@ export class FichajesController {
   @Post("getFichajesBC")
   async getFichajesBC() {
     try {
+      console.log("Causa");
+
       return {
         ok: true,
         data: await this.fichajesInstance.fusionarFichajesBC(),
@@ -157,7 +156,7 @@ export class FichajesController {
   @Get("misFichajes")
   async getMisFichajes(
     @Query() { fechaInicio, fechaFinal },
-    @User() user: DecodedIdToken,
+    @User() user: UserRecord,
   ) {
     try {
       if (!fechaInicio || !fechaFinal) throw Error("Faltan parámetros");
@@ -181,7 +180,7 @@ export class FichajesController {
 
   @UseGuards(AuthGuard)
   @Get("sinValidar")
-  async getSinValidar(@User() user: DecodedIdToken) {
+  async getSinValidar(@User() user: UserRecord) {
     try {
       const arraySubordinados = await this.trabajadoresInstance.getSubordinados(
         user.uid,
@@ -213,5 +212,23 @@ export class FichajesController {
   @Post("validarFichajesAntiguos")
   async validarFichajesAntiguos() {
     return await this.fichajesInstance.validarFichajesAntiguos();
+  }
+
+  @UseGuards(AuthGuard)
+  @Get("fichajesResto")
+  async getFichajes(@Query() { idSql }: { idSql: number }) {
+    try {
+      if (!idSql) throw Error("Faltan parámetros");
+
+      const fichajes = await this.fichajesInstance.getFichajes(Number(idSql));
+
+      return {
+        ok: true,
+        data: fichajes,
+      };
+    } catch (err) {
+      console.log(err);
+      return { ok: false, message: err.message };
+    }
   }
 }
