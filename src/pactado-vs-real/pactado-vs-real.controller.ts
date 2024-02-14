@@ -7,11 +7,11 @@ import {
 } from "@nestjs/common";
 import { DateTime } from "luxon";
 import { PactadoVsRealService } from "./pactado-vs-real.service";
-import { ParseDatePipe } from "../parse-date/parse-date.pipe";
 import { AuthGuard } from "../guards/auth.guard";
 import { User } from "../decorators/get-user.decorator";
 import { UserRecord } from "firebase-admin/auth";
 import { TrabajadorService } from "../trabajadores/trabajadores.class";
+import { GetPactadoVsRealRequestDto } from "./pactado-vs-real.dto";
 
 @Controller("pactado-vs-real")
 export class PactadoVsRealController {
@@ -23,13 +23,13 @@ export class PactadoVsRealController {
   @UseGuards(AuthGuard)
   @Get()
   async pactadoVsReal(
-    @Query("fechaInicio", ParseDatePipe) fechaInicio: Date,
+    @Query() req: GetPactadoVsRealRequestDto,
     @User() user: UserRecord,
   ) {
-    if (!fechaInicio)
+    if (!req.fechaInicio)
       return new BadRequestException("fechaInicio es requerida");
 
-    const inicio = DateTime.fromJSDate(fechaInicio);
+    const inicio = DateTime.fromJSDate(req.fechaInicio);
     const usuarioCompleto = await this.trabajadorService.getTrabajadorByAppId(
       user.uid,
     );

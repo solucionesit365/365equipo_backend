@@ -3,10 +3,10 @@ import { AuthGuard } from "../guards/auth.guard";
 import { Fichajes } from "./fichajes.class";
 import { SchedulerGuard } from "../guards/scheduler.guard";
 import { TrabajadorService } from "../trabajadores/trabajadores.class";
-import { ParseDatePipe } from "../parse-date/parse-date.pipe";
 import { DateTime } from "luxon";
 import { User } from "../decorators/get-user.decorator";
 import { UserRecord } from "firebase-admin/auth";
+import { GetFichajesPendientesRequestDto } from "./fichajes.dto";
 
 @Controller("fichajes")
 export class FichajesController {
@@ -198,13 +198,10 @@ export class FichajesController {
 
   @UseGuards(AuthGuard)
   @Post("hayFichajesPendientes")
-  async hayFichajesPendientes(
-    @Body("arrayIds") arrayIds: number[],
-    @Body("fecha", ParseDatePipe) fecha: Date,
-  ) {
+  async hayFichajesPendientes(@Body() req: GetFichajesPendientesRequestDto) {
     return await this.fichajesInstance.hayFichajesPendientes(
-      arrayIds,
-      DateTime.fromJSDate(fecha),
+      req.arrayIds,
+      DateTime.fromJSDate(req.fecha),
     );
   }
 

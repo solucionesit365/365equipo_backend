@@ -3,6 +3,14 @@ import { DateTime } from "luxon";
 import { TrabajadorService } from "../trabajadores/trabajadores.class";
 import { FichajesValidadosService } from "../fichajes-validados/fichajes-validados.class";
 import { UserRecord } from "firebase-admin/auth";
+import { Trabajador, Tienda, Contrato } from "@prisma/client";
+
+type TrabajadorExtendido = Trabajador & {
+  tienda?: Tienda | null; // Relación con Tienda
+  contratos?: Contrato[] | null; // Relación con Contratos
+  responsable?: Trabajador | null; // Relación con Responsable
+  subordinados?: Trabajador[] | null; // Relación con Subordinados
+};
 
 @Injectable()
 export class PactadoVsRealService {
@@ -38,7 +46,7 @@ export class PactadoVsRealService {
       }
     }
 
-    const trabajadoresTienda: any[] = [];
+    const trabajadoresTienda: TrabajadorExtendido[] = [];
 
     for (let i = 0; i < idsSubordinados.length; i += 1) {
       const trabajador = await this.trabajadoresInstance.getTrabajadorBySqlId(
@@ -53,7 +61,7 @@ export class PactadoVsRealService {
       pactadoReal.push({
         nombre: trabajadoresTienda[i].nombreApellidos,
         idTrabajador: trabajadoresTienda[i].id,
-        contrato: trabajadoresTienda[i].horasContrato,
+        contrato: (trabajadoresTienda[i].contratos[0].horasContrato * 40) / 100,
         arrayValidados: [],
       });
 

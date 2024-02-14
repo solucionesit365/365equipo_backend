@@ -1,6 +1,7 @@
 import {
   IsBoolean,
   IsDate,
+  IsNotEmpty,
   IsNumber,
   IsOptional,
   IsString,
@@ -146,4 +147,42 @@ export class FichajeValidadoDto {
 
   @IsBoolean()
   enviado: boolean;
+}
+
+export class GetSemanasFichajesPagarRequestDto {
+  @IsNotEmpty()
+  @Type(() => Date)
+  @IsDate()
+  diaEntreSemana: Date;
+}
+
+export class GetAllFichajesValidadosRequestDto {
+  @IsNotEmpty()
+  @Type(() => Date)
+  @IsDate()
+  fecha: Date;
+}
+
+export class GetTiendaDiaRequestDto {
+  @IsNotEmpty()
+  @Type(() => Number)
+  @IsNumber()
+  tienda: number;
+
+  @IsNotEmpty()
+  @Type(() => Date)
+  @IsDate()
+  dia: Date;
+}
+
+export class GetResumenRequestDto {
+  @IsNotEmpty()
+  @Type(() => Number)
+  @IsNumber()
+  idTienda: number;
+
+  @IsNotEmpty()
+  @Type(() => Date)
+  @IsDate()
+  fechaEntreSemana: Date;
 }

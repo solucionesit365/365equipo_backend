@@ -8,12 +8,17 @@ import {
   ParseIntPipe,
 } from "@nestjs/common";
 import { FichajesValidadosService } from "./fichajes-validados.class";
-import { FichajeValidadoDto } from "./fichajes-validados.dto";
+import {
+  FichajeValidadoDto,
+  GetAllFichajesValidadosRequestDto,
+  GetResumenRequestDto,
+  GetSemanasFichajesPagarRequestDto,
+  GetTiendaDiaRequestDto,
+} from "./fichajes-validados.dto";
 import { Notificaciones } from "../notificaciones/notificaciones.class";
 import { TrabajadorService } from "../trabajadores/trabajadores.class";
 import { AuthGuard } from "../guards/auth.guard";
 import { SchedulerGuard } from "../guards/scheduler.guard";
-import { ParseDatePipe } from "../parse-date/parse-date.pipe";
 import { DateTime } from "luxon";
 
 @Controller("fichajes-validados")
@@ -88,7 +93,9 @@ export class FichajesValidadosController {
 
   @UseGuards(AuthGuard)
   @Post("actualizarValidados")
-  async updateFichajesValidados(@Body() FichajesValidadosService: FichajeValidadoDto) {
+  async updateFichajesValidados(
+    @Body() FichajesValidadosService: FichajeValidadoDto,
+  ) {
     try {
       if (
         await this.fichajesValidadosInstance.updateFichajesValidados(
@@ -215,13 +222,14 @@ export class FichajesValidadosController {
   @UseGuards(AuthGuard)
   @Get("getSemanasFichajesPagar")
   async getSemanasFichajesPagar(
-    @Query("diaEntreSemana", ParseDatePipe) diaEntreSemana: Date,
+    @Query() req: GetSemanasFichajesPagarRequestDto,
   ) {
     try {
       const respValidados =
         await this.fichajesValidadosInstance.getSemanasFichajesPagar(
-          DateTime.fromJSDate(diaEntreSemana),
+          DateTime.fromJSDate(req.diaEntreSemana),
         );
+
       if (respValidados.length > 0) {
         return {
           ok: true,
@@ -242,10 +250,10 @@ export class FichajesValidadosController {
 
   @UseGuards(AuthGuard)
   @Get("getAllFichajesValidados")
-  async getAllFichajes(@Query("fecha", ParseDatePipe) fecha: Date) {
+  async getAllFichajes(@Query() req: GetAllFichajesValidadosRequestDto) {
     try {
       const respAllFichajes =
-        await this.fichajesValidadosInstance.getAllFichajesValidados(fecha);
+        await this.fichajesValidadosInstance.getAllFichajesValidados(req.fecha);
 
       if (respAllFichajes.length > 0) {
         return {
@@ -265,14 +273,11 @@ export class FichajesValidadosController {
 
   @UseGuards(AuthGuard)
   @Get("getTiendaDia")
-  async getTiendaDia(
-    @Query("tienda", ParseIntPipe) tienda: number,
-    @Query("dia", ParseDatePipe) fecha: Date,
-  ) {
+  async getTiendaDia(@Query() req: GetTiendaDiaRequestDto) {
     try {
       const respFichajesV = await this.fichajesValidadosInstance.getTiendaDia(
-        tienda,
-        fecha,
+        req.tienda,
+        req.dia,
       );
       if (respFichajesV.length > 0) {
         return {
@@ -292,18 +297,13 @@ export class FichajesValidadosController {
 
   @UseGuards(AuthGuard)
   @Get("getResumen")
-  async getResumen(
-    @Query("fechaEntreSemana", ParseDatePipe) fechaEntreSemana: Date,
-    @Query("idTienda", ParseIntPipe) idTienda: number,
-  ) {
+  async getResumen(@Query() req: GetResumenRequestDto) {
     try {
-      if (!fechaEntreSemana || !idTienda) throw Error("Faltan parámetros");
-
       return {
         ok: true,
         data: await this.fichajesValidadosInstance.resumenSemana(
-          fechaEntreSemana,
-          idTienda,
+          req.fechaEntreSemana,
+          req.idTienda,
         ),
       };
     } catch (error) {
