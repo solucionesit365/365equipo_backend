@@ -83,7 +83,6 @@ export class Fichajes {
 
   async fusionarFichajesBC() {
     const fichajesBC = await this.schFichajes.getFichajesBC();
-    console.log(fichajesBC);
 
     const trabajadores = await this.trabajadoresInstance.getTrabajadores();
     const fichajesPretty = [];
@@ -103,7 +102,7 @@ export class Fichajes {
           tipo: "ENTRADA",
           enviado: true,
           idExterno: Number(fichajesBC[i].usuari),
-          comentario: fichajesBC[i].comentario,
+          comentario: fichajesBC[i].comentari,
           validado: false,
           dni: fichajesBC[i].dni,
           nombre: fichajesBC[i].nombre,
@@ -116,7 +115,7 @@ export class Fichajes {
           tipo: "SALIDA",
           enviado: true,
           idExterno: Number(fichajesBC[i].usuari),
-          comentario: fichajesBC[i].comentario,
+          comentario: fichajesBC[i].comentari,
           validado: false,
           dni: fichajesBC[i].dni,
           nombre: fichajesBC[i].nombre,
