@@ -199,7 +199,6 @@ export class FichajesDatabase {
 
   async getNominas() {
     const token = await this.MbctokenService.getToken();
-    console.log(token);
 
     let response = await axios.get(
       `https://api.businesscentral.dynamics.com/v2.0/${process.env.MBC_TOKEN_TENANT}/Production/ODataV4/Company('${process.env.MBC_COMPANY_NAME}')/archivo`,
