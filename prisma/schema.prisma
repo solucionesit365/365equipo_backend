@@ -38,6 +38,7 @@ model Trabajador {
   subordinados     Trabajador[] @relation("Responsable")
   roles            Role[]
   permisos         Permiso[]
+  excedencia       Boolean      @default(false)
 }
 
 model Tienda {
