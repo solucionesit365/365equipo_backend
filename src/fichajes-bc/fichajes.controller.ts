@@ -65,7 +65,7 @@ export class FichajesController {
     }
   }
 
-  // @UseGuards(SchedulerGuard)
+  @UseGuards(SchedulerGuard)
   @Post("sincroFichajes")
   async sincroFichajes() {
     try {
@@ -77,7 +77,7 @@ export class FichajesController {
     }
   }
 
-  // @UseGuards(SchedulerGuard)
+  @UseGuards(SchedulerGuard)
   @Post("getFichajesBC")
   async getFichajesBC() {
     try {
