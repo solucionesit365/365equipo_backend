@@ -5,7 +5,7 @@ import { join } from "path";
 import { NestExpressApplication } from "@nestjs/platform-express";
 import { Settings } from "luxon";
 
-Settings.defaultZone = "utc";
+Settings.defaultZone = "Europe/Madrid";
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
