@@ -34,17 +34,21 @@ export class TrabajadorDatabaseService {
         nacionalidad: reqTrabajador.nacionalidad,
         displayFoto: reqTrabajador.displayFoto,
         excedencia: reqTrabajador.excedencia,
-        responsable: {
-          connect: {
-            id: reqTrabajador.idResponsable,
-          },
-        },
+        responsable: reqTrabajador.idResponsable
+          ? {
+              connect: {
+                id: reqTrabajador.idResponsable,
+              },
+            }
+          : null,
         nSeguridadSocial: reqTrabajador.nSeguridadSocial,
-        tienda: {
-          connect: {
-            id: reqTrabajador.idTienda,
-          },
-        },
+        tienda: reqTrabajador.idTienda
+          ? {
+              connect: {
+                id: reqTrabajador.idTienda,
+              },
+            }
+          : null,
         contratos: {
           create: {
             fechaAlta: reqTrabajador.contrato.fechaAlta,
