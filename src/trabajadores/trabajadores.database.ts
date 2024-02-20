@@ -40,7 +40,7 @@ export class TrabajadorDatabaseService {
                 id: reqTrabajador.idResponsable,
               },
             }
-          : null,
+          : {},
         nSeguridadSocial: reqTrabajador.nSeguridadSocial,
         tienda: reqTrabajador.idTienda
           ? {
@@ -48,7 +48,7 @@ export class TrabajadorDatabaseService {
                 id: reqTrabajador.idTienda,
               },
             }
-          : null,
+          : {},
         contratos: {
           create: {
             fechaAlta: reqTrabajador.contrato.fechaAlta,
