@@ -4,7 +4,10 @@ import { DateTime } from "luxon";
 import { TrabajadorCompleto } from "./trabajadores.interface";
 import { HitMssqlService } from "../hit-mssql/hit-mssql.service";
 import { Prisma } from "@prisma/client";
-import { TrabajadorFormRequest } from "./trabajadores.dto";
+import {
+  CreateTrabajadorRequestDto,
+  TrabajadorFormRequest,
+} from "./trabajadores.dto";
 
 @Injectable()
 export class TrabajadorDatabaseService {
@@ -12,6 +15,49 @@ export class TrabajadorDatabaseService {
     private prisma: PrismaService,
     private readonly hitMssqlService: HitMssqlService,
   ) {}
+
+  async crearTrabajador(reqTrabajador: CreateTrabajadorRequestDto) {
+    return await this.prisma.trabajador.create({
+      data: {
+        dni: reqTrabajador.dni,
+        nombreApellidos: reqTrabajador.nombreApellidos,
+        displayName: reqTrabajador.displayName,
+        emails: reqTrabajador.emails,
+        direccion: reqTrabajador.direccion,
+        llevaEquipo: reqTrabajador.llevaEquipo,
+        tipoTrabajador: "Interno",
+        ciudad: reqTrabajador.ciudad,
+        telefonos: reqTrabajador.telefonos,
+        codigoPostal: reqTrabajador.codigoPostal,
+        cuentaCorriente: reqTrabajador.cuentaCorriente,
+        fechaNacimiento: reqTrabajador.fechaNacimiento,
+        nacionalidad: reqTrabajador.nacionalidad,
+        displayFoto: reqTrabajador.displayFoto,
+        excedencia: reqTrabajador.excedencia,
+        responsable: {
+          connect: {
+            id: reqTrabajador.idResponsable,
+          },
+        },
+        nSeguridadSocial: reqTrabajador.nSeguridadSocial,
+        tienda: {
+          connect: {
+            id: reqTrabajador.idTienda,
+          },
+        },
+        contratos: {
+          create: {
+            fechaAlta: reqTrabajador.contrato.fechaAlta,
+            fechaAntiguedad: reqTrabajador.contrato.fechaAntiguedad,
+            horasContrato: reqTrabajador.contrato.horasContrato,
+            inicioContrato: reqTrabajador.contrato.inicioContrato,
+            fechaBaja: reqTrabajador.contrato.fechaBaja,
+            finalContrato: reqTrabajador.contrato.finalContrato,
+          },
+        },
+      },
+    });
+  }
 
   async getTrabajadorByAppId(uid: string) {
     const trabajador = await this.prisma.trabajador.findUnique({

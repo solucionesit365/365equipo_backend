@@ -1,3 +1,4 @@
+import { Prisma, Trabajador } from "@prisma/client";
 import { Type } from "class-transformer";
 import {
   IsArray,
@@ -5,10 +6,12 @@ import {
   IsDate,
   IsNotEmpty,
   IsNumber,
+  IsObject,
   IsOptional,
   IsString,
   ValidateNested,
 } from "class-validator";
+import { CreateContratoDto } from "../contrato/contrato.dto";
 
 export class TrabajadorDto {
   @IsNumber()
@@ -159,4 +162,85 @@ export class EditTrabajadorRequest {
 
   @ValidateNested()
   modificado: TrabajadorFormRequest;
+}
+
+export class CreateTrabajadorRequestDto {
+  @IsNotEmpty()
+  @IsObject()
+  @ValidateNested()
+  @Type(() => CreateContratoDto)
+  contrato: CreateContratoDto;
+
+  @IsOptional()
+  @IsString()
+  displayFoto: string;
+
+  @IsNotEmpty()
+  @IsBoolean()
+  excedencia: boolean;
+
+  @IsNotEmpty()
+  @IsString()
+  emails: string;
+
+  @IsNotEmpty()
+  @IsString()
+  telefonos: string;
+
+  @IsNotEmpty()
+  @IsString()
+  nombreApellidos: string;
+
+  @IsNotEmpty()
+  @IsString()
+  displayName: string;
+
+  @IsNotEmpty()
+  @Type(() => Date)
+  @IsDate()
+  fechaNacimiento: Date;
+
+  @IsNotEmpty()
+  @IsString()
+  dni: string;
+
+  @IsOptional()
+  @IsString()
+  direccion: string;
+
+  @IsOptional()
+  @IsString()
+  ciudad: string;
+
+  @IsOptional()
+  @IsString()
+  codigoPostal: string;
+
+  @IsOptional()
+  @IsString()
+  nacionalidad: string;
+
+  @IsNotEmpty()
+  @IsString()
+  nSeguridadSocial: string;
+
+  @IsNotEmpty()
+  @IsString()
+  cuentaCorriente: string;
+
+  @IsOptional()
+  @IsNumber()
+  idResponsable: number | null;
+
+  @IsOptional()
+  @IsNumber()
+  idTienda: number | null;
+
+  @IsNotEmpty()
+  @IsBoolean()
+  llevaEquipo: boolean;
+
+  @IsOptional()
+  @IsString()
+  tokenQR: string;
 }

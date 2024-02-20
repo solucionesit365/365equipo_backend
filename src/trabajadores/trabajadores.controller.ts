@@ -6,6 +6,7 @@ import { AuthGuard } from "../guards/auth.guard";
 import { User } from "../decorators/get-user.decorator";
 import { UserRecord } from "firebase-admin/auth";
 import {
+  CreateTrabajadorRequestDto,
   EditTrabajadorRequest,
   TrabajadorFormRequest,
 } from "./trabajadores.dto";
@@ -255,5 +256,12 @@ export class TrabajadoresController {
       console.log(error);
       return { ok: false, message: error.message };
     }
+  }
+
+  // Faltan roles
+  @UseGuards(AuthGuard)
+  @Post("crear")
+  async crearTrabajador(@Body() req: CreateTrabajadorRequestDto) {
+    return await this.trabajadorInstance.crearTrabajador(req);
   }
 }

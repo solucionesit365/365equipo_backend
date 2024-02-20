@@ -7,7 +7,10 @@ import { SolicitudesVacacionesService } from "../solicitud-vacaciones/solicitud-
 import { TrabajadorDatabaseService } from "./trabajadores.database";
 import { UserRecord } from "firebase-admin/auth";
 import { Prisma } from "@prisma/client";
-import { TrabajadorFormRequest } from "./trabajadores.dto";
+import {
+  CreateTrabajadorRequestDto,
+  TrabajadorFormRequest,
+} from "./trabajadores.dto";
 
 @Injectable()
 export class TrabajadorService {
@@ -20,6 +23,10 @@ export class TrabajadorService {
     private readonly solicitudesVacaciones: SolicitudesVacacionesService,
     private readonly schTrabajadores: TrabajadorDatabaseService,
   ) {}
+
+  async crearTrabajador(reqTrabajador: CreateTrabajadorRequestDto) {
+    return await this.schTrabajadores.crearTrabajador(reqTrabajador);
+  }
 
   async getTrabajadorByAppId(uid: string) {
     const resUser = await this.schTrabajadores.getTrabajadorByAppId(uid);
