@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { EvaluacionesDatabase } from "./evaluaciones.mongodb";
-import { evaluacionesInterface } from "./evaluaciones.interface";
+import { evaluacionesInterface, iluoInterface } from "./evaluaciones.interface";
 
 @Injectable()
 export class EvaluacionesService {
@@ -62,6 +62,41 @@ export class EvaluacionesService {
 
   async getEvaluados(idSql: number, año: number) {
     const response = await this.evaluacionesDB.getEvaluados(idSql, año);
+
+    if (response) {
+      return response;
+    }
+  }
+
+  //add ILUO
+  async addILUO(evaluacion: iluoInterface) {
+    const response = await this.evaluacionesDB.addILUO(evaluacion);
+
+    if (response) {
+      return true;
+    }
+  }
+
+  async getPlantillasILUO(plantillaAsociada: string) {
+    const response = await this.evaluacionesDB.getPlantillasILUO(
+      plantillaAsociada,
+    );
+
+    if (response) {
+      return response;
+    }
+  }
+
+  async addILUORespuestas(iluo: iluoInterface) {
+    const response = await this.evaluacionesDB.addILUORespuestas(iluo);
+
+    if (response) {
+      return response;
+    }
+  }
+
+  async getILUORespuestas(idSql: number, año: number) {
+    const response = await this.evaluacionesDB.getILUORespuestas(idSql, año);
 
     if (response) {
       return response;

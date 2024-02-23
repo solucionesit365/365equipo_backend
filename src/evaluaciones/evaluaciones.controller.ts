@@ -1,7 +1,7 @@
 import { Controller, Post, UseGuards, Body, Get, Query } from "@nestjs/common";
 import { AuthGuard } from "../guards/auth.guard";
 import { EvaluacionesService } from "./evaluaciones.class";
-import { evaluacionesInterface } from "./evaluaciones.interface";
+import { evaluacionesInterface, iluoInterface } from "./evaluaciones.interface";
 
 @Controller("evaluaciones")
 export class EvaluacionesController {
@@ -124,6 +124,70 @@ export class EvaluacionesController {
   async getEvaluados(@Query() request) {
     try {
       const response = await this.evaluacionesclass.getEvaluados(
+        Number(request.idSql),
+        Number(request.año),
+      );
+      if (response) {
+        return {
+          ok: true,
+          data: response,
+        };
+      }
+    } catch (error) {}
+  }
+
+  // @UseGuards(AuthGuard)
+  @Post("addILUO")
+  async addILUO(@Body() evaluacion: iluoInterface) {
+    try {
+      const response = await this.evaluacionesclass.addILUO(evaluacion);
+      if (response) {
+        return {
+          ok: true,
+          data: response,
+        };
+      } else return { ok: false };
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  @UseGuards(AuthGuard)
+  @Get("getPlantillasILUO")
+  async getPlantillasILUO(
+    @Query("plantillaAsociada") plantillaAsociada: string,
+  ) {
+    try {
+      const response = await this.evaluacionesclass.getPlantillasILUO(
+        plantillaAsociada,
+      );
+      if (response) {
+        return {
+          ok: true,
+          data: response,
+        };
+      }
+    } catch (error) {}
+  }
+
+  @UseGuards(AuthGuard)
+  @Post("addILUORespuestas")
+  async addILUORespuestas(@Body() iluo: iluoInterface) {
+    const response = await this.evaluacionesclass.addILUORespuestas(iluo);
+
+    if (response) {
+      return {
+        ok: true,
+        data: response,
+      };
+    }
+  }
+
+  @UseGuards(AuthGuard)
+  @Get("getILUORespuestas")
+  async getILUORespuestas(@Query() request) {
+    try {
+      const response = await this.evaluacionesclass.getILUORespuestas(
         Number(request.idSql),
         Number(request.año),
       );
