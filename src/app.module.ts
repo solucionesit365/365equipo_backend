@@ -34,6 +34,8 @@ import { HitMssqlModule } from "./hit-mssql/hit-mssql.module";
 import { MongoModule } from "./mongo/mongo.module";
 import { Cultura365Module } from "./cultura365/cultura365.module";
 import { MBCTokenModule } from "./bussinesCentral/services/mbctoken/mbctoken.service.module";
+import { RoleModule } from './role/role.module';
+import { PermissionModule } from './permission/permission.module';
 
 @Module({
   imports: [
@@ -73,6 +75,8 @@ import { MBCTokenModule } from "./bussinesCentral/services/mbctoken/mbctoken.ser
     MongoModule,
     Cultura365Module,
     MBCTokenModule,
+    RoleModule,
+    PermissionModule,
   ],
   controllers: [AppController],
 })
