@@ -1,7 +1,11 @@
 import { Controller, Post, UseGuards, Body, Get, Query } from "@nestjs/common";
 import { AuthGuard } from "../guards/auth.guard";
 import { EvaluacionesService } from "./evaluaciones.class";
-import { evaluacionesInterface, iluoInterface } from "./evaluaciones.interface";
+import {
+  CreateEvaluacionesInterfaceDto,
+  CrearIluoInterfaceDto,
+  MostrarEvaluacionDto,
+} from "./evaluaciones.dto";
 
 @Controller("evaluaciones")
 export class EvaluacionesController {
@@ -9,7 +13,7 @@ export class EvaluacionesController {
 
   @UseGuards(AuthGuard)
   @Post("addPlantilla")
-  async addPlantilla(@Body() evaluacion: evaluacionesInterface) {
+  async addPlantilla(@Body() evaluacion: CreateEvaluacionesInterfaceDto) {
     try {
       const response = await this.evaluacionesclass.addPlantilla(evaluacion);
       if (response) {
@@ -89,11 +93,9 @@ export class EvaluacionesController {
   //Eliminar plantillas
   @UseGuards(AuthGuard)
   @Post("deletePlantillaAdmin")
-  async deletePlantillaAdmin(@Body() evaluacion: evaluacionesInterface) {
+  async deletePlantillaAdmin(@Body() { _id }: { _id: string }) {
     try {
-      const response = await this.evaluacionesclass.deletePlantillaAdmin(
-        evaluacion,
-      );
+      const response = await this.evaluacionesclass.deletePlantillaAdmin(_id);
       if (response) {
         return {
           ok: true,
@@ -109,7 +111,7 @@ export class EvaluacionesController {
 
   @UseGuards(AuthGuard)
   @Post("addEvaluacion")
-  async addEvaluacion(@Body() evaluacion: evaluacionesInterface) {
+  async addEvaluacion(@Body() evaluacion: CreateEvaluacionesInterfaceDto) {
     const response = await this.evaluacionesclass.addEvaluacion(evaluacion);
     if (response) {
       return {
@@ -138,7 +140,7 @@ export class EvaluacionesController {
 
   // @UseGuards(AuthGuard)
   @Post("addILUO")
-  async addILUO(@Body() evaluacion: iluoInterface) {
+  async addILUO(@Body() evaluacion: CrearIluoInterfaceDto) {
     try {
       const response = await this.evaluacionesclass.addILUO(evaluacion);
       if (response) {
@@ -172,7 +174,7 @@ export class EvaluacionesController {
 
   @UseGuards(AuthGuard)
   @Post("addILUORespuestas")
-  async addILUORespuestas(@Body() iluo: iluoInterface) {
+  async addILUORespuestas(@Body() iluo: CrearIluoInterfaceDto) {
     const response = await this.evaluacionesclass.addILUORespuestas(iluo);
 
     if (response) {

@@ -1,12 +1,17 @@
 import { Injectable } from "@nestjs/common";
 import { EvaluacionesDatabase } from "./evaluaciones.mongodb";
-import { evaluacionesInterface, iluoInterface } from "./evaluaciones.interface";
+import {
+  CreateEvaluacionesInterfaceDto,
+  CrearIluoInterfaceDto,
+  MostrarEvaluacionDto,
+  MostrarIluoInterfaceDto,
+} from "./evaluaciones.dto";
 
 @Injectable()
 export class EvaluacionesService {
   constructor(private readonly evaluacionesDB: EvaluacionesDatabase) {}
 
-  async addPlantilla(evaluacion: evaluacionesInterface) {
+  async addPlantilla(evaluacion: CreateEvaluacionesInterfaceDto) {
     const response = await this.evaluacionesDB.addplantilla(evaluacion);
 
     if (response) {
@@ -48,11 +53,11 @@ export class EvaluacionesService {
     }
   }
 
-  async deletePlantillaAdmin(evaluacion: evaluacionesInterface) {
-    return await this.evaluacionesDB.deletePlantillaAdmin(evaluacion);
+  async deletePlantillaAdmin(_id: string) {
+    return await this.evaluacionesDB.deletePlantillaAdmin(_id);
   }
 
-  async addEvaluacion(evaluacion: evaluacionesInterface) {
+  async addEvaluacion(evaluacion: CreateEvaluacionesInterfaceDto) {
     const response = await this.evaluacionesDB.addEvaluacion(evaluacion);
 
     if (response) {
@@ -69,7 +74,7 @@ export class EvaluacionesService {
   }
 
   //add ILUO
-  async addILUO(evaluacion: iluoInterface) {
+  async addILUO(evaluacion: CrearIluoInterfaceDto) {
     const response = await this.evaluacionesDB.addILUO(evaluacion);
 
     if (response) {
@@ -87,7 +92,7 @@ export class EvaluacionesService {
     }
   }
 
-  async addILUORespuestas(iluo: iluoInterface) {
+  async addILUORespuestas(iluo: CrearIluoInterfaceDto) {
     const response = await this.evaluacionesDB.addILUORespuestas(iluo);
 
     if (response) {
