@@ -1,12 +1,17 @@
 import { Injectable } from "@nestjs/common";
 import { EvaluacionesDatabase } from "./evaluaciones.mongodb";
-import { evaluacionesInterface } from "./evaluaciones.interface";
+import {
+  CreateEvaluacionesInterfaceDto,
+  CrearIluoInterfaceDto,
+  MostrarEvaluacionDto,
+  MostrarIluoInterfaceDto,
+} from "./evaluaciones.dto";
 
 @Injectable()
 export class EvaluacionesService {
   constructor(private readonly evaluacionesDB: EvaluacionesDatabase) {}
 
-  async addPlantilla(evaluacion: evaluacionesInterface) {
+  async addPlantilla(evaluacion: CreateEvaluacionesInterfaceDto) {
     const response = await this.evaluacionesDB.addplantilla(evaluacion);
 
     if (response) {
@@ -48,11 +53,11 @@ export class EvaluacionesService {
     }
   }
 
-  async deletePlantillaAdmin(evaluacion: evaluacionesInterface) {
-    return await this.evaluacionesDB.deletePlantillaAdmin(evaluacion);
+  async deletePlantillaAdmin(_id: string) {
+    return await this.evaluacionesDB.deletePlantillaAdmin(_id);
   }
 
-  async addEvaluacion(evaluacion: evaluacionesInterface) {
+  async addEvaluacion(evaluacion: CreateEvaluacionesInterfaceDto) {
     const response = await this.evaluacionesDB.addEvaluacion(evaluacion);
 
     if (response) {
@@ -62,6 +67,41 @@ export class EvaluacionesService {
 
   async getEvaluados(idSql: number, año: number) {
     const response = await this.evaluacionesDB.getEvaluados(idSql, año);
+
+    if (response) {
+      return response;
+    }
+  }
+
+  //add ILUO
+  async addILUO(evaluacion: CrearIluoInterfaceDto) {
+    const response = await this.evaluacionesDB.addILUO(evaluacion);
+
+    if (response) {
+      return true;
+    }
+  }
+
+  async getPlantillasILUO(plantillaAsociada: string) {
+    const response = await this.evaluacionesDB.getPlantillasILUO(
+      plantillaAsociada,
+    );
+
+    if (response) {
+      return response;
+    }
+  }
+
+  async addILUORespuestas(iluo: CrearIluoInterfaceDto) {
+    const response = await this.evaluacionesDB.addILUORespuestas(iluo);
+
+    if (response) {
+      return response;
+    }
+  }
+
+  async getILUORespuestas(idSql: number, año: number) {
+    const response = await this.evaluacionesDB.getILUORespuestas(idSql, año);
 
     if (response) {
       return response;
