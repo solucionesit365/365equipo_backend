@@ -4,6 +4,7 @@ import {
   // Get,
   // InternalServerErrorException,
   Post,
+  UseGuards,
 } from "@nestjs/common";
 // import axios from "axios";
 // import { EmailService } from "../email/email.class";
@@ -12,11 +13,21 @@ import { FichajeValidadoDto } from "../fichajes-validados/fichajes-validados.dto
 import { DateTime } from "luxon";
 import { TrabajadorService } from "../trabajadores/trabajadores.class";
 import { Cuadrantes } from "../cuadrantes/cuadrantes.class";
+import { Roles } from "../decorators/role.decorator";
+import { RoleGuard } from "../guards/role.guard";
+import { AuthGuard } from "../guards/auth.guard";
 
 // import { Prisma } from "@prisma/client";
 
 @Controller("test")
 export class TestController {
+  @Roles("ADMIN")
+  @UseGuards(AuthGuard, RoleGuard)
+  @Post("testRole")
+  testRole() {
+    return "Role test";
+  }
+
   // constructor(private readonly cuadrantesInstance: Cuadrantes) {}
   // @Get()
   // test() {
