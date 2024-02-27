@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
-import { CreateRoleDto } from "./role.dto";
+import { AddPermissionDto, CreateRoleDto } from "./role.dto";
 
 @Injectable()
 export class RoleService {
@@ -10,9 +10,9 @@ export class RoleService {
     return this.prisma.role.create({
       data: {
         name: data.name,
-        permissions: {
-          connect: data.permissionsIds.map((id) => ({ id })),
-        },
+        // permissions: {
+        //   connect: data.permissionsIds.map((id) => ({ id })),
+        // },
       },
     });
   }
@@ -37,6 +37,19 @@ export class RoleService {
   async deleteRole(id: string) {
     return this.prisma.role.delete({
       where: { id },
+    });
+  }
+
+  async addPermission(data: AddPermissionDto) {
+    return this.prisma.role.update({
+      where: { id: data.roleId },
+      data: {
+        permissions: {
+          connect: {
+            id: data.permissionId,
+          },
+        },
+      },
     });
   }
 }

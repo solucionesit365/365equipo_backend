@@ -18,10 +18,6 @@ export class RoleGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const roles = this.reflector.get<string[]>("roles", context.getHandler()); // Correctamente leyendo los metadatos
-
-    if (!roles) {
-      return true; // Si no hay roles definidos, permite el acceso
-    }
     const request = context.switchToHttp().getRequest();
     const user: UserRecord = request.user;
 

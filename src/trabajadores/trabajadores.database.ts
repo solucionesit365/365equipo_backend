@@ -158,6 +158,8 @@ export class TrabajadorDatabaseService {
         },
         responsable: true,
         tienda: true,
+        roles: true,
+        permisos: true,
       },
       orderBy: {
         nombreApellidos: "asc",

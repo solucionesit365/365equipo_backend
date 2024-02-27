@@ -4,8 +4,14 @@ export class CreateRoleDto {
   @IsNotEmpty()
   @IsString()
   name: string;
+}
+
+export class AddPermissionDto {
+  @IsNotEmpty()
+  @IsString()
+  roleId: string;
 
   @IsNotEmpty()
-  @IsArray()
-  permissionsIds: string[];
+  @IsString()
+  permissionId: string;
 }

@@ -24,7 +24,7 @@ export class TestController {
   @Roles("ADMIN")
   @UseGuards(AuthGuard, RoleGuard)
   @Post("testRole")
-  testRole() {
+  async testRole() {
     return "Role test";
   }
 
