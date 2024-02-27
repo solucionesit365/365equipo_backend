@@ -17,7 +17,7 @@ export class Fichajes {
   ) {}
 
   async nuevaEntrada(trabajador: Trabajador) {
-    const hora = new Date();
+    const hora = DateTime.now().toJSDate();
 
     const insert = await this.schFichajes.nuevaEntrada(
       trabajador.idApp,
@@ -33,7 +33,7 @@ export class Fichajes {
   }
 
   async nuevaSalida(trabajador: Trabajador) {
-    const hora = new Date();
+    const hora = DateTime.now().toJSDate();
 
     const insert = await this.schFichajes.nuevaSalida(
       trabajador.idApp,
@@ -97,7 +97,9 @@ export class Fichajes {
       if (fichajesBC[i].accio === 1) {
         fichajesPretty.push({
           _id: fichajesBC[i].idr,
-          hora: moment(fichajesBC[i].tmst).toDate(),
+          hora: DateTime.fromJSDate(new Date(fichajesBC[i].tmst)).minus({
+            hours: 1,
+          }),
           uid: idApp,
           tipo: "ENTRADA",
           enviado: true,
@@ -110,7 +112,9 @@ export class Fichajes {
       } else if (fichajesBC[i].accio === 2) {
         fichajesPretty.push({
           _id: fichajesBC[i].idr,
-          hora: moment(fichajesBC[i].tmst).toDate(),
+          hora: DateTime.fromJSDate(new Date(fichajesBC[i].tmst)).minus({
+            hours: 1,
+          }),
           uid: idApp,
           tipo: "SALIDA",
           enviado: true,
