@@ -30,6 +30,14 @@ export class AnuncioDto {
   @IsNumber()
   visto: number;
 
+  @IsOptional()
+  @IsString()
+  creador: string;
+
+  @IsOptional()
+  @IsString()
+  telefonoCreador: string;
+
   fechaCreacion: Date;
 
   constructor() {
