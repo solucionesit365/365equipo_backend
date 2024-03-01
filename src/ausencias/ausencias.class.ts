@@ -78,12 +78,66 @@ export class AusenciasService {
     return true; // Devuelve true o lo que necesites para indicar que la operación fue exitosa.
   }
 
+  // actualiza aunsencias sin fechaRevision
   async updateAusencia(ausencia: AusenciaInterface) {
-    return await this.schAusencias.updateAusencia(ausencia);
+    const ausenciaToUpdate = await this.schAusencias.getAusenciasById(
+      new ObjectId(ausencia._id),
+    );
+    if (!ausenciaToUpdate) {
+      throw new Error("Ausencia no encontrada");
+    }
+
+    if (
+      ausenciaToUpdate.fechaInicio.getTime() !==
+        ausencia.fechaInicio.getTime() ||
+      ausenciaToUpdate.fechaFinal.getTime() !== ausencia.fechaFinal.getTime()
+    ) {
+      // Si las fechas de la ausencia han cambiado, llama a addAusenciaToCuadrantes
+      await this.cuadrantesInstance.addAusenciaToCuadrantes(ausencia);
+    }
+
+    await this.schAusencias.updateAusencia(ausencia);
+
+    // Elimina cuadrantes que están fuera del nuevo rango de fechas
+    await this.schAusencias.eliminarCuadrantesFueraDeRango(
+      ausencia.idUsuario,
+      ausencia.fechaInicio,
+      ausencia.fechaFinal,
+      ausencia.tipo,
+    );
+
+    return true;
   }
 
   async updateAusenciaResto(ausencia: AusenciaInterface) {
-    return await this.schAusencias.updateAusenciaResto(ausencia);
+    const ausenciaToUpdate = await this.schAusencias.getAusenciasById(
+      new ObjectId(ausencia._id),
+    );
+
+    if (!ausenciaToUpdate) {
+      throw new Error("Ausencia no encontrada");
+    }
+
+    if (
+      ausenciaToUpdate.fechaInicio.getTime() !==
+        ausencia.fechaInicio.getTime() ||
+      ausenciaToUpdate.fechaFinal.getTime() !== ausencia.fechaFinal.getTime()
+    ) {
+      // Si las fechas de la ausencia han cambiado, llama a addAusenciaToCuadrantes
+      await this.cuadrantesInstance.addAusenciaToCuadrantes(ausencia);
+    }
+
+    await this.schAusencias.updateAusenciaResto(ausencia);
+
+    // Elimina cuadrantes que están fuera del nuevo rango de fechas
+    await this.schAusencias.eliminarCuadrantesFueraDeRango(
+      ausencia.idUsuario,
+      ausencia.fechaInicio,
+      ausencia.fechaFinal,
+      ausencia.tipo,
+    );
+
+    return true;
   }
 
   async getAusencias() {

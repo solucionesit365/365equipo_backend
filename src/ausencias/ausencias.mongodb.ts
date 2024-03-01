@@ -34,6 +34,28 @@ export class AusenciasDatabase {
     return resDelete.acknowledged && resDelete.deletedCount > 0;
   }
 
+  async eliminarCuadrantesFueraDeRango(
+    idUsuario: number,
+    nuevaFechaInicio: Date,
+    nuevaFechaFinal: Date,
+    tipo: string,
+  ) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const collection = db.collection("cuadrantes2");
+
+    // Eliminar cuadrantes que ya no caen dentro del nuevo rango de fechas
+    const resultado = await collection.deleteMany({
+      idTrabajador: idUsuario,
+      "ausencia.tipo": tipo,
+      $or: [
+        { inicio: { $lt: nuevaFechaInicio } },
+        { final: { $gt: nuevaFechaFinal } },
+      ],
+    });
+
+    console.log(`Cuadrantes eliminados: ${resultado.deletedCount}`);
+  }
+
   async updateAusencia(ausencia: AusenciaInterface) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const ausenciasCollection = db.collection<AusenciaInterface>("ausencias");
