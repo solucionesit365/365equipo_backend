@@ -359,6 +359,17 @@ export class TrabajadorDatabaseService {
       where: {
         idResponsable: trabajador.id,
       },
+      include: {
+        contratos: {
+          where: {
+            fechaBaja: null,
+          },
+          orderBy: {
+            fechaAlta: "desc",
+          },
+          take: 1,
+        },
+      },
     });
 
     return subordinados;
