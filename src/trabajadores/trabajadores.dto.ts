@@ -139,6 +139,9 @@ export class TrabajadorFormRequest {
   @IsArray()
   arrayPermisos: string[];
 
+  @IsArray()
+  arrayRoles: string[];
+
   @IsOptional()
   @IsNumber()
   idResponsable: number | null;

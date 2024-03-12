@@ -749,28 +749,43 @@ export class TrabajadorDatabaseService {
   ) {
     await this.sqlHandleCambios(trabajador, original);
 
+    let payload = {
+      nombreApellidos: trabajador.nombreApellidos,
+      displayName: trabajador.displayName,
+      emails: trabajador.emails,
+      dni: trabajador.dni,
+      direccion: trabajador.direccion,
+      ciudad: trabajador.ciudad,
+      telefonos: trabajador.telefonos,
+      fechaNacimiento: trabajador.fechaNacimiento,
+      nacionalidad: trabajador.nacionalidad,
+      nSeguridadSocial: trabajador.nSeguridadSocial,
+      codigoPostal: trabajador.codigoPostal,
+      cuentaCorriente: trabajador.cuentaCorriente,
+      idResponsable: trabajador.idResponsable,
+      idTienda: trabajador.idTienda,
+      llevaEquipo: trabajador.llevaEquipo ? true : false,
+      tokenQR: trabajador.tokenQR,
+      roles: {
+        set: trabajador.arrayRoles.map((rol) => {
+          return {
+            id: rol,
+          };
+        }),
+      },
+    };
+
+    if (trabajador.arrayRoles.length === 0 || trabajador.arrayRoles[0] === "") {
+      delete payload.roles;
+      await this.prisma
+        .$queryRaw`DELETE FROM _RoleToTrabajador WHERE B = ${trabajador.id}`;
+    }
+
     const response = await this.prisma.trabajador.update({
       where: {
         id: trabajador.id,
       },
-      data: {
-        nombreApellidos: trabajador.nombreApellidos,
-        displayName: trabajador.displayName,
-        emails: trabajador.emails,
-        dni: trabajador.dni,
-        direccion: trabajador.direccion,
-        ciudad: trabajador.ciudad,
-        telefonos: trabajador.telefonos,
-        fechaNacimiento: trabajador.fechaNacimiento,
-        nacionalidad: trabajador.nacionalidad,
-        nSeguridadSocial: trabajador.nSeguridadSocial,
-        codigoPostal: trabajador.codigoPostal,
-        cuentaCorriente: trabajador.cuentaCorriente,
-        idResponsable: trabajador.idResponsable,
-        idTienda: trabajador.idTienda,
-        llevaEquipo: trabajador.llevaEquipo ? true : false,
-        tokenQR: trabajador.tokenQR,
-      },
+      data: payload,
     });
 
     return true;
