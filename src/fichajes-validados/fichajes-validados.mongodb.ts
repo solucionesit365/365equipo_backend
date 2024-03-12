@@ -268,4 +268,29 @@ export class FichajesValidadosDatabase {
       })
       .toArray();
   }
+
+  //Para el informe de kathy
+  async getFichajesValidadosInforme(
+    fechaInicio: DateTime,
+    fechaFinal: DateTime,
+    idTrabajador: number,
+  ) {
+    // Convertir fechas a UTC
+    let fechaInicioUTC = fechaInicio.toUTC();
+    let fechaFinalUTC = fechaFinal.toUTC();
+
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const fichajesCollection =
+      db.collection<FichajeValidadoDto>("fichajesValidados2");
+
+    return await fichajesCollection
+      .find({
+        idTrabajador: idTrabajador,
+        $and: [
+          { fichajeEntrada: { $gte: fechaInicioUTC.toJSDate() } },
+          { fichajeSalida: { $lte: fechaFinalUTC.toJSDate() } },
+        ],
+      })
+      .toArray();
+  }
 }
