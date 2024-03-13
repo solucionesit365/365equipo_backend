@@ -56,10 +56,11 @@ model Equipo {
 }
 
 model Empresa {
-  id        Int    @id @default(autoincrement())
+  id        String     @id @default(uuid())
   nombre    String
   cif       String
   idExterno Int?
+  contratos Contrato[]
 }
 
 model Contrato {
@@ -72,6 +73,8 @@ model Contrato {
   fechaBaja       DateTime?
   trabajador      Trabajador? @relation(fields: [dni], references: [dni])
   dni             String
+  idEmpresa       String?
+  empresa         Empresa?    @relation(fields: [idEmpresa], references: [id])
 }
 
 model Role {

@@ -36,6 +36,7 @@ import { Cultura365Module } from "./cultura365/cultura365.module";
 import { MBCTokenModule } from "./bussinesCentral/services/mbctoken/mbctoken.service.module";
 import { RoleModule } from './role/role.module';
 import { PermissionModule } from './permission/permission.module';
+import { EmpresaModule } from './empresa/empresa.module';
 
 @Module({
   imports: [
@@ -77,6 +78,7 @@ import { PermissionModule } from './permission/permission.module';
     MBCTokenModule,
     RoleModule,
     PermissionModule,
+    EmpresaModule,
   ],
   controllers: [AppController],
 })
