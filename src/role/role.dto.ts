@@ -15,3 +15,13 @@ export class AddPermissionDto {
   @IsString()
   permissionId: string;
 }
+
+export class RemovePermissionDto {
+  @IsNotEmpty()
+  @IsString()
+  roleId: string;
+
+  @IsNotEmpty()
+  @IsString()
+  permissionId: string;
+}

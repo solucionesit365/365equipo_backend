@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Post, UseGuards } from "@nestjs/common";
 import { RoleService } from "./role.service";
-import { AddPermissionDto, CreateRoleDto } from "./role.dto";
+import { AddPermissionDto, CreateRoleDto, RemovePermissionDto } from "./role.dto";
 import { AuthGuard } from "../guards/auth.guard";
 
 @Controller("role")
@@ -23,6 +23,12 @@ export class RoleController {
   @Post("addPermission")
   async addPermission(@Body() roleData: AddPermissionDto) {
     return await this.roleService.addPermission(roleData);
+  }
+
+  @UseGuards(AuthGuard)
+  @Post("removePermission")
+  async removePermission(@Body() roleData: RemovePermissionDto) {
+    return await this.roleService.removePermission(roleData);
   }
 
   // @Post("update")
