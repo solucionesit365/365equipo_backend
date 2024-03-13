@@ -21,7 +21,7 @@ import { AuthGuard } from "../guards/auth.guard";
 
 @Controller("test")
 export class TestController {
-  @Roles("ADMIN")
+  @Roles("ADMIN", "DEPENDIENTA")
   @UseGuards(AuthGuard, RoleGuard)
   @Post("testRole")
   async testRole() {

@@ -79,6 +79,7 @@ export class TrabajadorDatabaseService {
           take: 1, // Toma solo el contrato más reciente
         },
         tienda: true,
+        roles: true,
       },
     });
 
