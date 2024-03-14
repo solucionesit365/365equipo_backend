@@ -225,6 +225,22 @@ export class FichajesValidadosService {
     return resFichajesValidados;
   }
 
+  //Para informe de Kathy
+  async getFichajesValidadosInforme(
+    fechaInicio: DateTime,
+    fechaFinal: DateTime,
+    idTrabajador: number,
+  ) {
+    const resFichajesValidados =
+      await this.schFichajesValidados.getFichajesValidadosInforme(
+        fechaInicio,
+        fechaFinal,
+        idTrabajador,
+      );
+
+    return resFichajesValidados;
+  }
+
   // Solo se usa para el test de rectificarFichajesValidados
   async getTodos() {
     return await this.schFichajesValidados.getTodos();

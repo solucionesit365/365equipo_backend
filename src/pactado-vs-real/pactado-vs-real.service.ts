@@ -56,6 +56,7 @@ export class PactadoVsRealService {
     }
 
     const pactadoReal = [];
+    console.log(trabajadoresTienda);
 
     for (let i = 0; i < trabajadoresTienda.length; i += 1) {
       pactadoReal.push({
@@ -77,7 +78,41 @@ export class PactadoVsRealService {
         pactadoReal[i].arrayValidados.push(fichajesValidadosDia);
       }
     }
-    console.log(pactadoReal);
+    return pactadoReal;
+  }
+
+  async informePactadoVsReal(fechaInicio: DateTime) {
+    const trabajadores = await this.trabajadoresInstance.getTrabajadores();
+
+    const promesasTrabajadores = trabajadores.map(async (trabajador) => {
+      const arrayValidadosPromesas = [];
+
+      for (let j = 0; j < 7; j += 1) {
+        const fecha = fechaInicio.plus({ days: j });
+        const promesaFichaje =
+          this.fichajesValidadosService.getFichajesValidadosInforme(
+            fecha.startOf("day"),
+            fecha.endOf("day"),
+            trabajador.id, // Asegúrate de pasar el ID del trabajador aquí
+          );
+
+        arrayValidadosPromesas.push(promesaFichaje);
+      }
+
+      const arrayValidados = await Promise.all(arrayValidadosPromesas);
+
+      return {
+        nombre: trabajador.nombreApellidos,
+        idTrabajador: trabajador.id,
+        dni: trabajador.dni,
+        tienda: trabajador.tienda?.nombre,
+        contrato: (trabajador.contratos[0].horasContrato * 40) / 100,
+        fechaAntiguedad: trabajador.contratos[0].fechaAntiguedad,
+        arrayValidados,
+      };
+    });
+
+    const pactadoReal = await Promise.all(promesasTrabajadores);
     return pactadoReal;
   }
 }
