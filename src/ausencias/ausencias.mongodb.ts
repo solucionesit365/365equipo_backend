@@ -67,6 +67,7 @@ export class AusenciasDatabase {
       {
         $set: {
           fechaInicio: ausencia.fechaInicio,
+          fechaFinal: ausencia.fechaFinal,
           tipo: ausencia.tipo,
           comentario: ausencia.comentario,
           completa: ausencia.completa,

@@ -26,6 +26,7 @@ export type TiposAusencia =
   | "VACACIONES"
   | "SANCIÓN"
   | "ABSENTISMO"
+  | "REM"
   | "HORAS_JUSTIFICADAS";
 
 export interface TRequestCuadrante {
