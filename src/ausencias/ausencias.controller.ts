@@ -35,6 +35,7 @@ export class AusenciasController {
         tipo === "HORAS_JUSTIFICADAS" ||
         tipo === "SANCIÓN" ||
         tipo === "ABSENTISMO" ||
+        tipo === "REM" ||
         (tipo === "DIA_PERSONAL" &&
           typeof idUsuario === "number" &&
           typeof fechaInicio === "string" &&
@@ -92,8 +93,16 @@ export class AusenciasController {
 
   @UseGuards(AuthGuard)
   @Post("updateAusencia")
-  async updateAusencia(@Body() ausencia: AusenciaInterface) {
+  async updateAusencia(@Body() ausencia: any) {
     try {
+      ausencia.fechaInicio = DateTime.fromFormat(
+        ausencia.fechaInicio,
+        "dd/MM/yyyy",
+      ).toJSDate();
+      ausencia.fechaFinal = DateTime.fromFormat(
+        ausencia.fechaFinal,
+        "dd/MM/yyyy",
+      ).toJSDate();
       const respAusencia = await this.ausenciasInstance.updateAusencia(
         ausencia,
       );
