@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, InternalServerErrorException } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { HitMssqlService } from "../hit-mssql/hit-mssql.service";
 import { DateTime } from "luxon";
@@ -117,6 +117,28 @@ export class ContratoService {
 
   async getHorasContratoNew(idSql: number, conFecha: DateTime) {
     await this.getHorasContrato(idSql, conFecha);
+  }
+
+  async getContratoByDni(dni: string) {
+    try {
+      const resContrato = await this.prisma.contrato.findMany({
+        where: {
+          dni: dni,
+        },
+        include: {
+          empresa: true,
+        },
+      });
+
+      if (resContrato.length === 0) return null;
+
+      return resContrato;
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException(
+        "Error al obtener el contrato por DNI",
+      );
+    }
   }
 }
 

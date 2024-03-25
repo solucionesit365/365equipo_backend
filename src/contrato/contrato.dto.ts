@@ -1,6 +1,12 @@
 import { Prisma } from "@prisma/client";
 import { Type } from "class-transformer";
-import { IsDate, IsNotEmpty, IsNumber, IsOptional } from "class-validator";
+import {
+  IsDate,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from "class-validator";
 
 export class CreateContratoDto implements Prisma.ContratoCreateInput {
   @IsNotEmpty()
@@ -31,4 +37,10 @@ export class CreateContratoDto implements Prisma.ContratoCreateInput {
   @Type(() => Date)
   @IsDate()
   inicioContrato: Date;
+}
+
+export class GetContratoDto {
+  @IsNotEmpty()
+  @IsString()
+  dni: string;
 }

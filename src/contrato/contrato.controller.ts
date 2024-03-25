@@ -5,6 +5,9 @@ import { AuthGuard } from "../guards/auth.guard";
 import { UserRecord } from "firebase-admin/auth";
 import { User } from "../decorators/get-user.decorator";
 import { TrabajadorService } from "../trabajadores/trabajadores.class";
+import { GetContratoDto } from "./contrato.dto";
+import { Roles } from "src/decorators/role.decorator";
+import { RoleGuard } from "src/guards/role.guard";
 
 @Controller("contrato")
 export class ContratoController {
@@ -42,5 +45,12 @@ export class ContratoController {
       console.log(error);
       return { ok: false, message: error.message };
     }
+  }
+
+  @Roles("RRHH_ADMIN")
+  @UseGuards(AuthGuard, RoleGuard)
+  @Get("getContratoByDni")
+  async getContratoByDni(@Query() req: GetContratoDto) {
+    return await this.contratoService.getContratoByDni(req.dni);
   }
 }
