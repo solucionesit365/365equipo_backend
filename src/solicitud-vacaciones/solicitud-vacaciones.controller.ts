@@ -28,26 +28,77 @@ export class SolicitudVacacionesController {
         );
       this.email.enviarEmail(
         solicitudTrabajador.emails,
-        `Tu solicitud ha sido enviada con estos datos: <br/> 
+        `<!DOCTYPE html>
+      <html>
+      <head>
+        <style>
+          body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #4a4a4a;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+          }
+          h2 {
+            color: #0047ab;
+          }
+          table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 20px;
+            border: 1px solid #000000;
+          }
+          th {
+            background-color: #0047ab;
+            color: #ffffff;
+            padding: 10px;
+            text-align: center;
+          }
+          td {
+            background-color: #ffffff;
+            color: #000000;
+            padding: 10px;
+            text-align: center;
+            border-bottom: 1px solid #dddddd;
+            
+          }
+          .highlight {
+            background-color: #e7f4ff;
+          }
+          th, td {
+            border: 1px solid #000000;
+          }
+          p{
+            color: #000000;
+          }
+        </style>
+      </head>
+      <body>
+        <h2>Solicitud de Vacaciones</h2>
+        <p>Tu solicitud ha sido enviada con estos datos:</p>
         <table>
-        <tr style="background-color:#0000ff ">
-          <th>Fecha Inicio</th>
-          <th>Fecha Final</th>
-          <th>Fecha Incorporación</th>
-          <th>Observación</th>
-          <th>Total de días</th>
-        </tr>
-        <tr>
-          
-          <td>${solicitudesVacaciones.fechaInicio}</td>
-          <td>${solicitudesVacaciones.fechaFinal}</td>
-          <td>${solicitudesVacaciones.fechaIncorporacion}</td>
-          <td>${solicitudesVacaciones.observaciones}</td>
-          <td>${solicitudesVacaciones.totalDias}</td>
-        </tr>
-      </table>
-       `,
-        "Solicitud de Vacaciones",
+          <thead>
+            <tr>
+              <th>Fecha Inicio</th>
+              <th>Fecha Final</th>
+              <th>Fecha Incorporación</th>
+              <th>Observación</th>
+              <th>Total de días</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="highlight">
+              <td>${solicitudesVacaciones.fechaInicio}</td>
+              <td>${solicitudesVacaciones.fechaFinal}</td>
+              <td>${solicitudesVacaciones.fechaIncorporacion}</td>
+              <td>${solicitudesVacaciones.observaciones}</td>
+              <td>${solicitudesVacaciones.totalDias}</td>
+            </tr>
+          </tbody>
+        </table>
+      </body>
+      </html>`,
+        "Confirmación de Solicitud de Vacaciones",
       );
 
       return {
@@ -276,7 +327,20 @@ export class SolicitudVacacionesController {
 
         this.email.enviarEmail(
           solicitudTrabajador.emails,
-          `Tus vacaciones han sido: ${solicitud.estado}S <br/> Motivo: ${solicitud.respuestaSolicitud} `,
+          `
+            <div style="font-family: 'Arial', sans-serif; color: #333;">
+              <p>Tus vacaciones han sido: <strong>${
+                solicitud.estado
+              }</strong></p>
+              ${
+                solicitud.respuestaSolicitud
+                  ? `<p><strong>Motivo:</strong> ${solicitud.respuestaSolicitud}</p>`
+                  : "Controlate no gastes mucho"
+              }
+              <p>Esperamos que disfrutes de tu tiempo libre.</p>
+              <p>Saludos cordiales,<br/>El equipo de 365</p>
+            </div>
+          `,
           "Estado de Vacaciones",
         );
 

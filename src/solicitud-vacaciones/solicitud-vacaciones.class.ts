@@ -127,31 +127,83 @@ export class SolicitudesVacacionesService {
       );
     this.email.enviarEmail(
       solicitudTrabajador.emails,
-      `Tu solicitud ha sido enviada con estos datos: <br/> 
-    <table>
-    <tr style="background-color:#0000ff ">
-      <th>Fecha Inicio</th>
-      <th>Fecha Final</th>
-      <th>Fecha Incorporación</th>
-      <th>Creadas el:</th>
-      <th>Observación</th>
-      <th>Total de días</th>
-      <th>Estado</th>
-    </tr>
-    <tr>
-      
-      <td>${vacaciones.fechaInicio}</td>
-      <td>${vacaciones.fechaFinal}</td>
-      <td>${vacaciones.fechaIncorporacion}</td>
-      <td>${vacaciones.fechaCreacion}</td>
-      <td>${vacaciones.observaciones}</td>
-      <td>${vacaciones.totalDias}</td>
-      <td>${vacaciones.estado}</td>
-    </tr>
-  </table>
-   `,
-      "Solicitud de Vacaciones",
+      `<!DOCTYPE html>
+    <html>
+    <head>
+      <style>
+        body {
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+          color: #4a4a4a;
+          margin: 0;
+          padding: 20px;
+          background-color: #f4f4f4;
+        }
+        h2 {
+          color: #0047ab;
+        }
+        table {
+          border-collapse: collapse;
+          width: 100%;
+          margin-top: 20px;
+          border: 1px solid #000000;
+        }
+        th {
+          background-color: #0047ab;
+          color: #ffffff;
+          padding: 10px;
+          text-align: center;
+        }
+        td {
+          background-color: #ffffff;
+          color: #000000;
+          padding: 10px;
+          text-align: center;
+          border-bottom: 1px solid #dddddd;
+          
+        }
+        .highlight {
+          background-color: #e7f4ff;
+        }
+        th, td {
+          border: 1px solid #000000;
+        }
+        p{
+          color: #000000;
+        }
+      </style>
+    </head>
+    <body>
+      <h2>Solicitud de Vacaciones</h2>
+      <p>Tu solicitud ha sido enviada con estos datos:</p>
+      <table>
+        <thead>
+          <tr>
+            <th>Fecha Inicio</th>
+            <th>Fecha Final</th>
+            <th>Fecha Incorporación</th>
+            <th>Creadas el</th>
+            <th>Observación</th>
+            <th>Total de días</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="highlight">
+            <td>${vacaciones.fechaInicio}</td>
+            <td>${vacaciones.fechaFinal}</td>
+            <td>${vacaciones.fechaIncorporacion}</td>
+            <td>${vacaciones.fechaCreacion}</td>
+            <td>${vacaciones.observaciones}</td>
+            <td>${vacaciones.totalDias}</td>
+            <td>${vacaciones.estado}</td>
+          </tr>
+        </tbody>
+      </table>
+    </body>
+    </html>`,
+      "Confirmación de Solicitud de Vacaciones",
     );
+
     return { ok: true };
   }
 
