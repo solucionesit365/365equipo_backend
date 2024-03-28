@@ -148,17 +148,39 @@ export class PactadoVsRealService {
       prototipo,
     ];
 
-    for (let i = 0; ausenciasTrabajador.length; i += 1) {
-      for (let j = 0; j < 7; j += 1) {
-        if (inicioSemana <= ausenciasTrabajador[i]) {
-          
-        }
+    for (let i = 0; i < ausenciasTrabajador.length; i += 1) {
+      const limiteIzquierdo =
+        DateTime.fromJSDate(ausenciasTrabajador[i].fechaInicio) < inicioSemana
+          ? inicioSemana
+          : DateTime.fromJSDate(ausenciasTrabajador[i].fechaInicio);
+      const limiteDerecho =
+        DateTime.fromJSDate(ausenciasTrabajador[i].fechaFinal) > finalSemana
+          ? finalSemana
+          : DateTime.fromJSDate(ausenciasTrabajador[i].fechaFinal);
+
+      const diferenciaDias = Math.ceil(
+        limiteDerecho.diff(limiteIzquierdo, "days").days,
+      );
+
+      const horas = !!ausenciasTrabajador[i].horas
+        ? ausenciasTrabajador[i].horas
+        : 8;
+
+      const indexDia = limiteIzquierdo.weekday - 1;
+
+      for (let j = 0; j < diferenciaDias; j += 1) {
+        ausencias[indexDia + j].total += horas;
+        ausencias[indexDia + j].tipo = ausenciasTrabajador[i].tipo;
       }
-      const indexDia = ausenciasTrabajador[i].fechaInicio.getDay();
 
       ausencias[indexDia].total += ausenciasTrabajador[i].horas;
       ausencias[indexDia].tipo = ausenciasTrabajador[i].tipo;
     }
+
+    return {
+      ausenciasSemana: ausencias,
+      totalHorasAusencias: ausencias.reduce((acc, curr) => acc + curr.total, 0),
+    };
   }
 
   async informePactadoVsReal(inicioSemana: DateTime) {
@@ -188,7 +210,15 @@ export class PactadoVsRealService {
         (ausencia) => ausencia.idUsuario === trabajador.id,
       );
 
-      const ausencias = this.construirAusenciasSemanales(ausenciasTrabajador);
+      let ausencias = null;
+
+      if (ausenciasTrabajador.length > 0) {
+        ausencias = this.construirAusenciasSemanales(
+          ausenciasTrabajador,
+          inicioSemana,
+          inicioSemana.endOf("week"),
+        );
+      }
 
       return {
         nombre: trabajador.nombreApellidos,
@@ -199,7 +229,7 @@ export class PactadoVsRealService {
         fechaAntiguedad: trabajador.contratos[0].fechaAntiguedad,
         arrayValidados,
         horasAPagar: this.horasAPagarTrabajador(arrayValidados),
-        ausencias,
+        ...ausencias,
       };
     });
 
