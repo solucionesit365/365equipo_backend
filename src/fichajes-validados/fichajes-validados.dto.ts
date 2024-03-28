@@ -102,10 +102,6 @@ export class FichajeValidadoDto {
   @Type(() => TCuadranteMinDto)
   cuadrante: TCuadranteMinDto;
 
-  // @ValidateNested()
-  // @Type(() => Fichaje)
-  // fichajes: Fichaje;
-
   @Type(() => Date)
   @IsDate()
   fichajeEntrada: Date;

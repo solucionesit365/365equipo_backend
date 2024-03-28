@@ -49,9 +49,6 @@ export class PactadoVsRealController {
   @UseGuards(AuthGuard)
   @Get("informePactadoVsReal")
   async informePactadoVsReal(@Query() req: GetPactadoVsRealRequestDto) {
-    if (!req.fechaInicio)
-      return new BadRequestException("fechaInicio es requerida");
-
     const inicio = DateTime.fromJSDate(req.fechaInicio);
 
     const data = await this.pactadoRealService.informePactadoVsReal(
