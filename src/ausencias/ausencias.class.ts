@@ -4,6 +4,7 @@ import { Cuadrantes } from "../cuadrantes/cuadrantes.class";
 import { ObjectId } from "mongodb";
 import { TiposAusencia } from "../cuadrantes/cuadrantes.interface";
 import { AusenciaInterface } from "./ausencias.interface";
+import { DateTime } from "luxon";
 
 @Injectable()
 export class AusenciasService {
@@ -150,5 +151,12 @@ export class AusenciasService {
 
   async sincroAusenciasHit() {
     return await this.schAusencias.sincroAusenciasHit();
+  }
+
+  async getAusenciasIntervalo(fechaInicio: DateTime, fechaFinal: DateTime) {
+    return await this.schAusencias.getAusenciasIntervalo(
+      fechaInicio,
+      fechaFinal,
+    );
   }
 }

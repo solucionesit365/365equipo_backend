@@ -5,6 +5,8 @@ import { FichajesValidadosService } from "../fichajes-validados/fichajes-validad
 import { UserRecord } from "firebase-admin/auth";
 import { Trabajador, Tienda, Contrato } from "@prisma/client";
 import { FichajeValidadoDto } from "../fichajes-validados/fichajes-validados.dto";
+import { AusenciasService } from "../ausencias/ausencias.class";
+import { AusenciaInterface } from "../ausencias/ausencias.interface";
 
 type TrabajadorExtendido = Trabajador & {
   tienda?: Tienda | null; // Relación con Tienda
@@ -18,6 +20,7 @@ export class PactadoVsRealService {
   constructor(
     private readonly trabajadoresInstance: TrabajadorService,
     private readonly fichajesValidadosService: FichajesValidadosService,
+    private readonly ausenciasService: AusenciasService,
   ) {}
   async pactadoVsReal(
     trabajadorRequest: UserRecord,
@@ -125,24 +128,43 @@ export class PactadoVsRealService {
     return suma;
   }
 
+  private construirAusenciasSemanales(
+    ausenciasTrabajador: AusenciaInterface[],
+    inicioSemana: DateTime,
+    finalSemana: DateTime,
+  ) {
+    const prototipo = {
+      total: 0,
+      tipo: null,
+    };
+
+    const ausencias = [
+      prototipo,
+      prototipo,
+      prototipo,
+      prototipo,
+      prototipo,
+      prototipo,
+      prototipo,
+    ];
+
+    for (let i = 0; ausenciasTrabajador.length; i += 1) {
+      for (let j = 0; j < 7; j += 1) {
+        if (inicioSemana <= ausenciasTrabajador[i]) {
+          
+        }
+      }
+      const indexDia = ausenciasTrabajador[i].fechaInicio.getDay();
+
+      ausencias[indexDia].total += ausenciasTrabajador[i].horas;
+      ausencias[indexDia].tipo = ausenciasTrabajador[i].tipo;
+    }
+  }
+
   async informePactadoVsReal(inicioSemana: DateTime) {
     const trabajadores = await this.trabajadoresInstance.getTrabajadores();
 
     const promesasTrabajadores = trabajadores.map(async (trabajador) => {
-      // const arrayValidadosPromesas = [];
-
-      // for (let j = 0; j < 7; j += 1) {
-      //   const fecha = inicioSemana.plus({ days: j });
-      //   const promesaFichaje =
-      //     this.fichajesValidadosService.getFichajesValidadosInforme(
-      //       fecha.startOf("day"),
-      //       fecha.endOf("day"),
-      //       trabajador.id, // Asegúrate de pasar el ID del trabajador aquí
-      //     );
-
-      //   arrayValidadosPromesas.push(promesaFichaje);
-      // }
-
       const arrayValidadosMezclados =
         await this.fichajesValidadosService.getFichajesValidadosInforme(
           inicioSemana.startOf("day"),
@@ -154,6 +176,20 @@ export class PactadoVsRealService {
         arrayValidadosMezclados,
       );
 
+      // De todos los trabajadores
+      const ausenciasTrabajadores =
+        await this.ausenciasService.getAusenciasIntervalo(
+          inicioSemana,
+          inicioSemana.endOf("week"),
+        );
+
+      // Filtrar por la propiedad "idTrabajador" === trabajador.id
+      const ausenciasTrabajador = ausenciasTrabajadores.filter(
+        (ausencia) => ausencia.idUsuario === trabajador.id,
+      );
+
+      const ausencias = this.construirAusenciasSemanales(ausenciasTrabajador);
+
       return {
         nombre: trabajador.nombreApellidos,
         idTrabajador: trabajador.id,
@@ -163,6 +199,7 @@ export class PactadoVsRealService {
         fechaAntiguedad: trabajador.contratos[0].fechaAntiguedad,
         arrayValidados,
         horasAPagar: this.horasAPagarTrabajador(arrayValidados),
+        ausencias,
       };
     });
 

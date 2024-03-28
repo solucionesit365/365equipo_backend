@@ -114,6 +114,30 @@ export class AusenciasDatabase {
     return respAusencia;
   }
 
+  async getAusenciasIntervalo(fechaInicio: DateTime, fechaFinal: DateTime) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const ausenciasCollection = db.collection<AusenciaInterface>("ausencias");
+
+    // Convertir fechas de DateTime a Date de JS si es necesario
+    const inicio = fechaInicio.toJSDate(); // Asumiendo que fechaInicio es un objeto DateTime que necesita ser convertido
+    const final = fechaFinal.toJSDate(); // Lo mismo para fechaFinal
+
+    const query = {
+      $or: [
+        // Condición 1: La ausencia comienza dentro del intervalo
+        { fechaInicio: { $gte: inicio, $lte: final } },
+        // Condición 2: La ausencia termina dentro del intervalo
+        { fechaFinal: { $gte: inicio, $lte: final } },
+        // Condición 3: La ausencia comienza antes y termina después del intervalo
+        { fechaInicio: { $lte: inicio }, final: { $gte: final } },
+      ],
+    };
+
+    const ausencias = await ausenciasCollection.find(query).toArray();
+
+    return ausencias;
+  }
+
   async getAusenciasById(idAusencia: ObjectId) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const ausenciasCollection = db.collection<AusenciaInterface>("ausencias");
