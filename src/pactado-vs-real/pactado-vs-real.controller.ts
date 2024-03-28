@@ -46,7 +46,7 @@ export class PactadoVsRealController {
     };
   }
 
-  // @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard)
   @Get("informePactadoVsReal")
   async informePactadoVsReal(@Query() req: GetPactadoVsRealRequestDto) {
     if (!req.fechaInicio)
