@@ -11,6 +11,7 @@ import { FichajesValidadosService } from "../fichajes-validados/fichajes-validad
 import { DateTime } from "luxon";
 import { ContratoService } from "../contrato/contrato.service";
 import { Trabajador } from "@prisma/client";
+import { CopiarSemanaCuadranteDto } from "./cuadrantes.dto";
 
 moment.locale("custom", {
   week: {
@@ -711,6 +712,53 @@ export class Cuadrantes {
 
     if (resTurno) return resTurno;
     return null;
+  }
+
+  async copiarSemanaCuadrante(reqCopiar: CopiarSemanaCuadranteDto) {
+    const diaSemanaOrigen = DateTime.fromJSDate(reqCopiar.fechaSemanaOrigen);
+    const diaSemanaDestino = DateTime.fromJSDate(reqCopiar.fechaSemanaDestino);
+
+    const inicioSemanaOrigen = diaSemanaOrigen.startOf("week");
+    const finalSemanaOrigen = diaSemanaOrigen.endOf("week");
+
+    const inicioSemanaDestino = diaSemanaDestino.startOf("week");
+    const finalSemanaDestino = diaSemanaDestino.endOf("week");
+
+    const cuadrantes = await this.schCuadrantes.getCuadrantes(
+      reqCopiar.idTienda,
+      inicioSemanaOrigen,
+      finalSemanaOrigen,
+    );
+
+    if (cuadrantes.length > 0) {
+      const cuadrantesFechasModificadas = cuadrantes.map((cuadrante) => {
+        const fechaInicio = DateTime.fromJSDate(cuadrante.inicio);
+        const fechaFinal = DateTime.fromJSDate(cuadrante.final); // No se utiliza porque fechaFinal siempre está en el mismo día que fechaInicio
+
+        const diferenciaDias = fechaInicio.diff(
+          inicioSemanaOrigen,
+          "days",
+        ).days;
+
+        const nuevaFechaInicio = inicioSemanaDestino.plus({
+          days: diferenciaDias,
+        });
+        const nuevaFechaFinal = finalSemanaDestino.plus({
+          days: diferenciaDias,
+        });
+
+        return {
+          ...cuadrante,
+          inicio: nuevaFechaInicio.toJSDate(),
+          final: nuevaFechaFinal.toJSDate(),
+          enviado: false,
+        };
+      });
+
+      await this.schCuadrantes.insertCuadrantes(cuadrantesFechasModificadas);
+    }
+
+    return true;
   }
 
   // // Solo para migraciones

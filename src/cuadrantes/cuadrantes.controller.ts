@@ -19,6 +19,7 @@ import { ObjectId } from "mongodb";
 import { ContratoService } from "../contrato/contrato.service";
 import { User } from "../decorators/get-user.decorator";
 import { UserRecord } from "firebase-admin/auth";
+import { CopiarSemanaCuadranteDto } from "./cuadrantes.dto";
 
 @Controller("cuadrantes")
 export class CuadrantesController {
@@ -351,6 +352,12 @@ export class CuadrantesController {
       console.log(err);
       return { ok: false, message: err.message };
     }
+  }
+
+  @UseGuards(AuthGuard)
+  @Post("copiarSemanaCuadrante")
+  async copiarSemanaCuadrante(@Body() reqCopiar: CopiarSemanaCuadranteDto) {
+    return this.cuadrantesInstance.copiarSemanaCuadrante(reqCopiar);
   }
 
   @UseGuards(SchedulerGuard)

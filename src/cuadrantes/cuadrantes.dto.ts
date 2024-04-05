@@ -2,6 +2,7 @@ import {
   IsBoolean,
   IsDate,
   IsEnum,
+  IsNotEmpty,
   IsNumber,
   IsOptional,
   IsString,
@@ -83,4 +84,20 @@ export class TCuadranteDto {
   @IsOptional()
   @IsString()
   dni: string;
+}
+
+export class CopiarSemanaCuadranteDto {
+  @IsNotEmpty()
+  @Type(() => Date)
+  @IsDate()
+  fechaSemanaOrigen: Date;
+
+  @IsNotEmpty()
+  @Type(() => Date)
+  @IsDate()
+  fechaSemanaDestino: Date;
+
+  @IsNotEmpty()
+  @IsNumber()
+  idTienda: number;
 }
