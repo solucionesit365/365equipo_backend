@@ -104,6 +104,22 @@ export class EvaluacionesDatabase {
     return response;
   }
 
+  async getEvaluadosAdminTiendas(tienda: number, año: number) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const evaluacionesCollect = db.collection<MostrarEvaluacionDto>(
+      "evaluacionesRespuestas",
+    );
+
+    const query = {
+      "encuestado.tienda": tienda,
+      "encuestado.year": año,
+    };
+
+    const response = await evaluacionesCollect.find(query).toArray();
+
+    return response;
+  }
+
   //add ILUO
   async addILUO(plantilla: CrearIluoInterfaceDto) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");

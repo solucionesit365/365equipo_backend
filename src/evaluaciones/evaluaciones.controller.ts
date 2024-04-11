@@ -112,6 +112,8 @@ export class EvaluacionesController {
   @UseGuards(AuthGuard)
   @Post("addEvaluacion")
   async addEvaluacion(@Body() evaluacion: CreateEvaluacionesInterfaceDto) {
+    console.log(evaluacion);
+
     const response = await this.evaluacionesclass.addEvaluacion(evaluacion);
     if (response) {
       return {
@@ -127,6 +129,23 @@ export class EvaluacionesController {
     try {
       const response = await this.evaluacionesclass.getEvaluados(
         Number(request.idSql),
+        Number(request.año),
+      );
+      if (response) {
+        return {
+          ok: true,
+          data: response,
+        };
+      }
+    } catch (error) {}
+  }
+
+  // @UseGuards(AuthGuard)
+  @Get("getEvaluadosAdminTiendas")
+  async getEvaluadosAdminTiendas(@Query() request) {
+    try {
+      const response = await this.evaluacionesclass.getEvaluadosAdminTiendas(
+        Number(request.tienda),
         Number(request.año),
       );
       if (response) {

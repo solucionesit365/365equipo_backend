@@ -56,6 +56,10 @@ class Encuestado {
   @IsOptional()
   @IsString()
   departamento: string;
+
+  @IsOptional()
+  @IsNumber()
+  tienda: number;
 }
 
 class PreguntaEvaluadaILUO {
