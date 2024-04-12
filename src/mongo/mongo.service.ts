@@ -11,7 +11,7 @@ export class MongoService {
     if (process.env.ENTORNO === "test") {
       mongoHost = "test-365equipo.cgnccs9.mongodb.net";
     } else mongoHost = "365-equipo-new.kfiby.mongodb.net";
-    const uri = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@${mongoHost}`;
+    const uri = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@${mongoHost}/soluciones`;
     const client = new MongoClient(uri);
     this.conexion = client.connect();
   }
