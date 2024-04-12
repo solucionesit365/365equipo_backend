@@ -16,11 +16,15 @@ import { Cuadrantes } from "../cuadrantes/cuadrantes.class";
 import { Roles } from "../decorators/role.decorator";
 import { RoleGuard } from "../guards/role.guard";
 import { AuthGuard } from "../guards/auth.guard";
+import { PrismaService } from "../prisma/prisma.service";
+import axios from "axios";
 
 // import { Prisma } from "@prisma/client";
 
 @Controller("test")
 export class TestController {
+  constructor(private readonly prismaService: PrismaService) {}
+
   @Roles("ADMIN", "DEPENDIENTA")
   @UseGuards(AuthGuard, RoleGuard)
   @Post("testRole")
@@ -248,5 +252,140 @@ export class TestController {
   //   }
   //   await this.fichajesInstance.setAllFichajes(fichajes);
   //   return "OK";
+  // }
+
+  // @Post("insertEmpresa")
+  // async insertEmpresa() {
+  //   const empresas = await axios.post("http://localhost:3001/test/getEmpresas");
+
+  //   return await this.prismaService.empresa.createMany({
+  //     data: empresas.data,
+  //   });
+  // }
+
+  // @Post("insertTiendas")
+  // async insertTiendas() {
+  //   const tiendas = await axios.post("http://localhost:3001/test/getTiendas");
+
+  //   return await this.prismaService.tienda.createMany({
+  //     data: tiendas.data,
+  //   });
+  // }
+
+  // @Post("insertTrabajadores")
+  // async insertTrabajadores() {
+  //   const trabajadores = await axios.post(
+  //     "http://localhost:3001/test/getTrabajadores",
+  //   );
+
+  //   return await this.prismaService.trabajador.createMany({
+  //     data: trabajadores.data,
+  //   });
+  // }
+
+  // @Post("insertContratos")
+  // async insertContratos() {
+  //   const contratos = await axios.post(
+  //     "http://localhost:3001/test/getContrato",
+  //   );
+
+  //   return await this.prismaService.contrato.createMany({
+  //     data: contratos.data,
+  //   });
+  // }
+
+  // @Post("insertEquipos")
+  // async insertEquipos() {
+  //   const equipos = await axios.post("http://localhost:3001/test/getEquipos");
+
+  //   return await this.prismaService.equipo.createMany({
+  //     data: equipos.data,
+  //   });
+  // }
+
+  // @Post("insertPermisos")
+  // async inserPermisos() {
+  //   const permisos = await axios.post("http://localhost:3001/test/getPermisos");
+
+  //   return await this.prismaService.permiso.createMany({
+  //     data: permisos.data,
+  //   });
+  // }
+
+  // @Post("insertRoles")
+  // async insertRoles() {
+  //   const roles = await axios.post("http://localhost:3001/test/getRoles");
+
+  //   return await this.prismaService.role.createMany({
+  //     data: roles.data,
+  //   });
+  // }
+
+  // @Post("insertPermisoToRole")
+  // async insertPermisoToRole() {
+  //   const permisoToRole = await axios.post(
+  //     "http://localhost:3001/test/getPermisoToRole",
+  //   );
+
+  //   for (let i = 0; i < permisoToRole.data.length; i++) {
+  //     await this.prismaService.$queryRawUnsafe(`
+  //       INSERT INTO "_PermisoToRole" ("A", "B") VALUES ('${permisoToRole.data[i].A}', '${permisoToRole.data[i].B}');
+  //     `);
+  //   }
+
+  //   return true;
+  //   // return await this.prismaService.role.createMany({
+  //   //   data: roles.data,
+  //   // });
+  // }
+
+  // @Post("getEmpresas")
+  // async getEmpresas() {
+  //   const empresas = await this.prismaService.empresa.findMany();
+  //   return empresas;
+  // }
+
+  // @Post("getTiendas")
+  // async getTiendas() {
+  //   const tiendas = await this.prismaService.tienda.findMany();
+  //   return tiendas;
+  // }
+
+  // @Post("getTrabajadores")
+  // async getTrabajadores() {
+  //   const trabajadores = await this.prismaService.trabajador.findMany();
+  //   return trabajadores;
+  // }
+
+  // @Post("getContrato")
+  // async getContrato() {
+  //   const contrato = await this.prismaService.contrato.findMany();
+  //   return contrato;
+  // }
+
+  // @Post("getEquipos")
+  // async getEquipos() {
+  //   const equipos = await this.prismaService.equipo.findMany();
+  //   return equipos;
+  // }
+
+  // @Post("getPermisos")
+  // async getPermisos() {
+  //   const permisos = await this.prismaService.permiso.findMany();
+  //   return permisos;
+  // }
+
+  // @Post("getRoles")
+  // async getRoles() {
+  //   const roles = await this.prismaService.role.findMany();
+  //   return roles;
+  // }
+
+  // @Post("getPermisoToRole")
+  // async getPermisoToRole() {
+  //   const roles = await this.prismaService.$queryRawUnsafe(`
+  //     select * from _PermisoToRole;
+  //   `);
+  //   return roles;
   // }
 }
