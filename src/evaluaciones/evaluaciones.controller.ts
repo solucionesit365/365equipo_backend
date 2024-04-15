@@ -140,7 +140,7 @@ export class EvaluacionesController {
     } catch (error) {}
   }
 
-  // @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard)
   @Get("getEvaluadosAdminTiendas")
   async getEvaluadosAdminTiendas(@Query() request) {
     try {
@@ -157,7 +157,7 @@ export class EvaluacionesController {
     } catch (error) {}
   }
 
-  // @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard)
   @Post("addILUO")
   async addILUO(@Body() evaluacion: CrearIluoInterfaceDto) {
     try {
