@@ -779,7 +779,7 @@ export class TrabajadorDatabaseService {
     if (trabajador.arrayRoles.length === 0 || trabajador.arrayRoles[0] === "") {
       delete payload.roles;
       await this.prisma
-        .$queryRaw`DELETE FROM _RoleToTrabajador WHERE B = ${trabajador.id}`;
+        .$queryRaw`DELETE FROM "_RoleToTrabajador" WHERE "B" = ${trabajador.id}`;
     }
 
     const response = await this.prisma.trabajador.update({
