@@ -167,7 +167,7 @@ export class SolicitudVacacionesDatabase {
       { $set: { idAppResponsable } },
     );
 
-    if (resultado.acknowledged && resultado.modifiedCount > 0) {
+    if (resultado.acknowledged) {
       return true;
     } else {
       throw new Error(
