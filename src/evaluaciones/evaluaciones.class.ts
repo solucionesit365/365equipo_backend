@@ -73,6 +73,17 @@ export class EvaluacionesService {
     }
   }
 
+  async getEvaluadosAdminTiendas(tienda: number, año: number) {
+    const response = await this.evaluacionesDB.getEvaluadosAdminTiendas(
+      tienda,
+      año,
+    );
+
+    if (response) {
+      return response;
+    }
+  }
+
   //add ILUO
   async addILUO(evaluacion: CrearIluoInterfaceDto) {
     const response = await this.evaluacionesDB.addILUO(evaluacion);
