@@ -8,7 +8,7 @@ import {
   IsString,
 } from "class-validator";
 
-export class CreateContratoDto implements Prisma.ContratoCreateInput {
+export class CreateContratoDto {
   @IsNotEmpty()
   @Type(() => Date)
   @IsDate()
