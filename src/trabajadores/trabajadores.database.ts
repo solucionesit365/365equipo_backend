@@ -17,7 +17,7 @@ export class TrabajadorDatabaseService {
   ) {}
 
   async crearTrabajador(reqTrabajador: CreateTrabajadorRequestDto) {
-    await this.prisma.trabajador.create({
+    const newTrabajador = await this.prisma.trabajador.create({
       data: {
         dni: reqTrabajador.dni,
         nombreApellidos: reqTrabajador.nombreApellidos,
@@ -54,6 +54,7 @@ export class TrabajadorDatabaseService {
 
     await this.prisma.contrato.create({
       data: {
+        idTrabajador: newTrabajador.id,
         dni: reqTrabajador.dni,
         fechaAlta: reqTrabajador.contrato.fechaAlta,
         fechaAntiguedad: reqTrabajador.contrato.fechaAntiguedad,

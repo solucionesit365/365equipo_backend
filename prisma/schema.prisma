@@ -71,8 +71,8 @@ model Contrato {
   fechaAlta       DateTime
   fechaAntiguedad DateTime
   fechaBaja       DateTime?
-  trabajador      Trabajador? @relation(fields: [idTrabajador], references: [id])
-  idTrabajador    Int?
+  trabajador      Trabajador @relation(fields: [idTrabajador], references: [id])
+  idTrabajador    Int
   dni             String
   idEmpresa       String?
   empresa         Empresa?    @relation(fields: [idEmpresa], references: [id])
