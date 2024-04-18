@@ -1,5 +1,6 @@
 import {
   Controller,
+  Get,
   InternalServerErrorException,
   // Get,
   // InternalServerErrorException,
@@ -30,6 +31,11 @@ export class TestController {
   @Post("testRole")
   async testRole() {
     return "Role test";
+  }
+
+  @Get()
+  test() {
+    return "Operativo";
   }
 
   // constructor(private readonly cuadrantesInstance: Cuadrantes) {}
