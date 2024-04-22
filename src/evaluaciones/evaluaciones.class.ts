@@ -118,4 +118,14 @@ export class EvaluacionesService {
       return response;
     }
   }
+
+  async updateFirmaEvaluado(_id: string, firmaEvaluado: string) {
+    const response = await this.evaluacionesDB.updateFirmaEvaluado(
+      _id,
+      firmaEvaluado,
+    );
+    if (response) {
+      return response;
+    }
+  }
 }
