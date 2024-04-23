@@ -221,7 +221,7 @@ export class EvaluacionesController {
     } catch (error) {}
   }
 
-  // @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard)
   @Post("updateFirmaEvaluado")
   async updateFirmaEvaluado(@Body() { _id, firmaEvaluado }) {
     try {
