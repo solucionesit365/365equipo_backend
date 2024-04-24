@@ -35,6 +35,9 @@ class Configuracion {
 
   @IsBoolean()
   subirFoto: boolean;
+
+  @IsBoolean()
+  firmaResponsable: boolean;
 }
 
 class Encuestado {
@@ -56,6 +59,10 @@ class Encuestado {
   @IsOptional()
   @IsString()
   departamento: string;
+
+  @IsOptional()
+  @IsNumber()
+  tienda: number;
 }
 
 class PreguntaEvaluadaILUO {

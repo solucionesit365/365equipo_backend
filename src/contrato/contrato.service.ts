@@ -38,30 +38,31 @@ export class ContratoService {
     return [];
   }
 
-  async copiarHistoriaContratosHitSoluciones() {
-    const arrayContratos = await this.getHistoriaContratos();
+  // async copiarHistoriaContratosHitSoluciones() {
+  //   const arrayContratos = await this.getHistoriaContratos();
 
-    if (arrayContratos.length === 0)
-      throw Error("No hay contratos para traspasar");
+  //   if (arrayContratos.length === 0)
+  //     throw Error("No hay contratos para traspasar");
 
-    await this.prisma.contrato.deleteMany({});
+  //   await this.prisma.contrato.deleteMany({});
 
-    await this.prisma.contrato.createMany({
-      data: arrayContratos.map((row) => {
-        return {
-          horasContrato: row.horasContrato,
-          dni: row.dni,
-          inicioContrato: convertToDate(row.inicioContrato),
-          finalContrato: convertToDate(row.finalContrato),
-          fechaAlta: convertToDate(row.fechaAlta),
-          fechaAntiguedad: convertToDate(row.fechaAntiguedad),
-          fechaBaja: convertToDate(row.fechaBaja),
-        };
-      }),
-    });
+  //   await this.prisma.contrato.createMany({
+  //     data: arrayContratos.map((row) => {
+  //       return {
+  //         idTrabajador:
+  //         horasContrato: row.horasContrato,
+  //         dni: row.dni,
+  //         inicioContrato: convertToDate(row.inicioContrato),
+  //         finalContrato: convertToDate(row.finalContrato),
+  //         fechaAlta: convertToDate(row.fechaAlta),
+  //         fechaAntiguedad: convertToDate(row.fechaAntiguedad),
+  //         fechaBaja: convertToDate(row.fechaBaja),
+  //       };
+  //     }),
+  //   });
 
-    return true;
-  }
+  //   return true;
+  // }
 
   async getHistoricoContratos(dni: string) {
     const resContratos = await this.prisma.contrato.findMany({
@@ -76,7 +77,8 @@ export class ContratoService {
   }
 
   async descargarHistoriaContratos() {
-    return await this.copiarHistoriaContratosHitSoluciones();
+    return 1;
+    // return await this.copiarHistoriaContratosHitSoluciones();
   }
 
   async getHorasContratoById(idSql: number, fecha: DateTime) {

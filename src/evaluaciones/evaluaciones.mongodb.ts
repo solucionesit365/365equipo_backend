@@ -104,6 +104,22 @@ export class EvaluacionesDatabase {
     return response;
   }
 
+  async getEvaluadosAdminTiendas(tienda: number, año: number) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const evaluacionesCollect = db.collection<MostrarEvaluacionDto>(
+      "evaluacionesRespuestas",
+    );
+
+    const query = {
+      "encuestado.tienda": tienda,
+      "encuestado.year": año,
+    };
+
+    const response = await evaluacionesCollect.find(query).toArray();
+
+    return response;
+  }
+
   //add ILUO
   async addILUO(plantilla: CrearIluoInterfaceDto) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
@@ -149,5 +165,25 @@ export class EvaluacionesDatabase {
     const response = await evaluacionesCollect.find(query).toArray();
 
     return response;
+  }
+
+  async updateFirmaEvaluado(_id: string, firmaEvaluado: string) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const evaluacionesCollect = db.collection<MostrarEvaluacionDto>(
+      "evaluacionesRespuestas",
+    );
+    const resUpdate = await evaluacionesCollect.updateOne(
+      {
+        _id: new ObjectId(_id),
+      },
+      {
+        $set: {
+          firmaEvaluado: firmaEvaluado,
+        },
+      },
+    );
+
+    if (resUpdate.acknowledged && resUpdate.matchedCount > 0) return true;
+    throw Error("No se ha podido actualizar la firma del evaluado");
   }
 }

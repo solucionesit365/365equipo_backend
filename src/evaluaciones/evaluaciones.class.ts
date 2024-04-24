@@ -73,6 +73,17 @@ export class EvaluacionesService {
     }
   }
 
+  async getEvaluadosAdminTiendas(tienda: number, año: number) {
+    const response = await this.evaluacionesDB.getEvaluadosAdminTiendas(
+      tienda,
+      año,
+    );
+
+    if (response) {
+      return response;
+    }
+  }
+
   //add ILUO
   async addILUO(evaluacion: CrearIluoInterfaceDto) {
     const response = await this.evaluacionesDB.addILUO(evaluacion);
@@ -103,6 +114,16 @@ export class EvaluacionesService {
   async getILUORespuestas(idSql: number, año: number) {
     const response = await this.evaluacionesDB.getILUORespuestas(idSql, año);
 
+    if (response) {
+      return response;
+    }
+  }
+
+  async updateFirmaEvaluado(_id: string, firmaEvaluado: string) {
+    const response = await this.evaluacionesDB.updateFirmaEvaluado(
+      _id,
+      firmaEvaluado,
+    );
     if (response) {
       return response;
     }

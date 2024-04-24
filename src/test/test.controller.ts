@@ -1,5 +1,6 @@
 import {
   Controller,
+  Get,
   InternalServerErrorException,
   // Get,
   // InternalServerErrorException,
@@ -30,6 +31,11 @@ export class TestController {
   @Post("testRole")
   async testRole() {
     return "Role test";
+  }
+
+  @Get()
+  test() {
+    return "Operativo";
   }
 
   // constructor(private readonly cuadrantesInstance: Cuadrantes) {}
@@ -388,4 +394,32 @@ export class TestController {
   //   `);
   //   return roles;
   // }
+
+  @Post("relacionarContratos")
+  async relacionarContratos() {
+    // Conectar contrato a trabajador por contrato.dni = trabajador.dni
+    const contratos = await this.prismaService.contrato.findMany();
+    const trabajadores = await this.prismaService.trabajador.findMany();
+
+    for (let i = 0; i < contratos.length; i++) {
+      const trabajador = trabajadores.find(
+        (trabajador) => trabajador.dni === contratos[i].dni,
+      );
+
+      if (trabajador) {
+        await this.prismaService.trabajador.update({
+          where: { id: trabajador.id },
+          data: {
+            contratos: {
+              connect: {
+                id: contratos[i].id,
+              },
+            },
+          },
+        });
+      }
+    }
+
+    return true;
+  }
 }

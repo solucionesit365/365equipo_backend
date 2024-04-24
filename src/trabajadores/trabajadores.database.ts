@@ -17,7 +17,7 @@ export class TrabajadorDatabaseService {
   ) {}
 
   async crearTrabajador(reqTrabajador: CreateTrabajadorRequestDto) {
-    return await this.prisma.trabajador.create({
+    const newTrabajador = await this.prisma.trabajador.create({
       data: {
         dni: reqTrabajador.dni,
         nombreApellidos: reqTrabajador.nombreApellidos,
@@ -49,18 +49,23 @@ export class TrabajadorDatabaseService {
               },
             }
           : {},
-        contratos: {
-          create: {
-            fechaAlta: reqTrabajador.contrato.fechaAlta,
-            fechaAntiguedad: reqTrabajador.contrato.fechaAntiguedad,
-            horasContrato: reqTrabajador.contrato.horasContrato,
-            inicioContrato: reqTrabajador.contrato.inicioContrato,
-            fechaBaja: reqTrabajador.contrato.fechaBaja,
-            finalContrato: reqTrabajador.contrato.finalContrato,
-          },
-        },
       },
     });
+
+    await this.prisma.contrato.create({
+      data: {
+        idTrabajador: newTrabajador.id,
+        dni: reqTrabajador.dni,
+        fechaAlta: reqTrabajador.contrato.fechaAlta,
+        fechaAntiguedad: reqTrabajador.contrato.fechaAntiguedad,
+        horasContrato: reqTrabajador.contrato.horasContrato,
+        inicioContrato: reqTrabajador.contrato.inicioContrato,
+        fechaBaja: reqTrabajador.contrato.fechaBaja,
+        finalContrato: reqTrabajador.contrato.finalContrato,
+      },
+    });
+
+    return true;
   }
 
   async getTrabajadorByAppId(uid: string) {
