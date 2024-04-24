@@ -35,6 +35,9 @@ class Configuracion {
 
   @IsBoolean()
   subirFoto: boolean;
+
+  @IsBoolean()
+  firmaResponsable: boolean;
 }
 
 class Encuestado {

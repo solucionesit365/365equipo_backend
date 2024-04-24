@@ -220,4 +220,23 @@ export class EvaluacionesController {
       }
     } catch (error) {}
   }
+
+  @UseGuards(AuthGuard)
+  @Post("updateFirmaEvaluado")
+  async updateFirmaEvaluado(@Body() { _id, firmaEvaluado }) {
+    try {
+      const response = await this.evaluacionesclass.updateFirmaEvaluado(
+        _id,
+        firmaEvaluado,
+      );
+      console.log(response);
+      if (response) {
+        console.log("Dentro de response", response);
+        return {
+          ok: true,
+          data: response,
+        };
+      }
+    } catch (error) {}
+  }
 }

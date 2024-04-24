@@ -166,4 +166,24 @@ export class EvaluacionesDatabase {
 
     return response;
   }
+
+  async updateFirmaEvaluado(_id: string, firmaEvaluado: string) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const evaluacionesCollect = db.collection<MostrarEvaluacionDto>(
+      "evaluacionesRespuestas",
+    );
+    const resUpdate = await evaluacionesCollect.updateOne(
+      {
+        _id: new ObjectId(_id),
+      },
+      {
+        $set: {
+          firmaEvaluado: firmaEvaluado,
+        },
+      },
+    );
+
+    if (resUpdate.acknowledged && resUpdate.matchedCount > 0) return true;
+    throw Error("No se ha podido actualizar la firma del evaluado");
+  }
 }
