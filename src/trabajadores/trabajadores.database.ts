@@ -54,7 +54,11 @@ export class TrabajadorDatabaseService {
 
     await this.prisma.contrato.create({
       data: {
-        idTrabajador: newTrabajador.id,
+        trabajador: {
+          connect: {
+            id: newTrabajador.id,
+          },
+        },
         dni: reqTrabajador.dni,
         fechaAlta: reqTrabajador.contrato.fechaAlta,
         fechaAntiguedad: reqTrabajador.contrato.fechaAntiguedad,
