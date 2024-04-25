@@ -3,14 +3,14 @@ import { DateTime } from "luxon";
 import { TrabajadorService } from "../trabajadores/trabajadores.class";
 import { FichajesValidadosService } from "../fichajes-validados/fichajes-validados.class";
 import { UserRecord } from "firebase-admin/auth";
-import { Trabajador, Tienda, Contrato } from "@prisma/client";
+import { Trabajador, Tienda, Contrato2 } from "@prisma/client";
 import { FichajeValidadoDto } from "../fichajes-validados/fichajes-validados.dto";
 import { AusenciasService } from "../ausencias/ausencias.class";
 import { AusenciaInterface } from "../ausencias/ausencias.interface";
 
 type TrabajadorExtendido = Trabajador & {
   tienda?: Tienda | null; // Relación con Tienda
-  contratos?: Contrato[] | null; // Relación con Contratos
+  contratos?: Contrato2[] | null; // Relación con Contratos
   responsable?: Trabajador | null; // Relación con Responsable
   subordinados?: Trabajador[] | null; // Relación con Subordinados
 };

@@ -395,29 +395,54 @@ export class TestController {
   //   return roles;
   // }
 
-  @Post("relacionarContratos")
-  async relacionarContratos() {
-    // Conectar contrato a trabajador por contrato.dni = trabajador.dni
+  // // @Post("relacionarContratos")
+  // // async relacionarContratos() {
+  // //   // Conectar contrato a trabajador por contrato.dni = trabajador.dni
+  // //   const contratos = await this.prismaService.contrato.findMany();
+  // //   const trabajadores = await this.prismaService.trabajador.findMany();
+
+  // //   for (let i = 0; i < contratos.length; i++) {
+  // //     const trabajador = trabajadores.find(
+  // //       (trabajador) => trabajador.dni === contratos[i].dni,
+  // //     );
+
+  // //     if (trabajador) {
+  // //       await this.prismaService.trabajador.update({
+  // //         where: { id: trabajador.id },
+  // //         data: {
+  // //           contratos: {
+  // //             connect: {
+  // //               id: contratos[i].id,
+  // //             },
+  // //           },
+  // //         },
+  // //       });
+  // //     }
+  // //   }
+
+  // //   return true;
+  // // }
+
+  @Post("traspasarContratos2")
+  async traspaso() {
     const contratos = await this.prismaService.contrato.findMany();
-    const trabajadores = await this.prismaService.trabajador.findMany();
 
     for (let i = 0; i < contratos.length; i++) {
-      const trabajador = trabajadores.find(
-        (trabajador) => trabajador.dni === contratos[i].dni,
-      );
-
-      if (trabajador) {
-        await this.prismaService.trabajador.update({
-          where: { id: trabajador.id },
-          data: {
-            contratos: {
-              connect: {
-                id: contratos[i].id,
-              },
+      await this.prismaService.contrato2.create({
+        data: {
+          fechaAlta: contratos[i].fechaAlta,
+          fechaBaja: contratos[i].fechaBaja,
+          finalContrato: contratos[i].finalContrato,
+          fechaAntiguedad: contratos[i].fechaAntiguedad,
+          horasContrato: contratos[i].horasContrato,
+          inicioContrato: contratos[i].inicioContrato,
+          Trabajador: {
+            connect: {
+              id: contratos[i].idTrabajador,
             },
           },
-        });
-      }
+        },
+      });
     }
 
     return true;
