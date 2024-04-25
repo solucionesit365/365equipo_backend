@@ -237,8 +237,8 @@ export class CuadrantesDatabase {
     const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes2");
     const resCuadrantes = await cuadrantesCollection
       .find({
-        fechaInicio: { $gte: fechaInicioBusqueda.toJSDate() },
-        fechaFinal: { $lte: fechaFinalBusqueda.toJSDate() },
+        inicio: { $gte: fechaInicioBusqueda.toJSDate() },
+        final: { $lte: fechaFinalBusqueda.toJSDate() },
       })
       .toArray();
 
