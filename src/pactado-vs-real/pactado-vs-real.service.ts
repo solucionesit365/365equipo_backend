@@ -7,6 +7,8 @@ import { Trabajador, Tienda, Contrato2 } from "@prisma/client";
 import { FichajeValidadoDto } from "../fichajes-validados/fichajes-validados.dto";
 import { AusenciasService } from "../ausencias/ausencias.class";
 import { AusenciaInterface } from "../ausencias/ausencias.interface";
+import { PactadoVsRealDto } from "./pactado-vs-real.dto";
+import { Cuadrantes } from "../cuadrantes/cuadrantes.class";
 
 type TrabajadorExtendido = Trabajador & {
   tienda?: Tienda | null; // Relación con Tienda
@@ -21,6 +23,7 @@ export class PactadoVsRealService {
     private readonly trabajadoresInstance: TrabajadorService,
     private readonly fichajesValidadosService: FichajesValidadosService,
     private readonly ausenciasService: AusenciasService,
+    private readonly cuadranteService: Cuadrantes,
   ) {}
   async pactadoVsReal(
     trabajadorRequest: UserRecord,
@@ -59,7 +62,7 @@ export class PactadoVsRealService {
       trabajadoresTienda.push(trabajador);
     }
 
-    const pactadoReal = [];
+    const pactadoReal: PactadoVsRealDto[] = [];
     console.log(trabajadoresTienda);
 
     for (let i = 0; i < trabajadoresTienda.length; i += 1) {
@@ -82,6 +85,22 @@ export class PactadoVsRealService {
         pactadoReal[i].arrayValidados.push(fichajesValidadosDia);
       }
     }
+
+    return await this.adjuntarContratos(pactadoReal, fechaInicio);
+  }
+
+  private async adjuntarContratos(
+    pactadoReal: PactadoVsRealDto[],
+    fechaEntreSemana: DateTime,
+  ) {
+    for (let i = 0; i < pactadoReal.length; i += 1) {
+      pactadoReal[i]["cuadrante"] =
+        await this.cuadranteService.getCuadranteSemanaTrabajador(
+          pactadoReal[i].idTrabajador,
+          fechaEntreSemana,
+        );
+    }
+
     return pactadoReal;
   }
 
