@@ -747,6 +747,8 @@ export class Cuadrantes {
           days: diferenciaDias,
         });
 
+        delete cuadrante._id;
+
         return {
           ...cuadrante,
           inicio: nuevaFechaInicio.toJSDate(),
