@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, Inject, forwardRef } from "@nestjs/common";
 import { diaPersonalMongo } from "./dia-personal.mongodb";
 import { diaPersonal } from "./dia-personal.interface";
 import { ContratoService } from "../contrato/contrato.service";
@@ -10,6 +10,7 @@ export class diaPersonalClass {
   constructor(
     private readonly schdiaPersonal: diaPersonalMongo,
     private readonly contratoService: ContratoService,
+    @Inject(forwardRef(() => TrabajadorService))
     private readonly trabajadorInstance: TrabajadorService,
     private readonly email: EmailService,
   ) {}
@@ -100,11 +101,27 @@ export class diaPersonalClass {
     );
   }
 
-  async enviarAlEmail(vacaciones) {
+  async enviarAlEmail(diaPersonal) {
     const solicitudTrabajador =
       await this.trabajadorInstance.getTrabajadorBySqlId(
-        Number(vacaciones.idBeneficiario),
+        Number(diaPersonal.idBeneficiario),
       );
+
+    diaPersonal.fechaInicio = new Date(diaPersonal.fechaInicio);
+    diaPersonal.fechaFinal = new Date(diaPersonal.fechaFinal);
+    diaPersonal.fechaIncorporacion = new Date(diaPersonal.fechaIncorporacion);
+    diaPersonal.fechaCreacion = new Date(diaPersonal.fechaCreacion);
+
+    let fechaInicio = DateTime.fromJSDate(diaPersonal.fechaInicio).toFormat(
+      "dd/MM/yyyy",
+    );
+    let fechaFinal = DateTime.fromJSDate(diaPersonal.fechaFinal).toFormat(
+      "dd/MM/yyyy",
+    );
+    let fechaIncorporacion = DateTime.fromJSDate(
+      diaPersonal.fechaIncorporacion,
+    ).toFormat("dd/MM/yyyy");
+
     this.email.enviarEmail(
       solicitudTrabajador.emails,
       `<!DOCTYPE html>
@@ -163,25 +180,25 @@ export class diaPersonalClass {
               <div class="section">
                   <div class="item">
                       <span class="label">Fecha de Inicio:</span>
-                      <span class="value">${vacaciones.fechaInicio}</span>
+                      <span class="value">${fechaInicio}</span>
                   </div>
                   <div class="item">
                       <span class="label">Fecha Final:</span>
-                      <span class="value">${vacaciones.fechaFinal}</span>
+                      <span class="value">${fechaFinal}</span>
                   </div>
                   <div class="item">
                       <span class="label">Fecha de Incorporación:</span>
-                      <span class="value">${vacaciones.fechaIncorporacion}</span>
+                      <span class="value">${fechaIncorporacion}</span>
                   </div>
                   <div class="item">
                       <span class="label">Total de Días:</span>
-                      <span class="value">${vacaciones.totalDias}</span>
+                      <span class="value">${diaPersonal.totalDias}</span>
                   </div>
               </div>
               <div class="section highlight">
                   <div class="item">
                       <span class="label">Observaciones:</span>
-                      <span class="value">${vacaciones.observaciones}</span>
+                      <span class="value">${diaPersonal.observaciones}</span>
                   </div>
               </div>
           </div>

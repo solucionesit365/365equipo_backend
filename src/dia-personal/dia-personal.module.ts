@@ -12,7 +12,8 @@ import { TrabajadoresModule } from "../trabajadores/trabajadores.module";
     forwardRef(() => TrabajadoresModule),
     forwardRef(() => ContratoModule),
   ],
-  controllers: [DiaPersonalController],
   providers: [diaPersonalClass, diaPersonalMongo],
+  exports: [diaPersonalClass],
+  controllers: [DiaPersonalController],
 })
 export class DiaPersonalModule {}
