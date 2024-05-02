@@ -60,6 +60,20 @@ export class diaPersonalMongo {
     return respSolicitudes;
   }
 
+  async solicitudesSubordinadosDiaPersonal(
+    idAppResponsable: string,
+    year: number,
+  ) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const solicitudDiaPersonalCollection =
+      db.collection<diaPersonal>("diaPersonal");
+    const respSolicitudes = await solicitudDiaPersonalCollection
+      .find({ idAppResponsable, year })
+      .toArray();
+
+    return respSolicitudes;
+  }
+
   //Borrar solicitud de vacaciones
   async borrarSolicitud(_id: string) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
@@ -93,5 +107,40 @@ export class diaPersonalMongo {
     if (respSolicitudes.acknowledged && respSolicitudes.modifiedCount > 0)
       return true;
     throw Error("No se ha podido modificar el estado");
+  }
+
+  async haySolicitudesParaBeneficiario(
+    idBeneficiario: number,
+  ): Promise<boolean> {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const solicitudDiaPersonalCollection =
+      db.collection<diaPersonal>("diaPersonal");
+
+    const cuenta = await solicitudDiaPersonalCollection.countDocuments({
+      idBeneficiario,
+    });
+    return cuenta > 0;
+  }
+
+  async actualizarIdAppResponsable(
+    idBeneficiario: number,
+    idAppResponsable: string,
+  ) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const solicitudDiaPersonalCollection =
+      db.collection<diaPersonal>("diaPersonal");
+
+    const resultado = await solicitudDiaPersonalCollection.updateMany(
+      { idBeneficiario },
+      { $set: { idAppResponsable } },
+    );
+
+    if (resultado.acknowledged) {
+      return true;
+    } else {
+      throw new Error(
+        "No se pudo actualizar el idAppResponsable para las solicitudes del beneficiario",
+      );
+    }
   }
 }

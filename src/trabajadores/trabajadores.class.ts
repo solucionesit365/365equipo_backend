@@ -4,6 +4,7 @@ import { FirebaseService } from "../firebase/firebase.service";
 import { PermisosService } from "../permisos/permisos.class";
 import { DateTime } from "luxon";
 import { SolicitudesVacacionesService } from "../solicitud-vacaciones/solicitud-vacaciones.class";
+import { diaPersonalClass } from "src/dia-personal/dia-personal.class";
 import { TrabajadorDatabaseService } from "./trabajadores.database";
 import { UserRecord } from "firebase-admin/auth";
 import { Prisma } from "@prisma/client";
@@ -21,6 +22,7 @@ export class TrabajadorService {
     private readonly emailInstance: EmailService,
     @Inject(forwardRef(() => SolicitudesVacacionesService))
     private readonly solicitudesVacaciones: SolicitudesVacacionesService,
+    private readonly solicitudesDiaPersonal: diaPersonalClass,
     private readonly schTrabajadores: TrabajadorDatabaseService,
   ) {}
 
@@ -273,9 +275,17 @@ export class TrabajadorService {
           await this.solicitudesVacaciones.haySolicitudesParaBeneficiario(
             original.id,
           );
+        const solicitudesExistenDiaPersonal =
+          await this.solicitudesDiaPersonal.haySolicitudesParaBeneficiario(
+            original.id,
+          );
 
-        if (solicitudesExisten) {
+        if (solicitudesExisten && solicitudesExistenDiaPersonal) {
           await this.solicitudesVacaciones.actualizarIdAppResponsable(
+            original.id,
+            nuevoIdAppResponsable,
+          );
+          await this.solicitudesDiaPersonal.actualizarIdAppResponsable(
             original.id,
             nuevoIdAppResponsable,
           );

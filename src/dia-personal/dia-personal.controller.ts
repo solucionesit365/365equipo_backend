@@ -182,6 +182,74 @@ export class DiaPersonalController {
     }
   }
 
+  @UseGuards(AuthGuard)
+  @Get("solicitudesSubordinadosDiaPersonal")
+  async solicitudesSubordinadosDiaPersonal(
+    @Query() { idAppResponsable, year },
+  ) {
+    try {
+      if (!idAppResponsable) throw Error("Faltan datos");
+
+      const solicitudesEmpleadosDirectos =
+        await this.diaPersonalInstance.solicitudesSubordinadosDiaPersonal(
+          idAppResponsable,
+          Number(year),
+        );
+      const empleadosTipoCoordi =
+        await this.trabajadorInstance.getSubordinadosConTienda(
+          idAppResponsable,
+        );
+      const soyCoordinadora: boolean =
+        await this.trabajadorInstance.esCoordinadora(idAppResponsable);
+      const addArray = [];
+
+      if (empleadosTipoCoordi.length > 0) {
+        for (let i = 0; i < empleadosTipoCoordi.length; i++) {
+          if (empleadosTipoCoordi[i].llevaEquipo) {
+            // Caso coordinadora
+            const solicitudesSubordinadosCoordinadora =
+              await this.diaPersonalInstance.solicitudesSubordinadosDiaPersonal(
+                empleadosTipoCoordi[i].idApp,
+                Number(year),
+              );
+
+            if (solicitudesSubordinadosCoordinadora.length > 0) {
+              for (
+                let j = 0;
+                j < solicitudesSubordinadosCoordinadora.length;
+                j++
+              ) {
+                solicitudesSubordinadosCoordinadora[j]["validador"] =
+                  idAppResponsable;
+              }
+              addArray.push(...solicitudesSubordinadosCoordinadora);
+            }
+          }
+        }
+      }
+
+      if (soyCoordinadora) {
+        for (let i = 0; i < addArray.length; i++) {
+          addArray[i]["validador"] = idAppResponsable;
+        }
+
+        for (let i = 0; i < solicitudesEmpleadosDirectos.length; i++) {
+          solicitudesEmpleadosDirectos[i]["validador"] = idAppResponsable;
+        }
+      }
+
+      if (solicitudesEmpleadosDirectos.length > 0) {
+        solicitudesEmpleadosDirectos.push(...addArray);
+        return { ok: true, data: solicitudesEmpleadosDirectos };
+      } else if (addArray.length > 0) {
+        return { ok: true, data: addArray };
+      } else return { ok: true, data: [] };
+    } catch (err) {
+      console.log(err);
+      return { ok: false, message: err.message };
+    }
+  }
+
   //Borrar solicitud de vacaciones
   @UseGuards(AuthGuard)
   @Post("borrarSolicitud")
@@ -251,6 +319,16 @@ export class DiaPersonalController {
     } catch (err) {
       console.log(err);
       return { ok: false, message: err.message };
+    }
+  }
+
+  @UseGuards(AuthGuard)
+  @Post("enviarAlEmail")
+  async enviarAlEmail(@Body() data) {
+    try {
+      return this.diaPersonalInstance.enviarAlEmail(data);
+    } catch (error) {
+      return error;
     }
   }
 }
