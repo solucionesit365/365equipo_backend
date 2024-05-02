@@ -50,14 +50,48 @@ export class FichajesController {
   }
 
   @UseGuards(AuthGuard)
+  @Post("inicioDescanso")
+  async descanso(@User() user: UserRecord) {
+    try {
+      const usuarioCompleto =
+        await this.trabajadoresInstance.getTrabajadorByAppId(user.uid);
+
+      return {
+        ok: true,
+        data: await this.fichajesInstance.nuevoInicioDescanso(usuarioCompleto),
+      };
+    } catch (err) {
+      console.log(err);
+      return { ok: false, message: err.message };
+    }
+  }
+
+  @UseGuards(AuthGuard)
+  @Post("finalDescanso")
+  async finalDescanso(@User() user: UserRecord) {
+    try {
+      const usuarioCompleto =
+        await this.trabajadoresInstance.getTrabajadorByAppId(user.uid);
+
+      return {
+        ok: true,
+        data: await this.fichajesInstance.nuevoFinalDescanso(usuarioCompleto),
+      };
+    } catch (err) {
+      console.log(err);
+      return { ok: false, message: err.message };
+    }
+  }
+
+  @UseGuards(AuthGuard)
   @Get("estado")
   async getEstado(@Query("date") dateString: string, @User() user: UserRecord) {
     try {
       const date = new Date(dateString);
-
+      const result = await this.fichajesInstance.getEstado(user.uid, date);
       return {
         ok: true,
-        data: await this.fichajesInstance.getEstado(user.uid, date),
+        data: result,
       };
     } catch (err) {
       console.log(err);

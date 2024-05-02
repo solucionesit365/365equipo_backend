@@ -48,6 +48,38 @@ export class Fichajes {
     throw Error("No se ha podido registrar la salida");
   }
 
+  async nuevoInicioDescanso(trabajador: Trabajador) {
+    const hora = DateTime.now().toJSDate();
+
+    const insert = await this.schFichajes.nuevoInicioDescanso(
+      trabajador.idApp,
+      hora,
+      trabajador.id,
+      trabajador.nombreApellidos,
+      trabajador.dni,
+    );
+
+    if (insert) return true;
+
+    throw Error("No se ha podido registrar el inicio del descanso");
+  }
+
+  async nuevoFinalDescanso(trabajador: Trabajador) {
+    const hora = DateTime.now().toJSDate();
+
+    const insert = await this.schFichajes.nuevoFinalDescanso(
+      trabajador.idApp,
+      hora,
+      trabajador.id,
+      trabajador.nombreApellidos,
+      trabajador.dni,
+    );
+
+    if (insert) return true;
+
+    throw Error("No se ha podido registrar el inicio del descanso");
+  }
+
   async getEstado(uid: string, fecha: Date) {
     const fichajes = await this.schFichajes.getFichajesDia(uid, fecha);
     const primerFichaje = fichajes[0];
@@ -57,13 +89,21 @@ export class Fichajes {
       return "SIN_ENTRADA";
     } else if (primerFichaje.tipo === "SALIDA") {
       return "ERROR";
-    } else if (ultimoFichaje.tipo === "ENTRADA") {
+    } else if (
+      ultimoFichaje.tipo === "ENTRADA" ||
+      ultimoFichaje.tipo === "FINAL_DESCANSO"
+    ) {
       return {
         estado: "TRABAJANDO",
         data: ultimoFichaje,
       };
     } else if (ultimoFichaje.tipo === "SALIDA") {
       return "HA_SALIDO";
+    } else if (ultimoFichaje.tipo === "INICIO_DESCANSO") {
+      return {
+        estado: "DESCANSANDO",
+        data: ultimoFichaje,
+      };
     } else return "ERROR";
   }
 
