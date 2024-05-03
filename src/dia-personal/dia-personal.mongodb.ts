@@ -136,7 +136,6 @@ export class diaPersonalMongo {
       { idBeneficiario },
       { $set: { idAppResponsable } },
     );
-    console.log(resultado);
 
     if (resultado.acknowledged) {
       return true;
