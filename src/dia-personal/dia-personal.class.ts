@@ -85,18 +85,18 @@ export class diaPersonalClass {
     );
   }
 
-  async actualizarIdAppResponsable(
+  async actualizarIdAppResponsableDiaPersonal(
     idBeneficiario: number,
     idAppResponsable: string,
   ) {
-    return await this.schdiaPersonal.actualizarIdAppResponsable(
+    return await this.schdiaPersonal.actualizarIdAppResponsableDiaPersonal(
       idBeneficiario,
       idAppResponsable,
     );
   }
 
-  async haySolicitudesParaBeneficiario(idBeneficiario: number) {
-    return await this.schdiaPersonal.haySolicitudesParaBeneficiario(
+  async haySolicitudesParaBeneficiarioDiaPersonal(idBeneficiario: number) {
+    return await this.schdiaPersonal.haySolicitudesParaBeneficiarioDiaPersonal(
       idBeneficiario,
     );
   }

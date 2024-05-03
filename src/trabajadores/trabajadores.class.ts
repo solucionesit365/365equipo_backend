@@ -277,7 +277,7 @@ export class TrabajadorService {
             original.id,
           );
         const solicitudesExistenDiaPersonal =
-          await this.solicitudesDiaPersonal.haySolicitudesParaBeneficiario(
+          await this.solicitudesDiaPersonal.haySolicitudesParaBeneficiarioDiaPersonal(
             original.id,
           );
 
@@ -286,7 +286,7 @@ export class TrabajadorService {
             original.id,
             nuevoIdAppResponsable,
           );
-          await this.solicitudesDiaPersonal.actualizarIdAppResponsable(
+          await this.solicitudesDiaPersonal.actualizarIdAppResponsableDiaPersonal(
             original.id,
             nuevoIdAppResponsable,
           );

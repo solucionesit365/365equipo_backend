@@ -109,7 +109,7 @@ export class diaPersonalMongo {
     throw Error("No se ha podido modificar el estado");
   }
 
-  async haySolicitudesParaBeneficiario(
+  async haySolicitudesParaBeneficiarioDiaPersonal(
     idBeneficiario: number,
   ): Promise<boolean> {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
@@ -119,10 +119,12 @@ export class diaPersonalMongo {
     const cuenta = await solicitudDiaPersonalCollection.countDocuments({
       idBeneficiario,
     });
+    console.log(cuenta);
+
     return cuenta > 0;
   }
 
-  async actualizarIdAppResponsable(
+  async actualizarIdAppResponsableDiaPersonal(
     idBeneficiario: number,
     idAppResponsable: string,
   ) {
@@ -134,6 +136,7 @@ export class diaPersonalMongo {
       { idBeneficiario },
       { $set: { idAppResponsable } },
     );
+    console.log(resultado);
 
     if (resultado.acknowledged) {
       return true;
