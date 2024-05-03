@@ -735,10 +735,9 @@ export class Cuadrantes {
         const fechaInicio = DateTime.fromJSDate(cuadrante.inicio);
         const fechaFinal = DateTime.fromJSDate(cuadrante.final); // No se utiliza porque fechaFinal siempre está en el mismo día que fechaInicio
 
-        const diferenciaDias = fechaInicio.diff(
-          inicioSemanaOrigen,
-          "days",
-        ).days;
+        const diferenciaDias = Math.abs(
+          inicioSemanaOrigen.diff(inicioSemanaDestino, "days").days,
+        );
 
         const nuevaFechaInicio = inicioSemanaDestino.plus({
           days: diferenciaDias,
