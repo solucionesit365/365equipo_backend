@@ -43,7 +43,7 @@ steps:
 
 availableSecrets:
   secretManager:
-    - versionName: "projects/silema/secrets/slack-webhook/versions/2"
+    - versionName: "projects/silema/secrets/slack-webhook/versions/1"
       env: "SLACK_WEBHOOK"
 
 images:
