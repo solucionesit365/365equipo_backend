@@ -43,7 +43,7 @@ steps:
 
 availableSecrets:
   secretManager:
-    - versionName: "projects/silema/secrets/SLACK_WEBHOOK_URL/versions/1"
+    - versionName: "projects/565898129046/secrets/SLACK_WEBHOOK_URL/versions/1"
       env: "SLACK_WEBHOOK_URL"
 
 images:
