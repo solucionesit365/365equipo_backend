@@ -10,14 +10,12 @@ steps:
       - '-f'
       - Dockerfile
     id: Build
-
   - name: gcr.io/cloud-builders/docker
     args:
       - push
       - >-
         $_AR_HOSTNAME/$PROJECT_ID/cloud-run-source-deploy/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
     id: Push
-
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
     args:
       - run
@@ -33,40 +31,34 @@ steps:
       - '--quiet'
     id: Deploy
     entrypoint: gcloud
-
   - name: 'curlimages/curl:7.85.0'
     args:
-      - '-X'
-      - 'POST'
-      - '--data-urlencode'
-      - >-
-        payload={"text":"El despliegue de `$_SERVICE_NAME` ha sido completado exitosamente."}
-      - '$(cat /workspace/_SLACK_WEBHOOK_URL)'
+    - '-X'
+    - 'POST'
+    - '--data-urlencode'
+    - >-
+      payload={"text":"El despliegue de `$_SERVICE_NAME` ha sido completado exitosamente."}
+    - '$(cat /workspace/_SLACK_WEBHOOK_URL)'
     env:
       - 'SLACK_WEBHOOK_URL=$_SLACK_WEBHOOK_URL'
     secretEnv:
       - '_SLACK_WEBHOOK_URL'
-
 images:
   - >-
     $_AR_HOSTNAME/$PROJECT_ID/cloud-run-source-deploy/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
-
 options:
   substitutionOption: ALLOW_LOOSE
   logging: CLOUD_LOGGING_ONLY
-
 substitutions:
+  _AR_HOSTNAME: europe-west1-docker.pkg.dev
   _PLATFORM: managed
   _SERVICE_NAME: backend-365app
   _DEPLOY_REGION: europe-west1
   _TRIGGER_ID: 1ee26914-7778-4edc-b9b3-a127077196ed
-  _AR_HOSTNAME: europe-west1-docker.pkg.dev
-
 tags:
   - gcp-cloud-build-deploy-cloud-run
   - gcp-cloud-build-deploy-cloud-run-managed
   - backend-365app
-
 secrets:
   - kmsKeyName: projects/YOUR_PROJECT_ID/locations/YOUR_KMS_LOCATION/keyRings/YOUR_KEY_RING_NAME/cryptoKeys/YOUR_KEY_NAME
     secretEnv:
