@@ -102,15 +102,31 @@ export class DiaPersonalClass {
   }
 
   async enviarAlEmail(diaPersonal) {
-    const solicitudTrabajador =
-      await this.trabajadorInstance.getTrabajadorBySqlId(
-        Number(diaPersonal.idBeneficiario),
+    try {
+      const solicitudTrabajador =
+        await this.trabajadorInstance.getTrabajadorBySqlId(
+          Number(diaPersonal.idBeneficiario),
+        );
+
+      const emailContent = this.constructEmailContent(diaPersonal);
+
+      this.email.enviarEmail(
+        solicitudTrabajador.emails,
+        emailContent,
+        "Confirmación de Solicitud de Dia Personal",
       );
 
+      return { ok: true };
+    } catch (err) {
+      console.log(err);
+      return { ok: false, message: err.message };
+    }
+  }
+
+  private constructEmailContent(diaPersonal) {
     diaPersonal.fechaInicio = new Date(diaPersonal.fechaInicio);
     diaPersonal.fechaFinal = new Date(diaPersonal.fechaFinal);
     diaPersonal.fechaIncorporacion = new Date(diaPersonal.fechaIncorporacion);
-    diaPersonal.fechaCreacion = new Date(diaPersonal.fechaCreacion);
 
     let fechaInicio = DateTime.fromJSDate(diaPersonal.fechaInicio).toFormat(
       "dd/MM/yyyy",
@@ -122,9 +138,7 @@ export class DiaPersonalClass {
       diaPersonal.fechaIncorporacion,
     ).toFormat("dd/MM/yyyy");
 
-    this.email.enviarEmail(
-      solicitudTrabajador.emails,
-      `<!DOCTYPE html>
+    return `<!DOCTYPE html>
       <html lang="es">
       <head>
           <meta charset="UTF-8">
@@ -203,13 +217,6 @@ export class DiaPersonalClass {
               </div>
           </div>
       </body>
-      </html>
-      
-      
-      `,
-      "Confirmación de Solicitud de Dia Personal",
-    );
-
-    return { ok: true };
+      </html>`;
   }
 }
