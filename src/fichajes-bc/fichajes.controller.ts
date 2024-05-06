@@ -18,69 +18,52 @@ export class FichajesController {
   @UseGuards(AuthGuard)
   @Post("entrada")
   async entrada(@User() user: UserRecord) {
-    try {
-      const usuarioCompleto =
-        await this.trabajadoresInstance.getTrabajadorByAppId(user.uid);
+    const usuarioCompleto =
+      await this.trabajadoresInstance.getTrabajadorByAppId(user.uid);
 
-      return {
-        ok: true,
-        data: await this.fichajesInstance.nuevaEntrada(usuarioCompleto),
-      };
-    } catch (err) {
-      console.log(err);
-      return { ok: false, message: err.message };
-    }
+    await this.fichajesInstance.nuevaEntrada(usuarioCompleto);
+
+    return true;
   }
 
   @UseGuards(AuthGuard)
   @Post("salida")
   async salida(@User() user: UserRecord) {
-    try {
-      const usuarioCompleto =
-        await this.trabajadoresInstance.getTrabajadorByAppId(user.uid);
+    const usuarioCompleto =
+      await this.trabajadoresInstance.getTrabajadorByAppId(user.uid);
 
-      return {
-        ok: true,
-        data: await this.fichajesInstance.nuevaSalida(usuarioCompleto),
-      };
-    } catch (err) {
-      console.log(err);
-      return { ok: false, message: err.message };
-    }
+    await this.fichajesInstance.nuevaSalida(usuarioCompleto);
+    return true;
   }
 
   @UseGuards(AuthGuard)
   @Post("inicioDescanso")
   async descanso(@User() user: UserRecord) {
-    try {
-      const usuarioCompleto =
-        await this.trabajadoresInstance.getTrabajadorByAppId(user.uid);
+    const usuarioCompleto =
+      await this.trabajadoresInstance.getTrabajadorByAppId(user.uid);
 
-      return {
-        ok: true,
-        data: await this.fichajesInstance.nuevoInicioDescanso(usuarioCompleto),
-      };
-    } catch (err) {
-      console.log(err);
-      return { ok: false, message: err.message };
-    }
+    // Desfichar: Requisito legal.
+    await this.fichajesInstance.nuevaSalida(usuarioCompleto);
+
+    // Inicio descanso:
+    await this.fichajesInstance.nuevoInicioDescanso(usuarioCompleto);
+
+    return true;
   }
 
   @UseGuards(AuthGuard)
   @Post("finalDescanso")
   async finalDescanso(@User() user: UserRecord) {
-    try {
-      const usuarioCompleto =
-        await this.trabajadoresInstance.getTrabajadorByAppId(user.uid);
+    const usuarioCompleto =
+      await this.trabajadoresInstance.getTrabajadorByAppId(user.uid);
 
-      return {
-        ok: true,
-        data: await this.fichajesInstance.nuevoFinalDescanso(usuarioCompleto),
-      };
-    } catch (err) {
-      console.log(err);
-      return { ok: false, message: err.message };
-    }
+    // Final descanso
+    await this.fichajesInstance.nuevoFinalDescanso(usuarioCompleto);
+
+    // Fichaje entrada automático
+    await this.fichajesInstance.nuevaEntrada(usuarioCompleto);
+
+    return true;
   }
 
   @UseGuards(AuthGuard)

@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, InternalServerErrorException } from "@nestjs/common";
 import { FichajesDatabase } from "./fichajes.mongodb";
 import { TrabajadorService } from "../trabajadores/trabajadores.class";
 import { Trabajador } from "@prisma/client";
@@ -27,9 +27,10 @@ export class Fichajes {
       trabajador.dni,
     );
 
-    if (insert) return true;
-
-    throw Error("No se ha podido registrar la entrada");
+    if (!insert)
+      throw new InternalServerErrorException(
+        "No se ha podido registrar la entrada",
+      );
   }
 
   async nuevaSalida(trabajador: Trabajador) {
@@ -43,9 +44,10 @@ export class Fichajes {
       trabajador.dni,
     );
 
-    if (insert) return true;
-
-    throw Error("No se ha podido registrar la salida");
+    if (!insert)
+      throw new InternalServerErrorException(
+        "No se ha podido registrar la salida",
+      );
   }
 
   async nuevoInicioDescanso(trabajador: Trabajador) {
@@ -59,9 +61,10 @@ export class Fichajes {
       trabajador.dni,
     );
 
-    if (insert) return true;
-
-    throw Error("No se ha podido registrar el inicio del descanso");
+    if (!insert)
+      throw new InternalServerErrorException(
+        "No se ha podido registrar el inicio del descanso",
+      );
   }
 
   async nuevoFinalDescanso(trabajador: Trabajador) {
@@ -75,9 +78,10 @@ export class Fichajes {
       trabajador.dni,
     );
 
-    if (insert) return true;
-
-    throw Error("No se ha podido registrar el inicio del descanso");
+    if (!insert)
+      throw new InternalServerErrorException(
+        "No se ha podido registrar el inicio del descanso",
+      );
   }
 
   async getEstado(uid: string, fecha: Date) {
