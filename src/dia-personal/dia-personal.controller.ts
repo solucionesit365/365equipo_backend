@@ -1,14 +1,6 @@
-import {
-  Controller,
-  Post,
-  UseGuards,
-  Headers,
-  Body,
-  Get,
-  Query,
-} from "@nestjs/common";
+import { Controller, Post, UseGuards, Body, Get, Query } from "@nestjs/common";
 import { AuthGuard } from "../guards/auth.guard";
-import { diaPersonalClass } from "./dia-personal.class";
+import { DiaPersonalClass } from "./dia-personal.class";
 import { diaPersonal } from "./dia-personal.interface";
 import { EmailService } from "src/email/email.class";
 import { TrabajadorService } from "../trabajadores/trabajadores.class";
@@ -17,7 +9,7 @@ import { DateTime } from "luxon";
 @Controller("dia-personal")
 export class DiaPersonalController {
   constructor(
-    private readonly diaPersonalInstance: diaPersonalClass,
+    private readonly diaPersonalInstance: DiaPersonalClass,
     private readonly trabajadorInstance: TrabajadorService,
     private readonly email: EmailService,
   ) {}
@@ -128,9 +120,7 @@ export class DiaPersonalController {
                 </div>
             </div>
         </body>
-        </html>
-        
-        
+        </html>      
         `,
         "Confirmación de Solicitud de Dia Personal",
       );
@@ -214,14 +204,6 @@ export class DiaPersonalController {
               );
 
             if (solicitudesSubordinadosCoordinadora.length > 0) {
-              for (
-                let j = 0;
-                j < solicitudesSubordinadosCoordinadora.length;
-                j++
-              ) {
-                solicitudesSubordinadosCoordinadora[j]["validador"] =
-                  idAppResponsable;
-              }
               addArray.push(...solicitudesSubordinadosCoordinadora);
             }
           }
@@ -229,13 +211,9 @@ export class DiaPersonalController {
       }
 
       if (soyCoordinadora) {
-        for (let i = 0; i < addArray.length; i++) {
-          addArray[i]["validador"] = idAppResponsable;
-        }
-
-        for (let i = 0; i < solicitudesEmpleadosDirectos.length; i++) {
-          solicitudesEmpleadosDirectos[i]["validador"] = idAppResponsable;
-        }
+        addArray.forEach((solicitud) => {
+          solicitud["validador"] = idAppResponsable;
+        });
       }
 
       if (solicitudesEmpleadosDirectos.length > 0) {
@@ -326,7 +304,7 @@ export class DiaPersonalController {
   @Post("enviarAlEmail")
   async enviarAlEmail(@Body() data) {
     try {
-      return this.diaPersonalInstance.enviarAlEmail(data);
+      return await this.diaPersonalInstance.enviarAlEmail(data);
     } catch (error) {
       return error;
     }

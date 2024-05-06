@@ -6,7 +6,7 @@ import { EmailService } from "../email/email.class";
 import { TrabajadorService } from "../trabajadores/trabajadores.class";
 import { DateTime } from "luxon";
 @Injectable()
-export class diaPersonalClass {
+export class DiaPersonalClass {
   constructor(
     private readonly schdiaPersonal: diaPersonalMongo,
     private readonly contratoService: ContratoService,

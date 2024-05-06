@@ -4,7 +4,7 @@ import { FirebaseService } from "../firebase/firebase.service";
 import { PermisosService } from "../permisos/permisos.class";
 import { DateTime } from "luxon";
 import { SolicitudesVacacionesService } from "../solicitud-vacaciones/solicitud-vacaciones.class";
-import { diaPersonalClass } from "../dia-personal/dia-personal.class";
+import { DiaPersonalClass } from "../dia-personal/dia-personal.class";
 import { TrabajadorDatabaseService } from "./trabajadores.database";
 import { UserRecord } from "firebase-admin/auth";
 import { Prisma } from "@prisma/client";
@@ -22,8 +22,8 @@ export class TrabajadorService {
     private readonly emailInstance: EmailService,
     @Inject(forwardRef(() => SolicitudesVacacionesService))
     private readonly solicitudesVacaciones: SolicitudesVacacionesService,
-    @Inject(forwardRef(() => diaPersonalClass))
-    private readonly solicitudesDiaPersonal: diaPersonalClass,
+    @Inject(forwardRef(() => DiaPersonalClass))
+    private readonly solicitudesDiaPersonal: DiaPersonalClass,
     private readonly schTrabajadores: TrabajadorDatabaseService,
   ) {}
 
