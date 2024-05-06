@@ -39,9 +39,13 @@ steps:
       - |
         curl -X POST -H 'Content-type: application/json' --data '{"text": "El despliegue del servicio $_SERVICE_NAME (commit: $COMMIT_SHA) en Cloud Run ha sido completado en $_DEPLOY_REGION ✅"}' $SLACK_WEBHOOK_URL
     env:
-      - 'SLACK_WEBHOOK_URL=$$_SLACK_WEBHOOK'
-    secrets: 
-      - name: slack_webhook_url
+      - 'SLACK_WEBHOOK_URL=$(SLACK_WEBHOOK)'
+
+availableSecrets:
+  secretManager:
+    - versionName: "projects/silema/secrets/slack-webhook/versions/2"
+      env: "SLACK_WEBHOOK"
+
 images:
   - >-
     $_AR_HOSTNAME/$PROJECT_ID/cloud-run-source-deploy/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
