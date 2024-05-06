@@ -37,9 +37,9 @@ steps:
     args:
       - '-c'
       - |
-        curl -X POST -H 'Content-type: application/json' --data '{"text": "El despliegue del servicio $_SERVICE_NAME (commit: $COMMIT_SHA) en Cloud Run ha sido completado en $_DEPLOY_REGION ✅"}' $(SLACK_WEBHOOK_URL)
+        curl -X POST -H 'Content-type: application/json' --data '{"text": "El despliegue del servicio $_SERVICE_NAME (commit: $COMMIT_SHA) en Cloud Run ha sido completado en $_DEPLOY_REGION ✅"}' "$SLACK_WEBHOOK_URL"
     env:
-      - 'SLACK_WEBHOOK_URL=$(SLACK_WEBHOOK_URL)'
+      - 'SLACK_WEBHOOK_URL'
 
 availableSecrets:
   secretManager:
