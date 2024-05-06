@@ -33,16 +33,18 @@ steps:
     entrypoint: gcloud
   - name: 'curlimages/curl:7.85.0'
     args:
-    - '-X'
-    - 'POST'
-    - '--data-urlencode'
-    - >-
-      payload={"text":"El despliegue de `$_SERVICE_NAME` ha sido completado exitosamente."}
-    - '$(cat /workspace/_SLACK_WEBHOOK_URL)'
-    env:
-      - 'SLACK_WEBHOOK_URL=$_SLACK_WEBHOOK_URL'
+      - '-X'
+      - 'POST'
+      - '--data-urlencode'
+      - >-
+        payload={"text":"El despliegue de `$_SERVICE_NAME` ha sido completado exitosamente."}
+      - '$SLACK_WEBHOOK_URL'
     secretEnv:
-      - '_SLACK_WEBHOOK_URL'
+      - 'SLACK_WEBHOOK_URL'
+secrets:
+  - secret: projects/silema/secrets/_SLACK_WEBHOOK_URL/versions/latest
+    secretEnv:
+      SLACK_WEBHOOK_URL: _SLACK_WEBHOOK_URL
 images:
   - >-
     $_AR_HOSTNAME/$PROJECT_ID/cloud-run-source-deploy/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
@@ -59,7 +61,3 @@ tags:
   - gcp-cloud-build-deploy-cloud-run
   - gcp-cloud-build-deploy-cloud-run-managed
   - backend-365app
-secrets:
-  - kmsKeyName: projects/YOUR_PROJECT_ID/locations/YOUR_KMS_LOCATION/keyRings/YOUR_KEY_RING_NAME/cryptoKeys/YOUR_KEY_NAME
-    secretEnv:
-      _SLACK_WEBHOOK_URL: 'YOUR_ENCRYPTED_SLACK_WEBHOOK_URL'
