@@ -36,11 +36,9 @@ steps:
     args:
       - '-c'
       - |
-        # Obtén el webhook desde Secret Manager
-        WEBHOOK_URL=$(gcloud secrets versions access latest --secret="slack-webhook-url")
         curl -X POST -H 'Content-type: application/json' \
         --data '{"text":"El despliegue ha finalizado exitosamente para el servicio $_SERVICE_NAME con el commit SHA $COMMIT_SHA"}' \
-        $WEBHOOK_URL
+        $slack-webhook-url
     id: NotifySlack
 
 images:
@@ -49,6 +47,7 @@ images:
 options:
   substitutionOption: ALLOW_LOOSE
   logging: CLOUD_LOGGING_ONLY
+  secretEnv: ['slack-webhook-url']
 substitutions:
   _AR_HOSTNAME: europe-west1-docker.pkg.dev
   _PLATFORM: managed
