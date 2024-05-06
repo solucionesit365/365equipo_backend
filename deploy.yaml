@@ -31,7 +31,7 @@ steps:
       - '--quiet'
     id: Deploy
     entrypoint: gcloud
-  - name: 'alpine:latest'
+  - name: 'curlimages/curl:latest'
     entrypoint: /bin/sh
     args:
       - '-c'
