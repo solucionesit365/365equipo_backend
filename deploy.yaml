@@ -52,13 +52,3 @@ images:
 options:
   substitutionOption: ALLOW_LOOSE
   logging: CLOUD_LOGGING_ONLY
-substitutions:
-  _AR_HOSTNAME: europe-west1-docker.pkg.dev
-  _PLATFORM: managed
-  _SERVICE_NAME: backend-365app
-  _DEPLOY_REGION: europe-west1
-  _TRIGGER_ID: 1ee26914-7778-4edc-b9b3-a127077196ed
-tags:
-  - gcp-cloud-build-deploy-cloud-run
-  - gcp-cloud-build-deploy-cloud-run-managed
-  - backend-365app
