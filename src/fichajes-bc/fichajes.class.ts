@@ -50,12 +50,33 @@ export class Fichajes {
       );
   }
 
+  async getInicioFichaje(
+    horaInicioDescanso: DateTime,
+    uid: string,
+  ): Promise<DateTime> {
+    const fichajesRecientes = await this.getFichajesByUidInverso(
+      uid,
+      horaInicioDescanso.minus({ hours: 8 }).toJSDate(),
+      horaInicioDescanso.toJSDate(),
+    );
+
+    for (let i = 0; i > fichajesRecientes.length; i += 1) {
+      if (fichajesRecientes[i].tipo === "ENTRADA") {
+        return DateTime.fromJSDate(fichajesRecientes[i].hora);
+      }
+    }
+
+    throw new InternalServerErrorException(
+      "No hay ningún fichaje de entrada reciente",
+    );
+  }
+
   async nuevoInicioDescanso(trabajador: Trabajador) {
-    const hora = DateTime.now().toJSDate();
+    const hora = DateTime.now();
 
     const insert = await this.schFichajes.nuevoInicioDescanso(
       trabajador.idApp,
-      hora,
+      hora.toJSDate(),
       trabajador.id,
       trabajador.nombreApellidos,
       trabajador.dni,
@@ -65,6 +86,7 @@ export class Fichajes {
       throw new InternalServerErrorException(
         "No se ha podido registrar el inicio del descanso",
       );
+    return hora;
   }
 
   async nuevoFinalDescanso(trabajador: Trabajador) {
@@ -99,16 +121,53 @@ export class Fichajes {
     ) {
       return {
         estado: "TRABAJANDO",
-        data: ultimoFichaje,
+        data: DateTime.fromJSDate(ultimoFichaje.hora).toISO(),
       };
     } else if (ultimoFichaje.tipo === "SALIDA") {
       return "HA_SALIDO";
     } else if (ultimoFichaje.tipo === "INICIO_DESCANSO") {
-      return {
+      const resDescanso = {
         estado: "DESCANSANDO",
-        data: ultimoFichaje,
+        inicioDescanso: DateTime.fromJSDate(ultimoFichaje.hora).toISO(),
+        fichajeEntrada: DateTime.fromJSDate(
+          fichajes[fichajes.length - 2].hora,
+        ).toISO(),
       };
+      return resDescanso;
     } else return "ERROR";
+  }
+
+  async getTiempoDescansoTotalDia(
+    inicio: DateTime,
+    final: DateTime,
+    uid: string,
+  ) {
+    const descansos = await this.schFichajes.getDescansosTrabajadorDia(
+      inicio,
+      final,
+      uid,
+    );
+
+    let totalTiempoDescanso = 0; // Inicializamos el contador de tiempo total de descanso
+
+    for (let i = 0; i < descansos.length - 1; i++) {
+      // Aseguramos que tenemos un par "INICIO_DESCANSO" seguido de "FINAL_DESCANSO"
+      if (
+        descansos[i].tipo === "INICIO_DESCANSO" &&
+        descansos[i + 1].tipo === "FINAL_DESCANSO"
+      ) {
+        const inicioDescanso = new Date(descansos[i].hora).getTime(); // Convierte la fecha a milisegundos
+        const finalDescanso = new Date(descansos[i + 1].hora).getTime(); // Convierte la fecha a milisegundos
+
+        // Calculamos la diferencia en milisegundos y la convertimos a minutos
+        totalTiempoDescanso += (finalDescanso - inicioDescanso) / 1000 / 60;
+
+        // Incrementamos el índice en 1 para saltar al siguiente par
+        i++;
+      }
+    }
+
+    return totalTiempoDescanso; // Retornamos el tiempo total en minutos
   }
 
   async sincroFichajes() {
@@ -189,6 +248,18 @@ export class Fichajes {
 
   async getFichajesByUid(uid: string, fechaInicio: Date, fechaFinal: Date) {
     return await this.schFichajes.getFichajesByUid(
+      uid,
+      fechaInicio,
+      fechaFinal,
+    );
+  }
+
+  async getFichajesByUidInverso(
+    uid: string,
+    fechaInicio: Date,
+    fechaFinal: Date,
+  ) {
+    return await this.schFichajes.getFichajesByUidInverso(
       uid,
       fechaInicio,
       fechaFinal,
