@@ -99,11 +99,19 @@ export class FichajesController {
     const inicio = DateTime.now().startOf("day");
     const final = inicio.endOf("day");
 
-    return await this.fichajesInstance.getTiempoDescansoTotalDia(
-      inicio,
-      final,
-      user.uid,
-    );
+    try {
+      const tiempoDescanso =
+        await this.fichajesInstance.getTiempoDescansoTotalDia(
+          inicio,
+          final,
+          user.uid,
+        );
+      return tiempoDescanso;
+    } catch (err) {
+      console.log(err);
+    }
+
+    return 0;
   }
 
   @UseGuards(SchedulerGuard)
