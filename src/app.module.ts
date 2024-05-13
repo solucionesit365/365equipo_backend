@@ -34,9 +34,11 @@ import { HitMssqlModule } from "./hit-mssql/hit-mssql.module";
 import { MongoModule } from "./mongo/mongo.module";
 import { Cultura365Module } from "./cultura365/cultura365.module";
 import { MBCTokenModule } from "./bussinesCentral/services/mbctoken/mbctoken.service.module";
-import { RoleModule } from './role/role.module';
-import { PermissionModule } from './permission/permission.module';
-import { EmpresaModule } from './empresa/empresa.module';
+import { RoleModule } from "./role/role.module";
+import { PermissionModule } from "./permission/permission.module";
+import { EmpresaModule } from "./empresa/empresa.module";
+import { KpiTiendasController } from "./kpi-tiendas/kpi-tiendas.controller";
+import { KpiTiendasModule } from "./kpi-tiendas/kpi-tiendas.module";
 
 @Module({
   imports: [
@@ -79,7 +81,8 @@ import { EmpresaModule } from './empresa/empresa.module';
     RoleModule,
     PermissionModule,
     EmpresaModule,
+    KpiTiendasModule,
   ],
-  controllers: [AppController],
+  controllers: [AppController, KpiTiendasController],
 })
 export class AppModule {}
