@@ -358,7 +358,7 @@ export class FichajesDatabase {
           $in: ["INICIO_DESCANSO", "FINAL_DESCANSO"],
         },
       })
-      .sort({ hora: -1 })
+      .sort({ hora: 1 })
       .toArray();
   }
 

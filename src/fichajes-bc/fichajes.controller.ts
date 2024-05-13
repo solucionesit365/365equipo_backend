@@ -80,17 +80,10 @@ export class FichajesController {
   @UseGuards(AuthGuard)
   @Get("estado")
   async getEstado(@Query("date") dateString: string, @User() user: UserRecord) {
-    try {
-      const date = new Date(dateString);
-      const result = await this.fichajesInstance.getEstado(user.uid, date);
-      return {
-        ok: true,
-        data: result,
-      };
-    } catch (err) {
-      console.log(err);
-      return { ok: false, message: err.message };
-    }
+    const date = new Date(dateString);
+    const result = await this.fichajesInstance.getEstado(user.uid, date);
+
+    return result;
   }
 
   @UseGuards(AuthGuard)

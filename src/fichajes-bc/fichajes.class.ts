@@ -60,7 +60,7 @@ export class Fichajes {
       horaInicioDescanso.toJSDate(),
     );
 
-    for (let i = 0; i > fichajesRecientes.length; i += 1) {
+    for (let i = 0; i < fichajesRecientes.length; i += 1) {
       if (fichajesRecientes[i].tipo === "ENTRADA") {
         return DateTime.fromJSDate(fichajesRecientes[i].hora);
       }
@@ -110,31 +110,62 @@ export class Fichajes {
     const fichajes = await this.schFichajes.getFichajesDia(uid, fecha);
     const primerFichaje = fichajes[0];
     const ultimoFichaje = fichajes[fichajes.length - 1];
+    const ultimaEntrada = fichajes.find(
+      (fichaje) => fichaje.tipo === "ENTRADA",
+    );
 
     if (!ultimoFichaje) {
-      return "SIN_ENTRADA";
-    } else if (primerFichaje.tipo === "SALIDA") {
-      return "ERROR";
+      return {
+        estado: "SIN_ENTRADA",
+        entrada: ultimaEntrada
+          ? DateTime.fromJSDate(ultimaEntrada.hora).toISO()
+          : null,
+        ultimoFichaje: ultimoFichaje
+          ? DateTime.fromJSDate(ultimoFichaje.hora).toISO()
+          : null,
+      };
     } else if (
       ultimoFichaje.tipo === "ENTRADA" ||
       ultimoFichaje.tipo === "FINAL_DESCANSO"
     ) {
       return {
         estado: "TRABAJANDO",
-        data: DateTime.fromJSDate(ultimoFichaje.hora).toISO(),
+        entrada: ultimaEntrada
+          ? DateTime.fromJSDate(ultimaEntrada.hora).toISO()
+          : null,
+        ultimoFichaje: ultimoFichaje
+          ? DateTime.fromJSDate(ultimoFichaje.hora).toISO()
+          : null,
       };
     } else if (ultimoFichaje.tipo === "SALIDA") {
-      return "HA_SALIDO";
-    } else if (ultimoFichaje.tipo === "INICIO_DESCANSO") {
-      const resDescanso = {
-        estado: "DESCANSANDO",
-        inicioDescanso: DateTime.fromJSDate(ultimoFichaje.hora).toISO(),
-        fichajeEntrada: DateTime.fromJSDate(
-          fichajes[fichajes.length - 2].hora,
-        ).toISO(),
+      return {
+        estado: "HA_SALIDO",
+        entrada: ultimaEntrada
+          ? DateTime.fromJSDate(ultimaEntrada.hora).toISO()
+          : null,
+        ultimoFichaje: ultimoFichaje
+          ? DateTime.fromJSDate(ultimoFichaje.hora).toISO()
+          : null,
       };
-      return resDescanso;
-    } else return "ERROR";
+    } else if (ultimoFichaje.tipo === "INICIO_DESCANSO") {
+      // const resDescanso = {
+      //   estado: "DESCANSANDO",
+      //   inicioDescanso: DateTime.fromJSDate(ultimoFichaje.hora).toISO(),
+      //   fichajeEntrada: DateTime.fromJSDate(
+      //     fichajes[fichajes.length - 2].hora,
+      //   ).toISO(),
+      // };
+
+      return {
+        estado: "DESCANSANDO",
+        entrada: ultimaEntrada
+          ? DateTime.fromJSDate(ultimaEntrada.hora).toISO()
+          : null,
+        ultimoFichaje: ultimoFichaje
+          ? DateTime.fromJSDate(ultimoFichaje.hora).toISO()
+          : null,
+      };
+    } else throw new InternalServerErrorException("Estado no reconocido");
   }
 
   async getTiempoDescansoTotalDia(
@@ -151,23 +182,29 @@ export class Fichajes {
     let totalTiempoDescanso = 0; // Inicializamos el contador de tiempo total de descanso
 
     for (let i = 0; i < descansos.length - 1; i++) {
-      // Aseguramos que tenemos un par "INICIO_DESCANSO" seguido de "FINAL_DESCANSO"
-      if (
-        descansos[i].tipo === "INICIO_DESCANSO" &&
-        descansos[i + 1].tipo === "FINAL_DESCANSO"
-      ) {
-        const inicioDescanso = new Date(descansos[i].hora).getTime(); // Convierte la fecha a milisegundos
-        const finalDescanso = new Date(descansos[i + 1].hora).getTime(); // Convierte la fecha a milisegundos
+      if (descansos[i].tipo === "INICIO_DESCANSO") {
+        const inicioDescanso = DateTime.fromJSDate(descansos[i].hora);
 
-        // Calculamos la diferencia en milisegundos y la convertimos a minutos
-        totalTiempoDescanso += (finalDescanso - inicioDescanso) / 1000 / 60;
+        // Inicializa finalDescanso como undefined
+        let finalDescanso: DateTime | null;
 
-        // Incrementamos el índice en 1 para saltar al siguiente par
-        i++;
+        // Busca el correspondiente FIN_DESCANSO
+        for (let j = i + 1; j < descansos.length; j++) {
+          if (descansos[j].tipo === "FINAL_DESCANSO") {
+            finalDescanso = DateTime.fromJSDate(descansos[j].hora);
+            i = j;
+            break; // Rompe el bucle una vez que encuentres el fin del descanso
+          }
+        }
+
+        if (finalDescanso) {
+          totalTiempoDescanso += Math.abs(
+            finalDescanso.diff(inicioDescanso, "hours").hours,
+          );
+        }
       }
     }
-
-    return totalTiempoDescanso; // Retornamos el tiempo total en minutos
+    return totalTiempoDescanso;
   }
 
   async sincroFichajes() {
