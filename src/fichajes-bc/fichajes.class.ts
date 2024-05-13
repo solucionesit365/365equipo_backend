@@ -50,12 +50,33 @@ export class Fichajes {
       );
   }
 
+  async getInicioFichaje(
+    horaInicioDescanso: DateTime,
+    uid: string,
+  ): Promise<DateTime> {
+    const fichajesRecientes = await this.getFichajesByUidInverso(
+      uid,
+      horaInicioDescanso.minus({ hours: 8 }).toJSDate(),
+      horaInicioDescanso.toJSDate(),
+    );
+
+    for (let i = 0; i < fichajesRecientes.length; i += 1) {
+      if (fichajesRecientes[i].tipo === "ENTRADA") {
+        return DateTime.fromJSDate(fichajesRecientes[i].hora);
+      }
+    }
+
+    throw new InternalServerErrorException(
+      "No hay ningún fichaje de entrada reciente",
+    );
+  }
+
   async nuevoInicioDescanso(trabajador: Trabajador) {
-    const hora = DateTime.now().toJSDate();
+    const hora = DateTime.now();
 
     const insert = await this.schFichajes.nuevoInicioDescanso(
       trabajador.idApp,
-      hora,
+      hora.toJSDate(),
       trabajador.id,
       trabajador.nombreApellidos,
       trabajador.dni,
@@ -65,6 +86,7 @@ export class Fichajes {
       throw new InternalServerErrorException(
         "No se ha podido registrar el inicio del descanso",
       );
+    return hora;
   }
 
   async nuevoFinalDescanso(trabajador: Trabajador) {
@@ -86,29 +108,94 @@ export class Fichajes {
 
   async getEstado(uid: string, fecha: Date) {
     const fichajes = await this.schFichajes.getFichajesDia(uid, fecha);
-    const primerFichaje = fichajes[0];
     const ultimoFichaje = fichajes[fichajes.length - 1];
+    const ultimaEntrada = fichajes.find(
+      (fichaje) => fichaje.tipo === "ENTRADA",
+    );
 
     if (!ultimoFichaje) {
-      return "SIN_ENTRADA";
-    } else if (primerFichaje.tipo === "SALIDA") {
-      return "ERROR";
+      return {
+        estado: "SIN_ENTRADA",
+        entrada: ultimaEntrada
+          ? DateTime.fromJSDate(ultimaEntrada.hora).toISO()
+          : null,
+        ultimoFichaje: ultimoFichaje
+          ? DateTime.fromJSDate(ultimoFichaje.hora).toISO()
+          : null,
+      };
     } else if (
       ultimoFichaje.tipo === "ENTRADA" ||
       ultimoFichaje.tipo === "FINAL_DESCANSO"
     ) {
       return {
         estado: "TRABAJANDO",
-        data: ultimoFichaje,
+        entrada: ultimaEntrada
+          ? DateTime.fromJSDate(ultimaEntrada.hora).toISO()
+          : null,
+        ultimoFichaje: ultimoFichaje
+          ? DateTime.fromJSDate(ultimoFichaje.hora).toISO()
+          : null,
       };
     } else if (ultimoFichaje.tipo === "SALIDA") {
-      return "HA_SALIDO";
+      return {
+        estado: "HA_SALIDO",
+        entrada: ultimaEntrada
+          ? DateTime.fromJSDate(ultimaEntrada.hora).toISO()
+          : null,
+        ultimoFichaje: ultimoFichaje
+          ? DateTime.fromJSDate(ultimoFichaje.hora).toISO()
+          : null,
+      };
     } else if (ultimoFichaje.tipo === "INICIO_DESCANSO") {
       return {
         estado: "DESCANSANDO",
-        data: ultimoFichaje,
+        entrada: ultimaEntrada
+          ? DateTime.fromJSDate(ultimaEntrada.hora).toISO()
+          : null,
+        ultimoFichaje: ultimoFichaje
+          ? DateTime.fromJSDate(ultimoFichaje.hora).toISO()
+          : null,
       };
-    } else return "ERROR";
+    } else throw new InternalServerErrorException("Estado no reconocido");
+  }
+
+  async getTiempoDescansoTotalDia(
+    inicio: DateTime,
+    final: DateTime,
+    uid: string,
+  ) {
+    const descansos = await this.schFichajes.getDescansosTrabajadorDia(
+      inicio,
+      final,
+      uid,
+    );
+
+    let totalTiempoDescanso = 0; // Inicializamos el contador de tiempo total de descanso
+
+    for (let i = 0; i < descansos.length - 1; i++) {
+      if (descansos[i].tipo === "INICIO_DESCANSO") {
+        const inicioDescanso = DateTime.fromJSDate(descansos[i].hora);
+
+        // Inicializa finalDescanso como undefined
+        let finalDescanso: DateTime | null;
+
+        // Busca el correspondiente FIN_DESCANSO
+        for (let j = i + 1; j < descansos.length; j++) {
+          if (descansos[j].tipo === "FINAL_DESCANSO") {
+            finalDescanso = DateTime.fromJSDate(descansos[j].hora);
+            i = j;
+            break; // Rompe el bucle una vez que encuentres el fin del descanso
+          }
+        }
+
+        if (finalDescanso) {
+          totalTiempoDescanso += Math.abs(
+            finalDescanso.diff(inicioDescanso, "hours").hours,
+          );
+        }
+      }
+    }
+    return totalTiempoDescanso;
   }
 
   async sincroFichajes() {
@@ -189,6 +276,18 @@ export class Fichajes {
 
   async getFichajesByUid(uid: string, fechaInicio: Date, fechaFinal: Date) {
     return await this.schFichajes.getFichajesByUid(
+      uid,
+      fechaInicio,
+      fechaFinal,
+    );
+  }
+
+  async getFichajesByUidInverso(
+    uid: string,
+    fechaInicio: Date,
+    fechaFinal: Date,
+  ) {
+    return await this.schFichajes.getFichajesByUidInverso(
       uid,
       fechaInicio,
       fechaFinal,

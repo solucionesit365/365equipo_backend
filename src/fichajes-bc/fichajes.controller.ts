@@ -42,13 +42,24 @@ export class FichajesController {
     const usuarioCompleto =
       await this.trabajadoresInstance.getTrabajadorByAppId(user.uid);
 
-    // Desfichar: Requisito legal.
-    await this.fichajesInstance.nuevaSalida(usuarioCompleto);
+    // // Desfichar: Requisito legal.
+    // await this.fichajesInstance.nuevaSalida(usuarioCompleto);
 
     // Inicio descanso:
-    await this.fichajesInstance.nuevoInicioDescanso(usuarioCompleto);
+    const horaInicioDescanso = await this.fichajesInstance.nuevoInicioDescanso(
+      usuarioCompleto,
+    );
 
-    return true;
+    const inicioFichaje = await this.fichajesInstance.getInicioFichaje(
+      horaInicioDescanso,
+      user.uid,
+    );
+
+    return {
+      ok: true,
+      inicioDescanso: horaInicioDescanso.toISO(),
+      inicioFichaje: inicioFichaje.toISO(),
+    };
   }
 
   @UseGuards(AuthGuard)
@@ -60,8 +71,8 @@ export class FichajesController {
     // Final descanso
     await this.fichajesInstance.nuevoFinalDescanso(usuarioCompleto);
 
-    // Fichaje entrada automático
-    await this.fichajesInstance.nuevaEntrada(usuarioCompleto);
+    // // Fichaje entrada automático
+    // await this.fichajesInstance.nuevaEntrada(usuarioCompleto);
 
     return true;
   }
@@ -69,17 +80,31 @@ export class FichajesController {
   @UseGuards(AuthGuard)
   @Get("estado")
   async getEstado(@Query("date") dateString: string, @User() user: UserRecord) {
+    const date = new Date(dateString);
+    const result = await this.fichajesInstance.getEstado(user.uid, date);
+
+    return result;
+  }
+
+  @UseGuards(AuthGuard)
+  @Get("tiempoDescansoTotalDia")
+  async tiempoDescansoTotalDia(@User() user: UserRecord) {
+    const inicio = DateTime.now().startOf("day");
+    const final = inicio.endOf("day");
+
     try {
-      const date = new Date(dateString);
-      const result = await this.fichajesInstance.getEstado(user.uid, date);
-      return {
-        ok: true,
-        data: result,
-      };
+      const tiempoDescanso =
+        await this.fichajesInstance.getTiempoDescansoTotalDia(
+          inicio,
+          final,
+          user.uid,
+        );
+      return tiempoDescanso;
     } catch (err) {
       console.log(err);
-      return { ok: false, message: err.message };
     }
+
+    return 0;
   }
 
   @UseGuards(SchedulerGuard)
