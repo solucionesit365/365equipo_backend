@@ -108,7 +108,6 @@ export class Fichajes {
 
   async getEstado(uid: string, fecha: Date) {
     const fichajes = await this.schFichajes.getFichajesDia(uid, fecha);
-    const primerFichaje = fichajes[0];
     const ultimoFichaje = fichajes[fichajes.length - 1];
     const ultimaEntrada = fichajes.find(
       (fichaje) => fichaje.tipo === "ENTRADA",
@@ -148,14 +147,6 @@ export class Fichajes {
           : null,
       };
     } else if (ultimoFichaje.tipo === "INICIO_DESCANSO") {
-      // const resDescanso = {
-      //   estado: "DESCANSANDO",
-      //   inicioDescanso: DateTime.fromJSDate(ultimoFichaje.hora).toISO(),
-      //   fichajeEntrada: DateTime.fromJSDate(
-      //     fichajes[fichajes.length - 2].hora,
-      //   ).toISO(),
-      // };
-
       return {
         estado: "DESCANSANDO",
         entrada: ultimaEntrada
