@@ -19,7 +19,7 @@ async function bootstrap() {
       "http://localhost:8080",
       "https://silema.web.app",
       "https://365equipo.com",
-      "https://tarjeta-cliente.web.app",
+      "https://club365obrador.web.app",
       "https://silema--test-08eqf71j.web.app",
     ],
   });
