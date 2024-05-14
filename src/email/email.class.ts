@@ -9,15 +9,12 @@ export class EmailService {
 
   constructor(private readonly authInstance: FirebaseService) {
     this.transporter = nodemailer.createTransport({
-      host: "smtp.gmail.com",
+      host: "smtp.sendgrid.net",
       port: 587,
-      service: "gmail",
+      secure: false,
       auth: {
-        user: "noreply@365equipo.com",
+        user: "apikey",
         pass: process.env.EMAIL_PASS,
-        clientId: process.env.CLIENT_ID,
-        clientSecret: process.env.CLIENT_SECRET,
-        refreshToken: process.env.REFRESH_TOKEN,
       },
     });
   }
