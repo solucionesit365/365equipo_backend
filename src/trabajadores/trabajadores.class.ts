@@ -246,7 +246,7 @@ export class TrabajadorService {
       "365 Equipo - Verificar email",
     );
 
-    return true;
+    return arrayEmails[0].trim();
   }
 
   async resolverCaptcha(): Promise<boolean> {
