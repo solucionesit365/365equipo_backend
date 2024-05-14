@@ -212,7 +212,7 @@ export class TrabajadorService {
     dni = dni.trim().toUpperCase();
     const datosUsuario = await this.schTrabajadores.getTrabajadorByDni(dni);
 
-    if (!DateTime.fromJSDate(datosUsuario.contratos[0].inicioContrato).isValid)
+    if (!DateTime.fromJSDate(datosUsuario.contratos[0]?.inicioContrato).isValid)
       throw Error("Fecha de inicio de contrato incorrecta");
 
     const arrayEmails = datosUsuario.emails.split(";");
