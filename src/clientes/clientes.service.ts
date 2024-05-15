@@ -421,4 +421,12 @@ export class ClientesService {
       email,
     );
   }
+
+  async getAllFlayers() {
+    try {
+      return await this.schSolicitudesCliente.getAllFlayers();
+    } catch (error) {
+      console.log(error);
+    }
+  }
 }

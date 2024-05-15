@@ -124,4 +124,26 @@ export class ClientesController {
       return { ok: false, message: err.message };
     }
   }
+
+  @Get("getClientesRegistrados")
+  async getAllFlayers() {
+    try {
+      const response = await this.clientesInstance.getAllFlayers();
+      if (response.length > 1) {
+        return {
+          ok: true,
+          data: response,
+        };
+      } else
+        return {
+          ok: false,
+          data: "No hay clientes registrados",
+        };
+    } catch (error) {
+      return {
+        ok: false,
+        data: error,
+      };
+    }
+  }
 }

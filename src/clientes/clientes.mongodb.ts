@@ -43,6 +43,14 @@ export class SolicitudNuevoClienteBbdd {
     return await solicitudesClienteCollection.findOne({ _id: idSolicitud });
   }
 
+  async getAllFlayers() {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const solicitudesClienteCollection =
+      db.collection<SolicitudCliente>("codigosFlayers");
+
+    return await solicitudesClienteCollection.find().toArray();
+  }
+
   async borrarSolicitud(idSolicitud: string) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const solicitudesClienteCollection = db.collection<SolicitudCliente>(
