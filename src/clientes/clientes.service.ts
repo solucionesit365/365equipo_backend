@@ -94,10 +94,23 @@ export class ClientesService {
       );
       return true;
     } else {
-      await this.tarjetaClienteInstance.sendQRInvitation(
-        `QR_INVITACION_${email}`,
-        email,
-      );
+      const solicitud: SolicitudCliente = {
+        _id: new ObjectId().toString(),
+        email: email,
+        fechaRegistro: new Date(),
+        newsletter,
+      };
+      await this.schSolicitudesCliente.nuevaSolicitud(solicitud); //Guarda en Mongo
+      const codFlayer = `QR_INVITACION_${uuidv4()}`;
+      const data = {
+        _id: new ObjectId().toString(),
+        email: email,
+        fechaRegistro: new Date(),
+        caducado: false,
+        codigo: codFlayer,
+      };
+      await this.schSolicitudesCliente.nuevoCodigoFlayer(data); //Guarda el codigo flayer en mongo aea
+      await this.tarjetaClienteInstance.sendQRInvitation(codFlayer, email); //genera y envía QR al correo
     }
   }
 
