@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, InternalServerErrorException } from "@nestjs/common";
 import { FichajesDatabase } from "./fichajes.mongodb";
 import { TrabajadorService } from "../trabajadores/trabajadores.class";
 import { Trabajador } from "@prisma/client";
@@ -27,9 +27,10 @@ export class Fichajes {
       trabajador.dni,
     );
 
-    if (insert) return true;
-
-    throw Error("No se ha podido registrar la entrada");
+    if (!insert)
+      throw new InternalServerErrorException(
+        "No se ha podido registrar la entrada",
+      );
   }
 
   async nuevaSalida(trabajador: Trabajador) {
@@ -43,9 +44,44 @@ export class Fichajes {
       trabajador.dni,
     );
 
-    if (insert) return true;
+    if (!insert)
+      throw new InternalServerErrorException(
+        "No se ha podido registrar la salida",
+      );
+  }
 
-    throw Error("No se ha podido registrar la salida");
+  async nuevoInicioDescanso(trabajador: Trabajador) {
+    const hora = DateTime.now().toJSDate();
+
+    const insert = await this.schFichajes.nuevoInicioDescanso(
+      trabajador.idApp,
+      hora,
+      trabajador.id,
+      trabajador.nombreApellidos,
+      trabajador.dni,
+    );
+
+    if (!insert)
+      throw new InternalServerErrorException(
+        "No se ha podido registrar el inicio del descanso",
+      );
+  }
+
+  async nuevoFinalDescanso(trabajador: Trabajador) {
+    const hora = DateTime.now().toJSDate();
+
+    const insert = await this.schFichajes.nuevoFinalDescanso(
+      trabajador.idApp,
+      hora,
+      trabajador.id,
+      trabajador.nombreApellidos,
+      trabajador.dni,
+    );
+
+    if (!insert)
+      throw new InternalServerErrorException(
+        "No se ha podido registrar el inicio del descanso",
+      );
   }
 
   async getEstado(uid: string, fecha: Date) {
@@ -57,13 +93,21 @@ export class Fichajes {
       return "SIN_ENTRADA";
     } else if (primerFichaje.tipo === "SALIDA") {
       return "ERROR";
-    } else if (ultimoFichaje.tipo === "ENTRADA") {
+    } else if (
+      ultimoFichaje.tipo === "ENTRADA" ||
+      ultimoFichaje.tipo === "FINAL_DESCANSO"
+    ) {
       return {
         estado: "TRABAJANDO",
         data: ultimoFichaje,
       };
     } else if (ultimoFichaje.tipo === "SALIDA") {
       return "HA_SALIDO";
+    } else if (ultimoFichaje.tipo === "INICIO_DESCANSO") {
+      return {
+        estado: "DESCANSANDO",
+        data: ultimoFichaje,
+      };
     } else return "ERROR";
   }
 
@@ -98,7 +142,7 @@ export class Fichajes {
         fichajesPretty.push({
           _id: fichajesBC[i].idr,
           hora: DateTime.fromJSDate(new Date(fichajesBC[i].tmst)).minus({
-            hours: 1,
+            hours: 2,
           }),
           uid: idApp,
           tipo: "ENTRADA",
@@ -113,7 +157,7 @@ export class Fichajes {
         fichajesPretty.push({
           _id: fichajesBC[i].idr,
           hora: DateTime.fromJSDate(new Date(fichajesBC[i].tmst)).minus({
-            hours: 1,
+            hours: 2,
           }),
           uid: idApp,
           tipo: "SALIDA",

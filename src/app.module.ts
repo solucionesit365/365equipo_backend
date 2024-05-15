@@ -37,8 +37,10 @@ import { MBCTokenModule } from "./bussinesCentral/services/mbctoken/mbctoken.ser
 import { RoleModule } from "./role/role.module";
 import { PermissionModule } from "./permission/permission.module";
 import { EmpresaModule } from "./empresa/empresa.module";
+
 import { KpiTiendasController } from "./kpi-tiendas/kpi-tiendas.controller";
 import { KpiTiendasModule } from "./kpi-tiendas/kpi-tiendas.module";
+import { DiaPersonalModule } from "./dia-personal/dia-personal.module";
 
 @Module({
   imports: [
@@ -81,7 +83,9 @@ import { KpiTiendasModule } from "./kpi-tiendas/kpi-tiendas.module";
     RoleModule,
     PermissionModule,
     EmpresaModule,
+
     KpiTiendasModule,
+    DiaPersonalModule,
   ],
   controllers: [AppController, KpiTiendasController],
 })

@@ -7,3 +7,11 @@ export class GetPactadoVsRealRequestDto {
   @IsDate()
   fechaInicio: Date;
 }
+
+export interface PactadoVsRealDto {
+  nombre: string;
+  idTrabajador: number;
+  contrato: number;
+  arrayValidados: any[];
+  cuadrante?: any[];
+}

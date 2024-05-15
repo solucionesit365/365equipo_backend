@@ -4,6 +4,7 @@ import { FirebaseService } from "../firebase/firebase.service";
 import { PermisosService } from "../permisos/permisos.class";
 import { DateTime } from "luxon";
 import { SolicitudesVacacionesService } from "../solicitud-vacaciones/solicitud-vacaciones.class";
+import { DiaPersonalClass } from "../dia-personal/dia-personal.class";
 import { TrabajadorDatabaseService } from "./trabajadores.database";
 import { UserRecord } from "firebase-admin/auth";
 import { Prisma } from "@prisma/client";
@@ -21,6 +22,8 @@ export class TrabajadorService {
     private readonly emailInstance: EmailService,
     @Inject(forwardRef(() => SolicitudesVacacionesService))
     private readonly solicitudesVacaciones: SolicitudesVacacionesService,
+    @Inject(forwardRef(() => DiaPersonalClass))
+    private readonly solicitudesDiaPersonal: DiaPersonalClass,
     private readonly schTrabajadores: TrabajadorDatabaseService,
   ) {}
 
@@ -209,7 +212,7 @@ export class TrabajadorService {
     dni = dni.trim().toUpperCase();
     const datosUsuario = await this.schTrabajadores.getTrabajadorByDni(dni);
 
-    if (!DateTime.fromJSDate(datosUsuario.contratos[0].inicioContrato).isValid)
+    if (!DateTime.fromJSDate(datosUsuario.contratos[0]?.inicioContrato).isValid)
       throw Error("Fecha de inicio de contrato incorrecta");
 
     const arrayEmails = datosUsuario.emails.split(";");
@@ -243,7 +246,7 @@ export class TrabajadorService {
       "365 Equipo - Verificar email",
     );
 
-    return true;
+    return arrayEmails[0].trim();
   }
 
   async resolverCaptcha(): Promise<boolean> {
@@ -273,9 +276,17 @@ export class TrabajadorService {
           await this.solicitudesVacaciones.haySolicitudesParaBeneficiario(
             original.id,
           );
+        const solicitudesExistenDiaPersonal =
+          await this.solicitudesDiaPersonal.haySolicitudesParaBeneficiarioDiaPersonal(
+            original.id,
+          );
 
-        if (solicitudesExisten) {
+        if (solicitudesExisten && solicitudesExistenDiaPersonal) {
           await this.solicitudesVacaciones.actualizarIdAppResponsable(
+            original.id,
+            nuevoIdAppResponsable,
+          );
+          await this.solicitudesDiaPersonal.actualizarIdAppResponsableDiaPersonal(
             original.id,
             nuevoIdAppResponsable,
           );

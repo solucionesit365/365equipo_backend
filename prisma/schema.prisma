@@ -32,7 +32,7 @@ model Trabajador {
   llevaEquipo      Boolean
   tokenQR          String?
   displayFoto      String?
-  contratos        Contrato[]
+  contratos        Contrato2[]
   // Autorelación
   responsable      Trabajador?  @relation("Responsable", fields: [idResponsable], references: [id], onDelete: SetNull)
   subordinados     Trabajador[] @relation("Responsable")
@@ -60,7 +60,7 @@ model Empresa {
   nombre    String
   cif       String
   idExterno Int?
-  contratos Contrato[]
+  contratos Contrato2[]
 }
 
 model Contrato {
@@ -71,11 +71,25 @@ model Contrato {
   fechaAlta       DateTime
   fechaAntiguedad DateTime
   fechaBaja       DateTime?
-  trabajador      Trabajador @relation(fields: [idTrabajador], references: [id])
+  // trabajador      Trabajador @relation(fields: [idTrabajador], references: [id])
   idTrabajador    Int
   dni             String
   idEmpresa       String?
-  empresa         Empresa?    @relation(fields: [idEmpresa], references: [id])
+  // empresa         Empresa?    @relation(fields: [idEmpresa], references: [id])
+}
+
+model Contrato2 {
+  id              String      @id @default(uuid())
+  horasContrato   Float
+  inicioContrato  DateTime
+  finalContrato   DateTime?
+  fechaAlta       DateTime
+  fechaAntiguedad DateTime
+  fechaBaja       DateTime?
+  idEmpresa       String?
+  idTrabajador    Int
+  Empresa         Empresa?   @relation(fields: [idEmpresa], references: [id])
+  Trabajador      Trabajador @relation(fields: [idTrabajador], references: [id])
 }
 
 model Role {

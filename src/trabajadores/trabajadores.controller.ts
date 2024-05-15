@@ -8,6 +8,7 @@ import { UserRecord } from "firebase-admin/auth";
 import {
   CreateTrabajadorRequestDto,
   EditTrabajadorRequest,
+  GetSubordinadosDto,
   TrabajadorFormRequest,
 } from "./trabajadores.dto";
 
@@ -100,17 +101,10 @@ export class TrabajadoresController {
 
   @UseGuards(AuthGuard)
   @Get("getSubordinados")
-  async getSubordinados(@Query() { uid }) {
-    try {
-      if (!uid) throw Error("Faltan datos");
+  async getSubordinados(@Query() req: GetSubordinadosDto) {
+    const resUser = await this.trabajadorInstance.getSubordinados(req.uid);
 
-      const resUser = await this.trabajadorInstance.getSubordinados(uid);
-
-      return { ok: true, data: resUser };
-    } catch (err) {
-      console.log(err);
-      return { ok: false, message: err.message };
-    }
+    return { ok: true, data: resUser };
   }
 
   @UseGuards(AuthGuard)

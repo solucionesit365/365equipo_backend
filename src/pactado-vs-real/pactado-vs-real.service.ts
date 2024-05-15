@@ -3,14 +3,16 @@ import { DateTime } from "luxon";
 import { TrabajadorService } from "../trabajadores/trabajadores.class";
 import { FichajesValidadosService } from "../fichajes-validados/fichajes-validados.class";
 import { UserRecord } from "firebase-admin/auth";
-import { Trabajador, Tienda, Contrato } from "@prisma/client";
+import { Trabajador, Tienda, Contrato2 } from "@prisma/client";
 import { FichajeValidadoDto } from "../fichajes-validados/fichajes-validados.dto";
 import { AusenciasService } from "../ausencias/ausencias.class";
 import { AusenciaInterface } from "../ausencias/ausencias.interface";
+import { PactadoVsRealDto } from "./pactado-vs-real.dto";
+import { Cuadrantes } from "../cuadrantes/cuadrantes.class";
 
 type TrabajadorExtendido = Trabajador & {
   tienda?: Tienda | null; // Relación con Tienda
-  contratos?: Contrato[] | null; // Relación con Contratos
+  contratos?: Contrato2[] | null; // Relación con Contratos
   responsable?: Trabajador | null; // Relación con Responsable
   subordinados?: Trabajador[] | null; // Relación con Subordinados
 };
@@ -21,6 +23,7 @@ export class PactadoVsRealService {
     private readonly trabajadoresInstance: TrabajadorService,
     private readonly fichajesValidadosService: FichajesValidadosService,
     private readonly ausenciasService: AusenciasService,
+    private readonly cuadranteService: Cuadrantes,
   ) {}
   async pactadoVsReal(
     trabajadorRequest: UserRecord,
@@ -59,7 +62,7 @@ export class PactadoVsRealService {
       trabajadoresTienda.push(trabajador);
     }
 
-    const pactadoReal = [];
+    const pactadoReal: PactadoVsRealDto[] = [];
     console.log(trabajadoresTienda);
 
     for (let i = 0; i < trabajadoresTienda.length; i += 1) {
@@ -82,6 +85,22 @@ export class PactadoVsRealService {
         pactadoReal[i].arrayValidados.push(fichajesValidadosDia);
       }
     }
+
+    return await this.adjuntarContratos(pactadoReal, fechaInicio);
+  }
+
+  private async adjuntarContratos(
+    pactadoReal: PactadoVsRealDto[],
+    fechaEntreSemana: DateTime,
+  ) {
+    for (let i = 0; i < pactadoReal.length; i += 1) {
+      pactadoReal[i]["cuadrante"] =
+        await this.cuadranteService.getCuadranteSemanaTrabajador(
+          pactadoReal[i].idTrabajador,
+          fechaEntreSemana,
+        );
+    }
+
     return pactadoReal;
   }
 
@@ -133,48 +152,41 @@ export class PactadoVsRealService {
     inicioSemana: DateTime,
     finalSemana: DateTime,
   ) {
-    const prototipo = {
-      total: 0,
-      tipo: null,
-    };
-
-    const ausencias = [
-      prototipo,
-      prototipo,
-      prototipo,
-      prototipo,
-      prototipo,
-      prototipo,
-      prototipo,
-    ];
+    const ausencias = Array(7)
+      .fill(null)
+      .map(() => ({
+        total: 0,
+        tipo: null,
+      }));
 
     for (let i = 0; i < ausenciasTrabajador.length; i += 1) {
-      const limiteIzquierdo =
-        DateTime.fromJSDate(ausenciasTrabajador[i].fechaInicio) < inicioSemana
-          ? inicioSemana
-          : DateTime.fromJSDate(ausenciasTrabajador[i].fechaInicio);
-      const limiteDerecho =
-        DateTime.fromJSDate(ausenciasTrabajador[i].fechaFinal) > finalSemana
-          ? finalSemana
-          : DateTime.fromJSDate(ausenciasTrabajador[i].fechaFinal);
+      const fechaInicio = DateTime.fromJSDate(
+        ausenciasTrabajador[i].fechaInicio,
+      );
+      const fechaFinal = DateTime.fromJSDate(ausenciasTrabajador[i].fechaFinal);
 
-      const diferenciaDias = Math.ceil(
+      const limiteIzquierdo =
+        fechaInicio < inicioSemana ? inicioSemana : fechaInicio;
+      const limiteDerecho = fechaFinal > finalSemana ? finalSemana : fechaFinal;
+
+      // Asegurándonos de que siempre haya al menos 1 día de diferencia
+      const diferenciaDias = Math.max(
         limiteDerecho.diff(limiteIzquierdo, "days").days,
+        1,
       );
 
-      const horas = !!ausenciasTrabajador[i].horas
-        ? ausenciasTrabajador[i].horas
-        : 8;
+      const horas = ausenciasTrabajador[i].horas || 8; // Usando el valor por defecto de 8 horas si no está especificado
 
       const indexDia = limiteIzquierdo.weekday - 1;
 
       for (let j = 0; j < diferenciaDias; j += 1) {
+        // Sumar horas al total del día correspondiente
         ausencias[indexDia + j].total += horas;
-        ausencias[indexDia + j].tipo = ausenciasTrabajador[i].tipo;
+        // Establecer el tipo solo si es el primer día de la ausencia o si el tipo aún es null
+        if (j === 0 || ausencias[indexDia + j].tipo === null) {
+          ausencias[indexDia + j].tipo = ausenciasTrabajador[i].tipo;
+        }
       }
-
-      ausencias[indexDia].total += ausenciasTrabajador[i].horas;
-      ausencias[indexDia].tipo = ausenciasTrabajador[i].tipo;
     }
 
     return {

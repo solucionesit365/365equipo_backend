@@ -93,9 +93,9 @@ export class ContratoService {
   async getHorasContrato(idSql: number, conFecha: DateTime) {
     const fecha = conFecha.endOf("day");
 
-    const response = await this.prisma.contrato.findFirst({
+    const response = await this.prisma.contrato2.findFirst({
       where: {
-        trabajador: {
+        Trabajador: {
           id: idSql,
         },
         fechaAlta: {
@@ -123,12 +123,14 @@ export class ContratoService {
 
   async getContratoByDni(dni: string) {
     try {
-      const resContrato = await this.prisma.contrato.findMany({
+      const resContrato = await this.prisma.contrato2.findMany({
         where: {
-          dni: dni,
+          Trabajador: {
+            dni: dni,
+          },
         },
         include: {
-          empresa: true,
+          Empresa: true,
         },
       });
 

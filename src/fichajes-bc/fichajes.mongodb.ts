@@ -63,6 +63,54 @@ export class FichajesDatabase {
     return null;
   }
 
+  async nuevoInicioDescanso(
+    uid: string,
+    hora: Date,
+    idExterno: number,
+    nombre: string,
+    dni: string,
+  ) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const fichajesCollection = db.collection<FichajeDto>("fichajes");
+    const resInsert = await fichajesCollection.insertOne({
+      enviado: false,
+      hora,
+      tipo: "INICIO_DESCANSO",
+      uid,
+      idExterno,
+      validado: false,
+      nombre,
+      dni,
+    });
+
+    if (resInsert.acknowledged) return resInsert.insertedId;
+    return null;
+  }
+
+  async nuevoFinalDescanso(
+    uid: string,
+    hora: Date,
+    idExterno: number,
+    nombre: string,
+    dni: string,
+  ) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const fichajesCollection = db.collection<FichajeDto>("fichajes");
+    const resInsert = await fichajesCollection.insertOne({
+      enviado: false,
+      hora,
+      tipo: "FINAL_DESCANSO",
+      uid,
+      idExterno,
+      validado: false,
+      nombre,
+      dni,
+    });
+
+    if (resInsert.acknowledged) return resInsert.insertedId;
+    return null;
+  }
+
   async getFichajesDia(uid: string, fecha: Date) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const fichajesCollection = db.collection<FichajeDto>("fichajes");

@@ -5,7 +5,7 @@ export interface FichajeDto {
   _id?: ObjectId;
   hora: Date;
   uid: string;
-  tipo: "ENTRADA" | "SALIDA";
+  tipo: "ENTRADA" | "SALIDA" | "INICIO_DESCANSO" | "FINAL_DESCANSO";
   enviado: boolean;
   idExterno: number;
   comentario?: string;

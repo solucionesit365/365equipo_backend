@@ -1,6 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { MongoService } from "../mongo/mongo.service";
 import { SolicitudCliente } from "./clientes.interface";
+import { CodigoFlayers } from "./clientes.interface";
 import { HitMssqlService } from "../hit-mssql/hit-mssql.service";
 
 @Injectable()
@@ -10,6 +11,7 @@ export class SolicitudNuevoClienteBbdd {
     private readonly hitMssqlService: HitMssqlService,
   ) {}
 
+  //Guardar los datos del cliente que ha solicitado un flayer por QR
   async nuevaSolicitud(solicitud: SolicitudCliente) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const solicitudesClienteCollection = db.collection<SolicitudCliente>(
@@ -20,6 +22,16 @@ export class SolicitudNuevoClienteBbdd {
     throw Error(
       "No se ha podido insertar la solicitud de registro del nuevo cliente",
     );
+  }
+
+  //Guardar cupon de un solo uso
+  async nuevoCodigoFlayer(flayer: CodigoFlayers) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const solicitudesClienteCollection =
+      db.collection<CodigoFlayers>("codigosFlayers");
+    const resInsert = await solicitudesClienteCollection.insertOne(flayer);
+    if (resInsert.acknowledged) return resInsert.insertedId;
+    throw Error("No se ha podido guardar el codigo del flayer");
   }
 
   async getSolicitud(idSolicitud: string) {
