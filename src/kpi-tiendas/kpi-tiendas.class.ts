@@ -20,4 +20,8 @@ export class KpiTiendasClass {
   async getAllKPIs(semana: number, año: number) {
     return await this.kpiTiendasDB.getAllKPIs(semana, año);
   }
+
+  async borrarKPITienda(kpiTienda: KpiTiendasInterface) {
+    return await this.kpiTiendasDB.borrarKPITienda(kpiTienda);
+  }
 }

@@ -63,4 +63,23 @@ export class KpiTiendasController {
       }
     } catch (error) {}
   }
+
+  @UseGuards(AuthGuard)
+  @Post("borrarKpiTienda")
+  async borrarKpiTienda(@Body() kpiTienda: KpiTiendasInterface) {
+    try {
+      const respKPIS = await this.KpiTiendasClass.borrarKPITienda(kpiTienda);
+
+      if (respKPIS)
+        return {
+          ok: true,
+          data: respKPIS,
+        };
+    } catch (error) {
+      return {
+        ok: false,
+        data: error,
+      };
+    }
+  }
 }

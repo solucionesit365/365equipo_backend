@@ -37,4 +37,14 @@ export class KpiTiendasDatabase {
 
     return respKPIS;
   }
+
+  async borrarKPITienda(kpiTienda: KpiTiendasInterface) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const kpiTiendaCollection =
+      db.collection<KpiTiendasInterface>("kpiTiendas");
+    const respKPIS = await kpiTiendaCollection.deleteOne({
+      _id: new ObjectId(kpiTienda._id),
+    });
+    return respKPIS.acknowledged && respKPIS.deletedCount > 0;
+  }
 }
