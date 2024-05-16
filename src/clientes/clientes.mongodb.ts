@@ -64,6 +64,30 @@ export class SolicitudNuevoClienteBbdd {
     return resDelete.acknowledged;
   }
 
+  async validarFlayer(codigo: string) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const solicitudesClienteCollection =
+      db.collection<CodigoFlayers>("codigosFlayers");
+
+    return await solicitudesClienteCollection.findOne({ codigo: codigo });
+  }
+  async caducarFlayer(codigo: string) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const solicitudesClienteCollection =
+      db.collection<CodigoFlayers>("codigosFlayers");
+
+    return await solicitudesClienteCollection.updateOne(
+      {
+        codigo: codigo,
+      },
+      {
+        $set: {
+          caducado: true,
+        },
+      },
+    );
+  }
+
   async nuevoCliente(
     nombre: string,
     apellidos: string,
