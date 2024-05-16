@@ -146,4 +146,26 @@ export class ClientesController {
       };
     }
   }
+
+  @Get("validarFlayer")
+  async validarFlayer(@Query("codigo") codigo: string) {
+    try {
+      const response = await this.clientesInstance.validarFlayer(codigo);
+      console.log(response);
+
+      if (response) {
+        if (!response.caducado) {
+          await this.clientesInstance.caducarFlayer(codigo);
+        }
+        return {
+          ok: true,
+          data: response,
+        };
+      } else
+        return {
+          ok: false,
+          data: "No hay flayer con este QR",
+        };
+    } catch (error) {}
+  }
 }

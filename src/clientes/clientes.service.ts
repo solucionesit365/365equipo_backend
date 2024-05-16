@@ -429,4 +429,12 @@ export class ClientesService {
       console.log(error);
     }
   }
+
+  async validarFlayer(codigo: string) {
+    return await this.schSolicitudesCliente.validarFlayer(codigo);
+  }
+
+  async caducarFlayer(codigo: string) {
+    return await this.schSolicitudesCliente.caducarFlayer(codigo);
+  }
 }
