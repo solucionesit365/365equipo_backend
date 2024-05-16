@@ -7,7 +7,7 @@ export interface SolicitudCliente {
   telefono?: string;
   newsletter: boolean;
   codigoPostal?: string;
-};
+}
 
 export interface CodigoFlayers {
   _id: string;
@@ -15,4 +15,5 @@ export interface CodigoFlayers {
   fechaRegistro: Date;
   caducado: boolean;
   codigo: string;
+  newsletter: boolean;
 }
