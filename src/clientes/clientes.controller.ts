@@ -129,7 +129,7 @@ export class ClientesController {
   async getAllFlayers() {
     try {
       const response = await this.clientesInstance.getAllFlayers();
-      if (response.length > 1) {
+      if (response.length > 0) {
         return {
           ok: true,
           data: response,
@@ -151,7 +151,6 @@ export class ClientesController {
   async validarFlayer(@Query("codigo") codigo: string) {
     try {
       const response = await this.clientesInstance.validarFlayer(codigo);
-      console.log(response);
 
       if (response) {
         if (!response.caducado) {
@@ -167,5 +166,23 @@ export class ClientesController {
           data: "No hay flayer con este QR",
         };
     } catch (error) {}
+  }
+
+  @Get("updateAll")
+  async caducarFlayer(@Query("codigo") codigo: string) {
+    try {
+      const response = await this.clientesInstance.caducarFlayer(codigo);
+
+      if (response)
+        return {
+          ok: true,
+          data: response,
+        };
+
+      throw Error("No se ha podido modificar el codigo");
+    } catch (err) {
+      console.log(err);
+      return { ok: false, message: err.message };
+    }
   }
 }

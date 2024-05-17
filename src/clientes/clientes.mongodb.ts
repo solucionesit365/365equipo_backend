@@ -17,6 +17,14 @@ export class SolicitudNuevoClienteBbdd {
     const solicitudesClienteCollection = db.collection<SolicitudCliente>(
       "solicitudRegistroCliente",
     );
+    const solicitudExistente = await solicitudesClienteCollection.findOne({
+      email: solicitud.email,
+    });
+    if (solicitudExistente) {
+      throw new Error(
+        "Este correo ya ha sido utilizado para registrar una solicitud.",
+      );
+    }
     const resInsert = await solicitudesClienteCollection.insertOne(solicitud);
     if (resInsert.acknowledged) return resInsert.insertedId;
     throw Error(
@@ -29,6 +37,15 @@ export class SolicitudNuevoClienteBbdd {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const solicitudesClienteCollection =
       db.collection<CodigoFlayers>("codigosFlayers");
+
+    const solicitudExistente = await solicitudesClienteCollection.findOne({
+      email: flayer.email,
+    });
+    if (solicitudExistente) {
+      throw new Error(
+        "Este correo ya ha sido utilizado para tener un codigo de flayer",
+      );
+    }
     const resInsert = await solicitudesClienteCollection.insertOne(flayer);
     if (resInsert.acknowledged) return resInsert.insertedId;
     throw Error("No se ha podido guardar el codigo del flayer");
@@ -46,7 +63,7 @@ export class SolicitudNuevoClienteBbdd {
   async getAllFlayers() {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const solicitudesClienteCollection =
-      db.collection<SolicitudCliente>("codigosFlayers");
+      db.collection<CodigoFlayers>("codigosFlayers");
 
     return await solicitudesClienteCollection.find().toArray();
   }
