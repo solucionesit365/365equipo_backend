@@ -108,6 +108,7 @@ export class ClientesService {
         fechaRegistro: new Date(),
         caducado: false,
         codigo: codFlayer,
+        newsletter: true,
       };
       await this.schSolicitudesCliente.nuevoCodigoFlayer(data); //Guarda el codigo flayer en mongo aea
       await this.tarjetaClienteInstance.sendQRInvitation(codFlayer, email); //genera y envía QR al correo
