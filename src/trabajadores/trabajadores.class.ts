@@ -269,6 +269,8 @@ export class TrabajadorService {
         const nuevoResponsable = await this.getTrabajadorBySqlId(
           payload.idResponsable,
         );
+        console.log(nuevoResponsable);
+
         const nuevoIdAppResponsable = nuevoResponsable.idApp;
 
         // Actualiza el idAppResponsable en MongoDB para todas las solicitudes del beneficiario y evita que no pueda actualizar
@@ -276,16 +278,20 @@ export class TrabajadorService {
           await this.solicitudesVacaciones.haySolicitudesParaBeneficiario(
             original.id,
           );
+        console.log(solicitudesExisten);
+
         const solicitudesExistenDiaPersonal =
           await this.solicitudesDiaPersonal.haySolicitudesParaBeneficiarioDiaPersonal(
             original.id,
           );
 
-        if (solicitudesExisten && solicitudesExistenDiaPersonal) {
+        if (solicitudesExisten) {
           await this.solicitudesVacaciones.actualizarIdAppResponsable(
             original.id,
             nuevoIdAppResponsable,
           );
+        }
+        if (solicitudesExistenDiaPersonal) {
           await this.solicitudesDiaPersonal.actualizarIdAppResponsableDiaPersonal(
             original.id,
             nuevoIdAppResponsable,
