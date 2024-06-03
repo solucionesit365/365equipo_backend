@@ -14,4 +14,5 @@ export interface AusenciaInterface {
   enviado?: boolean;
   completa: boolean;
   horas?: number;
+  tienda?: string;
 }
