@@ -41,6 +41,7 @@ import { EmpresaModule } from "./empresa/empresa.module";
 import { KpiTiendasController } from "./kpi-tiendas/kpi-tiendas.controller";
 import { KpiTiendasModule } from "./kpi-tiendas/kpi-tiendas.module";
 import { DiaPersonalModule } from "./dia-personal/dia-personal.module";
+import { DistribucionMensajesModule } from './distribucion-mensajes/distribucion-mensajes.module';
 
 @Module({
   imports: [
@@ -86,6 +87,7 @@ import { DiaPersonalModule } from "./dia-personal/dia-personal.module";
 
     KpiTiendasModule,
     DiaPersonalModule,
+    DistribucionMensajesModule,
   ],
   controllers: [AppController, KpiTiendasController],
 })
