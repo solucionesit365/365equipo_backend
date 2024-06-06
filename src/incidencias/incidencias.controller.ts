@@ -55,11 +55,7 @@ export class IncidenciasController {
     try {
       const respIncidencias = await this.incidenciaInstance.getIncidencias();
       if (respIncidencias) {
-        // Filtrar las incidencias por destinatario
-        const filteredIncidencias = respIncidencias.filter(
-          (incidencia) => incidencia.destinatario === "tecnicos",
-        );
-        return { ok: true, data: filteredIncidencias };
+        return { ok: true, data: respIncidencias };
       } else {
         throw Error("No se ha encontrado ninguna incidencia");
       }
