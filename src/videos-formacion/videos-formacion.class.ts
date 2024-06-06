@@ -30,6 +30,11 @@ export class videosFormacion365Class {
     return response;
   }
 
+  async getVideosVistos() {
+    const response = await this.videosDB.getVideosVistos();
+    return response;
+  }
+
   async updateVideo(video: videosFormacion365Interface) {
     return await this.videosDB.updatevideo(video);
   }

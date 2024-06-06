@@ -44,6 +44,16 @@ export class videosFormacion365Mongo {
     return response;
   }
 
+  async getVideosVistos() {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const videosCollect = db.collection<videosVistosFormacion365Interface>(
+      "videosVistosFormacion",
+    );
+    const response = await videosCollect.find({}).toArray();
+
+    return response;
+  }
+
   async findVideoByIdVideo(nombre: string, idVideo: string) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const videosCollect = db.collection<videosVistosFormacion365Interface>(

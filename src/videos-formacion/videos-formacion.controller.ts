@@ -77,6 +77,24 @@ export class VideosFormacionController {
   }
 
   @UseGuards(AuthGuard)
+  @Get("getVideosFormacionVistos")
+  async getVideosFormacionVistos() {
+    try {
+      const response = await this.formacionInstance.getVideosVistos();
+
+      if (response) {
+        return {
+          ok: true,
+          data: response,
+        };
+      } else
+        throw Error("No se ha encontrado ningun video de formacion ja visto");
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  @UseGuards(AuthGuard)
   @Post("updateVideoFormacion")
   async updateVideoFormacion(
     @Body() videoModificado: videosFormacion365Interface,
