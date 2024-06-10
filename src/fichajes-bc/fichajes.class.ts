@@ -16,7 +16,11 @@ export class Fichajes {
     private readonly cuadrantesInstance: Cuadrantes,
   ) {}
 
-  async nuevaEntrada(trabajador: Trabajador) {
+  async nuevaEntrada(
+    trabajador: Trabajador,
+    latitud?: number,
+    longitud?: number,
+  ) {
     const hora = DateTime.now().toJSDate();
 
     const insert = await this.schFichajes.nuevaEntrada(
@@ -25,6 +29,8 @@ export class Fichajes {
       trabajador.id,
       trabajador.nombreApellidos,
       trabajador.dni,
+      latitud,
+      longitud,
     );
 
     if (!insert)
@@ -33,7 +39,11 @@ export class Fichajes {
       );
   }
 
-  async nuevaSalida(trabajador: Trabajador) {
+  async nuevaSalida(
+    trabajador: Trabajador,
+    latitud?: number,
+    longitud?: number,
+  ) {
     const hora = DateTime.now().toJSDate();
 
     const insert = await this.schFichajes.nuevaSalida(
@@ -42,6 +52,8 @@ export class Fichajes {
       trabajador.id,
       trabajador.nombreApellidos,
       trabajador.dni,
+      latitud,
+      longitud,
     );
 
     if (!insert)

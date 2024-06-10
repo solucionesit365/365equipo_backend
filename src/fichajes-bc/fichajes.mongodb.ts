@@ -21,6 +21,8 @@ export class FichajesDatabase {
     idExterno: number,
     nombre: string,
     dni: string,
+    latitud?: number,
+    longitud?: number,
   ) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const fichajesCollection = db.collection<FichajeDto>("fichajes");
@@ -33,6 +35,10 @@ export class FichajesDatabase {
       validado: false,
       nombre,
       dni,
+      geolocalizacion:
+        latitud !== undefined && longitud !== undefined
+          ? { latitud, longitud }
+          : undefined,
     });
 
     if (resInsert.acknowledged) return resInsert.insertedId;
@@ -45,6 +51,8 @@ export class FichajesDatabase {
     idExterno: number,
     nombre: string,
     dni: string,
+    latitud?: number, // Añadir latitud
+    longitud?: number, // Añadir longitud
   ) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const fichajesCollection = db.collection<FichajeDto>("fichajes");
@@ -57,6 +65,10 @@ export class FichajesDatabase {
       validado: false,
       nombre,
       dni,
+      geolocalizacion:
+        latitud !== undefined && longitud !== undefined
+          ? { latitud, longitud }
+          : undefined,
     });
 
     if (resInsert.acknowledged) return resInsert.insertedId;

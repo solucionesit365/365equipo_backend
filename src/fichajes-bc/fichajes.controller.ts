@@ -17,22 +17,36 @@ export class FichajesController {
 
   @UseGuards(AuthGuard)
   @Post("entrada")
-  async entrada(@User() user: UserRecord) {
+  async entrada(
+    @User() user: UserRecord,
+    @Body() body: { latitud?: number; longitud?: number },
+  ) {
     const usuarioCompleto =
       await this.trabajadoresInstance.getTrabajadorByAppId(user.uid);
 
-    await this.fichajesInstance.nuevaEntrada(usuarioCompleto);
+    await this.fichajesInstance.nuevaEntrada(
+      usuarioCompleto,
+      body.latitud,
+      body.longitud,
+    );
 
     return true;
   }
 
   @UseGuards(AuthGuard)
   @Post("salida")
-  async salida(@User() user: UserRecord) {
+  async salida(
+    @User() user: UserRecord,
+    @Body() body: { latitud?: number; longitud?: number },
+  ) {
     const usuarioCompleto =
       await this.trabajadoresInstance.getTrabajadorByAppId(user.uid);
 
-    await this.fichajesInstance.nuevaSalida(usuarioCompleto);
+    await this.fichajesInstance.nuevaSalida(
+      usuarioCompleto,
+      body.latitud,
+      body.longitud,
+    );
     return true;
   }
 
