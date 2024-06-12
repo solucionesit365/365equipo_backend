@@ -19,6 +19,7 @@ export class AusenciasService {
     nombre: string,
     dni: string,
     tipo: TiposAusencia,
+    tienda: string,
     fechaInicio: Date,
     fechaFinal: Date,
     fechaRevision: Date,
@@ -31,6 +32,7 @@ export class AusenciasService {
       nombre,
       dni,
       tipo,
+      tienda,
       fechaInicio,
       fechaFinal,
       fechaRevision,
@@ -51,6 +53,7 @@ export class AusenciasService {
         dni,
         horas,
         tipo,
+        tienda,
       });
       return resInsert;
     }
