@@ -176,7 +176,7 @@ export class FichajesDatabase {
           }
           if (data != null) {
             const response = await axios.post(
-              `https:api.businesscentral.dynamics.com/v2.0/${process.env.MBC_TOKEN_TENANT}/Production/ODataV4/Company('${process.env.MBC_COMPANY_NAME}')/cdpDadesFichador2`,
+              `https:api.businesscentral.dynamics.com/v2.0/${process.env.MBC_TOKEN_TENANT}/Production/ODataV4/Company('${process.env.MBC_COMPANY_NAME_PROD}')/cdpDadesFichador2`,
               data,
               {
                 headers: {
@@ -223,7 +223,7 @@ export class FichajesDatabase {
         now.plus({ days: 1 }).toISO().split("T")[0] + "T00:00:00Z";
 
       let response = await axios.get(
-        `https://api.businesscentral.dynamics.com/v2.0/${process.env.MBC_TOKEN_TENANT}/Production/ODataV4/Company('${process.env.MBC_COMPANY_NAME}')/cdpDadesFichador2?$filter=tmst ge ${startDate} and tmst lt ${endDate} and comentari ne '365EquipoDeTrabajo' and dni ne null&$select=accio, usuari, idr, tmst, comentari, nombre, dni`,
+        `https://api.businesscentral.dynamics.com/v2.0/${process.env.MBC_TOKEN_TENANT}/Production/ODataV4/Company('${process.env.MBC_COMPANY_NAME_PROD}')/cdpDadesFichador2?$filter=tmst ge ${startDate} and tmst lt ${endDate} and comentari ne '365EquipoDeTrabajo' and dni ne null&$select=accio, usuari, idr, tmst, comentari, nombre, dni`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -249,7 +249,7 @@ export class FichajesDatabase {
     const token = await this.MbctokenService.getToken();
 
     let response = await axios.get(
-      `https://api.businesscentral.dynamics.com/v2.0/${process.env.MBC_TOKEN_TENANT}/Production/ODataV4/Company('${process.env.MBC_COMPANY_NAME}')/archivo`,
+      `https://api.businesscentral.dynamics.com/v2.0/${process.env.MBC_TOKEN_TENANT}/Production/ODataV4/Company('${process.env.MBC_COMPANY_NAME_PROD}')/archivo`,
       {
         headers: {
           Authorization: `Bearer ${token}`,
