@@ -1,11 +1,13 @@
 import { ObjectId } from "mongodb";
-import { DateTime } from "luxon";
 export interface DistribucionMensajes {
   _id: ObjectId;
+  titulo: string;
   creador: string;
   mensaje: string;
-  fechaInicio: string | DateTime;
-  fechaFin: string | DateTime;
+  fechaInicio: Date;
+  fechaFin: Date;
   enviarEmail: boolean;
   activo: boolean;
+  createdAt: Date;
+  updatedAt?: Date;
 }
