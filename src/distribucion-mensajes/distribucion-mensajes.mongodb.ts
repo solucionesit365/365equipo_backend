@@ -8,17 +8,6 @@ import { DateTime } from "luxon";
 export class DistribucionMensajesDatabase {
   constructor(private readonly mongoDbService: MongoService) {}
 
-  // async insertarMensajeDB(mensajes: DistribucionMensajes) {
-  //   console.log("Gaaaaaaaaaa");
-
-  //   const db = (await this.mongoDbService.getConexion()).db("soluciones");
-  //   const disMensajesCollection = db.collection<DistribucionMensajes>(
-  //     "distribucionMensajes",
-  //   );
-  //   const resInsert = await disMensajesCollection.insertOne(mensajes);
-  //   if (resInsert.acknowledged) return resInsert.insertedId;
-  //   return null;
-  // }
   async insertarMensajeDB(mensaje: DistribucionMensajes) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const disMensajesCollection = db.collection<DistribucionMensajes>(
@@ -67,5 +56,50 @@ export class DistribucionMensajesDatabase {
         },
       },
     );
+  }
+
+  async updateMensajeforDate(fechaInicio?: Date, fechaFin?: Date) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const disMensajesCollection = db.collection<DistribucionMensajes>(
+      "distribucionMensajes",
+    );
+
+    // Buscar el mensaje activo
+    const mensaje = await disMensajesCollection.findOne({ activo: true });
+
+    if (!mensaje) {
+      console.log("Mensaje activo no encontrado en la base de datos");
+      return; //salir de la función si no hay ningun mensaje activo
+    }
+
+    //Verificar si las fechas no son undefined
+    if (!fechaInicio) {
+      fechaInicio = new Date(mensaje.fechaInicio);
+    }
+
+    if (!fechaFin) {
+      fechaFin = new Date(mensaje.fechaFin);
+    }
+
+    const hoy = DateTime.now().startOf("day");
+    const inicio = DateTime.fromJSDate(fechaInicio).startOf("day");
+    const fin = DateTime.fromJSDate(fechaFin).startOf("day");
+
+    if (hoy >= inicio && hoy <= fin) {
+      return await disMensajesCollection.updateOne(
+        {
+          _id: new ObjectId(mensaje._id),
+          activo: true,
+        },
+        {
+          $set: {
+            activo: false,
+          },
+        },
+      );
+    } else {
+      console.log("Hoy no está dentro del rango de fechas especificado.");
+      return null;
+    }
   }
 }

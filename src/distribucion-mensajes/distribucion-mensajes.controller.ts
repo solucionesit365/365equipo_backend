@@ -2,6 +2,7 @@ import { Controller, Post, UseGuards, Body, Get, Query } from "@nestjs/common";
 import { DistribucionMensajesClass } from "./distribucion-mensajes.class";
 import { AuthGuard } from "../guards/auth.guard";
 import { DistribucionMensajes } from "./distribucion-mensajes.interface";
+import { SchedulerGuard } from "src/guards/scheduler.guard";
 
 @Controller("distribucion-mensajes")
 export class DistribucionMensajesController {
@@ -18,9 +19,7 @@ export class DistribucionMensajesController {
         .map(Number);
       const inicio = new Date(añoInicio, mesInicio - 1, diaInicio);
 
-      const [diaFin, mesFin, añoFin] = mensaje.fechaFin
-        .split("/")
-        .map(Number);
+      const [diaFin, mesFin, añoFin] = mensaje.fechaFin.split("/").map(Number);
       const fin = new Date(añoFin, mesFin - 1, diaFin);
 
       mensaje.fechaInicio = inicio;
@@ -90,5 +89,14 @@ export class DistribucionMensajesController {
         };
       }
     } catch (error) {}
+  }
+
+  @UseGuards(SchedulerGuard)
+  @Post("updateMensajeforDate")
+  async updateMensajeforDate(@Body() mensaje) {
+    return await this.DistribucionMensajesClass.updateMensajeforDate(
+      mensaje.fechaInicio,
+      mensaje.fechaFin,
+    );
   }
 }
