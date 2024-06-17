@@ -68,4 +68,17 @@ export class DistribucionMensajesDatabase {
       },
     );
   }
+
+  async deleteMessage(id: string) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const disMensajesCollection = db.collection<DistribucionMensajes>(
+      "distribucionMensajes",
+    );
+
+    const resDelete = await disMensajesCollection.deleteOne({
+      _id: new ObjectId(id),
+    });
+
+    return resDelete.acknowledged && resDelete.deletedCount > 0;
+  }
 }

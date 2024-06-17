@@ -18,9 +18,7 @@ export class DistribucionMensajesController {
         .map(Number);
       const inicio = new Date(añoInicio, mesInicio - 1, diaInicio);
 
-      const [diaFin, mesFin, añoFin] = mensaje.fechaFin
-        .split("/")
-        .map(Number);
+      const [diaFin, mesFin, añoFin] = mensaje.fechaFin.split("/").map(Number);
       const fin = new Date(añoFin, mesFin - 1, diaFin);
 
       mensaje.fechaInicio = inicio;
@@ -90,5 +88,26 @@ export class DistribucionMensajesController {
         };
       }
     } catch (error) {}
+  }
+
+  @UseGuards(AuthGuard)
+  @Post("deleteMessage")
+  async deleteMessage(@Query() { id }) {
+    try {
+      const deleteMensaje = await this.DistribucionMensajesClass.deleteMessage(
+        id,
+      );
+      console.log(deleteMensaje);
+
+      if (deleteMensaje) {
+        return {
+          ok: true,
+          data: deleteMensaje,
+        };
+      }
+    } catch (error) {
+      console.log(error);
+      return { ok: false, message: error.message };
+    }
   }
 }

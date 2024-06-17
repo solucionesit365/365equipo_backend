@@ -37,4 +37,8 @@ export class DistribucionMensajesClass {
   async updateOneMensajes(id: string, activo: boolean) {
     return await this.dMensajesDatabase.updateOneMensajes(id, activo);
   }
+
+  async deleteMessage(id: string) {
+    return await this.dMensajesDatabase.deleteMessage(id);
+  }
 }
