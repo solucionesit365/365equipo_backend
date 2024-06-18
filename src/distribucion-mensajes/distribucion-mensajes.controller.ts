@@ -94,12 +94,9 @@ export class DistribucionMensajesController {
   @Post("deleteMessage")
   async deleteMessage(@Query() { id }) {
     try {
-      console.log(id);
-      
       const deleteMensaje = await this.DistribucionMensajesClass.deleteMessage(
         id,
       );
-      console.log(deleteMensaje);
 
       if (deleteMensaje) {
         return {
