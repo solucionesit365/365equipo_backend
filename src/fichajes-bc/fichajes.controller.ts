@@ -100,8 +100,7 @@ export class FichajesController {
   @Post("sincroFichajes")
   async sincroFichajes() {
     try {
-      await this.fichajesInstance.sincroFichajes();
-      return { ok: true };
+      return await this.fichajesInstance.sincroFichajes();
     } catch (err) {
       console.log(err);
       return { ok: false, message: err.message };
