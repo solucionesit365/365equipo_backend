@@ -175,7 +175,7 @@ export class FichajesDatabase {
 
           try {
             const response = await axios.post(
-              `https://api.businesscentral.dynamics.com/v2.0/${process.env.MBC_TOKEN_TENANT}/${process.env.MCB_ENVIRONMENT_DEV}/ODataV4/Company('${process.env.MBC_COMPANYNAME_FILAPENA_DEV}')/cdpDadesFichador2`,
+              `https://api.businesscentral.dynamics.com/v2.0/${process.env.MBC_TOKEN_TENANT}/Production/ODataV4/Company('${process.env.MBC_COMPANY_NAME_PROD}')/cdpDadesFichador2`,
               data,
               {
                 headers: {
