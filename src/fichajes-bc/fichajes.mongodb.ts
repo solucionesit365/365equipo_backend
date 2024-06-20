@@ -154,41 +154,28 @@ export class FichajesDatabase {
 
   async enviarFichajesBC(fichajes: FichajeDto[]) {
     try {
-      let data = null;
       const token = await this.MbctokenService.getToken();
-
-      console.log(fichajes);
 
       if (fichajes.length > 0) {
         for (let i = 0; i < fichajes.length; i += 1) {
-          const hora = moment(fichajes[0].hora);
+          const hora = moment(fichajes[i].hora);
+          const data = {
+            idr: fichajes[i]._id.toString(),
+            tmst: hora.toISOString(),
+            accio: fichajes[i].tipo === "ENTRADA" ? 1 : 2,
+            usuari: fichajes[i].idExterno.toString(),
+            editor: "365EquipoDeTrabajo",
+            historial: null,
+            lloc: null,
+            nombre: null,
+            dni: null,
+            comentari: "365EquipoDeTrabajo",
+            id: 0,
+          };
 
-          if (fichajes[i].tipo === "ENTRADA") {
-            data = {
-              idr: fichajes[i]._id.toString(),
-              tmst: hora.toISOString(),
-              accio: 1,
-              usuari: fichajes[i].idExterno.toString,
-              editor: "365EquipoDeTrabajo",
-              historial: null,
-              lloc: null,
-              comentari: "365EquipoDeTrabajo",
-              id: 0,
-            };
-          } else if (fichajes[i].tipo === "SALIDA") {
-            data = {
-              idr: fichajes[i]._id.toString(),
-              tmst: hora.toISOString(),
-              accio: 2,
-              usuari: fichajes[i].idExterno.toString(),
-              editor: "365EquipoDeTrabajo",
-              comentari: "365EquipoDeTrabajo",
-              id: 0,
-            };
-          }
-          if (data != null) {
+          try {
             const response = await axios.post(
-              `https:api.businesscentral.dynamics.com/v2.0/${process.env.MBC_TOKEN_TENANT}/Production/ODataV4/Company('${process.env.MBC_COMPANY_NAME_PROD}')/cdpDadesFichador2`,
+              `https://api.businesscentral.dynamics.com/v2.0/${process.env.MBC_TOKEN_TENANT}/Production/ODataV4/Company('${process.env.MBC_COMPANY_NAME_PROD}')/cdpDadesFichador2`,
               data,
               {
                 headers: {
@@ -197,28 +184,36 @@ export class FichajesDatabase {
                 },
               },
             );
+
             if (response.status == 201) {
+              console.log(response);
+
               const db = (await this.mongoDbService.getConexion()).db(
                 "soluciones",
               );
               const fichajesCollection = db.collection<FichajeDto>("fichajes");
-
-              const updatePromises = fichajes.map((item) =>
-                fichajesCollection.updateOne(
-                  { _id: item._id },
-                  { $set: { enviado: true } },
-                ),
+              const resp = await fichajesCollection.updateOne(
+                { _id: fichajes[i]._id },
+                { $set: { enviado: true } },
               );
-              await Promise.all(updatePromises);
-              return { message: "Fichajes sincronizados" };
+              console.log(resp);
             } else {
-              return response;
+              console.error(`Failed to send record ${fichajes[i]._id}`);
             }
+          } catch (error) {
+            console.error(
+              `Error sending record ${fichajes[i]._id}`,
+              error.response?.data || error.message,
+            );
           }
         }
-      } else return { message: "No hay fichajes para enviar a BC" };
+
+        return { message: "Fichajes sincronizados" };
+      } else {
+        return { message: "No hay fichajes para enviar a BC" };
+      }
     } catch (error) {
-      return { Response: error.response.data };
+      return { Response: error.response?.data || error.message };
     }
   }
 
