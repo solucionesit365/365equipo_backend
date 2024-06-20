@@ -326,6 +326,49 @@ export class FichajesDatabase {
       .toArray();
   }
 
+  async getFichajesByUidInverso(
+    uid: string,
+    fechaInicio: Date,
+    fechaFinal: Date,
+  ) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const fichajesCollection = db.collection<FichajeDto>("fichajes");
+
+    return await fichajesCollection
+      .find({
+        uid,
+        hora: {
+          $gte: fechaInicio,
+          $lt: fechaFinal,
+        },
+      })
+      .sort({ hora: -1 })
+      .toArray();
+  }
+
+  async getDescansosTrabajadorDia(
+    inicio: DateTime,
+    final: DateTime,
+    uid: string,
+  ) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const fichajesCollection = db.collection<FichajeDto>("fichajes");
+
+    return await fichajesCollection
+      .find({
+        uid,
+        hora: {
+          $gte: inicio.toJSDate(),
+          $lt: final.toJSDate(),
+        },
+        tipo: {
+          $in: ["INICIO_DESCANSO", "FINAL_DESCANSO"],
+        },
+      })
+      .sort({ hora: 1 })
+      .toArray();
+  }
+
   async updateFichaje(id: string, validado: boolean) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const anuncios = db.collection("fichajes");
