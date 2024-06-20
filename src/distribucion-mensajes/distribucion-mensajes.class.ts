@@ -31,4 +31,8 @@ export class DistribucionMensajesClass {
   async updateMensajeforDate(inicio: Date, final: Date) {
     return await this.dMensajesDatabase.updateMensajeforDate(inicio, final);
   }
+
+  async deleteMessage(id: string) {
+    return await this.dMensajesDatabase.deleteMessage(id);
+  }
 }

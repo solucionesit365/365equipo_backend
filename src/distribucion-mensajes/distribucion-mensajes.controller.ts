@@ -99,4 +99,24 @@ export class DistribucionMensajesController {
       mensaje.fechaFin,
     );
   }
+
+  @UseGuards(AuthGuard)
+  @Post("deleteMessage")
+  async deleteMessage(@Query() { id }) {
+    try {
+      const deleteMensaje = await this.DistribucionMensajesClass.deleteMessage(
+        id,
+      );
+
+      if (deleteMensaje) {
+        return {
+          ok: true,
+          data: deleteMensaje,
+        };
+      }
+    } catch (error) {
+      console.log(error);
+      return { ok: false, message: error.message };
+    }
+  }
 }
