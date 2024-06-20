@@ -1,4 +1,4 @@
-import { IsNumber, IsOptional, IsString } from "class-validator";
+import { IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
 
 export class CreateEmpresaDto {
   @IsString()
@@ -25,4 +25,10 @@ export class UpdateEmpresaDto {
   @IsOptional()
   @IsNumber()
   idExterno: number;
+}
+
+export class DeleteEmpresaDto {
+  @IsNotEmpty()
+  @IsString()
+  id: string;
 }

@@ -56,15 +56,16 @@ model Equipo {
 }
 
 model Empresa {
-  id        String     @id @default(uuid())
-  nombre    String
-  cif       String
-  idExterno Int?
-  contratos Contrato2[]
+  id             String      @id @default(uuid())
+  nombre         String
+  cif            String
+  idExterno      Int?
+  autogestionada Boolean     @default(false)
+  contratos      Contrato2[]
 }
 
 model Contrato {
-  id              Int         @id @default(autoincrement())
+  id              Int       @id @default(autoincrement())
   horasContrato   Float
   inicioContrato  DateTime
   finalContrato   DateTime?
@@ -78,8 +79,9 @@ model Contrato {
   // empresa         Empresa?    @relation(fields: [idEmpresa], references: [id])
 }
 
+// Este es el único que se utiliza. "Contrato" a secas está deprecado
 model Contrato2 {
-  id              String      @id @default(uuid())
+  id              String     @id @default(uuid())
   horasContrato   Float
   inicioContrato  DateTime
   finalContrato   DateTime?
