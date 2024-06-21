@@ -245,6 +245,24 @@ export class CuadrantesDatabase {
     return resCuadrantes?.length > 0 ? resCuadrantes : [];
   }
 
+  async getTiendasSemana(
+    idTienda: number,
+    fechaInicioBusqueda: DateTime,
+    fechaFinalBusqueda: DateTime,
+  ) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const cuadrantesCollection = db.collection<TCuadrante>("cuadrantes2");
+    const resCuadrantes = await cuadrantesCollection
+      .find({
+        idTienda: Number(idTienda),
+        inicio: { $gte: fechaInicioBusqueda.toJSDate() },
+        final: { $lte: fechaFinalBusqueda.toJSDate() },
+      })
+      .toArray();
+
+    return resCuadrantes?.length > 0 ? resCuadrantes : [];
+  }
+
   // Cuadrantes 2.0
   async getSemanas1Tienda(idTienda: number) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
