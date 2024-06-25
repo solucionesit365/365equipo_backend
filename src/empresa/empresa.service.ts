@@ -16,10 +16,10 @@ export class EmpresaService {
         data: {
           nombre: reqCreateEmpresa.nombre,
           cif: reqCreateEmpresa.cif,
-          idExterno: reqCreateEmpresa.idExterno
-            ? reqCreateEmpresa.idExterno
-            : null,
-          autogestionada: reqCreateEmpresa.idExterno ? true : false,
+          // idExterno: reqCreateEmpresa.idExterno
+          //   ? reqCreateEmpresa.idExterno
+          //   : null,
+          autogestionada: true,
         },
       });
       return empresa;
