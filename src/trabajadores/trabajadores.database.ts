@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, InternalServerErrorException } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { DateTime } from "luxon";
 import { HitMssqlService } from "../hit-mssql/hit-mssql.service";
@@ -944,6 +944,15 @@ export class TrabajadorDatabaseService {
   }
 
   async deleteTrabajador(idSql: number) {
+    // Borrar permisos del trabajador
+    await this.prisma
+      .$queryRaw`DELETE FROM "_PermisoToTrabajador" WHERE "B" = ${idSql}`;
+
+    // Borrar roles del trabajador
+    await this.prisma
+      .$queryRaw`DELETE FROM "_RoleToTrabajador" WHERE "B" = ${idSql}`;
+
+    // Borrar trabajador
     await this.prisma.trabajador.delete({
       where: {
         id: idSql,

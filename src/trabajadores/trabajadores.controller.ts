@@ -192,22 +192,6 @@ export class TrabajadoresController {
     }
   }
 
-  @UseGuards(AdminGuard)
-  @Post("borrarTrabajador")
-  async borrarTrabajador(@Body() { idSql }) {
-    try {
-      if (!idSql) throw Error("Faltan parámetros");
-
-      return {
-        ok: true,
-        data: await this.borrarTrabajador(idSql),
-      };
-    } catch (err) {
-      console.log(err);
-      return { ok: false, message: err.message };
-    }
-  }
-
   @UseGuards(AuthGuard)
   @Get("getAllCoordis")
   async getAllCoordis() {
