@@ -7,6 +7,7 @@ import { User } from "../decorators/get-user.decorator";
 import { UserRecord } from "firebase-admin/auth";
 import {
   CreateTrabajadorRequestDto,
+  DeleteTrabajadorDto,
   EditTrabajadorRequest,
   GetSubordinadosDto,
   TrabajadorFormRequest,
@@ -257,5 +258,12 @@ export class TrabajadoresController {
   @Post("crear")
   async crearTrabajador(@Body() req: CreateTrabajadorRequestDto) {
     return await this.trabajadorInstance.crearTrabajador(req);
+  }
+
+  @UseGuards(AuthGuard)
+  @Post("eliminar")
+  async eliminarTrabajador(@Body() req: DeleteTrabajadorDto) {
+    await this.trabajadorInstance.eliminarTrabajador(req.id);
+    return true;
   }
 }

@@ -1,4 +1,9 @@
-import { Injectable, Inject, forwardRef } from "@nestjs/common";
+import {
+  Injectable,
+  Inject,
+  forwardRef,
+  InternalServerErrorException,
+} from "@nestjs/common";
 import { EmailService } from "../email/email.class";
 import { FirebaseService } from "../firebase/firebase.service";
 import { PermisosService } from "../permisos/permisos.class";
@@ -29,6 +34,15 @@ export class TrabajadorService {
 
   async crearTrabajador(reqTrabajador: CreateTrabajadorRequestDto) {
     return await this.schTrabajadores.crearTrabajador(reqTrabajador);
+  }
+
+  async eliminarTrabajador(idSql: number) {
+    try {
+      await this.schTrabajadores.deleteTrabajador(idSql);
+    } catch (err) {
+      console.log(err);
+      return new InternalServerErrorException();
+    }
   }
 
   async getTrabajadorByAppId(uid: string) {

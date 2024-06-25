@@ -253,3 +253,9 @@ export class GetSubordinadosDto {
   @IsString()
   uid: string;
 }
+
+export class DeleteTrabajadorDto {
+  @IsNotEmpty()
+  @IsNumber()
+  id: number;
+}
