@@ -173,7 +173,7 @@ export class CuadrantesController {
     }
   }
 
-  // @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard)
   @Get("getCuadranteSupers")
   async getTiendasSemana(
     @Query() { idTienda, fecha }: { idTienda: number; fecha: string },
