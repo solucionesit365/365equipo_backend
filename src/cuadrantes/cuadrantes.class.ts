@@ -274,6 +274,8 @@ export class Cuadrantes {
 
     const cuadrantesUnicos = Array.from(uniqueMap.values());
 
+    console.log(allCuadrantes);
+
     return cuadrantesUnicos;
   }
 
@@ -722,7 +724,11 @@ export class Cuadrantes {
     const finalSemanaOrigen = diaSemanaOrigen.endOf("week");
 
     const inicioSemanaDestino = diaSemanaDestino.startOf("week");
-    const finalSemanaDestino = diaSemanaDestino.endOf("week");
+
+    const diferenciaDias = inicioSemanaDestino.diff(
+      inicioSemanaOrigen,
+      "days",
+    ).days;
 
     const cuadrantes = await this.schCuadrantes.getCuadrantes(
       reqCopiar.idTienda,
@@ -733,18 +739,10 @@ export class Cuadrantes {
     if (cuadrantes.length > 0) {
       const cuadrantesFechasModificadas = cuadrantes.map((cuadrante) => {
         const fechaInicio = DateTime.fromJSDate(cuadrante.inicio);
-        const fechaFinal = DateTime.fromJSDate(cuadrante.final); // No se utiliza porque fechaFinal siempre está en el mismo día que fechaInicio
+        const fechaFinal = DateTime.fromJSDate(cuadrante.final);
 
-        const diferenciaDias = Math.abs(
-          inicioSemanaOrigen.diff(inicioSemanaDestino, "days").days,
-        );
-
-        const nuevaFechaInicio = inicioSemanaDestino.plus({
-          days: diferenciaDias,
-        });
-        const nuevaFechaFinal = finalSemanaDestino.plus({
-          days: diferenciaDias,
-        });
+        const nuevaFechaInicio = fechaInicio.plus({ days: diferenciaDias });
+        const nuevaFechaFinal = fechaFinal.plus({ days: diferenciaDias });
 
         delete cuadrante._id;
 
