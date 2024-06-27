@@ -409,6 +409,16 @@ export class Cuadrantes {
     return await this.schCuadrantes.getSemanas1Tienda(idTienda);
   }
 
+  async getTiendasSemana(idTienda: number, fecha: DateTime) {
+    const fechaInicio = fecha.startOf("week");
+    const fechaFinal = fecha.endOf("week");
+
+    return await this.schCuadrantes.getTiendasSemana(
+      Number(idTienda),
+      fechaInicio,
+      fechaFinal,
+    );
+  }
   // Cuadrantes 2.0
   private async getPendientesEnvio() {
     return await this.schCuadrantes.getPendientesEnvio();
