@@ -1,5 +1,9 @@
 import { Injectable, InternalServerErrorException } from "@nestjs/common";
-import { CreateEmpresaDto, UpdateEmpresaDto } from "./empresa.dto";
+import {
+  CreateEmpresaDto,
+  DeleteEmpresaDto,
+  UpdateEmpresaDto,
+} from "./empresa.dto";
 import { PrismaService } from "../prisma/prisma.service";
 
 @Injectable()
@@ -12,9 +16,10 @@ export class EmpresaService {
         data: {
           nombre: reqCreateEmpresa.nombre,
           cif: reqCreateEmpresa.cif,
-          idExterno: reqCreateEmpresa.idExterno
-            ? reqCreateEmpresa.idExterno
-            : null,
+          // idExterno: reqCreateEmpresa.idExterno
+          //   ? reqCreateEmpresa.idExterno
+          //   : null,
+          autogestionada: true,
         },
       });
       return empresa;
@@ -37,6 +42,21 @@ export class EmpresaService {
         },
       });
       return empresa;
+    } catch (err) {
+      console.log(err);
+      throw new InternalServerErrorException();
+    }
+  }
+
+  async getEmpresas() {
+    return await this.prismaService.empresa.findMany();
+  }
+
+  async deleteEmpresa(reqDeleteEmpresa: DeleteEmpresaDto) {
+    try {
+      await this.prismaService.empresa.delete({
+        where: { id: reqDeleteEmpresa.id },
+      });
     } catch (err) {
       console.log(err);
       throw new InternalServerErrorException();

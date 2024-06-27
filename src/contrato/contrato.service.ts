@@ -65,9 +65,11 @@ export class ContratoService {
   // }
 
   async getHistoricoContratos(dni: string) {
-    const resContratos = await this.prisma.contrato.findMany({
+    const resContratos = await this.prisma.contrato2.findMany({
       where: {
-        dni: dni,
+        Trabajador: {
+          dni: dni,
+        },
       },
     });
 
