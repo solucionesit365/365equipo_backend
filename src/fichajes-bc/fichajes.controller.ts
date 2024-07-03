@@ -237,19 +237,11 @@ export class FichajesController {
   @UseGuards(AuthGuard)
   @Get("sinValidar")
   async getSinValidar(@User() user: UserRecord) {
-    try {
-      const arraySubordinados = await this.trabajadoresInstance.getSubordinados(
-        user.uid,
-      );
+    const arraySubordinados = await this.trabajadoresInstance.getSubordinados(
+      user.uid,
+    );
 
-      return {
-        ok: true,
-        data: await this.fichajesInstance.getParesSinValidar(arraySubordinados),
-      };
-    } catch (err) {
-      console.log(err);
-      return { ok: false, message: err.message };
-    }
+    return await this.fichajesInstance.getParesSinValidar(arraySubordinados);
   }
 
   @UseGuards(AuthGuard)

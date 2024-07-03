@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,12 +8,12 @@ datasource db {
 }
 
 model Trabajador {
-  id               Int          @id @default(autoincrement())
-  idApp            String?      @unique
+  id               Int            @id @default(autoincrement())
+  idApp            String?        @unique
   nombreApellidos  String
   displayName      String?
   emails           String
-  dni              String       @unique
+  dni              String         @unique
   direccion        String?
   ciudad           String?
   telefonos        String?
@@ -28,25 +25,28 @@ model Trabajador {
   tipoTrabajador   String
   idResponsable    Int?
   idTienda         Int?
-  tienda           Tienda?      @relation(fields: [idTienda], references: [id])
+  tienda           Tienda?        @relation(fields: [idTienda], references: [id])
   llevaEquipo      Boolean
   tokenQR          String?
   displayFoto      String?
   contratos        Contrato2[]
   // Autorelación
-  responsable      Trabajador?  @relation("Responsable", fields: [idResponsable], references: [id], onDelete: SetNull)
-  subordinados     Trabajador[] @relation("Responsable")
+  responsable      Trabajador?    @relation("Responsable", fields: [idResponsable], references: [id], onDelete: SetNull)
+  subordinados     Trabajador[]   @relation("Responsable")
   roles            Role[]
   permisos         Permiso[]
-  excedencia       Boolean      @default(false)
+  fichajes         ParesFichaje[] // Relación con ParesFichaje
+  excedencia       Boolean        @default(false)
+  descansos        Descanso[]
 }
 
 model Tienda {
-  id           Int          @id @default(autoincrement())
+  id           Int            @id @default(autoincrement())
   nombre       String
   direccion    String?
   idExterno    Int?
   trabajadores Trabajador[]
+  fichajes     ParesFichaje[] // Relación con ParesFichaje
 }
 
 model Equipo {
@@ -106,4 +106,41 @@ model Permiso {
   name  String
   roles Role[]
   users Trabajador[]
+}
+
+model ParesFichaje {
+  id           String     @id @default(uuid())
+  entrada      DateTime
+  descansos    Descanso[]
+  estado       Estado
+  salida       DateTime?
+  trabajador   Trabajador @relation(fields: [trabajadorId], references: [id])
+  trabajadorId Int
+  latitud      Float?
+  longitud     Float?
+  lugar        Tienda?    @relation(fields: [lugarId], references: [id])
+  lugarId      Int?
+}
+
+model Descanso {
+  id           String       @id @default(uuid())
+  inicio       DateTime
+  final        DateTime?
+  tipo         TipoDescanso
+  idPar        String
+  parFichaje   ParesFichaje @relation(fields: [idPar], references: [id])
+  trabajadorId Int
+  trabajador   Trabajador   @relation(fields: [trabajadorId], references: [id])
+}
+
+enum TipoDescanso {
+  DESCANSO
+  COMIDA
+}
+
+enum Estado {
+  TRABAJANDO
+  COMIENDO
+  DESCANSANDO
+  LIBRE
 }
