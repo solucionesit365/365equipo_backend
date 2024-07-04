@@ -11,3 +11,15 @@ export class SalidaRequestDto {
   @IsString()
   idPar: string;
 }
+
+export class InicioDescansoRequestDto {
+  @IsNotEmpty()
+  @IsString()
+  idPar: string;
+}
+
+export class FinalDescansoRequestDto {
+  @IsNotEmpty()
+  @IsString()
+  idDescanso: string;
+}

@@ -1,10 +1,21 @@
-import { Body, Controller, Get, Post, UseGuards } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  ForbiddenException,
+  Get,
+  Post,
+  UseGuards,
+} from "@nestjs/common";
 import { AuthGuard } from "../guards/auth.guard";
 import { User } from "../decorators/get-user.decorator";
 import { UserRecord } from "firebase-admin/auth";
 import { ParFichajeService } from "./par-fichaje.service";
 import { TrabajadorService } from "../trabajadores/trabajadores.class";
-import { SalidaRequestDto } from "./par-fichaje.dto";
+import {
+  FinalDescansoRequestDto,
+  InicioDescansoRequestDto,
+  SalidaRequestDto,
+} from "./par-fichaje.dto";
 
 @Controller("par-fichaje")
 export class ParFichajeController {
@@ -23,6 +34,13 @@ export class ParFichajeController {
       user.uid,
     );
 
+    const ultimoParFichaje = await this.parFichajeService.getUltimoPar(
+      usuarioCompleto,
+    );
+
+    if (ultimoParFichaje?.id && ultimoParFichaje.estado !== "LIBRE")
+      throw new ForbiddenException("Antes de fichar entrada, ficha salida");
+
     await this.parFichajeService.entrada(
       usuarioCompleto,
       body.latitud,
@@ -40,6 +58,39 @@ export class ParFichajeController {
     );
 
     await this.parFichajeService.salida(usuarioCompleto, body.idPar);
+
+    return true;
+  }
+
+  @UseGuards(AuthGuard)
+  @Post("inicioDescanso")
+  async inicioDescanso(
+    @User() user: UserRecord,
+    @Body() body: InicioDescansoRequestDto,
+  ) {
+    const usuarioCompleto = await this.trabajadorService.getTrabajadorByAppId(
+      user.uid,
+    );
+
+    await this.parFichajeService.inicioDescanso(usuarioCompleto, body.idPar);
+
+    return true;
+  }
+
+  @UseGuards(AuthGuard)
+  @Post("finalDescanso")
+  async finalDescanso(
+    @User() user: UserRecord,
+    @Body() body: FinalDescansoRequestDto,
+  ) {
+    const usuarioCompleto = await this.trabajadorService.getTrabajadorByAppId(
+      user.uid,
+    );
+
+    await this.parFichajeService.finalDescanso(
+      usuarioCompleto,
+      body.idDescanso,
+    );
 
     return true;
   }
