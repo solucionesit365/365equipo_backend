@@ -169,4 +169,21 @@ export class VideosFormacionController {
       return { existe: false, message: error.message };
     }
   }
+
+  @UseGuards(AuthGuard)
+  @Get("videosPorCategoria")
+  async videosPorCategoria(@Query("categoria") categoria: string) {
+    try {
+      const videos = await this.formacionInstance.getVideosByCategoria(
+        categoria,
+      );
+      return {
+        ok: true,
+        data: videos,
+      };
+    } catch (error) {
+      console.log(error);
+      return { message: error.message };
+    }
+  }
 }
