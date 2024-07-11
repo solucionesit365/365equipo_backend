@@ -4,6 +4,7 @@ import {
   ForbiddenException,
   Get,
   Post,
+  Query,
   UseGuards,
 } from "@nestjs/common";
 import { AuthGuard } from "../guards/auth.guard";
@@ -13,9 +14,11 @@ import { ParFichajeService } from "./par-fichaje.service";
 import { TrabajadorService } from "../trabajadores/trabajadores.class";
 import {
   FinalDescansoRequestDto,
+  GetResumenDto,
   InicioDescansoRequestDto,
   SalidaRequestDto,
 } from "./par-fichaje.dto";
+import { DateTime } from "luxon";
 
 @Controller("par-fichaje")
 export class ParFichajeController {
@@ -103,5 +106,23 @@ export class ParFichajeController {
     );
 
     return await this.parFichajeService.getUltimoPar(usuarioCompleto);
+  }
+
+  @UseGuards(AuthGuard)
+  @Get("getSinValidarTienda")
+  async getSinValidarTienda(@Query() params: GetResumenDto) {
+    // const usuarioCompleto = await this.trabajadorService.getTrabajadorByAppId(
+    //   user.uid,
+    // );
+
+    // Se usa fecha de ayer porque son mínimo del día anterior los "sinValidar"
+    const yesterday = DateTime.now().minus({ days: 1 });
+    const threeWeeksAgo = yesterday.minus({ weeks: 3 });
+
+    return await this.parFichajeService.getSinValidarTienda(
+      params.idTienda,
+      threeWeeksAgo,
+      yesterday,
+    );
   }
 }

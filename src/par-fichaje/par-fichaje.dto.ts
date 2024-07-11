@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty } from "class-validator";
+import { IsString, IsNotEmpty, IsNumber } from "class-validator";
 
 export interface Descanso {
   inicioDescanso: Date;
@@ -22,4 +22,10 @@ export class FinalDescansoRequestDto {
   @IsNotEmpty()
   @IsString()
   idDescanso: string;
+}
+
+export class GetResumenDto {
+  @IsNotEmpty()
+  @IsNumber()
+  idTienda: number;
 }

@@ -179,4 +179,24 @@ export class ParFichajeService {
       },
     });
   }
+
+  public async getSinValidarTienda(
+    idTienda: number,
+    fechaInicio: DateTime,
+    fechaFinal: DateTime,
+  ) {
+    const paresTiendaSemana = await this.prisma.paresFichaje.findMany({
+      where: {
+        lugar: {
+          id: idTienda,
+        },
+        entrada: {
+          gte: fechaInicio.toJSDate(),
+          lte: fechaFinal.toJSDate(),
+        },
+      },
+    });
+
+    return paresTiendaSemana;
+  }
 }
