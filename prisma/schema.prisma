@@ -38,6 +38,7 @@ model Trabajador {
   fichajes         ParesFichaje[] // Relación con ParesFichaje
   excedencia       Boolean        @default(false)
   descansos        Descanso[]
+  planes           Plan[]
 }
 
 model Tienda {
@@ -47,6 +48,7 @@ model Tienda {
   idExterno    Int?
   trabajadores Trabajador[]
   fichajes     ParesFichaje[] // Relación con ParesFichaje
+  planes       Plan[]
 }
 
 model Equipo {
@@ -131,6 +133,17 @@ model Descanso {
   parFichaje   ParesFichaje @relation(fields: [idPar], references: [id])
   trabajadorId Int
   trabajador   Trabajador   @relation(fields: [trabajadorId], references: [id])
+}
+
+model Plan {
+  id         String     @id @default(uuid())
+  trabajadorId Int
+  trabajador   Trabajador @relation(fields: [trabajadorId], references: [id])
+  idTienda    Int
+  tienda      Tienda    @relation(fields: [idTienda], references: [id])
+  inicio     DateTime
+  final      DateTime
+  
 }
 
 enum TipoDescanso {

@@ -1,3 +1,4 @@
+import { Type } from "class-transformer";
 import { IsString, IsNotEmpty, IsNumber } from "class-validator";
 
 export interface Descanso {
@@ -26,6 +27,7 @@ export class FinalDescansoRequestDto {
 
 export class GetResumenDto {
   @IsNotEmpty()
+  @Type(() => Number)
   @IsNumber()
   idTienda: number;
 }

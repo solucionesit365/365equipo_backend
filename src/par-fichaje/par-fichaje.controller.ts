@@ -108,7 +108,7 @@ export class ParFichajeController {
     return await this.parFichajeService.getUltimoPar(usuarioCompleto);
   }
 
-  @UseGuards(AuthGuard)
+  // @UseGuards(AuthGuard)
   @Get("getSinValidarTienda")
   async getSinValidarTienda(@Query() params: GetResumenDto) {
     // const usuarioCompleto = await this.trabajadorService.getTrabajadorByAppId(

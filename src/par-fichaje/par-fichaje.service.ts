@@ -194,6 +194,7 @@ export class ParFichajeService {
           gte: fechaInicio.toJSDate(),
           lte: fechaFinal.toJSDate(),
         },
+        estado: "LIBRE",
       },
     });
 
