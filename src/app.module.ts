@@ -37,7 +37,14 @@ import { MBCTokenModule } from "./bussinesCentral/services/mbctoken/mbctoken.ser
 import { RoleModule } from "./role/role.module";
 import { PermissionModule } from "./permission/permission.module";
 import { EmpresaModule } from "./empresa/empresa.module";
+
+import { KpiTiendasController } from "./kpi-tiendas/kpi-tiendas.controller";
+import { KpiTiendasModule } from "./kpi-tiendas/kpi-tiendas.module";
 import { DiaPersonalModule } from "./dia-personal/dia-personal.module";
+import { DistribucionMensajesModule } from './distribucion-mensajes/distribucion-mensajes.module';
+import { VideosFormacionModule } from "./videos-formacion/videos-formacion.module";
+import { BiometriaModule } from './biometria/biometria.module';
+
 
 @Module({
   imports: [
@@ -80,8 +87,13 @@ import { DiaPersonalModule } from "./dia-personal/dia-personal.module";
     RoleModule,
     PermissionModule,
     EmpresaModule,
+
+    KpiTiendasModule,
     DiaPersonalModule,
+    DistribucionMensajesModule,
+    VideosFormacionModule,
+    BiometriaModule,
   ],
-  controllers: [AppController],
+  controllers: [AppController, KpiTiendasController],
 })
 export class AppModule {}

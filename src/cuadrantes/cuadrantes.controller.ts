@@ -173,6 +173,26 @@ export class CuadrantesController {
     }
   }
 
+  @UseGuards(AuthGuard)
+  @Get("getCuadranteSupers")
+  async getTiendasSemana(
+    @Query() { idTienda, fecha }: { idTienda: number; fecha: string },
+  ) {
+    try {
+      if (!fecha) throw Error("Faltan datos");
+      return {
+        ok: true,
+        data: await this.cuadrantesInstance.getTiendasSemana(
+          Number(idTienda),
+          DateTime.fromJSDate(new Date(fecha)),
+        ),
+      };
+    } catch (err) {
+      console.log(err);
+      return { ok: false, message: err.message };
+    }
+  }
+
   //Todas las semanas 1 tienda
   @UseGuards(AuthGuard)
   @Get("getTiendaTodasSemanas")

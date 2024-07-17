@@ -247,3 +247,15 @@ export class CreateTrabajadorRequestDto {
   @IsString()
   tokenQR: string;
 }
+
+export class GetSubordinadosDto {
+  @IsNotEmpty()
+  @IsString()
+  uid: string;
+}
+
+export class DeleteTrabajadorDto {
+  @IsNotEmpty()
+  @IsNumber()
+  id: number;
+}

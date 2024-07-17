@@ -1,4 +1,9 @@
-import { Injectable, Inject, forwardRef } from "@nestjs/common";
+import {
+  Injectable,
+  Inject,
+  forwardRef,
+  InternalServerErrorException,
+} from "@nestjs/common";
 import { EmailService } from "../email/email.class";
 import { FirebaseService } from "../firebase/firebase.service";
 import { PermisosService } from "../permisos/permisos.class";
@@ -29,6 +34,15 @@ export class TrabajadorService {
 
   async crearTrabajador(reqTrabajador: CreateTrabajadorRequestDto) {
     return await this.schTrabajadores.crearTrabajador(reqTrabajador);
+  }
+
+  async eliminarTrabajador(idSql: number) {
+    try {
+      await this.schTrabajadores.deleteTrabajador(idSql);
+    } catch (err) {
+      console.log(err);
+      return new InternalServerErrorException();
+    }
   }
 
   async getTrabajadorByAppId(uid: string) {
@@ -212,7 +226,7 @@ export class TrabajadorService {
     dni = dni.trim().toUpperCase();
     const datosUsuario = await this.schTrabajadores.getTrabajadorByDni(dni);
 
-    if (!DateTime.fromJSDate(datosUsuario.contratos[0].inicioContrato).isValid)
+    if (!DateTime.fromJSDate(datosUsuario.contratos[0]?.inicioContrato).isValid)
       throw Error("Fecha de inicio de contrato incorrecta");
 
     const arrayEmails = datosUsuario.emails.split(";");
@@ -246,7 +260,7 @@ export class TrabajadorService {
       "365 Equipo - Verificar email",
     );
 
-    return true;
+    return arrayEmails[0].trim();
   }
 
   async resolverCaptcha(): Promise<boolean> {
@@ -269,6 +283,7 @@ export class TrabajadorService {
         const nuevoResponsable = await this.getTrabajadorBySqlId(
           payload.idResponsable,
         );
+
         const nuevoIdAppResponsable = nuevoResponsable.idApp;
 
         // Actualiza el idAppResponsable en MongoDB para todas las solicitudes del beneficiario y evita que no pueda actualizar
@@ -276,16 +291,19 @@ export class TrabajadorService {
           await this.solicitudesVacaciones.haySolicitudesParaBeneficiario(
             original.id,
           );
+
         const solicitudesExistenDiaPersonal =
           await this.solicitudesDiaPersonal.haySolicitudesParaBeneficiarioDiaPersonal(
             original.id,
           );
 
-        if (solicitudesExisten && solicitudesExistenDiaPersonal) {
+        if (solicitudesExisten) {
           await this.solicitudesVacaciones.actualizarIdAppResponsable(
             original.id,
             nuevoIdAppResponsable,
           );
+        }
+        if (solicitudesExistenDiaPersonal) {
           await this.solicitudesDiaPersonal.actualizarIdAppResponsableDiaPersonal(
             original.id,
             nuevoIdAppResponsable,

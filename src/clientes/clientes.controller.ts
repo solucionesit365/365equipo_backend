@@ -124,4 +124,65 @@ export class ClientesController {
       return { ok: false, message: err.message };
     }
   }
+
+  @Get("getClientesRegistrados")
+  async getAllFlayers() {
+    try {
+      const response = await this.clientesInstance.getAllFlayers();
+      if (response.length > 0) {
+        return {
+          ok: true,
+          data: response,
+        };
+      } else
+        return {
+          ok: false,
+          data: "No hay clientes registrados",
+        };
+    } catch (error) {
+      return {
+        ok: false,
+        data: error,
+      };
+    }
+  }
+
+  @Get("validarFlayer")
+  async validarFlayer(@Query("codigo") codigo: string) {
+    try {
+      const response = await this.clientesInstance.validarFlayer(codigo);
+
+      if (response) {
+        if (!response.caducado) {
+          await this.clientesInstance.caducarFlayer(codigo);
+        }
+        return {
+          ok: true,
+          data: response,
+        };
+      } else
+        return {
+          ok: false,
+          data: "No hay flayer con este QR",
+        };
+    } catch (error) {}
+  }
+
+  @Get("updateAll")
+  async caducarFlayer(@Query("codigo") codigo: string) {
+    try {
+      const response = await this.clientesInstance.caducarFlayer(codigo);
+
+      if (response)
+        return {
+          ok: true,
+          data: response,
+        };
+
+      throw Error("No se ha podido modificar el codigo");
+    } catch (err) {
+      console.log(err);
+      return { ok: false, message: err.message };
+    }
+  }
 }

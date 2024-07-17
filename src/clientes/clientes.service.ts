@@ -94,10 +94,24 @@ export class ClientesService {
       );
       return true;
     } else {
-      await this.tarjetaClienteInstance.sendQRInvitation(
-        `QR_INVITACION_${email}`,
-        email,
-      );
+      const solicitud: SolicitudCliente = {
+        _id: new ObjectId().toString(),
+        email: email,
+        fechaRegistro: new Date(),
+        newsletter,
+      };
+      await this.schSolicitudesCliente.nuevaSolicitud(solicitud); //Guarda en Mongo
+      const codFlayer = `QR_INVITACION_${uuidv4()}`;
+      const data = {
+        _id: new ObjectId().toString(),
+        email: email,
+        fechaRegistro: new Date(),
+        caducado: false,
+        codigo: codFlayer,
+        newsletter: true,
+      };
+      await this.schSolicitudesCliente.nuevoCodigoFlayer(data); //Guarda el codigo flayer en mongo aea
+      await this.tarjetaClienteInstance.sendQRInvitation(codFlayer, email); //genera y envía QR al correo
     }
   }
 
@@ -407,5 +421,21 @@ export class ClientesService {
       idExterna,
       email,
     );
+  }
+
+  async getAllFlayers() {
+    try {
+      return await this.schSolicitudesCliente.getAllFlayers();
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async validarFlayer(codigo: string) {
+    return await this.schSolicitudesCliente.validarFlayer(codigo);
+  }
+
+  async caducarFlayer(codigo: string) {
+    return await this.schSolicitudesCliente.caducarFlayer(codigo);
   }
 }

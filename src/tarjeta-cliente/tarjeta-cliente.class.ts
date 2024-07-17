@@ -228,7 +228,7 @@ export class TarjetaClienteService {
                   class="qr"
                   src="cid:123456"
                 />
-        
+              <p>Valgut només el dia de la inauguració</p>
                 <p id="team">
                 </p>
                 <p></p>

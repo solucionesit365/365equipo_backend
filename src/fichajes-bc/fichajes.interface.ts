@@ -13,6 +13,10 @@ export interface FichajeDto {
   nombre: string;
   dni: string;
   idTrabajador?: number; //no existe, pero para poder mutar la interface
+  geolocalizacion?: {
+    latitud?: number;
+    longitud?: number;
+  };
 }
 
 export interface ParFichaje {

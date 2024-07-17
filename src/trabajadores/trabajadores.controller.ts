@@ -7,7 +7,9 @@ import { User } from "../decorators/get-user.decorator";
 import { UserRecord } from "firebase-admin/auth";
 import {
   CreateTrabajadorRequestDto,
+  DeleteTrabajadorDto,
   EditTrabajadorRequest,
+  GetSubordinadosDto,
   TrabajadorFormRequest,
 } from "./trabajadores.dto";
 
@@ -100,17 +102,10 @@ export class TrabajadoresController {
 
   @UseGuards(AuthGuard)
   @Get("getSubordinados")
-  async getSubordinados(@Query() { uid }) {
-    try {
-      if (!uid) throw Error("Faltan datos");
+  async getSubordinados(@Query() req: GetSubordinadosDto) {
+    const resUser = await this.trabajadorInstance.getSubordinados(req.uid);
 
-      const resUser = await this.trabajadorInstance.getSubordinados(uid);
-
-      return { ok: true, data: resUser };
-    } catch (err) {
-      console.log(err);
-      return { ok: false, message: err.message };
-    }
+    return { ok: true, data: resUser };
   }
 
   @UseGuards(AuthGuard)
@@ -197,22 +192,6 @@ export class TrabajadoresController {
     }
   }
 
-  @UseGuards(AdminGuard)
-  @Post("borrarTrabajador")
-  async borrarTrabajador(@Body() { idSql }) {
-    try {
-      if (!idSql) throw Error("Faltan parámetros");
-
-      return {
-        ok: true,
-        data: await this.borrarTrabajador(idSql),
-      };
-    } catch (err) {
-      console.log(err);
-      return { ok: false, message: err.message };
-    }
-  }
-
   @UseGuards(AuthGuard)
   @Get("getAllCoordis")
   async getAllCoordis() {
@@ -263,5 +242,12 @@ export class TrabajadoresController {
   @Post("crear")
   async crearTrabajador(@Body() req: CreateTrabajadorRequestDto) {
     return await this.trabajadorInstance.crearTrabajador(req);
+  }
+
+  @UseGuards(AuthGuard)
+  @Post("eliminar")
+  async eliminarTrabajador(@Body() req: DeleteTrabajadorDto) {
+    await this.trabajadorInstance.eliminarTrabajador(req.id);
+    return true;
   }
 }

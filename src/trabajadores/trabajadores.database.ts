@@ -1,7 +1,6 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, InternalServerErrorException } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { DateTime } from "luxon";
-import { TrabajadorCompleto } from "./trabajadores.interface";
 import { HitMssqlService } from "../hit-mssql/hit-mssql.service";
 import { Prisma } from "@prisma/client";
 import {
@@ -942,5 +941,22 @@ export class TrabajadorDatabaseService {
     // if (resTrabajadores.recordset.length > 0) return resTrabajadores.recordset;
     // else
     throw Error("Error, no hay trabajadores");
+  }
+
+  async deleteTrabajador(idSql: number) {
+    // Borrar permisos del trabajador
+    await this.prisma
+      .$queryRaw`DELETE FROM "_PermisoToTrabajador" WHERE "B" = ${idSql}`;
+
+    // Borrar roles del trabajador
+    await this.prisma
+      .$queryRaw`DELETE FROM "_RoleToTrabajador" WHERE "B" = ${idSql}`;
+
+    // Borrar trabajador
+    await this.prisma.trabajador.delete({
+      where: {
+        id: idSql,
+      },
+    });
   }
 }
