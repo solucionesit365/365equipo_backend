@@ -31,95 +31,6 @@ export class Cuadrantes {
     private readonly fichajesValidadosInstance: FichajesValidadosService,
   ) {}
 
-  // Cuadrante 2.0
-  async getCuadrantesIndividual(
-    idTrabajador: number,
-    fechaInicioBusqueda: DateTime,
-    fechaFinalBusqueda: DateTime,
-  ) {
-    const arrayCuadrantesTrabajador =
-      await this.schCuadrantes.getCuadrantesIndividual(
-        idTrabajador,
-        fechaInicioBusqueda,
-        fechaFinalBusqueda,
-      );
-
-    const nombreTrabajador = (
-      await this.trabajadoresInstance.getTrabajadorBySqlId(idTrabajador)
-    ).nombreApellidos;
-
-    const resultado = await this.addEmptyDays(
-      arrayCuadrantesTrabajador,
-      idTrabajador,
-      nombreTrabajador,
-      fechaInicioBusqueda,
-      fechaFinalBusqueda,
-    );
-    return resultado;
-  }
-
-  // Cuadrantes 2.0 INCOMPLETO!!!
-  async borrarTurno(idTurno: string) {
-    // FALTA AGREGAR UN TRIGGER PARA MODIFICARLO EN HIT TAMBIÉN !!!
-    return await this.schCuadrantes.borrarTurno(idTurno);
-  }
-
-  async borrarTurnoByPlan(idPlan: string) {
-    // FALTA AGREGAR UN TRIGGER PARA MODIFICARLO EN HIT TAMBIÉN !!!
-    return await this.schCuadrantes.borrarTurnoByPlan(idPlan);
-  }
-
-  private async addEmptyDays(
-    arrayCuadrantes: WithId<TCuadrante>[],
-    idTrabajador: number,
-    nombreTrabajador: string,
-    inicioSemana: DateTime,
-    finalSemana: DateTime,
-  ) {
-    let diaActual = inicioSemana;
-    const diasCompletos: WithId<TCuadrante>[] = [];
-
-    const horasContrato = await this.contratoService.getHorasContratoByIdNew(
-      idTrabajador,
-      inicioSemana,
-    );
-
-    while (diaActual <= finalSemana) {
-      // Cuenta cuántas veces el día actual aparece en arrayCuadrantes
-      const vecesDia = arrayCuadrantes.filter((cuadrante) =>
-        DateTime.fromJSDate(cuadrante.inicio).hasSame(diaActual, "day"),
-      ).length;
-
-      if (vecesDia === 0) {
-        // Si el día no está en arrayCuadrantes, lo añade con inicio y final a las 00:00
-        diasCompletos.push({
-          _id: new ObjectId(),
-          enviado: false,
-          historialPlanes: [],
-          horasContrato: horasContrato,
-          idPlan: new ObjectId().toJSON(),
-          idTrabajador: idTrabajador,
-          nombre: nombreTrabajador,
-          totalHoras: 0,
-          inicio: diaActual.toJSDate(),
-          final: diaActual.toJSDate(),
-          idTienda: null,
-          ausencia: null,
-          bolsaHorasInicial: null, // OJO, MIRAR ESTO 3.0
-        });
-      } else {
-        // Si el día está en arrayCuadrantes, añade todos los cuadrantes de ese día
-        const cuadrantesDia = arrayCuadrantes.filter((cuadrante) =>
-          DateTime.fromJSDate(cuadrante.inicio).hasSame(diaActual, "day"),
-        );
-        diasCompletos.push(...cuadrantesDia);
-      }
-
-      diaActual = diaActual.plus({ days: 1 });
-    }
-
-    return diasCompletos;
-  }
 
   // Cuadrantes 2.0
   async getBolsaHorasById(
@@ -136,7 +47,7 @@ export class Cuadrantes {
   }
 
   // Cuadrantes 2.0
-  async getBolsaInicial(idTrabajador: number, lunesActual: DateTime) {
+  private async getBolsaInicial(idTrabajador: number, lunesActual: DateTime) {
     console.log("entra aqui");
 
     const lunesAnterior = lunesActual.minus({ days: 7 }).startOf("week");
