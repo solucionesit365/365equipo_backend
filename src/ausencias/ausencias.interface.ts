@@ -1,5 +1,5 @@
 import { ObjectId } from "mongodb";
-import { TiposAusencia } from "src/cuadrantes/cuadrantes.interface";
+import { TiposAusencia } from "src/cuadrantesOLD/cuadrantes.interface";
 
 export interface AusenciaInterface {
   _id?: ObjectId;

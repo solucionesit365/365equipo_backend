@@ -10,7 +10,6 @@ import { AusenciasModule } from "./ausencias/ausencias.module";
 import { CalendarioFestivosModule } from "./calendario-festivos/calendario-festivos.module";
 import { ClientesModule } from "./clientes/clientes.module";
 import { CryptoModule } from "./crypto/crypto.module";
-import { CuadrantesModule } from "./cuadrantes/cuadrantes.module";
 import { EmailModule } from "./email/email.module";
 import { EvaluacionesModule } from "./evaluaciones/evaluaciones.module";
 import { FichajesModule } from "./fichajes-bc/fichajes.module";
@@ -37,14 +36,13 @@ import { MBCTokenModule } from "./bussinesCentral/services/mbctoken/mbctoken.ser
 import { RoleModule } from "./role/role.module";
 import { PermissionModule } from "./permission/permission.module";
 import { EmpresaModule } from "./empresa/empresa.module";
-
 import { KpiTiendasController } from "./kpi-tiendas/kpi-tiendas.controller";
 import { KpiTiendasModule } from "./kpi-tiendas/kpi-tiendas.module";
 import { DiaPersonalModule } from "./dia-personal/dia-personal.module";
-import { DistribucionMensajesModule } from './distribucion-mensajes/distribucion-mensajes.module';
+import { DistribucionMensajesModule } from "./distribucion-mensajes/distribucion-mensajes.module";
 import { VideosFormacionModule } from "./videos-formacion/videos-formacion.module";
-import { ParFichajeModule } from './par-fichaje/par-fichaje.module';
-
+import { ParFichajeModule } from "./par-fichaje/par-fichaje.module";
+import { PlanModule } from "./plan/plan.module";
 
 @Module({
   imports: [
@@ -60,7 +58,6 @@ import { ParFichajeModule } from './par-fichaje/par-fichaje.module';
     CalendarioFestivosModule,
     ClientesModule,
     CryptoModule,
-    CuadrantesModule,
     EmailModule,
     EvaluacionesModule,
     FichajesModule,
@@ -87,12 +84,12 @@ import { ParFichajeModule } from './par-fichaje/par-fichaje.module';
     RoleModule,
     PermissionModule,
     EmpresaModule,
-
     KpiTiendasModule,
     DiaPersonalModule,
     DistribucionMensajesModule,
     VideosFormacionModule,
     ParFichajeModule,
+    PlanModule,
   ],
   controllers: [AppController, KpiTiendasController],
 })

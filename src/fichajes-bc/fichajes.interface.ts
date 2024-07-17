@@ -1,5 +1,5 @@
 import { ObjectId, WithId } from "mongodb";
-import { TCuadrante } from "../cuadrantes/cuadrantes.interface";
+import { TCuadrante } from "../cuadrantesOLD/cuadrantes.interface";
 
 export interface FichajeDto {
   _id?: ObjectId;

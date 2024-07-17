@@ -5,7 +5,7 @@ import { Trabajador } from "@prisma/client";
 import * as moment from "moment";
 import { ObjectId, WithId } from "mongodb";
 import { FichajeDto, ParFichaje } from "./fichajes.interface";
-import { Cuadrantes } from "../cuadrantes/cuadrantes.class";
+import { Cuadrantes } from "../cuadrantesOLD/cuadrantes.class";
 import { DateTime } from "luxon";
 
 @Injectable()

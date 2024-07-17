@@ -39,6 +39,7 @@ model Trabajador {
   excedencia       Boolean        @default(false)
   descansos        Descanso[]
   planes           Plan[]
+  ausencias        Ausencia[]
 }
 
 model Tienda {
@@ -49,6 +50,7 @@ model Tienda {
   trabajadores Trabajador[]
   fichajes     ParesFichaje[] // Relación con ParesFichaje
   planes       Plan[]
+  ausencias    Ausencia[]
 }
 
 model Equipo {
@@ -136,14 +138,27 @@ model Descanso {
 }
 
 model Plan {
-  id         String     @id @default(uuid())
-  trabajadorId Int
-  trabajador   Trabajador @relation(fields: [trabajadorId], references: [id])
-  idTienda    Int
-  tienda      Tienda    @relation(fields: [idTienda], references: [id])
-  inicio     DateTime
-  final      DateTime
-  
+  id           String      @id @default(uuid())
+  trabajadorId Int?
+  trabajador   Trabajador? @relation(fields: [trabajadorId], references: [id])
+  idTienda     Int
+  tienda       Tienda      @relation(fields: [idTienda], references: [id])
+  inicio       DateTime
+  final        DateTime
+}
+
+model Ausencia {
+  id            String       @id @default(uuid())
+  inicio        DateTime
+  final         DateTime
+  fechaRevision DateTime?
+  comentario    String?
+  tipo          TipoAusencia
+  completa      Boolean
+  trabajadorId  Int
+  tiendaId      Int?
+  tienda        Tienda?      @relation(fields: [tiendaId], references: [id])
+  trabajador    Trabajador   @relation(fields: [trabajadorId], references: [id])
 }
 
 enum TipoDescanso {
@@ -156,4 +171,15 @@ enum Estado {
   COMIENDO
   DESCANSANDO
   LIBRE
+}
+
+enum TipoAusencia {
+  BAJA
+  PERMISO_MATERNIDAD_PATERNIDAD
+  DIA_PERSONAL
+  VACACIONES
+  SANCION
+  ABSENTISMO
+  REM
+  HORAS_JUSTIFICADAS
 }

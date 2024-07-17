@@ -1,4 +1,4 @@
-import { TCuadrante } from "../cuadrantes/cuadrantes.interface";
+import { TCuadrante } from "../cuadrantesOLD/cuadrantes.interface";
 
 export interface TFichajeValidado {
   _id?: string;

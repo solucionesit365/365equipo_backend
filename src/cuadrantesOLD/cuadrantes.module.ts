@@ -18,4 +18,4 @@ import { CuadrantesController } from "./cuadrantes.controller";
   controllers: [CuadrantesController],
   exports: [Cuadrantes],
 })
-export class CuadrantesModule {}
+export class CuadrantesOldModule {}

@@ -8,7 +8,7 @@ import { FichajeValidadoDto } from "../fichajes-validados/fichajes-validados.dto
 import { AusenciasService } from "../ausencias/ausencias.class";
 import { AusenciaInterface } from "../ausencias/ausencias.interface";
 import { PactadoVsRealDto } from "./pactado-vs-real.dto";
-import { Cuadrantes } from "../cuadrantes/cuadrantes.class";
+import { Cuadrantes } from "../cuadrantesOLD/cuadrantes.class";
 
 type TrabajadorExtendido = Trabajador & {
   tienda?: Tienda | null; // Relación con Tienda

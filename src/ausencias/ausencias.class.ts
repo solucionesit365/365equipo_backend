@@ -1,8 +1,8 @@
 import { Injectable } from "@nestjs/common";
 import { AusenciasDatabase } from "./ausencias.mongodb";
-import { Cuadrantes } from "../cuadrantes/cuadrantes.class";
+import { Cuadrantes } from "../cuadrantesOLD/cuadrantes.class";
 import { ObjectId } from "mongodb";
-import { TiposAusencia } from "../cuadrantes/cuadrantes.interface";
+import { TiposAusencia } from "../cuadrantesOLD/cuadrantes.interface";
 import { AusenciaInterface } from "./ausencias.interface";
 import { DateTime } from "luxon";
 
