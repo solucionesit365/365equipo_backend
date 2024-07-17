@@ -43,6 +43,7 @@ import { KpiTiendasModule } from "./kpi-tiendas/kpi-tiendas.module";
 import { DiaPersonalModule } from "./dia-personal/dia-personal.module";
 import { DistribucionMensajesModule } from './distribucion-mensajes/distribucion-mensajes.module';
 import { VideosFormacionModule } from "./videos-formacion/videos-formacion.module";
+import { BiometriaModule } from './biometria/biometria.module';
 
 
 @Module({
@@ -91,6 +92,7 @@ import { VideosFormacionModule } from "./videos-formacion/videos-formacion.modul
     DiaPersonalModule,
     DistribucionMensajesModule,
     VideosFormacionModule,
+    BiometriaModule,
   ],
   controllers: [AppController, KpiTiendasController],
 })
