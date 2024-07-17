@@ -25,4 +25,14 @@ export class PlanService {
 
     return planesTrabajador;
   }
+
+  async borrarPlan(idPlan: string) {
+    const plan = await this.prisma.plan.delete({
+      where: {
+        id: idPlan,
+      },
+    });
+
+    return plan;
+  }
 }
