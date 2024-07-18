@@ -7,7 +7,7 @@ import { Tienda } from "../tiendas/tiendas.class";
 import { HitMssqlService } from "../hit-mssql/hit-mssql.service";
 import { AusenciaInterface } from "../ausencias/ausencias.interface";
 import { TrabajadorService } from "../trabajadores/trabajadores.class";
-import { FichajesValidadosService } from "../fichajes-validados/fichajes-validados.class";
+import { FichajesValidadosService } from "../fichajes-validadosOLD/fichajes-validados.class";
 import { DateTime } from "luxon";
 import { ContratoService } from "../contrato/contrato.service";
 import { Trabajador } from "@prisma/client";
@@ -30,73 +30,6 @@ export class Cuadrantes {
     private readonly trabajadoresInstance: TrabajadorService,
     private readonly fichajesValidadosInstance: FichajesValidadosService,
   ) {}
-
-
-  // Cuadrantes 2.0
-  async getBolsaHorasById(
-    idSql: number,
-    fecha: DateTime,
-    horasContrato: number,
-  ): Promise<number> {
-    const { horasCuadranteTotal, horasMasMenos } = await this.getBolsaInicial(
-      idSql,
-      fecha,
-    );
-
-    return horasContrato + horasMasMenos;
-  }
-
-  // Cuadrantes 2.0
-  private async getBolsaInicial(idTrabajador: number, lunesActual: DateTime) {
-    console.log("entra aqui");
-
-    const lunesAnterior = lunesActual.minus({ days: 7 }).startOf("week");
-    const domingoAnterior = lunesActual.minus({ days: 1 }).endOf("week");
-
-    const fichajesValidados =
-      await this.fichajesValidadosInstance.getParaCuadranteNew(
-        lunesAnterior,
-        domingoAnterior,
-        idTrabajador,
-      );
-    let horasCuadranteTotal = 0;
-    let horasMasMenos = 0;
-
-    for (let i = 0; i < fichajesValidados.length; i += 1) {
-      horasMasMenos +=
-        fichajesValidados[i].horasExtra +
-        fichajesValidados[i].horasAprendiz +
-        fichajesValidados[i].horasCoordinacion;
-      horasCuadranteTotal = horasMasMenos;
-    }
-
-    console.log(horasMasMenos);
-
-    return {
-      horasCuadranteTotal,
-      horasMasMenos,
-    };
-  }
-
-  async recuentoTiendasIndividual(
-    idTrabajador: number,
-    inicioSemana: DateTime,
-    finalSemana: DateTime,
-  ): Promise<number[]> {
-    const cuadrantesTrabajador =
-      await this.schCuadrantes.getCuadrantesIndividual(
-        idTrabajador,
-        inicioSemana,
-        finalSemana,
-      );
-    const tiendasSet = new Set<number>();
-
-    for (const cuadrante of cuadrantesTrabajador) {
-      tiendasSet.add(cuadrante.idTienda);
-    }
-
-    return [...tiendasSet];
-  }
 
   async recuentoTiendasSubordinados(
     arrayTrabajadores: number[],
@@ -201,105 +134,6 @@ export class Cuadrantes {
       fechaInicioSemana,
       fechaFinalSemana,
     );
-  }
-
-  // Vieja, después borrarla
-  async getCuadrantesOld(
-    idTienda: number,
-    fechaBusqueda: DateTime,
-    role: "DEPENDIENTA" | "COORDINADORA" | "SUPERVISORA",
-    idSql?: number,
-  ) {
-    const fechaInicioSemana = fechaBusqueda.startOf("week");
-    const fechaFinalSemana = fechaBusqueda.endOf("week");
-
-    const responsableTienda =
-      await this.trabajadoresInstance.getResponsableTienda(idTienda);
-    const equipoCompleto =
-      await this.trabajadoresInstance.getSubordinadosByIdNew(
-        responsableTienda.id,
-        fechaInicioSemana,
-      );
-
-    if (idSql) {
-      const usuarioActual =
-        await this.trabajadoresInstance.getTrabajadorBySqlId(idSql);
-      const horasContratoCurrentUser =
-        await this.contratoService.getHorasContratoByIdNew(
-          idSql,
-          fechaInicioSemana,
-        );
-      (usuarioActual.contratos[0].horasContrato =
-        (horasContratoCurrentUser * 100) / 40),
-        equipoCompleto.push(usuarioActual);
-    }
-
-    const cuadrantes: TCuadrante[] = await this.schCuadrantes.getCuadrantes(
-      idTienda,
-      fechaInicioSemana,
-      fechaFinalSemana,
-    );
-
-    const cuadrantesVacios: TCuadrante[] = [];
-    let hayUno = false;
-
-    for (let i = 0; i < equipoCompleto.length; i += 1) {
-      for (let j = 0; j < cuadrantes.length; j += 1) {
-        if (equipoCompleto[i].id === cuadrantes[j].idTrabajador) {
-          hayUno = true;
-          cuadrantes[j]["horasContrato"] =
-            (equipoCompleto[i].contratos[0].horasContrato * 40) / 100;
-
-          break;
-        }
-      }
-
-      if (!hayUno) {
-        const nuevoCuadrante: TCuadrante = {
-          _id: new ObjectId(),
-          idTrabajador: equipoCompleto[i].id,
-          nombre: equipoCompleto[i].nombreApellidos,
-          idTienda: idTienda,
-          totalHoras: 0,
-          enviado: false,
-          historialPlanes: [],
-          horasContrato:
-            (equipoCompleto[i].contratos[0].horasContrato * 40) / 100,
-          idPlan: null,
-          inicio: undefined,
-          final: undefined,
-          ausencia: null,
-          bolsaHorasInicial: 0,
-        };
-
-        cuadrantesVacios.push(nuevoCuadrante);
-      }
-    }
-    cuadrantes.push(...cuadrantesVacios);
-
-    // Cuadrantes multitienda:
-    // Falta añadir un tercer push, para los trabajadores que vienen de otro responsable,
-    // pero que van a trabajar a esta tienda. Se deben mostrar todos los que vengan a trabajar
-    // a la tienda aunque no sean subordinados de la tienda destino
-
-    for (let i = 0; i < cuadrantes.length; i += 1) {
-      cuadrantes[i]["bolsaHorasInicial"] = await this.getBolsaHorasById(
-        cuadrantes[i].idTrabajador,
-        DateTime.fromJSDate(cuadrantes[i].inicio),
-        cuadrantes[i].horasContrato,
-      );
-
-      if (!cuadrantes[i].horasContrato) {
-        const trabajadorCuadrante =
-          await this.trabajadoresInstance.getTrabajadorBySqlId(
-            cuadrantes[i].idTrabajador,
-          );
-        cuadrantes[i].horasContrato =
-          (Number(trabajadorCuadrante.contratos[0].horasContrato) * 40) / 100;
-      }
-    }
-
-    return cuadrantes;
   }
 
   // Cuadrantes 2.0

@@ -10,7 +10,7 @@ import {
 // import axios from "axios";
 // import { EmailService } from "../email/email.class";
 // import { FichajesValidadosService } from "../fichajes-validados/fichajes-validados.class";
-import { FichajeValidadoDto } from "../fichajes-validados/fichajes-validados.dto";
+import { FichajeValidadoDto } from "../fichajes-validadosOLD/fichajes-validados.dto";
 import { DateTime } from "luxon";
 import { TrabajadorService } from "../trabajadores/trabajadores.class";
 import { Cuadrantes } from "../cuadrantesOLD/cuadrantes.class";

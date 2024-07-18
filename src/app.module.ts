@@ -13,7 +13,7 @@ import { CryptoModule } from "./crypto/crypto.module";
 import { EmailModule } from "./email/email.module";
 import { EvaluacionesModule } from "./evaluaciones/evaluaciones.module";
 import { FichajesModule } from "./fichajes-bc/fichajes.module";
-import { FichajesValidadosModule } from "./fichajes-validados/fichajes-validados.module";
+// import { FichajesValidadosModule } from "./fichajes-validadosOLD/fichajes-validados.module";
 import { FirebaseModule } from "./firebase/firebase.module";
 import { IncidenciasModule } from "./incidencias/incidencias.module";
 import { MantenimientoModule } from "./mantenimiento/mantenimiento.module";
@@ -43,6 +43,7 @@ import { DistribucionMensajesModule } from "./distribucion-mensajes/distribucion
 import { VideosFormacionModule } from "./videos-formacion/videos-formacion.module";
 import { ParFichajeModule } from "./par-fichaje/par-fichaje.module";
 import { PlanModule } from "./plan/plan.module";
+import { TrabajadorPuestoModule } from './trabajador-puesto/trabajador-puesto.module';
 
 @Module({
   imports: [
@@ -61,7 +62,7 @@ import { PlanModule } from "./plan/plan.module";
     EmailModule,
     EvaluacionesModule,
     FichajesModule,
-    FichajesValidadosModule,
+    // FichajesValidadosModule,
     FirebaseModule,
     IncidenciasModule,
     MantenimientoModule,
@@ -90,6 +91,7 @@ import { PlanModule } from "./plan/plan.module";
     VideosFormacionModule,
     ParFichajeModule,
     PlanModule,
+    TrabajadorPuestoModule,
   ],
   controllers: [AppController, KpiTiendasController],
 })

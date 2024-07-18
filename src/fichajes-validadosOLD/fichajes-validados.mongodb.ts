@@ -196,30 +196,6 @@ export class FichajesValidadosDatabase {
       .toArray();
   }
 
-  // Cuadrantes 2.0
-  async getParaCuadranteNew(
-    lunes: DateTime,
-    domingo: DateTime,
-    idTrabajador: number,
-  ) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
-    const fichajesCollection =
-      db.collection<FichajeValidadoDto>("fichajesValidados2");
-
-    const response = await fichajesCollection
-      .find({
-        idTrabajador,
-        $and: [
-          {
-            fichajeEntrada: { $gte: lunes.toJSDate() },
-            fichajeSalida: { $lte: domingo.toJSDate() },
-          },
-        ],
-      })
-      .toArray();
-    return response;
-  }
-
   async getFichajesValidadosTiendaRango(
     idTienda: number,
     fechaInicio: DateTime,

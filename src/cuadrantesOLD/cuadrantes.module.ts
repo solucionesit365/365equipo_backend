@@ -4,7 +4,7 @@ import { CuadrantesDatabase } from "./cuadrantes.mongodb";
 import { ContratoModule } from "../contrato/contrato.module";
 import { TiendasModule } from "../tiendas/tiendas.module";
 import { TrabajadoresModule } from "../trabajadores/trabajadores.module";
-import { FichajesValidadosModule } from "../fichajes-validados/fichajes-validados.module";
+import { FichajesValidadosModule } from "../fichajes-validadosOLD/fichajes-validados.module";
 import { CuadrantesController } from "./cuadrantes.controller";
 
 @Module({

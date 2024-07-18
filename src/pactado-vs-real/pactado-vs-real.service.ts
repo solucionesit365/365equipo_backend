@@ -1,10 +1,10 @@
 import { Injectable } from "@nestjs/common";
 import { DateTime } from "luxon";
 import { TrabajadorService } from "../trabajadores/trabajadores.class";
-import { FichajesValidadosService } from "../fichajes-validados/fichajes-validados.class";
+import { FichajesValidadosService } from "../fichajes-validadosOLD/fichajes-validados.class";
 import { UserRecord } from "firebase-admin/auth";
 import { Trabajador, Tienda, Contrato2 } from "@prisma/client";
-import { FichajeValidadoDto } from "../fichajes-validados/fichajes-validados.dto";
+import { FichajeValidadoDto } from "../fichajes-validadosOLD/fichajes-validados.dto";
 import { AusenciasService } from "../ausencias/ausencias.class";
 import { AusenciaInterface } from "../ausencias/ausencias.interface";
 import { PactadoVsRealDto } from "./pactado-vs-real.dto";

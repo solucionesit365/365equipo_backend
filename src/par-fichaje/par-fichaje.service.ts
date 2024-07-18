@@ -200,4 +200,21 @@ export class ParFichajeService {
 
     return paresTiendaSemana;
   }
+
+  public async getParesValidadosById(
+    fechaInicio: DateTime,
+    fechaFinal: DateTime,
+    idTrabajador: number,
+  ) {
+    return await this.prisma.paresFichaje.findMany({
+      where: {
+        trabajadorId: idTrabajador,
+        entrada: {
+          gte: fechaInicio.toJSDate(),
+          lte: fechaFinal.toJSDate(),
+        },
+        validado: true,
+      },
+    });
+  }
 }

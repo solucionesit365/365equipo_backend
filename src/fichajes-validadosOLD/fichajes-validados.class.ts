@@ -24,18 +24,6 @@ export class FichajesValidadosService {
     return await this.schFichajesValidados.getFichajesValidados(idTrabajador);
   }
 
-  async getFichajesValidadosRango(
-    idTrabajador: number,
-    fechaInicio: DateTime,
-    fechaFinal: DateTime,
-  ) {
-    return await this.schFichajesValidados.getParaCuadranteNew(
-      fechaInicio,
-      fechaFinal,
-      idTrabajador,
-    );
-  }
-
   async getPendientesEnvio() {
     return await this.schFichajesValidados.getPendientesEnvio();
   }
@@ -117,18 +105,18 @@ export class FichajesValidadosService {
     );
   }
 
-  // Cuadrantes 2.0
-  async getParaCuadranteNew(
-    lunes: DateTime,
-    domingo: DateTime,
-    idTrabajador: number,
-  ) {
-    return await this.schFichajesValidados.getParaCuadranteNew(
-      lunes,
-      domingo,
-      idTrabajador,
-    );
-  }
+  // // Cuadrantes 2.0 -- REEMPLAZADO
+  // async getParaCuadranteNew(
+  //   lunes: DateTime,
+  //   domingo: DateTime,
+  //   idTrabajador: number,
+  // ) {
+  //   return await this.schFichajesValidados.getParaCuadranteNew(
+  //     lunes,
+  //     domingo,
+  //     idTrabajador,
+  //   );
+  // }
   async getTiendaDia(tienda: number, dia: Date) {
     return await this.schFichajesValidados.getTiendaDia(
       tienda,

@@ -113,17 +113,21 @@ model Permiso {
 }
 
 model ParesFichaje {
-  id           String     @id @default(uuid())
-  entrada      DateTime
-  descansos    Descanso[]
-  estado       Estado
-  salida       DateTime?
-  trabajador   Trabajador @relation(fields: [trabajadorId], references: [id])
-  trabajadorId Int
-  latitud      Float?
-  longitud     Float?
-  lugar        Tienda?    @relation(fields: [lugarId], references: [id])
-  lugarId      Int?
+  id                String     @id @default(uuid())
+  entrada           DateTime
+  descansos         Descanso[]
+  estado            Estado
+  salida            DateTime?
+  trabajador        Trabajador @relation(fields: [trabajadorId], references: [id])
+  trabajadorId      Int
+  latitud           Float?
+  longitud          Float?
+  lugar             Tienda?    @relation(fields: [lugarId], references: [id])
+  lugarId           Int?
+  validado          Boolean    @default(false)
+  horasExtras       Float      @default(0)
+  horasCoordinacion Float      @default(0)
+  horasAprendiz     Float      @default(0)
 }
 
 model Descanso {
