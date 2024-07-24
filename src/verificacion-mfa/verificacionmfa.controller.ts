@@ -32,7 +32,7 @@ export class VerificacionmfaController {
       const usuario = await this.authInstance.getUserByUid(verificacion.uid);
       this.email.enviarEmail(
         usuario.email,
-        `Utiliza este codigo para poder ver tu perfil: ${verificacion.codigo}`,
+        `Utiliza este codigo para para realizar la acción solicitada </br>: ${verificacion.codigo}`,
         "Tu codigo de Verificación",
       );
       return {
