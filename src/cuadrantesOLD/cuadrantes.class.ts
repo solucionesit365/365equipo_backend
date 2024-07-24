@@ -31,52 +31,6 @@ export class Cuadrantes {
     private readonly fichajesValidadosInstance: FichajesValidadosService,
   ) {}
 
-  async recuentoTiendasSubordinados(
-    arrayTrabajadores: number[],
-    inicioSemana: DateTime,
-    finalSemana: DateTime,
-  ): Promise<number[]> {
-    const tiendasSet = new Set<number>();
-
-    for (const idTrabajador of arrayTrabajadores) {
-      const cuadrantesTrabajador =
-        await this.schCuadrantes.getCuadrantesIndividual(
-          idTrabajador,
-          inicioSemana,
-          finalSemana,
-        );
-
-      for (const cuadrante of cuadrantesTrabajador) {
-        tiendasSet.add(cuadrante.idTienda);
-      }
-    }
-
-    return [...tiendasSet];
-  }
-
-  async getCuadranteDependienta(idTrabajador: number, fechaBusqueda: DateTime) {
-    const fechaInicioSemana = fechaBusqueda.startOf("week");
-    const fechaFinalSemana = fechaBusqueda.endOf("week");
-    const puestosTrabajo = await this.recuentoTiendasIndividual(
-      idTrabajador,
-      fechaInicioSemana,
-      fechaFinalSemana,
-    );
-    const cuadrantes: TCuadrante[] = [];
-
-    for (let i = 0; i < puestosTrabajo.length; i += 1) {
-      cuadrantes.push(
-        ...(await this.schCuadrantes.getCuadrantes(
-          puestosTrabajo[i],
-          fechaInicioSemana,
-          fechaFinalSemana,
-        )),
-      );
-    }
-
-    return cuadrantes;
-  }
-
   async getCuadranteCoordinadora(
     idTrabajador: number,
     arrayIdSubordinados: number[],

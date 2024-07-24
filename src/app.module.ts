@@ -43,7 +43,6 @@ import { DistribucionMensajesModule } from "./distribucion-mensajes/distribucion
 import { VideosFormacionModule } from "./videos-formacion/videos-formacion.module";
 import { ParFichajeModule } from "./par-fichaje/par-fichaje.module";
 import { PlanModule } from "./plan/plan.module";
-import { TrabajadorPuestoModule } from './trabajador-puesto/trabajador-puesto.module';
 
 @Module({
   imports: [
@@ -91,7 +90,6 @@ import { TrabajadorPuestoModule } from './trabajador-puesto/trabajador-puesto.mo
     VideosFormacionModule,
     ParFichajeModule,
     PlanModule,
-    TrabajadorPuestoModule,
   ],
   controllers: [AppController, KpiTiendasController],
 })
