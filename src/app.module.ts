@@ -41,11 +41,9 @@ import { EmpresaModule } from "./empresa/empresa.module";
 import { KpiTiendasController } from "./kpi-tiendas/kpi-tiendas.controller";
 import { KpiTiendasModule } from "./kpi-tiendas/kpi-tiendas.module";
 import { DiaPersonalModule } from "./dia-personal/dia-personal.module";
-import { DistribucionMensajesModule } from './distribucion-mensajes/distribucion-mensajes.module';
+import { DistribucionMensajesModule } from "./distribucion-mensajes/distribucion-mensajes.module";
 import { VideosFormacionModule } from "./videos-formacion/videos-formacion.module";
-import { NotasInformativasController } from './notas-informativas/notas-informativas.controller';
-import { NotasInformativasModule } from './notas-informativas/notas-informativas.module';
-
+import { NotasInformativasModule } from "./notas-informativas/notas-informativas.module";
 
 @Module({
   imports: [
@@ -95,6 +93,6 @@ import { NotasInformativasModule } from './notas-informativas/notas-informativas
     VideosFormacionModule,
     NotasInformativasModule,
   ],
-  controllers: [AppController, KpiTiendasController, NotasInformativasController],
+  controllers: [AppController, KpiTiendasController],
 })
 export class AppModule {}

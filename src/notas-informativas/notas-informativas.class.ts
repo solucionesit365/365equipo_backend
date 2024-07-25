@@ -15,4 +15,15 @@ export class NotasInformativasClass {
 
     throw Error("No se ha podido insertar la nota informativa");
   }
+
+  async getNotasInformativas(idTienda?: number) {
+    const arrayNotasInformativas =
+      await this.schnotasInformativas.getNotasInformativas(idTienda);
+    if (arrayNotasInformativas.length > 0) return arrayNotasInformativas;
+    return null;
+  }
+
+  async borrarNotasInformativas(notas: NotasInformativas) {
+    return this.schnotasInformativas.borrarNotasInformativas(notas);
+  }
 }
