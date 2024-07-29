@@ -3,7 +3,7 @@ import { ObjectId } from "mongodb";
 export interface NotasInformativas {
   _id: ObjectId;
   titulo: string;
-  pdfNotainformativaile: string;
+  pdfNotainformativa: string;
   categoria: string; //pdf or video
   caducidad: Date;
   tiendas: number;

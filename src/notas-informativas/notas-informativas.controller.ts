@@ -55,6 +55,22 @@ export class NotasInformativasController {
   }
 
   @UseGuards(AuthGuard)
+  @Get("getAllNotasInformativas")
+  async getAllNotasInformativas() {
+    try {
+      const resNotasInformativas =
+        await this.notasInformativasInstance.getAllNotasInformativas();
+      return {
+        ok: true,
+        data: resNotasInformativas,
+      };
+    } catch (err) {
+      console.log(err);
+      return { ok: false, message: err.message };
+    }
+  }
+
+  @UseGuards(AuthGuard)
   @Post("borrarNotasInformativas")
   async borrarNotasInformativas(@Body() notas: NotasInformativas) {
     try {

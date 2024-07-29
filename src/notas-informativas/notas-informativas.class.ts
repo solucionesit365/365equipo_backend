@@ -23,6 +23,10 @@ export class NotasInformativasClass {
     return null;
   }
 
+  async getAllNotasInformativas() {
+    return this.schnotasInformativas.getAllNotasInformativas();
+  }
+
   async borrarNotasInformativas(notas: NotasInformativas) {
     return this.schnotasInformativas.borrarNotasInformativas(notas);
   }
