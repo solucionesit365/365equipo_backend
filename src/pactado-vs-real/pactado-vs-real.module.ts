@@ -3,7 +3,7 @@ import { PactadoVsRealService } from "./pactado-vs-real.service";
 import { TrabajadoresModule } from "../trabajadores/trabajadores.module";
 import { FichajesValidadosModule } from "../fichajes-validadosOLD/fichajes-validados.module";
 import { PactadoVsRealController } from "./pactado-vs-real.controller";
-import { AusenciasModule } from "../ausencias/ausencias.module";
+import { AusenciasModule } from "../ausenciasOLD/ausencias.module";
 import { CuadrantesModule } from "../cuadrantesOLD/cuadrantes.module";
 
 @Module({

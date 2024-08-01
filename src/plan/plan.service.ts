@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { DateTime } from "luxon";
 import { ParFichajeService } from "../par-fichaje/par-fichaje.service";
-import { Plan } from "@prisma/client";
+import { Plan, Prisma } from "@prisma/client";
 
 @Injectable()
 export class PlanService {
@@ -276,7 +276,10 @@ export class PlanService {
     });
   }
 
-  async guardarCuadrantes(planesModificables: Plan[], planesNuevos: Plan[]) {
+  async guardarCuadrantes(
+    planesModificables: Plan[],
+    planesNuevos: Prisma.PlanCreateManyInput[],
+  ) {
     // 1. Modificar los planes existentes
     for (const plan of planesModificables) {
       const { id, ...dataToUpdate } = plan;
@@ -295,5 +298,54 @@ export class PlanService {
         data: planesNuevos,
       });
     }
+  }
+
+  async copiarPlanesSemana(
+    fechaSemanaOrigen: DateTime,
+    fechaSemanaDestino: DateTime,
+    idTienda: number,
+  ) {
+    const inicioSemanaOrigen = fechaSemanaOrigen.startOf("week");
+    const finalSemanaOrigen = fechaSemanaDestino.endOf("week");
+
+    const inicioSemanaDestino = fechaSemanaDestino.startOf("week");
+
+    const diferenciaDias = inicioSemanaDestino.diff(
+      inicioSemanaOrigen,
+      "days",
+    ).days;
+
+    const planes = await this.getPlanesByTienda(
+      idTienda,
+      inicioSemanaOrigen,
+      finalSemanaOrigen,
+    );
+
+    if (planes.length > 0) {
+      const planesFechasModificadas = planes.map((plan) => {
+        const fechaInicio = DateTime.fromJSDate(plan.inicio);
+        const fechaFinal = DateTime.fromJSDate(plan.final);
+
+        const nuevaFechaInicio = fechaInicio.plus({ days: diferenciaDias });
+        const nuevaFechaFinal = fechaFinal.plus({ days: diferenciaDias });
+
+        delete plan.id;
+
+        return {
+          ...plan,
+          inicio: nuevaFechaInicio.toJSDate(),
+          final: nuevaFechaFinal.toJSDate(),
+          enviado: false,
+        };
+      });
+
+      await this.insertPlanes(planesFechasModificadas);
+    }
+  }
+
+  async insertPlanes(planesFechasModificadas: Plan[]) {
+    await this.prisma.plan.createMany({
+      data: planesFechasModificadas,
+    });
   }
 }

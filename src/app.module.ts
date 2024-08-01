@@ -6,7 +6,7 @@ import { AdminModule } from "./admin/admin.module";
 import { AnunciosModule } from "./anuncios/anuncios.module";
 import { ArchivoDigitalModule } from "./archivo-digital/archivo-digital.module";
 import { AuditoriasModule } from "./auditorias/auditorias.module";
-import { AusenciasModule } from "./ausencias/ausencias.module";
+import { AusenciasModule } from "./ausenciasOLD/ausencias.module";
 import { CalendarioFestivosModule } from "./calendario-festivos/calendario-festivos.module";
 import { ClientesModule } from "./clientes/clientes.module";
 import { CryptoModule } from "./crypto/crypto.module";
@@ -43,6 +43,8 @@ import { DistribucionMensajesModule } from "./distribucion-mensajes/distribucion
 import { VideosFormacionModule } from "./videos-formacion/videos-formacion.module";
 import { ParFichajeModule } from "./par-fichaje/par-fichaje.module";
 import { PlanModule } from "./plan/plan.module";
+import { PlanAusenciaModule } from './plan-ausencia/plan-ausencia.module';
+import { AusenciaModule } from './ausencia/ausencia.module';
 
 @Module({
   imports: [
@@ -90,6 +92,8 @@ import { PlanModule } from "./plan/plan.module";
     VideosFormacionModule,
     ParFichajeModule,
     PlanModule,
+    PlanAusenciaModule,
+    AusenciaModule,
   ],
   controllers: [AppController, KpiTiendasController],
 })
