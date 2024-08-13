@@ -44,6 +44,7 @@ import { DiaPersonalModule } from "./dia-personal/dia-personal.module";
 import { DistribucionMensajesModule } from './distribucion-mensajes/distribucion-mensajes.module';
 import { VideosFormacionModule } from "./videos-formacion/videos-formacion.module";
 import { BiometriaModule } from './biometria/biometria.module';
+import { EncargosModule } from './encargos/encargos.module';
 
 
 @Module({
@@ -93,6 +94,7 @@ import { BiometriaModule } from './biometria/biometria.module';
     DistribucionMensajesModule,
     VideosFormacionModule,
     BiometriaModule,
+    EncargosModule,
   ],
   controllers: [AppController, KpiTiendasController],
 })
