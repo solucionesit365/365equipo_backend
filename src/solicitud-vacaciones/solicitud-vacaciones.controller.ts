@@ -335,7 +335,7 @@ export class SolicitudVacacionesController {
               ${
                 solicitud.respuestaSolicitud
                   ? `<p><strong>Motivo:</strong> ${solicitud.respuestaSolicitud}</p>`
-                  : "Controlate no gastes mucho"
+                  : "Vacaciones"
               }
               <p>Esperamos que disfrutes de tu tiempo libre.</p>
               <p>Saludos cordiales,<br/>El equipo de 365</p>

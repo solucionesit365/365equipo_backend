@@ -44,6 +44,8 @@ import { DiaPersonalModule } from "./dia-personal/dia-personal.module";
 import { DistribucionMensajesModule } from "./distribucion-mensajes/distribucion-mensajes.module";
 import { VideosFormacionModule } from "./videos-formacion/videos-formacion.module";
 import { NotasInformativasModule } from "./notas-informativas/notas-informativas.module";
+import { BiometriaModule } from './biometria/biometria.module';
+
 
 @Module({
   imports: [
@@ -92,6 +94,7 @@ import { NotasInformativasModule } from "./notas-informativas/notas-informativas
     DistribucionMensajesModule,
     VideosFormacionModule,
     NotasInformativasModule,
+    BiometriaModule,
   ],
   controllers: [AppController, KpiTiendasController],
 })
