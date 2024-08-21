@@ -434,7 +434,10 @@ export class Fichajes {
     subFichajesSimples: WithId<FichajeDto>[],
   ) {
     for (let i = 0; i < subFichajesSimples.length; i += 1) {
-      if (subFichajesSimples[i].tipo === "SALIDA") {
+      if (
+        subFichajesSimples[i].tipo === "SALIDA" &&
+        DateTime.fromJSDate(subFichajesSimples[i].hora) > horaEntrada
+      ) {
         const horaSalida = DateTime.fromJSDate(subFichajesSimples[i].hora);
         if (
           horaEntrada.year === horaSalida.year &&
@@ -448,7 +451,9 @@ export class Fichajes {
     return null;
   }
 
-  private async obtenerParesTrabajador(fichajesSimples: WithId<FichajeDto>[]) {
+  async obtenerParesTrabajador(fichajesSimples: WithId<FichajeDto>[]) {
+    this.ordenarPorHora(fichajesSimples);
+
     const pares: ParFichaje[] = [];
 
     for (let i = 0; i < fichajesSimples.length; i += 1) {
@@ -468,14 +473,9 @@ export class Fichajes {
             ),
           });
         } else {
-          const salidaHipotetica = await this.createFichajeSalidaSistema(
-            DateTime.fromJSDate(fichajesSimples[i].hora),
-            fichajesSimples[i].idTrabajador,
-          );
-
           pares.push({
             entrada: fichajesSimples[i],
-            salida: salidaHipotetica,
+            salida: null,
             cuadrante: await this.cuadrantesInstance.getTurnoDia(
               fichajesSimples[i].idTrabajador,
               DateTime.fromJSDate(fichajesSimples[i].hora),
@@ -486,58 +486,6 @@ export class Fichajes {
     }
     return pares;
   }
-
-  // private async obtenerParesTrabajador(fichajesSimples: WithId<FichajeDto>[]) {
-  //   const pares: ParFichaje[] = [];
-
-  //   if (fichajesSimples.length % 2 === 0) {
-  //     for (let i = 0; i < fichajesSimples.length; i += 2) {
-  //       if (
-  //         fichajesSimples[i].tipo === "ENTRADA" &&
-  //         fichajesSimples[i + 1].tipo === "SALIDA"
-  //       ) {
-  //         pares.push({
-  //           entrada: fichajesSimples[i],
-  //           salida: fichajesSimples[i + 1],
-  //           cuadrante: await this.cuadrantesInstance.getTurnoDia(
-  //             fichajesSimples[i].idTrabajador,
-  //             DateTime.fromJSDate(fichajesSimples[i].hora),
-  //           ),
-  //         });
-  //       }
-  //     }
-  //   } else throw Error("No se podrán conseguir los pares de una lista impar");
-  //   return pares;
-  // }
-
-  // private async transformarFichajesSinValidar(
-  //   fichajesPdtesDesordenados: WithId<FichajeDto>[],
-  //   idResponsable: number,
-  // ) {
-  //   const fichajesTransformados: FichajeValidadoDto[] = [];
-
-  //   for (const fichaje of fichajesPdtesDesordenados) {
-  //     const data: FichajeValidadoDto = {
-  //       aPagar: false,
-  //       comentario: { entrada: "", salida: "" },
-  //       enviado: false,
-  //       horasAprendiz: 0,
-  //       horasCoordinacion: 0,
-  //       horasExtra: 0,
-  //       horasPagar: {
-  //         comentario: "",
-  //         estadoValidado: "",
-  //         respSuper: "",
-  //         total: 0,
-  //       },
-  //       idResponsable,
-  //       idTrabajador: fichaje.idTrabajador,
-  //       fecha: fichaje.hora.toISOString(),
-  //     };
-
-  //     fichajesTransformados.push();
-  //   }
-  // }
 
   async hayFichajesPendientes(ids: number[], fecha: DateTime) {
     console.log("Entro causa");
