@@ -129,7 +129,7 @@ export class AusenciasDatabase {
         // Condición 2: La ausencia termina dentro del intervalo
         { fechaFinal: { $gte: inicio, $lte: final } },
         // Condición 3: La ausencia comienza antes y termina después del intervalo
-        { fechaInicio: { $lte: inicio }, final: { $gte: final } },
+        { fechaInicio: { $lte: inicio }, fechaFinal: { $gte: final } },
       ],
     };
 

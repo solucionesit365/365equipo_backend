@@ -170,10 +170,8 @@ export class PactadoVsRealService {
       const limiteDerecho = fechaFinal > finalSemana ? finalSemana : fechaFinal;
 
       // Asegurándonos de que siempre haya al menos 1 día de diferencia
-      const diferenciaDias = Math.max(
-        limiteDerecho.diff(limiteIzquierdo, "days").days,
-        1,
-      );
+      const diferenciaDias =
+        Math.floor(limiteDerecho.diff(limiteIzquierdo, "days").days) + 1;
 
       const horas = ausenciasTrabajador[i].horas || 8; // Usando el valor por defecto de 8 horas si no está especificado
 
