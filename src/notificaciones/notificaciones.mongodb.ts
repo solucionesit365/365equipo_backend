@@ -22,6 +22,13 @@ export class NotificacionsDatabase {
     throw Error("No se ha podido guardar o actualizar el token FCM");
   }
 
+  async getFCMToken(uid: string) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const notificaciones = db.collection<NotificacionDto>("notificaciones");
+
+    return await notificaciones.findOne({ uid });
+  }
+
   async newInAppNotification(notification: InAppNotification) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const inAppNotifications =

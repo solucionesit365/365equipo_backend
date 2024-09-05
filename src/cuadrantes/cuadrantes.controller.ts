@@ -74,6 +74,13 @@ export class CuadrantesController {
           DateTime.fromJSDate(new Date(fecha)),
         );
       }
+      if (Number(idTienda)) {
+        // Esto es tratado como Dependienta tambien , se obtiene el cuadrante de la tienda por su idTienda
+        cuadrantes = await this.cuadrantesInstance.getTiendasSemana(
+          Number(idTienda),
+          DateTime.fromJSDate(new Date(fecha)),
+        );
+      }
 
       return {
         ok: true,
