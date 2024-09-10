@@ -9,7 +9,17 @@ export class Notificaciones {
   constructor(private readonly schNotificaciones: NotificacionsDatabase) {}
 
   async saveToken(uid: string, token: string) {
-    return await this.schNotificaciones.saveToken(uid, token);
+    const save = await this.schNotificaciones.saveToken(uid, token);
+    if (save) {
+      await admin
+        .messaging()
+        .subscribeToTopic(token, "notificaciones_generales");
+
+      return {
+        ok: true,
+        data: "Token FCM guardado y suscrito a notificaciones_generales",
+      };
+    }
   }
 
   async sendMessage(titulo: string, body: string, fcmToken: string) {
@@ -63,7 +73,7 @@ export class Notificaciones {
   async marcarComoNoLeida(id: string, uid: string) {
     return await this.schNotificaciones.marcarComoNoLeida(id, uid);
   }
-  
+
   // Función para enviar notificación a un dispositivo
   async sendNotificationToDevice(
     fcmToken: string,
@@ -89,6 +99,27 @@ export class Notificaciones {
       console.error("Error al enviar la notificación:", error);
       throw new Error("Error al enviar la notificación");
     }
+  }
+
+  // Función para enviar notificación al topic notificaciones_notificaciones_generales
+  async sendNotificationToTopic(title: string, message: string, topic: string) {
+    const noti = {
+      notification: {
+        title: title,
+        body: message,
+      },
+      topic: topic,
+    };
+
+    await admin
+      .messaging()
+      .send(noti)
+      .then((res) => {
+        console.log("Notificación enviada:", res);
+      })
+      .catch((error) => {
+        console.error("Error al enviar notificación:", error);
+      });
   }
 
   async getFCMToken(uid: string) {
