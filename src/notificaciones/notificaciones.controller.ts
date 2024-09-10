@@ -92,8 +92,6 @@ export class NotificacionesController {
   @UseGuards(AuthGuard)
   @Post("saveTokenFCM")
   async saveToken(@Query() { token, uid }: { token: string; uid: string }) {
-    console.log(uid);
-    console.log(token);
     try {
       return {
         ok: true,
@@ -135,6 +133,21 @@ export class NotificacionesController {
           data: "usuario no autenticado",
         };
       }
+    } catch (error) {
+      console.log(error);
+      return { ok: false, message: error.message };
+    }
+  }
+
+  @UseGuards(AuthGuard)
+  @Get("testNotificationTopic")
+  async testNotificationTopic() {
+    try {
+      return this.notificacionesInstance.sendNotificationToTopic(
+        "NUEVO ANUNCIO DE 365OBRADOR",
+        "Vacante disponible en el departamento de camaras.",
+        "notificaciones_generales",
+      );
     } catch (error) {
       console.log(error);
       return { ok: false, message: error.message };
