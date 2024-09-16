@@ -20,6 +20,7 @@ import { ContratoService } from "../contrato/contrato.service";
 import { User } from "../decorators/get-user.decorator";
 import { UserRecord } from "firebase-admin/auth";
 import { CopiarSemanaCuadranteDto } from "./cuadrantes.dto";
+import { Notificaciones } from "../notificaciones/notificaciones.class";
 
 @Controller("cuadrantes")
 export class CuadrantesController {
@@ -28,6 +29,7 @@ export class CuadrantesController {
     private readonly cuadrantesInstance: Cuadrantes,
     private readonly contratoService: ContratoService,
     private readonly trabajadoresInstance: TrabajadorService,
+    private readonly notificacionesInstance: Notificaciones,
   ) {}
 
   @UseGuards(AuthGuard)
@@ -364,13 +366,17 @@ export class CuadrantesController {
               reqCuadrante.idTrabajador,
             );
 
-          // this.notificaciones.newInAppNotification({
-          //   uid: trabajadorID.idApp,
-          //   titulo: "CUADRANTE TIENDA",
-          //   mensaje: `Se ha creado tu horario de la semana ${fechaInicio.weekNumber}`,
-          //   leido: false,
-          //   creador: "SISTEMA",
-          // });
+          const token = await this.notificacionesInstance.getFCMToken(
+            trabajadorID.idApp,
+          );
+
+          await this.notificacionesInstance.sendNotificationToDevice(
+            token.token,
+            "NUEVO CUADRANTE CREADO",
+            `Se ha creado el cuadrate de la semana ${fechaInicio.weekNumber}`,
+            "/cuadrantes-tienda",
+          );
+
           return { ok: true };
         }
       }

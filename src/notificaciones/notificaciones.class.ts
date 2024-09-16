@@ -75,10 +75,11 @@ export class Notificaciones {
   }
 
   // Función para enviar notificación a un dispositivo
-  async sendNotificationToDevice(
+  async sendNotificationToDevice( 
     fcmToken: string,
     title: string,
     message: string,
+    url?: string,
   ) {
     const payload: admin.messaging.Message = {
       token: fcmToken, // Aquí va el token del dispositivo
@@ -87,7 +88,7 @@ export class Notificaciones {
         body: message,
       },
       data: {
-        click_action: "FLUTTER_NOTIFICATION_CLICK", // Acciones para cuando se hace clic en la notificación
+        click_action: url, // Acciones para cuando se hace clic en la notificación
       },
     };
 
@@ -97,7 +98,6 @@ export class Notificaciones {
       return response;
     } catch (error) {
       console.error("Error al enviar la notificación:", error);
-      throw new Error("Error al enviar la notificación");
     }
   }
 
