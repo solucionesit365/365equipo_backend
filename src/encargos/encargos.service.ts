@@ -27,4 +27,8 @@ export class EncargosService {
       return await this.encargosDB.updateEncargo(encargo);
     } else return { ok: false, data: "No hay tienda" };
   }
+
+  async getAllEncargos() {
+    return await this.encargosDB.getAllEncargos();
+  }
 }
