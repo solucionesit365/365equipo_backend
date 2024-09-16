@@ -9,9 +9,9 @@ export class EncargosDatabase {
 
   async newEncargo(encargo: EncargosInterface) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
-    const anuncios = db.collection<EncargosInterface>("encargos");
+    const encargos = db.collection<EncargosInterface>("encargos");
 
-    const resInsert = await anuncios.insertOne(encargo);
+    const resInsert = await encargos.insertOne(encargo);
 
     if (resInsert.acknowledged) return resInsert.insertedId;
     return null;
@@ -21,16 +21,12 @@ export class EncargosDatabase {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const encargos = db.collection<EncargosInterface>("encargos");
 
-    console.log(idTienda);
-
     return await encargos.find({ idTienda: idTienda }).toArray();
   }
 
   async updateEncargo(encargo: EncargosInterface) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const auditoriasCollection = db.collection<EncargosInterface>("encargos");
-
-    console.log(encargo);
 
     const response = await auditoriasCollection.updateOne(
       {
@@ -45,5 +41,11 @@ export class EncargosDatabase {
     );
 
     return response.acknowledged;
+  }
+
+  async getAllEncargos() {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const encargos = db.collection<EncargosInterface>("encargos");
+    return await encargos.find().toArray();
   }
 }

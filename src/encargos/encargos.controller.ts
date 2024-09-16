@@ -2,6 +2,7 @@ import { Controller, Body, UseGuards, Post, Get, Query } from "@nestjs/common";
 import { EncargosInterface } from "./encargos.interface";
 import { EncargosService } from "./encargos.service";
 import { AuthGuard } from "../guards/auth.guard";
+import { error } from "console";
 
 @Controller("encargos")
 export class EncargosController {
@@ -33,6 +34,16 @@ export class EncargosController {
   async updateEncargo(@Body() encargo: EncargosInterface) {
     try {
       return await this.EncargoService.updateEncargo(encargo);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  @UseGuards(AuthGuard)
+  @Get("getAllEncargos")
+  async getAllEncargos() {
+    try {
+      return await this.EncargoService.getAllEncargos();
     } catch (error) {
       console.log(error);
     }
