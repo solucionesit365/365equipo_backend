@@ -5,6 +5,8 @@ import { SolicitudVacaciones } from "./solicitud-vacaciones.interface";
 import { EmailService } from "src/email/email.class";
 import { TrabajadorService } from "../trabajadores/trabajadores.class";
 import { Notificaciones } from "src/notificaciones/notificaciones.class";
+import { UserRecord } from "firebase-admin/auth";
+import { User } from "../decorators/get-user.decorator";
 
 @Controller("solicitud-vacaciones")
 export class SolicitudVacacionesController {
@@ -13,6 +15,7 @@ export class SolicitudVacacionesController {
     private readonly notificaciones: Notificaciones,
     private readonly email: EmailService,
     private readonly trabajadorInstance: TrabajadorService,
+    private readonly notificacionesInstance: Notificaciones,
   ) {}
 
   //Nueva solicitud de vacaciones
@@ -20,6 +23,7 @@ export class SolicitudVacacionesController {
   @Post("nuevaSolicitud")
   async nuevaSolicitudVacaciones(
     @Body() solicitudesVacaciones: SolicitudVacaciones,
+    @User() user: UserRecord,
   ) {
     try {
       const solicitudTrabajador =
@@ -100,6 +104,21 @@ export class SolicitudVacacionesController {
       </html>`,
         "Confirmación de Solicitud de Vacaciones",
       );
+
+      //enviar notificacion
+      //get TokenFCM
+      const userToken = await this.notificacionesInstance.getFCMToken(user.uid);
+
+      console.log(userToken);
+      if (userToken) {
+        //enviar notificacion
+        await this.notificacionesInstance.sendNotificationToDevice(
+          userToken.token,
+          "Solicitud de vacaciones",
+          "Se ha creado una solicitud de vacaciones a tu nombre.",
+          "/mis-vacaciones",
+        );
+      }
 
       return {
         ok: true,
@@ -289,6 +308,7 @@ export class SolicitudVacacionesController {
   @Post("setEstadoSolicitud")
   async updateSolicitudVacacionesEstado(
     @Body() solicitudesVacaciones: SolicitudVacaciones,
+    @User() user: UserRecord,
   ) {
     try {
       if (!solicitudesVacaciones.estado || !solicitudesVacaciones._id)
@@ -316,14 +336,27 @@ export class SolicitudVacacionesController {
           await this.trabajadorInstance.getTrabajadorBySqlId(
             Number(solicitud.idBeneficiario),
           );
-        this.notificaciones.newInAppNotification({
-          uid: solicitudTrabajador.idApp,
-          titulo: "Vacaciones",
-          mensaje: `Tus vacaciones han sido ${solicitud.estado}S`,
-          leido: false,
-          creador: "SISTEMA",
-          url: "/mis-vacaciones",
-        });
+
+        // this.notificaciones.newInAppNotification({
+        //   uid: solicitudTrabajador.idApp,
+        //   titulo: "Vacaciones",
+        //   mensaje: `Tus vacaciones han sido ${solicitud.estado}S`,
+        //   leido: false,
+        //   creador: "SISTEMA",
+        //   url: "/mis-vacaciones",
+        // });
+
+        const userToken = await this.notificacionesInstance.getFCMToken(
+          user.uid,
+        );
+
+        //enviar notificacion
+        await this.notificacionesInstance.sendNotificationToDevice(
+          userToken.token,
+          "Estado de vacaciones",
+          `Tu solicitud de vacaciones ha sido ${solicitud.estado}. Que disfrutes`,
+          "/mis-vacaciones",
+        );
 
         this.email.enviarEmail(
           solicitudTrabajador.emails,
