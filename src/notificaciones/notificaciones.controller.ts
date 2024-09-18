@@ -1,11 +1,4 @@
-import {
-  Controller,
-  Post,
-  Body,
-  UseGuards,
-  Get,
-  Headers,
-} from "@nestjs/common";
+import { Controller, Post, Body, UseGuards, Get, Query } from "@nestjs/common";
 import { Notificaciones } from "./notificaciones.class";
 import { AuthGuard } from "../guards/auth.guard";
 import { FirebaseService } from "../firebase/firebase.service";
@@ -93,6 +86,71 @@ export class NotificacionesController {
     } catch (err) {
       console.log(err);
       return { ok: false, message: err.message };
+    }
+  }
+
+  @UseGuards(AuthGuard)
+  @Post("saveTokenFCM")
+  async saveToken(@Query() { token, uid }: { token: string; uid: string }) {
+    try {
+      return {
+        ok: true,
+        data: await this.notificacionesInstance.saveToken(uid, token),
+      };
+    } catch (error) {
+      console.log(error);
+      return { ok: false, message: error.message };
+    }
+  }
+
+  @UseGuards(AuthGuard)
+  @Get("testNotification")
+  async testNotification(@User() user: UserRecord) {
+    try {
+      if (user) {
+        const userToken = await this.notificacionesInstance.getFCMToken(
+          user.uid,
+        );
+        if (userToken) {
+          const message = this.notificacionesInstance.sendNotificationToDevice(
+            userToken.token,
+            "NOTIFICACIÓN CHULA",
+            "Estos es una prueba que puede que funcione gaaaaa",
+          );
+          return {
+            ok: true,
+            data: message,
+          };
+        } else {
+          return {
+            ok: false,
+            data: "El usuario no tiene token FCM, probablemente tiene notificaciones bloqueadas",
+          };
+        }
+      } else {
+        return {
+          ok: false,
+          data: "usuario no autenticado",
+        };
+      }
+    } catch (error) {
+      console.log(error);
+      return { ok: false, message: error.message };
+    }
+  }
+
+  @UseGuards(AuthGuard)
+  @Get("testNotificationTopic")
+  async testNotificationTopic() {
+    try {
+      return this.notificacionesInstance.sendNotificationToTopic(
+        "NUEVO ANUNCIO DE 365OBRADOR",
+        "Vacante disponible en el departamento de camaras.",
+        "notificaciones_generales",
+      );
+    } catch (error) {
+      console.log(error);
+      return { ok: false, message: error.message };
     }
   }
 }
