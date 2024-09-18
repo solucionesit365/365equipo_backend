@@ -273,11 +273,9 @@ export class TrabajadorService {
 
   async guardarCambiosForm(
     original: TrabajadorFormRequest,
-    usuarioGestor: UserRecord,
+    // usuarioGestor: UserRecord, //corregir para que funcione con los permisos
     payload: TrabajadorFormRequest,
   ) {
-    const cualquieraDe = ["SUPER_ADMIN", "RRHH_ADMIN"];
-
     if (payload.idResponsable)
       if (original.idResponsable !== payload.idResponsable) {
         const nuevoResponsable = await this.getTrabajadorBySqlId(
@@ -311,14 +309,9 @@ export class TrabajadorService {
         }
       }
 
-    if (
-      this.permisosInstance.pasoPermitidoByClaims(
-        usuarioGestor.customClaims?.arrayPermisos,
-        cualquieraDe,
-      )
-    ) {
+    {
       return await this.schTrabajadores.guardarCambiosForm(payload, original);
-    } else throw Error("No tienes permisos para realizar esta acción");
+    }
   }
 
   async getNivelMenosUno(idSql: number) {
