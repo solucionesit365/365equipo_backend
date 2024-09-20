@@ -3,11 +3,13 @@ import { DistribucionMensajesClass } from "./distribucion-mensajes.class";
 import { AuthGuard } from "../guards/auth.guard";
 import { DistribucionMensajes } from "./distribucion-mensajes.interface";
 import { SchedulerGuard } from "src/guards/scheduler.guard";
+import { Notificaciones } from "../notificaciones/notificaciones.class";
 
 @Controller("distribucion-mensajes")
 export class DistribucionMensajesController {
   constructor(
     private readonly DistribucionMensajesClass: DistribucionMensajesClass,
+    private readonly notificaciones: Notificaciones,
   ) {}
 
   @UseGuards(AuthGuard)
@@ -73,6 +75,13 @@ export class DistribucionMensajesController {
               mensaje._id,
               mensaje.activo,
             );
+
+          // Enviar la notificación si el mensaje está activo
+          await this.notificaciones.sendNotificationToTopic(
+            "NUEVO MENSAJE DE DISTRIBUCION",
+            `Disponible en la app.`,
+            "TEST_DEMO",
+          );
           return {
             ok: true,
             data: response,
