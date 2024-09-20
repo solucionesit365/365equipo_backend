@@ -337,26 +337,19 @@ export class SolicitudVacacionesController {
             Number(solicitud.idBeneficiario),
           );
 
-        // this.notificaciones.newInAppNotification({
-        //   uid: solicitudTrabajador.idApp,
-        //   titulo: "Vacaciones",
-        //   mensaje: `Tus vacaciones han sido ${solicitud.estado}S`,
-        //   leido: false,
-        //   creador: "SISTEMA",
-        //   url: "/mis-vacaciones",
-        // });
-
         const userToken = await this.notificacionesInstance.getFCMToken(
           user.uid,
         );
-
-        //enviar notificacion
-        await this.notificacionesInstance.sendNotificationToDevice(
-          userToken.token,
-          "Estado de vacaciones",
-          `Tu solicitud de vacaciones ha sido ${solicitud.estado}. Que disfrutes`,
-          "/mis-vacaciones",
-        );
+        // Verificar que el token no sea nulo
+        if (userToken && userToken.token) {
+          //enviar notificacion
+          await this.notificacionesInstance.sendNotificationToDevice(
+            userToken.token,
+            "Estado de vacaciones",
+            `Tu solicitud de vacaciones ha sido ${solicitud.estado}.`,
+            "/mis-vacaciones",
+          );
+        }
 
         this.email.enviarEmail(
           solicitudTrabajador.emails,

@@ -159,14 +159,14 @@ export class TrabajadoresController {
     original: TrabajadorFormRequest,
     @Body("modificado")
     modificado: TrabajadorFormRequest,
-    @User() firebaseUser: UserRecord,
+    // @User() firebaseUser: UserRecord,
   ) {
     try {
       return {
         ok: true,
         data: await this.trabajadorInstance.guardarCambiosForm(
           original,
-          firebaseUser,
+          // firebaseUser,
           modificado,
         ),
       };

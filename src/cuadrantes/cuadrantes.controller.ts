@@ -366,16 +366,19 @@ export class CuadrantesController {
               reqCuadrante.idTrabajador,
             );
 
-          const token = await this.notificacionesInstance.getFCMToken(
-            trabajadorID.idApp,
-          );
-
-          await this.notificacionesInstance.sendNotificationToDevice(
-            token.token,
-            "NUEVO CUADRANTE CREADO",
-            `Se ha creado el cuadrate de la semana ${fechaInicio.weekNumber}`,
-            "/cuadrantes-tienda",
-          );
+          if (trabajadorID.idApp) {
+            const token = await this.notificacionesInstance.getFCMToken(
+              trabajadorID.idApp,
+            );
+            if (token && token.token) {
+              await this.notificacionesInstance.sendNotificationToDevice(
+                token.token,
+                "NUEVO CUADRANTE CREADO",
+                `Se ha creado el cuadrate de la semana ${fechaInicio.weekNumber}`,
+                "/cuadrantes-tienda",
+              );
+            }
+          }
 
           return { ok: true };
         }

@@ -50,24 +50,19 @@ export class AnunciosController {
   @Post("addAnuncio")
   async addAnuncio(@Body() anuncio: AnuncioDto) {
     try {
-      // Falta comprobación de quién puede enviar un anuncio, ahora
-      // mismo cualquiera lo puede hacer.
-
-      //Notificacion Anuncio
       if (await this.anunciosInstance.addAnuncio(anuncio)) {
         const arrayTrabajador = await this.trabajadores.getTrabajadores();
-        arrayTrabajador.forEach((trabajador) => {
-          if (trabajador.idApp != null) {
-            this.notificaciones.newInAppNotification({
-              uid: trabajador.idApp,
-              titulo: "Nuevo anuncio",
-              mensaje: "Tienes un nuevo anuncio ves al tablón de anuncios",
-              leido: false,
-              creador: "SISTEMA",
-              url: "/anuncios",
-            });
-          }
-        });
+        const trabajadorConIdApp = arrayTrabajador.some(
+          (trabajador) => trabajador.idApp != null,
+        );
+        if (trabajadorConIdApp) {
+          //Notificacion Anuncio
+          this.notificaciones.sendNotificationToTopic(
+            "NUEVO ANUNCIO",
+            "Disponible",
+            "TEST_DEMO",
+          );
+        }
 
         return {
           ok: true,

@@ -11,9 +11,7 @@ export class Notificaciones {
   async saveToken(uid: string, token: string) {
     const save = await this.schNotificaciones.saveToken(uid, token);
     if (save) {
-      await admin
-        .messaging()
-        .subscribeToTopic(token, "notificaciones_generales");
+      await admin.messaging().subscribeToTopic(token, "TEST_DEMO");
 
       return {
         ok: true,
@@ -75,7 +73,7 @@ export class Notificaciones {
   }
 
   // Función para enviar notificación a un dispositivo
-  async sendNotificationToDevice( 
+  async sendNotificationToDevice(
     fcmToken: string,
     title: string,
     message: string,
@@ -88,10 +86,10 @@ export class Notificaciones {
         body: message,
       },
       data: {
-        click_action: url, // Acciones para cuando se hace clic en la notificación
+        url: url || "/", // Acciones para cuando se hace clic en la notificación
       },
     };
-
+    console.log("URL enviada:", url);
     try {
       const response = await admin.messaging().send(payload);
       console.log("Notificación enviada:", response);
