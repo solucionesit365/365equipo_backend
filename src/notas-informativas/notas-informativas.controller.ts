@@ -12,8 +12,6 @@ import { NotasInformativasClass } from "./notas-informativas.class";
 import { NotasInformativas } from "./notas-informativas.interface";
 import { Notificaciones } from "../notificaciones/notificaciones.class";
 import { TrabajadorService } from "../trabajadores/trabajadores.class";
-import { User } from "../decorators/get-user.decorator";
-import { UserRecord } from "firebase-admin/auth";
 
 @Controller("notas-informativas")
 export class NotasInformativasController {
@@ -25,10 +23,7 @@ export class NotasInformativasController {
 
   @UseGuards(AuthGuard)
   @Post("nuevaNotaInformativa")
-  async nuevaNotaInformativa(
-    @Body() nota: NotasInformativas,
-    @User() user: UserRecord,
-  ) {
+  async nuevaNotaInformativa(@Body() nota: NotasInformativas) {
     try {
       if (typeof nota.fechaCreacion === "string") {
         nota.fechaCreacion = new Date(nota.fechaCreacion);
@@ -36,35 +31,35 @@ export class NotasInformativasController {
       if (typeof nota.caducidad === "string") {
         nota.caducidad = new Date(nota.caducidad);
       }
-      const usuarioCompleto = await this.trabajadores.getTrabajadorByAppId(
-        user.uid,
-      );
-      const tieneRolAdecuado = usuarioCompleto.roles.some((rol) =>
-        ["ModoTienda", "Dependienta", "Super_Admin"].includes(rol.name),
+      const usuariosCompletos = await this.trabajadores.getTrabajadores();
+
+      // Filtrar solo los trabajadores que tienen los roles adecuados
+      const trabajadoresConRolAdecuado = usuariosCompletos.filter(
+        (trabajador) =>
+          trabajador.roles.some((rol) => ["Tienda"].includes(rol.name)),
       );
 
-      const userToken = await this.notificaciones.getFCMToken(
-        usuarioCompleto.idApp,
-      );
-      if (tieneRolAdecuado) {
-        // Si tienes el token fcmToken del dispositivo y quieres notificar al dispositivo directamente:
-        if (userToken && userToken.token) {
-          await this.notificaciones.sendNotificationToDevice(
-            userToken.token, // Suponiendo que idApp es el fcmToken
-            "Nueva nota informativa ",
-            `${nota.titulo}`,
-            "/notasInformativas",
+      for (const trabajador of trabajadoresConRolAdecuado) {
+        // Verificar que el idApp existe antes de llamar a getFCMToken
+        if (trabajador.idApp) {
+          const userToken = await this.notificaciones.getFCMToken(
+            trabajador.idApp,
           );
-        } else {
-          console.log("No se encontró fcmToken para este usuario.");
-        }
-      } else {
-        console.log(
-          "El usuario no tiene los roles necesarios para recibir la notificación.",
-        );
-      }
 
-      console.log(usuarioCompleto);
+          if (userToken && userToken.token) {
+            try {
+              await this.notificaciones.sendNotificationToDevice(
+                userToken.token,
+                "Nueva nota informativa",
+                `${nota.titulo}`,
+                "/notasInformativas",
+              );
+            } catch (error) {
+              console.error(error);
+            }
+          }
+        }
+      }
 
       return {
         ok: true,

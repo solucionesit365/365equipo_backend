@@ -11,7 +11,9 @@ export class Notificaciones {
   async saveToken(uid: string, token: string) {
     const save = await this.schNotificaciones.saveToken(uid, token);
     if (save) {
-      await admin.messaging().subscribeToTopic(token, "TEST_DEMO");
+      await admin
+        .messaging()
+        .subscribeToTopic(token, "notificaciones_generales");
 
       return {
         ok: true,
