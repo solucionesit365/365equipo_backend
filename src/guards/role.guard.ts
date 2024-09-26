@@ -32,9 +32,9 @@ export class RoleGuard implements CanActivate {
         },
       });
 
-      const hasRole = userRoles.roles.some((role) => roles.includes(role.name));
-
-      if (roles.includes("Super_Admin")) return true;
+      const hasRole =
+        userRoles.roles.some((role) => roles.includes(role.name)) ||
+        userRoles.roles.some((role) => role.name === "Super_Admin");
 
       if (!hasRole) {
         throw new UnauthorizedException(
