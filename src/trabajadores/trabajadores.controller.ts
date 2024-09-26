@@ -1,17 +1,17 @@
 import { Controller, Get, Query, UseGuards, Post, Body } from "@nestjs/common";
 import { SchedulerGuard } from "../guards/scheduler.guard";
 import { TrabajadorService } from "./trabajadores.class";
-import { AdminGuard } from "../guards/admin.guard";
 import { AuthGuard } from "../guards/auth.guard";
+import { Roles } from "../decorators/role.decorator";
 import { User } from "../decorators/get-user.decorator";
 import { UserRecord } from "firebase-admin/auth";
 import {
   CreateTrabajadorRequestDto,
   DeleteTrabajadorDto,
-  EditTrabajadorRequest,
   GetSubordinadosDto,
   TrabajadorFormRequest,
 } from "./trabajadores.dto";
+import { RoleGuard } from "src/guards/role.guard";
 
 @Controller("trabajadores")
 export class TrabajadoresController {
@@ -244,7 +244,8 @@ export class TrabajadoresController {
     return await this.trabajadorInstance.crearTrabajador(req);
   }
 
-  // @UseGuards(AuthGuard)
+  @Roles("Super_Admin", "RRHH_ADMIN")
+  @UseGuards(AuthGuard, RoleGuard)
   @Post("eliminar")
   async eliminarTrabajador(@Body() req: DeleteTrabajadorDto) {
     return await this.trabajadorInstance.eliminarTrabajador(req.id);

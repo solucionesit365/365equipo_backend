@@ -34,6 +34,8 @@ export class RoleGuard implements CanActivate {
 
       const hasRole = userRoles.roles.some((role) => roles.includes(role.name));
 
+      if (roles.includes("Super_Admin")) return true;
+
       if (!hasRole) {
         throw new UnauthorizedException(
           "No tienes permiso para realizar esta acción",
