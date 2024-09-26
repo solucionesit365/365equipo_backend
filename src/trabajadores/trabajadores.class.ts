@@ -38,7 +38,7 @@ export class TrabajadorService {
 
   async eliminarTrabajador(idSql: number) {
     try {
-      await this.schTrabajadores.deleteTrabajador(idSql);
+      return await this.schTrabajadores.deleteTrabajador(idSql);
     } catch (err) {
       console.log(err);
       return new InternalServerErrorException();

@@ -244,10 +244,9 @@ export class TrabajadoresController {
     return await this.trabajadorInstance.crearTrabajador(req);
   }
 
-  @UseGuards(AuthGuard)
+  // @UseGuards(AuthGuard)
   @Post("eliminar")
   async eliminarTrabajador(@Body() req: DeleteTrabajadorDto) {
-    await this.trabajadorInstance.eliminarTrabajador(req.id);
-    return true;
+    return await this.trabajadorInstance.eliminarTrabajador(req.id);
   }
 }

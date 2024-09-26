@@ -92,7 +92,7 @@ model Contrato2 {
   idEmpresa       String?
   idTrabajador    Int
   Empresa         Empresa?   @relation(fields: [idEmpresa], references: [id])
-  Trabajador      Trabajador @relation(fields: [idTrabajador], references: [id])
+  Trabajador      Trabajador @relation(fields: [idTrabajador], references: [id], onDelete: Cascade)
 }
 
 model Role {
