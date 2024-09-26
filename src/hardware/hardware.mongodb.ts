@@ -27,7 +27,6 @@ export class HardwareDatabase {
   async updateHardware(hardWare: HardWareInterface) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const hInventario = db.collection<HardWareInterface>("inventarioHardware");
-
     const response = await hInventario.updateOne(
       {
         _id: new ObjectId(hardWare._id),
