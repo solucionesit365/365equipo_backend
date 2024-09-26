@@ -39,6 +39,7 @@ model Trabajador {
   roles            Role[]
   permisos         Permiso[]
   excedencia       Boolean      @default(false)
+  dispositivo      String?
 }
 
 model Tienda {
