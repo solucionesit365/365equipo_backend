@@ -12,6 +12,7 @@ import {
   GetSubordinadosDto,
   TrabajadorFormRequest,
 } from "./trabajadores.dto";
+import { Roles } from "src/decorators/role.decorator";
 
 @Controller("trabajadores")
 export class TrabajadoresController {
@@ -249,5 +250,22 @@ export class TrabajadoresController {
   async eliminarTrabajador(@Body() req: DeleteTrabajadorDto) {
     await this.trabajadorInstance.eliminarTrabajador(req.id);
     return true;
+  }
+
+  @Roles("Super_Admin")
+  @UseGuards(AuthGuard)
+  @Get("listadoSanidad")
+  async listadoSanidad() {
+    const trabajadoresFull = await this.trabajadorInstance.getTrabajadores();
+    const trabajadoresSanidad = trabajadoresFull.map((trabajador) => {
+      return {
+        id: trabajador.id,
+        nombre: trabajador.nombreApellidos,
+        dni: trabajador.dni,
+        tienda: trabajador.tienda?.nombre,
+      };
+    });
+
+    return trabajadoresSanidad;
   }
 }
