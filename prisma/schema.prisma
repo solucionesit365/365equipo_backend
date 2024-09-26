@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -28,18 +25,17 @@ model Trabajador {
   tipoTrabajador   String
   idResponsable    Int?
   idTienda         Int?
-  tienda           Tienda?      @relation(fields: [idTienda], references: [id])
   llevaEquipo      Boolean
   tokenQR          String?
   displayFoto      String?
-  contratos        Contrato2[]
-  // Autorelación
-  responsable      Trabajador?  @relation("Responsable", fields: [idResponsable], references: [id], onDelete: SetNull)
-  subordinados     Trabajador[] @relation("Responsable")
-  roles            Role[]
-  permisos         Permiso[]
   excedencia       Boolean      @default(false)
   dispositivo      String?
+  contratos        Contrato2[]
+  responsable      Trabajador?  @relation("Responsable", fields: [idResponsable], references: [id])
+  subordinados     Trabajador[] @relation("Responsable")
+  tienda           Tienda?      @relation(fields: [idTienda], references: [id])
+  permisos         Permiso[]    @relation("PermisoToTrabajador")
+  roles            Role[]       @relation("RoleToTrabajador")
 }
 
 model Tienda {
@@ -73,14 +69,11 @@ model Contrato {
   fechaAlta       DateTime
   fechaAntiguedad DateTime
   fechaBaja       DateTime?
-  // trabajador      Trabajador @relation(fields: [idTrabajador], references: [id])
-  idTrabajador    Int
   dni             String
   idEmpresa       String?
-  // empresa         Empresa?    @relation(fields: [idEmpresa], references: [id])
+  idTrabajador    Int
 }
 
-// Este es el único que se utiliza. "Contrato" a secas está deprecado
 model Contrato2 {
   id              String     @id @default(uuid())
   horasContrato   Float
@@ -92,19 +85,31 @@ model Contrato2 {
   idEmpresa       String?
   idTrabajador    Int
   Empresa         Empresa?   @relation(fields: [idEmpresa], references: [id])
-  Trabajador      Trabajador @relation(fields: [idTrabajador], references: [id])
+  Trabajador      Trabajador @relation(fields: [idTrabajador], references: [id], onDelete: Cascade)
 }
 
 model Role {
   id          String       @id @default(uuid())
   name        String
-  permissions Permiso[]
-  users       Trabajador[]
+  permissions Permiso[]    @relation("PermisoToRole")
+  users       Trabajador[] @relation("RoleToTrabajador")
 }
 
 model Permiso {
   id    String       @id @default(uuid())
   name  String
-  roles Role[]
-  users Trabajador[]
+  roles Role[]       @relation("PermisoToRole")
+  users Trabajador[] @relation("PermisoToTrabajador")
+}
+
+model Color {
+  id    String       @id @default(uuid())
+  value ColorSemanal
+}
+
+enum ColorSemanal {
+  green
+  orange
+  blue
+  brown
 }

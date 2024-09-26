@@ -46,6 +46,7 @@ import { VideosFormacionModule } from "./videos-formacion/videos-formacion.modul
 import { NotasInformativasModule } from "./notas-informativas/notas-informativas.module";
 import { BiometriaModule } from './biometria/biometria.module';
 import { EncargosModule } from './encargos/encargos.module';
+import { ColorSemanalModule } from './color-semanal/color-semanal.module';
 
 
 @Module({
@@ -97,6 +98,7 @@ import { EncargosModule } from './encargos/encargos.module';
     NotasInformativasModule,
     BiometriaModule,
     EncargosModule,
+    ColorSemanalModule,
   ],
   controllers: [AppController, KpiTiendasController],
 })
