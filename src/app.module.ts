@@ -44,9 +44,11 @@ import { DiaPersonalModule } from "./dia-personal/dia-personal.module";
 import { DistribucionMensajesModule } from "./distribucion-mensajes/distribucion-mensajes.module";
 import { VideosFormacionModule } from "./videos-formacion/videos-formacion.module";
 import { NotasInformativasModule } from "./notas-informativas/notas-informativas.module";
-import { BiometriaModule } from './biometria/biometria.module';
-import { EncargosModule } from './encargos/encargos.module';
-
+import { BiometriaModule } from "./biometria/biometria.module";
+import { EncargosModule } from "./encargos/encargos.module";
+import { ChatGateway } from "./chat/chat.gateway";
+import { ChatController } from "./chat/chat.controller";
+import { ChatModule } from "./chat/chat.module";
 
 @Module({
   imports: [
@@ -97,6 +99,8 @@ import { EncargosModule } from './encargos/encargos.module';
     NotasInformativasModule,
     BiometriaModule,
     EncargosModule,
+    ChatGateway,
+    ChatModule,
   ],
   controllers: [AppController, KpiTiendasController],
 })
