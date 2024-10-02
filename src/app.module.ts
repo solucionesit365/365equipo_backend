@@ -49,6 +49,7 @@ import { EncargosModule } from "./encargos/encargos.module";
 import { ColorSemanalModule } from "./color-semanal/color-semanal.module";
 import { SanidadModule } from "./sanidad/sanidad.module";
 import { HardwareModule } from "./hardware/hardware.module";
+import { ChatModule } from "./chat/chat.module";
 
 @Module({
   imports: [
@@ -101,6 +102,7 @@ import { HardwareModule } from "./hardware/hardware.module";
     ColorSemanalModule,
     SanidadModule,
     HardwareModule,
+    ChatModule,
   ],
   controllers: [AppController, KpiTiendasController],
 })
