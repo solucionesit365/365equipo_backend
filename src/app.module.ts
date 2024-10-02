@@ -44,11 +44,11 @@ import { DiaPersonalModule } from "./dia-personal/dia-personal.module";
 import { DistribucionMensajesModule } from "./distribucion-mensajes/distribucion-mensajes.module";
 import { VideosFormacionModule } from "./videos-formacion/videos-formacion.module";
 import { NotasInformativasModule } from "./notas-informativas/notas-informativas.module";
-import { BiometriaModule } from './biometria/biometria.module';
-import { EncargosModule } from './encargos/encargos.module';
-import { ColorSemanalModule } from './color-semanal/color-semanal.module';
-import { SanidadModule } from './sanidad/sanidad.module';
-
+import { BiometriaModule } from "./biometria/biometria.module";
+import { EncargosModule } from "./encargos/encargos.module";
+import { ColorSemanalModule } from "./color-semanal/color-semanal.module";
+import { SanidadModule } from "./sanidad/sanidad.module";
+import { HardwareModule } from "./hardware/hardware.module";
 
 @Module({
   imports: [
@@ -91,7 +91,6 @@ import { SanidadModule } from './sanidad/sanidad.module';
     RoleModule,
     PermissionModule,
     EmpresaModule,
-
     KpiTiendasModule,
     DiaPersonalModule,
     DistribucionMensajesModule,
@@ -101,6 +100,7 @@ import { SanidadModule } from './sanidad/sanidad.module';
     EncargosModule,
     ColorSemanalModule,
     SanidadModule,
+    HardwareModule,
   ],
   controllers: [AppController, KpiTiendasController],
 })
