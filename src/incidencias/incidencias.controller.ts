@@ -203,14 +203,19 @@ export class IncidenciasController {
           incidencia.uid,
         );
         if (arrayTrabajador.idApp != null) {
-          this.notificaciones.newInAppNotification({
-            uid: arrayTrabajador.idApp,
-            titulo: "Estado de la incidencia",
-            mensaje: `El estado de tu incidencia a cambiado a ${incidencia.estado}`,
-            leido: false,
-            creador: "SISTEMA",
-            url: "/abrir-incidencia",
-          });
+          const userToken = await this.notificaciones.getFCMToken(
+            incidencia.uid,
+          );
+          // Verificar que el token no sea nulo
+          if (userToken && userToken.token) {
+            //enviar notificacion
+            await this.notificaciones.sendNotificationToDevice(
+              userToken.token,
+              "Estado de Incidencia",
+              `El estado de tu incidencia a cambiado a ${incidencia.estado}.`,
+              "/abrir-incidencia",
+            );
+          }
         }
 
         return {
@@ -232,14 +237,19 @@ export class IncidenciasController {
           incidencia.uid,
         );
         if (arrayTrabajador.idApp != null) {
-          this.notificaciones.newInAppNotification({
-            uid: arrayTrabajador.idApp,
-            titulo: "Mensaje Incidencia",
-            mensaje: "Te han respondido la incidencia",
-            leido: false,
-            creador: "SISTEMA",
-            url: "/abrir-incidencia",
-          });
+          const userToken = await this.notificaciones.getFCMToken(
+            incidencia.uid,
+          );
+          // Verificar que el token no sea nulo
+          if (userToken && userToken.token) {
+            //enviar notificacion
+            await this.notificaciones.sendNotificationToDevice(
+              userToken.token,
+              "Mensaje de Incidencia",
+              "Te han respondido la incidencia",
+              "/abrir-incidencia",
+            );
+          }
         }
 
         return {

@@ -23,23 +23,22 @@ export class AnunciosController {
         user.uid,
       );
 
-      if (usuarioCompleto.llevaEquipo && !usuarioCompleto.idTienda) {
+      // Si el usuario no tiene tienda, o lleva equipo sin tener tienda
+      if (
+        !usuarioCompleto.idTienda ||
+        (usuarioCompleto.llevaEquipo && !usuarioCompleto.idTienda)
+      ) {
         return {
           ok: true,
           data: await this.anunciosInstance.getAnuncios(),
         };
-      } else if (usuarioCompleto.idTienda) {
-        return {
-          ok: true,
-          data: await this.anunciosInstance.getAnuncios(
-            usuarioCompleto.idTienda,
-          ),
-        };
-      } else
-        return {
-          ok: true,
-          data: [],
-        };
+      }
+
+      // Si el usuario tiene tienda
+      return {
+        ok: true,
+        data: await this.anunciosInstance.getAnuncios(usuarioCompleto.idTienda),
+      };
     } catch (err) {
       console.log(err);
       return { ok: false, message: err.message };
@@ -50,24 +49,19 @@ export class AnunciosController {
   @Post("addAnuncio")
   async addAnuncio(@Body() anuncio: AnuncioDto) {
     try {
-      // Falta comprobación de quién puede enviar un anuncio, ahora
-      // mismo cualquiera lo puede hacer.
-
-      //Notificacion Anuncio
       if (await this.anunciosInstance.addAnuncio(anuncio)) {
         const arrayTrabajador = await this.trabajadores.getTrabajadores();
-        arrayTrabajador.forEach((trabajador) => {
-          if (trabajador.idApp != null) {
-            this.notificaciones.newInAppNotification({
-              uid: trabajador.idApp,
-              titulo: "Nuevo anuncio",
-              mensaje: "Tienes un nuevo anuncio ves al tablón de anuncios",
-              leido: false,
-              creador: "SISTEMA",
-              url: "/anuncios",
-            });
-          }
-        });
+        const trabajadorConIdApp = arrayTrabajador.some(
+          (trabajador) => trabajador.idApp != null,
+        );
+        if (trabajadorConIdApp) {
+          //Notificacion Anuncio
+          this.notificaciones.sendNotificationToTopic(
+            "NUEVO ANUNCIO",
+            "Disponible",
+            "notificaciones_generales",
+          );
+        }
 
         return {
           ok: true,

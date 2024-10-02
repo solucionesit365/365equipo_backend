@@ -5,9 +5,15 @@ import { TrabajadoresModule } from "../trabajadores/trabajadores.module";
 import { CuadrantesModule } from "../cuadrantes/cuadrantes.module";
 import { FichajesController } from "./fichajes.controller";
 import { MBCTokenModule } from "src/bussinesCentral/services/mbctoken/mbctoken.service.module";
+import { NotificacionesModule } from "../notificaciones/notificaciones.module";
 
 @Module({
-  imports: [TrabajadoresModule, CuadrantesModule, MBCTokenModule],
+  imports: [
+    TrabajadoresModule,
+    CuadrantesModule,
+    MBCTokenModule,
+    NotificacionesModule,
+  ],
   providers: [Fichajes, FichajesDatabase],
   exports: [Fichajes],
   controllers: [FichajesController],

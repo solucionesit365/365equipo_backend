@@ -75,7 +75,7 @@ export class Notificaciones {
   }
 
   // Función para enviar notificación a un dispositivo
-  async sendNotificationToDevice( 
+  async sendNotificationToDevice(
     fcmToken: string,
     title: string,
     message: string,
@@ -88,10 +88,10 @@ export class Notificaciones {
         body: message,
       },
       data: {
-        click_action: url, // Acciones para cuando se hace clic en la notificación
+        url: url || "/", // Acciones para cuando se hace clic en la notificación
       },
     };
-
+    console.log("URL enviada:", url);
     try {
       const response = await admin.messaging().send(payload);
       console.log("Notificación enviada:", response);
