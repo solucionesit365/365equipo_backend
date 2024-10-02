@@ -14,8 +14,6 @@ import {
 
 import { RoleGuard } from "src/guards/role.guard";
 
-import { Roles } from "src/decorators/role.decorator";
-
 @Controller("trabajadores")
 export class TrabajadoresController {
   constructor(private readonly trabajadorInstance: TrabajadorService) {}
