@@ -6,6 +6,7 @@ import {
   OnGatewayDisconnect,
 } from "@nestjs/websockets";
 import { Server, Socket } from "socket.io";
+import { ChatService } from "./chat.class";
 
 @WebSocketGateway({
   cors: {
@@ -23,6 +24,7 @@ import { Server, Socket } from "socket.io";
   },
 })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
+  constructor(private readonly chatInstance: ChatService) {}
   @WebSocketServer() server: Server;
 
   handleConnection(client: Socket) {
@@ -61,5 +63,25 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         `El mensaje no tiene un contactId o senderId válido: ${payload}`,
       );
     }
+  }
+
+  // Nuevo método para manejar el evento `messagesRead`
+  @SubscribeMessage("messagesRead")
+  async handleMessagesRead(
+    client: Socket,
+    payload: { messageIds: string[]; contactId: number; readerId: number },
+  ) {
+    const { messageIds, contactId, readerId } = payload;
+
+    // Llamar a la lógica de actualización de base de datos
+    const updatedMessages = await this.chatInstance.markMessageAsRead({
+      ids: messageIds,
+    });
+
+    console.log(`Mensajes actualizados:`, updatedMessages);
+
+    // Emitir el evento `messagesRead` a ambos: el `contactId` (receptor) y el `senderId` (remitente)
+    this.server.to(contactId.toString()).emit("messagesRead", payload);
+    this.server.to(readerId.toString()).emit("messagesRead", payload);
   }
 }

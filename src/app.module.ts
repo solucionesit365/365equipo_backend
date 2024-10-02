@@ -46,8 +46,6 @@ import { VideosFormacionModule } from "./videos-formacion/videos-formacion.modul
 import { NotasInformativasModule } from "./notas-informativas/notas-informativas.module";
 import { BiometriaModule } from "./biometria/biometria.module";
 import { EncargosModule } from "./encargos/encargos.module";
-import { ChatGateway } from "./chat/chat.gateway";
-import { ChatController } from "./chat/chat.controller";
 import { ChatModule } from "./chat/chat.module";
 
 @Module({
@@ -99,7 +97,6 @@ import { ChatModule } from "./chat/chat.module";
     NotasInformativasModule,
     BiometriaModule,
     EncargosModule,
-    ChatGateway,
     ChatModule,
   ],
   controllers: [AppController, KpiTiendasController],

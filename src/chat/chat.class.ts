@@ -18,11 +18,7 @@ export class ChatService {
     return await this.schchat.saveMessage(mensaje);
   }
 
-  async markMessageAsRead(mensajes: {
-    ids: string[];
-    contactId: number;
-    readerId: number;
-  }) {
+  async markMessageAsRead(mensajes: { ids: string[] }) {
     return await this.schchat.markMessageAsRead(mensajes);
   }
 }
