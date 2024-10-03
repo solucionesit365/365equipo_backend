@@ -7,12 +7,14 @@ import {
   CreateTrabajadorRequestDto,
   TrabajadorFormRequest,
 } from "./trabajadores.dto";
+import { MongoService } from "../mongo/mongo.service";
 
 @Injectable()
 export class TrabajadorDatabaseService {
   constructor(
     private prisma: PrismaService,
     private readonly hitMssqlService: HitMssqlService,
+    private readonly mongoService: MongoService,
   ) {}
 
   async crearTrabajador(reqTrabajador: CreateTrabajadorRequestDto) {
@@ -645,6 +647,38 @@ export class TrabajadorDatabaseService {
           idResponsable: modificado.id,
         },
       });
+
+      const datosTienda = await this.prisma.tienda.findUnique({
+        where: {
+          id: modificado.idTienda,
+        },
+      });
+
+      if (datosTienda) {
+        const db = (await this.mongoService.getConexion()).db("soluciones");
+        const solicitudesVacacionesCollection = db.collection(
+          "solicitudVacaciones",
+        );
+
+        const trabajadorModificado = await this.prisma.trabajador.findUnique({
+          where: {
+            id: modificado.id,
+          },
+        });
+
+        await solicitudesVacacionesCollection.updateMany(
+          {
+            tienda: datosTienda.nombre,
+            estado: "PENDIENTE", // Solo las nuevas
+            idBeneficiario: { $ne: modificado.id },
+          },
+          {
+            $set: {
+              idAppResponsable: trabajadorModificado.idApp,
+            },
+          },
+        );
+      }
     }
 
     if (modificado.idTienda != original.idTienda) {
