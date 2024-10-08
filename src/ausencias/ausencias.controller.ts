@@ -4,6 +4,7 @@ import { AusenciaInterface } from "./ausencias.interface";
 import { AuthGuard } from "../guards/auth.guard";
 import { SchedulerGuard } from "../guards/scheduler.guard";
 import { DateTime } from "luxon";
+import { ObjectId } from "mongodb";
 
 @Controller("ausencias")
 export class AusenciasController {
@@ -19,6 +20,7 @@ export class AusenciasController {
       fechaFinal,
       fechaRevision,
       tipo,
+      horasContrato,
       tienda,
       comentario,
       nombre,
@@ -47,7 +49,7 @@ export class AusenciasController {
           typeof horas === "number")
       ) {
         const inicio = new Date(fechaInicio);
-        const final = new Date(fechaFinal);
+        const final = fechaFinal ? new Date(fechaFinal) : null;
         const revision = fechaRevision ? new Date(fechaRevision) : null;
 
         return {
@@ -57,6 +59,7 @@ export class AusenciasController {
             nombre,
             dni,
             tipo,
+            horasContrato,
             tienda,
             inicio,
             final,
@@ -129,10 +132,11 @@ export class AusenciasController {
         ausencia.fechaInicio,
         "dd/MM/yyyy",
       ).toJSDate();
-      ausencia.fechaFinal = DateTime.fromFormat(
-        ausencia.fechaFinal,
-        "dd/MM/yyyy",
-      ).toJSDate();
+      if (ausencia.fechaFinal)
+        ausencia.fechaFinal = DateTime.fromFormat(
+          ausencia.fechaFinal,
+          "dd/MM/yyyy",
+        ).toJSDate();
       if (ausencia.fechaRevision)
         ausencia.fechaRevision = DateTime.fromFormat(
           ausencia.fechaRevision,
@@ -174,4 +178,12 @@ export class AusenciasController {
       ok: true,
     };
   }
+
+  // @Post("anyadirContratos")
+  // async añadirContratos(id: ObjectId, horasContrato: number) {
+  //   await this.ausenciasInstance.añadirContratos(id, horasContrato);
+  //   return {
+  //     ok: true,
+  //   };
+  // }
 }

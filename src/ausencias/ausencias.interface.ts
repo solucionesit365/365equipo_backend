@@ -15,4 +15,5 @@ export interface AusenciaInterface {
   completa: boolean;
   horas?: number;
   tienda?: string;
+  horasContrato?:number;
 }
