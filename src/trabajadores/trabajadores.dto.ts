@@ -79,6 +79,9 @@ export class TrabajadorDto {
 
   @IsString()
   antiguedad: string;
+
+  @IsArray()
+  arrayRoles: string[];
 }
 
 export class TrabajadorFormRequest {
@@ -157,6 +160,16 @@ export class TrabajadorFormRequest {
   @IsOptional()
   @IsString()
   tokenQR: string;
+
+  @IsOptional()
+  @IsNotEmpty()
+  @IsString()
+  empresaId: string | null;
+
+  @IsOptional()
+  @IsNotEmpty()
+  @IsString()
+  tipoTrabajador: string | null;
 }
 
 export class EditTrabajadorRequest {
@@ -254,6 +267,7 @@ export class CreateTrabajadorRequestDto {
   @IsOptional()
   @IsString()
   tipoTrabajador: string;
+  arrayRoles: any;
 }
 
 export class GetSubordinadosDto {

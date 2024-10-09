@@ -53,6 +53,11 @@ export class TrabajadorDatabaseService {
               },
             }
           : {},
+        roles: {
+          connect: reqTrabajador.arrayRoles.map((rol) => ({
+            id: rol,
+          })),
+        },
       },
     });
 
@@ -173,6 +178,7 @@ export class TrabajadorDatabaseService {
         tienda: true,
         roles: true,
         permisos: true,
+        empresa: true,
       },
       orderBy: {
         nombreApellidos: "asc",
@@ -671,98 +677,14 @@ export class TrabajadorDatabaseService {
     }
   }
 
-  // async sqlHandleCambios(
-  //   modificado: TrabajadorCompleto,
-  //   original: TrabajadorCompleto,
-  // ) {
-  //   if (modificado.idResponsable != original.idResponsable) {
-  //     if (modificado.idTienda != original.idTienda)
-  //       throw Error(
-  //         "No es posible cambiar el responsable y la tienda a la vez",
-  //       );
-
-  //     if (original.llevaEquipo && !modificado.llevaEquipo) {
-  //       await this.prisma.trabajador.updateMany({
-  //         where: {
-  //           responsable: {
-  //             id: modificado.id,
-  //           },
-  //         },
-  //         data: {
-  //           idResponsable: null,
-  //         },
-  //       });
-  //     } else if (modificado.llevaEquipo && modificado.idTienda) {
-  //       await this.prisma.trabajador.update({
-  //         where: {
-  //           idTienda: modificado.idTienda,
-  //           id: modificado.id,
-  //           llevaEquipo: false,
-  //         },
-  //         data: {
-  //           idResponsable: modificado.id,
-  //         },
-  //       });
-  //     }
-  //   } else if (modificado.idTienda != original.idTienda) {
-  //     if (modificado.llevaEquipo && original.llevaEquipo) {
-  //       await this.prisma.trabajador.updateMany({
-  //         where: {
-  //           responsable: {
-  //             id: modificado.id,
-  //           },
-  //         },
-  //         data: {
-  //           idResponsable: null,
-  //         },
-  //       });
-
-  //       await this.prisma.trabajador.update({
-  //         where: {
-  //           idTienda: modificado.idTienda,
-  //           id: modificado.id,
-  //           llevaEquipo: false,
-  //         },
-
-  //         data: {
-  //           idResponsable: modificado.id,
-  //         },
-  //       });
-
-  //       // Falta 'C'
-  //     }
-  //   } else if (modificado.llevaEquipo && modificado.idTienda) {
-  //     await this.prisma.trabajador.update({
-  //       where: {
-  //         idTienda: modificado.idTienda,
-  //         id: modificado.id,
-  //         llevaEquipo: false,
-  //       },
-  //       data: {
-  //         idResponsable: modificado.id,
-  //       },
-  //     });
-  //   } else if (!modificado.llevaEquipo && original.llevaEquipo) {
-  //     await this.prisma.trabajador.updateMany({
-  //       where: {
-  //         responsable: {
-  //           id: modificado.id,
-  //         },
-  //       },
-  //       data: {
-  //         idResponsable: null,
-  //       },
-  //     });
-  //   }
-  // }
-
   async guardarCambiosForm(
     trabajador: TrabajadorFormRequest,
     original: TrabajadorFormRequest,
   ) {
     await this.sqlHandleCambios(trabajador, original);
+    console.log(trabajador);
 
-    let payload = {
+    let payload: Prisma.TrabajadorUpdateInput = {
       nombreApellidos: trabajador.nombreApellidos,
       displayName: trabajador.displayName,
       emails: trabajador.emails,
@@ -775,10 +697,18 @@ export class TrabajadorDatabaseService {
       nSeguridadSocial: trabajador.nSeguridadSocial,
       codigoPostal: trabajador.codigoPostal,
       cuentaCorriente: trabajador.cuentaCorriente,
-      idResponsable: trabajador.idResponsable,
-      idTienda: trabajador.idTienda,
+      responsable: {
+        connect: { id: trabajador.idResponsable },
+      },
+      tienda: {
+        connect: { id: trabajador.idTienda },
+      },
       llevaEquipo: trabajador.llevaEquipo ? true : false,
       tokenQR: trabajador.tokenQR,
+      empresa: {
+        connect: { id: trabajador.empresaId },
+      },
+      tipoTrabajador: trabajador.tipoTrabajador,
       roles: {
         set: trabajador.arrayRoles.map((rol) => {
           return {
@@ -787,6 +717,10 @@ export class TrabajadorDatabaseService {
         }),
       },
     };
+
+    // if (!trabajador.empresaId) {
+    //   delete payload.empresa;
+    // }
 
     if (trabajador.arrayRoles.length === 0 || trabajador.arrayRoles[0] === "") {
       delete payload.roles;
@@ -800,7 +734,6 @@ export class TrabajadorDatabaseService {
       },
       data: payload,
     });
-
     return true;
   }
 

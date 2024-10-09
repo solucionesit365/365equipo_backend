@@ -242,6 +242,8 @@ export class TrabajadoresController {
   @UseGuards(AuthGuard)
   @Post("crear")
   async crearTrabajador(@Body() req: CreateTrabajadorRequestDto) {
+    console.log(req);
+
     return await this.trabajadorInstance.crearTrabajador(req);
   }
 
