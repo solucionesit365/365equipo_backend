@@ -24,7 +24,7 @@ export class TrabajadorDatabaseService {
         emails: reqTrabajador.emails,
         direccion: reqTrabajador.direccion,
         llevaEquipo: reqTrabajador.llevaEquipo,
-        tipoTrabajador: "Interno",
+        tipoTrabajador: reqTrabajador.tipoTrabajador,
         ciudad: reqTrabajador.ciudad,
         telefonos: reqTrabajador.telefonos,
         codigoPostal: reqTrabajador.codigoPostal,
@@ -33,6 +33,11 @@ export class TrabajadorDatabaseService {
         nacionalidad: reqTrabajador.nacionalidad,
         displayFoto: reqTrabajador.displayFoto,
         excedencia: reqTrabajador.excedencia,
+        empresa: {
+          connect: {
+            id: reqTrabajador.idEmpresa,
+          },
+        },
         responsable: reqTrabajador.idResponsable
           ? {
               connect: {

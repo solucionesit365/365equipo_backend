@@ -246,6 +246,14 @@ export class CreateTrabajadorRequestDto {
   @IsOptional()
   @IsString()
   tokenQR: string;
+
+  @IsOptional()
+  @IsString()
+  idEmpresa: string;
+
+  @IsOptional()
+  @IsString()
+  tipoTrabajador: string;
 }
 
 export class GetSubordinadosDto {
