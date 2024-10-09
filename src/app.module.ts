@@ -50,6 +50,7 @@ import { ColorSemanalModule } from "./color-semanal/color-semanal.module";
 import { SanidadModule } from "./sanidad/sanidad.module";
 import { HardwareModule } from "./hardware/hardware.module";
 import { ChatModule } from "./chat/chat.module";
+import { TwilioModule } from './twilio/twilio.module';
 
 @Module({
   imports: [
@@ -103,6 +104,7 @@ import { ChatModule } from "./chat/chat.module";
     SanidadModule,
     HardwareModule,
     ChatModule,
+    TwilioModule,
   ],
   controllers: [AppController, KpiTiendasController],
 })
