@@ -33,9 +33,37 @@ export class TestController {
     return "Role test";
   }
 
-  @Get()
-  test() {
-    return "Operativo";
+  @Post()
+  async test() {
+    const personal = await this.prismaService.borrarEsto.findMany();
+
+    for (let i = 0; i < personal.length; i++) {
+      try {
+        await this.prismaService.trabajador.update({
+          data: {
+            empresa: {
+              connect: {
+                id: personal[i].idEmpresa,
+              },
+            },
+          },
+          where: {
+            dni: personal[i].dni,
+          },
+        });
+      } catch (error) {
+        if (error.code === "P2025") {
+          // Prisma error code 'P2025' indicates that the record was not found
+          console.log(
+            `No se encontró el trabajador con DNI: ${personal[i].dni}, se omite.`,
+          );
+        } else {
+          throw error; // Lanza otros errores inesperados
+        }
+      }
+    }
+
+    return true;
   }
 
   // constructor(private readonly cuadrantesInstance: Cuadrantes) {}
