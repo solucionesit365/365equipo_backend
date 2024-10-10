@@ -51,6 +51,7 @@ import { SanidadModule } from "./sanidad/sanidad.module";
 import { HardwareModule } from "./hardware/hardware.module";
 import { ChatModule } from "./chat/chat.module";
 import { TwilioModule } from './twilio/twilio.module';
+import { PdfModule } from './pdf/pdf.module';
 
 @Module({
   imports: [
@@ -105,6 +106,7 @@ import { TwilioModule } from './twilio/twilio.module';
     HardwareModule,
     ChatModule,
     TwilioModule,
+    PdfModule,
   ],
   controllers: [AppController, KpiTiendasController],
 })
