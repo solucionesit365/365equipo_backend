@@ -718,9 +718,9 @@ export class TrabajadorDatabaseService {
       },
     };
 
-    // if (!trabajador.empresaId) {
-    //   delete payload.empresa;
-    // }
+    if (!trabajador.idTienda) {
+      delete payload.tienda;
+    }
 
     if (trabajador.arrayRoles.length === 0 || trabajador.arrayRoles[0] === "") {
       delete payload.roles;
