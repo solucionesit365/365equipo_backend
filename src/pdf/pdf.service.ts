@@ -2,10 +2,13 @@ import { Injectable } from "@nestjs/common";
 import * as puppeteer from "puppeteer";
 import * as fs from "fs";
 import * as path from "path";
-import { PDFDocument, rgb } from "pdf-lib";
+import { PDFDocument } from "pdf-lib";
+import { CryptoService } from "../crypto/crypto.class";
 
 @Injectable()
 export class PdfService {
+  constructor(private readonly cryptoService: CryptoService) {}
+
   async generatePdfFromHtml(htmlContent: string): Promise<string> {
     // Ruta donde se guardará temporalmente el PDF
     const outputDir = path.join(__dirname, "..", "generated");

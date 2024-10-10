@@ -52,6 +52,7 @@ import { HardwareModule } from "./hardware/hardware.module";
 import { ChatModule } from "./chat/chat.module";
 import { TwilioModule } from './twilio/twilio.module';
 import { PdfModule } from './pdf/pdf.module';
+import { StorageModule } from './storage/storage.module';
 
 @Module({
   imports: [
@@ -107,6 +108,7 @@ import { PdfModule } from './pdf/pdf.module';
     ChatModule,
     TwilioModule,
     PdfModule,
+    StorageModule,
   ],
   controllers: [AppController, KpiTiendasController],
 })

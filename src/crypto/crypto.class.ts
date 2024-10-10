@@ -4,6 +4,7 @@ import {
   createCipheriv,
   createDecipheriv,
   createECDH,
+  createHash,
 } from "crypto";
 
 @Injectable()
@@ -71,29 +72,7 @@ export class CryptoService {
     );
   }
 
-  //   test() {
-  //     const myPrivateKey = process.env.SOLUCIONES_PRIVATE_KEY;
-  //     // const myPublicKey = process.env.SOLUCIONES_PUBLIC_KEY;
-  //     const otherPublicKey = process.env.HIT_PUBLIC_KEY;
-
-  //     this.ecdh.setPrivateKey(Buffer.from(myPrivateKey, "hex"));
-
-  //     const datitos = {
-  //       idCliente: "CliBoti_225_20170306075342",
-  //       nombre: "Ezequiel Andres Carissimo Oms",
-  //     };
-  //     const message = JSON.stringify(datitos);
-  //     const encryptedMessage =
-  //       "87a644a7d37aebfb95983a9c66759c17:0e3733f5f4e5ec1757ca5bcc3097c58c5f4db22c5739e9b8fd1cd7963310eb83a6f3da8665d1ea9c97ad4bb434997620ad8785c078f6c37ef39df831550bd5dda36890145e55b1852296eb4b72f2f2e65757c9e0193ac502d0d92907f1f04220";
-  //     // this.cifrarMensaje(message, otherPublicKey);
-
-  //     console.log("Encrypted Message:", encryptedMessage);
-
-  //     const decryptedMessage = this.decrypt(
-  //       this.computeSharedSecret(otherPublicKey),
-  //       encryptedMessage,
-  //     );
-
-  //     console.log("Decrypted Message:", decryptedMessage);
-  //   }
+  hashFile(file: Buffer): string {
+    return createHash("sha512").update(file).digest("hex");
+  }
 }
