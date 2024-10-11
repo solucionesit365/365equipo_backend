@@ -25,4 +25,14 @@ export class PerfilHardwareDatabase {
 
     return await perfiles.find({}).toArray();
   }
+
+  async deletePerfil(perfil: PerfilHardware) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const perfiles = db.collection<PerfilHardware>("perfilesHardware");
+
+    const respPerfiles = await perfiles.deleteOne({
+      _id: new ObjectId(perfil._id),
+    });
+    return respPerfiles.acknowledged && respPerfiles.deletedCount > 0;
+  }
 }

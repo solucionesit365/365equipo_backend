@@ -17,4 +17,7 @@ export class PerfilHardwareService {
   async getPerfiles() {
     return await this.perfilHardwareDatabase.getPerfilesH();
   }
+  async deletePerfil(perfil: PerfilHardware) {
+    return await this.perfilHardwareDatabase.deletePerfil(perfil);
+  }
 }

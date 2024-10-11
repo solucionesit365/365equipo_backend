@@ -31,4 +31,22 @@ export class PerfilHardwareController {
       console.log(err);
     }
   }
+
+  @UseGuards(AuthGuard)
+  @Post("deletePerfil")
+  async deleteAuditoria(@Body() auditoria: PerfilHardware) {
+    try {
+      const respPerf = await this.PerfilHardwareService.deletePerfil(auditoria);
+      if (respPerf)
+        return {
+          ok: true,
+          data: respPerf,
+        };
+
+      throw Error("No se ha podido borrar el perfil");
+    } catch (err) {
+      console.log(err);
+      return { ok: false, message: err.message };
+    }
+  }
 }
