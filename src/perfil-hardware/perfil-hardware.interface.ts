@@ -1,4 +1,7 @@
+import { ObjectId } from "mongodb";
+
 export interface PerfilHardware {
+  _id?: ObjectId;
   perfilHardware: string;
   tipoOrdenador: string;
   procesador: string;

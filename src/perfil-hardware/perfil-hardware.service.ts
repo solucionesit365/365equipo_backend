@@ -14,4 +14,7 @@ export class PerfilHardwareService {
       data: "Perfil de Hardware creado",
     };
   }
+  async getPerfiles() {
+    return await this.perfilHardwareDatabase.getPerfilesH();
+  }
 }

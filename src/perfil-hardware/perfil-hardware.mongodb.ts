@@ -18,4 +18,11 @@ export class PerfilHardwareDatabase {
     if (resInsert.acknowledged) return resInsert.insertedId;
     return null;
   }
+
+  async getPerfilesH() {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const perfiles = db.collection<PerfilHardware>("perfilesHardware");
+
+    return await perfiles.find({}).toArray();
+  }
 }

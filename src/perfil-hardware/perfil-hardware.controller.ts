@@ -1,4 +1,4 @@
-import { Controller, Body, UseGuards, Post } from "@nestjs/common";
+import { Controller, Body, UseGuards, Post, Get } from "@nestjs/common";
 import { PerfilHardwareService } from "./perfil-hardware.service";
 import { PerfilHardware } from "./perfil-hardware.interface";
 import { AuthGuard } from "../guards/auth.guard";
@@ -17,6 +17,18 @@ export class PerfilHardwareController {
     } catch (err) {
       console.log(err);
       return { ok: false, message: err.message };
+    }
+  }
+
+  @UseGuards(AuthGuard)
+  @Get("getPerfiles")
+  async getHardwares() {
+    try {
+      const respAusencias = await this.PerfilHardwareService.getPerfiles();
+      if (respAusencias) return { ok: true, data: respAusencias };
+      console.log(respAusencias);
+    } catch (err) {
+      console.log(err);
     }
   }
 }
