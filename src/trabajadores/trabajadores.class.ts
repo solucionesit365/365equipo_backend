@@ -362,4 +362,105 @@ export class TrabajadorService {
   async uploadFoto(displayFoto: string, uid: string) {
     return await this.schTrabajadores.uploadFoto(displayFoto, uid);
   }
+
+  async enviarEmailAuto(automatizaciones: any, user: UserRecord) {
+    //Si tiene okTicket
+    if (automatizaciones.okTicket) {
+      const emailBody = this.emailInstance.generarEmailTemplate(
+        `${automatizaciones.trabajador.nombreApellidos} - ${automatizaciones.trabajador.emails}`,
+        "Por favor, dar de alta en <strong>OkTickets</strong> al trabajador:",
+      );
+      const response = await this.emailInstance.enviarEmail(
+        "mcortez@365obrador.com, mpenafiel@365obrador.com",
+        emailBody,
+        "Alta en OKTickets",
+      );
+      if (response.accepted.length > 0) {
+        return {
+          ok: true,
+          data: response.accepted,
+        };
+      } else if (response.rejected.length > 0) {
+        return {
+          ok: true,
+          data: response.rejected,
+        };
+      } else {
+        console.log("No se ha enviado el email");
+      }
+    }
+
+    //si tiene Yumminn
+    if (automatizaciones.yummi) {
+      const emailBody = this.emailInstance.generarEmailTemplate(
+        `${automatizaciones.trabajador.nombreApellidos} - ${automatizaciones.trabajador.emails}`,
+        "Por favor, dar de alta en  en la plataforma de <strong>Yumminn</strong> al trabajador:",
+      );
+      const response = await this.emailInstance.enviarEmail(
+        "mcortez@365obrador.com, malvia@365obrador.com",
+        emailBody,
+        "Alta en Yummi",
+      );
+
+      if (response.accepted.length > 0) {
+        return {
+          ok: true,
+          data: response.accepted,
+        };
+      } else if (response.rejected.length > 0) {
+        return {
+          ok: true,
+          data: response.rejected,
+        };
+      } else {
+        console.log("No se ha enviado el email");
+      }
+    }
+
+    //Si neesita ordenador
+    if (automatizaciones.ordenador.necesitaOrdenador) {
+      const emailBody = this.emailInstance.generarEmailTemplate(
+        `<p>Para el trabajador ${automatizaciones.trabajador.nombreApellidos} - ${automatizaciones.trabajador.emails}</p>
+              <ul>
+        <li> Pefil: ${automatizaciones.ordenador.perfilUsuario.perfilHardware}</li>
+        <li>Tipo de ordenador: ${automatizaciones.ordenador.perfilUsuario.tipoOrdenador}</li>
+        <li>Procesador: ${automatizaciones.ordenador.perfilUsuario.procesador}</li>
+        <li>RAM: ${automatizaciones.ordenador.perfilUsuario.memoria}</li>
+        <li>Monitor oficina: ${automatizaciones.ordenador.perfilUsuario.monitorOficina}</li>
+        <li>Disco duro: ${automatizaciones.ordenador.perfilUsuario.HHD}</li>
+        <li>Pantalla: ${automatizaciones.ordenador.perfilUsuario.pantalla}</li>
+        <li>Teclado: ${automatizaciones.ordenador.perfilUsuario.teclado}</li>
+        <li>Sistema operativo: ${automatizaciones.ordenador.perfilUsuario.SO}</li>
+        <li>Mouse: ${automatizaciones.ordenador.perfilUsuario.mouse}</li>
+        <li>Pantalla táctil: ${automatizaciones.ordenador.perfilUsuario.pantallaTactil}</li>
+        <li>Huella táctil: ${automatizaciones.ordenador.perfilUsuario.huellaTactil}</li>
+        <li>Consideraciones: ${automatizaciones.ordenador.perfilUsuario.detallesExtras}</li>
+      </ul>
+      <p>Observaciones:</p>
+      <p>${automatizaciones.ordenador.observaciones}</p>
+       `,
+        ` <p> Solicitado por: ${user.displayName} (${user.email}) </p> Por favor, necesitamos un ordenador con las siguientes caracteristicas: `,
+      );
+
+      const response = await this.emailInstance.enviarEmail(
+        "mcortez@365obrador.com, japerez@365obrador.com",
+        emailBody,
+        "Solicitud ordenador",
+      );
+
+      if (response.accepted.length > 0) {
+        return {
+          ok: true,
+          data: response.accepted,
+        };
+      } else if (response.rejected.length > 0) {
+        return {
+          ok: true,
+          data: response.rejected,
+        };
+      } else {
+        console.log("No se ha enviado el email");
+      }
+    }
+  }
 }

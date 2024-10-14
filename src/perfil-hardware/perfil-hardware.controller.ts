@@ -3,10 +3,18 @@ import { PerfilHardwareService } from "./perfil-hardware.service";
 import { PerfilHardware } from "./perfil-hardware.interface";
 import { AuthGuard } from "../guards/auth.guard";
 
+/**
+ * Controller for managing hardware profiles.
+ */
 @Controller("perfil-hardware")
 export class PerfilHardwareController {
   constructor(private readonly PerfilHardwareService: PerfilHardwareService) {}
 
+  /**
+   * Creates a new hardware profile.
+   * @param perfilHardwareObj - The hardware profile object to be created.
+   * @returns A promise that resolves to the created hardware profile or an error object.
+   */
   @UseGuards(AuthGuard)
   @Post("newPerfilHardware")
   async newPerfilHardware(@Body() perfilHardwareObj: PerfilHardware) {
@@ -20,6 +28,10 @@ export class PerfilHardwareController {
     }
   }
 
+  /**
+   * Retrieves all hardware profiles.
+   * @returns A promise that resolves to an object containing the retrieved profiles or undefined.
+   */
   @UseGuards(AuthGuard)
   @Get("getPerfiles")
   async getHardwares() {
@@ -32,11 +44,16 @@ export class PerfilHardwareController {
     }
   }
 
+  /**
+   * Deletes a hardware profile.
+   * @param perfil - The hardware profile to be deleted.
+   * @returns A promise that resolves to an object indicating the success or failure of the deletion.
+   */
   @UseGuards(AuthGuard)
   @Post("deletePerfil")
-  async deleteAuditoria(@Body() auditoria: PerfilHardware) {
+  async deletPerfil(@Body() perfil: PerfilHardware) {
     try {
-      const respPerf = await this.PerfilHardwareService.deletePerfil(auditoria);
+      const respPerf = await this.PerfilHardwareService.deletePerfil(perfil);
       if (respPerf)
         return {
           ok: true,

@@ -270,4 +270,10 @@ export class TrabajadoresController {
 
     return trabajadoresSanidad;
   }
+
+  @UseGuards(AuthGuard)
+  @Post("postAutomatizaciones")
+  async enviarEmailAuto(@Body() req: any, @User() user: UserRecord) {
+    return await this.trabajadorInstance.enviarEmailAuto(req, user);
+  }
 }
