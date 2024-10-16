@@ -29,11 +29,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   handleConnection(client: Socket) {
     const userId = client.handshake.query.userId;
-    console.log(`Cliente conectado con userId: ${userId}`);
 
     if (userId && userId !== "undefined") {
       client.join(userId);
-      console.log(`Cliente ${client.id} unido a la sala ${userId}`);
     } else {
       console.error(
         `El cliente ${client.id} no tiene un userId válido: ${userId}`,
@@ -50,8 +48,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     client: Socket,
     payload: { content: string; senderId: number; contactId: number },
   ) {
-    console.log(`Mensaje recibido de ${client.id}:`, payload);
-
     const { contactId, senderId } = payload;
 
     if (contactId && senderId) {
@@ -74,11 +70,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const { messageIds, contactId, readerId } = payload;
 
     // Llamar a la lógica de actualización de base de datos
-    const updatedMessages = await this.chatInstance.markMessageAsRead({
+    await this.chatInstance.markMessageAsRead({
       ids: messageIds,
     });
-
-    console.log(`Mensajes actualizados:`, updatedMessages);
 
     // Emitir el evento `messagesRead` a ambos: el `contactId` (receptor) y el `senderId` (remitente)
     this.server.to(contactId.toString()).emit("messagesRead", payload);

@@ -48,8 +48,6 @@ export class ChatDatabase {
       },
     );
 
-    console.log(`Mensajes actualizados: ${result.modifiedCount}`);
-
     // Devuelve los mensajes actualizados
     return await chatCollection
       .find({ _id: { $in: messageObjectIds } })
