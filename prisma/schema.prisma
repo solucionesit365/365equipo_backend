@@ -8,12 +8,12 @@ datasource db {
 }
 
 model Trabajador {
-  id               Int                @id @default(autoincrement())
-  idApp            String?            @unique
+  id               Int       @id @default(autoincrement())
+  idApp            String?   @unique
   nombreApellidos  String
   displayName      String?
   emails           String
-  dni              String             @unique
+  dni              String    @unique
   direccion        String?
   ciudad           String?
   telefonos        String?
@@ -28,8 +28,10 @@ model Trabajador {
   llevaEquipo      Boolean
   tokenQR          String?
   displayFoto      String?
-  excedencia       Boolean            @default(false)
+  excedencia       Boolean   @default(false)
   dispositivo      String?
+  empresa          Empresa?  @relation(fields: [empresaId], references: [id])
+
   contratos        Contrato2[]
   responsable      Trabajador?        @relation("Responsable", fields: [idResponsable], references: [id])
   subordinados     Trabajador[]       @relation("Responsable")
@@ -37,6 +39,7 @@ model Trabajador {
   permisos         Permiso[]          @relation("PermisoToTrabajador")
   roles            Role[]             @relation("RoleToTrabajador")
   formacionSanidad FormacionSanidad[]
+  empresaId        String?
 }
 
 model Tienda {
@@ -54,12 +57,13 @@ model Equipo {
 }
 
 model Empresa {
-  id             String      @id @default(uuid())
+  id             String       @id @default(uuid())
   nombre         String
   cif            String
   idExterno      Int?
-  autogestionada Boolean     @default(false)
+  autogestionada Boolean      @default(false)
   contratos      Contrato2[]
+  Trabajador     Trabajador[]
 }
 
 model Contrato {
