@@ -682,7 +682,6 @@ export class TrabajadorDatabaseService {
     original: TrabajadorFormRequest,
   ) {
     await this.sqlHandleCambios(trabajador, original);
-    console.log(trabajador);
 
     let payload: Prisma.TrabajadorUpdateInput = {
       nombreApellidos: trabajador.nombreApellidos,
