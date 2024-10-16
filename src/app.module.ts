@@ -37,7 +37,6 @@ import { MBCTokenModule } from "./bussinesCentral/services/mbctoken/mbctoken.ser
 import { RoleModule } from "./role/role.module";
 import { PermissionModule } from "./permission/permission.module";
 import { EmpresaModule } from "./empresa/empresa.module";
-
 import { KpiTiendasController } from "./kpi-tiendas/kpi-tiendas.controller";
 import { KpiTiendasModule } from "./kpi-tiendas/kpi-tiendas.module";
 import { DiaPersonalModule } from "./dia-personal/dia-personal.module";
@@ -50,7 +49,10 @@ import { ColorSemanalModule } from "./color-semanal/color-semanal.module";
 import { SanidadModule } from "./sanidad/sanidad.module";
 import { HardwareModule } from "./hardware/hardware.module";
 import { ChatModule } from "./chat/chat.module";
-import { PerfilHardwareModule } from './perfil-hardware/perfil-hardware.module';
+import { PerfilHardwareModule } from "./perfil-hardware/perfil-hardware.module";
+import { TwilioModule } from "./twilio/twilio.module";
+import { PdfModule } from "./pdf/pdf.module";
+import { StorageModule } from "./storage/storage.module";
 
 @Module({
   imports: [
@@ -105,6 +107,9 @@ import { PerfilHardwareModule } from './perfil-hardware/perfil-hardware.module';
     HardwareModule,
     ChatModule,
     PerfilHardwareModule,
+    TwilioModule,
+    PdfModule,
+    StorageModule,
   ],
   controllers: [AppController, KpiTiendasController],
 })
