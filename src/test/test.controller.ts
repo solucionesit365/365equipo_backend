@@ -41,6 +41,30 @@ export class TestController {
     return "Operativo";
   }
 
+  @Post("insertEmpresa")
+  async insertEmpresa() {
+    const borrarEsto = await this.prismaService.borraresto.findMany();
+
+    for (let i = 0; i < borrarEsto.length; i++) {
+      try {
+        await this.prismaService.trabajador.update({
+          where: { dni: borrarEsto[i].dni },
+          data: {
+            empresa: {
+              connect: {
+                id: borrarEsto[i].idEmpresa,
+              },
+            },
+          },
+        });
+      } catch (err) {
+        console.log("No existe el trabajador con dni:", borrarEsto[i].dni);
+      }
+    }
+
+    return "terminado";
+  }
+
   // constructor(private readonly cuadrantesInstance: Cuadrantes) {}
   // @Get()
   // test() {
