@@ -179,7 +179,9 @@ export class PdfController {
   }
 
   @Get("test")
-  test() {
-    return path.join(__dirname, "firmas-test", "firma.png"); // La firma .png debe estar en esta ruta
+  async test() {
+    return await this.pdfService.addVerificationCodeToPdf(
+      "api_firma/sin_csv/fd457cb20662f65be9beb8b688a73ace5ec5f9705cc0043f693863d9a1b79bbf.pdf",
+    );
   }
 }

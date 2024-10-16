@@ -9,10 +9,14 @@ import { FileInterceptor } from "@nestjs/platform-express";
 import { StorageService } from "./storage.service";
 import { UploadFileDto } from "./storage.dto";
 import { Express } from "express"; // Importa Express para usar el tipo Multer
+import { CryptoService } from "../crypto/crypto.class";
 
 @Controller("storage")
 export class StorageController {
-  constructor(private readonly storageService: StorageService) {}
+  constructor(
+    private readonly storageService: StorageService,
+    private readonly cryptoService: CryptoService,
+  ) {}
 
   @Post("uploadFile")
   @UseInterceptors(FileInterceptor("file"))
@@ -20,12 +24,15 @@ export class StorageController {
     @Body() uploadFileDto: UploadFileDto,
     @UploadedFile() file: Express.Multer.File, // Ajuste aquí
   ) {
+    if (!file) {
+      throw new Error("File is required");
+    }
     const fileBuffer = file.buffer;
-    const { filePath, contentType } = uploadFileDto;
+    const { contentType } = uploadFileDto;
 
     try {
       const url = await this.storageService.uploadFile(
-        filePath,
+        "api_firma/sin_csv" + "/" + this.cryptoService.createCsv() + ".pdf",
         fileBuffer,
         contentType,
       );

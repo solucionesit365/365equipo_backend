@@ -2,12 +2,16 @@ import { Injectable } from "@nestjs/common";
 import * as puppeteer from "puppeteer";
 import * as fs from "fs";
 import * as path from "path";
-import { PDFDocument } from "pdf-lib";
+import { PDFDocument, degrees, rgb } from "pdf-lib";
+import { StorageService } from "../storage/storage.service";
 import { CryptoService } from "../crypto/crypto.class";
 
 @Injectable()
 export class PdfService {
-  constructor(private readonly cryptoService: CryptoService) {}
+  constructor(
+    private readonly storageService: StorageService,
+    private readonly cryptoService: CryptoService,
+  ) {}
 
   async generatePdfFromHtml(htmlContent: string): Promise<string> {
     // Ruta donde se guardará temporalmente el PDF
@@ -85,5 +89,67 @@ export class PdfService {
     fs.writeFileSync(outputPdfWithSignature, modifiedPdfBytes);
 
     return outputPdfWithSignature;
+  }
+
+  private changeFolderFilePath(filePath: string) {
+    return filePath.replace("sin_csv", "con_csv");
+  }
+
+  private cleanFileName(filePath: string) {
+    const parts = filePath.split("/");
+    const fileName = parts[parts.length - 1];
+    return fileName.replace(".pdf", "");
+  }
+
+  async addVerificationCodeToPdf(
+    pathFile: string,
+  ): Promise<{ pathFile: string; hash: string }> {
+    // Descargar el archivo PDF del bucket
+    const fileBuffer = await this.storageService.downloadFile(pathFile);
+
+    // Verificar si el archivo tiene un encabezado de PDF válido
+    const header = fileBuffer.subarray(0, 5).toString();
+    if (header !== "%PDF-") {
+      throw new Error("El archivo descargado no es un archivo PDF válido.");
+    }
+
+    // Cargar el PDF descargado usando pdf-lib
+    const pdfDoc = await PDFDocument.load(fileBuffer);
+
+    // Obtener todas las páginas del documento
+    const pages = pdfDoc.getPages();
+
+    // Agregar el código en cada página del documento
+    for (const page of pages) {
+      const { width } = page.getSize();
+      const fontSize = 8;
+      const text =
+        "Código seguro de verificación: " + this.cleanFileName(pathFile);
+
+      page.drawText(text, {
+        x: 20, // Un poco de margen desde el borde izquierdo
+        y: 10, // Cerca del borde inferior
+        size: fontSize,
+        rotate: degrees(0), // Sin rotación
+        color: rgb(0.5, 0.5, 0.5), // Color gris para que sea menos intrusivo
+        maxWidth: width - 40, // Máximo ancho para evitar desbordamiento
+      });
+    }
+
+    // Guardar el PDF modificado
+    const modifiedPdfBuffer = await pdfDoc.save();
+
+    // Generar el hash del archivo modificado
+    const hash = this.cryptoService.hashFile(Buffer.from(modifiedPdfBuffer));
+
+    // Subir el archivo modificado al bucket
+    return {
+      pathFile: await this.storageService.uploadFile(
+        this.changeFolderFilePath(pathFile),
+        Buffer.from(modifiedPdfBuffer),
+        "application/pdf",
+      ),
+      hash: hash,
+    };
   }
 }
