@@ -12,7 +12,7 @@ export class EmployeesClass {
 
       //get Employees ?$filter=number eq '4071'
       let response = await axios.get(
-        `${process.env.MCB_BASE_URL}/v2.0/${process.env.MBC_TOKEN_TENANT}/production/api/v2.0/companies(${process.env.MBC_COMPANYID})/employees`,
+        `${process.env.MCB_BASE_URL}/v2.0/${process.env.MBC_TOKEN_TENANT}/${process.env.MCB_ENVIRONMENT_DEV}/api/v2.0/companies(${process.env.MBC_COMPANYID_FILAPENA_DEV})/employees`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

@@ -365,6 +365,8 @@ export class TrabajadorService {
 
   async enviarEmailAuto(automatizaciones: any, user: UserRecord) {
     //Si tiene okTicket
+    console.log(automatizaciones);
+
     if (automatizaciones.okTicket) {
       const emailBody = this.emailInstance.generarEmailTemplate(
         `${automatizaciones.trabajador.nombreApellidos} - ${automatizaciones.trabajador.emails}`,
@@ -378,15 +380,13 @@ export class TrabajadorService {
       if (response.accepted.length > 0) {
         return {
           ok: true,
-          data: response.accepted,
+          data: `Emails enviados a ${response.accepted}`,
         };
       } else if (response.rejected.length > 0) {
         return {
           ok: true,
-          data: response.rejected,
+          data: `No se ha podido enviar: ${response.rejected}`,
         };
-      } else {
-        console.log("No se ha enviado el email");
       }
     }
 
@@ -405,15 +405,13 @@ export class TrabajadorService {
       if (response.accepted.length > 0) {
         return {
           ok: true,
-          data: response.accepted,
+          data: `Emails enviados a ${response.accepted}`,
         };
       } else if (response.rejected.length > 0) {
         return {
           ok: true,
-          data: response.rejected,
+          data: `No se ha podido enviar: ${response.rejected}`,
         };
-      } else {
-        console.log("No se ha enviado el email");
       }
     }
 
@@ -451,16 +449,25 @@ export class TrabajadorService {
       if (response.accepted.length > 0) {
         return {
           ok: true,
-          data: response.accepted,
+          data: `Emails enviados a ${response.accepted}`,
         };
       } else if (response.rejected.length > 0) {
         return {
           ok: true,
-          data: response.rejected,
+          data: `No se ha podido enviar: ${response.rejected}`,
         };
-      } else {
-        console.log("No se ha enviado el email");
       }
+    }
+
+    if (
+      !automatizaciones.okTicket &&
+      !automatizaciones.yummi &&
+      !automatizaciones.ordenador.necesitaOrdenado
+    ) {
+      return {
+        ok: false,
+        data: "No hay ninguna solicitud para enviar",
+      };
     }
   }
 }
