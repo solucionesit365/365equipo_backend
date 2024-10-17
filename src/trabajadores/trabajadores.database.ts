@@ -16,6 +16,8 @@ export class TrabajadorDatabaseService {
   ) {}
 
   async crearTrabajador(reqTrabajador: CreateTrabajadorRequestDto) {
+    console.log(reqTrabajador);
+
     const newTrabajador = await this.prisma.trabajador.create({
       data: {
         dni: reqTrabajador.dni,
@@ -60,6 +62,9 @@ export class TrabajadorDatabaseService {
         },
       },
     });
+    // if (!reqTrabajador.idResponsable) {
+    //   delete data.responsable;
+    // }
 
     await this.prisma.contrato2.create({
       data: {
@@ -719,6 +724,9 @@ export class TrabajadorDatabaseService {
 
     if (!trabajador.idTienda) {
       delete payload.tienda;
+    }
+    if (!trabajador.idResponsable) {
+      delete payload.responsable;
     }
 
     if (trabajador.arrayRoles.length === 0 || trabajador.arrayRoles[0] === "") {
