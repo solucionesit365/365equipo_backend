@@ -53,6 +53,7 @@ import { PerfilHardwareModule } from "./perfil-hardware/perfil-hardware.module";
 import { TwilioModule } from "./twilio/twilio.module";
 import { PdfModule } from "./pdf/pdf.module";
 import { StorageModule } from "./storage/storage.module";
+import { VideosModule } from './videos/videos.module';
 
 @Module({
   imports: [
@@ -110,6 +111,7 @@ import { StorageModule } from "./storage/storage.module";
     TwilioModule,
     PdfModule,
     StorageModule,
+    VideosModule,
   ],
   controllers: [AppController, KpiTiendasController],
 })

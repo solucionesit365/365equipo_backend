@@ -8,12 +8,12 @@ datasource db {
 }
 
 model Trabajador {
-  id               Int       @id @default(autoincrement())
-  idApp            String?   @unique
+  id               Int                @id @default(autoincrement())
+  idApp            String?            @unique
   nombreApellidos  String
   displayName      String?
   emails           String
-  dni              String    @unique
+  dni              String             @unique
   direccion        String?
   ciudad           String?
   telefonos        String?
@@ -28,18 +28,17 @@ model Trabajador {
   llevaEquipo      Boolean
   tokenQR          String?
   displayFoto      String?
-  excedencia       Boolean   @default(false)
+  excedencia       Boolean            @default(false)
   dispositivo      String?
-  empresa          Empresa?  @relation(fields: [empresaId], references: [id])
-
+  empresaId        String?
   contratos        Contrato2[]
+  formacionSanidad FormacionSanidad[]
+  empresa          Empresa?           @relation(fields: [empresaId], references: [id])
   responsable      Trabajador?        @relation("Responsable", fields: [idResponsable], references: [id])
   subordinados     Trabajador[]       @relation("Responsable")
   tienda           Tienda?            @relation(fields: [idTienda], references: [id])
   permisos         Permiso[]          @relation("PermisoToTrabajador")
   roles            Role[]             @relation("RoleToTrabajador")
-  formacionSanidad FormacionSanidad[]
-  empresaId        String?
 }
 
 model Tienda {
@@ -116,12 +115,21 @@ model FormacionSanidad {
   id                String     @id @default(uuid())
   nombre            String
   fecha             DateTime
-  trabajador        Trabajador @relation(fields: [idTrabajador], references: [id])
   idTrabajador      Int
   duracion          String
   lugar             String
   firmadoTrabajador Boolean    @default(false)
   firmadoEmpresa    Boolean    @default(false)
+  trabajador        Trabajador @relation(fields: [idTrabajador], references: [id])
+}
+
+model VideoFormacion {
+  id       String        @id @default(uuid())
+  name     String
+  pathFile String
+  date     DateTime      @default(now())
+  duration Int
+  category VideoCategory
 }
 
 enum ColorSemanal {
@@ -129,4 +137,9 @@ enum ColorSemanal {
   orange
   blue
   brown
+}
+
+enum VideoCategory {
+  PRL
+  Sanidad
 }

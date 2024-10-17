@@ -140,7 +140,7 @@ export class PdfService {
     const modifiedPdfBuffer = await pdfDoc.save();
 
     // Generar el hash del archivo modificado
-    const hash = this.cryptoService.hashFile(Buffer.from(modifiedPdfBuffer));
+    const hash = this.cryptoService.hashFile512(Buffer.from(modifiedPdfBuffer));
 
     // Subir el archivo modificado al bucket
     return {
