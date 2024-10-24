@@ -133,6 +133,29 @@ model VideoFormacion {
   category     VideoCategory
 }
 
+model Presentacion {
+  id       String               @id @default(uuid())
+  name     String
+  embed    String
+  category PresentationCategory
+  date     DateTime             @default(now())
+}
+
+model Question {
+  id         String             @id @default(uuid())
+  title      String
+  answer     String
+  type       AnswerType
+  categories QuestionCategory[]
+}
+
+model QuestionCategory {
+  id        String       @id @default(uuid())
+  name      String
+  questions Question[]
+  category  BusinessType
+}
+
 enum ColorSemanal {
   green
   orange
@@ -140,7 +163,22 @@ enum ColorSemanal {
   brown
 }
 
+enum AnswerType {
+  TEST
+  INPUT
+}
+
 enum VideoCategory {
+  PRL
+  Sanidad
+}
+
+enum PresentationCategory {
+  PRL
+  Sanidad
+}
+
+enum BusinessType {
   PRL
   Sanidad
 }

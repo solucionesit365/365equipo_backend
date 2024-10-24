@@ -53,7 +53,10 @@ import { PerfilHardwareModule } from "./perfil-hardware/perfil-hardware.module";
 import { TwilioModule } from "./twilio/twilio.module";
 import { PdfModule } from "./pdf/pdf.module";
 import { StorageModule } from "./storage/storage.module";
-import { VideosModule } from './videos/videos.module';
+import { VideosModule } from "./videos/videos.module";
+import { PresentationModule } from "./presentacion/presentation.module";
+import { QuestionModule } from './question/question.module';
+import { QuestionCategoryModule } from './question-category/question-category.module';
 
 @Module({
   imports: [
@@ -112,6 +115,9 @@ import { VideosModule } from './videos/videos.module';
     PdfModule,
     StorageModule,
     VideosModule,
+    PresentationModule,
+    QuestionModule,
+    QuestionCategoryModule,
   ],
   controllers: [AppController, KpiTiendasController],
 })
