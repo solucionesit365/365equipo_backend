@@ -124,12 +124,13 @@ model FormacionSanidad {
 }
 
 model VideoFormacion {
-  id       String        @id @default(uuid())
-  name     String
-  pathFile String
-  date     DateTime      @default(now())
-  duration Int
-  category VideoCategory
+  id           String        @id @default(uuid())
+  name         String
+  pathFile     String
+  relativePath String
+  date         DateTime      @default(now())
+  duration     Int
+  category     VideoCategory
 }
 
 enum ColorSemanal {

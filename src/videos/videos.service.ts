@@ -14,7 +14,12 @@ export class VideosService {
     private readonly storageService: StorageService,
   ) {}
 
-  async createVideo(data: CreateVideoDto, pathFile: string, hash: string) {
+  async createVideo(
+    data: CreateVideoDto,
+    pathFile: string,
+    hash: string,
+    relativePath: string,
+  ) {
     try {
       const newVideo = await this.prismaService.videoFormacion.create({
         data: {
@@ -23,6 +28,7 @@ export class VideosService {
           duration: data.duration,
           name: data.name,
           pathFile,
+          relativePath,
         },
       });
 
@@ -45,5 +51,21 @@ export class VideosService {
 
   async getVideos() {
     return await this.prismaService.videoFormacion.findMany();
+  }
+
+  async deleteVideo(id: string) {
+    const video = await this.prismaService.videoFormacion.findUnique({
+      where: { id },
+    });
+
+    if (!video) throw new ConflictException("El vídeo no existe");
+
+    await this.prismaService.videoFormacion.delete({
+      where: { id },
+    });
+
+    await this.storageService.deleteFile(video.relativePath);
+
+    return true;
   }
 }

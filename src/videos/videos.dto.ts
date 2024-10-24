@@ -1,5 +1,11 @@
 import { Type } from "class-transformer";
-import { IsEnum, IsOptional, IsString, IsNumber } from "class-validator";
+import {
+  IsEnum,
+  IsOptional,
+  IsString,
+  IsNumber,
+  IsNotEmpty,
+} from "class-validator";
 
 export class CreateVideoDto {
   @IsString()
@@ -15,4 +21,10 @@ export class CreateVideoDto {
 
   @IsEnum(["PRL", "Sanidad"])
   category: "PRL" | "Sanidad";
+}
+
+export class DeleteVideoDto {
+  @IsNotEmpty()
+  @IsString()
+  id: string;
 }
