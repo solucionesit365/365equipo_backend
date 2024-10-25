@@ -1,11 +1,29 @@
-import { IsEnum, IsString, IsArray, IsNotEmpty } from "class-validator";
+import {
+  IsEnum,
+  IsString,
+  IsArray,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  ValidateNested,
+} from "class-validator";
+import { Type } from "class-transformer";
+class Option {
+  @IsString()
+  text: string;
+}
 
 export class CreateQuestionDto {
   @IsString()
   title: string;
 
-  @IsString()
-  answer: string;
+  @IsOptional()
+  @IsNumber()
+  correctAnswerOptionIndex: number;
+
+  @IsOptional()
+  @IsString({ each: true })
+  correctFreeAnswer: string[];
 
   @IsEnum(["TEST", "INPUT"])
   type: "TEST" | "INPUT";
@@ -13,6 +31,11 @@ export class CreateQuestionDto {
   @IsArray()
   @IsString({ each: true })
   categories: string[];
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => Option)
+  options: Option[];
 }
 
 export class UpdateQuestionDto {
@@ -24,7 +47,7 @@ export class UpdateQuestionDto {
   title: string;
 
   @IsString()
-  answer: string;
+  correctAnswerOptionId: string;
 
   @IsEnum(["TEST", "INPUT"])
   type: "TEST" | "INPUT";
@@ -35,6 +58,12 @@ export class UpdateQuestionDto {
 }
 
 export class DeleteQuestionDto {
+  @IsNotEmpty()
+  @IsString()
+  id: string;
+}
+
+export class GetQuestionDto {
   @IsNotEmpty()
   @IsString()
   id: string;

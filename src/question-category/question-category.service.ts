@@ -35,7 +35,7 @@ export class QuestionCategoryService {
             id: questionCategory.id,
           },
           data: {
-            category: questionCategory.category,
+            department: questionCategory.department,
             name: questionCategory.name,
           },
         });
@@ -49,11 +49,11 @@ export class QuestionCategoryService {
     }
   }
 
-  async getQuestionCategories(filterCategory: "PRL" | "Sanidad") {
+  async getQuestionCategories(filterDepartment: "PRL" | "Sanidad") {
     try {
       return await this.prismaService.questionCategory.findMany({
         where: {
-          category: filterCategory,
+          department: filterDepartment,
         },
       });
     } catch (error) {

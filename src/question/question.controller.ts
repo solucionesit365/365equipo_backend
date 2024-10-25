@@ -12,6 +12,7 @@ import { AuthGuard } from "../guards/auth.guard";
 import {
   CreateQuestionDto,
   DeleteQuestionDto,
+  GetQuestionDto,
   UpdateQuestionDto,
 } from "./question.dto";
 
@@ -22,7 +23,15 @@ export class QuestionController {
   @UseGuards(AuthGuard)
   @Post("create")
   async createQuestion(@Body() req: CreateQuestionDto) {
-    return await this.questionService.createQuestion(req);
+    if (req.type === "INPUT")
+      return await this.questionService.createQuestionInput(req);
+    else {
+      const createdQuestion = await this.questionService.createQuestionTest(
+        req,
+      );
+      await this.questionService.addAnswerOptions(createdQuestion.id, req);
+      return;
+    }
   }
 
   @UseGuards(AuthGuard)
@@ -35,6 +44,12 @@ export class QuestionController {
   @Get()
   async getQuestions() {
     return await this.questionService.getQuestions();
+  }
+
+  @UseGuards(AuthGuard)
+  @Get()
+  async getQuestion(@Query() req: GetQuestionDto) {
+    return await this.questionService.getQuestion(req.id);
   }
 
   @UseGuards(AuthGuard)

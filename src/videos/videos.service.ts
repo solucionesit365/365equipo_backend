@@ -24,7 +24,7 @@ export class VideosService {
       const newVideo = await this.prismaService.videoFormacion.create({
         data: {
           id: hash, // Utilizando el hash como ID
-          category: data.category,
+          department: data.department,
           duration: data.duration,
           name: data.name,
           pathFile,

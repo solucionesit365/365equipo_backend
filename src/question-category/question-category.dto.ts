@@ -5,7 +5,7 @@ export class CreateQuestionCategoryDto {
   name: string;
 
   @IsEnum(["PRL", "Sanidad"])
-  category: "PRL" | "Sanidad";
+  department: "PRL" | "Sanidad";
 }
 
 export class UpdateQuestionCategoryDto {
@@ -17,10 +17,10 @@ export class UpdateQuestionCategoryDto {
   name: string;
 
   @IsEnum(["PRL", "Sanidad"])
-  category: "PRL" | "Sanidad";
+  department: "PRL" | "Sanidad";
 }
 
 export class GetQuestionCategoryDto {
   @IsEnum(["PRL", "Sanidad"])
-  section: "PRL" | "Sanidad";
+  department: "PRL" | "Sanidad";
 }

@@ -124,36 +124,46 @@ model FormacionSanidad {
 }
 
 model VideoFormacion {
-  id           String        @id @default(uuid())
+  id           String     @id @default(uuid())
   name         String
   pathFile     String
   relativePath String
-  date         DateTime      @default(now())
+  date         DateTime   @default(now())
   duration     Int
-  category     VideoCategory
+  department   Department
 }
 
 model Presentacion {
-  id       String               @id @default(uuid())
-  name     String
-  embed    String
-  category PresentationCategory
-  date     DateTime             @default(now())
+  id         String     @id @default(uuid())
+  name       String
+  embed      String
+  department Department
+  date       DateTime   @default(now())
 }
 
 model Question {
-  id         String             @id @default(uuid())
-  title      String
-  answer     String
-  type       AnswerType
-  categories QuestionCategory[]
+  id                    String             @id @default(uuid())
+  title                 String
+  type                  AnswerType
+  categories            QuestionCategory[]
+  correctAnswerOptionId String?
+  options               AnswerOption[]
+  correctFreeAnswer     String[]
+  date                  DateTime           @default(now())
 }
 
 model QuestionCategory {
-  id        String       @id @default(uuid())
-  name      String
-  questions Question[]
-  category  BusinessType
+  id         String     @id @default(uuid())
+  name       String
+  questions  Question[]
+  department Department
+}
+
+model AnswerOption {
+  id         String   @id @default(uuid())
+  title      String
+  Question   Question @relation(fields: [questionId], references: [id])
+  questionId String
 }
 
 enum ColorSemanal {
@@ -168,17 +178,7 @@ enum AnswerType {
   INPUT
 }
 
-enum VideoCategory {
-  PRL
-  Sanidad
-}
-
-enum PresentationCategory {
-  PRL
-  Sanidad
-}
-
-enum BusinessType {
+enum Department {
   PRL
   Sanidad
 }

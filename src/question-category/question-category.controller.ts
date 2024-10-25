@@ -37,7 +37,7 @@ export class QuestionCategoryController {
   @Get()
   async getQuestionCategories(@Query() query: GetQuestionCategoryDto) {
     return await this.questionCategoryService.getQuestionCategories(
-      query.section,
+      query.department,
     );
   }
 }

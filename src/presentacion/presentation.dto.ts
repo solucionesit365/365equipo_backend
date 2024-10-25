@@ -8,7 +8,7 @@ export class CreatePresentationDto {
   embed: string;
 
   @IsEnum(["PRL", "Sanidad"])
-  category: "PRL" | "Sanidad";
+  department: "PRL" | "Sanidad";
 }
 
 export class DeletePresentationDto {
@@ -33,12 +33,12 @@ export class UpdatePresentationDto {
   embed: string;
 
   @IsEnum(["PRL", "Sanidad"])
-  category: "PRL" | "Sanidad";
+  department: "PRL" | "Sanidad";
 }
 
 export class TPresentation {
   id: string;
   name: string;
   embed: string;
-  category: "PRL" | "Sanidad";
+  department: "PRL" | "Sanidad";
 }

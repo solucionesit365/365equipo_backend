@@ -20,7 +20,7 @@ export class CreateVideoDto {
   duration: number;
 
   @IsEnum(["PRL", "Sanidad"])
-  category: "PRL" | "Sanidad";
+  department: "PRL" | "Sanidad";
 }
 
 export class DeleteVideoDto {
