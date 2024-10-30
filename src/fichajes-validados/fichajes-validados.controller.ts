@@ -155,15 +155,26 @@ export class FichajesValidadosController {
   @Get("getFichajesPagar")
   async getFichajesPagar(
     @Query()
-    { idResponsable, aPagar }: { idResponsable: number; aPagar: string },
+    {
+      idResponsable,
+      aPagar,
+      fecha,
+    }: {
+      idResponsable: number;
+      aPagar: string;
+      fecha: any;
+    },
   ) {
     try {
       const aPagarBoolean = aPagar == "true" ? true : false;
+
+      const parsedDate = DateTime.fromISO(fecha);
 
       const respValidados =
         await this.fichajesValidadosInstance.getFichajesPagar(
           Number(idResponsable),
           aPagarBoolean,
+          parsedDate,
         );
       if (respValidados.length > 0) {
         return {

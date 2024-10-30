@@ -73,10 +73,15 @@ export class FichajesValidadosService {
     );
   }
 
-  async getFichajesPagar(idResponsable: number, aPagar: boolean) {
+  async getFichajesPagar(
+    idResponsable: number,
+    aPagar: boolean,
+    fecha: DateTime,
+  ) {
     return await this.schFichajesValidados.getFichajesPagar(
       idResponsable,
       aPagar,
+      fecha,
     );
   }
 
