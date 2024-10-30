@@ -166,6 +166,26 @@ model AnswerOption {
   questionId String
 }
 
+model Formacion {
+  id          String           @id @default(uuid())
+  name        String
+  date        DateTime         @default(now())
+  department  Department
+  description String?
+  pasos       PasosFormacion[] @relation("PasosEnFormacion")
+  nPasos      Int
+}
+
+model PasosFormacion {
+  id            String            @id @default(uuid())
+  name          String
+  description   String?
+  type          PasoFormacionType
+  resourceId    String
+  Formaciones   Formacion?        @relation("PasosEnFormacion", fields: [formacionesId], references: [id], onDelete: Cascade)
+  formacionesId String?
+}
+
 enum ColorSemanal {
   green
   orange
@@ -181,4 +201,11 @@ enum AnswerType {
 enum Department {
   PRL
   Sanidad
+}
+
+enum PasoFormacionType {
+  VIDEO_FORMATIVO
+  PRESENTACION
+  CUESTIONARIO
+  DOCUMENTO_PARA_FIRMAR
 }

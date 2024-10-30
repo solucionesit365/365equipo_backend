@@ -1,0 +1,46 @@
+import { Controller, Get, Post, Query, UseGuards } from "@nestjs/common";
+import { FormacionService } from "./formacion.service";
+import { AuthGuard } from "../guards/auth.guard";
+import {
+  CreateFormacionDto,
+  DeleteFormacionDto,
+  GetFormacionByIdDto,
+  GetFormacionesDto,
+  UpdateFormacionDto,
+} from "./formacion.dto";
+
+@Controller("formacion")
+export class FormacionController {
+  constructor(private readonly formacionService: FormacionService) {}
+
+  @UseGuards(AuthGuard)
+  @Get()
+  async getFormaciones(@Query() req: GetFormacionesDto) {
+    return await this.formacionService.getFormaciones(req);
+  }
+
+  @UseGuards(AuthGuard)
+  @Get("id")
+  async getFormacionById(@Query() req: GetFormacionByIdDto) {
+    return await this.formacionService.getFormacionById(req);
+  }
+
+  @UseGuards(AuthGuard)
+  @Post("create")
+  async createFormacion(@Query() req: CreateFormacionDto) {
+    return await this.formacionService.createFormacion(req);
+  }
+
+  @UseGuards(AuthGuard)
+  @Post("update")
+  async updateFormacion(@Query() req: UpdateFormacionDto) {
+    return await this.formacionService.updateFormacion(req);
+  }
+
+  @UseGuards(AuthGuard)
+  @Post("delete")
+  async deleteFormacion(@Query() req: DeleteFormacionDto) {
+    await this.formacionService.deleteFormacion(req.id);
+    return true;
+  }
+}
