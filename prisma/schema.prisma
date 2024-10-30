@@ -141,6 +141,16 @@ model Presentacion {
   date       DateTime   @default(now())
 }
 
+model Questionnaire {
+  id                  String             @id @default(uuid())
+  name                String
+  department          Department
+  date                DateTime           @default(now())
+  type                QuestionnaireType
+  questions           Question[]
+  categoryOfQuestions QuestionCategory[]
+}
+
 model Question {
   id                    String             @id @default(uuid())
   title                 String
@@ -150,13 +160,18 @@ model Question {
   options               AnswerOption[]
   correctFreeAnswer     String[]
   date                  DateTime           @default(now())
+
+  Questionnaire   Questionnaire? @relation(fields: [questionnaireId], references: [id])
+  questionnaireId String?
 }
 
 model QuestionCategory {
-  id         String     @id @default(uuid())
-  name       String
-  questions  Question[]
-  department Department
+  id              String         @id @default(uuid())
+  name            String
+  questions       Question[]
+  department      Department
+  Questionnaire   Questionnaire? @relation(fields: [questionnaireId], references: [id])
+  questionnaireId String?
 }
 
 model AnswerOption {
@@ -208,4 +223,9 @@ enum PasoFormacionType {
   PRESENTACION
   CUESTIONARIO
   DOCUMENTO_PARA_FIRMAR
+}
+
+enum QuestionnaireType {
+  RANDOM
+  SELECTION
 }
