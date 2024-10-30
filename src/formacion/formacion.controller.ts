@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Query, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Post, Query, UseGuards } from "@nestjs/common";
 import { FormacionService } from "./formacion.service";
 import { AuthGuard } from "../guards/auth.guard";
 import {
@@ -27,19 +27,19 @@ export class FormacionController {
 
   @UseGuards(AuthGuard)
   @Post("create")
-  async createFormacion(@Query() req: CreateFormacionDto) {
+  async createFormacion(@Body() req: CreateFormacionDto) {
     return await this.formacionService.createFormacion(req);
   }
 
   @UseGuards(AuthGuard)
   @Post("update")
-  async updateFormacion(@Query() req: UpdateFormacionDto) {
+  async updateFormacion(@Body() req: UpdateFormacionDto) {
     return await this.formacionService.updateFormacion(req);
   }
 
   @UseGuards(AuthGuard)
   @Post("delete")
-  async deleteFormacion(@Query() req: DeleteFormacionDto) {
+  async deleteFormacion(@Body() req: DeleteFormacionDto) {
     await this.formacionService.deleteFormacion(req.id);
     return true;
   }
