@@ -21,23 +21,15 @@ export class TrabajadoresController {
   @UseGuards(AuthGuard)
   @Get()
   async getTrabajadores() {
-    try {
-      const arrayTrabajadores = await this.trabajadorInstance.getTrabajadores();
+    const arrayTrabajadores = await this.trabajadorInstance.getTrabajadores();
 
+    return arrayTrabajadores.map((trabajador) => {
       return {
-        ok: true,
-        data: arrayTrabajadores.map((trabajador) => {
-          return {
-            ...trabajador,
-            inicioContrato:
-              trabajador.contratos[0].inicioContrato.toLocaleDateString(),
-          };
-        }),
+        ...trabajador,
+        inicioContrato:
+          trabajador.contratos[0].inicioContrato.toLocaleDateString(),
       };
-    } catch (err) {
-      console.log(err);
-      return { ok: false, message: err.message };
-    }
+    });
   }
 
   @UseGuards(AuthGuard)
