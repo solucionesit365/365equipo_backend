@@ -4,6 +4,7 @@ import { TestController } from "./test.controller";
 // import { FichajesValidadosModule } from "../fichajes-validados/fichajes-validados.module";
 // import { TrabajadoresModule } from "../trabajadores/trabajadores.module";
 import { CuadrantesModule } from "../cuadrantes/cuadrantes.module";
+// import { AusenciasModule } from "src/ausencias/ausencias.module";
 // Cambio pequeño
 @Module({
   // imports: [EmailModule, FichajesValidadosModule, TrabajadoresModule],

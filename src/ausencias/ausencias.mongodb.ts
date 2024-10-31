@@ -60,10 +60,20 @@ export class AusenciasDatabase {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const ausenciasCollection = db.collection<AusenciaInterface>("ausencias");
 
+    // Verificar si la ausencia tiene 'tienda' como null
+    const currentAusencia = await ausenciasCollection.findOne({
+      _id: new ObjectId(ausencia._id),
+    });
+
+    // Determinar si se debe actualizar el campo 'tienda'
+    let tiendaUpdate = {};
+    if (currentAusencia && currentAusencia.tienda === null && ausencia.tienda) {
+      tiendaUpdate = { tienda: ausencia.tienda };
+    }
+
+    // Realizar la actualización para todos los campos excepto 'tienda' si no se permite
     const resUpdate = await ausenciasCollection.updateOne(
-      {
-        _id: new ObjectId(ausencia._id),
-      },
+      { _id: new ObjectId(ausencia._id) },
       {
         $set: {
           fechaInicio: ausencia.fechaInicio,
@@ -72,6 +82,7 @@ export class AusenciasDatabase {
           comentario: ausencia.comentario,
           completa: ausencia.completa,
           horas: ausencia.horas,
+          ...tiendaUpdate, // Actualizar 'tienda' solo si inicialmente era null
         },
       },
     );
@@ -84,10 +95,20 @@ export class AusenciasDatabase {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const ausenciasCollection = db.collection<AusenciaInterface>("ausencias");
 
+    // Verificar si la ausencia tiene 'tienda' como null
+    const currentAusencia = await ausenciasCollection.findOne({
+      _id: new ObjectId(ausencia._id),
+    });
+
+    // Determinar si se debe actualizar el campo 'tienda'
+    let tiendaUpdate = {};
+    if (currentAusencia && currentAusencia.tienda === null && ausencia.tienda) {
+      tiendaUpdate = { tienda: ausencia.tienda };
+    }
+
+    // Realizar la actualización para todos los campos excepto 'tienda' si no se permite
     const resUpdate = await ausenciasCollection.updateOne(
-      {
-        _id: new ObjectId(ausencia._id),
-      },
+      { _id: new ObjectId(ausencia._id) },
       {
         $set: {
           fechaInicio: ausencia.fechaInicio,
@@ -97,6 +118,7 @@ export class AusenciasDatabase {
           comentario: ausencia.comentario,
           completa: ausencia.completa,
           horas: ausencia.horas,
+          ...tiendaUpdate, // Actualizar 'tienda' solo si inicialmente era null
         },
       },
     );
@@ -231,4 +253,14 @@ export class AusenciasDatabase {
         throw Error("No se ha podido guardar el estado enviado de la ausencia");
     }
   }
+
+  // async updateAusenciaHorasContrato(id: ObjectId, horasContrato: number) {
+  //   const db = (await this.mongoDbService.getConexion()).db("soluciones");
+  //   const ausenciasCollection = db.collection("ausencias");
+
+  //   await ausenciasCollection.updateOne(
+  //     { _id: id },
+  //     { $set: { horasContrato: horasContrato } },
+  //   );
+  // }
 }

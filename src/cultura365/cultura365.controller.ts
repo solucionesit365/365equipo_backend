@@ -35,24 +35,6 @@ export class Cultura365Controller {
   async getVideos() {
     try {
       const respvideo = await this.culturaInstance.getVideos();
-      // // Verifica si las notificaciones ya se enviaron
-      // if (!this.notificacionesEnviadas) {
-      //   const arrayTrabajador = await this.trabajadores.getTrabajadores();
-      //   arrayTrabajador.forEach((trabajador) => {
-      //     if (trabajador.idApp != null) {
-      //       this.notificaciones.newInAppNotification({
-      //         uid: trabajador.idApp,
-      //         titulo: "Nuevo Apartado",
-      //         mensaje: "¡Estrenamos nuevo apartado de Cultura en la APP!",
-      //         leido: false,
-      //         creador: "SISTEMA",
-      //         url: "/videoCultura",
-      //       });
-      //     }
-      //   });
-      //   // Marca las notificaciones como enviadas
-      //   this.notificacionesEnviadas = true;
-      // }
 
       if (respvideo) return { ok: true, data: respvideo };
       else throw Error("No se ha encontrado ningun video");

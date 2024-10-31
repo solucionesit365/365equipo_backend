@@ -54,7 +54,7 @@ export class FirebaseService {
 
   async borrarArchivo(filePaths: string | string[]) {
     try {
-      const bucketName = "gs://silema.appspot.com";
+      const bucketName = "silema.appspot.com"; // Solo el nombre del bucket, sin 'gs://'
       const bucket = this.storage.bucket(bucketName);
 
       if (!Array.isArray(filePaths)) {
@@ -62,17 +62,20 @@ export class FirebaseService {
       }
 
       const deletePromises = filePaths.map(async (filePath) => {
-        const file = bucket.file(filePath);
+        // Asegúrate de que 'filePath' no incluya el prefijo completo de la URL.
+        // Debe ser algo como 'videos/archivo.mp4'
+        const relativeFilePath = filePath.replace(
+          /^https:\/\/storage\.googleapis\.com\/[^\/]+\//,
+          "",
+        );
+        const file = bucket.file(relativeFilePath);
         const [exists] = await file.exists();
-
-        console.log(deletePromises);
-        console.log(file);
 
         if (exists) {
           await file.delete();
-          console.log(`Archivo ${filePath} borrado exitosamente.`);
+          console.log(`Archivo ${relativeFilePath} borrado exitosamente.`);
         } else {
-          console.log(`El archivo ${filePath} no existe.`);
+          console.log(`El archivo ${relativeFilePath} no existe.`);
         }
       });
 

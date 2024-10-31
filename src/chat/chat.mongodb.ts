@@ -30,11 +30,7 @@ export class ChatDatabase {
     return await chatCollection.find({ _id: result.insertedId }).toArray();
   }
 
-  async markMessageAsRead(mensajes: {
-    ids: string[];
-    contactId: number;
-    readerId: number;
-  }) {
+  async markMessageAsRead(mensajes: { ids: string[] }) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const chatCollection = db.collection<Chat>("chat");
 
@@ -45,16 +41,12 @@ export class ChatDatabase {
     const result = await chatCollection.updateMany(
       {
         _id: { $in: messageObjectIds },
-        contactId: mensajes.contactId,
-        senderId: mensajes.readerId,
         read: false,
       },
       {
         $set: { read: true },
       },
     );
-
-    console.log(result);
 
     // Devuelve los mensajes actualizados
     return await chatCollection

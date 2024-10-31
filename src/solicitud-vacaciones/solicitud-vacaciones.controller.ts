@@ -7,12 +7,12 @@ import { TrabajadorService } from "../trabajadores/trabajadores.class";
 import { Notificaciones } from "src/notificaciones/notificaciones.class";
 import { UserRecord } from "firebase-admin/auth";
 import { User } from "../decorators/get-user.decorator";
+import { SchedulerGuard } from "src/guards/scheduler.guard";
 
 @Controller("solicitud-vacaciones")
 export class SolicitudVacacionesController {
   constructor(
     private readonly solicitudVacacionesInstance: SolicitudesVacacionesService,
-    private readonly notificaciones: Notificaciones,
     private readonly email: EmailService,
     private readonly trabajadorInstance: TrabajadorService,
     private readonly notificacionesInstance: Notificaciones,
@@ -393,5 +393,65 @@ export class SolicitudVacacionesController {
       console.log(err);
       return { ok: false, message: err.message };
     }
+  }
+
+  @UseGuards(SchedulerGuard)
+  @Post("NotificarVacacionesPendientesSupervisoras")
+  async notificarVacacionesPendientesSupervisoras() {
+    const year = new Date().getFullYear();
+
+    // Obtener todos los trabajadores que son supervisoras y llevan equipo
+    const supervisorasConEquipo =
+      await this.trabajadorInstance.getTrabajadores();
+
+    // Filtrar las supervisoras que llevan equipo
+    const usuariosSupervisora = supervisorasConEquipo.filter(
+      (usuario) =>
+        usuario.roles.some((rol) => rol.name === "Supervisora") &&
+        usuario.llevaEquipo,
+    );
+
+    // Mapeamos cada supervisora a una promesa que se encargará de enviar la notificación
+    const notificacionesPromises = usuariosSupervisora.map(
+      async (supervisora) => {
+        // Obtener las solicitudes pendientes de subordinados de esta supervisora
+        const solicitudesPendientes =
+          await this.solicitudVacacionesInstance.getsolicitudesSubordinados(
+            supervisora.idApp,
+            year,
+          );
+
+        // Filtrar las solicitudes que estén en estado 'PENDIENTE'
+        const solicitudesPendientesFiltradas = solicitudesPendientes.filter(
+          (solicitud) => solicitud.estado === "PENDIENTE",
+        );
+
+        if (solicitudesPendientesFiltradas.length > 0) {
+          // Obtener el token de la supervisora para enviar la notificación
+          const userToken = await this.notificacionesInstance.getFCMToken(
+            supervisora.idApp,
+          );
+
+          // Si se encuentra el token, enviar la notificación
+          if (userToken && userToken.token) {
+            try {
+              await this.notificacionesInstance.sendNotificationToDevice(
+                userToken.token,
+                "Vacaciones Pendientes",
+                `Tienes solicitudes de vacaciones pendientes de aprobar.`,
+                "/vacaciones",
+              );
+            } catch (error) {
+              console.log(error);
+            }
+          }
+        }
+      },
+    );
+
+    // Ejecutar todas las promesas de notificación en paralelo
+    await Promise.all(notificacionesPromises);
+
+    return { ok: true, message: "Notificaciones enviadas correctamente" };
   }
 }

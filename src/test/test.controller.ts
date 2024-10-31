@@ -19,12 +19,15 @@ import { RoleGuard } from "../guards/role.guard";
 import { AuthGuard } from "../guards/auth.guard";
 import { PrismaService } from "../prisma/prisma.service";
 import axios from "axios";
+import { AusenciasService } from "src/ausencias/ausencias.class";
 
 // import { Prisma } from "@prisma/client";
 
 @Controller("test")
 export class TestController {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    private readonly prismaService: PrismaService, // private readonly trabajadorInstance: TrabajadorService, // private readonly cuadrantesInstance: Cuadrantes, // private readonly ausenciasInstance: AusenciasService,
+  ) {}
 
   @Roles("ADMIN", "DEPENDIENTA")
   @UseGuards(AuthGuard, RoleGuard)
@@ -447,4 +450,56 @@ export class TestController {
 
     return true;
   }
+
+  //Añadir contratos a ausencias o actualizarlo
+  // @Post("rectificarAusencias")
+  // async rectificarAusencias() {
+  //   const ausencias = await this.ausenciasInstance.getAusencias();
+  //   const cache = [];
+
+  //   for (let i = 0; i < ausencias.length; i += 1) {
+  //     const index = cache.findIndex(
+  //       (cachedItem) => cachedItem.idUsuario === ausencias[i].idUsuario,
+  //     );
+
+  //     try {
+  //       let horasContrato;
+
+  //       if (index === -1) {
+  //         const trabajadorAux =
+  //           await this.trabajadorInstance.getTrabajadorBySqlId(
+  //             ausencias[i].idUsuario,
+  //           );
+
+  //         // Extraer horasContrato de los contratos del trabajador
+  //         horasContrato =
+  //           trabajadorAux.contratos && trabajadorAux.contratos.length > 0
+  //             ? (trabajadorAux.contratos[0].horasContrato * 40) / 100
+  //             : null;
+
+  //         // Guardar la información en el caché para uso posterior
+  //         cache.push({
+  //           idUsuario: ausencias[i].idUsuario,
+  //           horasContrato,
+  //         });
+  //       } else {
+  //         // Recuperar horasContrato del caché
+  //         horasContrato = cache[index].horasContrato;
+  //       }
+
+  //       // Solo actualizar si el valor de horasContrato es diferente
+  //       if (ausencias[i].horasContrato !== horasContrato) {
+  //         // Actualizar la ausencia en la base de datos
+  //         await this.ausenciasInstance.añadirContratos(
+  //           ausencias[i]._id,
+  //           horasContrato,
+  //         );
+  //       }
+  //     } catch (err) {
+  //       console.log(err.message);
+  //     }
+  //   }
+
+  //   return "OK";
+  // }
 }

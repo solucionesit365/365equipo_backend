@@ -37,7 +37,6 @@ import { MBCTokenModule } from "./bussinesCentral/services/mbctoken/mbctoken.ser
 import { RoleModule } from "./role/role.module";
 import { PermissionModule } from "./permission/permission.module";
 import { EmpresaModule } from "./empresa/empresa.module";
-
 import { KpiTiendasController } from "./kpi-tiendas/kpi-tiendas.controller";
 import { KpiTiendasModule } from "./kpi-tiendas/kpi-tiendas.module";
 import { DiaPersonalModule } from "./dia-personal/dia-personal.module";
@@ -46,9 +45,20 @@ import { VideosFormacionModule } from "./videos-formacion/videos-formacion.modul
 import { NotasInformativasModule } from "./notas-informativas/notas-informativas.module";
 import { BiometriaModule } from "./biometria/biometria.module";
 import { EncargosModule } from "./encargos/encargos.module";
-import { ChatGateway } from "./chat/chat.gateway";
-import { ChatController } from "./chat/chat.controller";
+import { ColorSemanalModule } from "./color-semanal/color-semanal.module";
+import { SanidadModule } from "./sanidad/sanidad.module";
+import { HardwareModule } from "./hardware/hardware.module";
 import { ChatModule } from "./chat/chat.module";
+import { PerfilHardwareModule } from "./perfil-hardware/perfil-hardware.module";
+import { TwilioModule } from "./twilio/twilio.module";
+import { PdfModule } from "./pdf/pdf.module";
+import { StorageModule } from "./storage/storage.module";
+import { VideosModule } from "./videos/videos.module";
+import { PresentationModule } from "./presentacion/presentation.module";
+import { QuestionModule } from './question/question.module';
+import { QuestionCategoryModule } from './question-category/question-category.module';
+import { FormacionModule } from './formacion/formacion.module';
+import { QuestionnaireModule } from './questionnaire/questionnaire.module';
 
 @Module({
   imports: [
@@ -91,7 +101,6 @@ import { ChatModule } from "./chat/chat.module";
     RoleModule,
     PermissionModule,
     EmpresaModule,
-
     KpiTiendasModule,
     DiaPersonalModule,
     DistribucionMensajesModule,
@@ -99,8 +108,20 @@ import { ChatModule } from "./chat/chat.module";
     NotasInformativasModule,
     BiometriaModule,
     EncargosModule,
-    ChatGateway,
+    ColorSemanalModule,
+    SanidadModule,
+    HardwareModule,
     ChatModule,
+    PerfilHardwareModule,
+    TwilioModule,
+    PdfModule,
+    StorageModule,
+    VideosModule,
+    PresentationModule,
+    QuestionModule,
+    QuestionCategoryModule,
+    FormacionModule,
+    QuestionnaireModule,
   ],
   controllers: [AppController, KpiTiendasController],
 })

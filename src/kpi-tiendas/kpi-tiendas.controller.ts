@@ -2,19 +2,60 @@ import { Controller, UseGuards, Body, Post, Get, Query } from "@nestjs/common";
 import { KpiTiendasClass } from "./kpi-tiendas.class";
 import { AuthGuard } from "../guards/auth.guard";
 import { KpiTiendasInterface } from "./kpi-tiendas.interface";
+import { Notificaciones } from "../notificaciones/notificaciones.class";
+import { TrabajadorService } from "../trabajadores/trabajadores.class";
 
 @Controller("kpi-tiendas")
 export class KpiTiendasController {
-  constructor(private readonly KpiTiendasClass: KpiTiendasClass) {}
+  constructor(
+    private readonly KpiTiendasClass: KpiTiendasClass,
+    private readonly notificaciones: Notificaciones,
+    private readonly trabajadores: TrabajadorService,
+  ) {}
 
   @UseGuards(AuthGuard)
   @Post("nuevoKpiTienda")
   async nuevoKPI(@Body() kpiTienda: KpiTiendasInterface) {
     try {
-      return {
-        ok: true,
-        data: await this.KpiTiendasClass.nuevoKPI(kpiTienda),
-      };
+      const nuevoKPI = await this.KpiTiendasClass.nuevoKPI(kpiTienda);
+      if (nuevoKPI) {
+        const usuariosCompletos = await this.trabajadores.getTrabajadores();
+
+        // Filtrar solo los trabajadores que tienen los roles adecuados
+        const trabajadoresConRolAdecuado = usuariosCompletos.filter(
+          (trabajador) =>
+            trabajador.roles.some((rol) =>
+              ["Tienda", "Coordinadora_A"].includes(rol.name),
+            ) && trabajador.idTienda === kpiTienda.tienda,
+        );
+
+        for (const trabajador of trabajadoresConRolAdecuado) {
+          // Verificar que el idApp existe antes de llamar a getFCMToken
+          if (trabajador.idApp) {
+            const userToken = await this.notificaciones.getFCMToken(
+              trabajador.idApp,
+            );
+
+            if (userToken && userToken.token) {
+              try {
+                await this.notificaciones.sendNotificationToDevice(
+                  userToken.token,
+                  "Nuevo KPI Disponible",
+                  `${kpiTienda.comentario}`,
+                  "/kpiTiendaIndex",
+                );
+              } catch (error) {
+                console.error(error);
+              }
+            }
+          }
+        }
+
+        return {
+          ok: true,
+          data: nuevoKPI,
+        };
+      }
     } catch (err) {
       console.log(err);
       return { ok: false, message: err.message };

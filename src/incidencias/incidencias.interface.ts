@@ -17,6 +17,7 @@ export interface Incidencias {
   }[];
   nombre: string;
   uid: string;
+  tienda: string;
 }
 
 export interface IncidenciasInvitado {

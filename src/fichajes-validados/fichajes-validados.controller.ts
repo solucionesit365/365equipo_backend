@@ -105,31 +105,41 @@ export class FichajesValidadosController {
         const fichajeTrabajador = await this.trabajador.getTrabajadorBySqlId(
           FichajesValidadosService.idTrabajador,
         );
-        if (
-          FichajesValidadosService.aPagar &&
-          FichajesValidadosService.horasPagar.estadoValidado == "PENDIENTE"
-        ) {
-          this.notificaciones.newInAppNotification({
-            uid: fichajeTrabajador.idApp,
-            titulo: "Solicitud Horas a Pagar",
-            mensaje: `Se ha solicitado ${FichajesValidadosService.horasPagar.total}h a pagar`,
-            leido: false,
-            creador: "SISTEMA",
-            url: "",
-          });
-        }
-        if (FichajesValidadosService.horasPagar.estadoValidado != "PENDIENTE") {
-          {
-            this.notificaciones.newInAppNotification({
-              uid: fichajeTrabajador.idApp,
-              titulo: "Pago de horas",
-              mensaje: `${FichajesValidadosService.horasPagar.estadoValidado} ${FichajesValidadosService.horasPagar.total}h `,
-              leido: false,
-              creador: "SISTEMA",
-              url: "",
-            });
+        if (fichajeTrabajador.idApp) {
+          const userToken = await this.notificaciones.getFCMToken(
+            fichajeTrabajador.idApp,
+          );
+          if (userToken && userToken.token) {
+            if (
+              FichajesValidadosService.aPagar &&
+              FichajesValidadosService.horasPagar.estadoValidado == "PENDIENTE"
+            ) {
+              try {
+                await this.notificaciones.sendNotificationToDevice(
+                  userToken.token,
+                  "Solicitud Horas a Pagar",
+                  `Se ha solicitado ${FichajesValidadosService.horasPagar.total}h a pagar`,
+                  "/",
+                );
+
+                if (
+                  FichajesValidadosService.horasPagar.estadoValidado !==
+                  "PENDIENTE"
+                ) {
+                  await this.notificaciones.sendNotificationToDevice(
+                    userToken.token,
+                    "Pago de horas",
+                    `${FichajesValidadosService.horasPagar.estadoValidado} ${FichajesValidadosService.horasPagar.total}h`,
+                    "/",
+                  );
+                }
+              } catch (error) {
+                console.error("Error al enviar la notificación:", error);
+              }
+            }
           }
         }
+
         return {
           ok: true,
         };
@@ -145,15 +155,26 @@ export class FichajesValidadosController {
   @Get("getFichajesPagar")
   async getFichajesPagar(
     @Query()
-    { idResponsable, aPagar }: { idResponsable: number; aPagar: string },
+    {
+      idResponsable,
+      aPagar,
+      fecha,
+    }: {
+      idResponsable: number;
+      aPagar: string;
+      fecha: any;
+    },
   ) {
     try {
       const aPagarBoolean = aPagar == "true" ? true : false;
+
+      const parsedDate = DateTime.fromISO(fecha);
 
       const respValidados =
         await this.fichajesValidadosInstance.getFichajesPagar(
           Number(idResponsable),
           aPagarBoolean,
+          parsedDate,
         );
       if (respValidados.length > 0) {
         return {

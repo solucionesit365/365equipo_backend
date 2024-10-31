@@ -19,6 +19,7 @@ export class AusenciasService {
     nombre: string,
     dni: string,
     tipo: TiposAusencia,
+    horasContrato: number,
     tienda: string,
     fechaInicio: Date,
     fechaFinal: Date,
@@ -32,6 +33,7 @@ export class AusenciasService {
       nombre,
       dni,
       tipo,
+      horasContrato,
       tienda,
       fechaInicio,
       fechaFinal,
@@ -53,6 +55,7 @@ export class AusenciasService {
         dni,
         horas,
         tipo,
+        horasContrato,
         tienda,
       });
       return resInsert;
@@ -92,9 +95,20 @@ export class AusenciasService {
     }
 
     if (
-      ausenciaToUpdate.fechaInicio.getTime() !==
-        ausencia.fechaInicio.getTime() ||
-      ausenciaToUpdate.fechaFinal.getTime() !== ausencia.fechaFinal.getTime()
+      // Verifica si `fechaInicio` ha cambiado o uno de ellos es `null`
+      (ausenciaToUpdate.fechaInicio &&
+        ausencia.fechaInicio &&
+        ausenciaToUpdate.fechaInicio.getTime() !==
+          ausencia.fechaInicio.getTime()) ||
+      (!ausenciaToUpdate.fechaInicio && ausencia.fechaInicio) ||
+      (ausenciaToUpdate.fechaInicio && !ausencia.fechaInicio) ||
+      // Verifica si `fechaFinal` ha cambiado o uno de ellos es `null`
+      (ausenciaToUpdate.fechaFinal &&
+        ausencia.fechaFinal &&
+        ausenciaToUpdate.fechaFinal.getTime() !==
+          ausencia.fechaFinal.getTime()) ||
+      (!ausenciaToUpdate.fechaFinal && ausencia.fechaFinal) ||
+      (ausenciaToUpdate.fechaFinal && !ausencia.fechaFinal)
     ) {
       // Si las fechas de la ausencia han cambiado, llama a addAusenciaToCuadrantes
       await this.cuadrantesInstance.addAusenciaToCuadrantes(ausencia);
@@ -123,9 +137,20 @@ export class AusenciasService {
     }
 
     if (
-      ausenciaToUpdate.fechaInicio.getTime() !==
-        ausencia.fechaInicio.getTime() ||
-      ausenciaToUpdate.fechaFinal.getTime() !== ausencia.fechaFinal.getTime()
+      // Verifica si `fechaInicio` ha cambiado o uno de ellos es `null`
+      (ausenciaToUpdate.fechaInicio &&
+        ausencia.fechaInicio &&
+        ausenciaToUpdate.fechaInicio.getTime() !==
+          ausencia.fechaInicio.getTime()) ||
+      (!ausenciaToUpdate.fechaInicio && ausencia.fechaInicio) ||
+      (ausenciaToUpdate.fechaInicio && !ausencia.fechaInicio) ||
+      // Verifica si `fechaFinal` ha cambiado o uno de ellos es `null`
+      (ausenciaToUpdate.fechaFinal &&
+        ausencia.fechaFinal &&
+        ausenciaToUpdate.fechaFinal.getTime() !==
+          ausencia.fechaFinal.getTime()) ||
+      (!ausenciaToUpdate.fechaFinal && ausencia.fechaFinal) ||
+      (ausenciaToUpdate.fechaFinal && !ausencia.fechaFinal)
     ) {
       // Si las fechas de la ausencia han cambiado, llama a addAusenciaToCuadrantes
       await this.cuadrantesInstance.addAusenciaToCuadrantes(ausencia);
@@ -162,4 +187,11 @@ export class AusenciasService {
       fechaFinal,
     );
   }
+
+  // async añadirContratos(id: ObjectId, horasContrato: number) {
+  //   return await this.schAusencias.updateAusenciaHorasContrato(
+  //     id,
+  //     horasContrato,
+  //   );
+  // }
 }

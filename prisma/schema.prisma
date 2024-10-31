@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,12 +8,12 @@ datasource db {
 }
 
 model Trabajador {
-  id               Int          @id @default(autoincrement())
-  idApp            String?      @unique
+  id               Int                @id @default(autoincrement())
+  idApp            String?            @unique
   nombreApellidos  String
   displayName      String?
   emails           String
-  dni              String       @unique
+  dni              String             @unique
   direccion        String?
   ciudad           String?
   telefonos        String?
@@ -28,17 +25,20 @@ model Trabajador {
   tipoTrabajador   String
   idResponsable    Int?
   idTienda         Int?
-  tienda           Tienda?      @relation(fields: [idTienda], references: [id])
   llevaEquipo      Boolean
   tokenQR          String?
   displayFoto      String?
+  excedencia       Boolean            @default(false)
+  dispositivo      String?
+  empresaId        String?
   contratos        Contrato2[]
-  // Autorelación
-  responsable      Trabajador?  @relation("Responsable", fields: [idResponsable], references: [id], onDelete: SetNull)
-  subordinados     Trabajador[] @relation("Responsable")
-  roles            Role[]
-  permisos         Permiso[]
-  excedencia       Boolean      @default(false)
+  formacionSanidad FormacionSanidad[]
+  empresa          Empresa?           @relation(fields: [empresaId], references: [id])
+  responsable      Trabajador?        @relation("Responsable", fields: [idResponsable], references: [id])
+  subordinados     Trabajador[]       @relation("Responsable")
+  tienda           Tienda?            @relation(fields: [idTienda], references: [id])
+  permisos         Permiso[]          @relation("PermisoToTrabajador")
+  roles            Role[]             @relation("RoleToTrabajador")
 }
 
 model Tienda {
@@ -56,12 +56,13 @@ model Equipo {
 }
 
 model Empresa {
-  id             String      @id @default(uuid())
+  id             String       @id @default(uuid())
   nombre         String
   cif            String
   idExterno      Int?
-  autogestionada Boolean     @default(false)
+  autogestionada Boolean      @default(false)
   contratos      Contrato2[]
+  Trabajador     Trabajador[]
 }
 
 model Contrato {
@@ -72,14 +73,11 @@ model Contrato {
   fechaAlta       DateTime
   fechaAntiguedad DateTime
   fechaBaja       DateTime?
-  // trabajador      Trabajador @relation(fields: [idTrabajador], references: [id])
-  idTrabajador    Int
   dni             String
   idEmpresa       String?
-  // empresa         Empresa?    @relation(fields: [idEmpresa], references: [id])
+  idTrabajador    Int
 }
 
-// Este es el único que se utiliza. "Contrato" a secas está deprecado
 model Contrato2 {
   id              String     @id @default(uuid())
   horasContrato   Float
@@ -91,19 +89,143 @@ model Contrato2 {
   idEmpresa       String?
   idTrabajador    Int
   Empresa         Empresa?   @relation(fields: [idEmpresa], references: [id])
-  Trabajador      Trabajador @relation(fields: [idTrabajador], references: [id])
+  Trabajador      Trabajador @relation(fields: [idTrabajador], references: [id], onDelete: Cascade)
 }
 
 model Role {
   id          String       @id @default(uuid())
   name        String
-  permissions Permiso[]
-  users       Trabajador[]
+  permissions Permiso[]    @relation("PermisoToRole")
+  users       Trabajador[] @relation("RoleToTrabajador")
 }
 
 model Permiso {
   id    String       @id @default(uuid())
   name  String
-  roles Role[]
-  users Trabajador[]
+  roles Role[]       @relation("PermisoToRole")
+  users Trabajador[] @relation("PermisoToTrabajador")
+}
+
+model Color {
+  id    String       @id @default(uuid())
+  value ColorSemanal
+}
+
+model FormacionSanidad {
+  id                String     @id @default(uuid())
+  nombre            String
+  fecha             DateTime
+  idTrabajador      Int
+  duracion          String
+  lugar             String
+  firmadoTrabajador Boolean    @default(false)
+  firmadoEmpresa    Boolean    @default(false)
+  trabajador        Trabajador @relation(fields: [idTrabajador], references: [id])
+}
+
+model VideoFormacion {
+  id           String     @id @default(uuid())
+  name         String
+  pathFile     String
+  relativePath String
+  date         DateTime   @default(now())
+  duration     Int
+  department   Department
+}
+
+model Presentacion {
+  id         String     @id @default(uuid())
+  name       String
+  embed      String
+  department Department
+  date       DateTime   @default(now())
+}
+
+model Questionnaire {
+  id                  String             @id @default(uuid())
+  name                String
+  department          Department
+  date                DateTime           @default(now())
+  type                QuestionnaireType
+  questions           Question[]
+  categoryOfQuestions QuestionCategory[]
+}
+
+model Question {
+  id                    String             @id @default(uuid())
+  title                 String
+  type                  AnswerType
+  categories            QuestionCategory[]
+  correctAnswerOptionId String?
+  options               AnswerOption[]
+  correctFreeAnswer     String[]
+  date                  DateTime           @default(now())
+
+  Questionnaire   Questionnaire? @relation(fields: [questionnaireId], references: [id])
+  questionnaireId String?
+}
+
+model QuestionCategory {
+  id              String         @id @default(uuid())
+  name            String
+  questions       Question[]
+  department      Department
+  Questionnaire   Questionnaire? @relation(fields: [questionnaireId], references: [id])
+  questionnaireId String?
+}
+
+model AnswerOption {
+  id         String   @id @default(uuid())
+  title      String
+  Question   Question @relation(fields: [questionId], references: [id])
+  questionId String
+}
+
+model Formacion {
+  id          String           @id @default(uuid())
+  name        String
+  date        DateTime         @default(now())
+  department  Department
+  description String?
+  pasos       PasosFormacion[] @relation("PasosEnFormacion")
+  nPasos      Int
+}
+
+model PasosFormacion {
+  id            String            @id @default(uuid())
+  name          String
+  description   String?
+  type          PasoFormacionType
+  resourceId    String
+  Formaciones   Formacion?        @relation("PasosEnFormacion", fields: [formacionesId], references: [id], onDelete: Cascade)
+  formacionesId String?
+}
+
+enum ColorSemanal {
+  green
+  orange
+  blue
+  brown
+}
+
+enum AnswerType {
+  TEST
+  INPUT
+}
+
+enum Department {
+  PRL
+  Sanidad
+}
+
+enum PasoFormacionType {
+  VIDEO_FORMATIVO
+  PRESENTACION
+  CUESTIONARIO
+  DOCUMENTO_PARA_FIRMAR
+}
+
+enum QuestionnaireType {
+  RANDOM
+  SELECTION
 }

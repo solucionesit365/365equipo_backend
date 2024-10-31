@@ -76,14 +76,38 @@ export class FichajesValidadosDatabase {
     );
     return respFichajes;
   }
-  async getFichajesPagar(idResponsable: number, aPagar: boolean) {
+  async getFichajesPagar(
+    idResponsable: number,
+    aPagar: boolean,
+    fecha: DateTime,
+  ) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const fichajesValidadosCollect =
       db.collection<FichajeValidadoDto>("fichajesValidados2");
 
-    return await fichajesValidadosCollect
-      .find({ idResponsable, aPagar })
+    // Convertir la fecha a DateTime y obtener el inicio de la semana
+    const fechaInicio = DateTime.fromISO(fecha.toString())
+      .startOf("week")
+      .startOf("day")
+      .toJSDate();
+    const fechaFinal = DateTime.fromISO(fecha.toString())
+      .endOf("week")
+      .endOf("day")
+      .toJSDate();
+
+    const fechajesValidados = await fichajesValidadosCollect
+      .find({
+        idResponsable,
+        aPagar,
+        fichajeEntrada: {
+          $gte: fechaInicio,
+          $lt: fechaFinal,
+        },
+      })
       .toArray();
+    console.log(fechajesValidados);
+
+    return fechajesValidados;
   }
 
   async getAllFichajesPagar(aPagar: boolean) {

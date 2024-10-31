@@ -13,23 +13,85 @@ import {
   videosFormacion365Interface,
   videosVistosFormacion365Interface,
 } from "./videos-formacion.interface";
+import { TrabajadorService } from "src/trabajadores/trabajadores.class";
+import { Notificaciones } from "src/notificaciones/notificaciones.class";
 
 @Controller("videos-formacion")
 export class VideosFormacionController {
-  constructor(private readonly formacionInstance: videosFormacion365Class) {}
+  constructor(
+    private readonly formacionInstance: videosFormacion365Class,
+    private readonly trabajadores: TrabajadorService,
+    private readonly notificaciones: Notificaciones,
+  ) {}
 
   @UseGuards(AuthGuard)
   @Post("nuevoVideoFormacion")
   async nuevoVideoFormacion(@Body() video: videosFormacion365Interface) {
     try {
       video.creacion = new Date();
-      return {
-        ok: true,
-        data: await this.formacionInstance.nuevoVideo(video),
-      };
+
+      const nuevoVideo = await this.formacionInstance.nuevoVideo(video);
+
+      if (nuevoVideo) {
+        // Enviar respuesta inmediatamente al frontend para no bloquear
+        const response = { ok: true, data: nuevoVideo };
+
+        setImmediate(async () => {
+          try {
+            const usuariosCompletos = await this.trabajadores.getTrabajadores();
+
+            // Filtrar solo los trabajadores que tienen los roles adecuados
+            const trabajadoresConRolAdecuado = usuariosCompletos.filter(
+              (trabajador) =>
+                trabajador.roles.some((rol) =>
+                  ["Tienda", "Dependienta"].includes(rol.name),
+                ),
+            );
+
+            // Obtener los tokens FCM para todos los trabajadores con los roles adecuados
+            const tokens = await Promise.all(
+              trabajadoresConRolAdecuado.map(async (trabajador) => {
+                if (trabajador.idApp) {
+                  const userToken = await this.notificaciones.getFCMToken(
+                    trabajador.idApp,
+                  );
+                  if (userToken && userToken.token) {
+                    return userToken.token;
+                  }
+                }
+                return null;
+              }),
+            );
+
+            // Filtrar los tokens válidos y enviar notificaciones
+            const validTokens = tokens.filter((token) => token !== null);
+            if (validTokens.length > 0) {
+              await Promise.all(
+                validTokens.map((token) =>
+                  this.notificaciones.sendNotificationToDevice(
+                    token,
+                    "Nuevo video De Formación",
+                    `${video.titulo}`,
+                    "/videoFormacion",
+                  ),
+                ),
+              );
+            }
+          } catch (error) {
+            console.error(
+              "Error al enviar notificaciones en segundo plano:",
+              error,
+            );
+          }
+        });
+
+        return response;
+      } else {
+        throw new Error("No se pudo crear el video de formación");
+      }
     } catch (error) {
-      console.log(error);
-      return { ok: false, messag: error.message };
+      console.error("Error en nuevoVideoFormacion:", error);
+      return { ok: false, message: error.message };
     }
   }
 

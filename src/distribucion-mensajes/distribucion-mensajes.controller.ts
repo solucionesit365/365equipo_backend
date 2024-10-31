@@ -80,7 +80,7 @@ export class DistribucionMensajesController {
           await this.notificaciones.sendNotificationToTopic(
             "NUEVO MENSAJE DE DISTRIBUCION",
             `Disponible en la app.`,
-            "TEST_DEMO",
+            "notificaciones_generales",
           );
           return {
             ok: true,
