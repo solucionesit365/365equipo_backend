@@ -1,19 +1,24 @@
 import { Type } from "class-transformer";
-import {
-  IsEnum,
-  IsOptional,
-  IsString,
-  IsNumber,
-  IsNotEmpty,
-} from "class-validator";
+import { IsEnum, IsString, IsNumber, IsNotEmpty } from "class-validator";
 
 export class CreateVideoDto {
   @IsString()
   name: string;
 
-  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  duration: number;
+
+  @IsEnum(["PRL", "Sanidad"])
+  department: "PRL" | "Sanidad";
+}
+
+export class UpdateVideoDto {
   @IsString()
-  description: string;
+  id: string;
+
+  @IsString()
+  name: string;
 
   @Type(() => Number)
   @IsNumber()

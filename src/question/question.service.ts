@@ -3,6 +3,7 @@ import { PrismaService } from "../prisma/prisma.service";
 import {
   CreateQuestionDto,
   DeleteQuestionDto,
+  GetQuestionsDto,
   UpdateQuestionDto,
 } from "./question.dto";
 
@@ -125,9 +126,17 @@ export class QuestionService {
     }
   }
 
-  async getQuestions() {
+  async getQuestions(categoryId: GetQuestionsDto["categoryId"]) {
     try {
-      return await this.prismaService.question.findMany();
+      return await this.prismaService.question.findMany({
+        where: {
+          categories: {
+            some: {
+              id: categoryId,
+            },
+          },
+        },
+      });
     } catch (error) {
       console.error("Error getting questions", error);
       throw new InternalServerErrorException("Error getting questions");
@@ -139,6 +148,10 @@ export class QuestionService {
       return await this.prismaService.question.findUnique({
         where: {
           id,
+        },
+        include: {
+          categories: true,
+          options: true,
         },
       });
     } catch (error) {
