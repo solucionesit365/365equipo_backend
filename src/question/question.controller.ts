@@ -13,6 +13,7 @@ import {
   CreateQuestionDto,
   DeleteQuestionDto,
   GetQuestionDto,
+  GetQuestionsDto,
   UpdateQuestionDto,
 } from "./question.dto";
 
@@ -42,12 +43,12 @@ export class QuestionController {
 
   @UseGuards(AuthGuard)
   @Get()
-  async getQuestions() {
-    return await this.questionService.getQuestions();
+  async getQuestions(@Query() req: GetQuestionsDto) {
+    return await this.questionService.getQuestions(req.categoryId);
   }
 
   @UseGuards(AuthGuard)
-  @Get()
+  @Get("id")
   async getQuestion(@Query() req: GetQuestionDto) {
     return await this.questionService.getQuestion(req.id);
   }

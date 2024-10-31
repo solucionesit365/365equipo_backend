@@ -4,7 +4,7 @@ import {
   ConflictException,
 } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
-import { CreateVideoDto } from "./videos.dto";
+import { CreateVideoDto, UpdateVideoDto } from "./videos.dto";
 import { StorageService } from "../storage/storage.service";
 
 @Injectable()
@@ -67,5 +67,29 @@ export class VideosService {
     await this.storageService.deleteFile(video.relativePath);
 
     return true;
+  }
+
+  async updateVideoData(data: UpdateVideoDto) {
+    try {
+      const video = await this.prismaService.videoFormacion.findUnique({
+        where: { id: data.id },
+      });
+
+      if (!video) throw new ConflictException("El vídeo no existe");
+
+      await this.prismaService.videoFormacion.update({
+        where: { id: data.id },
+        data: {
+          department: data.department,
+          duration: data.duration,
+          name: data.name,
+        },
+      });
+
+      return true;
+    } catch (error) {
+      console.error("Error updating video", error);
+      throw new InternalServerErrorException("Error updating video");
+    }
   }
 }

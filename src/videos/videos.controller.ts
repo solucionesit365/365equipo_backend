@@ -8,7 +8,7 @@ import {
   Get,
   UseGuards,
 } from "@nestjs/common";
-import { CreateVideoDto, DeleteVideoDto } from "./videos.dto";
+import { CreateVideoDto, DeleteVideoDto, UpdateVideoDto } from "./videos.dto";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { StorageService } from "../storage/storage.service";
 import { CryptoService } from "../crypto/crypto.class";
@@ -59,5 +59,11 @@ export class VideosController {
   @Post("delete")
   async deleteVideo(@Body() req: DeleteVideoDto) {
     return await this.videoService.deleteVideo(req.id);
+  }
+
+  @UseGuards(AuthGuard)
+  @Post("update")
+  async updateVideo(@Body() req: UpdateVideoDto) {
+    return await this.videoService.updateVideoData(req);
   }
 }
