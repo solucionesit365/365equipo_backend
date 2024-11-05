@@ -12,7 +12,7 @@ import {
   TrabajadorFormRequest,
 } from "./trabajadores.dto";
 
-import { RoleGuard } from "src/guards/role.guard";
+import { RoleGuard } from "../guards/role.guard";
 
 @Controller("trabajadores")
 export class TrabajadoresController {
