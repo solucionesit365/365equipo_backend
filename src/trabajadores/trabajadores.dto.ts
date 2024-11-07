@@ -1,5 +1,5 @@
 import { Prisma, Trabajador } from "@prisma/client";
-import { Type } from "class-transformer";
+import { Transform, Type } from "class-transformer";
 import {
   IsArray,
   IsBoolean,
@@ -12,6 +12,7 @@ import {
   ValidateNested,
 } from "class-validator";
 import { CreateContratoDto } from "../contrato/contrato.dto";
+import { DateTime } from "luxon";
 
 export class TrabajadorDto {
   @IsNumber()
@@ -106,7 +107,19 @@ export class TrabajadorFormRequest {
   displayName: string;
 
   @IsNotEmpty()
-  @Type(() => Date)
+  @Transform(({ value }) => {
+    // Si es string en formato dd/MM/yyyy
+    if (typeof value === "string" && value.includes("/")) {
+      return DateTime.fromFormat(value, "dd/MM/yyyy").toJSDate();
+    }
+
+    // Si es string en formato ISO
+    if (typeof value === "string") {
+      return DateTime.fromISO(value).toJSDate();
+    }
+
+    return value;
+  })
   @IsDate()
   fechaNacimiento: Date;
 

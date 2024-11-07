@@ -688,7 +688,7 @@ export class TrabajadorDatabaseService {
   ) {
     await this.sqlHandleCambios(trabajador, original);
 
-    let payload: Prisma.TrabajadorUpdateInput = {
+    const payload: Prisma.TrabajadorUpdateInput = {
       nombreApellidos: trabajador.nombreApellidos,
       displayName: trabajador.displayName,
       emails: trabajador.emails,
@@ -735,7 +735,7 @@ export class TrabajadorDatabaseService {
         .$queryRaw`DELETE FROM "_RoleToTrabajador" WHERE "B" = ${trabajador.id}`;
     }
 
-    const response = await this.prisma.trabajador.update({
+    await this.prisma.trabajador.update({
       where: {
         id: trabajador.id,
       },

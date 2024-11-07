@@ -133,6 +133,29 @@ model VideoFormacion {
   department   Department
 }
 
+model DocumentoOriginal {
+  id           String             @id @default(uuid()) // Esto es el CSV
+  name         String
+  pathFile     String
+  relativePath String
+  hash         String
+  date         DateTime           @default(now())
+  department   Department
+  firmados     DocumentoFirmado[]
+}
+
+model DocumentoFirmado {
+  id                  String            @id @default(uuid())
+  name                String
+  pathFile            String
+  relativePath        String
+  hash                String
+  date                DateTime          @default(now())
+  department          Department
+  original            DocumentoOriginal @relation(fields: [documentoOriginalId], references: [id])
+  documentoOriginalId String
+}
+
 model Presentacion {
   id         String     @id @default(uuid())
   name       String

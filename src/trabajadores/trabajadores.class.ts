@@ -75,10 +75,17 @@ export class TrabajadorService {
   }
 
   async getTrabajadores() {
-    const arrayTrabajadores = await this.schTrabajadores.getTrabajadores();
+    try {
+      const arrayTrabajadores = await this.schTrabajadores.getTrabajadores();
 
-    if (arrayTrabajadores) return arrayTrabajadores;
-    return [];
+      if (arrayTrabajadores) return arrayTrabajadores;
+      return [];
+    } catch (err) {
+      console.log(err);
+      throw new InternalServerErrorException(
+        "Error al obtener los trabajadores",
+      );
+    }
   }
 
   async getSubordinadosConTienda(idAppResponsable: string) {

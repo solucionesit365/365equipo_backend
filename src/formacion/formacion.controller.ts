@@ -19,7 +19,7 @@ export class FormacionController {
     return await this.formacionService.getFormaciones(req);
   }
 
-  @UseGuards(AuthGuard)
+  // @UseGuards(AuthGuard)
   @Get("id")
   async getFormacionById(@Query() req: GetFormacionByIdDto) {
     return await this.formacionService.getFormacionById(req);

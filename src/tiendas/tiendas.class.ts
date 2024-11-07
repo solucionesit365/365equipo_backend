@@ -1,5 +1,10 @@
-import { Injectable, Inject, forwardRef } from "@nestjs/common";
-import { Trabajador } from "@prisma/client";
+import {
+  Injectable,
+  Inject,
+  forwardRef,
+  InternalServerErrorException,
+} from "@nestjs/common";
+import { Trabajador, Tienda as TTienda } from "@prisma/client";
 import { TrabajadorService } from "../trabajadores/trabajadores.class";
 import { TiendaDatabaseService } from "./tiendas.database";
 
@@ -12,10 +17,28 @@ export class Tienda {
   ) {}
 
   async getTiendas() {
-    const arrayTiendas = await this.schTiendas.getTiendas();
+    try {
+      return this.ordenarTiendas(await this.schTiendas.getTiendas());
+    } catch (err) {
+      console.log(err);
+      throw new InternalServerErrorException("Error al obtener las tiendas");
+    }
+  }
 
-    if (arrayTiendas) return arrayTiendas;
-    throw Error("No hay tiendas");
+  private ordenarTiendas(tiendas: TTienda[]) {
+    return tiendas.sort((a, b) => {
+      const nameA = a.nombre.toLowerCase();
+      const nameB = b.nombre.toLowerCase();
+
+      if (nameA.startsWith("t--") && !nameB.startsWith("t--")) return -1;
+      if (!nameA.startsWith("t--") && nameB.startsWith("t--")) return 1;
+
+      if (nameA.startsWith("m--") && !nameB.startsWith("m--")) return -1;
+      if (!nameA.startsWith("m--") && nameB.startsWith("m--")) return 1;
+
+      // Si no empiezan con 't--' ni 'm--', se ordenan alfabéticamente
+      return nameA.localeCompare(nameB);
+    });
   }
 
   async getTiendasHit() {

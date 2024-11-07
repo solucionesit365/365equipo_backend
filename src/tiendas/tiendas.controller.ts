@@ -15,15 +15,7 @@ export class TiendasController {
   @UseGuards(AuthGuard)
   @Get()
   async getTiendas() {
-    try {
-      return {
-        ok: true,
-        data: await this.tiendasInstance.getTiendas(),
-      };
-    } catch (err) {
-      console.log(err);
-      return { ok: false, message: err.message };
-    }
+    return await this.tiendasInstance.getTiendas();
   }
 
   @UseGuards(AuthGuard)

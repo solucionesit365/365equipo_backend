@@ -34,6 +34,9 @@ export class FormacionService {
         where: {
           id: req.id,
         },
+        include: {
+          pasos: true,
+        },
       });
     } catch (error) {
       throw new InternalServerErrorException("Error al obtener la formación");
