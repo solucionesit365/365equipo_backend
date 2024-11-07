@@ -123,12 +123,12 @@ export class videosFormacion365Mongo {
     return vistasPorVideo;
   }
 
-  async getVideosByCategoria(categoria: string) {
+  async getVideosByCategoria(categoria: string, idTienda: number) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const videosCollect =
       db.collection<videosFormacion365Interface>("videosFormacion");
     const response = await videosCollect
-      .find({ categoria: categoria })
+      .find({ categoria: categoria, tiendas: { $in: [idTienda, -1] } })
       .toArray();
 
     return response;
