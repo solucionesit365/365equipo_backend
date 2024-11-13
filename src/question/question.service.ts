@@ -22,6 +22,11 @@ export class QuestionService {
               id: categoryId,
             })),
           },
+          // options: {
+          //   create: question.options.map((option) => ({
+          //     title: option.text,
+          //   })),
+          // },
         },
       });
 
@@ -170,6 +175,19 @@ export class QuestionService {
     } catch (error) {
       console.error("Error deleting question", error);
       throw new InternalServerErrorException("Error deleting question");
+    }
+  }
+
+  async getQuestionOptions(id: string) {
+    try {
+      return await this.prismaService.answerOption.findMany({
+        where: {
+          questionId: id,
+        },
+      });
+    } catch (error) {
+      console.error("Error getting question options", error);
+      throw new InternalServerErrorException("Error getting question options");
     }
   }
 }

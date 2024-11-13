@@ -27,3 +27,8 @@ export class DeleteDocumentoDto {
   @IsString()
   id: string;
 }
+
+export class DownloadPdfByIdDto {
+  @IsString()
+  id: string;
+}

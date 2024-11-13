@@ -1,14 +1,26 @@
-import { Body, Controller, Get, Post, Query, UseGuards } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Get,
+  NotFoundException,
+  Post,
+  Query,
+  Res,
+  UseGuards,
+} from "@nestjs/common";
 import { PdfService } from "./pdf.service";
 import { AuthGuard } from "../guards/auth.guard";
 import {
   DeleteDocumentoDto,
+  DownloadPdfByIdDto,
   GeneratePdfDto,
   GetDocumentosFirmadosDto,
   GetDocumentosOriginalesDto,
 } from "./pdf.dto";
 import { StorageService } from "../storage/storage.service";
 import { CryptoService } from "../crypto/crypto.class";
+import { join } from "path";
+import { Response as ExpressResponse } from "express";
 
 @Controller("pdf")
 export class PdfController {
@@ -248,6 +260,63 @@ export class PdfController {
       return {
         error: false,
       };
+    }
+  }
+
+  @Get("documentoOriginal")
+  async getDocument(
+    @Query() req: DownloadPdfByIdDto,
+    @Res() res: ExpressResponse,
+  ) {
+    try {
+      const pdfStream = await this.pdfService.getStreamPdfById(req.id);
+
+      // Configurar headers
+      res.set({
+        "Content-Type": "application/pdf",
+        "Content-Disposition": "inline; filename=documento.pdf",
+        "Cache-Control": "no-cache",
+        "Accept-Ranges": "bytes",
+      });
+
+      // Manejar errores del stream
+      pdfStream.on("error", (error) => {
+        console.error("Error en el stream:", error);
+        if (!res.headersSent) {
+          res.status(500).json({ message: "Error al transmitir el documento" });
+        }
+      });
+
+      // Recolectar datos para verificar que no está vacío
+      let hasData = false;
+      pdfStream.on("data", (chunk) => {
+        hasData = true;
+      });
+
+      // Verificar al final si recibimos datos
+      pdfStream.on("end", () => {
+        if (!hasData) {
+          console.error("Stream terminó sin datos");
+        }
+      });
+
+      // Pipe el stream a la respuesta
+      pdfStream.pipe(res);
+
+      // Manejar el cierre de la conexión
+      res.on("close", () => {
+        pdfStream.destroy();
+      });
+    } catch (error) {
+      console.error("Error completo:", error);
+      if (error instanceof NotFoundException) {
+        res.status(404).json({ message: "Documento no encontrado" });
+      } else {
+        res.status(500).json({
+          message: "Error interno al obtener el documento",
+          error: error.message,
+        });
+      }
     }
   }
 }

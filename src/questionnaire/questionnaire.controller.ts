@@ -37,7 +37,7 @@ export class QuestionnaireController {
     return await this.questionnaireSerive.getQuestionnaires(req);
   }
 
-  @UseGuards(AuthGuard)
+  // @UseGuards(AuthGuard)
   @Get("id")
   async getQuestionnaireById(@Query() req: GetQuestionnaireIdDto) {
     return await this.questionnaireSerive.getQuestionnaireById(req.id);

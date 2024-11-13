@@ -73,3 +73,8 @@ export class GetQuestionsDto {
   @IsString()
   categoryId: string;
 }
+
+export class GetOptionsDto {
+  @IsString()
+  id: string;
+}

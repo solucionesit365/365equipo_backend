@@ -17,6 +17,8 @@ export class QuestionnaireService {
           name: req.name,
           department: req.department,
           type: req.type,
+          maxErrors: req.maxErrors,
+          nQuestions: req.nQuestions,
           questions: {
             connect: req.questions.map((question) => ({ id: question })),
           },
