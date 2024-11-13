@@ -159,6 +159,8 @@ model Questionnaire {
   type                QuestionnaireType
   questions           Question[]
   categoryOfQuestions QuestionCategory[]
+  maxErrors           Int                @default(0)
+  nQuestions          Int?
 }
 
 model Question {
