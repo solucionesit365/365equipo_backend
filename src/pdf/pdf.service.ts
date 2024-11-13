@@ -1,4 +1,8 @@
-import { Injectable, InternalServerErrorException } from "@nestjs/common";
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from "@nestjs/common";
 import * as puppeteer from "puppeteer";
 import * as fs from "fs";
 import * as path from "path";
@@ -7,6 +11,7 @@ import { StorageService } from "../storage/storage.service";
 import { CryptoService } from "../crypto/crypto.class";
 import { GeneratePdfDto, GetDocumentosOriginalesDto } from "./pdf.dto";
 import { PrismaService } from "../prisma/prisma.service";
+import { Readable } from "stream";
 
 @Injectable()
 export class PdfService {
@@ -335,6 +340,28 @@ export class PdfService {
         },
       });
     } catch (error) {
+      console.error("Error obteniendo documento original:", error);
+      throw new InternalServerErrorException(
+        "Error obteniendo documento original.",
+      );
+    }
+  }
+
+  async getStreamPdfById(id: string): Promise<Readable> {
+    try {
+      const pdfData = await this.prismaService.documentoOriginal.findUnique({
+        where: { id },
+      });
+
+      if (!pdfData) {
+        throw new NotFoundException("Documento no encontrado");
+      }
+
+      return await this.storageService.getFileStream(pdfData.relativePath);
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
       console.error("Error obteniendo documento original:", error);
       throw new InternalServerErrorException(
         "Error obteniendo documento original.",
