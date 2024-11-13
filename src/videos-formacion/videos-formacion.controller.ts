@@ -45,7 +45,7 @@ export class VideosFormacionController {
               (trabajador) =>
                 trabajador.roles.some((rol) =>
                   ["Tienda", "Dependienta"].includes(rol.name),
-                ),
+                ) && video.tiendas.includes(trabajador.idTienda),
             );
 
             // Obtener los tokens FCM para todos los trabajadores con los roles adecuados
@@ -234,10 +234,14 @@ export class VideosFormacionController {
 
   @UseGuards(AuthGuard)
   @Get("videosPorCategoria")
-  async videosPorCategoria(@Query("categoria") categoria: string) {
+  async videosPorCategoria(
+    @Query("categoria") categoria: string,
+    @Query("idTienda") idTienda: number,
+  ) {
     try {
       const videos = await this.formacionInstance.getVideosByCategoria(
         categoria,
+        idTienda,
       );
       return {
         ok: true,
