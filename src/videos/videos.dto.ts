@@ -33,3 +33,9 @@ export class DeleteVideoDto {
   @IsString()
   id: string;
 }
+
+export class GetInfoVideoDto {
+  @IsNotEmpty()
+  @IsString()
+  id: string;
+}

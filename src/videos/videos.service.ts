@@ -6,6 +6,7 @@ import {
 import { PrismaService } from "../prisma/prisma.service";
 import { CreateVideoDto, UpdateVideoDto } from "./videos.dto";
 import { StorageService } from "../storage/storage.service";
+import internal from "stream";
 
 @Injectable()
 export class VideosService {
@@ -90,6 +91,35 @@ export class VideosService {
     } catch (error) {
       console.error("Error updating video", error);
       throw new InternalServerErrorException("Error updating video");
+    }
+  }
+
+  async getVideoBuffer(id: string): Promise<Buffer> {
+    try {
+      const video = await this.prismaService.videoFormacion.findUnique({
+        where: { id },
+      });
+
+      if (!video) throw new ConflictException("El vídeo no existe");
+
+      return await this.storageService.downloadFile(video.relativePath);
+    } catch (error) {
+      console.error("Error getting video", error);
+      throw new InternalServerErrorException("Error getting video");
+    }
+  }
+
+  async getInfoVideo(id: string) {
+    try {
+      const video = await this.prismaService.videoFormacion.findUnique({
+        where: { id },
+      });
+
+      if (!video) throw new ConflictException("El vídeo no existe");
+      return video;
+    } catch (error) {
+      console.error("Error getting video", error);
+      throw new InternalServerErrorException("Error getting video");
     }
   }
 }

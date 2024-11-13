@@ -46,7 +46,6 @@ import { NotasInformativasModule } from "./notas-informativas/notas-informativas
 import { BiometriaModule } from "./biometria/biometria.module";
 import { EncargosModule } from "./encargos/encargos.module";
 import { ColorSemanalModule } from "./color-semanal/color-semanal.module";
-import { SanidadModule } from "./sanidad/sanidad.module";
 import { HardwareModule } from "./hardware/hardware.module";
 import { ChatModule } from "./chat/chat.module";
 import { PerfilHardwareModule } from "./perfil-hardware/perfil-hardware.module";
@@ -55,10 +54,10 @@ import { PdfModule } from "./pdf/pdf.module";
 import { StorageModule } from "./storage/storage.module";
 import { VideosModule } from "./videos/videos.module";
 import { PresentationModule } from "./presentacion/presentation.module";
-import { QuestionModule } from './question/question.module';
-import { QuestionCategoryModule } from './question-category/question-category.module';
-import { FormacionModule } from './formacion/formacion.module';
-import { QuestionnaireModule } from './questionnaire/questionnaire.module';
+import { QuestionModule } from "./question/question.module";
+import { QuestionCategoryModule } from "./question-category/question-category.module";
+import { FormacionModule } from "./formacion/formacion.module";
+import { QuestionnaireModule } from "./questionnaire/questionnaire.module";
 
 @Module({
   imports: [
@@ -109,7 +108,6 @@ import { QuestionnaireModule } from './questionnaire/questionnaire.module';
     BiometriaModule,
     EncargosModule,
     ColorSemanalModule,
-    SanidadModule,
     HardwareModule,
     ChatModule,
     PerfilHardwareModule,

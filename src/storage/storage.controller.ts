@@ -66,4 +66,25 @@ export class StorageController {
       throw error;
     }
   }
+
+  @Post("downloadVideo")
+  async downloadVideo(@Body() req: DownloadFileDto, @Res() res: Response) {
+    try {
+      const fileBuffer = await this.storageService.downloadFile(
+        req.relativePath,
+      );
+
+      // Configurar los headers para la descarga del PDF
+      res.set({
+        "Content-Type": "video/mp4",
+        "Content-Length": fileBuffer.length,
+      });
+
+      // Enviar el buffer
+      return res.send(fileBuffer);
+    } catch (error) {
+      console.error("Error downloading video", error);
+      throw error;
+    }
+  }
 }

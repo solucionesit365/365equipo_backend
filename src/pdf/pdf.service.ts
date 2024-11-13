@@ -24,7 +24,75 @@ export class PdfService {
     try {
       const page = await browser.newPage();
 
-      await page.setContent(htmlContent, {
+      // Añadir los estilos de Quill al HTML
+      const htmlWithStyles = `
+        <html>
+          <head>
+            <style>
+              /* Estilos básicos de Quill */
+              .ql-align-center {
+                text-align: center;
+              }
+              .ql-align-right {
+                text-align: right;
+              }
+              .ql-align-justify {
+                text-align: justify;
+              }
+              /* Estilos adicionales */
+              body {
+                font-family: Arial, sans-serif;
+                line-height: 1.5;
+                padding: 20px;
+              }
+              p {
+                margin: 0 0 1em 0;
+              }
+              strong {
+                font-weight: bold;
+              }
+              em {
+                font-style: italic;
+              }
+              h1 {
+                font-size: 2em;
+                margin: 0.67em 0;
+              }
+              h2 {
+                font-size: 1.5em;
+                margin: 0.75em 0;
+              }
+              ul, ol {
+                padding-left: 2em;
+                margin: 1em 0;
+              }
+              .ql-indent-1 {
+                padding-left: 3em;
+              }
+              .ql-indent-2 {
+                padding-left: 6em;
+              }
+              /* Ajustes para listas */
+              .ql-bullet {
+                list-style-type: disc;
+              }
+              .ql-ordered {
+                list-style-type: decimal;
+              }
+              /* Ajustes para imágenes */
+              img {
+                max-width: 100%;
+                height: auto;
+              }
+            </style>
+          </head>
+          <body>
+            ${htmlContent}
+          </body>
+        </html>
+      `;
+
+      await page.setContent(htmlWithStyles, {
         waitUntil: "domcontentloaded",
       });
 
@@ -38,6 +106,10 @@ export class PdfService {
           bottom: "20mm",
           left: "20mm",
         },
+        // Opciones adicionales para mejorar la calidad
+        preferCSSPageSize: true,
+        displayHeaderFooter: false,
+        scale: 1,
       });
 
       // Convertir Uint8Array a Buffer
