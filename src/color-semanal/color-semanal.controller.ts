@@ -11,9 +11,9 @@ export class ColorSemanalController {
 
   @Roles("COLOR_ADMIN")
   @UseGuards(AuthGuard, RoleGuard)
-  @Post("saveColorOut")
+  @Post("saveColorIn")
   async saveColor(@Body() { color }: ColorValidation) {
-    return await this.colorSemanalService.saveColorOut(color);
+    return await this.colorSemanalService.saveColorIn(color);
   }
 
   @UseGuards(AuthGuard)

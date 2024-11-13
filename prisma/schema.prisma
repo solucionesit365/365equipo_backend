@@ -106,8 +106,9 @@ model Permiso {
 }
 
 model Color {
-  id    String       @id @default(uuid())
-  value ColorSemanal
+  id        String       @id @default(uuid())
+  value     ColorSemanal
+  updatedAt DateTime     @default(now())
 }
 
 model VideoFormacion {
