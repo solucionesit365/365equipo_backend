@@ -241,7 +241,7 @@ export class Fichajes {
         fichajesPretty.push({
           _id: fichajesBC[i].idr,
           hora: DateTime.fromJSDate(new Date(fichajesBC[i].tmst)).minus({
-            hours: 2,
+            hours: 1,
           }),
           uid: idApp,
           tipo: "ENTRADA",
@@ -256,7 +256,7 @@ export class Fichajes {
         fichajesPretty.push({
           _id: fichajesBC[i].idr,
           hora: DateTime.fromJSDate(new Date(fichajesBC[i].tmst)).minus({
-            hours: 2,
+            hours: 1,
           }),
           uid: idApp,
           tipo: "SALIDA",
