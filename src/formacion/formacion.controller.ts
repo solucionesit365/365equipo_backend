@@ -2,6 +2,8 @@ import { Body, Controller, Get, Post, Query, UseGuards } from "@nestjs/common";
 import { FormacionService } from "./formacion.service";
 import { AuthGuard } from "../guards/auth.guard";
 import {
+  CompartirFormacionDto,
+  CompartirFormacionManualDto,
   CreateFormacionDto,
   DeleteFormacionDto,
   GetFormacionByIdDto,
@@ -42,5 +44,17 @@ export class FormacionController {
   async deleteFormacion(@Body() req: DeleteFormacionDto) {
     await this.formacionService.deleteFormacion(req.id);
     return true;
+  }
+
+  @UseGuards(AuthGuard)
+  @Post("compartir/grupo")
+  async compartirFormacionGrupo(@Body() req: CompartirFormacionDto) {
+    return await this.formacionService.compartirFormacionGrupo(req);
+  }
+
+  @UseGuards(AuthGuard)
+  @Post("compartir/manual")
+  async compartirFormacionManual(@Body() req: CompartirFormacionManualDto) {
+    return await this.formacionService.compartirFormacionManual(req);
   }
 }

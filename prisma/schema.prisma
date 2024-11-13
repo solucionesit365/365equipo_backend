@@ -8,12 +8,12 @@ datasource db {
 }
 
 model Trabajador {
-  id               Int                @id @default(autoincrement())
-  idApp            String?            @unique
+  id               Int          @id @default(autoincrement())
+  idApp            String?      @unique
   nombreApellidos  String
   displayName      String?
   emails           String
-  dni              String             @unique
+  dni              String       @unique
   direccion        String?
   ciudad           String?
   telefonos        String?
@@ -28,17 +28,16 @@ model Trabajador {
   llevaEquipo      Boolean
   tokenQR          String?
   displayFoto      String?
-  excedencia       Boolean            @default(false)
+  excedencia       Boolean      @default(false)
   dispositivo      String?
   empresaId        String?
   contratos        Contrato2[]
-  formacionSanidad FormacionSanidad[]
-  empresa          Empresa?           @relation(fields: [empresaId], references: [id])
-  responsable      Trabajador?        @relation("Responsable", fields: [idResponsable], references: [id])
-  subordinados     Trabajador[]       @relation("Responsable")
-  tienda           Tienda?            @relation(fields: [idTienda], references: [id])
-  permisos         Permiso[]          @relation("PermisoToTrabajador")
-  roles            Role[]             @relation("RoleToTrabajador")
+  empresa          Empresa?     @relation(fields: [empresaId], references: [id])
+  responsable      Trabajador?  @relation("Responsable", fields: [idResponsable], references: [id])
+  subordinados     Trabajador[] @relation("Responsable")
+  tienda           Tienda?      @relation(fields: [idTienda], references: [id])
+  permisos         Permiso[]    @relation("PermisoToTrabajador")
+  roles            Role[]       @relation("RoleToTrabajador")
 }
 
 model Tienda {
@@ -111,18 +110,6 @@ model Color {
   value ColorSemanal
 }
 
-model FormacionSanidad {
-  id                String     @id @default(uuid())
-  nombre            String
-  fecha             DateTime
-  idTrabajador      Int
-  duracion          String
-  lugar             String
-  firmadoTrabajador Boolean    @default(false)
-  firmadoEmpresa    Boolean    @default(false)
-  trabajador        Trabajador @relation(fields: [idTrabajador], references: [id])
-}
-
 model VideoFormacion {
   id           String     @id @default(uuid())
   name         String
@@ -131,6 +118,29 @@ model VideoFormacion {
   date         DateTime   @default(now())
   duration     Int
   department   Department
+}
+
+model DocumentoOriginal {
+  id           String             @id @default(uuid()) // Esto es el CSV
+  name         String
+  pathFile     String
+  relativePath String
+  hash         String
+  date         DateTime           @default(now())
+  department   Department
+  firmados     DocumentoFirmado[]
+}
+
+model DocumentoFirmado {
+  id                  String            @id @default(uuid())
+  name                String
+  pathFile            String
+  relativePath        String
+  hash                String
+  date                DateTime          @default(now())
+  department          Department
+  original            DocumentoOriginal @relation(fields: [documentoOriginalId], references: [id])
+  documentoOriginalId String
 }
 
 model Presentacion {
@@ -149,6 +159,8 @@ model Questionnaire {
   type                QuestionnaireType
   questions           Question[]
   categoryOfQuestions QuestionCategory[]
+  maxErrors           Int                @default(0)
+  nQuestions          Int?
 }
 
 model Question {

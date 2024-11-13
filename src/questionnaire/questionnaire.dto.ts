@@ -2,6 +2,8 @@ import {
   IsArray,
   IsEnum,
   IsNotEmpty,
+  IsNumber,
+  IsOptional,
   IsString,
   ValidateNested,
 } from "class-validator";
@@ -23,6 +25,13 @@ export class CreateQuestionnaireDto {
   @IsArray()
   @IsString({ each: true })
   categoryOfQuestions: string[];
+
+  @IsNumber()
+  maxErrors: number;
+
+  @IsOptional()
+  @IsNumber()
+  nQuestions: number;
 }
 
 export class UpdateQuestionnaireDto {

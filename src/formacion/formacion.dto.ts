@@ -1,9 +1,11 @@
 import { Type } from "class-transformer";
 import {
+  ArrayMinSize,
   IsArray,
   IsEnum,
   IsInt,
   IsNotEmpty,
+  IsNumber,
   IsOptional,
   IsString,
   ValidateNested,
@@ -23,6 +25,46 @@ export class DeleteFormacionDto {
   @IsNotEmpty()
   @IsString()
   id: string;
+}
+
+export class TrabajadorSubDto {
+  @IsOptional()
+  @IsNumber()
+  id: number;
+
+  @IsNotEmpty()
+  @IsString()
+  nombreApellidos: string;
+
+  @IsNotEmpty()
+  @IsString()
+  email: string;
+
+  @IsOptional()
+  @IsString()
+  telefono: string;
+}
+
+export class CompartirFormacionDto {
+  @IsNotEmpty()
+  @IsString()
+  formacionId: string;
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @ArrayMinSize(1)
+  @Type(() => TrabajadorSubDto)
+  trabajadores: TrabajadorSubDto[];
+}
+
+export class CompartirFormacionManualDto {
+  @IsNotEmpty()
+  @IsString()
+  formacionId: string;
+
+  @ValidateNested()
+  @Type(() => TrabajadorSubDto)
+  trabajador: TrabajadorSubDto;
 }
 
 enum Department {
