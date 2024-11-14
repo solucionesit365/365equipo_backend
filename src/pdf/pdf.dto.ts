@@ -27,3 +27,26 @@ export class DeleteDocumentoDto {
   @IsString()
   id: string;
 }
+
+export class DownloadPdfByIdDto {
+  @IsString()
+  id: string;
+}
+
+export class SignDocumentDto {
+  @IsNotEmpty()
+  @IsString()
+  documentId: string;
+
+  @IsNotEmpty()
+  @IsString()
+  signature: string;
+
+  @IsNotEmpty()
+  @IsString()
+  fullName: string;
+
+  @IsNotEmpty()
+  @IsString()
+  phone: string;
+}

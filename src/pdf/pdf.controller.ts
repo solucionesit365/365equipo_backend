@@ -1,14 +1,31 @@
-import { Body, Controller, Get, Post, Query, UseGuards } from "@nestjs/common";
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Get,
+  InternalServerErrorException,
+  NotFoundException,
+  Post,
+  Query,
+  Res,
+  UseGuards,
+} from "@nestjs/common";
 import { PdfService } from "./pdf.service";
 import { AuthGuard } from "../guards/auth.guard";
 import {
   DeleteDocumentoDto,
+  DownloadPdfByIdDto,
   GeneratePdfDto,
   GetDocumentosFirmadosDto,
   GetDocumentosOriginalesDto,
+  SignDocumentDto,
 } from "./pdf.dto";
 import { StorageService } from "../storage/storage.service";
 import { CryptoService } from "../crypto/crypto.class";
+import { join } from "path";
+import { Response as ExpressResponse } from "express";
+import { PrismaService } from "../prisma/prisma.service";
+import { DateTime } from "luxon";
 
 @Controller("pdf")
 export class PdfController {
@@ -16,6 +33,7 @@ export class PdfController {
     private readonly pdfService: PdfService,
     private readonly storageService: StorageService,
     private readonly cryptoService: CryptoService,
+    private readonly prismaService: PrismaService,
   ) {}
 
   //   @Get("generate")
@@ -210,7 +228,7 @@ export class PdfController {
       "application/pdf",
     );
 
-    await this.pdfService.guardarDocumentoPdf(
+    await this.pdfService.guardarDocumentoOriginalPdf(
       CSV,
       relativePath,
       url,
@@ -248,6 +266,124 @@ export class PdfController {
       return {
         error: false,
       };
+    }
+  }
+
+  @Get("documentoOriginal")
+  async getDocument(
+    @Query() req: DownloadPdfByIdDto,
+    @Res() res: ExpressResponse,
+  ) {
+    try {
+      const pdfStream = await this.pdfService.getStreamPdfById(req.id);
+
+      // Configurar headers
+      res.set({
+        "Content-Type": "application/pdf",
+        "Content-Disposition": "inline; filename=documento.pdf",
+        "Cache-Control": "no-cache",
+        "Accept-Ranges": "bytes",
+      });
+
+      // Manejar errores del stream
+      pdfStream.on("error", (error) => {
+        console.error("Error en el stream:", error);
+        if (!res.headersSent) {
+          res.status(500).json({ message: "Error al transmitir el documento" });
+        }
+      });
+
+      // Recolectar datos para verificar que no está vacío
+      let hasData = false;
+      pdfStream.on("data", (chunk) => {
+        hasData = true;
+      });
+
+      // Verificar al final si recibimos datos
+      pdfStream.on("end", () => {
+        if (!hasData) {
+          console.error("Stream terminó sin datos");
+        }
+      });
+
+      // Pipe el stream a la respuesta
+      pdfStream.pipe(res);
+
+      // Manejar el cierre de la conexión
+      res.on("close", () => {
+        pdfStream.destroy();
+      });
+    } catch (error) {
+      console.error("Error completo:", error);
+      if (error instanceof NotFoundException) {
+        res.status(404).json({ message: "Documento no encontrado" });
+      } else {
+        res.status(500).json({
+          message: "Error interno al obtener el documento",
+          error: error.message,
+        });
+      }
+    }
+  }
+
+  @UseGuards(AuthGuard)
+  @Post("sign")
+  async signDocument(@Body() req: SignDocumentDto) {
+    try {
+      const signDatetime = DateTime.now();
+      // Convertir la firma de base64 a buffer
+      const base64Data = req.signature.split(";base64,").pop();
+      if (!base64Data) {
+        throw new BadRequestException("Formato de firma inválido");
+      }
+
+      const signatureBuffer = Buffer.from(base64Data, "base64");
+
+      const originalPdfData =
+        await this.prismaService.documentoOriginal.findFirst({
+          where: {
+            id: req.documentId,
+          },
+        });
+
+      const originalPdfBuffer = await this.storageService.downloadFile(
+        originalPdfData.relativePath,
+      );
+
+      const signedPdfBuffer = await this.pdfService.addSignatureToPdf(
+        originalPdfBuffer,
+        signatureBuffer,
+        req.fullName,
+        signDatetime,
+      );
+
+      const hashSignedPdf = this.cryptoService.hashFile512(signedPdfBuffer);
+      const relativePath = `api_firma/pdfs_firmados/${hashSignedPdf}.pdf`;
+      const url = await this.storageService.uploadFile(
+        relativePath,
+        signedPdfBuffer,
+        "application/pdf",
+      );
+
+      await this.pdfService.guardarDocumentoFirmadoPdf(
+        req.documentId,
+        `api_firma/pdfs_firmados/${hashSignedPdf}.pdf`,
+        url,
+        hashSignedPdf,
+        "Firmado por: " + req.fullName,
+      );
+
+      return true;
+    } catch (error) {
+      console.error("Error signing document:", error);
+
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+
+      throw new InternalServerErrorException(
+        "Error al procesar la firma del documento",
+      );
     }
   }
 }
