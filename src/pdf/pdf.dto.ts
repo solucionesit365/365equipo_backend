@@ -32,3 +32,13 @@ export class DownloadPdfByIdDto {
   @IsString()
   id: string;
 }
+
+export class SignDocumentDto {
+  @IsNotEmpty()
+  @IsString()
+  resourceId: string;
+
+  @IsNotEmpty()
+  @IsString()
+  signature: string; // Base64
+}

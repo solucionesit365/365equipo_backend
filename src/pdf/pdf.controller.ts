@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
@@ -16,11 +17,13 @@ import {
   GeneratePdfDto,
   GetDocumentosFirmadosDto,
   GetDocumentosOriginalesDto,
+  SignDocumentDto,
 } from "./pdf.dto";
 import { StorageService } from "../storage/storage.service";
 import { CryptoService } from "../crypto/crypto.class";
 import { join } from "path";
 import { Response as ExpressResponse } from "express";
+import { PrismaService } from "../prisma/prisma.service";
 
 @Controller("pdf")
 export class PdfController {
@@ -28,6 +31,7 @@ export class PdfController {
     private readonly pdfService: PdfService,
     private readonly storageService: StorageService,
     private readonly cryptoService: CryptoService,
+    private readonly prismaService: PrismaService,
   ) {}
 
   //   @Get("generate")
@@ -317,6 +321,65 @@ export class PdfController {
           error: error.message,
         });
       }
+    }
+  }
+
+  @UseGuards(AuthGuard)
+  @Post("sign")
+  async signDocument(@Body() signDocumentDto: SignDocumentDto) {
+    try {
+      // Convertir la firma de base64 a buffer
+      const base64Data = signDocumentDto.signature.split(";base64,").pop();
+      if (!base64Data) {
+        throw new BadRequestException("Formato de firma inválido");
+      }
+
+      const signatureBuffer = Buffer.from(base64Data, "base64");
+
+      const originalPdfData =
+        await this.prismaService.documentoOriginal.findFirst({
+          where: {
+            id: signDocumentDto.resourceId,
+          },
+        });
+
+      const originalPdfBuffer = await this.storageService.downloadFile(
+        originalPdfData.relativePath,
+      );
+
+      // Aquí puedes implementar la lógica para combinar el PDF con la firma
+      // Por ejemplo, usando una librería como pdf-lib o similar
+
+      // Guardar el registro de la firma en la base de datos
+      await this.prismaService.documentSignature.create({
+        data: {
+          documentId: signDocumentDto.resourceId,
+          signaturePath,
+          signerName: signDocumentDto.fullName,
+          signerPhone: signDocumentDto.phone,
+          signedAt: new Date(),
+        },
+      });
+      // Guardar documento firmado en el sistema
+      // await this.storageService.uploadFile(
+      //   signaturePath,
+      //   signatureBuffer,
+      //   "image/png",
+      // );
+      return {
+        success: true,
+        message: "Documento firmado correctamente",
+      };
+    } catch (error) {
+      console.error("Error signing document:", error);
+
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+
+      throw new InternalServerErrorException(
+        "Error al procesar la firma del documento",
+      );
     }
   }
 }
