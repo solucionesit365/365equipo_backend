@@ -127,17 +127,12 @@ export class PdfService {
     }
   }
   async addSignatureToPdf(
-    pdfPath: string,
-    signaturePath: string,
+    pdfBuffer: Buffer,
+    signatureBuffer: Buffer,
   ): Promise<string> {
-    // Leer el archivo PDF ya generado
-    const pdfBytes = fs.readFileSync(pdfPath);
     // Crear un nuevo PDFDocument a partir del PDF existente
-    const pdfDoc = await PDFDocument.load(pdfBytes);
-
-    // Leer la imagen de la firma
-    const signatureImageBytes = fs.readFileSync(signaturePath);
-    const signatureImage = await pdfDoc.embedPng(signatureImageBytes);
+    const pdfDoc = await PDFDocument.load(pdfBuffer);
+    const signatureImage = await pdfDoc.embedPng(signatureBuffer);
 
     // Obtener la primera página del PDF
     const pages = pdfDoc.getPages();
