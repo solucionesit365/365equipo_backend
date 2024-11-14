@@ -214,6 +214,14 @@ model PasosFormacion {
   formacionesId String?
 }
 
+model SmsOtp {
+  id    String   @id @default(uuid())
+  phone String
+  otp   String
+  date  DateTime @default(now())
+  used  Boolean  @default(false)
+}
+
 enum ColorSemanal {
   green
   orange
