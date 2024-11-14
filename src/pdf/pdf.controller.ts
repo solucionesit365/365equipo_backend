@@ -25,6 +25,7 @@ import { CryptoService } from "../crypto/crypto.class";
 import { join } from "path";
 import { Response as ExpressResponse } from "express";
 import { PrismaService } from "../prisma/prisma.service";
+import { DateTime } from "luxon";
 
 @Controller("pdf")
 export class PdfController {
@@ -227,7 +228,7 @@ export class PdfController {
       "application/pdf",
     );
 
-    await this.pdfService.guardarDocumentoPdf(
+    await this.pdfService.guardarDocumentoOriginalPdf(
       CSV,
       relativePath,
       url,
@@ -327,10 +328,11 @@ export class PdfController {
 
   @UseGuards(AuthGuard)
   @Post("sign")
-  async signDocument(@Body() signDocumentDto: SignDocumentDto) {
+  async signDocument(@Body() req: SignDocumentDto) {
     try {
+      const signDatetime = DateTime.now();
       // Convertir la firma de base64 a buffer
-      const base64Data = signDocumentDto.signature.split(";base64,").pop();
+      const base64Data = req.signature.split(";base64,").pop();
       if (!base64Data) {
         throw new BadRequestException("Formato de firma inválido");
       }
@@ -340,7 +342,7 @@ export class PdfController {
       const originalPdfData =
         await this.prismaService.documentoOriginal.findFirst({
           where: {
-            id: signDocumentDto.resourceId,
+            id: req.documentId,
           },
         });
 
@@ -351,17 +353,27 @@ export class PdfController {
       const signedPdfBuffer = await this.pdfService.addSignatureToPdf(
         originalPdfBuffer,
         signatureBuffer,
+        req.fullName,
+        signDatetime,
       );
-      // Guardar documento firmado en el sistema
-      // await this.storageService.uploadFile(
-      //   signaturePath,
-      //   signatureBuffer,
-      //   "image/png",
-      // );
-      return {
-        success: true,
-        message: "Documento firmado correctamente",
-      };
+
+      const hashSignedPdf = this.cryptoService.hashFile512(signedPdfBuffer);
+      const relativePath = `api_firma/pdfs_firmados/${hashSignedPdf}.pdf`;
+      const url = await this.storageService.uploadFile(
+        relativePath,
+        signedPdfBuffer,
+        "application/pdf",
+      );
+
+      await this.pdfService.guardarDocumentoFirmadoPdf(
+        req.documentId,
+        `api_firma/pdfs_firmados/${hashSignedPdf}.pdf`,
+        url,
+        hashSignedPdf,
+        "Firmado por: " + req.fullName,
+      );
+
+      return true;
     } catch (error) {
       console.error("Error signing document:", error);
 

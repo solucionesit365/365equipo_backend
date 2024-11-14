@@ -36,9 +36,17 @@ export class DownloadPdfByIdDto {
 export class SignDocumentDto {
   @IsNotEmpty()
   @IsString()
-  resourceId: string;
+  documentId: string;
 
   @IsNotEmpty()
   @IsString()
-  signature: string; // Base64
+  signature: string;
+
+  @IsNotEmpty()
+  @IsString()
+  fullName: string;
+
+  @IsNotEmpty()
+  @IsString()
+  phone: string;
 }

@@ -12,6 +12,7 @@ import { CryptoService } from "../crypto/crypto.class";
 import { GeneratePdfDto, GetDocumentosOriginalesDto } from "./pdf.dto";
 import { PrismaService } from "../prisma/prisma.service";
 import { Readable } from "stream";
+import { DateTime } from "luxon";
 
 @Injectable()
 export class PdfService {
@@ -126,26 +127,26 @@ export class PdfService {
       await browser.close();
     }
   }
+
   async addSignatureToPdf(
     pdfBuffer: Buffer,
     signatureBuffer: Buffer,
-  ): Promise<string> {
-    // Crear un nuevo PDFDocument a partir del PDF existente
+    fullName: string,
+    datetime: DateTime,
+  ): Promise<Buffer> {
     const pdfDoc = await PDFDocument.load(pdfBuffer);
     const signatureImage = await pdfDoc.embedPng(signatureBuffer);
-
-    // Obtener la primera página del PDF
     const pages = pdfDoc.getPages();
     const firstPage = pages[0];
 
-    // Definir el tamaño y posición de la imagen de la firma (en el fondo de la página)
+    // Definir el tamaño y posición de la imagen de la firma
     const { width, height } = firstPage.getSize();
-    const signatureWidth = 150; // Ancho de la firma
-    const signatureHeight = 50; // Alto de la firma
-    const xPosition = width - signatureWidth - 50; // Posición en el eje X
-    const yPosition = 50; // Posición en el eje Y (cerca del borde inferior)
+    const signatureWidth = 150;
+    const signatureHeight = 50;
+    const xPosition = width - signatureWidth - 50;
+    const yPosition = 50;
 
-    // Dibujar la imagen de la firma en la primera página
+    // Dibujar la imagen de la firma
     firstPage.drawImage(signatureImage, {
       x: xPosition,
       y: yPosition,
@@ -153,80 +154,26 @@ export class PdfService {
       height: signatureHeight,
     });
 
-    // Guardar el nuevo PDF modificado
-    const modifiedPdfBytes = await pdfDoc.save();
-    const outputPdfWithSignature = path.join(
-      __dirname,
-      "..",
-      "generated",
-      "output_with_signature.pdf",
-    );
-    fs.writeFileSync(outputPdfWithSignature, modifiedPdfBytes);
+    // Formatear la fecha y hora
+    const formattedDate = datetime
+      .setLocale("es")
+      .toFormat("dd 'de' MMMM 'de' yyyy 'a las' HH:mm'h'");
 
-    return outputPdfWithSignature;
+    // Añadir el texto de la firma
+    firstPage.drawText(`Firmado por ${fullName}`, {
+      x: xPosition,
+      y: yPosition - 15,
+      size: 10,
+    });
+
+    firstPage.drawText(`el ${formattedDate}`, {
+      x: xPosition,
+      y: yPosition - 30,
+      size: 10,
+    });
+
+    return Buffer.from(await pdfDoc.save());
   }
-
-  private changeFolderFilePath(filePath: string) {
-    return filePath.replace("sin_csv", "con_csv");
-  }
-
-  private cleanFileName(filePath: string) {
-    const parts = filePath.split("/");
-    const fileName = parts[parts.length - 1];
-    return fileName.replace(".pdf", "");
-  }
-
-  // async addVerificationCodeToPdf(
-  //   pathFile: string,
-  // ): Promise<{ pathFile: string; hash: string }> {
-  //   // Descargar el archivo PDF del bucket
-  //   const fileBuffer = await this.storageService.downloadFile(pathFile);
-
-  //   // Verificar si el archivo tiene un encabezado de PDF válido
-  //   const header = fileBuffer.subarray(0, 5).toString();
-  //   if (header !== "%PDF-") {
-  //     throw new Error("El archivo descargado no es un archivo PDF válido.");
-  //   }
-
-  //   // Cargar el PDF descargado usando pdf-lib
-  //   const pdfDoc = await PDFDocument.load(fileBuffer);
-
-  //   // Obtener todas las páginas del documento
-  //   const pages = pdfDoc.getPages();
-
-  //   // Agregar el código en cada página del documento
-  //   for (const page of pages) {
-  //     const { width } = page.getSize();
-  //     const fontSize = 8;
-  //     const text =
-  //       "Código seguro de verificación: " + this.cleanFileName(pathFile);
-
-  //     page.drawText(text, {
-  //       x: 20, // Un poco de margen desde el borde izquierdo
-  //       y: 10, // Cerca del borde inferior
-  //       size: fontSize,
-  //       rotate: degrees(0), // Sin rotación
-  //       color: rgb(0.5, 0.5, 0.5), // Color gris para que sea menos intrusivo
-  //       maxWidth: width - 40, // Máximo ancho para evitar desbordamiento
-  //     });
-  //   }
-
-  //   // Guardar el PDF modificado
-  //   const modifiedPdfBuffer = await pdfDoc.save();
-
-  //   // Generar el hash del archivo modificado
-  //   const hash = this.cryptoService.hashFile512(Buffer.from(modifiedPdfBuffer));
-
-  //   // Subir el archivo modificado al bucket
-  //   return {
-  //     pathFile: await this.storageService.uploadFile(
-  //       this.changeFolderFilePath(pathFile),
-  //       Buffer.from(modifiedPdfBuffer),
-  //       "application/pdf",
-  //     ),
-  //     hash: hash,
-  //   };
-  // }
 
   async addVerificationCodeToPdf(
     fileBuffer: Buffer,
@@ -268,7 +215,7 @@ export class PdfService {
     };
   }
 
-  async guardarDocumentoPdf(
+  async guardarDocumentoOriginalPdf(
     CSV: string,
     relativePath: string,
     url: string,
@@ -282,6 +229,37 @@ export class PdfService {
           id: CSV,
           department,
           name,
+          hash,
+          pathFile: url,
+          relativePath,
+        },
+      });
+    } catch (error) {
+      console.error("Error guardando documento PDF:", error);
+      throw new InternalServerErrorException("Error guardando documento PDF.");
+    }
+  }
+
+  async guardarDocumentoFirmadoPdf(
+    originalDocumentId: string,
+    relativePath: string,
+    url: string,
+    hash: string,
+    name: string,
+  ) {
+    try {
+      const documentoOriginal =
+        await this.prismaService.documentoOriginal.findUnique({
+          where: {
+            id: originalDocumentId,
+          },
+        });
+
+      await this.prismaService.documentoFirmado.create({
+        data: {
+          department: documentoOriginal.department,
+          name,
+          documentoOriginalId: originalDocumentId,
           hash,
           pathFile: url,
           relativePath,
