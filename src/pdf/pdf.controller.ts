@@ -3,6 +3,7 @@ import {
   Body,
   Controller,
   Get,
+  InternalServerErrorException,
   NotFoundException,
   Post,
   Query,
@@ -347,19 +348,10 @@ export class PdfController {
         originalPdfData.relativePath,
       );
 
-      // Aquí puedes implementar la lógica para combinar el PDF con la firma
-      // Por ejemplo, usando una librería como pdf-lib o similar
-
-      // Guardar el registro de la firma en la base de datos
-      await this.prismaService.documentSignature.create({
-        data: {
-          documentId: signDocumentDto.resourceId,
-          signaturePath,
-          signerName: signDocumentDto.fullName,
-          signerPhone: signDocumentDto.phone,
-          signedAt: new Date(),
-        },
-      });
+      const signedPdfBuffer = await this.pdfService.addSignatureToPdf(
+        originalPdfBuffer,
+        signatureBuffer,
+      );
       // Guardar documento firmado en el sistema
       // await this.storageService.uploadFile(
       //   signaturePath,
