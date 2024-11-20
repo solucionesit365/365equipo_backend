@@ -7,18 +7,11 @@ export class HardwareService {
   constructor(private readonly hardwareDatabase: HardwareDatabase) {}
 
   async newHardware(hardWare: HardWareInterface) {
-    if (!hardWare.SN) {
-      return {
-        ok: false,
-        data: "El trabajador y número de serie son obligatorios",
-      };
-    } else {
-      this.hardwareDatabase.newHardWare(hardWare);
-      return {
-        ok: true,
-        data: "Dispositivo creado",
-      };
-    }
+    this.hardwareDatabase.newHardWare(hardWare);
+    return {
+      ok: true,
+      data: "Dispositivo creado",
+    };
   }
 
   async getHardware() {

@@ -8,6 +8,8 @@ export interface HardWareInterface {
   marca: string;
   modelo: string;
   SN: string;
+  IMEI: string;
+  IMEI2: string;
   wmicBios: string;
   SO: string;
   procesador: string;
