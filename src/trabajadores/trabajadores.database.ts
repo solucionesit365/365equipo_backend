@@ -443,7 +443,7 @@ export class TrabajadorDatabaseService {
         },
       },
     });
-    subordinados[0].contratos;
+
     return subordinados;
   }
 
