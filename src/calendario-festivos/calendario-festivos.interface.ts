@@ -17,5 +17,5 @@ export interface eventoNavideño {
   asistira: boolean;
   nombreApellidos: string;
   fechaRespuesta: Date;
-  year: Number;
+  year: number;
 }

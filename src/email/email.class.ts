@@ -1,7 +1,6 @@
-import { Injectable, Inject, forwardRef } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import * as nodemailer from "nodemailer";
 import { FirebaseService } from "../firebase/firebase.service";
-import { TrabajadorService } from "../trabajadores/trabajadores.class";
 
 @Injectable()
 export class EmailService {

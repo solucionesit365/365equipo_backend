@@ -1,7 +1,7 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { PactadoVsRealService } from './pactado-vs-real.service';
+import { Test, TestingModule } from "@nestjs/testing";
+import { PactadoVsRealService } from "./pactado-vs-real.service";
 
-describe('PactadoVsRealService', () => {
+describe("PactadoVsRealService", () => {
   let service: PactadoVsRealService;
 
   beforeEach(async () => {
@@ -12,7 +12,7 @@ describe('PactadoVsRealService', () => {
     service = module.get<PactadoVsRealService>(PactadoVsRealService);
   });
 
-  it('should be defined', () => {
+  it("should be defined", () => {
     expect(service).toBeDefined();
   });
 });

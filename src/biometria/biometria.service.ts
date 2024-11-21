@@ -1,10 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable } from "@nestjs/common";
 import {
   generateRegistrationOptions,
   verifyRegistrationResponse,
-} from '@simplewebauthn/server';
-import { BiometriaDatabase } from './biometria.mongodb';
-import { Biometria } from './biometria.interface';
+} from "@simplewebauthn/server";
+import { BiometriaDatabase } from "./biometria.mongodb";
 
 @Injectable()
 export class BiometriaService {
@@ -12,16 +11,16 @@ export class BiometriaService {
 
   async generateRegistrationOptions(user) {
     const options = generateRegistrationOptions({
-      rpName: 'Ejemplo PWA',
-      rpID: '365equipo.com',  // Añadir rpID
+      rpName: "Ejemplo PWA",
+      rpID: "365equipo.com", // Añadir rpID
       userID: user.id,
       userName: user.email,
       userDisplayName: user.name,
       timeout: 60000,
-      attestationType: 'direct',
+      attestationType: "direct",
       authenticatorSelection: {
-        authenticatorAttachment: 'platform',
-        userVerification: 'required',
+        authenticatorAttachment: "platform",
+        userVerification: "required",
       },
     });
 
@@ -35,14 +34,17 @@ export class BiometriaService {
     const authData = await this.authDbService.getChallenge(user.id);
 
     const verification = await verifyRegistrationResponse({
-      response,  // Usar directamente 'response' en lugar de 'credential'
+      response, // Usar directamente 'response' en lugar de 'credential'
       expectedChallenge: authData.challenge,
-      expectedOrigin: 'https://tu-dominio.com',
-      expectedRPID: 'tu-dominio.com',
+      expectedOrigin: "https://tu-dominio.com",
+      expectedRPID: "tu-dominio.com",
     });
 
     if (verification.verified) {
-      await this.authDbService.saveCredential(user.id, verification.registrationInfo);
+      await this.authDbService.saveCredential(
+        user.id,
+        verification.registrationInfo,
+      );
     }
 
     return verification;

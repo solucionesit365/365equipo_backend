@@ -1,6 +1,6 @@
 import { ObjectId } from "mongodb";
 
-export interface diaPersonal {
+export interface DiaPersonal {
   _id?: ObjectId;
   idBeneficiario: number;
   dni?: string;

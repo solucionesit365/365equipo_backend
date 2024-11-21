@@ -1,7 +1,7 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { VideosFormacionController } from './videos-formacion.controller';
+import { Test, TestingModule } from "@nestjs/testing";
+import { VideosFormacionController } from "./videos-formacion.controller";
 
-describe('VideosFormacionController', () => {
+describe("VideosFormacionController", () => {
   let controller: VideosFormacionController;
 
   beforeEach(async () => {
@@ -9,10 +9,12 @@ describe('VideosFormacionController', () => {
       controllers: [VideosFormacionController],
     }).compile();
 
-    controller = module.get<VideosFormacionController>(VideosFormacionController);
+    controller = module.get<VideosFormacionController>(
+      VideosFormacionController,
+    );
   });
 
-  it('should be defined', () => {
+  it("should be defined", () => {
     expect(controller).toBeDefined();
   });
 });

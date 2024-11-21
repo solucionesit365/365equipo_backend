@@ -1,12 +1,4 @@
-import {
-  Controller,
-  Post,
-  UseGuards,
-  Headers,
-  Body,
-  Get,
-  Query,
-} from "@nestjs/common";
+import { Controller, Post, UseGuards, Body, Get, Query } from "@nestjs/common";
 import { AuthGuard } from "../guards/auth.guard";
 import { videosFormacion365Class } from "./videos-formacion.class";
 import {

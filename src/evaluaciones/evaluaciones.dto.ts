@@ -1,7 +1,5 @@
 import {
   IsBoolean,
-  IsDate,
-  IsEnum,
   IsNotEmpty,
   IsNumber,
   IsOptional,

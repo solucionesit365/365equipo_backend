@@ -1,7 +1,7 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { ColorSemanalController } from './color-semanal.controller';
+import { Test, TestingModule } from "@nestjs/testing";
+import { ColorSemanalController } from "./color-semanal.controller";
 
-describe('ColorSemanalController', () => {
+describe("ColorSemanalController", () => {
   let controller: ColorSemanalController;
 
   beforeEach(async () => {
@@ -12,7 +12,7 @@ describe('ColorSemanalController', () => {
     controller = module.get<ColorSemanalController>(ColorSemanalController);
   });
 
-  it('should be defined', () => {
+  it("should be defined", () => {
     expect(controller).toBeDefined();
   });
 });

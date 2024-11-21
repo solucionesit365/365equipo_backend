@@ -8,7 +8,7 @@ import { AuthGuard } from "../guards/auth.guard";
  */
 @Controller("perfil-hardware")
 export class PerfilHardwareController {
-  constructor(private readonly PerfilHardwareService: PerfilHardwareService) {}
+  constructor(private readonly perfilHardwareService: PerfilHardwareService) {}
 
   /**
    * Creates a new hardware profile.
@@ -19,7 +19,7 @@ export class PerfilHardwareController {
   @Post("newPerfilHardware")
   async newPerfilHardware(@Body() perfilHardwareObj: PerfilHardware) {
     try {
-      return await this.PerfilHardwareService.newPerfilHardware(
+      return await this.perfilHardwareService.newPerfilHardware(
         perfilHardwareObj,
       );
     } catch (err) {
@@ -36,7 +36,7 @@ export class PerfilHardwareController {
   @Get("getPerfiles")
   async getHardwares() {
     try {
-      const respAusencias = await this.PerfilHardwareService.getPerfiles();
+      const respAusencias = await this.perfilHardwareService.getPerfiles();
       if (respAusencias) return { ok: true, data: respAusencias };
       console.log(respAusencias);
     } catch (err) {
@@ -53,7 +53,7 @@ export class PerfilHardwareController {
   @Post("deletePerfil")
   async deletPerfil(@Body() perfil: PerfilHardware) {
     try {
-      const respPerf = await this.PerfilHardwareService.deletePerfil(perfil);
+      const respPerf = await this.perfilHardwareService.deletePerfil(perfil);
       if (respPerf)
         return {
           ok: true,

@@ -1,10 +1,8 @@
 import { Body, Controller, Post, UseGuards, Get } from "@nestjs/common";
 import { AusenciasService } from "./ausencias.class";
-import { AusenciaInterface } from "./ausencias.interface";
 import { AuthGuard } from "../guards/auth.guard";
 import { SchedulerGuard } from "../guards/scheduler.guard";
 import { DateTime } from "luxon";
-import { ObjectId } from "mongodb";
 
 @Controller("ausencias")
 export class AusenciasController {

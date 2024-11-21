@@ -1,7 +1,7 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { KpiTiendasController } from './kpi-tiendas.controller';
+import { Test, TestingModule } from "@nestjs/testing";
+import { KpiTiendasController } from "./kpi-tiendas.controller";
 
-describe('KpiTiendasController', () => {
+describe("KpiTiendasController", () => {
   let controller: KpiTiendasController;
 
   beforeEach(async () => {
@@ -12,7 +12,7 @@ describe('KpiTiendasController', () => {
     controller = module.get<KpiTiendasController>(KpiTiendasController);
   });
 
-  it('should be defined', () => {
+  it("should be defined", () => {
     expect(controller).toBeDefined();
   });
 });

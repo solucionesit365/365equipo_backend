@@ -4,7 +4,6 @@ import { CuadrantesDatabase } from "./cuadrantes.mongodb";
 import { ObjectId, WithId } from "mongodb";
 import { TCuadrante } from "./cuadrantes.interface";
 import { Tienda } from "../tiendas/tiendas.class";
-import { HitMssqlService } from "../hit-mssql/hit-mssql.service";
 import { AusenciaInterface } from "../ausencias/ausencias.interface";
 import { TrabajadorService } from "../trabajadores/trabajadores.class";
 import { FichajesValidadosService } from "../fichajes-validados/fichajes-validados.class";
@@ -25,7 +24,6 @@ export class Cuadrantes {
     private readonly schCuadrantes: CuadrantesDatabase,
     private readonly contratoService: ContratoService,
     private readonly tiendasInstance: Tienda,
-    private readonly hitMssqlService: HitMssqlService,
     @Inject(forwardRef(() => TrabajadorService))
     private readonly trabajadoresInstance: TrabajadorService,
     private readonly fichajesValidadosInstance: FichajesValidadosService,
@@ -127,10 +125,7 @@ export class Cuadrantes {
     fecha: DateTime,
     horasContrato: number,
   ): Promise<number> {
-    const { horasCuadranteTotal, horasMasMenos } = await this.getBolsaInicial(
-      idSql,
-      fecha,
-    );
+    const { horasMasMenos } = await this.getBolsaInicial(idSql, fecha);
 
     return horasContrato + horasMasMenos;
   }
@@ -436,133 +431,6 @@ export class Cuadrantes {
     );
   }
 
-  // Cuadrantes 2.0 (faltaría optimizar la velocidad de las consultas batch)
-  public async sincronizarConHit() {
-    const cuadrantes = await this.getPendientesEnvio();
-    const tiendas = await this.tiendasInstance.getTiendas();
-
-    // Crear una función asíncrona para manejar la sincronización de cada cuadrante
-    const sincronizarCuadrante = async (cuadrante: TCuadrante) => {
-      const query = "DECLARE @idTurno VARCHAR(255) = NULL";
-      let subQuery = "";
-
-      const sqlBorrar = this.schCuadrantes.borrarHistorial(cuadrante);
-      const nombreTablaPlanificacion = this.schCuadrantes.nombreTablaSqlHit(
-        cuadrante.inicio,
-      );
-
-      if (cuadrante && !cuadrante.ausencia) {
-        const entrada = DateTime.fromJSDate(cuadrante.inicio);
-        const salida = DateTime.fromJSDate(cuadrante.final);
-        const tipoTurno = entrada.hour < 12 ? "M" : "T";
-
-        subQuery += `
-            SELECT @idTurno = NULL;
-            SELECT TOP 1 @idTurno = idTurno from cdpTurnos WHERE horaInicio = '${entrada.toFormat(
-              "yyyy-MM-dd HH:mm:ss",
-            )}' AND horaFin = '${salida.toFormat("yyyy-MM-dd HH:mm:ss")}';
-  
-            IF @idTurno IS NOT NULL
-              BEGIN
-                DELETE FROM ${nombreTablaPlanificacion} WHERE idPlan = '${
-          cuadrante.idPlan
-        }';
-                INSERT INTO ${nombreTablaPlanificacion} (
-                  idPlan, 
-                  fecha, 
-                  botiga, 
-                  periode, 
-                  idTurno, 
-                  usuarioModif, 
-                  fechaModif, 
-                  activo
-                ) 
-                VALUES (
-                  '${cuadrante.idPlan}', 
-                  '${entrada.toFormat("yyyy-MM-dd HH:mm:ss")}',
-                  ${this.tiendasInstance.convertirTiendaToExterno(
-                    cuadrante.idTienda,
-                    tiendas,
-                  )}, 
-                  '${tipoTurno}', 
-                  @idTurno, 
-                  '365EquipoDeTrabajo', 
-                  GETDATE(), 
-                  1
-                );
-              END
-            ELSE
-              BEGIN
-                SELECT @idTurno = NEWID()
-                INSERT INTO cdpTurnos (
-                  nombre, 
-                  horaInicio, 
-                  horaFin, 
-                  idTurno, 
-                  color, 
-                  tipoEmpleado
-                ) 
-                VALUES (
-                  'De ${entrada.toFormat("HH:mm")} a ${salida.toFormat(
-          "HH:mm",
-        )}', 
-                  '${entrada.toFormat("HH:mm")}', 
-                  '${salida.toFormat("HH:mm")}', 
-                  @idTurno, 
-                  '#DDDDDD', 
-                  'RESPONSABLE/DEPENDENTA
-                  ');
-                  DELETE FROM ${nombreTablaPlanificacion} WHERE idPlan = '${
-          cuadrante.idPlan
-        }';
-                  INSERT INTO ${nombreTablaPlanificacion} (
-                    idPlan, 
-                    fecha, 
-                    botiga, 
-                    periode, 
-                    idTurno, 
-                    usuarioModif, 
-                    fechaModif, 
-                    activo
-                  ) 
-                  VALUES (
-                    '${cuadrante.idPlan}', 
-                    '${entrada.toFormat("yyyy-MM-dd HH:mm:ss")}',
-                    ${this.tiendasInstance.convertirTiendaToExterno(
-                      cuadrante.idTienda,
-                      tiendas,
-                    )}, 
-                    '${tipoTurno}', 
-                    @idTurno, 
-                    '365EquipoDeTrabajo', 
-                    GETDATE(), 
-                    1
-                  );
-              END
-          `;
-      }
-
-      const resPlanes = await this.hitMssqlService.recHit(
-        sqlBorrar + query + subQuery,
-      );
-
-      // if (resPlanes.rowsAffected.includes(1)) {
-      // await this.schCuadrantes.setCuadranteEnviado(cuadrante._id);
-      // } else {
-      throw Error("Fallo en la consulta");
-      // }
-    };
-    // Dividir los cuadrantes en lotes y procesarlos en paralelo con Promise.all
-
-    const batchSize = 60; // Ajusta este valor según sea necesario
-    for (let i = 0; i < cuadrantes.length; i += batchSize) {
-      const batch = cuadrantes.slice(i, i + batchSize);
-      await Promise.all(batch.map(sincronizarCuadrante));
-    }
-
-    return true;
-  }
-
   // Cuadrantes 2.0 guardado nuevo
   async saveCuadrante(cuadrantes: TCuadrante[], oldCuadrante: TCuadrante[]) {
     const cuadrantesModificables: TCuadrante[] = [];
@@ -570,34 +438,9 @@ export class Cuadrantes {
     let coincidencia: boolean;
 
     for (let i = 0; i < cuadrantes.length; i += 1) {
-      const fechaCuadrante = DateTime.fromJSDate(cuadrantes[i].inicio);
       coincidencia = false;
 
       for (let j = 0; j < oldCuadrante.length; j += 1) {
-        const fechaOldCuadrante = DateTime.fromJSDate(oldCuadrante[j].inicio);
-
-        // COMPROBAR AQUÍ POR QUÉ NO DEVUELVE NADA EN GUARDARCUADRANTES EN LA SIGUIENTE FUNCIÓN (SCHMONGO)
-        // if (fechaCuadrante.hasSame(fechaOldCuadrante, "day")) {
-        //   cuadrantes[i].ausencia = oldCuadrante[j].ausencia;
-        //   if (
-        //     fechaCuadrante.hasSame(fechaOldCuadrante, "hour") &&
-        //     fechaCuadrante.hasSame(fechaOldCuadrante, "minute")
-        //   ) {
-        //     modificado = false;
-        //   } else modificado = true;
-
-        //   if (modificado) {
-        //     // No hacer nada si hay ausencia completa, porque está bloqueado
-        //     if (oldCuadrante[j].ausencia && oldCuadrante[j].ausencia.completa)
-        //       break;
-
-        //     cuadrantes[i].historialPlanes = oldCuadrante[j].historialPlanes;
-        //     cuadrantes[i].historialPlanes.push(cuadrantes[i].idPlan);
-        //     cuadrantes[i].enviado = false;
-
-        //     cuadrantesModificables.push(cuadrantes[i]);
-        //   } else break;
-        // }
         if (cuadrantes[i]._id.toString() === oldCuadrante[j]._id.toString()) {
           cuadrantesModificables.push(cuadrantes[i]);
           coincidencia = true;

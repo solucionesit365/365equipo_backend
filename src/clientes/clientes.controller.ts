@@ -9,15 +9,7 @@ import {
   Query,
   Res,
 } from "@nestjs/common";
-// import { NewClientRequest } from "./clientes.interface";
-import {
-  IsNotEmpty,
-  IsEmail,
-  IsBoolean,
-  IsString,
-  IsNumber,
-  IsOptional,
-} from "class-validator";
+import { IsEmail, IsBoolean, IsString, IsOptional } from "class-validator";
 import { ClientesService } from "./clientes.service";
 import { Response } from "express";
 

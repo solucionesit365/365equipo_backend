@@ -2,16 +2,17 @@ import { Injectable } from "@nestjs/common";
 import { MbctokenService } from "../../bussinesCentral/services/mbctoken/mbctoken.service";
 import * as baseDatos from "./employees.mssql";
 import axios from "axios";
+
 @Injectable()
 export class EmployeesClass {
-  constructor(private readonly MbctokenService: MbctokenService) {}
+  constructor(private readonly mbctokenService: MbctokenService) {}
 
   async getEmployees() {
     try {
-      const token = await this.MbctokenService.getToken();
+      const token = await this.mbctokenService.getToken();
 
       //get Employees ?$filter=number eq '4071'
-      let response = await axios.get(
+      const response = await axios.get(
         `${process.env.MCB_BASE_URL}/v2.0/${process.env.MBC_TOKEN_TENANT}/${process.env.MCB_ENVIRONMENT_DEV}/api/v2.0/companies(${process.env.MBC_COMPANYID_FILAPENA_DEV})/employees`,
         {
           headers: {

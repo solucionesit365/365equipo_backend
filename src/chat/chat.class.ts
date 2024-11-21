@@ -1,6 +1,4 @@
 import { Injectable } from "@nestjs/common";
-import { ObjectId } from "mongodb";
-import { DateTime } from "luxon";
 import { ChatDatabase } from "./chat.mongodb";
 import { Chat } from "./chat.interface";
 
@@ -8,8 +6,8 @@ import { Chat } from "./chat.interface";
 export class ChatService {
   constructor(private readonly schchat: ChatDatabase) {}
 
-  async getMessagesByContact(contactId: number, senderId: number) {
-    return await this.schchat.getMessagesByContact(contactId, senderId);
+  async getMessagesByContact(contactId: number) {
+    return await this.schchat.getMessagesByContact(contactId);
   }
 
   async saveMessage(mensaje: Chat) {

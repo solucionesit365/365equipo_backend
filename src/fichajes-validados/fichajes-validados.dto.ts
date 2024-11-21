@@ -31,16 +31,6 @@ class TCuadranteMinDto {
   totalHoras: number;
 }
 
-class Fichaje {
-  @Type(() => Date)
-  @IsDate()
-  entrada: Date;
-
-  @Type(() => Date)
-  @IsDate()
-  salida: Date;
-}
-
 class IdFichajes {
   @IsString()
   entrada: string;
