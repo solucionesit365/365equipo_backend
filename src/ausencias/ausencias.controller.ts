@@ -1,7 +1,6 @@
 import { Body, Controller, Post, UseGuards, Get } from "@nestjs/common";
 import { AusenciasService } from "./ausencias.class";
 import { AuthGuard } from "../guards/auth.guard";
-import { SchedulerGuard } from "../guards/scheduler.guard";
 import { DateTime } from "luxon";
 
 @Controller("ausencias")
@@ -167,21 +166,4 @@ export class AusenciasController {
       console.log(error);
     }
   }
-
-  @UseGuards(SchedulerGuard)
-  @Post("sincroAusenciasHit")
-  async sincroAusenciasHit() {
-    await this.ausenciasInstance.sincroAusenciasHit();
-    return {
-      ok: true,
-    };
-  }
-
-  // @Post("anyadirContratos")
-  // async añadirContratos(id: ObjectId, horasContrato: number) {
-  //   await this.ausenciasInstance.añadirContratos(id, horasContrato);
-  //   return {
-  //     ok: true,
-  //   };
-  // }
 }

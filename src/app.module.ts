@@ -19,7 +19,6 @@ import { FirebaseModule } from "./firebase/firebase.module";
 import { IncidenciasModule } from "./incidencias/incidencias.module";
 import { MantenimientoModule } from "./mantenimiento/mantenimiento.module";
 import { MigracionesModule } from "./migraciones/migraciones.module";
-import { NominasModule } from "./nominas/nominas.module";
 import { NotificacionesModule } from "./notificaciones/notificaciones.module";
 import { PactadoVsRealModule } from "./pactado-vs-real/pactado-vs-real.module";
 import { PermisosModule } from "./permisos/permisos.module";
@@ -30,7 +29,6 @@ import { TestModule } from "./test/test.module";
 import { TiendasModule } from "./tiendas/tiendas.module";
 import { TrabajadoresModule } from "./trabajadores/trabajadores.module";
 import { VerificacionMfaModule } from "./verificacion-mfa/verificacion-mfa.module";
-import { HitMssqlModule } from "./hit-mssql/hit-mssql.module";
 import { MongoModule } from "./mongo/mongo.module";
 import { Cultura365Module } from "./cultura365/cultura365.module";
 import { MBCTokenModule } from "./bussinesCentral/services/mbctoken/mbctoken.service.module";
@@ -82,7 +80,6 @@ import { QuestionnaireModule } from "./questionnaire/questionnaire.module";
     IncidenciasModule,
     MantenimientoModule,
     MigracionesModule,
-    NominasModule,
     NotificacionesModule,
     PactadoVsRealModule,
     PermisosModule,
@@ -93,7 +90,6 @@ import { QuestionnaireModule } from "./questionnaire/questionnaire.module";
     TiendasModule,
     TrabajadoresModule,
     VerificacionMfaModule,
-    HitMssqlModule,
     MongoModule,
     Cultura365Module,
     MBCTokenModule,

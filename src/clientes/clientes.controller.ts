@@ -7,11 +7,9 @@ import {
   ValidationPipe,
   Get,
   Query,
-  Res,
 } from "@nestjs/common";
 import { IsEmail, IsBoolean, IsString, IsOptional } from "class-validator";
 import { ClientesService } from "./clientes.service";
-import { Response } from "express";
 
 class NewClientRequest {
   @IsEmail()
@@ -74,29 +72,29 @@ export class ClientesController {
     };
   }
 
-  @Get("confirmarEmail")
-  async confirmarEmail(
-    @Query("idSolicitud") idSolicitud: string,
-    @Res() res: Response,
-  ) {
-    try {
-      if (!idSolicitud) throw Error("Faltan parámetros");
+  // @Get("confirmarEmail")
+  // async confirmarEmail(
+  //   @Query("idSolicitud") idSolicitud: string,
+  //   @Res() res: Response,
+  // ) {
+  //   try {
+  //     if (!idSolicitud) throw Error("Faltan parámetros");
 
-      const issuerId = "3388000000022232953";
-      const classId = `${issuerId}.tarjetas-cliente`;
+  //     const issuerId = "3388000000022232953";
+  //     const classId = `${issuerId}.tarjetas-cliente`;
 
-      const walletUrl = await this.clientesInstance.confirmarEmail(
-        idSolicitud,
-        issuerId,
-        classId,
-      );
-      if (walletUrl) return res.render("verificado", { walletUrl });
-      else throw Error("Error de verificación de email");
-    } catch (err) {
-      console.log(err);
-      return res.render("falloVerificado");
-    }
-  }
+  //     const walletUrl = await this.clientesInstance.confirmarEmail(
+  //       idSolicitud,
+  //       issuerId,
+  //       classId,
+  //     );
+  //     if (walletUrl) return res.render("verificado", { walletUrl });
+  //     else throw Error("Error de verificación de email");
+  //   } catch (err) {
+  //     console.log(err);
+  //     return res.render("falloVerificado");
+  //   }
+  // }
 
   @Get("test")
   async testClientQr() {

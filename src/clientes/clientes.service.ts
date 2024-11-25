@@ -115,30 +115,30 @@ export class ClientesService {
     }
   }
 
-  async crearCliente(
-    nombre: string,
-    apellidos: string,
-    telefono: string,
-    codigoPostal: string,
-    toEmail: string,
-  ) {
-    const uniqueId = uuidv4();
-    const idCliente = "CliBoti_APP_" + uniqueId;
-    let idExterna = "QRCLIENT" + uuidv4();
-    idExterna = idExterna.replace(/-/g, "");
+  // async crearCliente(
+  //   nombre: string,
+  //   apellidos: string,
+  //   telefono: string,
+  //   codigoPostal: string,
+  //   toEmail: string,
+  // ) {
+  //   const uniqueId = uuidv4();
+  //   const idCliente = "CliBoti_APP_" + uniqueId;
+  //   let idExterna = "QRCLIENT" + uuidv4();
+  //   idExterna = idExterna.replace(/-/g, "");
 
-    await this.nuevoCliente(
-      nombre,
-      apellidos,
-      telefono,
-      idCliente,
-      codigoPostal,
-      idExterna,
-      toEmail,
-    );
+  //   await this.nuevoCliente(
+  //     nombre,
+  //     apellidos,
+  //     telefono,
+  //     idCliente,
+  //     codigoPostal,
+  //     idExterna,
+  //     toEmail,
+  //   );
 
-    return idExterna;
-  }
+  //   return idExterna;
+  // }
 
   async enviarStringIdentificacion(
     idExterna: string,
@@ -152,43 +152,43 @@ export class ClientesService {
     );
   }
 
-  async confirmarEmail(
-    idSolicitud: SolicitudCliente["_id"],
-    issuerId: string,
-    classId: string,
-  ) {
-    const solicitud = await this.schSolicitudesCliente.getSolicitud(
-      idSolicitud,
-    );
+  // async confirmarEmail(
+  //   idSolicitud: SolicitudCliente["_id"],
+  //   issuerId: string,
+  //   classId: string,
+  // ) {
+  //   const solicitud = await this.schSolicitudesCliente.getSolicitud(
+  //     idSolicitud,
+  //   );
 
-    if (!solicitud) throw Error("No existe esta solicitud o ha caducado");
+  //   if (!solicitud) throw Error("No existe esta solicitud o ha caducado");
 
-    const idExterna = await this.crearCliente(
-      solicitud.nombre,
-      solicitud.apellidos,
-      solicitud.telefono,
-      solicitud.codigoPostal,
-      solicitud.email,
-    );
-    const walletUrl = await this.createPassObject(
-      idExterna,
-      solicitud.nombre,
-      issuerId,
-      classId,
-    );
+  //   const idExterna = await this.crearCliente(
+  //     solicitud.nombre,
+  //     solicitud.apellidos,
+  //     solicitud.telefono,
+  //     solicitud.codigoPostal,
+  //     solicitud.email,
+  //   );
+  //   const walletUrl = await this.createPassObject(
+  //     idExterna,
+  //     solicitud.nombre,
+  //     issuerId,
+  //     classId,
+  //   );
 
-    await this.enviarStringIdentificacion(
-      idExterna,
-      solicitud.email,
-      walletUrl,
-    );
+  //   await this.enviarStringIdentificacion(
+  //     idExterna,
+  //     solicitud.email,
+  //     walletUrl,
+  //   );
 
-    if (idExterna) {
-      if (await this.schSolicitudesCliente.borrarSolicitud(solicitud._id))
-        return walletUrl;
-    }
-    throw Error("No se ha podido registrar el cliente");
-  }
+  //   if (idExterna) {
+  //     if (await this.schSolicitudesCliente.borrarSolicitud(solicitud._id))
+  //       return walletUrl;
+  //   }
+  //   throw Error("No se ha podido registrar el cliente");
+  // }
 
   async createPassObject(
     idTarjetaCliente: string,
@@ -401,26 +401,6 @@ export class ClientesService {
         console.log(err);
       }
     }
-  }
-
-  private async nuevoCliente(
-    nombre: string,
-    apellidos: string,
-    telefono: string,
-    id: string,
-    codigoPostal: string,
-    idExterna: string,
-    email: string,
-  ) {
-    await this.schSolicitudesCliente.nuevoCliente(
-      nombre,
-      apellidos,
-      telefono,
-      id,
-      codigoPostal,
-      idExterna,
-      email,
-    );
   }
 
   async getAllFlayers() {

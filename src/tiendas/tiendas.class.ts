@@ -41,23 +41,23 @@ export class Tienda {
     });
   }
 
-  async getTiendasHit() {
-    return await this.schTiendas.getTiendasHit();
-  }
+  // async getTiendasHit() {
+  //   return await this.schTiendas.getTiendasHit();
+  // }
 
-  async actualizarTiendas() {
-    const arrayTiendasApp = await this.getTiendas();
-    const arrayTiendasHit = await this.getTiendasHit();
+  // async actualizarTiendas() {
+  //   const arrayTiendasApp = await this.getTiendas();
+  //   // const arrayTiendasHit = await this.getTiendasHit();
 
-    const tiendasExistentesIds = arrayTiendasApp.map(
-      (tiendaApp) => tiendaApp.idExterno,
-    );
-    const tiendasNuevas = arrayTiendasHit.filter(
-      (tiendaExterno) =>
-        !tiendasExistentesIds.includes(tiendaExterno.idExterno),
-    );
-    return this.schTiendas.addTiendasNuevas(tiendasNuevas);
-  }
+  //   const tiendasExistentesIds = arrayTiendasApp.map(
+  //     (tiendaApp) => tiendaApp.idExterno,
+  //   );
+  //   const tiendasNuevas = arrayTiendasHit.filter(
+  //     (tiendaExterno) =>
+  //       !tiendasExistentesIds.includes(tiendaExterno.idExterno),
+  //   );
+  //   return this.schTiendas.addTiendasNuevas(tiendasNuevas);
+  // }
 
   private checkExists(arrayTiendas: any[], buscar: any) {
     for (let i = 0; i < arrayTiendas.length; i += 1) {
