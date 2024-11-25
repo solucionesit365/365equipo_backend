@@ -9,10 +9,7 @@ import { ObjectId } from "mongodb";
 export class ChatDatabase {
   constructor(private readonly mongoDbService: MongoService) {}
 
-  async getMessagesByContact(
-    contactId: number,
-    senderId: number,
-  ): Promise<Chat[]> {
+  async getMessagesByContact(contactId: number): Promise<Chat[]> {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const chatCollection = db.collection<Chat>("chat");
     return await chatCollection
@@ -38,7 +35,7 @@ export class ChatDatabase {
     const messageObjectIds = mensajes.ids.map((id) => new ObjectId(id));
 
     // Actualiza todos los mensajes que coincidan con los `_id`s proporcionados
-    const result = await chatCollection.updateMany(
+    await chatCollection.updateMany(
       {
         _id: { $in: messageObjectIds },
         read: false,

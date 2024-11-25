@@ -8,7 +8,7 @@ import { TrabajadorService } from "../trabajadores/trabajadores.class";
 @Controller("kpi-tiendas")
 export class KpiTiendasController {
   constructor(
-    private readonly KpiTiendasClass: KpiTiendasClass,
+    private readonly kpiTiendasClass: KpiTiendasClass,
     private readonly notificaciones: Notificaciones,
     private readonly trabajadores: TrabajadorService,
   ) {}
@@ -17,7 +17,7 @@ export class KpiTiendasController {
   @Post("nuevoKpiTienda")
   async nuevoKPI(@Body() kpiTienda: KpiTiendasInterface) {
     try {
-      const nuevoKPI = await this.KpiTiendasClass.nuevoKPI(kpiTienda);
+      const nuevoKPI = await this.kpiTiendasClass.nuevoKPI(kpiTienda);
       if (nuevoKPI) {
         const usuariosCompletos = await this.trabajadores.getTrabajadores();
 
@@ -69,7 +69,7 @@ export class KpiTiendasController {
     { semana, año, tienda }: { semana: number; año: number; tienda: number },
   ) {
     try {
-      const respKPIS = await this.KpiTiendasClass.getKPIS(
+      const respKPIS = await this.kpiTiendasClass.getKPIS(
         Number(semana),
         Number(año),
         Number(tienda),
@@ -92,7 +92,7 @@ export class KpiTiendasController {
     { semana, año }: { semana: number; año: number },
   ) {
     try {
-      const respKPIS = await this.KpiTiendasClass.getAllKPIs(
+      const respKPIS = await this.kpiTiendasClass.getAllKPIs(
         Number(semana),
         Number(año),
       );
@@ -109,7 +109,7 @@ export class KpiTiendasController {
   @Post("borrarKpiTienda")
   async borrarKpiTienda(@Body() kpiTienda: KpiTiendasInterface) {
     try {
-      const respKPIS = await this.KpiTiendasClass.borrarKPITienda(kpiTienda);
+      const respKPIS = await this.kpiTiendasClass.borrarKPITienda(kpiTienda);
 
       if (respKPIS)
         return {

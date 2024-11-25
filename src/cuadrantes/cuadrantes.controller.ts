@@ -402,7 +402,7 @@ export class CuadrantesController {
     try {
       return {
         ok: true,
-        data: await this.cuadrantesInstance.sincronizarConHit(),
+        // data: await this.cuadrantesInstance.sincronizarConHit(),
       };
     } catch (err) {
       console.log(err);

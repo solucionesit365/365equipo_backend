@@ -23,7 +23,7 @@ export class Notificaciones {
   }
 
   async sendMessage(titulo: string, body: string, fcmToken: string) {
-    const resSend = await axios.post(
+    await axios.post(
       "mi-end-point",
       {
         to: fcmToken,

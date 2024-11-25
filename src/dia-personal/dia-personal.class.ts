@@ -1,6 +1,6 @@
 import { Injectable, Inject, forwardRef } from "@nestjs/common";
 import { diaPersonalMongo } from "./dia-personal.mongodb";
-import { diaPersonal } from "./dia-personal.interface";
+import { DiaPersonal } from "./dia-personal.interface";
 import { ContratoService } from "../contrato/contrato.service";
 import { EmailService } from "../email/email.class";
 import { TrabajadorService } from "../trabajadores/trabajadores.class";
@@ -17,7 +17,7 @@ export class DiaPersonalClass {
   ) {}
 
   //Nueva solicitud de dia personal
-  async nuevaSolicitudDiaPersonal(diaPersonal: diaPersonal) {
+  async nuevaSolicitudDiaPersonal(diaPersonal: DiaPersonal) {
     try {
       const horasContrato = await this.contratoService.getHorasContratoByIdNew(
         diaPersonal.idBeneficiario,
@@ -80,7 +80,7 @@ export class DiaPersonalClass {
   }
 
   //Actualizar estado de el dia Personal
-  async updateSolicitudDiaPersonalEstado(diaPersonal: diaPersonal) {
+  async updateSolicitudDiaPersonalEstado(diaPersonal: DiaPersonal) {
     return await this.schdiaPersonal.updateSolicitudDiaPersonalEstado(
       diaPersonal,
     );

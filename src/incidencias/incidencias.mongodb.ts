@@ -2,7 +2,6 @@ import { Injectable } from "@nestjs/common";
 import { MongoService } from "../mongo/mongo.service";
 import { Incidencias, IncidenciasInvitado } from "./incidencias.interface";
 import { ObjectId } from "mongodb";
-import { toArray } from "rxjs";
 
 @Injectable()
 export class IncidenciasDatabase {

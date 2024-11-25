@@ -157,10 +157,10 @@ export class AuditoriasController {
   @UseGuards(AuthGuard)
   @Get("getAuditoriasTienda")
   async getAuditoriasTienda(
-    @Query() { tienda, habilitado }: { tienda: number; habilitado: boolean },
+    @Query() { tienda, habilitado }: { tienda: number; habilitado: string },
   ) {
     try {
-      const habilitadoBollean = (habilitado = "true" ? true : false);
+      const habilitadoBollean = habilitado === "true";
 
       const respAuditoria = await this.auditoriaInstance.getAuditoriasTienda(
         Number(tienda),

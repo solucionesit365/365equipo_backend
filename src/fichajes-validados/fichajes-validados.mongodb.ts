@@ -274,8 +274,8 @@ export class FichajesValidadosDatabase {
     }
 
     // Convertir fechas a UTC
-    let fechaInicioUTC = fechaInicio.toUTC();
-    let fechaFinalUTC = fechaFinal.toUTC();
+    const fechaInicioUTC = fechaInicio.toUTC();
+    const fechaFinalUTC = fechaFinal.toUTC();
 
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const fichajesCollection =
@@ -300,8 +300,8 @@ export class FichajesValidadosDatabase {
     idTrabajador: number,
   ) {
     // Convertir fechas a UTC
-    let fechaInicioUTC = fechaInicio.toUTC();
-    let fechaFinalUTC = fechaFinal.toUTC();
+    const fechaInicioUTC = fechaInicio.toUTC();
+    const fechaFinalUTC = fechaFinal.toUTC();
 
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const fichajesCollection =

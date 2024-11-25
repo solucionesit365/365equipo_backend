@@ -1,4 +1,3 @@
-import { Prisma, Trabajador } from "@prisma/client";
 import { Transform, Type } from "class-transformer";
 import {
   IsArray,

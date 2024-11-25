@@ -2,7 +2,6 @@ import { Injectable, InternalServerErrorException } from "@nestjs/common";
 import { FichajesDatabase } from "./fichajes.mongodb";
 import { TrabajadorService } from "../trabajadores/trabajadores.class";
 import { Trabajador } from "@prisma/client";
-import * as moment from "moment";
 import { ObjectId, WithId } from "mongodb";
 import { FichajeDto, ParFichaje } from "./fichajes.interface";
 import { Cuadrantes } from "../cuadrantes/cuadrantes.class";
@@ -379,7 +378,7 @@ export class Fichajes {
     );
 
     if (cuadrantes.length > 0) {
-      let entrada = DateTime.fromJSDate(cuadrantes[0].inicio);
+      const entrada = DateTime.fromJSDate(cuadrantes[0].inicio);
       let salida = DateTime.fromJSDate(cuadrantes[0].final);
       const diferencia = entrada.diff(salida, "minutes").minutes;
 

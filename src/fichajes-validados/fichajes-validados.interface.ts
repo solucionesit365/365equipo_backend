@@ -6,7 +6,7 @@ export interface TFichajeValidado {
   idResponsable: number;
   nombre: string;
   fecha: Date;
-  cuadrante: TCuadrante
+  cuadrante: TCuadrante;
   fichajes: {
     entrada: Date;
     salida: Date;

@@ -1,7 +1,6 @@
-import { Controller, Post, Body, Req, UseGuards } from "@nestjs/common";
+import { Controller, Post, Body, UseGuards } from "@nestjs/common";
 import { BiometriaService } from "./biometria.service";
-import { Request } from "express";
-import { AuthGuard } from "src/guards/auth.guard";
+import { AuthGuard } from "../guards/auth.guard";
 
 @Controller("biometria")
 export class BiometriaController {
@@ -9,7 +8,7 @@ export class BiometriaController {
 
   @UseGuards(AuthGuard)
   @Post("register-options")
-  async registerOptions(@Body() body: any, @Req() req: Request) {
+  async registerOptions(@Body() body: any) {
     const user = body.user; // Obtener el usuario del cuerpo de la solicitud
     const options = await this.biometriaService.generateRegistrationOptions(
       user,
@@ -19,7 +18,7 @@ export class BiometriaController {
 
   @UseGuards(AuthGuard)
   @Post("register")
-  async register(@Body() body: any, @Req() req: Request) {
+  async register(@Body() body: any) {
     const user = body.user; // Obtener el usuario del cuerpo de la solicitud
     const verification = await this.biometriaService.verifyRegistrationResponse(
       body.credential,

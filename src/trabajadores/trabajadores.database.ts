@@ -1,7 +1,6 @@
-import { Injectable, InternalServerErrorException } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { DateTime } from "luxon";
-import { HitMssqlService } from "../hit-mssql/hit-mssql.service";
 import { Prisma } from "@prisma/client";
 import {
   CreateTrabajadorRequestDto,
@@ -10,10 +9,7 @@ import {
 
 @Injectable()
 export class TrabajadorDatabaseService {
-  constructor(
-    private prisma: PrismaService,
-    private readonly hitMssqlService: HitMssqlService,
-  ) {}
+  constructor(private prisma: PrismaService) {}
 
   async crearTrabajador(reqTrabajador: CreateTrabajadorRequestDto) {
     console.log(reqTrabajador);
@@ -528,7 +524,7 @@ export class TrabajadorDatabaseService {
   }
 
   async setIdApp(idSql: number, uid: string) {
-    const trabajador = await this.prisma.trabajador.update({
+    await this.prisma.trabajador.update({
       where: {
         id: idSql,
       },
@@ -811,92 +807,7 @@ export class TrabajadorDatabaseService {
     return null;
   }
 
-  async getTrabajadoresSage(): Promise<
-    {
-      id: number;
-      nombreApellidos: string;
-      displayName: string;
-      emails: string;
-      dni: string;
-      direccion: string;
-      ciudad: string;
-      telefonos: string;
-      fechaNacimiento: string;
-      nacionalidad: string;
-      nSeguridadSocial: string;
-      codigoPostal: string;
-      cuentaCorriente: string;
-      tipoTrabajador: string;
-      inicioContrato: string;
-      finalContrato: string;
-      antiguedad: string;
-      idEmpresa: number;
-    }[]
-  > {
-    const sqlQuery = ` 
-	WITH CTE_Resultado AS (
-    SELECT
-      de.CODI as id,
-      de.NOM as nombreApellidos,
-      de.MEMO as displayName,
-    de2.valor as emails,
-      pe.Dni as dni,
-    de3.valor as direccion,
-    de4.valor as ciudad,
-    de5.valor as telefonos,
-    de6.valor as fechaNacimiento,
-    de7.valor as nacionalidad,
-      pe.ProvNumSoe as nSeguridadSocial,
-    de8.valor as codigoPostal,
-      ec.IBANReceptor as cuentaCorriente,
-    de9.valor as tipoTrabajador,
-      CONVERT(nvarchar, en.FechaAlta, 103) as inicioContrato,
-      CONVERT(nvarchar, en.FechaBaja, 103) as finalContrato,
-      CONVERT(nvarchar, en.FechaAntiguedad, 103) as antiguedad,
-      en.CodigoEmpresa as idEmpresa,
-      ROW_NUMBER() OVER (PARTITION BY pe.Dni ORDER BY (SELECT NULL)) AS RowNumber
-    FROM silema_ts.sage.dbo.Personas pe
-    LEFT JOIN silema_ts.sage.dbo.EmpleadoCobro ec ON pe.dni = ec.IDBeneficiario
-    LEFT JOIN silema_ts.sage.dbo.EmpleadoNomina en ON pe.dni = en.Dni
-    LEFT JOIN silema_ts.sage.dbo.Empresas em ON em.CodigoEmpresa = en.CodigoEmpresa
-    LEFT JOIN dependentesExtes de1 ON de1.nom = 'DNI' AND de1.valor COLLATE SQL_Latin1_General_CP1_CI_AS = pe.Dni
-    LEFT JOIN dependentesExtes de2 ON de1.id = de2.id AND de2.nom = 'EMAIL'
-    LEFT JOIN dependentesExtes de3 ON de1.id = de3.id AND de3.nom = 'ADRESA'
-    LEFT JOIN dependentesExtes de4 ON de1.id = de4.id AND de4.nom = 'CIUTAT'
-    LEFT JOIN dependentesExtes de5 ON de1.id = de5.id AND de5.nom = 'TLF_MOBIL'
-    LEFT JOIN dependentesExtes de6 ON de1.id = de6.id AND de6.nom = 'DATA_NAIXEMENT'
-    LEFT JOIN dependentesExtes de7 ON de1.id = de7.id AND de7.nom = 'NACIONALITAT'
-    LEFT JOIN dependentesExtes de8 ON de1.id = de8.id AND de8.nom = 'CODIGO POSTAL'
-    LEFT JOIN dependentesExtes de9 ON de1.id = de9.id AND de9.nom = 'TIPUSTREBALLADOR'
-    LEFT JOIN dependentes de ON de.CODI = de1.id
-    
-  
-    WHERE 
-    en.FechaAlta IS NOT NULL AND en.FechaBaja IS NULL
-    AND en.CodigoEmpresa IN (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 14, 15) 
-    AND de.CODI IS NOT NULL 
-  )
-  SELECT *
-  FROM CTE_Resultado
-  WHERE RowNumber = 1
-  ORDER BY nombreApellidos;
-  
-`;
-    const resTrabajadores = await this.hitMssqlService.recHit(sqlQuery);
-    // if (resTrabajadores.recordset.length > 0) return resTrabajadores.recordset;
-    // else
-    throw Error("Error, no hay trabajadores");
-  }
-
   async deleteTrabajador(idSql: number) {
-    // // Borrar permisos del trabajador
-    // await this.prisma
-    //   .$queryRaw`DELETE FROM "_PermisoToTrabajador" WHERE "B" = ${idSql}`;
-
-    // // Borrar roles del trabajador
-    // await this.prisma
-    //   .$queryRaw`DELETE FROM "_RoleToTrabajador" WHERE "B" = ${idSql}`;
-
     // Borrar trabajador
     return await this.prisma.trabajador.delete({
       where: {

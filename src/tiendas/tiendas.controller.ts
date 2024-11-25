@@ -18,19 +18,19 @@ export class TiendasController {
     return await this.tiendasInstance.getTiendas();
   }
 
-  @UseGuards(AuthGuard)
-  @Get("actualizarTiendas")
-  async actualizarTiendas() {
-    try {
-      return {
-        ok: true,
-        data: await this.tiendasInstance.actualizarTiendas(),
-      };
-    } catch (err) {
-      console.log(err);
-      return { ok: false, message: err.message };
-    }
-  }
+  // @UseGuards(AuthGuard)
+  // @Get("actualizarTiendas")
+  // async actualizarTiendas() {
+  //   try {
+  //     return {
+  //       ok: true,
+  //       data: await this.tiendasInstance.actualizarTiendas(),
+  //     };
+  //   } catch (err) {
+  //     console.log(err);
+  //     return { ok: false, message: err.message };
+  //   }
+  // }
 
   @UseGuards(AuthGuard)
   @Get("responsable")

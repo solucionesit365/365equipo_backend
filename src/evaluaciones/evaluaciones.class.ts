@@ -3,8 +3,6 @@ import { EvaluacionesDatabase } from "./evaluaciones.mongodb";
 import {
   CreateEvaluacionesInterfaceDto,
   CrearIluoInterfaceDto,
-  MostrarEvaluacionDto,
-  MostrarIluoInterfaceDto,
 } from "./evaluaciones.dto";
 
 @Injectable()

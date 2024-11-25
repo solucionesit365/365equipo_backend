@@ -1,4 +1,4 @@
-import { IsEnum, IsNotEmpty, IsString } from "class-validator";
+import { IsEmail, IsEnum, IsNotEmpty, IsString } from "class-validator";
 
 export class GeneratePdfDto {
   @IsNotEmpty()
@@ -36,9 +36,21 @@ export class DownloadPdfByIdDto {
 export class SignDocumentDto {
   @IsNotEmpty()
   @IsString()
-  resourceId: string;
+  documentId: string;
 
   @IsNotEmpty()
   @IsString()
-  signature: string; // Base64
+  signature: string;
+
+  @IsNotEmpty()
+  @IsString()
+  fullName: string;
+
+  @IsNotEmpty()
+  @IsString()
+  phone: string;
+
+  @IsNotEmpty()
+  @IsEmail()
+  email: string;
 }

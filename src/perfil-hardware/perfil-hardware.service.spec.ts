@@ -312,7 +312,7 @@ describe("PerfilHardwareDatabase", () => {
         modeloPropuesto: "Test Model",
         detallesExtras: "Test details",
       };
-    
+
       const mockCollection = {
         deleteOne: jest.fn().mockResolvedValue({
           acknowledged: true,
@@ -325,9 +325,11 @@ describe("PerfilHardwareDatabase", () => {
       jest.spyOn(mongoService, "getConexion").mockResolvedValue({
         db: jest.fn().mockReturnValue(mockDb),
       } as any);
-    
-      const result = await perfilHardwareDatabase.deletePerfil(mockPerfilHardware);
-    
+
+      const result = await perfilHardwareDatabase.deletePerfil(
+        mockPerfilHardware,
+      );
+
       expect(mongoService.getConexion).toHaveBeenCalled();
       expect(mockDb.collection).toHaveBeenCalledWith("perfilesHardware");
       expect(mockCollection.deleteOne).toHaveBeenCalledWith({
@@ -358,7 +360,7 @@ describe("PerfilHardwareDatabase", () => {
         modeloPropuesto: "Custom Build",
         detallesExtras: "High-end gaming setup",
       };
-    
+
       const mockCollection = {
         deleteOne: jest.fn().mockResolvedValue({
           acknowledged: true,
@@ -371,9 +373,11 @@ describe("PerfilHardwareDatabase", () => {
       jest.spyOn(mongoService, "getConexion").mockResolvedValue({
         db: jest.fn().mockReturnValue(mockDb),
       } as any);
-    
-      const result = await perfilHardwareDatabase.deletePerfil(mockPerfilHardware);
-    
+
+      const result = await perfilHardwareDatabase.deletePerfil(
+        mockPerfilHardware,
+      );
+
       expect(mongoService.getConexion).toHaveBeenCalled();
       expect(mockDb.collection).toHaveBeenCalledWith("perfilesHardware");
       expect(mockCollection.deleteOne).toHaveBeenCalledWith({
@@ -381,8 +385,8 @@ describe("PerfilHardwareDatabase", () => {
       });
       expect(result).toBe(false);
     });
-  })
-  
+  });
+
   //borrar uno y no mas
   it("should handle and throw an error when database connection fails during deletion", async () => {
     const mockPerfilHardware: PerfilHardware = {
@@ -405,12 +409,14 @@ describe("PerfilHardwareDatabase", () => {
       modeloPropuesto: "Test Model",
       detallesExtras: "Test details",
     };
-  
+
     const mockError = new Error("Database connection failed");
     jest.spyOn(mongoService, "getConexion").mockRejectedValue(mockError);
-  
-    await expect(perfilHardwareDatabase.deletePerfil(mockPerfilHardware)).rejects.toThrow("Database connection failed");
-  
+
+    await expect(
+      perfilHardwareDatabase.deletePerfil(mockPerfilHardware),
+    ).rejects.toThrow("Database connection failed");
+
     expect(mongoService.getConexion).toHaveBeenCalled();
   });
 });

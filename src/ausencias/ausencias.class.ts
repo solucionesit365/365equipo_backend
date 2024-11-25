@@ -177,21 +177,10 @@ export class AusenciasService {
     return await this.schAusencias.getAusenciasById(idAusencia);
   }
 
-  async sincroAusenciasHit() {
-    return await this.schAusencias.sincroAusenciasHit();
-  }
-
   async getAusenciasIntervalo(fechaInicio: DateTime, fechaFinal: DateTime) {
     return await this.schAusencias.getAusenciasIntervalo(
       fechaInicio,
       fechaFinal,
     );
   }
-
-  // async añadirContratos(id: ObjectId, horasContrato: number) {
-  //   return await this.schAusencias.updateAusenciaHorasContrato(
-  //     id,
-  //     horasContrato,
-  //   );
-  // }
 }

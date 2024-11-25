@@ -1,12 +1,4 @@
-import {
-  Controller,
-  Post,
-  Get,
-  Body,
-  Query,
-  UseGuards,
-  ParseIntPipe,
-} from "@nestjs/common";
+import { Controller, Post, Get, Body, Query, UseGuards } from "@nestjs/common";
 import { FichajesValidadosService } from "./fichajes-validados.class";
 import {
   FichajeValidadoDto,

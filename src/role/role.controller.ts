@@ -6,7 +6,6 @@ import {
   RemovePermissionDto,
 } from "./role.dto";
 import { AuthGuard } from "../guards/auth.guard";
-import { ok } from "assert";
 
 @Controller("role")
 export class RoleController {

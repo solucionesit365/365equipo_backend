@@ -1,7 +1,7 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { PactadoVsRealController } from './pactado-vs-real.controller';
+import { Test, TestingModule } from "@nestjs/testing";
+import { PactadoVsRealController } from "./pactado-vs-real.controller";
 
-describe('PactadoVsRealController', () => {
+describe("PactadoVsRealController", () => {
   let controller: PactadoVsRealController;
 
   beforeEach(async () => {
@@ -12,7 +12,7 @@ describe('PactadoVsRealController', () => {
     controller = module.get<PactadoVsRealController>(PactadoVsRealController);
   });
 
-  it('should be defined', () => {
+  it("should be defined", () => {
     expect(controller).toBeDefined();
   });
 });

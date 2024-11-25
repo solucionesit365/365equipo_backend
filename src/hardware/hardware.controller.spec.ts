@@ -1,7 +1,7 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { HardwareController } from './hardware.controller';
+import { Test, TestingModule } from "@nestjs/testing";
+import { HardwareController } from "./hardware.controller";
 
-describe('HardwareController', () => {
+describe("HardwareController", () => {
   let controller: HardwareController;
 
   beforeEach(async () => {
@@ -12,7 +12,7 @@ describe('HardwareController', () => {
     controller = module.get<HardwareController>(HardwareController);
   });
 
-  it('should be defined', () => {
+  it("should be defined", () => {
     expect(controller).toBeDefined();
   });
 });

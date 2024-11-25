@@ -16,11 +16,8 @@ export class ChatController {
 
   @UseGuards(AuthGuard)
   @Get("history/:contactId")
-  async getChatHistory(
-    @Param("contactId") contactId: number,
-    @Param("senderId") senderId: number,
-  ): Promise<Chat[]> {
-    return await this.chatInstance.getMessagesByContact(contactId, senderId);
+  async getChatHistory(@Param("contactId") contactId: number): Promise<Chat[]> {
+    return await this.chatInstance.getMessagesByContact(contactId);
   }
 
   @UseGuards(AuthGuard)

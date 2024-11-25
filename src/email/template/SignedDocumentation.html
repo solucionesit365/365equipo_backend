@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Documentación Firmada - 365 Obrador</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      /* Reseteo y estilos base */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+        color: #333333;
+        background-color: #f5f5f5;
+        margin: 0;
+        padding: 0;
+      }
+
+      /* Contenedor principal */
+      .email-container {
+        max-width: 600px;
+        margin: 0 auto;
+        background-color: #ffffff;
+        padding: 40px;
+      }
+
+      /* Header */
+      .header {
+        text-align: center;
+        padding-bottom: 30px;
+        border-bottom: 2px solid #f0f0f0;
+        margin-bottom: 30px;
+      }
+
+      .logo {
+        max-width: 200px;
+        height: auto;
+        margin-bottom: 20px;
+      }
+
+      /* Contenido */
+      .content {
+        padding: 20px 0;
+      }
+
+      h1 {
+        color: #2c3e50;
+        font-size: 24px;
+        margin-bottom: 20px;
+        text-align: center;
+      }
+
+      .message {
+        margin-bottom: 25px;
+        color: #555;
+      }
+
+      .document-info {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 20px;
+        margin: 20px 0;
+      }
+
+      .document-details {
+        margin: 15px 0;
+      }
+
+      .highlight {
+        color: #2c3e50;
+        font-weight: bold;
+      }
+
+      /* Footer */
+      .footer {
+        margin-top: 40px;
+        padding-top: 20px;
+        border-top: 2px solid #f0f0f0;
+        text-align: center;
+        font-size: 14px;
+        color: #666;
+      }
+
+      .contact-info {
+        margin-top: 15px;
+        font-style: italic;
+      }
+
+      /* Responsive */
+      @media screen and (max-width: 600px) {
+        .email-container {
+          padding: 20px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="email-container">
+      <div class="header">
+        <img src="{{logoUrl}}" alt="365 Obrador" class="logo" />
+        <h1>Confirmación de Firma de Documentación</h1>
+      </div>
+
+      <div class="content">
+        <p class="message">Estimado/a {{employeeName}},</p>
+
+        <p class="message">
+          Este correo confirma que has firmado exitosamente la siguiente
+          documentación en la plataforma de 365 Obrador:
+        </p>
+
+        <div class="document-info">
+          <p class="document-details">
+            <span class="highlight">Documento:</span> {{documentName}}
+          </p>
+          <p class="document-details">
+            <span class="highlight">Fecha de firma:</span> {{signedDate}}
+          </p>
+          <p class="document-details">
+            <span class="highlight">Hora:</span> {{signedTime}}
+          </p>
+        </div>
+
+        <p class="message">
+          Encontrarás una copia del documento firmado adjunto a este correo
+          electrónico para tu registro personal.
+        </p>
+
+        <p class="message">
+          Si no has realizado esta firma o detectas alguna anomalía, por favor
+          contacta inmediatamente con el departamento de Recursos Humanos.
+        </p>
+      </div>
+
+      <div class="footer">
+        <p>365 Obrador - Gestión Documental</p>
+        <div class="contact-info">
+          <p>{{companyAddress}}</p>
+          <p>Email: {{companyEmail}} | Tel: {{companyPhone}}</p>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

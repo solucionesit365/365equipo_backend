@@ -6,13 +6,11 @@ import { TrabajadorService } from "../trabajadores/trabajadores.class";
 import { Cuadrantes } from "../cuadrantes/cuadrantes.class";
 import { DateTime } from "luxon";
 import { ContratoService } from "../contrato/contrato.service";
-import { HitMssqlService } from "../hit-mssql/hit-mssql.service";
 
 @Injectable()
 export class SolicitudesVacacionesService {
   constructor(
     private readonly schSolicitudVacaciones: SolicitudVacacionesDatabase,
-    private readonly hitMssqlService: HitMssqlService,
     private readonly email: EmailService,
     @Inject(forwardRef(() => TrabajadorService))
     private readonly trabajadorInstance: TrabajadorService,
@@ -273,77 +271,5 @@ export class SolicitudesVacacionesService {
     return await this.schSolicitudVacaciones.haySolicitudesParaBeneficiario(
       idBeneficiario,
     );
-  }
-
-  async guardarEnHit(vacaciones: SolicitudVacaciones) {
-    if (!vacaciones.idBeneficiario || vacaciones.estado != "APROBADA")
-      return false;
-    const fechaInicio = DateTime.fromFormat(
-      vacaciones.fechaInicio,
-      "dd/MM/yyyy",
-    );
-    const fechaFinal = DateTime.fromFormat(vacaciones.fechaFinal, "dd/MM/yyyy");
-    const nombreTabla = `cdpCalendariLaboral_${fechaInicio.toFormat("yyyy")}`;
-
-    if (!fechaInicio.isValid || !fechaFinal.isValid) return false;
-
-    const sql = `
-      DECLARE @InsertedRows INT;
-      DECLARE @UpdatedRows INT;
-
-      WITH Dates AS (
-        SELECT CONVERT(datetime, '${fechaInicio.toFormat(
-          "yyyy-MM-dd",
-        )}', 126) AS Date
-        UNION ALL
-        SELECT DATEADD(day, 1, Date)
-        FROM Dates
-        WHERE DATEADD(day, 1, Date) <= CONVERT(datetime, '${fechaFinal.toFormat(
-          "yyyy-MM-dd",
-        )}', 126)
-      )
-      MERGE ${nombreTabla} AS Target
-      USING (SELECT * FROM Dates) AS Source
-      ON Target.idEmpleado = ${vacaciones.idBeneficiario}
-        AND MONTH(Target.fecha) = MONTH(Source.Date)
-        AND YEAR(Target.fecha) = YEAR(Source.Date)
-        AND DAY(Target.fecha) = DAY(Source.Date)
-      WHEN MATCHED THEN
-        UPDATE SET
-          Target.estado = 'VACANCES',
-          Target.observaciones = '[Horas:24]',
-          Target.TimeStamp = GETDATE(),
-          Target.usuarioModif = '365Equipo'
-      WHEN NOT MATCHED THEN
-        INSERT (id, fecha, idEmpleado, estado, observaciones, TimeStamp, usuarioModif)
-        VALUES (NEWID(), Source.Date, ${
-          vacaciones.idBeneficiario
-        }, 'VACANCES', '[Horas:24]', GETDATE(), '365Equipo');
-
-      SET @InsertedRows = @@ROWCOUNT;
-
-      -- Retorna el número de filas insertadas
-      SELECT @InsertedRows AS InsertedRows;
-    `;
-    const resultado = await this.hitMssqlService.recHit(sql);
-
-    // if (
-    //   resultado.recordset.length > 0 &&
-    //   fechaFinal.diff(fechaInicio, "days").days + 1 ===
-    //     resultado.recordset[0].InsertedRows
-    // ) {
-    //   await this.schSolicitudVacaciones.setEnviado(vacaciones);
-    // }
-  }
-
-  async sendToHit() {
-    const solicitudes =
-      await this.schSolicitudVacaciones.getSolicitudesParaEnviar();
-
-    for (let i = 0; i < solicitudes.length; i += 1) {
-      await this.guardarEnHit(solicitudes[i]);
-    }
-
-    return true;
   }
 }

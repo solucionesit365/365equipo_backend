@@ -2,7 +2,6 @@ import { Injectable } from "@nestjs/common";
 import { MongoService } from "../mongo/mongo.service";
 import { SolicitudVacaciones } from "./solicitud-vacaciones.interface";
 import { ObjectId } from "mongodb";
-import { DateTime } from "luxon";
 
 @Injectable()
 export class SolicitudVacacionesDatabase {
@@ -41,8 +40,8 @@ export class SolicitudVacacionesDatabase {
     const solicitudVacacionesCollection = db.collection<SolicitudVacaciones>(
       "solicitudVacaciones",
     );
-    const startDate = DateTime.local(year, 1, 1).toFormat("dd/MM/yyyy");
-    const endDate = DateTime.local(year + 1, 1, 1).toFormat("dd/MM/yyyy");
+    // const startDate = DateTime.local(year, 1, 1).toFormat("dd/MM/yyyy");
+    // const endDate = DateTime.local(year + 1, 1, 1).toFormat("dd/MM/yyyy");
 
     const respSolicitudes = await solicitudVacacionesCollection
       .find({ idBeneficiario, year })

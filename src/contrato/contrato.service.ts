@@ -1,42 +1,38 @@
 import { Injectable, InternalServerErrorException } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
-import { HitMssqlService } from "../hit-mssql/hit-mssql.service";
 import { DateTime } from "luxon";
 
 @Injectable()
 export class ContratoService {
-  constructor(
-    private readonly prisma: PrismaService,
-    private readonly hitMssqlService: HitMssqlService,
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
 
-  async getHistoriaContratos(): Promise<
-    {
-      horasContrato: number;
-      dni: string;
-      inicioContrato: string;
-      finalContrato: string;
-      fechaAlta: string;
-      fechaAntiguedad: string;
-      fechaBaja: string;
-    }[]
-  > {
-    const sql = `
-  SELECT 
-    PorJornada as horasContrato, 
-    Dni as dni, 
-    CONVERT(nvarchar, FechaInicioContrato, 103) as inicioContrato, 
-    CONVERT(nvarchar, FechaFinalContrato, 103) as finalContrato, 
-    CONVERT(nvarchar, FechaAlta, 103) as fechaAlta, 
-    CONVERT(nvarchar, FechaAntiguedad, 103) as fechaAntiguedad,
-    CONVERT(nvarchar, FechaBaja, 103) as fechaBaja
-  FROM silema_ts.sage.dbo.EmpleadoNomina`;
+  // async getHistoriaContratos(): Promise<
+  //   {
+  //     horasContrato: number;
+  //     dni: string;
+  //     inicioContrato: string;
+  //     finalContrato: string;
+  //     fechaAlta: string;
+  //     fechaAntiguedad: string;
+  //     fechaBaja: string;
+  //   }[]
+  // > {
+  //   const sql = `
+  // SELECT
+  //   PorJornada as horasContrato,
+  //   Dni as dni,
+  //   CONVERT(nvarchar, FechaInicioContrato, 103) as inicioContrato,
+  //   CONVERT(nvarchar, FechaFinalContrato, 103) as finalContrato,
+  //   CONVERT(nvarchar, FechaAlta, 103) as fechaAlta,
+  //   CONVERT(nvarchar, FechaAntiguedad, 103) as fechaAntiguedad,
+  //   CONVERT(nvarchar, FechaBaja, 103) as fechaBaja
+  // FROM silema_ts.sage.dbo.EmpleadoNomina`;
 
-    const resHisContratos = await this.hitMssqlService.recHit(sql);
+  //   const resHisContratos = await this.hitMssqlService.recHit(sql);
 
-    // if (resHisContratos.recordset.length > 0) return resHisContratos.recordset;
-    return [];
-  }
+  //   // if (resHisContratos.recordset.length > 0) return resHisContratos.recordset;
+  //   return [];
+  // }
 
   // async copiarHistoriaContratosHitSoluciones() {
   //   const arrayContratos = await this.getHistoriaContratos();
@@ -146,16 +142,4 @@ export class ContratoService {
       );
     }
   }
-}
-
-function convertToDate(dateString): Date {
-  if (!dateString) {
-    return null;
-  }
-  const fecha = DateTime.fromFormat(dateString, "dd/MM/yyyy");
-
-  if (!fecha.isValid) {
-    return null;
-  }
-  return fecha.toJSDate();
 }

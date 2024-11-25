@@ -4,7 +4,6 @@ import { EvaluacionesService } from "./evaluaciones.class";
 import {
   CreateEvaluacionesInterfaceDto,
   CrearIluoInterfaceDto,
-  MostrarEvaluacionDto,
 } from "./evaluaciones.dto";
 
 @Controller("evaluaciones")

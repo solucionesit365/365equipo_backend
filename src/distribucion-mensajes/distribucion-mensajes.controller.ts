@@ -1,14 +1,13 @@
 import { Controller, Post, UseGuards, Body, Get, Query } from "@nestjs/common";
 import { DistribucionMensajesClass } from "./distribucion-mensajes.class";
 import { AuthGuard } from "../guards/auth.guard";
-import { DistribucionMensajes } from "./distribucion-mensajes.interface";
 import { SchedulerGuard } from "src/guards/scheduler.guard";
 import { Notificaciones } from "../notificaciones/notificaciones.class";
 
 @Controller("distribucion-mensajes")
 export class DistribucionMensajesController {
   constructor(
-    private readonly DistribucionMensajesClass: DistribucionMensajesClass,
+    private readonly distribucionMensajesClass: DistribucionMensajesClass,
     private readonly notificaciones: Notificaciones,
   ) {}
 
@@ -30,7 +29,7 @@ export class DistribucionMensajesController {
       mensaje.createdAt = new Date();
       return {
         ok: true,
-        data: await this.DistribucionMensajesClass.insertarMensaje(mensaje),
+        data: await this.distribucionMensajesClass.insertarMensaje(mensaje),
       };
     } catch (err) {
       console.log(err);
@@ -44,7 +43,7 @@ export class DistribucionMensajesController {
     try {
       return {
         ok: true,
-        data: await this.DistribucionMensajesClass.getAllMensajes(),
+        data: await this.distribucionMensajesClass.getAllMensajes(),
       };
     } catch (error) {}
   }
@@ -55,7 +54,7 @@ export class DistribucionMensajesController {
     try {
       return {
         ok: true,
-        data: await this.DistribucionMensajesClass.getOneMessage(),
+        data: await this.distribucionMensajesClass.getOneMessage(),
       };
     } catch (error) {}
   }
@@ -64,14 +63,14 @@ export class DistribucionMensajesController {
   async updateOneMensaje(@Body() mensaje) {
     try {
       if (mensaje.activo) {
-        const activos = await this.DistribucionMensajesClass.getOneMessage();
+        const activos = await this.distribucionMensajesClass.getOneMessage();
         if (activos) {
           return {
             ok: false,
           };
         } else {
           const response =
-            await this.DistribucionMensajesClass.updateOneMensajes(
+            await this.distribucionMensajesClass.updateOneMensajes(
               mensaje._id,
               mensaje.activo,
             );
@@ -88,7 +87,7 @@ export class DistribucionMensajesController {
           };
         }
       } else {
-        const response = await this.DistribucionMensajesClass.updateOneMensajes(
+        const response = await this.distribucionMensajesClass.updateOneMensajes(
           mensaje._id,
           mensaje.activo,
         );
@@ -103,7 +102,7 @@ export class DistribucionMensajesController {
   @UseGuards(SchedulerGuard)
   @Post("updateMensajeforDate")
   async updateMensajeforDate(@Body() mensaje) {
-    return await this.DistribucionMensajesClass.updateMensajeforDate(
+    return await this.distribucionMensajesClass.updateMensajeforDate(
       mensaje.fechaInicio,
       mensaje.fechaFin,
     );
@@ -113,7 +112,7 @@ export class DistribucionMensajesController {
   @Post("deleteMessage")
   async deleteMessage(@Query() { id }) {
     try {
-      const deleteMensaje = await this.DistribucionMensajesClass.deleteMessage(
+      const deleteMensaje = await this.distribucionMensajesClass.deleteMessage(
         id,
       );
 

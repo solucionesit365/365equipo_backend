@@ -1,9 +1,9 @@
-import { Module } from '@nestjs/common';
-import { QuestionCategoryController } from './question-category.controller';
-import { QuestionCategoryService } from './question-category.service';
+import { Module } from "@nestjs/common";
+import { QuestionCategoryController } from "./question-category.controller";
+import { QuestionCategoryService } from "./question-category.service";
 
 @Module({
   controllers: [QuestionCategoryController],
-  providers: [QuestionCategoryService]
+  providers: [QuestionCategoryService],
 })
 export class QuestionCategoryModule {}

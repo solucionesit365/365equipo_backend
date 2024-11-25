@@ -74,6 +74,7 @@ export class QuestionnaireService {
   async getQuestionnaires(req: GetQuestionnairesDto) {
     try {
       const questionnaires = await this.prismaService.questionnaire.findMany({
+        where: { department: req.department },
         include: {
           questions: true,
           categoryOfQuestions: true,

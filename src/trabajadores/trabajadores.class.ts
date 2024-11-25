@@ -124,10 +124,6 @@ export class TrabajadorService {
     return await this.schTrabajadores.getSubordinadosByIdNew(id, conFecha);
   }
 
-  async descargarTrabajadoresHit() {
-    return await this.schTrabajadores.getTrabajadoresSage();
-  }
-
   async getTrabajadorTokenQR(idTrabajador: number, tokenQR: string) {
     const resUser = await this.schTrabajadores.getTrabajadorTokenQR(
       idTrabajador,
@@ -138,96 +134,92 @@ export class TrabajadorService {
     throw Error("No se ha podido obtener la información del usuario");
   }
 
-  async sincronizarConHit() {
-    const usuariosApp = await this.getTrabajadores();
-    const usuariosHit = await this.descargarTrabajadoresHit();
+  // XXXX antes era hit, en el futuro será BC, por eso no la borro
+  // async sincronizarConXXXX() {
+  //   const usuariosApp = await this.getTrabajadores();
+  //   const usuariosHit = await this.descargarTrabajadoresHit();
 
-    const modificarEnApp = [];
-    const modificarEnHit = [];
-    const usuariosNuevos = [];
-    const arrayEliminar = [];
+  //   const modificarEnApp = [];
+  //   const modificarEnHit = [];
+  //   const usuariosNuevos = [];
+  //   const arrayEliminar = [];
 
-    usuariosHit.forEach((usuarioHit) => {
-      const usuarioApp = usuariosApp.find(
-        (usuario) => usuario.id === usuarioHit.id,
-      );
+  //   usuariosHit.forEach((usuarioHit) => {
+  //     const usuarioApp = usuariosApp.find(
+  //       (usuario) => usuario.id === usuarioHit.id,
+  //     );
 
-      if (usuarioApp) {
-        const camposApp = [
-          "nombreApellidos",
-          "displayName",
-          "direccion",
-          "ciudad",
-          "fechaNacimiento",
-          "nSeguridadSocial",
-          "codigoPostal",
-          "cuentaCorriente",
-        ];
-        const camposHit = [
-          "dni",
-          "inicioContrato",
-          "finalContrato",
-          "antiguedad",
-          "idEmpresa",
-        ];
+  //     if (usuarioApp) {
+  //       const camposApp = [
+  //         "nombreApellidos",
+  //         "displayName",
+  //         "direccion",
+  //         "ciudad",
+  //         "fechaNacimiento",
+  //         "nSeguridadSocial",
+  //         "codigoPostal",
+  //         "cuentaCorriente",
+  //       ];
+  //       const camposHit = [
+  //         "dni",
+  //         "inicioContrato",
+  //         "finalContrato",
+  //         "antiguedad",
+  //         "idEmpresa",
+  //       ];
 
-        let cambiosApp = false;
-        let cambiosHit = false;
+  //       let cambiosApp = false;
+  //       let cambiosHit = false;
 
-        camposApp.forEach((campo) => {
-          if (usuarioApp[campo] !== usuarioHit[campo]) {
-            cambiosApp = true;
-            return;
-          }
-        });
+  //       camposApp.forEach((campo) => {
+  //         if (usuarioApp[campo] !== usuarioHit[campo]) {
+  //           cambiosApp = true;
+  //           return;
+  //         }
+  //       });
 
-        camposHit.forEach((campo) => {
-          if (usuarioApp[campo] !== usuarioHit[campo]) {
-            cambiosHit = true;
-            return;
-          }
-        });
+  //       camposHit.forEach((campo) => {
+  //         if (usuarioApp[campo] !== usuarioHit[campo]) {
+  //           cambiosHit = true;
+  //           return;
+  //         }
+  //       });
 
-        if (cambiosApp) {
-          modificarEnHit.push(usuarioApp);
-        }
+  //       if (cambiosApp) {
+  //         modificarEnHit.push(usuarioApp);
+  //       }
 
-        if (cambiosHit) {
-          modificarEnApp.push(usuarioHit);
-        }
-      } else {
-        usuariosNuevos.push(usuarioHit);
-      }
-    });
+  //       if (cambiosHit) {
+  //         modificarEnApp.push(usuarioHit);
+  //       }
+  //     } else {
+  //       usuariosNuevos.push(usuarioHit);
+  //     }
+  //   });
 
-    usuariosApp.forEach((usuarioApp) => {
-      const usuarioHit = usuariosHit.find(
-        (usuario) => usuario.id === usuarioApp.id,
-      );
+  //   usuariosApp.forEach((usuarioApp) => {
+  //     const usuarioHit = usuariosHit.find(
+  //       (usuario) => usuario.id === usuarioApp.id,
+  //     );
 
-      if (!usuarioHit) {
-        arrayEliminar.push(usuarioApp);
-      }
-    });
+  //     if (!usuarioHit) {
+  //       arrayEliminar.push(usuarioApp);
+  //     }
+  //   });
 
-    const totales = await this.schTrabajadores.actualizarUsuarios(
-      usuariosNuevos,
-      modificarEnApp,
-    );
+  //   await this.schTrabajadores.actualizarUsuarios(
+  //     usuariosNuevos,
+  //     modificarEnApp,
+  //   );
 
-    // Excluir usuario de test id: 999999
-    await this.schTrabajadores.eliminarUsuarios(arrayEliminar);
+  //   // Excluir usuario de test id: 999999
+  //   await this.schTrabajadores.eliminarUsuarios(arrayEliminar);
 
-    return {
-      totalModificarApp: modificarEnApp.length,
-      modificarEnApp,
-      // totalModificarHit: modificarEnHit.length,
-      // totalNuevos: usuariosNuevos.length,
-      // totalEliminar: arrayEliminar.length,
-      // usuariosNoActualizadosNuevos: totales.usuariosNoActualizadosNuevos,
-      // usuariosNoActualizadosApp: totales.usuariosNoActualizadosApp,
-    };
-  }
+  //   return {
+  //     totalModificarApp: modificarEnApp.length,
+  //     modificarEnApp,
+  //   };
+  // }
 
   async registrarUsuario(dni: string, password: string) {
     dni = dni.trim().toUpperCase();

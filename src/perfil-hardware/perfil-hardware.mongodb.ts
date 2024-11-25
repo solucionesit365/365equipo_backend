@@ -1,6 +1,5 @@
 import { Injectable } from "@nestjs/common";
 import { MongoService } from "../mongo/mongo.service";
-import { PerfilHardwareService } from "./perfil-hardware.service";
 import { ObjectId } from "mongodb";
 import { PerfilHardware } from "./perfil-hardware.interface";
 
