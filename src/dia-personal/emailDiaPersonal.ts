@@ -1,7 +1,7 @@
-import { diaPersonal } from "./dia-personal.interface";
+import { DiaPersonal } from "./dia-personal.interface";
 import { DateTime } from "luxon"; // Asegúrate de importar Luxon si aún no lo has hecho
 
-export function constructEmailContent(diaPersonal: diaPersonal): string {
+export function constructEmailContent(diaPersonal: DiaPersonal): string {
   diaPersonal.fechaInicio = new Date(diaPersonal.fechaInicio);
   diaPersonal.fechaFinal = new Date(diaPersonal.fechaFinal);
   diaPersonal.fechaIncorporacion = new Date(diaPersonal.fechaIncorporacion);

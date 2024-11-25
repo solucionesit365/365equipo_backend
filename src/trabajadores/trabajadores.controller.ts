@@ -107,7 +107,7 @@ export class TrabajadoresController {
     try {
       return {
         ok: true,
-        data: await this.trabajadorInstance.sincronizarConHit(),
+        // data: await this.trabajadorInstance.sincronizarConHit(),
       };
     } catch (err) {
       console.log(err);
@@ -121,7 +121,7 @@ export class TrabajadoresController {
     try {
       return {
         ok: true,
-        data: await this.trabajadorInstance.sincronizarConHit(),
+        // data: await this.trabajadorInstance.sincronizarConHit(),
       };
     } catch (err) {
       console.log(err);

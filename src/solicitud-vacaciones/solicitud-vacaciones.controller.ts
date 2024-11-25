@@ -387,7 +387,7 @@ export class SolicitudVacacionesController {
     try {
       return {
         ok: true,
-        data: await this.solicitudVacacionesInstance.sendToHit(),
+        // data: await this.solicitudVacacionesInstance.sendToHit(),
       };
     } catch (err) {
       console.log(err);
