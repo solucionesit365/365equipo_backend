@@ -1,10 +1,14 @@
 import { Injectable } from "@nestjs/common";
 import * as nodemailer from "nodemailer";
 import { FirebaseService } from "../firebase/firebase.service";
+import { join } from "path";
+import * as hbs from "handlebars";
+import * as fs from "fs/promises";
 
 @Injectable()
 export class EmailService {
   private transporter: any;
+  private readonly templateDir: string;
 
   constructor(private readonly authInstance: FirebaseService) {
     this.transporter = nodemailer.createTransport({
@@ -16,6 +20,8 @@ export class EmailService {
         pass: process.env.EMAIL_PASS,
       },
     });
+
+    this.templateDir = join(process.cwd(), "src", "email", "template");
   }
   async enviarEmail(
     to: string,
@@ -147,9 +153,64 @@ export class EmailService {
     `;
   }
 
-  // async sendMailById(id: number, mensaje: string, asunto: string) {
-  //   const usuario = await this.trabajadorInstance.getTrabajadorBySqlId(id);
+  private async compileTemplate(
+    templateName: string,
+    data: any,
+  ): Promise<string> {
+    try {
+      // Construir la ruta completa al template
+      const templatePath = join(this.templateDir, `${templateName}.html`);
 
-  //   this.enviarEmail(usuario.emails, mensaje, asunto);
-  // }
+      // Verificar si el archivo existe
+      try {
+        await fs.access(templatePath);
+      } catch (error) {
+        console.error("Template no encontrado:", error);
+        throw new Error(`Template no encontrado en: ${templatePath}`);
+      }
+
+      // Leer el contenido del template
+      const templateContent = await fs.readFile(templatePath, "utf-8");
+
+      // Compilar el template
+      const template = hbs.compile(templateContent);
+      const result = template(data);
+
+      return result;
+    } catch (error) {
+      console.error("Error en compileTemplate:", error);
+      throw new Error(`Error compilando template: ${error.message}`);
+    }
+  }
+
+  async sendDocumentToEmail(
+    pdfBuffer: Buffer,
+    toEmail: string,
+    template: string,
+    templateData: any = {},
+    subject = "Documento adjunto",
+  ): Promise<void> {
+    try {
+      const htmlContent = await this.compileTemplate(template, templateData);
+
+      const mailOptions = {
+        from: "noreply@365equipo.com",
+        to: toEmail,
+        subject: subject,
+        html: htmlContent,
+        attachments: [
+          {
+            filename: "documento_firmado.pdf",
+            content: pdfBuffer,
+            contentType: "application/pdf",
+          },
+        ],
+      };
+
+      await this.transporter.sendMail(mailOptions);
+    } catch (error) {
+      console.error("Error en sendDocumentToEmail:", error);
+      throw new Error(`Error enviando email: ${error.message}`);
+    }
+  }
 }
