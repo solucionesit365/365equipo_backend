@@ -12,7 +12,7 @@ import { MbctokenService } from "../bussinesCentral/services/mbctoken/mbctoken.s
 export class FichajesDatabase {
   constructor(
     private readonly mongoDbService: MongoService,
-    private readonly MbctokenService: MbctokenService, // private readonly hitInstance: FacTenaMssql,
+    private readonly mbctokenService: MbctokenService, // private readonly hitInstance: FacTenaMssql,
   ) {}
 
   async nuevaEntrada(
@@ -154,7 +154,7 @@ export class FichajesDatabase {
 
   async enviarFichajesBC(fichajes: FichajeDto[]) {
     try {
-      const token = await this.MbctokenService.getToken();
+      const token = await this.mbctokenService.getToken();
 
       if (fichajes.length > 0) {
         for (let i = 0; i < fichajes.length; i += 1) {
@@ -219,7 +219,7 @@ export class FichajesDatabase {
 
   async getFichajesBC() {
     try {
-      const token = await this.MbctokenService.getToken();
+      const token = await this.mbctokenService.getToken();
       console.log(token);
 
       // Obtener la fecha y hora actual en UTC
@@ -229,7 +229,7 @@ export class FichajesDatabase {
       const endDate =
         now.plus({ days: 1 }).toISO().split("T")[0] + "T00:00:00Z";
 
-      let response = await axios.get(
+      const response = await axios.get(
         `https://api.businesscentral.dynamics.com/v2.0/${process.env.MBC_TOKEN_TENANT}/Production/ODataV4/Company('${process.env.MBC_COMPANY_NAME_PROD}')/cdpDadesFichador2?$filter=tmst ge ${startDate} and tmst lt ${endDate} and comentari ne '365EquipoDeTrabajo' and dni ne null&$select=accio, usuari, idr, tmst, comentari, nombre, dni`,
         {
           headers: {
@@ -253,9 +253,9 @@ export class FichajesDatabase {
   }
 
   async getNominas() {
-    const token = await this.MbctokenService.getToken();
+    const token = await this.mbctokenService.getToken();
 
-    let response = await axios.get(
+    const response = await axios.get(
       `https://api.businesscentral.dynamics.com/v2.0/${process.env.MBC_TOKEN_TENANT}/Production/ODataV4/Company('${process.env.MBC_COMPANY_NAME_PROD}')/archivo`,
       {
         headers: {

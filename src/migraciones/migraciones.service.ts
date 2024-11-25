@@ -30,7 +30,7 @@
 // AND inicioContrato <= GETDATE() AND (fechaBaja >= GETDATE() OR fechaBaja IS NULL)
 // ) as horasContrato,
 // tr1.nombreApellidos as nombreResponsable,
-// tr1.idApp as idAppResponsable, 
+// tr1.idApp as idAppResponsable,
 // ti.nombre as nombreTienda,
 // CONVERT(nvarchar, tr.antiguedad, 103) as antiguedad,
 // tr.idEmpresa,
@@ -100,7 +100,7 @@
 
 //   async getTrabajadores() {
 //     const sql = `
-//       SELECT 
+//       SELECT
 //           ${GET_DATOS_TRABAJADOR}
 //       FROM trabajadores tr
 //       LEFT JOIN trabajadores tr1 ON tr.idResponsable = tr1.id

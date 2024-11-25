@@ -5,13 +5,13 @@ import { AuthGuard } from "../guards/auth.guard";
 
 @Controller("hardware")
 export class HardwareController {
-  constructor(private readonly HardwareService: HardwareService) {}
+  constructor(private readonly hardwareService: HardwareService) {}
 
   @UseGuards(AuthGuard)
   @Post("newHardware")
   async addAnuncio(@Body() hardware: HardWareInterface) {
     try {
-      return await this.HardwareService.newHardware(hardware);
+      return await this.hardwareService.newHardware(hardware);
     } catch (err) {
       console.log(err);
       return { ok: false, message: err.message };
@@ -22,7 +22,7 @@ export class HardwareController {
   @Get("getHardware")
   async getHardwares() {
     try {
-      return await this.HardwareService.getHardware();
+      return await this.hardwareService.getHardware();
     } catch (err) {
       console.log(err);
       return { ok: false, message: err.message };
@@ -33,7 +33,7 @@ export class HardwareController {
   @Post("updateHardware")
   async updateHardware(@Body() hardware: HardWareInterface) {
     try {
-      const response = await this.HardwareService.updateHardware(hardware);
+      const response = await this.hardwareService.updateHardware(hardware);
 
       return response;
     } catch (err) {

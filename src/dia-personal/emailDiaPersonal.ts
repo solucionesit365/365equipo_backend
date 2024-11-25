@@ -6,13 +6,13 @@ export function constructEmailContent(diaPersonal: diaPersonal): string {
   diaPersonal.fechaFinal = new Date(diaPersonal.fechaFinal);
   diaPersonal.fechaIncorporacion = new Date(diaPersonal.fechaIncorporacion);
 
-  let fechaInicio = DateTime.fromJSDate(diaPersonal.fechaInicio).toFormat(
+  const fechaInicio = DateTime.fromJSDate(diaPersonal.fechaInicio).toFormat(
     "dd/MM/yyyy",
   );
-  let fechaFinal = DateTime.fromJSDate(diaPersonal.fechaFinal).toFormat(
+  const fechaFinal = DateTime.fromJSDate(diaPersonal.fechaFinal).toFormat(
     "dd/MM/yyyy",
   );
-  let fechaIncorporacion = DateTime.fromJSDate(
+  const fechaIncorporacion = DateTime.fromJSDate(
     diaPersonal.fechaIncorporacion,
   ).toFormat("dd/MM/yyyy");
 

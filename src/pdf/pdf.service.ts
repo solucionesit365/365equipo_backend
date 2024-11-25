@@ -4,8 +4,6 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import * as puppeteer from "puppeteer";
-import * as fs from "fs";
-import * as path from "path";
 import { PDFDocument, degrees, rgb } from "pdf-lib";
 import { StorageService } from "../storage/storage.service";
 import { CryptoService } from "../crypto/crypto.class";
@@ -140,7 +138,7 @@ export class PdfService {
     const firstPage = pages[0];
 
     // Definir el tamaño y posición de la imagen de la firma
-    const { width, height } = firstPage.getSize();
+    const { width } = firstPage.getSize();
     const signatureWidth = 150;
     const signatureHeight = 50;
     const xPosition = width - signatureWidth - 50;

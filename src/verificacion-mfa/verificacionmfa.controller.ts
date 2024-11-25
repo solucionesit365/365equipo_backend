@@ -6,7 +6,6 @@ import {
   Headers,
   UseGuards,
   Query,
-  VersioningType,
 } from "@nestjs/common";
 import { VerificacionMFA } from "./verificacionmfa.interface";
 import { VerificacionService } from "./verificacionmfa.class";

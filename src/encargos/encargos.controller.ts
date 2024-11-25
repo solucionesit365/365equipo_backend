@@ -2,7 +2,6 @@ import { Controller, Body, UseGuards, Post, Get, Query } from "@nestjs/common";
 import { EncargosInterface } from "./encargos.interface";
 import { EncargosService } from "./encargos.service";
 import { AuthGuard } from "../guards/auth.guard";
-import { error } from "console";
 
 @Controller("encargos")
 export class EncargosController {

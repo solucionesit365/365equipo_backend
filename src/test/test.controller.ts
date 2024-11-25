@@ -1,33 +1,13 @@
-import {
-  Controller,
-  Get,
-  InternalServerErrorException,
-  // Get,
-  // InternalServerErrorException,
-  Post,
-  UseGuards,
-} from "@nestjs/common";
-// import axios from "axios";
-// import { EmailService } from "../email/email.class";
-// import { FichajesValidadosService } from "../fichajes-validados/fichajes-validados.class";
-import { FichajeValidadoDto } from "../fichajes-validados/fichajes-validados.dto";
-import { DateTime } from "luxon";
-import { TrabajadorService } from "../trabajadores/trabajadores.class";
-import { Cuadrantes } from "../cuadrantes/cuadrantes.class";
+import { Controller, Get, Post, UseGuards } from "@nestjs/common";
+
 import { Roles } from "../decorators/role.decorator";
 import { RoleGuard } from "../guards/role.guard";
 import { AuthGuard } from "../guards/auth.guard";
 import { PrismaService } from "../prisma/prisma.service";
-import axios from "axios";
-import { AusenciasService } from "src/ausencias/ausencias.class";
-
-// import { Prisma } from "@prisma/client";
 
 @Controller("test")
 export class TestController {
-  constructor(
-    private readonly prismaService: PrismaService, // private readonly trabajadorInstance: TrabajadorService, // private readonly cuadrantesInstance: Cuadrantes, // private readonly ausenciasInstance: AusenciasService,
-  ) {}
+  constructor(private readonly prismaService: PrismaService) {}
 
   @Roles("ADMIN", "DEPENDIENTA")
   @UseGuards(AuthGuard, RoleGuard)

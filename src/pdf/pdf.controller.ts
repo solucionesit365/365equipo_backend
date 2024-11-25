@@ -22,7 +22,6 @@ import {
 } from "./pdf.dto";
 import { StorageService } from "../storage/storage.service";
 import { CryptoService } from "../crypto/crypto.class";
-import { join } from "path";
 import { Response as ExpressResponse } from "express";
 import { PrismaService } from "../prisma/prisma.service";
 import { DateTime } from "luxon";
@@ -295,7 +294,7 @@ export class PdfController {
 
       // Recolectar datos para verificar que no está vacío
       let hasData = false;
-      pdfStream.on("data", (chunk) => {
+      pdfStream.on("data", () => {
         hasData = true;
       });
 

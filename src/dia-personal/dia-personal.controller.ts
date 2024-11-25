@@ -1,7 +1,7 @@
 import { Controller, Post, UseGuards, Body, Get, Query } from "@nestjs/common";
 import { AuthGuard } from "../guards/auth.guard";
 import { DiaPersonalClass } from "./dia-personal.class";
-import { diaPersonal } from "./dia-personal.interface";
+import { DiaPersonal } from "./dia-personal.interface";
 import { EmailService } from "src/email/email.class";
 import { TrabajadorService } from "../trabajadores/trabajadores.class";
 import { constructEmailContent } from "./emailDiaPersonal";
@@ -17,7 +17,7 @@ export class DiaPersonalController {
   //Nueva solicitud de vacaciones
   @UseGuards(AuthGuard)
   @Post("nuevaSolicitudDiaPersonal")
-  async nuevaSolicitudDiaPersonal(@Body() diaPersonal: diaPersonal) {
+  async nuevaSolicitudDiaPersonal(@Body() diaPersonal: DiaPersonal) {
     try {
       diaPersonal.fechaInicio = new Date(diaPersonal.fechaInicio);
       diaPersonal.fechaFinal = new Date(diaPersonal.fechaFinal);
@@ -159,7 +159,7 @@ export class DiaPersonalController {
 
   @UseGuards(AuthGuard)
   @Post("setEstadoSolicitud")
-  async updateSolicitudDiaPersonalEstado(@Body() diaPersonal: diaPersonal) {
+  async updateSolicitudDiaPersonalEstado(@Body() diaPersonal: DiaPersonal) {
     try {
       if (!diaPersonal.estado || !diaPersonal._id) throw Error("Faltan datos");
 
