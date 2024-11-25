@@ -15,6 +15,7 @@ export class ColorSemanalService {
       },
       data: {
         value: color,
+        updatedAt: DateTime.now().toJSDate(),
       },
     });
   }
