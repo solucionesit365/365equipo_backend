@@ -6,6 +6,7 @@ import {
   IsOptional,
   IsString,
   ValidateNested,
+  IsArray,
 } from "class-validator";
 import { Type } from "class-transformer";
 
@@ -159,6 +160,22 @@ export class GetTiendaDiaRequestDto {
   @Type(() => Date)
   @IsDate()
   dia: Date;
+}
+
+export class GetTiendaRangoRequestDto {
+  @IsArray()
+  @IsNotEmpty({ each: true })
+  tiendas: number[];
+
+  @Type(() => Date)
+  @IsDate()
+  @IsNotEmpty()
+  fechaInicio: Date;
+
+  @Type(() => Date)
+  @IsDate()
+  @IsNotEmpty()
+  fechaFin: Date;
 }
 
 export class GetResumenRequestDto {
