@@ -9,6 +9,7 @@ export interface videosFormacion365Interface {
   creacion: Date;
   views: number;
   urlVideo: string;
+  tiendas: number[];
 }
 //Ver quien ha visto el video
 export interface videosVistosFormacion365Interface {

@@ -17,6 +17,7 @@ export interface FichajeDto {
     latitud?: number;
     longitud?: number;
   };
+  salidaAutomatica?: boolean;
 }
 
 export interface ParFichaje {

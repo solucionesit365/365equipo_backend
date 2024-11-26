@@ -240,7 +240,7 @@ export class Fichajes {
         fichajesPretty.push({
           _id: fichajesBC[i].idr,
           hora: DateTime.fromJSDate(new Date(fichajesBC[i].tmst)).minus({
-            hours: 2,
+            hours: 1,
           }),
           uid: idApp,
           tipo: "ENTRADA",
@@ -255,7 +255,7 @@ export class Fichajes {
         fichajesPretty.push({
           _id: fichajesBC[i].idr,
           hora: DateTime.fromJSDate(new Date(fichajesBC[i].tmst)).minus({
-            hours: 2,
+            hours: 1,
           }),
           uid: idApp,
           tipo: "SALIDA",
@@ -472,13 +472,26 @@ export class Fichajes {
             ),
           });
         } else {
+          const cuadrante = await this.cuadrantesInstance.getTurnoDia(
+            fichajesSimples[i].idTrabajador,
+            DateTime.fromJSDate(fichajesSimples[i].hora),
+          );
           pares.push({
             entrada: fichajesSimples[i],
-            salida: null,
-            cuadrante: await this.cuadrantesInstance.getTurnoDia(
-              fichajesSimples[i].idTrabajador,
-              DateTime.fromJSDate(fichajesSimples[i].hora),
-            ),
+            salida: {
+              _id: new ObjectId(),
+              hora: DateTime.fromJSDate(cuadrante.final).toJSDate(),
+              idTrabajador: fichajesSimples[i].idTrabajador,
+              tipo: "SALIDA",
+              validado: false,
+              uid: fichajesSimples[i].uid,
+              nombre: fichajesSimples[i].nombre,
+              dni: fichajesSimples[i].dni,
+              enviado: false,
+              idExterno: fichajesSimples[i].idTrabajador,
+              salidaAutomatica: true,
+            },
+            cuadrante: cuadrante,
           });
         }
       }

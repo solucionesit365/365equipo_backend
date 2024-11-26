@@ -55,7 +55,7 @@ export class videosFormacion365Class {
     return await this.videosDB.findVideoByIdVideo(nombre, idVideo);
   }
 
-  async getVideosByCategoria(categoria: string) {
-    return await this.videosDB.getVideosByCategoria(categoria);
+  async getVideosByCategoria(categoria: string, idTienda: number) {
+    return await this.videosDB.getVideosByCategoria(categoria, idTienda);
   }
 }
