@@ -200,6 +200,29 @@ export class FichajesValidadosDatabase {
       .toArray();
   }
 
+  async getTiendaRango(
+    tiendas: number[],
+    fechaInicio: DateTime,
+    fechaFin: DateTime,
+  ) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const fichajesCollection =
+      db.collection<FichajeValidadoDto>("fichajesValidados2");
+
+    const fechaInicioISO = fechaInicio.startOf("day").toJSDate();
+    const fechaFinalISO = fechaFin.endOf("day").toJSDate();
+
+    return await fichajesCollection
+      .find({
+        idTienda: { $in: tiendas },
+        fichajeEntrada: {
+          $gte: fechaInicioISO,
+          $lte: fechaFinalISO,
+        },
+      })
+      .toArray();
+  }
+
   async getParaCuadrante(
     fechaInicio: DateTime,
     fechaFinal: DateTime,
