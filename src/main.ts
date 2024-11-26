@@ -4,6 +4,7 @@ import { ValidationPipe } from "@nestjs/common";
 import { join } from "path";
 import { NestExpressApplication } from "@nestjs/platform-express";
 import { Settings } from "luxon";
+import * as express from "express";
 
 Settings.defaultZone = "Europe/Madrid";
 async function bootstrap() {
@@ -30,7 +31,8 @@ async function bootstrap() {
   app.useStaticAssets(join(__dirname, "..", "public"));
   app.setBaseViewsDir(join(__dirname, "..", "views"));
   app.setViewEngine("hbs");
-
+  app.use(express.json({ limit: "50mb" }));
+  app.use(express.urlencoded({ limit: "50mb", extended: true }));
   await app.listen(3000);
 }
 

@@ -21,6 +21,7 @@ export class VisionController {
       }
 
       const fullText = detections[0].description;
+      // console.log("Texto detectado:", fullText); // Para debugging
       const ticketData = this.parseTicketText(fullText);
 
       return ticketData;
@@ -34,35 +35,49 @@ export class VisionController {
     const lines = text.split("\n");
     const ticket = {
       ticketId: null,
-      nif: null,
       total: null,
+      fecha: null,
     };
 
-    // Regex patterns
-    const nifRegex =
-      /[A-Z]\d{8}|[ABCDEFGHJKLMNPQRSUVW]\d{7}[0-9A-J]|\d{8}[A-Z]/i;
-    const totalRegex = /total\s*[\$]?\s*(\d+[.,]\d{2})/i;
-    const ticketIdRegex = /[Nn]º?\s*(ticket|factura|documento)?\s*:?\s*(\d+)/i;
+    // Patrones específicos para este formato de ticket
+    const ticketIdRegex = /N:\s*(\d+)/i; // Busca "N:" seguido de números
+    const totalRegex = /TOTAL:?\s*(\d+[.,]\d{2})/i; // Busca "TOTAL" seguido de números con decimales
+    const fechaRegex = /(\d{2}-\d{2}-\d{4})/; // Formato DD-MM-YYYY
 
     lines.forEach((line) => {
-      // Buscar NIF/CIF
-      const nifMatch = line.match(nifRegex);
-      if (nifMatch && !ticket.nif) {
-        ticket.nif = nifMatch[0];
+      // Para debugging
+      // console.log("Procesando línea:", line);
+
+      // Buscar número de ticket usando regex
+      const ticketIdMatch = line.match(ticketIdRegex);
+      if (ticketIdMatch) {
+        ticket.ticketId = ticketIdMatch[1]; // Esto capturará el número después de "N:"
       }
 
-      // Buscar total
+      // Buscar total usando regex
       const totalMatch = line.match(totalRegex);
       if (totalMatch) {
         ticket.total = totalMatch[1];
       }
 
-      // Buscar identificador del ticket
-      const ticketIdMatch = line.match(ticketIdRegex);
-      if (ticketIdMatch && !ticket.ticketId) {
-        ticket.ticketId = ticketIdMatch[2];
+      // Buscar fecha
+      const fechaMatch = line.match(fechaRegex);
+      if (fechaMatch) {
+        ticket.fecha = fechaMatch[1];
       }
     });
+
+    // Si no se encontró el total con el regex específico, buscar en formato más simple
+    if (!ticket.total) {
+      lines.forEach((line) => {
+        if (line.toLowerCase().includes("total")) {
+          const simpleTotal = line.match(/(\d+[.,]\d{2})/);
+          if (simpleTotal) {
+            ticket.total = simpleTotal[1];
+          }
+        }
+      });
+    }
 
     return ticket;
   }
