@@ -1,10 +1,12 @@
-import { Controller, Post, Body } from "@nestjs/common";
+import { Controller, Post, Body, UseGuards } from "@nestjs/common";
 import { ImageAnnotatorClient } from "@google-cloud/vision";
+import { AuthGuard } from "../guards/auth.guard";
 
 @Controller("vision")
 export class VisionController {
   private visionClient = new ImageAnnotatorClient();
 
+  @UseGuards(AuthGuard)
   @Post("scan")
   async scanTicket(@Body() body: { image: string }) {
     try {
