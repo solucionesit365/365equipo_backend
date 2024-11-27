@@ -6,6 +6,7 @@ import {
   GetResumenRequestDto,
   GetSemanasFichajesPagarRequestDto,
   GetTiendaDiaRequestDto,
+  GetTiendaRangoRequestDto,
 } from "./fichajes-validados.dto";
 import { Notificaciones } from "../notificaciones/notificaciones.class";
 import { TrabajadorService } from "../trabajadores/trabajadores.class";
@@ -291,6 +292,32 @@ export class FichajesValidadosController {
       const respFichajesV = await this.fichajesValidadosInstance.getTiendaDia(
         req.tienda,
         req.dia,
+      );
+      if (respFichajesV.length > 0) {
+        return {
+          ok: true,
+          data: respFichajesV,
+        };
+      } else {
+        return {
+          ok: false,
+          data: [],
+        };
+      }
+    } catch (error) {
+      return { ok: false, message: error.message };
+    }
+  }
+
+  @UseGuards(AuthGuard)
+  @Get("getTiendaRango")
+  async getTiendaRango(@Query() req: GetTiendaRangoRequestDto) {
+    try {
+      const tiendasNumeros = req.tiendas.map(Number);
+      const respFichajesV = await this.fichajesValidadosInstance.getTiendaRango(
+        tiendasNumeros,
+        req.fechaInicio,
+        req.fechaFin,
       );
       if (respFichajesV.length > 0) {
         return {

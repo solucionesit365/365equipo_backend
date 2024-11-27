@@ -141,6 +141,14 @@ export class FichajesValidadosService {
     );
   }
 
+  async getTiendaRango(tiendas: number[], fechaInicio: Date, fechaFin: Date) {
+    return await this.schFichajesValidados.getTiendaRango(
+      tiendas,
+      DateTime.fromJSDate(fechaInicio),
+      DateTime.fromJSDate(fechaFin),
+    );
+  }
+
   async resumenSemana(fecha: Date, idTienda: number) {
     const lunes = DateTime.fromJSDate(fecha).startOf("week");
     const domingo = DateTime.fromJSDate(fecha).endOf("week");
