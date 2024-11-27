@@ -476,11 +476,15 @@ export class Fichajes {
             fichajesSimples[i].idTrabajador,
             DateTime.fromJSDate(fichajesSimples[i].hora),
           );
+
           pares.push({
             entrada: fichajesSimples[i],
             salida: {
               _id: new ObjectId(),
-              hora: DateTime.fromJSDate(cuadrante.final).toJSDate(),
+              hora:
+                cuadrante && cuadrante.final
+                  ? DateTime.fromJSDate(cuadrante.final).toJSDate()
+                  : null,
               idTrabajador: fichajesSimples[i].idTrabajador,
               tipo: "SALIDA",
               validado: false,
@@ -554,3 +558,4 @@ export class Fichajes {
     return this.schFichajes.getFichajes(idSql);
   }
 }
+
