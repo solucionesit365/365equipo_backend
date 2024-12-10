@@ -173,7 +173,6 @@ export class TrabajadorFormRequest {
   @IsString()
   tokenQR: string;
 
-  @IsOptional()
   @IsNotEmpty()
   @IsString()
   empresaId: string | null;
