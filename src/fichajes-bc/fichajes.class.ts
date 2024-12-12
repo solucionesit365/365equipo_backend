@@ -558,4 +558,3 @@ export class Fichajes {
     return this.schFichajes.getFichajes(idSql);
   }
 }
-
