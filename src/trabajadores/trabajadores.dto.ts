@@ -293,3 +293,13 @@ export class DeleteTrabajadorDto {
   @IsNumber()
   id: number;
 }
+
+export class RegisterDto {
+  @IsNotEmpty()
+  @IsString()
+  dni: string;
+
+  @IsNotEmpty()
+  @IsString()
+  password: string;
+}

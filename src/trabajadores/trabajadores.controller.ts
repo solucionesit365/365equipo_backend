@@ -9,6 +9,7 @@ import {
   CreateTrabajadorRequestDto,
   DeleteTrabajadorDto,
   GetSubordinadosDto,
+  RegisterDto,
   TrabajadorFormRequest,
 } from "./trabajadores.dto";
 
@@ -130,14 +131,17 @@ export class TrabajadoresController {
   }
 
   @Post("registro")
-  async registroUsuarios(@Body() { dni, password }) {
+  async registroUsuarios(@Body() req: RegisterDto) {
     try {
-      if (!dni || !password || password < 6)
+      if (req.password.length < 6)
         throw Error("Algunos parámetros no son correctos");
 
       return {
         ok: true,
-        data: await this.trabajadorInstance.registrarUsuario(dni, password),
+        data: await this.trabajadorInstance.registrarUsuario(
+          req.dni,
+          req.password,
+        ),
       };
     } catch (err) {
       console.log(err);
