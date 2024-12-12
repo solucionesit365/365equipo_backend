@@ -477,26 +477,29 @@ export class Fichajes {
             DateTime.fromJSDate(fichajesSimples[i].hora),
           );
 
-          pares.push({
-            entrada: fichajesSimples[i],
-            salida: {
-              _id: new ObjectId(),
-              hora:
-                cuadrante && cuadrante.final
-                  ? DateTime.fromJSDate(cuadrante.final).toJSDate()
-                  : null,
-              idTrabajador: fichajesSimples[i].idTrabajador,
-              tipo: "SALIDA",
-              validado: false,
-              uid: fichajesSimples[i].uid,
-              nombre: fichajesSimples[i].nombre,
-              dni: fichajesSimples[i].dni,
-              enviado: false,
-              idExterno: fichajesSimples[i].idTrabajador,
-              salidaAutomatica: true,
-            },
-            cuadrante: cuadrante,
-          });
+          if (
+            cuadrante &&
+            cuadrante.final &&
+            DateTime.fromJSDate(cuadrante.final).isValid
+          ) {
+            pares.push({
+              entrada: fichajesSimples[i],
+              salida: {
+                _id: new ObjectId(),
+                hora: DateTime.fromJSDate(cuadrante.final).toJSDate(),
+                idTrabajador: fichajesSimples[i].idTrabajador,
+                tipo: "SALIDA",
+                validado: false,
+                uid: fichajesSimples[i].uid,
+                nombre: fichajesSimples[i].nombre,
+                dni: fichajesSimples[i].dni,
+                enviado: false,
+                idExterno: fichajesSimples[i].idTrabajador,
+                salidaAutomatica: true,
+              },
+              cuadrante: cuadrante,
+            });
+          }
         }
       }
     }

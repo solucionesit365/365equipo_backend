@@ -4,6 +4,7 @@ import { Admin } from "./admin.class";
 @Controller("admin")
 export class AdminController {
   constructor(private readonly adminInstance: Admin) {}
+
   @Post("signInWithCustomToken")
   async signInWithCustomToken(@Body() { email, password }) {
     try {
