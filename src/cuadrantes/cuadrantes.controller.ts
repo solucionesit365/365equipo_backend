@@ -12,20 +12,18 @@ import { AuthGuard } from "../guards/auth.guard";
 import { Cuadrantes } from "./cuadrantes.class";
 import { TCuadrante, TRequestCuadrante } from "./cuadrantes.interface";
 import { SchedulerGuard } from "../guards/scheduler.guard";
-import { FirebaseService } from "../firebase/firebase.service";
 import { TrabajadorService } from "../trabajadores/trabajadores.class";
 import { DateTime } from "luxon";
 import { ObjectId } from "mongodb";
 import { ContratoService } from "../contrato/contrato.service";
 import { User } from "../decorators/get-user.decorator";
 import { UserRecord } from "firebase-admin/auth";
-import { CopiarSemanaCuadranteDto } from "./cuadrantes.dto";
+import { CopiarSemanaCuadranteDto, GetCuadrantesDto } from "./cuadrantes.dto";
 import { Notificaciones } from "../notificaciones/notificaciones.class";
 
 @Controller("cuadrantes")
 export class CuadrantesController {
   constructor(
-    private readonly authInstance: FirebaseService,
     private readonly cuadrantesInstance: Cuadrantes,
     private readonly contratoService: ContratoService,
     private readonly trabajadoresInstance: TrabajadorService,
@@ -35,14 +33,12 @@ export class CuadrantesController {
   @UseGuards(AuthGuard)
   @Get()
   async getCuadrantes(
-    @Query() { fecha, idTienda }: { fecha: string; idTienda?: string },
+    @Query() req: GetCuadrantesDto,
     @User() user: UserRecord,
   ) {
     try {
       const usuarioCompleto =
         await this.trabajadoresInstance.getTrabajadorByAppId(user.uid);
-
-      if (!fecha) throw Error("Faltan datos");
 
       const tipoEmpleado = this.cuadrantesInstance.getRole(usuarioCompleto);
       let cuadrantes: TCuadrante[] = [];
@@ -50,7 +46,7 @@ export class CuadrantesController {
       if (tipoEmpleado === "DEPENDIENTA") {
         cuadrantes = await this.cuadrantesInstance.getCuadranteDependienta(
           usuarioCompleto.id,
-          DateTime.fromJSDate(new Date(fecha)),
+          DateTime.fromISO(req.fecha),
         );
       }
 
@@ -65,23 +61,32 @@ export class CuadrantesController {
         cuadrantes = await this.cuadrantesInstance.getCuadranteCoordinadora(
           usuarioCompleto.id,
           arrayIdEquipo,
-          DateTime.fromJSDate(new Date(fecha)),
+          DateTime.fromISO(req.fecha),
           usuarioCompleto.idTienda,
         );
       }
 
-      if (tipoEmpleado === "SUPERVISORA" && Number(idTienda)) {
+      if (tipoEmpleado === "SUPERVISORA" && req.idTienda) {
         cuadrantes = await this.cuadrantesInstance.getCuadranteSupervisora(
-          Number(idTienda),
-          DateTime.fromJSDate(new Date(fecha)),
+          req.idTienda,
+          DateTime.fromISO(req.fecha),
         );
       }
-      if (Number(idTienda)) {
-        // Esto es tratado como Dependienta tambien , se obtiene el cuadrante de la tienda por su idTienda
-        cuadrantes = await this.cuadrantesInstance.getTiendasSemana(
-          Number(idTienda),
-          DateTime.fromJSDate(new Date(fecha)),
+
+      if (req.idTienda) {
+        // Esto es tratado como Dependienta también, se obtiene el cuadrante de la tienda por su idTienda
+        const cuadrantesTienda = await this.cuadrantesInstance.getTiendasSemana(
+          req.idTienda,
+          DateTime.fromISO(req.fecha),
         );
+
+        // Fusionar cuadrantesTienda con cuadrantes sin duplicados según _id
+        const idsExistentes = new Set(cuadrantes.map((c) => c._id.toString()));
+        const cuadrantesUnicos = cuadrantesTienda.filter(
+          (cuadrante) => !idsExistentes.has(cuadrante._id.toString()),
+        );
+
+        cuadrantes = [...cuadrantes, ...cuadrantesUnicos];
       }
 
       return {

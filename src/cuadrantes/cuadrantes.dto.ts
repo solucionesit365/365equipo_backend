@@ -101,3 +101,14 @@ export class CopiarSemanaCuadranteDto {
   @IsNumber()
   idTienda: number;
 }
+
+export class GetCuadrantesDto {
+  @IsNotEmpty()
+  @IsString()
+  fecha: string;
+
+  @IsNotEmpty()
+  @Type(() => Number)
+  @IsNumber()
+  idTienda: number;
+}
