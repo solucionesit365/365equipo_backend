@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, InternalServerErrorException } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { DateTime } from "luxon";
 import { Prisma } from "@prisma/client";
@@ -98,6 +98,7 @@ export class TrabajadorDatabaseService {
         },
         tienda: true,
         roles: true,
+        responsable: true,
       },
     });
 
@@ -111,6 +112,11 @@ export class TrabajadorDatabaseService {
   }
 
   async getTrabajadorBySqlId(id: number) {
+    if (!id)
+      throw new InternalServerErrorException(
+        "id no definido en getTrabajadorBySqlId (trabajadores.database.ts)",
+      );
+
     const trabajador = await this.prisma.trabajador.findUnique({
       where: {
         id: id,

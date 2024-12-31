@@ -33,18 +33,14 @@ export class ContratoController {
   @UseGuards(AuthGuard)
   @Get("getHistoricoContratos")
   async getHistoricoContratos(@User() user: UserRecord) {
-    try {
-      const trabajadorCompleto =
-        await this.trabajadoresService.getTrabajadorByAppId(user.uid);
-      const resUser = await this.contratoService.getHistoricoContratos(
-        trabajadorCompleto.dni,
-      );
+    const trabajadorCompleto =
+      await this.trabajadoresService.getTrabajadorByAppId(user.uid);
 
-      return { ok: true, data: resUser };
-    } catch (error) {
-      console.log(error);
-      return { ok: false, message: error.message };
-    }
+    const resUser = await this.contratoService.getHistoricoContratos(
+      trabajadorCompleto.dni,
+    );
+
+    return resUser;
   }
 
   @Roles("RRHH_ADMIN")
