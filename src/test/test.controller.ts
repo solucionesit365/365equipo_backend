@@ -4,10 +4,14 @@ import { Roles } from "../decorators/role.decorator";
 import { RoleGuard } from "../guards/role.guard";
 import { AuthGuard } from "../guards/auth.guard";
 import { PrismaService } from "../prisma/prisma.service";
+import { LoggerService } from "../logger/logger.service";
 
 @Controller("test")
 export class TestController {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly loggerService: LoggerService,
+  ) {}
 
   @Roles("ADMIN", "DEPENDIENTA")
   @UseGuards(AuthGuard, RoleGuard)
@@ -18,6 +22,11 @@ export class TestController {
 
   @Get()
   test() {
+    this.loggerService.create({
+      action: "Prueba 1",
+      name: "Eze",
+      extraData: { edad: 30, club: "FCBARCELONA Y RCentral" },
+    });
     return "Operativo";
   }
 

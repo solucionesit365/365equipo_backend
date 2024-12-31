@@ -57,6 +57,7 @@ import { QuestionCategoryModule } from "./question-category/question-category.mo
 import { FormacionModule } from "./formacion/formacion.module";
 import { QuestionnaireModule } from "./questionnaire/questionnaire.module";
 import { VisionModule } from "./vision/vision.module";
+import { LoggerModule } from './logger/logger.module';
 
 @Module({
   imports: [
@@ -118,6 +119,7 @@ import { VisionModule } from "./vision/vision.module";
     FormacionModule,
     QuestionnaireModule,
     VisionModule,
+    LoggerModule,
   ],
   controllers: [AppController, KpiTiendasController],
 })
