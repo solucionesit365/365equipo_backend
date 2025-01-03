@@ -6,6 +6,9 @@ import { Notificaciones } from "../notificaciones/notificaciones.class";
 import { AuthGuard } from "../guards/auth.guard";
 import { User } from "../decorators/get-user.decorator";
 import { UserRecord } from "firebase-admin/auth";
+import { LoggerService } from "../logger/logger.service";
+import { CompleteUser } from "src/decorators/getCompleteUser.decorator";
+import { Trabajador } from "@prisma/client";
 
 @Controller("anuncios")
 export class AnunciosController {
@@ -13,6 +16,7 @@ export class AnunciosController {
     private readonly notificaciones: Notificaciones,
     private readonly trabajadores: TrabajadorService,
     private readonly anunciosInstance: AnunciosService,
+    private readonly loggerService: LoggerService,
   ) {}
 
   @UseGuards(AuthGuard)
@@ -47,9 +51,16 @@ export class AnunciosController {
 
   @UseGuards(AuthGuard)
   @Post("addAnuncio")
-  async addAnuncio(@Body() anuncio: AnuncioDto) {
+  async addAnuncio(@Body() data: AnuncioDto, @CompleteUser() user: Trabajador) {
     try {
-      if (await this.anunciosInstance.addAnuncio(anuncio)) {
+      const anuncio = await this.anunciosInstance.addAnuncio(data);
+
+      if (anuncio) {
+        this.loggerService.create({
+          action: "Crea un nuevo anuncio",
+          name: user.nombreApellidos,
+          extraData: anuncio,
+        });
         const arrayTrabajador = await this.trabajadores.getTrabajadores();
         const trabajadorConIdApp = arrayTrabajador.some(
           (trabajador) => trabajador.idApp != null,

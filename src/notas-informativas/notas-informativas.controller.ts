@@ -4,6 +4,9 @@ import { NotasInformativasClass } from "./notas-informativas.class";
 import { NotasInformativas } from "./notas-informativas.interface";
 import { Notificaciones } from "../notificaciones/notificaciones.class";
 import { TrabajadorService } from "../trabajadores/trabajadores.class";
+import { LoggerService } from "../logger/logger.service";
+import { CompleteUser } from "../decorators/getCompleteUser.decorator";
+import { Trabajador } from "@prisma/client";
 
 @Controller("notas-informativas")
 export class NotasInformativasController {
@@ -11,15 +14,20 @@ export class NotasInformativasController {
     private readonly notasInformativasInstance: NotasInformativasClass,
     private readonly trabajadores: TrabajadorService,
     private readonly notificaciones: Notificaciones,
+    private readonly loggerService: LoggerService,
   ) {}
 
   @UseGuards(AuthGuard)
   @Post("nuevaNotaInformativa")
-  async nuevaNotaInformativa(@Body() nota: NotasInformativas) {
+  async nuevaNotaInformativa(
+    @Body() nota: NotasInformativas,
+    @CompleteUser() user: Trabajador,
+  ) {
     try {
       if (typeof nota.fechaCreacion === "string") {
         nota.fechaCreacion = new Date(nota.fechaCreacion);
       }
+
       if (typeof nota.caducidad === "string") {
         nota.caducidad = new Date(nota.caducidad);
       }
@@ -53,9 +61,19 @@ export class NotasInformativasController {
         }
       }
 
+      const resNuevaNota =
+        await this.notasInformativasInstance.nuevaNotaInformativa(nota);
+
+      if (resNuevaNota)
+        this.loggerService.create({
+          action: "Crea una nota informativa",
+          name: user.nombreApellidos,
+          extraData: nota,
+        });
+
       return {
         ok: true,
-        data: await this.notasInformativasInstance.nuevaNotaInformativa(nota),
+        data: resNuevaNota,
       };
     } catch (err) {
       console.log(err);

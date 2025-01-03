@@ -2,12 +2,15 @@ import { Controller, Get, Query, Post, Body, UseGuards } from "@nestjs/common";
 import { AuthGuard } from "../guards/auth.guard";
 import { SolicitudesVacacionesService } from "./solicitud-vacaciones.class";
 import { SolicitudVacaciones } from "./solicitud-vacaciones.interface";
-import { EmailService } from "src/email/email.class";
+import { EmailService } from "../email/email.class";
 import { TrabajadorService } from "../trabajadores/trabajadores.class";
-import { Notificaciones } from "src/notificaciones/notificaciones.class";
+import { Notificaciones } from "../notificaciones/notificaciones.class";
 import { UserRecord } from "firebase-admin/auth";
 import { User } from "../decorators/get-user.decorator";
-import { SchedulerGuard } from "src/guards/scheduler.guard";
+import { SchedulerGuard } from "../guards/scheduler.guard";
+import { LoggerService } from "../logger/logger.service";
+import { CompleteUser } from "src/decorators/getCompleteUser.decorator";
+import { Trabajador } from "@prisma/client";
 
 @Controller("solicitud-vacaciones")
 export class SolicitudVacacionesController {
@@ -16,6 +19,7 @@ export class SolicitudVacacionesController {
     private readonly email: EmailService,
     private readonly trabajadorInstance: TrabajadorService,
     private readonly notificacionesInstance: Notificaciones,
+    private readonly loggerService: LoggerService,
   ) {}
 
   //Nueva solicitud de vacaciones
@@ -23,7 +27,7 @@ export class SolicitudVacacionesController {
   @Post("nuevaSolicitud")
   async nuevaSolicitudVacaciones(
     @Body() solicitudesVacaciones: SolicitudVacaciones,
-    @User() user: UserRecord,
+    @CompleteUser() user: Trabajador,
   ) {
     try {
       const solicitudTrabajador =
@@ -107,7 +111,9 @@ export class SolicitudVacacionesController {
 
       //enviar notificacion
       //get TokenFCM
-      const userToken = await this.notificacionesInstance.getFCMToken(user.uid);
+      const userToken = await this.notificacionesInstance.getFCMToken(
+        user.idApp,
+      );
 
       console.log(userToken);
       if (userToken) {
@@ -119,6 +125,11 @@ export class SolicitudVacacionesController {
           "/mis-vacaciones",
         );
       }
+
+      this.loggerService.create({
+        action: "Nueva solicitud de vacaciones",
+        name: `Creado por ${user.nombreApellidos} para ${solicitudTrabajador.nombreApellidos}`,
+      });
 
       return {
         ok: true,

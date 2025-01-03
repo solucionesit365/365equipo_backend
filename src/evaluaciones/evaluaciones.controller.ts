@@ -5,16 +5,23 @@ import {
   CreateEvaluacionesInterfaceDto,
   CrearIluoInterfaceDto,
 } from "./evaluaciones.dto";
+import { LoggerService } from "../logger/logger.service";
+import { CompleteUser } from "../decorators/getCompleteUser.decorator";
+import { Trabajador } from "@prisma/client";
 
 @Controller("evaluaciones")
 export class EvaluacionesController {
-  constructor(private readonly evaluacionesclass: EvaluacionesService) {}
+  constructor(
+    private readonly evaluacionesclass: EvaluacionesService,
+    private readonly loggerService: LoggerService,
+  ) {}
 
   @UseGuards(AuthGuard)
   @Post("addPlantilla")
   async addPlantilla(@Body() evaluacion: CreateEvaluacionesInterfaceDto) {
     try {
       const response = await this.evaluacionesclass.addPlantilla(evaluacion);
+
       if (response) {
         return {
           ok: true,
@@ -110,10 +117,18 @@ export class EvaluacionesController {
 
   @UseGuards(AuthGuard)
   @Post("addEvaluacion")
-  async addEvaluacion(@Body() evaluacion: CreateEvaluacionesInterfaceDto) {
-    console.log(evaluacion);
-
+  async addEvaluacion(
+    @Body() evaluacion: CreateEvaluacionesInterfaceDto,
+    @CompleteUser() user: Trabajador,
+  ) {
     const response = await this.evaluacionesclass.addEvaluacion(evaluacion);
+
+    this.loggerService.create({
+      action: "Crea una evaluación",
+      name: user.nombreApellidos,
+      extraData: evaluacion,
+    });
+
     if (response) {
       return {
         ok: true,

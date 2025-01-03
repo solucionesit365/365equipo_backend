@@ -2,71 +2,58 @@ import { Body, Controller, Post, UseGuards, Get } from "@nestjs/common";
 import { AusenciasService } from "./ausencias.class";
 import { AuthGuard } from "../guards/auth.guard";
 import { DateTime } from "luxon";
+import { LoggerService } from "../logger/logger.service";
+import { CrearAusenciaDto } from "./ausencias.dto";
+import { CompleteUser } from "src/decorators/getCompleteUser.decorator";
+import { Trabajador } from "@prisma/client";
 
 @Controller("ausencias")
 export class AusenciasController {
-  constructor(private readonly ausenciasInstance: AusenciasService) {}
+  constructor(
+    private readonly ausenciasInstance: AusenciasService,
+    private readonly loggerService: LoggerService,
+  ) {}
 
   @UseGuards(AuthGuard)
   @Post("nueva")
   async addAusencia(
-    @Body()
-    {
-      idUsuario,
-      fechaInicio,
-      fechaFinal,
-      fechaRevision,
-      tipo,
-      horasContrato,
-      tienda,
-      comentario,
-      nombre,
-      dni,
-      completa,
-      horas,
-    },
+    @Body() req: CrearAusenciaDto,
+    @CompleteUser() user: Trabajador,
   ) {
     try {
-      if (
-        tipo === "BAJA" ||
-        tipo === "PERMISO MATERNIDAD/PATERNIDAD" ||
-        tipo === "DIA_PERSONAL" ||
-        tipo === "VACACIONES" ||
-        tipo === "HORAS_JUSTIFICADAS" ||
-        tipo === "SANCIÓN" ||
-        tipo === "ABSENTISMO" ||
-        tipo === "REM" ||
-        (tipo === "DIA_PERSONAL" &&
-          typeof idUsuario === "number" &&
-          typeof fechaInicio === "string" &&
-          typeof fechaFinal === "string" &&
-          typeof fechaRevision === "string" &&
-          typeof comentario === "string" &&
-          typeof completa === "boolean" &&
-          typeof horas === "number")
-      ) {
-        const inicio = new Date(fechaInicio);
-        const final = fechaFinal ? new Date(fechaFinal) : null;
-        const revision = fechaRevision ? new Date(fechaRevision) : null;
+      const inicio = DateTime.fromISO(req.fechaInicio).toJSDate();
+      const final = req.fechaFinal
+        ? DateTime.fromISO(req.fechaFinal).toJSDate()
+        : null;
+      const revision = req.fechaRevision
+        ? DateTime.fromISO(req.fechaRevision).toJSDate()
+        : null;
 
-        return {
-          ok: true,
-          data: await this.ausenciasInstance.nuevaAusencia(
-            idUsuario,
-            nombre,
-            dni,
-            tipo,
-            horasContrato,
-            tienda,
-            inicio,
-            final,
-            revision,
-            comentario,
-            completa,
-            horas,
-          ),
-        };
-      } else throw Error("Parámetros incorrectos");
+      const ausencia = await this.ausenciasInstance.nuevaAusencia(
+        req.idUsuario,
+        req.nombre,
+        req.dni,
+        req.tipo,
+        req.horasContrato,
+        req.tienda,
+        inicio,
+        final,
+        revision,
+        req.comentario,
+        req.completa,
+        req.horas,
+      );
+
+      this.loggerService.create({
+        action: "Crea una ausencia",
+        name: `${user.nombreApellidos} para ${req.nombre}`,
+        extraData: ausencia,
+      });
+
+      return {
+        ok: true,
+        data: ausencia,
+      };
     } catch (err) {
       console.log(err);
       return { ok: false, message: err.message };
