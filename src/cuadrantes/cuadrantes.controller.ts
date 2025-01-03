@@ -12,7 +12,6 @@ import { AuthGuard } from "../guards/auth.guard";
 import { Cuadrantes } from "./cuadrantes.class";
 import { TCuadrante, TRequestCuadrante } from "./cuadrantes.interface";
 import { SchedulerGuard } from "../guards/scheduler.guard";
-import { FirebaseService } from "../firebase/firebase.service";
 import { TrabajadorService } from "../trabajadores/trabajadores.class";
 import { DateTime } from "luxon";
 import { ObjectId } from "mongodb";
@@ -21,15 +20,18 @@ import { User } from "../decorators/get-user.decorator";
 import { UserRecord } from "firebase-admin/auth";
 import { CopiarSemanaCuadranteDto } from "./cuadrantes.dto";
 import { Notificaciones } from "../notificaciones/notificaciones.class";
+import { LoggerService } from "../logger/logger.service";
+import { CompleteUser } from "src/decorators/getCompleteUser.decorator";
+import { Trabajador } from "@prisma/client";
 
 @Controller("cuadrantes")
 export class CuadrantesController {
   constructor(
-    private readonly authInstance: FirebaseService,
     private readonly cuadrantesInstance: Cuadrantes,
     private readonly contratoService: ContratoService,
     private readonly trabajadoresInstance: TrabajadorService,
     private readonly notificacionesInstance: Notificaciones,
+    private readonly loggerService: LoggerService,
   ) {}
 
   @UseGuards(AuthGuard)
@@ -261,12 +263,12 @@ export class CuadrantesController {
   @Post("saveCuadrante")
   async saveCuadrante(
     @Body() reqCuadrante: TRequestCuadrante,
-    @User() user: UserRecord,
+    @CompleteUser() user: Trabajador,
   ) {
     try {
       if (!reqCuadrante) throw Error("Faltan datos");
       const usuarioCompleto =
-        await this.trabajadoresInstance.getTrabajadorByAppId(user.uid);
+        await this.trabajadoresInstance.getTrabajadorByAppId(user.idApp);
       const trabajadorEditado =
         await this.trabajadoresInstance.getTrabajadorBySqlId(
           reqCuadrante.idTrabajador,
@@ -379,6 +381,11 @@ export class CuadrantesController {
               );
             }
           }
+
+          this.loggerService.create({
+            action: "Crea un cuadrante",
+            name: `${user.nombreApellidos} crea un cuadrante para ${trabajadorID.nombreApellidos}`,
+          });
 
           return { ok: true };
         }

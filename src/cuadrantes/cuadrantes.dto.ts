@@ -9,16 +9,7 @@ import {
   ValidateNested,
 } from "class-validator";
 import { Type } from "class-transformer";
-
-export enum TiposAusencia {
-  BAJA = "BAJA",
-  PERMISO_MATERNIDAD_PATERNIDAD = "PERMISO MATERNIDAD/PATERNIDAD",
-  DIA_PERSONAL = "DIA_PERSONAL",
-  VACACIONES = "VACACIONES",
-  SANCION = "SANCIÓN",
-  ABSENTISMO = "ABSENTISMO",
-  HORAS_JUSTIFICADAS = "HORAS_JUSTIFICADAS",
-}
+import { TiposAusencia } from "../ausencias/ausencias.dto";
 
 class TAusenciaMinDto {
   @IsEnum(TiposAusencia)

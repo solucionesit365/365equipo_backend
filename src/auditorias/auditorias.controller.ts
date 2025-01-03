@@ -1,30 +1,48 @@
 import { Controller, Post, UseGuards, Body, Get, Query } from "@nestjs/common";
 import { AuthGuard } from "../guards/auth.guard";
-
 import {
   AuditoriasInterface,
   AuditoriaRespuestas,
 } from "./auditorias.interface";
 import { AuditoriasService } from "./auditorias.class";
-import { Tienda } from "src/tiendas/tiendas.class";
+import { Tienda } from "../tiendas/tiendas.class";
+import { LoggerService } from "../logger/logger.service";
+import { CompleteUser } from "../decorators/getCompleteUser.decorator";
+import { Trabajador } from "@prisma/client";
 
 @Controller("auditorias")
 export class AuditoriasController {
   constructor(
     private readonly auditoriaInstance: AuditoriasService,
     private readonly tiendasInstance: Tienda,
+    private readonly loggerService: LoggerService,
   ) {}
 
   @UseGuards(AuthGuard)
   @Post("nuevaAuditoria")
-  async nuevaIncidencia(@Body() auditoria: AuditoriasInterface) {
+  async nuevaIncidencia(
+    @Body() auditoria: AuditoriasInterface,
+    @CompleteUser() user: Trabajador,
+  ) {
     try {
       if (typeof auditoria.caducidad === "string") {
         auditoria.caducidad = new Date(auditoria.caducidad);
       }
+
+      const resInsertAuditoria = await this.auditoriaInstance.nuevaAuditoria(
+        auditoria,
+      );
+
+      if (resInsertAuditoria)
+        this.loggerService.create({
+          action: "Crea una auditoría",
+          name: user.nombreApellidos,
+          extraData: auditoria,
+        });
+
       return {
         ok: true,
-        data: await this.auditoriaInstance.nuevaAuditoria(auditoria),
+        data: resInsertAuditoria,
       };
     } catch (err) {
       console.log(err);
