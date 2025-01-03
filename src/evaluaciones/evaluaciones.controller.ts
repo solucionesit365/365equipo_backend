@@ -5,10 +5,18 @@ import {
   CreateEvaluacionesInterfaceDto,
   CrearIluoInterfaceDto,
 } from "./evaluaciones.dto";
+import { LoggerService } from "src/logger/logger.service";
+import { UserRecord } from "firebase-admin/auth";
+import { User } from "../decorators/get-user.decorator";
+import { TrabajadorService } from "src/trabajadores/trabajadores.class";
 
 @Controller("evaluaciones")
 export class EvaluacionesController {
-  constructor(private readonly evaluacionesclass: EvaluacionesService) {}
+  constructor(
+    private readonly evaluacionesclass: EvaluacionesService,
+    private readonly loggerService: LoggerService,
+    private readonly trabajadores: TrabajadorService,
+  ) {}
 
   @UseGuards(AuthGuard)
   @Post("addPlantilla")
@@ -92,10 +100,31 @@ export class EvaluacionesController {
   //Eliminar plantillas
   @UseGuards(AuthGuard)
   @Post("deletePlantillaAdmin")
-  async deletePlantillaAdmin(@Body() { _id }: { _id: string }) {
+  async deletePlantillaAdmin(
+    @Body() { _id }: { _id: string },
+    @User() user: UserRecord,
+  ) {
     try {
+      const evaluacionToDelete = await this.evaluacionesclass.getEvaluacionById(
+        _id,
+      );
+      if (!evaluacionToDelete) {
+        throw new Error("Evaluacion no encontrada");
+      }
       const response = await this.evaluacionesclass.deletePlantillaAdmin(_id);
       if (response) {
+        // Obtener el nombre del usuario autenticado
+        const usuarioCompleto = await this.trabajadores.getTrabajadorByAppId(
+          user.uid,
+        );
+        const nombreUsuario = usuarioCompleto?.nombreApellidos || user.email;
+
+        // Registro de la auditoría
+        await this.loggerService.create({
+          action: "Eliminar Evaluacion",
+          name: nombreUsuario,
+          extraData: { evaluacionData: evaluacionToDelete },
+        });
         return {
           ok: true,
           data: response,

@@ -85,4 +85,20 @@ export class AnunciosDatabaseService {
   //   return null;
 
   // }
+
+  async getAnuncioById(_id: string) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const anuncios = db.collection<AnuncioDto>("anuncios");
+
+    try {
+      const anuncio = await anuncios.findOne({ _id: new ObjectId(_id) });
+      if (!anuncio) {
+        throw new Error("El anuncio no fue encontrado");
+      }
+      return anuncio;
+    } catch (error) {
+      console.error("Error al obtener el anuncio:", error);
+      throw new Error("Error al obtener el anuncio");
+    }
+  }
 }

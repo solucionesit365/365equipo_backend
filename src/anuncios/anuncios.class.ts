@@ -39,4 +39,8 @@ export class AnunciosService {
   // async guardarOfertaAnuncio(ofertas: OfertasAnuncios) {
   //   return await this.anunciosService.guardarOfertaAnuncio(ofertas);
   // }
+
+  async getAnuncioById(_id: string) {
+    return await this.schAnuncios.getAnuncioById(_id);
+  }
 }

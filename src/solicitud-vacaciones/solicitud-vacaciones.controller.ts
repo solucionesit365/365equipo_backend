@@ -8,6 +8,7 @@ import { Notificaciones } from "src/notificaciones/notificaciones.class";
 import { UserRecord } from "firebase-admin/auth";
 import { User } from "../decorators/get-user.decorator";
 import { SchedulerGuard } from "src/guards/scheduler.guard";
+import { LoggerService } from "src/logger/logger.service";
 
 @Controller("solicitud-vacaciones")
 export class SolicitudVacacionesController {
@@ -16,6 +17,7 @@ export class SolicitudVacacionesController {
     private readonly email: EmailService,
     private readonly trabajadorInstance: TrabajadorService,
     private readonly notificacionesInstance: Notificaciones,
+    private readonly loggerService: LoggerService,
   ) {}
 
   //Nueva solicitud de vacaciones
@@ -272,9 +274,30 @@ export class SolicitudVacacionesController {
   //Borrar solicitud de vacaciones
   @UseGuards(AuthGuard)
   @Post("borrarSolicitud")
-  async borrarSolicitud(@Body() { _id }: { _id: string }) {
+  async borrarSolicitud(
+    @Body() { _id }: { _id: string },
+    @User() user: UserRecord,
+  ) {
     try {
+      const solicitudEliminada =
+        await this.solicitudVacacionesInstance.getSolicitudesById(_id);
+      if (!solicitudEliminada) {
+        throw new Error("Solicitud no encontrada");
+      }
+
       await this.solicitudVacacionesInstance.borrarSolicitud(_id);
+
+      // Obtener el nombre del usuario autenticado
+      const usuarioCompleto =
+        await this.trabajadorInstance.getTrabajadorByAppId(user.uid);
+      const nombreUsuario = usuarioCompleto?.nombreApellidos || user.email;
+
+      // Registrar la auditoría con la solicitud eliminada
+      await this.loggerService.create({
+        action: "Eliminar Solicitud de Vacaciones",
+        name: nombreUsuario,
+        extraData: { solicitudEliminada },
+      });
 
       return {
         ok: true,

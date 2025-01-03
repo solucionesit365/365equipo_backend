@@ -69,4 +69,8 @@ export class AuditoriasService {
   async updateAuditoriaRespuestas(auditorias: AuditoriaRespuestas) {
     return await this.schAuditorias.updateAuditoriaRespuestas(auditorias);
   }
+
+  async getAuditoriasById(auditoria: AuditoriasInterface) {
+    return await this.schAuditorias.getAuditoriasById(auditoria);
+  }
 }

@@ -14,10 +14,14 @@ import {
 } from "./trabajadores.dto";
 
 import { RoleGuard } from "../guards/role.guard";
+import { LoggerService } from "src/logger/logger.service";
 
 @Controller("trabajadores")
 export class TrabajadoresController {
-  constructor(private readonly trabajadorInstance: TrabajadorService) {}
+  constructor(
+    private readonly trabajadorInstance: TrabajadorService,
+    private readonly loggerService: LoggerService,
+  ) {}
 
   @UseGuards(AuthGuard)
   @Get()
@@ -244,7 +248,30 @@ export class TrabajadoresController {
   @Roles("Super_Admin", "RRHH_ADMIN")
   @UseGuards(AuthGuard, RoleGuard)
   @Post("eliminar")
-  async eliminarTrabajador(@Body() req: DeleteTrabajadorDto) {
+  async eliminarTrabajador(
+    @Body() req: DeleteTrabajadorDto,
+    @User() user: UserRecord,
+  ) {
+    const trabajadorDelete = await this.trabajadorInstance.getTrabajadorBySqlId(
+      req.id,
+    );
+    if (!trabajadorDelete) {
+      throw new Error("Trabajador no encontrada");
+    }
+
+    // 3. Obtener el nombre del usuario autenticado
+    const usuarioCompleto = await this.trabajadorInstance.getTrabajadorByAppId(
+      user.uid,
+    );
+    const nombreUsuario = usuarioCompleto?.nombreApellidos || user.email;
+
+    // 4. Registrar la auditoría con la información del trabajador eliminado
+    await this.loggerService.create({
+      action: "Eliminar Trabajador",
+      name: nombreUsuario,
+      extraData: { trabajadorData: trabajadorDelete },
+    });
+
     return await this.trabajadorInstance.eliminarTrabajador(req.id);
   }
 

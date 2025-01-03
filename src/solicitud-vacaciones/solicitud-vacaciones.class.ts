@@ -86,7 +86,6 @@ export class SolicitudesVacacionesService {
     if (!vacacionesToDelete) {
       throw new Error("Vacaciones no encontrada");
     }
-    console.log(_id);
 
     // 2. Eliminar las vacaciones de schSolicitudVacaciones.
     await this.schSolicitudVacaciones.borrarSolicitud(_id);
