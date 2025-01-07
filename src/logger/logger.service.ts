@@ -22,4 +22,15 @@ export class LoggerService {
         "Fallo al crear el logger, información incorrecta",
       );
   }
+
+  async getLogs() {
+    try {
+      const db = (await this.mongoService.getConexion()).db("soluciones");
+      const loggerCollection = db.collection<TLoggerCollection>("logger");
+      return await loggerCollection.find().toArray();
+    } catch (err) {
+      console.log(err);
+      throw new InternalServerErrorException("Error al obtener logs");
+    }
+  }
 }
