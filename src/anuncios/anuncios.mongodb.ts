@@ -54,7 +54,14 @@ export class AnunciosDatabaseService {
       },
       {
         $set: {
-          caducidad: moment(anuncio.caducidad, "DD/MM/YYYY").toDate(),
+          caducidad:
+            anuncio.caducidad instanceof Date
+              ? anuncio.caducidad
+              : !isNaN(Date.parse(anuncio.caducidad))
+              ? new Date(anuncio.caducidad)
+              : moment(anuncio.caducidad, "DD/MM/YYYY", true).isValid()
+              ? moment(anuncio.caducidad, "DD/MM/YYYY").toDate()
+              : null,
           categoria: anuncio.categoria,
           descripcion: anuncio.descripcion,
           fotoPath: anuncio.fotoPath,

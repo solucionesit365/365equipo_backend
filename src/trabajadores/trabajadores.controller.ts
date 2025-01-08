@@ -14,10 +14,14 @@ import {
 } from "./trabajadores.dto";
 
 import { RoleGuard } from "../guards/role.guard";
+import { LoggerService } from "src/logger/logger.service";
 
 @Controller("trabajadores")
 export class TrabajadoresController {
-  constructor(private readonly trabajadorInstance: TrabajadorService) {}
+  constructor(
+    private readonly trabajadorInstance: TrabajadorService,
+    private readonly loggerService: LoggerService,
+  ) {}
 
   @UseGuards(AuthGuard)
   @Get()
@@ -157,8 +161,21 @@ export class TrabajadoresController {
     @Body("modificado")
     modificado: TrabajadorFormRequest,
     // @User() firebaseUser: UserRecord,
+    @User() user: UserRecord,
   ) {
     try {
+      const usuarioCompleto =
+        await this.trabajadorInstance.getTrabajadorByAppId(user.uid);
+      const nombreUsuario = usuarioCompleto?.nombreApellidos || user.email;
+      // Registro de auditoría
+      await this.loggerService.create({
+        action: "Actualizar Trabajador",
+        name: nombreUsuario,
+        extraData: {
+          originalData: original,
+          modifiedData: modificado,
+        },
+      });
       return {
         ok: true,
         data: await this.trabajadorInstance.guardarCambiosForm(
