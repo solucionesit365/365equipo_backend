@@ -51,6 +51,13 @@ export class EvaluacionesService {
     }
   }
 
+  async getEvaluacionById(_id: string) {
+    const response = await this.evaluacionesDB.getEvaluacionById(_id);
+    if (response) {
+      return response;
+    }
+  }
+
   async deletePlantillaAdmin(_id: string) {
     return await this.evaluacionesDB.deletePlantillaAdmin(_id);
   }

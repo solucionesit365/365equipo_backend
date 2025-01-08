@@ -105,14 +105,35 @@ export class AnunciosController {
 
   @UseGuards(AuthGuard)
   @Post("deleteAnuncio")
-  async deleteAnuncio(@Body() { _id }: { _id: string }) {
+  async deleteAnuncio(
+    @Body() { _id }: { _id: string },
+    @User() user: UserRecord,
+  ) {
     try {
       // Falta comprobación de quién puede enviar un anuncio, ahora
       // mismo cualquiera lo puede hacer.
-      if (await this.anunciosInstance.deleteAnuncio(_id))
+
+      // Obtener el anuncio antes de borrarlo
+      const anuncio = await this.anunciosInstance.getAnuncioById(_id);
+      if (!anuncio) {
+        throw new Error("El anuncio no existe");
+      }
+      if (await this.anunciosInstance.deleteAnuncio(_id)) {
+        // Obtener el nombre del usuario autenticado
+        const usuarioCompleto = await this.trabajadores.getTrabajadorByAppId(
+          user.uid,
+        );
+        const nombreUsuario = usuarioCompleto?.nombreApellidos || user.email;
+        // Registro de la auditoría
+        await this.loggerService.create({
+          action: "Eliminar Anuncio",
+          name: nombreUsuario,
+          extraData: { anuncioData: anuncio },
+        });
         return {
           ok: true,
         };
+      }
       throw Error("No se ha podido borrar el anuncio");
     } catch (err) {
       console.log(err);

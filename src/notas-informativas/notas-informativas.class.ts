@@ -27,6 +27,10 @@ export class NotasInformativasClass {
     return this.schnotasInformativas.getAllNotasInformativas();
   }
 
+  async getNotasInformativasById(_id: string) {
+    return await this.schnotasInformativas.getNotasInformativasById(_id);
+  }
+
   async borrarNotasInformativas(notas: NotasInformativas) {
     return this.schnotasInformativas.borrarNotasInformativas(notas);
   }

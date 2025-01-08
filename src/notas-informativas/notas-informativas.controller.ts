@@ -7,6 +7,8 @@ import { TrabajadorService } from "../trabajadores/trabajadores.class";
 import { LoggerService } from "../logger/logger.service";
 import { CompleteUser } from "../decorators/getCompleteUser.decorator";
 import { Trabajador } from "@prisma/client";
+import { UserRecord } from "firebase-admin/auth";
+import { User } from "../decorators/get-user.decorator";
 
 @Controller("notas-informativas")
 export class NotasInformativasController {
@@ -116,14 +118,38 @@ export class NotasInformativasController {
 
   @UseGuards(AuthGuard)
   @Post("borrarNotasInformativas")
-  async borrarNotasInformativas(@Body() notas: NotasInformativas) {
+  async borrarNotasInformativas(
+    @Body() notas: NotasInformativas,
+    @User() user: UserRecord,
+  ) {
     try {
+      const notaInformativaToDelete =
+        await this.notasInformativasInstance.getNotasInformativasById(
+          notas._id.toString(),
+        );
+      if (!notaInformativaToDelete) {
+        throw new Error("Evaluacion no encontrada");
+      }
       const resNotasInformativas =
         await this.notasInformativasInstance.borrarNotasInformativas(notas);
-      return {
-        ok: true,
-        data: resNotasInformativas,
-      };
+      if (resNotasInformativas) {
+        // Obtener el nombre del usuario autenticado
+        const usuarioCompleto = await this.trabajadores.getTrabajadorByAppId(
+          user.uid,
+        );
+        const nombreUsuario = usuarioCompleto?.nombreApellidos || user.email;
+        // Registro de la auditoría
+        await this.loggerService.create({
+          action: "Eliminar Notas Informativas",
+          name: nombreUsuario,
+          extraData: { evaluacionData: notaInformativaToDelete },
+        });
+
+        return {
+          ok: true,
+          data: resNotasInformativas,
+        };
+      }
     } catch (err) {
       console.log(err);
       return { ok: false, message: err.message };

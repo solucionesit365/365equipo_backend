@@ -283,9 +283,30 @@ export class SolicitudVacacionesController {
   //Borrar solicitud de vacaciones
   @UseGuards(AuthGuard)
   @Post("borrarSolicitud")
-  async borrarSolicitud(@Body() { _id }: { _id: string }) {
+  async borrarSolicitud(
+    @Body() { _id }: { _id: string },
+    @User() user: UserRecord,
+  ) {
     try {
+      const solicitudEliminada =
+        await this.solicitudVacacionesInstance.getSolicitudesById(_id);
+      if (!solicitudEliminada) {
+        throw new Error("Solicitud no encontrada");
+      }
+
       await this.solicitudVacacionesInstance.borrarSolicitud(_id);
+
+      // Obtener el nombre del usuario autenticado
+      const usuarioCompleto =
+        await this.trabajadorInstance.getTrabajadorByAppId(user.uid);
+      const nombreUsuario = usuarioCompleto?.nombreApellidos || user.email;
+
+      // Registrar la auditoría con la solicitud eliminada
+      await this.loggerService.create({
+        action: "Eliminar Solicitud de Vacaciones",
+        name: nombreUsuario,
+        extraData: { solicitudEliminada },
+      });
 
       return {
         ok: true,

@@ -9,6 +9,9 @@ import { Tienda } from "../tiendas/tiendas.class";
 import { LoggerService } from "../logger/logger.service";
 import { CompleteUser } from "../decorators/getCompleteUser.decorator";
 import { Trabajador } from "@prisma/client";
+import { UserRecord } from "firebase-admin/auth";
+import { User } from "../decorators/get-user.decorator";
+import { TrabajadorService } from "../trabajadores/trabajadores.class";
 
 @Controller("auditorias")
 export class AuditoriasController {
@@ -16,6 +19,7 @@ export class AuditoriasController {
     private readonly auditoriaInstance: AuditoriasService,
     private readonly tiendasInstance: Tienda,
     private readonly loggerService: LoggerService,
+    private readonly trabajadores: TrabajadorService,
   ) {}
 
   @UseGuards(AuthGuard)
@@ -207,16 +211,40 @@ export class AuditoriasController {
   //Borrar auditoria
   @UseGuards(AuthGuard)
   @Post("deleteAuditoria")
-  async deleteAuditoria(@Body() auditoria: AuditoriasInterface) {
+  async deleteAuditoria(
+    @Body() auditoria: AuditoriasInterface,
+    @User() user: UserRecord,
+  ) {
     try {
+      const auditoriaToDelete = await this.auditoriaInstance.getAuditoriasById(
+        auditoria,
+      );
+      if (!auditoriaToDelete) {
+        throw new Error("Auditoria no encontrada");
+      }
+
       const respAuditoria = await this.auditoriaInstance.deleteAuditoria(
         auditoria,
       );
-      if (respAuditoria)
+
+      if (respAuditoria) {
+        // Obtener el nombre del usuario autenticado
+        const usuarioCompleto = await this.trabajadores.getTrabajadorByAppId(
+          user.uid,
+        );
+        const nombreUsuario = usuarioCompleto?.nombreApellidos || user.email;
+        // Registro de la auditoría
+        await this.loggerService.create({
+          action: "Eliminar Auditoria",
+          name: nombreUsuario,
+          extraData: { auditoriaData: auditoriaToDelete },
+        });
+
         return {
           ok: true,
           data: respAuditoria,
         };
+      }
 
       throw Error("No se ha podido borrar la auditoria");
     } catch (err) {

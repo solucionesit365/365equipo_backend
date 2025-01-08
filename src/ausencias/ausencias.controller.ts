@@ -4,14 +4,19 @@ import { AuthGuard } from "../guards/auth.guard";
 import { DateTime } from "luxon";
 import { LoggerService } from "../logger/logger.service";
 import { CrearAusenciaDto } from "./ausencias.dto";
-import { CompleteUser } from "src/decorators/getCompleteUser.decorator";
+import { CompleteUser } from "../decorators/getCompleteUser.decorator";
 import { Trabajador } from "@prisma/client";
+import { UserRecord } from "firebase-admin/auth";
+import { User } from "../decorators/get-user.decorator";
+import { TrabajadorService } from "../trabajadores/trabajadores.class";
+import { ObjectId } from "mongodb";
 
 @Controller("ausencias")
 export class AusenciasController {
   constructor(
     private readonly ausenciasInstance: AusenciasService,
     private readonly loggerService: LoggerService,
+    private readonly trabajadores: TrabajadorService,
   ) {}
 
   @UseGuards(AuthGuard)
@@ -62,16 +67,40 @@ export class AusenciasController {
 
   @UseGuards(AuthGuard)
   @Post("deleteAusencia")
-  async deleteAusencia(@Body() { idAusencia }) {
+  async deleteAusencia(@Body() { idAusencia }, @User() user: UserRecord) {
     try {
+      //obtener la ausencia que se va a eliminar para poder usar sus propiedades
+      const ausenciaToDelete = await this.ausenciasInstance.getAusenciaById(
+        new ObjectId(idAusencia),
+      );
+      if (!ausenciaToDelete) {
+        throw new Error("Ausencia no encontrada");
+      }
+
+      // Eliminar la ausencia
       const respAusencias = await this.ausenciasInstance.deleteAusencia(
         idAusencia,
       );
-      if (respAusencias)
+
+      if (respAusencias) {
+        // Obtener el nombre del usuario autenticado
+        const usuarioCompleto = await this.trabajadores.getTrabajadorByAppId(
+          user.uid,
+        );
+        const nombreUsuario = usuarioCompleto?.nombreApellidos || user.email;
+
+        // Registro de la auditoría
+        await this.loggerService.create({
+          action: "Eliminar Ausencia",
+          name: nombreUsuario,
+          extraData: { ausenciaData: ausenciaToDelete },
+        });
+
         return {
           ok: true,
           data: respAusencias,
         };
+      }
 
       throw Error("No se ha podido borrar la ausencia");
     } catch (err) {

@@ -66,6 +66,16 @@ export class EvaluacionesDatabase {
     return response;
   }
 
+  async getEvaluacionById(_id: string) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const auditoriasCollection =
+      db.collection<MostrarEvaluacionDto>("evaluaciones");
+    const respAuditorias = await auditoriasCollection
+      .find({ _id: new ObjectId(_id) })
+      .toArray();
+    return respAuditorias;
+  }
+
   async deletePlantillaAdmin(_id: string) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
     const evaluacionesCollect =
