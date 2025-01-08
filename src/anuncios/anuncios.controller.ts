@@ -7,7 +7,7 @@ import { AuthGuard } from "../guards/auth.guard";
 import { User } from "../decorators/get-user.decorator";
 import { UserRecord } from "firebase-admin/auth";
 import { LoggerService } from "../logger/logger.service";
-import { CompleteUser } from "src/decorators/getCompleteUser.decorator";
+import { CompleteUser } from "../decorators/getCompleteUser.decorator";
 import { Trabajador } from "@prisma/client";
 
 @Controller("anuncios")
@@ -88,14 +88,29 @@ export class AnunciosController {
 
   @UseGuards(AuthGuard)
   @Post("updateAnuncio")
-  async updateAnuncio(@Body() anuncioModificado: UpdateAnuncioDto) {
+  async updateAnuncio(
+    @Body() anuncioModificado: UpdateAnuncioDto,
+    @User() user: UserRecord,
+  ) {
     try {
       // Falta comprobación de quién puede enviar un anuncio, ahora
       // mismo cualquiera lo puede hacer.
-      if (await this.anunciosInstance.updateAnuncio(anuncioModificado))
+      if (await this.anunciosInstance.updateAnuncio(anuncioModificado)) {
+        // Obtener el nombre del usuario autenticado
+        const usuarioCompleto = await this.trabajadores.getTrabajadorByAppId(
+          user.uid,
+        );
+        const nombreUsuario = usuarioCompleto?.nombreApellidos || user.email;
+        // Registro de la auditoría
+        await this.loggerService.create({
+          action: "Actualizar Anuncio",
+          name: nombreUsuario,
+          extraData: { anuncioData: anuncioModificado },
+        });
         return {
           ok: true,
         };
+      }
       throw Error("No se ha podido modificar el anuncio");
     } catch (err) {
       console.log(err);

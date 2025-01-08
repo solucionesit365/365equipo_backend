@@ -111,8 +111,14 @@ export class AusenciasController {
 
   @UseGuards(AuthGuard)
   @Post("updateAusencia")
-  async updateAusencia(@Body() ausencia: any) {
+  async updateAusencia(@Body() ausencia: any, @User() user: UserRecord) {
     try {
+      // Obtener el nombre del usuario autenticado
+      const usuarioCompleto = await this.trabajadores.getTrabajadorByAppId(
+        user.uid,
+      );
+      const nombreUsuario = usuarioCompleto?.nombreApellidos || user.email;
+
       ausencia.fechaInicio = DateTime.fromFormat(
         ausencia.fechaInicio,
         "dd/MM/yyyy",
@@ -124,12 +130,18 @@ export class AusenciasController {
       const respAusencia = await this.ausenciasInstance.updateAusencia(
         ausencia,
       );
-      if (respAusencia)
+      if (respAusencia) {
+        // Registrar en el logger
+        await this.loggerService.create({
+          action: "Actualizar Ausencia",
+          name: nombreUsuario,
+          extraData: { ausenciaData: ausencia },
+        });
         return {
           ok: true,
           data: respAusencia,
         };
-
+      }
       throw Error("No se ha podido modificar la ausencia");
     } catch (err) {
       console.log(err);
@@ -139,8 +151,14 @@ export class AusenciasController {
 
   @UseGuards(AuthGuard)
   @Post("updateAusenciaResto")
-  async updateAusenciaResto(@Body() ausencia: any) {
+  async updateAusenciaResto(@Body() ausencia: any, @User() user: UserRecord) {
     try {
+      // Obtener el nombre del usuario autenticado
+      const usuarioCompleto = await this.trabajadores.getTrabajadorByAppId(
+        user.uid,
+      );
+      const nombreUsuario = usuarioCompleto?.nombreApellidos || user.email;
+
       ausencia.fechaInicio = DateTime.fromFormat(
         ausencia.fechaInicio,
         "dd/MM/yyyy",
@@ -159,11 +177,18 @@ export class AusenciasController {
       const respAusencia = await this.ausenciasInstance.updateAusenciaResto(
         ausencia,
       );
-      if (respAusencia)
+      if (respAusencia) {
+        // Registrar auditoría
+        await this.loggerService.create({
+          action: "Actualizar Ausencia Resto",
+          name: nombreUsuario,
+          extraData: { ausenciaData: ausencia },
+        });
         return {
           ok: true,
           data: respAusencia,
         };
+      }
 
       throw Error("No se ha podido modificar la ausencia");
     } catch (err) {

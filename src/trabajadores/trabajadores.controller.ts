@@ -161,8 +161,21 @@ export class TrabajadoresController {
     @Body("modificado")
     modificado: TrabajadorFormRequest,
     // @User() firebaseUser: UserRecord,
+    @User() user: UserRecord,
   ) {
     try {
+      const usuarioCompleto =
+        await this.trabajadorInstance.getTrabajadorByAppId(user.uid);
+      const nombreUsuario = usuarioCompleto?.nombreApellidos || user.email;
+      // Registro de auditoría
+      await this.loggerService.create({
+        action: "Actualizar Trabajador",
+        name: nombreUsuario,
+        extraData: {
+          originalData: original,
+          modifiedData: modificado,
+        },
+      });
       return {
         ok: true,
         data: await this.trabajadorInstance.guardarCambiosForm(
