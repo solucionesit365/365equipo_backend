@@ -21,4 +21,8 @@ export class HardwareService {
   async updateHardware(hardWare: HardWareInterface) {
     return await this.hardwareDatabase.updateHardware(hardWare);
   }
+
+  async updateHardwareAll(hardWare: HardWareInterface) {
+    return await this.hardwareDatabase.updateHardwareAll(hardWare);
+  }
 }

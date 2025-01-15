@@ -41,4 +41,16 @@ export class HardwareController {
       return { ok: false, message: err.message };
     }
   }
+
+  @UseGuards(AuthGuard)
+  @Post("updateHardwareAll")
+  async updateHardwareAll(@Body() hardware: HardWareInterface) {
+    try {
+      const response = await this.hardwareService.updateHardwareAll(hardware);
+      return response;
+    } catch (err) {
+      console.log(err);
+      return { ok: false, message: err.message };
+    }
+  }
 }
