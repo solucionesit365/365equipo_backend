@@ -4,6 +4,11 @@ import { NotasInformativasClass } from "./notas-informativas.class";
 import { NotasInformativas } from "./notas-informativas.interface";
 import { Notificaciones } from "../notificaciones/notificaciones.class";
 import { TrabajadorService } from "../trabajadores/trabajadores.class";
+import { LoggerService } from "../logger/logger.service";
+import { CompleteUser } from "../decorators/getCompleteUser.decorator";
+import { Trabajador } from "@prisma/client";
+import { UserRecord } from "firebase-admin/auth";
+import { User } from "../decorators/get-user.decorator";
 
 @Controller("notas-informativas")
 export class NotasInformativasController {
@@ -11,15 +16,20 @@ export class NotasInformativasController {
     private readonly notasInformativasInstance: NotasInformativasClass,
     private readonly trabajadores: TrabajadorService,
     private readonly notificaciones: Notificaciones,
+    private readonly loggerService: LoggerService,
   ) {}
 
   @UseGuards(AuthGuard)
   @Post("nuevaNotaInformativa")
-  async nuevaNotaInformativa(@Body() nota: NotasInformativas) {
+  async nuevaNotaInformativa(
+    @Body() nota: NotasInformativas,
+    @CompleteUser() user: Trabajador,
+  ) {
     try {
       if (typeof nota.fechaCreacion === "string") {
         nota.fechaCreacion = new Date(nota.fechaCreacion);
       }
+
       if (typeof nota.caducidad === "string") {
         nota.caducidad = new Date(nota.caducidad);
       }
@@ -53,9 +63,19 @@ export class NotasInformativasController {
         }
       }
 
+      const resNuevaNota =
+        await this.notasInformativasInstance.nuevaNotaInformativa(nota);
+
+      if (resNuevaNota)
+        this.loggerService.create({
+          action: "Crea una nota informativa",
+          name: user.nombreApellidos,
+          extraData: nota,
+        });
+
       return {
         ok: true,
-        data: await this.notasInformativasInstance.nuevaNotaInformativa(nota),
+        data: resNuevaNota,
       };
     } catch (err) {
       console.log(err);
@@ -98,14 +118,38 @@ export class NotasInformativasController {
 
   @UseGuards(AuthGuard)
   @Post("borrarNotasInformativas")
-  async borrarNotasInformativas(@Body() notas: NotasInformativas) {
+  async borrarNotasInformativas(
+    @Body() notas: NotasInformativas,
+    @User() user: UserRecord,
+  ) {
     try {
+      const notaInformativaToDelete =
+        await this.notasInformativasInstance.getNotasInformativasById(
+          notas._id.toString(),
+        );
+      if (!notaInformativaToDelete) {
+        throw new Error("Evaluacion no encontrada");
+      }
       const resNotasInformativas =
         await this.notasInformativasInstance.borrarNotasInformativas(notas);
-      return {
-        ok: true,
-        data: resNotasInformativas,
-      };
+      if (resNotasInformativas) {
+        // Obtener el nombre del usuario autenticado
+        const usuarioCompleto = await this.trabajadores.getTrabajadorByAppId(
+          user.uid,
+        );
+        const nombreUsuario = usuarioCompleto?.nombreApellidos || user.email;
+        // Registro de la auditoría
+        await this.loggerService.create({
+          action: "Eliminar Notas Informativas",
+          name: nombreUsuario,
+          extraData: { evaluacionData: notaInformativaToDelete },
+        });
+
+        return {
+          ok: true,
+          data: resNotasInformativas,
+        };
+      }
     } catch (err) {
       console.log(err);
       return { ok: false, message: err.message };

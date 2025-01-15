@@ -5,16 +5,27 @@ import {
   CreateEvaluacionesInterfaceDto,
   CrearIluoInterfaceDto,
 } from "./evaluaciones.dto";
+import { LoggerService } from "../logger/logger.service";
+import { CompleteUser } from "../decorators/getCompleteUser.decorator";
+import { Trabajador } from "@prisma/client";
+import { UserRecord } from "firebase-admin/auth";
+import { User } from "../decorators/get-user.decorator";
+import { TrabajadorService } from "../trabajadores/trabajadores.class";
 
 @Controller("evaluaciones")
 export class EvaluacionesController {
-  constructor(private readonly evaluacionesclass: EvaluacionesService) {}
+  constructor(
+    private readonly evaluacionesclass: EvaluacionesService,
+    private readonly loggerService: LoggerService,
+    private readonly trabajadores: TrabajadorService,
+  ) {}
 
   @UseGuards(AuthGuard)
   @Post("addPlantilla")
   async addPlantilla(@Body() evaluacion: CreateEvaluacionesInterfaceDto) {
     try {
       const response = await this.evaluacionesclass.addPlantilla(evaluacion);
+
       if (response) {
         return {
           ok: true,
@@ -92,10 +103,31 @@ export class EvaluacionesController {
   //Eliminar plantillas
   @UseGuards(AuthGuard)
   @Post("deletePlantillaAdmin")
-  async deletePlantillaAdmin(@Body() { _id }: { _id: string }) {
+  async deletePlantillaAdmin(
+    @Body() { _id }: { _id: string },
+    @User() user: UserRecord,
+  ) {
     try {
+      const evaluacionToDelete = await this.evaluacionesclass.getEvaluacionById(
+        _id,
+      );
+      if (!evaluacionToDelete) {
+        throw new Error("Evaluacion no encontrada");
+      }
       const response = await this.evaluacionesclass.deletePlantillaAdmin(_id);
       if (response) {
+        // Obtener el nombre del usuario autenticado
+        const usuarioCompleto = await this.trabajadores.getTrabajadorByAppId(
+          user.uid,
+        );
+        const nombreUsuario = usuarioCompleto?.nombreApellidos || user.email;
+
+        // Registro de la auditoría
+        await this.loggerService.create({
+          action: "Eliminar Evaluacion",
+          name: nombreUsuario,
+          extraData: { evaluacionData: evaluacionToDelete },
+        });
         return {
           ok: true,
           data: response,
@@ -110,10 +142,18 @@ export class EvaluacionesController {
 
   @UseGuards(AuthGuard)
   @Post("addEvaluacion")
-  async addEvaluacion(@Body() evaluacion: CreateEvaluacionesInterfaceDto) {
-    console.log(evaluacion);
-
+  async addEvaluacion(
+    @Body() evaluacion: CreateEvaluacionesInterfaceDto,
+    @CompleteUser() user: Trabajador,
+  ) {
     const response = await this.evaluacionesclass.addEvaluacion(evaluacion);
+
+    this.loggerService.create({
+      action: "Crea una evaluación",
+      name: user.nombreApellidos,
+      extraData: evaluacion,
+    });
+
     if (response) {
       return {
         ok: true,

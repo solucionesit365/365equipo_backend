@@ -194,4 +194,14 @@ export class AuditoriaDatabase {
     );
     return respAuditoria.acknowledged;
   }
+
+  async getAuditoriasById(auditoria: AuditoriasInterface) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const auditoriasCollection =
+      db.collection<AuditoriasInterface>("auditorias");
+    const respAuditorias = await auditoriasCollection
+      .find({ _id: new ObjectId(auditoria._id) })
+      .toArray();
+    return respAuditorias;
+  }
 }

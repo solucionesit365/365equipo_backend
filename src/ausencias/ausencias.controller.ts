@@ -2,71 +2,63 @@ import { Body, Controller, Post, UseGuards, Get } from "@nestjs/common";
 import { AusenciasService } from "./ausencias.class";
 import { AuthGuard } from "../guards/auth.guard";
 import { DateTime } from "luxon";
+import { LoggerService } from "../logger/logger.service";
+import { CrearAusenciaDto } from "./ausencias.dto";
+import { CompleteUser } from "../decorators/getCompleteUser.decorator";
+import { Trabajador } from "@prisma/client";
+import { UserRecord } from "firebase-admin/auth";
+import { User } from "../decorators/get-user.decorator";
+import { TrabajadorService } from "../trabajadores/trabajadores.class";
+import { ObjectId } from "mongodb";
 
 @Controller("ausencias")
 export class AusenciasController {
-  constructor(private readonly ausenciasInstance: AusenciasService) {}
+  constructor(
+    private readonly ausenciasInstance: AusenciasService,
+    private readonly loggerService: LoggerService,
+    private readonly trabajadores: TrabajadorService,
+  ) {}
 
   @UseGuards(AuthGuard)
   @Post("nueva")
   async addAusencia(
-    @Body()
-    {
-      idUsuario,
-      fechaInicio,
-      fechaFinal,
-      fechaRevision,
-      tipo,
-      horasContrato,
-      tienda,
-      comentario,
-      nombre,
-      dni,
-      completa,
-      horas,
-    },
+    @Body() req: CrearAusenciaDto,
+    @CompleteUser() user: Trabajador,
   ) {
     try {
-      if (
-        tipo === "BAJA" ||
-        tipo === "PERMISO MATERNIDAD/PATERNIDAD" ||
-        tipo === "DIA_PERSONAL" ||
-        tipo === "VACACIONES" ||
-        tipo === "HORAS_JUSTIFICADAS" ||
-        tipo === "SANCIÓN" ||
-        tipo === "ABSENTISMO" ||
-        tipo === "REM" ||
-        (tipo === "DIA_PERSONAL" &&
-          typeof idUsuario === "number" &&
-          typeof fechaInicio === "string" &&
-          typeof fechaFinal === "string" &&
-          typeof fechaRevision === "string" &&
-          typeof comentario === "string" &&
-          typeof completa === "boolean" &&
-          typeof horas === "number")
-      ) {
-        const inicio = new Date(fechaInicio);
-        const final = fechaFinal ? new Date(fechaFinal) : null;
-        const revision = fechaRevision ? new Date(fechaRevision) : null;
+      const inicio = DateTime.fromISO(req.fechaInicio).toJSDate();
+      const final = req.fechaFinal
+        ? DateTime.fromISO(req.fechaFinal).toJSDate()
+        : null;
+      const revision = req.fechaRevision
+        ? DateTime.fromISO(req.fechaRevision).toJSDate()
+        : null;
 
-        return {
-          ok: true,
-          data: await this.ausenciasInstance.nuevaAusencia(
-            idUsuario,
-            nombre,
-            dni,
-            tipo,
-            horasContrato,
-            tienda,
-            inicio,
-            final,
-            revision,
-            comentario,
-            completa,
-            horas,
-          ),
-        };
-      } else throw Error("Parámetros incorrectos");
+      const ausencia = await this.ausenciasInstance.nuevaAusencia(
+        req.idUsuario,
+        req.nombre,
+        req.dni,
+        req.tipo,
+        req.horasContrato,
+        req.tienda,
+        inicio,
+        final,
+        revision,
+        req.comentario,
+        req.completa,
+        req.horas,
+      );
+
+      this.loggerService.create({
+        action: "Crea una ausencia",
+        name: `${user.nombreApellidos} para ${req.nombre}`,
+        extraData: ausencia,
+      });
+
+      return {
+        ok: true,
+        data: ausencia,
+      };
     } catch (err) {
       console.log(err);
       return { ok: false, message: err.message };
@@ -75,16 +67,40 @@ export class AusenciasController {
 
   @UseGuards(AuthGuard)
   @Post("deleteAusencia")
-  async deleteAusencia(@Body() { idAusencia }) {
+  async deleteAusencia(@Body() { idAusencia }, @User() user: UserRecord) {
     try {
+      //obtener la ausencia que se va a eliminar para poder usar sus propiedades
+      const ausenciaToDelete = await this.ausenciasInstance.getAusenciaById(
+        new ObjectId(idAusencia),
+      );
+      if (!ausenciaToDelete) {
+        throw new Error("Ausencia no encontrada");
+      }
+
+      // Eliminar la ausencia
       const respAusencias = await this.ausenciasInstance.deleteAusencia(
         idAusencia,
       );
-      if (respAusencias)
+
+      if (respAusencias) {
+        // Obtener el nombre del usuario autenticado
+        const usuarioCompleto = await this.trabajadores.getTrabajadorByAppId(
+          user.uid,
+        );
+        const nombreUsuario = usuarioCompleto?.nombreApellidos || user.email;
+
+        // Registro de la auditoría
+        await this.loggerService.create({
+          action: "Eliminar Ausencia",
+          name: nombreUsuario,
+          extraData: { ausenciaData: ausenciaToDelete },
+        });
+
         return {
           ok: true,
           data: respAusencias,
         };
+      }
 
       throw Error("No se ha podido borrar la ausencia");
     } catch (err) {
@@ -95,8 +111,14 @@ export class AusenciasController {
 
   @UseGuards(AuthGuard)
   @Post("updateAusencia")
-  async updateAusencia(@Body() ausencia: any) {
+  async updateAusencia(@Body() ausencia: any, @User() user: UserRecord) {
     try {
+      // Obtener el nombre del usuario autenticado
+      const usuarioCompleto = await this.trabajadores.getTrabajadorByAppId(
+        user.uid,
+      );
+      const nombreUsuario = usuarioCompleto?.nombreApellidos || user.email;
+
       ausencia.fechaInicio = DateTime.fromFormat(
         ausencia.fechaInicio,
         "dd/MM/yyyy",
@@ -108,12 +130,18 @@ export class AusenciasController {
       const respAusencia = await this.ausenciasInstance.updateAusencia(
         ausencia,
       );
-      if (respAusencia)
+      if (respAusencia) {
+        // Registrar en el logger
+        await this.loggerService.create({
+          action: "Actualizar Ausencia",
+          name: nombreUsuario,
+          extraData: { ausenciaData: ausencia },
+        });
         return {
           ok: true,
           data: respAusencia,
         };
-
+      }
       throw Error("No se ha podido modificar la ausencia");
     } catch (err) {
       console.log(err);
@@ -123,8 +151,14 @@ export class AusenciasController {
 
   @UseGuards(AuthGuard)
   @Post("updateAusenciaResto")
-  async updateAusenciaResto(@Body() ausencia: any) {
+  async updateAusenciaResto(@Body() ausencia: any, @User() user: UserRecord) {
     try {
+      // Obtener el nombre del usuario autenticado
+      const usuarioCompleto = await this.trabajadores.getTrabajadorByAppId(
+        user.uid,
+      );
+      const nombreUsuario = usuarioCompleto?.nombreApellidos || user.email;
+
       ausencia.fechaInicio = DateTime.fromFormat(
         ausencia.fechaInicio,
         "dd/MM/yyyy",
@@ -143,11 +177,18 @@ export class AusenciasController {
       const respAusencia = await this.ausenciasInstance.updateAusenciaResto(
         ausencia,
       );
-      if (respAusencia)
+      if (respAusencia) {
+        // Registrar auditoría
+        await this.loggerService.create({
+          action: "Actualizar Ausencia Resto",
+          name: nombreUsuario,
+          extraData: { ausenciaData: ausencia },
+        });
         return {
           ok: true,
           data: respAusencia,
         };
+      }
 
       throw Error("No se ha podido modificar la ausencia");
     } catch (err) {

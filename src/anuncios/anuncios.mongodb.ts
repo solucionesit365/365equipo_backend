@@ -54,7 +54,14 @@ export class AnunciosDatabaseService {
       },
       {
         $set: {
-          caducidad: moment(anuncio.caducidad, "DD/MM/YYYY").toDate(),
+          caducidad:
+            anuncio.caducidad instanceof Date
+              ? anuncio.caducidad
+              : !isNaN(Date.parse(anuncio.caducidad))
+              ? new Date(anuncio.caducidad)
+              : moment(anuncio.caducidad, "DD/MM/YYYY", true).isValid()
+              ? moment(anuncio.caducidad, "DD/MM/YYYY").toDate()
+              : null,
           categoria: anuncio.categoria,
           descripcion: anuncio.descripcion,
           fotoPath: anuncio.fotoPath,
@@ -85,4 +92,20 @@ export class AnunciosDatabaseService {
   //   return null;
 
   // }
+
+  async getAnuncioById(_id: string) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const anuncios = db.collection<AnuncioDto>("anuncios");
+
+    try {
+      const anuncio = await anuncios.findOne({ _id: new ObjectId(_id) });
+      if (!anuncio) {
+        throw new Error("El anuncio no fue encontrado");
+      }
+      return anuncio;
+    } catch (error) {
+      console.error("Error al obtener el anuncio:", error);
+      throw new Error("Error al obtener el anuncio");
+    }
+  }
 }

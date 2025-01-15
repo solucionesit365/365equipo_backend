@@ -42,6 +42,15 @@ export class NotasInformativasDatabes {
       db.collection<NotasInformativas>("notasInformativas");
     return await notasCollection.find({}).toArray();
   }
+  async getNotasInformativasById(_id: string) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const notasCollection =
+      db.collection<NotasInformativas>("notasInformativas");
+    const respNotas = await notasCollection
+      .find({ _id: new ObjectId(_id) })
+      .toArray();
+    return respNotas;
+  }
 
   async borrarNotasInformativas(notas: NotasInformativas) {
     const db = (await this.mongoDbService.getConexion()).db("soluciones");
