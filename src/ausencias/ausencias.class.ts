@@ -94,6 +94,9 @@ export class AusenciasService {
       throw new Error("Ausencia no encontrada");
     }
 
+    const fechaFinalToUpdate = ausenciaToUpdate.fechaFinal
+      ? ausenciaToUpdate.fechaFinal
+      : ausenciaToUpdate.fechaRevision;
     if (
       // Verifica si `fechaInicio` ha cambiado o uno de ellos es `null`
       (ausenciaToUpdate.fechaInicio &&
@@ -102,13 +105,11 @@ export class AusenciasService {
           ausencia.fechaInicio.getTime()) ||
       (!ausenciaToUpdate.fechaInicio && ausencia.fechaInicio) ||
       (ausenciaToUpdate.fechaInicio && !ausencia.fechaInicio) ||
-      // Verifica si `fechaFinal` ha cambiado o uno de ellos es `null`
-      (ausenciaToUpdate.fechaFinal &&
+      // Verifica si `fechaFinalToUpdate` ha cambiado
+      (fechaFinalToUpdate &&
         ausencia.fechaFinal &&
-        ausenciaToUpdate.fechaFinal.getTime() !==
-          ausencia.fechaFinal.getTime()) ||
-      (!ausenciaToUpdate.fechaFinal && ausencia.fechaFinal) ||
-      (ausenciaToUpdate.fechaFinal && !ausencia.fechaFinal)
+        fechaFinalToUpdate.getTime() !== ausencia.fechaFinal.getTime()) ||
+      (!fechaFinalToUpdate && ausencia.fechaFinal)
     ) {
       // Si las fechas de la ausencia han cambiado, llama a addAusenciaToCuadrantes
       await this.cuadrantesInstance.addAusenciaToCuadrantes(ausencia);
@@ -136,6 +137,10 @@ export class AusenciasService {
       throw new Error("Ausencia no encontrada");
     }
 
+    const fechaFinalToUpdate = ausenciaToUpdate.fechaFinal
+      ? ausenciaToUpdate.fechaFinal
+      : ausenciaToUpdate.fechaRevision;
+
     if (
       // Verifica si `fechaInicio` ha cambiado o uno de ellos es `null`
       (ausenciaToUpdate.fechaInicio &&
@@ -144,13 +149,11 @@ export class AusenciasService {
           ausencia.fechaInicio.getTime()) ||
       (!ausenciaToUpdate.fechaInicio && ausencia.fechaInicio) ||
       (ausenciaToUpdate.fechaInicio && !ausencia.fechaInicio) ||
-      // Verifica si `fechaFinal` ha cambiado o uno de ellos es `null`
-      (ausenciaToUpdate.fechaFinal &&
+      // Verifica si `fechaFinalToUpdate` ha cambiado
+      (fechaFinalToUpdate &&
         ausencia.fechaFinal &&
-        ausenciaToUpdate.fechaFinal.getTime() !==
-          ausencia.fechaFinal.getTime()) ||
-      (!ausenciaToUpdate.fechaFinal && ausencia.fechaFinal) ||
-      (ausenciaToUpdate.fechaFinal && !ausencia.fechaFinal)
+        fechaFinalToUpdate.getTime() !== ausencia.fechaFinal.getTime()) ||
+      (!fechaFinalToUpdate && ausencia.fechaFinal)
     ) {
       // Si las fechas de la ausencia han cambiado, llama a addAusenciaToCuadrantes
       await this.cuadrantesInstance.addAusenciaToCuadrantes(ausencia);

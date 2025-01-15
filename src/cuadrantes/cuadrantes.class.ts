@@ -460,7 +460,9 @@ export class Cuadrantes {
   // Cuadrantes 2.0
   async addAusenciaToCuadrantes(ausencia: AusenciaInterface) {
     const fechaInicio = DateTime.fromJSDate(ausencia.fechaInicio);
-    const fechaFinal = DateTime.fromJSDate(ausencia.fechaFinal);
+    const fechaFinal = ausencia.fechaFinal
+      ? DateTime.fromJSDate(ausencia.fechaFinal)
+      : DateTime.fromJSDate(ausencia.fechaRevision);
     const cuadrantesFinal: TCuadrante[] = [];
     const cuadrantesEnMedio = await this.schCuadrantes.getCuadrantesIndividual(
       ausencia.idUsuario,
