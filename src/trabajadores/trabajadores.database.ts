@@ -374,8 +374,16 @@ export class TrabajadorDatabaseService {
       where: {
         idApp,
       },
-      select: {
-        id: true,
+      include: {
+        contratos: {
+          where: {
+            fechaBaja: null,
+          },
+          orderBy: {
+            fechaAlta: "desc",
+          },
+          take: 1,
+        },
       },
     });
 
@@ -397,6 +405,7 @@ export class TrabajadorDatabaseService {
         },
       },
     });
+    subordinados.push(trabajador);
 
     return subordinados;
   }
