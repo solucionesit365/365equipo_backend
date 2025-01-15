@@ -80,6 +80,7 @@ export class DistribucionMensajesController {
             "NUEVO MENSAJE DE DISTRIBUCION",
             `Disponible en la app.`,
             "notificaciones_generales",
+            "/",
           );
           return {
             ok: true,

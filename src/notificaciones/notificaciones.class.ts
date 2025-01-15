@@ -102,11 +102,19 @@ export class Notificaciones {
   }
 
   // Función para enviar notificación al topic notificaciones_notificaciones_generales
-  async sendNotificationToTopic(title: string, message: string, topic: string) {
+  async sendNotificationToTopic(
+    title: string,
+    message: string,
+    topic: string,
+    url?: string,
+  ) {
     const noti = {
       notification: {
         title: title,
         body: message,
+      },
+      data: {
+        url: url || "", // Incluye la URL en los datos si se proporciona
       },
       topic: topic,
     };

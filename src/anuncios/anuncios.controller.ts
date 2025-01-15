@@ -71,6 +71,7 @@ export class AnunciosController {
             "NUEVO ANUNCIO",
             "Disponible",
             "notificaciones_generales",
+            "/anuncios",
           );
         }
 
