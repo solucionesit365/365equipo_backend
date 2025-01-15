@@ -48,7 +48,9 @@ export class TrabajadorService {
   async getTrabajadorByAppId(uid: string) {
     const resUser = await this.schTrabajadores.getTrabajadorByAppId(uid);
     if (resUser) return resUser;
-    throw Error("No se ha podido obtener la información del usuario");
+    throw new InternalServerErrorException(
+      "No se ha podido obtener la información del usuario",
+    );
   }
 
   async getTrabajadoresByTienda(idTienda: number) {
@@ -63,8 +65,10 @@ export class TrabajadorService {
 
   async getTrabajadorBySqlId(id: number) {
     const resUser = await this.schTrabajadores.getTrabajadorBySqlId(id);
+
     if (resUser) return resUser;
-    throw Error(
+
+    throw new InternalServerErrorException(
       "No se ha podido obtener la información del usuario. id: " + id,
     );
   }

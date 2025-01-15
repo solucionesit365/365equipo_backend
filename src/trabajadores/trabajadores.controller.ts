@@ -9,6 +9,7 @@ import {
   CreateTrabajadorRequestDto,
   DeleteTrabajadorDto,
   GetSubordinadosDto,
+  GetTrabajadorBySqlIdDto,
   RegisterDto,
   TrabajadorFormRequest,
 } from "./trabajadores.dto";
@@ -48,19 +49,16 @@ export class TrabajadoresController {
 
   @UseGuards(AuthGuard)
   @Get("getTrabajadorBySqlId")
-  async getTrabajadorBySqlId(@User() user: UserRecord, @Query() { id }) {
-    try {
-      // Fallo de seguridad grave, se introduce el uid desde el frontend
+  async getTrabajadorBySqlId(@Query() req: GetTrabajadorBySqlIdDto) {
+    // Fallo de seguridad grave, se introduce el uid desde el frontend. Añadir si tiene rol para acceder a ese usuario
+    return await this.trabajadorInstance.getTrabajadorBySqlId(Number(req.id));
+  }
 
-      const resUser = await this.trabajadorInstance.getTrabajadorBySqlId(
-        Number(id),
-      );
-
-      return { ok: true, data: resUser };
-    } catch (err) {
-      console.log(err);
-      return { ok: false, message: err.message };
-    }
+  @UseGuards(AuthGuard)
+  @Get("getMyOwnWorker")
+  async getMyOwnWorker(@User() user: UserRecord) {
+    // Fallo de seguridad grave, se introduce el uid desde el frontend. Añadir si tiene rol para acceder a ese usuario
+    return await this.trabajadorInstance.getTrabajadorByAppId(user.uid);
   }
 
   @UseGuards(AuthGuard)

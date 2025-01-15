@@ -302,3 +302,9 @@ export class RegisterDto {
   @IsString()
   password: string;
 }
+
+export class GetTrabajadorBySqlIdDto {
+  @IsNotEmpty()
+  @IsString()
+  id: string;
+}
