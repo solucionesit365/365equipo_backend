@@ -16,6 +16,7 @@ import {
 
 import { RoleGuard } from "../guards/role.guard";
 import { LoggerService } from "src/logger/logger.service";
+import { ApiBody } from "@nestjs/swagger";
 
 @Controller("trabajadores")
 export class TrabajadoresController {
@@ -152,6 +153,11 @@ export class TrabajadoresController {
   }
 
   @UseGuards(AuthGuard)
+  @ApiBody({
+    description: "Datos originales y modificados del trabajador",
+    type: TrabajadorFormRequest,
+    isArray: false, // Cambia esto si envías un array de datos
+  })
   @Post("guardarCambios")
   async guardarCambiosForm(
     @Body("original")
