@@ -37,8 +37,8 @@ export class AuthGuard implements CanActivate {
         },
       });
       request.user = usuarioCompleto;
-    } catch (err) {
-      // console.log(err);
+    } catch (err: any) {
+      console.log(err);
       throw new UnauthorizedException("No estás autorizado/a");
     }
     return true;
