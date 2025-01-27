@@ -58,6 +58,7 @@ import { FormacionModule } from "./formacion/formacion.module";
 import { QuestionnaireModule } from "./questionnaire/questionnaire.module";
 import { VisionModule } from "./vision/vision.module";
 import { LoggerModule } from './logger/logger.module';
+import { PowerAutomateModule } from './power-automate/power-automate.module';
 
 @Module({
   imports: [
@@ -120,6 +121,7 @@ import { LoggerModule } from './logger/logger.module';
     QuestionnaireModule,
     VisionModule,
     LoggerModule,
+    PowerAutomateModule,
   ],
   controllers: [AppController, KpiTiendasController],
 })
