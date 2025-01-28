@@ -40,6 +40,7 @@
     "google-auth-library": "^8.8.0",
     "hbs": "^4.2.0",
     "luxon": "^3.3.0",
+    "mailparser": "^3.7.2",
     "moment": "^2.29.4",
     "mongodb": "^5.1.0",
     "mssql": "^9.1.1",

@@ -1,5 +1,5 @@
-import { Controller, Get, Post, UseGuards } from "@nestjs/common";
-
+import { Controller, Get, Post, UseGuards, Body } from "@nestjs/common";
+import { simpleParser } from "mailparser";
 import { Roles } from "../decorators/role.decorator";
 import { RoleGuard } from "../guards/role.guard";
 import { AuthGuard } from "../guards/auth.guard";
@@ -18,6 +18,37 @@ export class TestController {
   @Post("testRole")
   async testRole() {
     return "Role test";
+  }
+
+  @Post("email")
+  async sendEmail(@Body() req: any) {
+    try {
+      // Extrae el RAW MIME del cuerpo de la solicitud
+      const rawEmail = req.email; // Campo enviado por SendGrid
+
+      // Parsea el correo
+      const parsedEmail = await simpleParser(rawEmail);
+
+      // Guarda los datos en el log
+      this.loggerService.create({
+        action: "Prueba 1",
+        name: "Eze",
+        extraData: {
+          quehace: "Envia un email correctamente Eze 28/01/2025",
+          emailData: {
+            from: parsedEmail.from?.text,
+            subject: parsedEmail.subject,
+            text: parsedEmail.text,
+            attachments: parsedEmail.attachments?.map((a) => a.filename),
+          },
+        },
+      });
+
+      return "Operativo";
+    } catch (error) {
+      console.error("Error procesando correo:", error);
+      return "Error interno";
+    }
   }
 
   @Get()
