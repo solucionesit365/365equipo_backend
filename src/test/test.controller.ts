@@ -6,6 +6,7 @@ import {
   Body,
   UseInterceptors,
   UploadedFile,
+  Req,
 } from "@nestjs/common";
 import { simpleParser } from "mailparser";
 import { Roles } from "../decorators/role.decorator";
@@ -14,6 +15,7 @@ import { AuthGuard } from "../guards/auth.guard";
 import { PrismaService } from "../prisma/prisma.service";
 import { LoggerService } from "../logger/logger.service";
 import { FileInterceptor } from "@nestjs/platform-express";
+import { Request } from "express";
 
 @Controller("test")
 export class TestController {
@@ -30,17 +32,20 @@ export class TestController {
   }
 
   @Post("email")
-  @UseInterceptors(FileInterceptor("email"))
-  async sendEmail(
-    @UploadedFile() file: Express.Multer.File,
-    @Body() body: any,
-  ) {
+  async sendEmail(@Req() req: Request) {
     try {
-      if (!file) {
-        throw new Error("No se recibió el campo 'email'");
+      // SendGrid envía el RAW MIME en req.body.email
+      const rawEmail = req.body.email;
+
+      if (!rawEmail) {
+        this.loggerService.create({
+          action: "Error en email",
+          name: "Sistema",
+          extraData: { error: "Campo 'email' no encontrado en el body" },
+        });
+        return "Campo 'email' faltante";
       }
 
-      const rawEmail = file.buffer.toString();
       const parsedEmail = await simpleParser(rawEmail);
 
       // Guarda los datos en el log
