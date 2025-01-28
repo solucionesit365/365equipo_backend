@@ -16,6 +16,7 @@ import { PrismaService } from "../prisma/prisma.service";
 import { LoggerService } from "../logger/logger.service";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { Request } from "express";
+import * as rawBody from "raw-body";
 
 @Controller("test")
 export class TestController {
@@ -24,27 +25,13 @@ export class TestController {
     private readonly loggerService: LoggerService,
   ) {}
 
-  @Roles("ADMIN", "DEPENDIENTA")
-  @UseGuards(AuthGuard, RoleGuard)
-  @Post("testRole")
-  async testRole() {
-    return "Role test";
-  }
-
   @Post("email")
   async sendEmail(@Req() req: Request) {
     try {
-      // SendGrid envía el RAW MIME en req.body.email
-      const rawEmail = req.body.email;
-
-      if (!rawEmail) {
-        this.loggerService.create({
-          action: "Error en email",
-          name: "Sistema",
-          extraData: { error: "Campo 'email' no encontrado en el body" },
-        });
-        return "Campo 'email' faltante";
-      }
+      // Obtén el cuerpo RAW
+      const rawEmail = await rawBody(req, {
+        encoding: true, // Asegura que el cuerpo sea tratado como un string
+      });
 
       const parsedEmail = await simpleParser(rawEmail);
 
@@ -66,17 +53,12 @@ export class TestController {
       return "Operativo";
     } catch (error) {
       console.error("Error procesando correo:", error);
+      this.loggerService.create({
+        action: "error webhook",
+        name: "Eze Test",
+        extraData: req,
+      });
       return "Error interno";
     }
-  }
-
-  @Get()
-  test() {
-    this.loggerService.create({
-      action: "Prueba 1",
-      name: "Eze",
-      extraData: { edad: 30, club: "FCBARCELONA Y RCentral" },
-    });
-    return "Operativo";
   }
 }
