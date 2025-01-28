@@ -26,13 +26,27 @@ export class TestController {
   ) {}
 
   @Post("email")
-  async sendEmail(@Req() req: Request) {
+  @UseInterceptors(FileInterceptor("email")) // Extrae el campo "email" del form-data
+  async sendEmail(
+    @UploadedFile() file: Express.Multer.File, // Archivo con el RAW MIME
+    @Req() req: Request,
+  ) {
     try {
-      // Obtén el cuerpo RAW
-      const rawEmail = await rawBody(req, {
-        encoding: true, // Asegura que el cuerpo sea tratado como un string
-      });
+      // Verifica si se recibió el archivo
+      if (!file) {
+        this.loggerService.create({
+          action: "Error en email",
+          name: "Sistema",
+          extraData: {
+            error: "Campo 'email' no encontrado",
+            tipo: req.rawHeaders,
+          },
+        });
+        return "Campo 'email' faltante";
+      }
 
+      // Convierte el buffer a string (RAW MIME)
+      const rawEmail = file.buffer.toString();
       const parsedEmail = await simpleParser(rawEmail);
 
       // Guarda los datos en el log
@@ -53,11 +67,6 @@ export class TestController {
       return "Operativo";
     } catch (error) {
       console.error("Error procesando correo:", error);
-      this.loggerService.create({
-        action: "error webhook",
-        name: "Eze Test",
-        extraData: req,
-      });
       return "Error interno";
     }
   }
