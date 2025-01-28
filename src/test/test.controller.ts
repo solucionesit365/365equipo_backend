@@ -1,10 +1,19 @@
-import { Controller, Get, Post, UseGuards, Body } from "@nestjs/common";
+import {
+  Controller,
+  Get,
+  Post,
+  UseGuards,
+  Body,
+  UseInterceptors,
+  UploadedFile,
+} from "@nestjs/common";
 import { simpleParser } from "mailparser";
 import { Roles } from "../decorators/role.decorator";
 import { RoleGuard } from "../guards/role.guard";
 import { AuthGuard } from "../guards/auth.guard";
 import { PrismaService } from "../prisma/prisma.service";
 import { LoggerService } from "../logger/logger.service";
+import { FileInterceptor } from "@nestjs/platform-express";
 
 @Controller("test")
 export class TestController {
@@ -21,12 +30,13 @@ export class TestController {
   }
 
   @Post("email")
-  async sendEmail(@Body() req: any) {
+  @UseInterceptors(FileInterceptor("email")) // Parsea el campo 'email'
+  async sendEmail(
+    @UploadedFile() file: Express.Multer.File,
+    @Body() body: any,
+  ) {
     try {
-      // Extrae el RAW MIME del cuerpo de la solicitud
-      const rawEmail = req.email; // Campo enviado por SendGrid
-
-      // Parsea el correo
+      const rawEmail = file.buffer.toString(); // Convierte el buffer a string
       const parsedEmail = await simpleParser(rawEmail);
 
       // Guarda los datos en el log
