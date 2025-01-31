@@ -16,33 +16,23 @@ export class TestController {
   constructor(private readonly loggerService: LoggerService) {}
 
   @Post("email")
-  @UseInterceptors(FileInterceptor("email")) // Mantenemos esto por si hay un archivo
+  @UseInterceptors(FileInterceptor("email"))
   async sendEmail(
     @Req() req: Request,
     @UploadedFile() file?: Express.Multer.File,
   ) {
     try {
-      // 1. Capturar el body crudo (sin procesar)
-      const rawBodyContent = (await rawBody(req)).toString("utf-8");
+      // Accede al raw body desde el request (capturado por el middleware)
+      const rawBodyContent =
+        req["rawBody"]?.toString() || "No se capturó raw body";
 
-      // 2. Capturar todas las cabeceras
-      const headers = { ...req.headers };
-
-      // 3. Capturar campos del form-data (si existe)
-      let formDataFields = {};
-      if (req.is("multipart/form-data")) {
-        // Solo para multipart, NestJS ya procesó los campos
-        // ¡OJO! Esto no captura archivos, solo campos de texto
-        formDataFields = req.body;
-      }
-
-      // 4. Registrar TODO en el logger
+      // Log de todo
       await this.loggerService.create({
         action: "Debug Power Automate Request",
         name: "Sistema",
         extraData: {
-          headers: headers,
-          rawBody: rawBodyContent, // Body crudo completo
+          headers: { ...req.headers },
+          rawBody: rawBodyContent, // Raw body obtenido del middleware
           detectedFile: file
             ? {
                 originalname: file.originalname,
@@ -50,8 +40,7 @@ export class TestController {
                 size: file.size,
               }
             : "No hay archivo subido",
-          formDataFields: formDataFields, // Campos de texto del form-data
-          error: null,
+          formDataFields: req.body, // Campos del form-data
         },
       });
 
