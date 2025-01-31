@@ -15,20 +15,27 @@ export class TestController {
   constructor(private readonly loggerService: LoggerService) {}
 
   @Post("email")
-  @UseInterceptors(FileInterceptor("email")) // Capturamos el archivo `email`
+  @UseInterceptors(FileInterceptor("email")) // Capturamos el archivo `email` si existe
   async receiveEmail(
     @Req() req: Request,
     @UploadedFile() file?: Express.Multer.File,
   ) {
     try {
-      if (!file) {
-        throw new Error("No se recibió el archivo del email.");
+      let parsedEmail;
+
+      if (file) {
+        // 📩 1️⃣ Si se recibe un archivo adjunto, parsearlo normalmente
+        parsedEmail = await simpleParser(file.buffer);
+      } else {
+        // 🔎 2️⃣ Si no hay archivo, intentar extraerlo desde `req.body`
+        parsedEmail = await simpleParser(req.body["email"]);
       }
 
-      // 1️⃣ Parsear el email desde el archivo adjunto
-      const parsedEmail = await simpleParser(file.buffer);
+      if (!parsedEmail) {
+        throw new Error("No se pudo parsear el email.");
+      }
 
-      // 2️⃣ Extraer información clave
+      // 📌 3️⃣ Extraer información clave
       const emailData = {
         from: parsedEmail.from?.text || "No especificado",
         to: parsedEmail.to?.text || "No especificado",
@@ -42,7 +49,7 @@ export class TestController {
         })),
       };
 
-      // 3️⃣ Guardar en logs
+      // 📝 4️⃣ Guardar en logs
       await this.loggerService.create({
         action: "Email recibido",
         name: "Sistema",
