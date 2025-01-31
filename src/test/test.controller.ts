@@ -1,6 +1,7 @@
 import { Controller, Post, Req, Body } from "@nestjs/common";
 import { Request } from "express";
-
+import * as rawBody from "raw-body";
+import { simpleParser } from "mailparser";
 import { LoggerService } from "../logger/logger.service";
 
 @Controller("test")
@@ -8,34 +9,36 @@ export class TestController {
   constructor(private readonly loggerService: LoggerService) {}
 
   @Post("email")
-  async receiveEmail(@Req() req: Request, @Body() body: any) {
+  async receiveEmail(@Req() req: Request) {
     try {
-      // Extraer datos esenciales del correo
-      const {
-        from, // Remitente del correo
-        to, // Destinatario
-        subject, // Asunto
-        text, // Cuerpo en texto plano
-        html, // Cuerpo en HTML
-        attachments, // Archivos adjuntos (si hay)
-      } = body;
+      // 1️⃣ Capturar el body en formato raw (SendGrid lo envía como multipart/form-data)
+      const rawBodyContent = await rawBody(req, { encoding: "utf-8" });
 
-      // Registrar en logs (opcional)
+      // 2️⃣ Parsear el email para extraer los datos
+      const parsedEmail = await simpleParser(rawBodyContent);
+
+      // 3️⃣ Extraer información clave
+      const emailData = {
+        from: parsedEmail.from?.text || "No especificado",
+        to: parsedEmail.to?.text || "No especificado",
+        subject: parsedEmail.subject || "Sin asunto",
+        text: parsedEmail.text || "Sin contenido",
+        html: parsedEmail.html || "Sin contenido HTML",
+        attachments: parsedEmail.attachments.map((att) => ({
+          filename: att.filename,
+          contentType: att.contentType,
+          size: att.size,
+        })),
+      };
+
+      // 4️⃣ Guardar en logs
       await this.loggerService.create({
         action: "Email recibido",
         name: "Sistema",
-        extraData: {
-          from,
-          to,
-          subject,
-          text,
-          html,
-          attachments: attachments ? attachments.length : "Sin adjuntos",
-        },
+        extraData: emailData,
       });
 
-      // Responder con éxito
-      return { message: "Correo recibido", subject, text, html };
+      return { message: "Correo procesado", ...emailData };
     } catch (error) {
       await this.loggerService.create({
         action: "Error procesando email",
