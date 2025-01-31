@@ -1,72 +1,77 @@
 import {
   Controller,
-  Get,
   Post,
-  UseGuards,
-  Body,
+  Req,
   UseInterceptors,
   UploadedFile,
-  Req,
 } from "@nestjs/common";
-import { simpleParser } from "mailparser";
-import { Roles } from "../decorators/role.decorator";
-import { RoleGuard } from "../guards/role.guard";
-import { AuthGuard } from "../guards/auth.guard";
-import { PrismaService } from "../prisma/prisma.service";
-import { LoggerService } from "../logger/logger.service";
-import { FileInterceptor } from "@nestjs/platform-express";
 import { Request } from "express";
 import * as rawBody from "raw-body";
+import { FileInterceptor } from "@nestjs/platform-express";
+import { simpleParser } from "mailparser";
+import { LoggerService } from "../logger/logger.service";
 
 @Controller("test")
 export class TestController {
-  constructor(
-    private readonly prismaService: PrismaService,
-    private readonly loggerService: LoggerService,
-  ) {}
+  constructor(private readonly loggerService: LoggerService) {}
 
   @Post("email")
-  @UseInterceptors(FileInterceptor("email")) // Extrae el campo "email" del form-data
+  @UseInterceptors(FileInterceptor("email")) // Mantenemos esto por si hay un archivo
   async sendEmail(
-    @UploadedFile() file: Express.Multer.File, // Archivo con el RAW MIME
     @Req() req: Request,
+    @UploadedFile() file?: Express.Multer.File,
   ) {
     try {
-      // Verifica si se recibió el archivo
-      if (!file) {
-        this.loggerService.create({
-          action: "Error en email",
-          name: "Sistema",
-          extraData: {
-            error: "Campo 'email' no encontrado",
-            tipo: req.rawHeaders,
-          },
-        });
-        return "Campo 'email' faltante";
+      // 1. Capturar el body crudo (sin procesar)
+      const rawBodyContent = (await rawBody(req)).toString("utf-8");
+
+      // 2. Capturar todas las cabeceras
+      const headers = { ...req.headers };
+
+      // 3. Capturar campos del form-data (si existe)
+      let formDataFields = {};
+      if (req.is("multipart/form-data")) {
+        // Solo para multipart, NestJS ya procesó los campos
+        // ¡OJO! Esto no captura archivos, solo campos de texto
+        formDataFields = req.body;
       }
 
-      // Convierte el buffer a string (RAW MIME)
-      const rawEmail = file.buffer.toString();
-      const parsedEmail = await simpleParser(rawEmail);
-
-      // Guarda los datos en el log
-      this.loggerService.create({
-        action: "Prueba 1",
-        name: "Eze",
+      // 4. Registrar TODO en el logger
+      await this.loggerService.create({
+        action: "Debug Power Automate Request",
+        name: "Sistema",
         extraData: {
-          quehace: "Envia un email correctamente Eze 28/01/2025",
-          emailData: {
-            from: parsedEmail.from?.text,
-            subject: parsedEmail.subject,
-            text: parsedEmail.text,
-            attachments: parsedEmail.attachments?.map((a) => a.filename),
-          },
+          headers: headers,
+          rawBody: rawBodyContent, // Body crudo completo
+          detectedFile: file
+            ? {
+                originalname: file.originalname,
+                mimetype: file.mimetype,
+                size: file.size,
+              }
+            : "No hay archivo subido",
+          formDataFields: formDataFields, // Campos de texto del form-data
+          error: null,
         },
       });
 
-      return "Operativo";
+      // 5. Procesar el email si hay archivo
+      if (file) {
+        const parsedEmail = await simpleParser(file.buffer);
+        // ... (tu lógica existente aquí)
+        return "Email procesado";
+      }
+
+      return "No se encontró archivo adjunto";
     } catch (error) {
-      console.error("Error procesando correo:", error);
+      await this.loggerService.create({
+        action: "Error en email",
+        name: "Sistema",
+        extraData: {
+          error: error.message,
+          stack: error.stack,
+        },
+      });
       return "Error interno";
     }
   }
