@@ -1,6 +1,12 @@
-import { Controller, Post, Req, Body } from "@nestjs/common";
+import {
+  Controller,
+  Post,
+  Req,
+  UseInterceptors,
+  UploadedFile,
+} from "@nestjs/common";
 import { Request } from "express";
-import * as rawBody from "raw-body";
+import { FileInterceptor } from "@nestjs/platform-express";
 import { simpleParser } from "mailparser";
 import { LoggerService } from "../logger/logger.service";
 
@@ -9,15 +15,20 @@ export class TestController {
   constructor(private readonly loggerService: LoggerService) {}
 
   @Post("email")
-  async receiveEmail(@Req() req: Request) {
+  @UseInterceptors(FileInterceptor("email")) // Capturamos el archivo `email`
+  async receiveEmail(
+    @Req() req: Request,
+    @UploadedFile() file?: Express.Multer.File,
+  ) {
     try {
-      // 1️⃣ Capturar el body en formato raw (SendGrid lo envía como multipart/form-data)
-      const rawBodyContent = await rawBody(req, { encoding: "utf-8" });
+      if (!file) {
+        throw new Error("No se recibió el archivo del email.");
+      }
 
-      // 2️⃣ Parsear el email para extraer los datos
-      const parsedEmail = await simpleParser(rawBodyContent);
+      // 1️⃣ Parsear el email desde el archivo adjunto
+      const parsedEmail = await simpleParser(file.buffer);
 
-      // 3️⃣ Extraer información clave
+      // 2️⃣ Extraer información clave
       const emailData = {
         from: parsedEmail.from?.text || "No especificado",
         to: parsedEmail.to?.text || "No especificado",
@@ -31,7 +42,7 @@ export class TestController {
         })),
       };
 
-      // 4️⃣ Guardar en logs
+      // 3️⃣ Guardar en logs
       await this.loggerService.create({
         action: "Email recibido",
         name: "Sistema",
