@@ -1,14 +1,6 @@
-import {
-  Controller,
-  Post,
-  Req,
-  UseInterceptors,
-  UploadedFile,
-} from "@nestjs/common";
+import { Controller, Post, Req, Body } from "@nestjs/common";
 import { Request } from "express";
-import * as rawBody from "raw-body";
-import { FileInterceptor } from "@nestjs/platform-express";
-import { simpleParser } from "mailparser";
+
 import { LoggerService } from "../logger/logger.service";
 
 @Controller("test")
@@ -16,52 +8,41 @@ export class TestController {
   constructor(private readonly loggerService: LoggerService) {}
 
   @Post("email")
-  @UseInterceptors(FileInterceptor("email"))
-  async sendEmail(
-    @Req() req: Request,
-    @UploadedFile() file?: Express.Multer.File,
-  ) {
+  async receiveEmail(@Req() req: Request, @Body() body: any) {
     try {
-      // Accede al raw body desde el request (capturado por el middleware)
-      const rawBodyContent =
-        req["rawBody"]?.toString() || "No se capturó raw body";
+      // Extraer datos esenciales del correo
+      const {
+        from, // Remitente del correo
+        to, // Destinatario
+        subject, // Asunto
+        text, // Cuerpo en texto plano
+        html, // Cuerpo en HTML
+        attachments, // Archivos adjuntos (si hay)
+      } = body;
 
-      // Log de todo
+      // Registrar en logs (opcional)
       await this.loggerService.create({
-        action: "Debug Power Automate Request",
+        action: "Email recibido",
         name: "Sistema",
         extraData: {
-          headers: { ...req.headers },
-          rawBody: rawBodyContent, // Raw body obtenido del middleware
-          detectedFile: file
-            ? {
-                originalname: file.originalname,
-                mimetype: file.mimetype,
-                size: file.size,
-              }
-            : "No hay archivo subido",
-          formDataFields: req.body, // Campos del form-data
+          from,
+          to,
+          subject,
+          text,
+          html,
+          attachments: attachments ? attachments.length : "Sin adjuntos",
         },
       });
 
-      // 5. Procesar el email si hay archivo
-      if (file) {
-        const parsedEmail = await simpleParser(file.buffer);
-        // ... (tu lógica existente aquí)
-        return "Email procesado";
-      }
-
-      return "No se encontró archivo adjunto";
+      // Responder con éxito
+      return { message: "Correo recibido", subject, text, html };
     } catch (error) {
       await this.loggerService.create({
-        action: "Error en email",
+        action: "Error procesando email",
         name: "Sistema",
-        extraData: {
-          error: error.message,
-          stack: error.stack,
-        },
+        extraData: { error: error.message, stack: error.stack },
       });
-      return "Error interno";
+      return { message: "Error interno", error: error.message };
     }
   }
 }

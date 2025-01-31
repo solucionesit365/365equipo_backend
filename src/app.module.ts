@@ -1,4 +1,4 @@
-import { MiddlewareConsumer, Module, NestModule } from "@nestjs/common";
+import { Module } from "@nestjs/common";
 import { AppController } from "./app.controller";
 import { ConfigModule } from "@nestjs/config";
 import { ContratoModule } from "./contrato/contrato.module";
@@ -59,7 +59,6 @@ import { QuestionnaireModule } from "./questionnaire/questionnaire.module";
 import { VisionModule } from "./vision/vision.module";
 import { LoggerModule } from "./logger/logger.module";
 import { PowerAutomateModule } from "./power-automate/power-automate.module";
-import { RawBodyMiddleware } from "./test/test.middleware";
 
 @Module({
   imports: [
@@ -126,8 +125,4 @@ import { RawBodyMiddleware } from "./test/test.middleware";
   ],
   controllers: [AppController, KpiTiendasController],
 })
-export class AppModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer.apply(RawBodyMiddleware).forRoutes("test/email"); // Aplica el middleware solo a esta ruta
-  }
-}
+export class AppModule {}
