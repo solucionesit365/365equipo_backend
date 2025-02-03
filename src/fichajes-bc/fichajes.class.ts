@@ -234,7 +234,7 @@ export class Fichajes {
         fichajesBC[i],
         trabajadores,
       );
-      if (idApp === "NO_TIENE_APP") continue;
+      // if (idApp === "NO_TIENE_APP") continue; //se quita por que no entraban los fichajes de las dependientas que no tienen la app cuando la tengan se actualiza el idApp
 
       if (fichajesBC[i].accio === 1) {
         fichajesPretty.push({
