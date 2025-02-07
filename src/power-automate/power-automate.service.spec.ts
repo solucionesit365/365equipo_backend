@@ -1,7 +1,7 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { PowerAutomateService } from './power-automate.service';
+import { Test, TestingModule } from "@nestjs/testing";
+import { PowerAutomateService } from "./power-automate.service";
 
-describe('PowerAutomateService', () => {
+describe("PowerAutomateService", () => {
   let service: PowerAutomateService;
 
   beforeEach(async () => {
@@ -12,7 +12,7 @@ describe('PowerAutomateService', () => {
     service = module.get<PowerAutomateService>(PowerAutomateService);
   });
 
-  it('should be defined', () => {
+  it("should be defined", () => {
     expect(service).toBeDefined();
   });
 });

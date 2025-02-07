@@ -16,7 +16,7 @@
       "restart": true,
       "sourceMaps": true,
       "stopOnEntry": false,
-      "console": "integratedTerminal",
+      "console": "internalConsole",
     }
   ]
 }
