@@ -15,12 +15,9 @@ export class PowerAutomateController {
   ) {}
 
   @Post("test")
-  async test(@Body() req: TestDto) {
+  async test(@Body() req: { text: string }) {
     try {
-      const db = (await this.mongoService.getConexion()).db("soluciones");
-      const powerAutomateCollection = db.collection("power-automate");
-      await powerAutomateCollection.insertOne(req);
-      return "OK";
+      return this.powerAutomateService.getTag("action", req.text);
     } catch (err) {
       console.log(err);
       return false;
@@ -28,7 +25,7 @@ export class PowerAutomateController {
   }
 
   @Post("email")
-  @UseInterceptors(FileInterceptor("email")) // Capturamos el archivo `email` si existe
+  @UseInterceptors(FileInterceptor("email"))
   async receiveEmail(
     @Req() req: Request,
     @UploadedFile() file?: Express.Multer.File,
