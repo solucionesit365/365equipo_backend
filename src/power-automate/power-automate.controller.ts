@@ -37,10 +37,8 @@ export class PowerAutomateController {
       let parsedEmail: any;
 
       if (file) {
-        // 📩 1️⃣ Si se recibe un archivo adjunto, parsearlo normalmente
         parsedEmail = await simpleParser(file.buffer);
       } else {
-        // 🔎 2️⃣ Si no hay archivo, intentar extraerlo desde `req.body`
         parsedEmail = await simpleParser(req.body["email"]);
       }
 
@@ -48,24 +46,18 @@ export class PowerAutomateController {
         throw new Error("No se pudo parsear el email.");
       }
 
-      // 📌 3️⃣ Extraer información clave
       const emailData = {
         from: parsedEmail.from?.text || "No especificado",
         to: parsedEmail.to?.text || "No especificado",
         subject: parsedEmail.subject || "Sin asunto",
         text: parsedEmail.text || "Sin contenido",
-        html: parsedEmail.html || "Sin contenido HTML",
-        attachments: parsedEmail.attachments.map((att) => ({
-          filename: att.filename,
-          contentType: att.contentType,
-          size: att.size,
-        })),
       };
 
-      // 📝 4️⃣ Guardar en logs
+      const action = this.powerAutomateService.getTag("action", emailData.text);
+
       await this.powerAutomateService.saveInPowerAutomateCollection({
-        action: "Email recibido",
-        name: "Sistema",
+        action,
+        name: "Tarea",
         extraData: emailData,
       });
 
