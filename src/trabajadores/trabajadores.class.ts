@@ -473,4 +473,8 @@ export class TrabajadorService {
       };
     }
   }
+
+  async restaurarTrabajador(reqTrabajador: CreateTrabajadorRequestDto) {
+    return await this.schTrabajadores.crearTrabajador(reqTrabajador);
+  }
 }
