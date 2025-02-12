@@ -405,7 +405,9 @@ export class TrabajadorDatabaseService {
         },
       },
     });
-    subordinados.push(trabajador);
+    if (!subordinados.some((sub) => sub.id === trabajador.id)) {
+      subordinados.push(trabajador);
+    }
 
     return subordinados;
   }
