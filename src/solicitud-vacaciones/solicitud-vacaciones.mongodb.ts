@@ -235,4 +235,28 @@ export class SolicitudVacacionesDatabase {
       return respSolicitudes;
     } else return [];
   }
+
+  async getSolicitudesMultiplesTrabajadores(
+    idsTrabajadores: number[],
+    year: number,
+  ) {
+    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const solicitudVacacionesCollection = db.collection("solicitudVacaciones");
+
+    // 🔹 Asegurar que los IDs están en formato correcto
+    if (!Array.isArray(idsTrabajadores) || idsTrabajadores.length === 0) {
+      console.warn("⚠️ No hay IDs de trabajadores para buscar solicitudes.");
+      return [];
+    }
+
+    // 🔹 Hacer la consulta correctamente con `$in`
+    const respSolicitudes = await solicitudVacacionesCollection
+      .find({
+        idBeneficiario: { $in: idsTrabajadores }, // Filtrar por IDs de beneficiarios
+        year: year, // Filtrar por año
+      })
+      .toArray();
+
+    return respSolicitudes;
+  }
 }

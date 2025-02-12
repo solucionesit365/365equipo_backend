@@ -486,4 +486,86 @@ export class SolicitudVacacionesController {
 
     return { ok: true, message: "Notificaciones enviadas correctamente" };
   }
+
+  @UseGuards(AuthGuard)
+  @Get("resumen")
+  async getResumenVacaciones(@Query() { idSql, year }) {
+    try {
+      if (!idSql || !year) throw Error("Faltan datos.");
+
+      // 🔹 Convertir `idSql` y `year` a `number`
+      const idResponsable = parseInt(idSql, 10);
+      const yearNumber = parseInt(year, 10);
+
+      if (isNaN(idResponsable) || isNaN(yearNumber)) {
+        throw new Error("idSql o year no son valores numéricos válidos.");
+      }
+
+      // 🔹 Obtener todas las dependientas y coordinadoras
+      const supervisorasTienda =
+        await this.trabajadorInstance.getSubordinadosByIdsql(idResponsable);
+
+      const coordinadoras = [];
+      for (const supervisora of supervisorasTienda) {
+        const subCoordinadoras =
+          await this.trabajadorInstance.getSubordinadosByIdsql(supervisora.id);
+        coordinadoras.push(...subCoordinadoras);
+      }
+
+      const dependientas = [];
+      for (const coordinadora of coordinadoras) {
+        const subDependientas =
+          await this.trabajadorInstance.getSubordinadosByIdsql(coordinadora.id);
+        dependientas.push(...subDependientas);
+      }
+
+      const trabajadores = [...dependientas, ...coordinadoras];
+      const idsTrabajadores = trabajadores.map((t) => t.id);
+
+      // 🔹 Obtener solicitudes de vacaciones de todos los trabajadores en una sola consulta
+      const solicitudes =
+        await this.solicitudVacacionesInstance.getSolicitudesMultiplesTrabajadores(
+          idsTrabajadores,
+          yearNumber,
+        );
+
+      // 🔹 Organizar datos para el frontend
+      const tiendasResumen = {};
+
+      // 📌 Registrar trabajadores en `tiendasResumen`
+      for (const trabajador of trabajadores) {
+        const tiendaId = trabajador.idTienda || "Sin asignar";
+
+        if (!tiendasResumen[tiendaId]) {
+          tiendasResumen[tiendaId] = { solicitados: 0, trabajadores: [] };
+        }
+
+        tiendasResumen[tiendaId].trabajadores.push(trabajador);
+      }
+
+      // 📌 Registrar solicitudes en `tiendasResumen`, usando `idTienda` del trabajador
+      for (const solicitud of solicitudes) {
+        // Buscamos el trabajador correspondiente a la solicitud
+        const trabajadorSolicitante = trabajadores.find(
+          (t) => t.id === solicitud.idBeneficiario,
+        );
+
+        // Si el trabajador existe, usamos su `idTienda`
+        const tiendaId = trabajadorSolicitante
+          ? trabajadorSolicitante.idTienda
+          : solicitud.tienda || "Sin asignar";
+
+        if (!tiendasResumen[tiendaId]) {
+          tiendasResumen[tiendaId] = { solicitados: 0, trabajadores: [] };
+        }
+
+        tiendasResumen[tiendaId].solicitados += solicitud.totalDias || 0;
+      }
+
+      return { ok: true, data: tiendasResumen };
+    } catch (err) {
+      console.error(err);
+      return { ok: false, message: err.message };
+    }
+  }
 }

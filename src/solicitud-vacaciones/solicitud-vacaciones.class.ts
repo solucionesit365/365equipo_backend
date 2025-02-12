@@ -271,4 +271,14 @@ export class SolicitudesVacacionesService {
       idBeneficiario,
     );
   }
+
+  async getSolicitudesMultiplesTrabajadores(
+    idsBeneficiarios: number[],
+    year: number,
+  ) {
+    return await this.schSolicitudVacaciones.getSolicitudesMultiplesTrabajadores(
+      idsBeneficiarios,
+      year,
+    );
+  }
 }
