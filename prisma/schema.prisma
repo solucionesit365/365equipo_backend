@@ -38,6 +38,7 @@ model Trabajador {
   tienda           Tienda?      @relation(fields: [idTienda], references: [id])
   permisos         Permiso[]    @relation("PermisoToTrabajador")
   roles            Role[]       @relation("RoleToTrabajador")
+  borrarEsto       String?      @default("borrarEsto")
 }
 
 model Tienda {
