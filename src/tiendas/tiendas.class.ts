@@ -96,4 +96,13 @@ export class Tienda {
     }
     return null;
   }
+
+  async getTiendas2() {
+    try {
+      return this.ordenarTiendas(await this.schTiendas.geTiendas2());
+    } catch (err) {
+      console.log(err);
+      throw new InternalServerErrorException("Error al obtener las tiendas");
+    }
+  }
 }

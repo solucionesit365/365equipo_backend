@@ -18,3 +18,18 @@ export interface Tienda {
   idExterno: number;
 }
 [];
+
+export interface Tiendas2 {
+  direccion: string;
+  CodigoPostal: number;
+  Poblacion: string;
+  Provincia: string;
+  CódMunicipio: number;
+  nombre: string;
+  Latitud: number;
+  Longitud: number;
+  Tipo: string;
+  id: number;
+  idExterno: number;
+  telefono: number;
+}

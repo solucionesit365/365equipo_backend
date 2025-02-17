@@ -46,4 +46,10 @@ export class TiendasController {
       return { ok: false, message: err.message };
     }
   }
+
+  @UseGuards(AuthGuard)
+  @Get("tiendas2")
+  async getTiendas2() {
+    return await this.tiendasInstance.getTiendas2();
+  }
 }
