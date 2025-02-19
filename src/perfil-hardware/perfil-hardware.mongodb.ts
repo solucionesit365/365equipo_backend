@@ -8,7 +8,7 @@ export class PerfilHardwareDatabase {
   constructor(private readonly mongoDbService: MongoService) {}
 
   async newPerfilHardware(perfilHard: PerfilHardware) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const perfilesHardwareColl =
       db.collection<PerfilHardware>("perfilesHardware");
 
@@ -19,14 +19,14 @@ export class PerfilHardwareDatabase {
   }
 
   async getPerfilesH() {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const perfiles = db.collection<PerfilHardware>("perfilesHardware");
 
     return await perfiles.find({}).toArray();
   }
 
   async deletePerfil(perfil: PerfilHardware) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const perfiles = db.collection<PerfilHardware>("perfilesHardware");
 
     const respPerfiles = await perfiles.deleteOne({

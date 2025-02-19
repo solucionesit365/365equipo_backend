@@ -10,7 +10,7 @@ export class SolicitudNuevoClienteBbdd {
 
   //Guardar los datos del cliente que ha solicitado un flayer por QR
   async nuevaSolicitud(solicitud: SolicitudCliente) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const solicitudesClienteCollection = db.collection<SolicitudCliente>(
       "solicitudRegistroCliente",
     );
@@ -31,7 +31,7 @@ export class SolicitudNuevoClienteBbdd {
 
   //Guardar cupon de un solo uso
   async nuevoCodigoFlayer(flayer: CodigoFlayers) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const solicitudesClienteCollection =
       db.collection<CodigoFlayers>("codigosFlayers");
 
@@ -49,7 +49,7 @@ export class SolicitudNuevoClienteBbdd {
   }
 
   async getSolicitud(idSolicitud: string) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const solicitudesClienteCollection = db.collection<SolicitudCliente>(
       "solicitudRegistroCliente",
     );
@@ -58,7 +58,7 @@ export class SolicitudNuevoClienteBbdd {
   }
 
   async getAllFlayers() {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const solicitudesClienteCollection =
       db.collection<CodigoFlayers>("codigosFlayers");
 
@@ -66,7 +66,7 @@ export class SolicitudNuevoClienteBbdd {
   }
 
   async borrarSolicitud(idSolicitud: string) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const solicitudesClienteCollection = db.collection<SolicitudCliente>(
       "solicitudRegistroCliente",
     );
@@ -79,14 +79,14 @@ export class SolicitudNuevoClienteBbdd {
   }
 
   async validarFlayer(codigo: string) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const solicitudesClienteCollection =
       db.collection<CodigoFlayers>("codigosFlayers");
 
     return await solicitudesClienteCollection.findOne({ codigo: codigo });
   }
   async caducarFlayer(codigo: string) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const solicitudesClienteCollection =
       db.collection<CodigoFlayers>("codigosFlayers");
 

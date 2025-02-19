@@ -10,7 +10,7 @@ export class SolicitudVacacionesDatabase {
   //Nueva solicitud de vacaciones
   async nuevaSolicitudVacaciones(solicitudVacaciones: SolicitudVacaciones) {
     solicitudVacaciones._id = new ObjectId();
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const solicitudVacacionesCollection = db.collection<SolicitudVacaciones>(
       "solicitudVacaciones",
     );
@@ -23,7 +23,7 @@ export class SolicitudVacacionesDatabase {
 
   //Mostrar todas las solicitudes de las vacaciones de los trabajadores
   async getSolicitudes(year: number) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const solicitudVacacionesCollection = db.collection<SolicitudVacaciones>(
       "solicitudVacaciones",
     );
@@ -36,7 +36,7 @@ export class SolicitudVacacionesDatabase {
 
   //Mostrar Solicitudes de las vacaciones de el trabajador por idSql
   async getSolicitudesTrabajadorSqlId(idBeneficiario: number, year: number) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const solicitudVacacionesCollection = db.collection<SolicitudVacaciones>(
       "solicitudVacaciones",
     );
@@ -51,7 +51,7 @@ export class SolicitudVacacionesDatabase {
   }
 
   async getVacacionesByTiendas(tienda: string) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const solicitudVacacionesCollection = db.collection<SolicitudVacaciones>(
       "solicitudVacaciones",
     );
@@ -63,7 +63,7 @@ export class SolicitudVacacionesDatabase {
   }
 
   async getsolicitudesSubordinados(idAppResponsable: string, year: number) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const solicitudVacacionesCollection = db.collection<SolicitudVacaciones>(
       "solicitudVacaciones",
     );
@@ -75,7 +75,7 @@ export class SolicitudVacacionesDatabase {
   }
 
   async getVacacionesByEstado(estado: string) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const solicitudVacacionesCollection = db.collection<SolicitudVacaciones>(
       "solicitudVacaciones",
     );
@@ -87,7 +87,7 @@ export class SolicitudVacacionesDatabase {
   }
 
   async getSolicitudesById(_id: string) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const solicitudVacacionesCollection = db.collection<SolicitudVacaciones>(
       "solicitudVacaciones",
     );
@@ -101,7 +101,7 @@ export class SolicitudVacacionesDatabase {
 
   //Borrar solicitud de vacaciones
   async borrarSolicitud(_id: string) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const solicitudVacacionesCollection = db.collection<SolicitudVacaciones>(
       "solicitudVacaciones",
     );
@@ -116,7 +116,7 @@ export class SolicitudVacacionesDatabase {
   async updateSolicitudVacacionesEstado(
     solicitudesVacaciones: SolicitudVacaciones,
   ) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const solicitudVacacionesCollection = db.collection<SolicitudVacaciones>(
       "solicitudVacaciones",
     );
@@ -141,7 +141,7 @@ export class SolicitudVacacionesDatabase {
   async haySolicitudesParaBeneficiario(
     idBeneficiario: number,
   ): Promise<boolean> {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const solicitudVacacionesCollection = db.collection<SolicitudVacaciones>(
       "solicitudVacaciones",
     );
@@ -156,7 +156,7 @@ export class SolicitudVacacionesDatabase {
     idBeneficiario: number,
     idAppResponsable: string,
   ) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const solicitudVacacionesCollection = db.collection<SolicitudVacaciones>(
       "solicitudVacaciones",
     );
@@ -179,7 +179,7 @@ export class SolicitudVacacionesDatabase {
     console.log(vacaciones);
 
     try {
-      const db = (await this.mongoDbService.getConexion()).db("soluciones");
+      const db = (await this.mongoDbService.getConexion()).db();
       const solicitudVacacionesCollection = db.collection<SolicitudVacaciones>(
         "solicitudVacaciones",
       );
@@ -219,7 +219,7 @@ export class SolicitudVacacionesDatabase {
       idAppResponsable: string;
     }[]
   > {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const solicitudVacacionesCollection = db.collection<SolicitudVacaciones>(
       "solicitudVacaciones",
     );
@@ -240,7 +240,7 @@ export class SolicitudVacacionesDatabase {
     idsTrabajadores: number[],
     year: number,
   ) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const solicitudVacacionesCollection = db.collection("solicitudVacaciones");
 
     // 🔹 Asegurar que los IDs están en formato correcto

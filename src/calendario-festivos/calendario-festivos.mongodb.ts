@@ -11,7 +11,7 @@ export class CalendarioFestivosDatabase {
   constructor(private readonly mongoDbService: MongoService) {}
 
   async nuevoFestivo(festivo: CalendarioFestivosInterface) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const calendarioCollection =
       db.collection<CalendarioFestivosInterface>("calendarioFestivos");
 
@@ -23,7 +23,7 @@ export class CalendarioFestivosDatabase {
   }
 
   async getFestivos() {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const calendarioCollection =
       db.collection<CalendarioFestivosInterface>("calendarioFestivos");
 
@@ -33,7 +33,7 @@ export class CalendarioFestivosDatabase {
   }
 
   async getFestivosByTienda(tienda: number) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const calendarioCollection =
       db.collection<CalendarioFestivosInterface>("calendarioFestivos");
 
@@ -49,7 +49,7 @@ export class CalendarioFestivosDatabase {
   }
 
   async updateFestivo(festivo: CalendarioFestivosInterface) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const calendarioCollection =
       db.collection<CalendarioFestivosInterface>("calendarioFestivos");
 
@@ -74,7 +74,7 @@ export class CalendarioFestivosDatabase {
   }
 
   async deleteFestivo(idFestivo: string) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const ausenciasCollection =
       db.collection<CalendarioFestivosInterface>("calendarioFestivos");
 
@@ -87,7 +87,7 @@ export class CalendarioFestivosDatabase {
 
   //Notifcacion navideña
   async nuevoEvento(festivo: eventoNavideño) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const calendarioCollection =
       db.collection<eventoNavideño>("invitacionNavidad");
 
@@ -99,7 +99,7 @@ export class CalendarioFestivosDatabase {
   }
 
   async verificacionRespuesta(idUsuario: number) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const calendarioCollection =
       db.collection<eventoNavideño>("invitacionNavidad");
 
@@ -112,7 +112,7 @@ export class CalendarioFestivosDatabase {
   }
 
   async getEventos() {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const calendarioCollection =
       db.collection<eventoNavideño>("invitacionNavidad");
     // Filtrar para obtener solo documentos que contienen 'idUsuario'
@@ -122,7 +122,7 @@ export class CalendarioFestivosDatabase {
   }
 
   async getEventosByAsistirOrNo(asistira: string) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const calendarioCollection =
       db.collection<eventoNavideño>("invitacionNavidad");
     const asistiraBoolean = asistira == "true" ? true : false;

@@ -8,7 +8,7 @@ export class NotificacionsDatabase {
   constructor(private readonly mongoDbService: MongoService) {}
 
   async saveToken(uid: string, token: string) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const notificaciones = db.collection<NotificacionDto>("notificaciones");
 
     const updateResult = await notificaciones.updateOne(
@@ -23,14 +23,14 @@ export class NotificacionsDatabase {
   }
 
   async getFCMToken(uid: string) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const notificaciones = db.collection<NotificacionDto>("notificaciones");
 
     return await notificaciones.findOne({ uid });
   }
 
   async newInAppNotification(notification: InAppNotification) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const inAppNotifications =
       db.collection<InAppNotification>("inAppNotifications");
     notification.leido = false;
@@ -41,7 +41,7 @@ export class NotificacionsDatabase {
   }
 
   async deleteInAppNotification(id: string) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const inAppNotifications =
       db.collection<InAppNotification>("inAppNotifications");
 
@@ -54,7 +54,7 @@ export class NotificacionsDatabase {
   }
 
   async getInAppNotifications(uid: string) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const inAppNotifications =
       db.collection<InAppNotification>("inAppNotifications");
 
@@ -62,7 +62,7 @@ export class NotificacionsDatabase {
   }
 
   async getInAppNotificationsPendientes(uid: string) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const inAppNotifications =
       db.collection<InAppNotification>("inAppNotifications");
 
@@ -70,7 +70,7 @@ export class NotificacionsDatabase {
   }
 
   async getAllInAppNotifications(uid: string) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const inAppNotifications =
       db.collection<InAppNotification>("inAppNotifications");
 
@@ -78,7 +78,7 @@ export class NotificacionsDatabase {
   }
 
   async marcarComoLeida(id: string, uid: string) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const inAppNotifications =
       db.collection<InAppNotification>("inAppNotifications");
 
@@ -98,7 +98,7 @@ export class NotificacionsDatabase {
   }
 
   async marcarComoNoLeida(id: string, uid: string) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const inAppNotifications =
       db.collection<InAppNotification>("inAppNotifications");
 

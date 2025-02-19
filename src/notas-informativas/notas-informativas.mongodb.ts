@@ -16,7 +16,7 @@ export class NotasInformativasDatabes {
   }
 
   async nuevaNotaInformativa(nota: NotasInformativas) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const notasCollection =
       db.collection<NotasInformativas>("notasInformativas");
     const resInsert = await notasCollection.insertOne(nota);
@@ -25,7 +25,7 @@ export class NotasInformativasDatabes {
   }
 
   async getNotasInformativas(idTienda: number) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const notasCollection =
       db.collection<NotasInformativas>("notasInformativas");
     if (idTienda) {
@@ -37,13 +37,13 @@ export class NotasInformativasDatabes {
   }
 
   async getAllNotasInformativas() {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const notasCollection =
       db.collection<NotasInformativas>("notasInformativas");
     return await notasCollection.find({}).toArray();
   }
   async getNotasInformativasById(_id: string) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const notasCollection =
       db.collection<NotasInformativas>("notasInformativas");
     const respNotas = await notasCollection
@@ -53,7 +53,7 @@ export class NotasInformativasDatabes {
   }
 
   async borrarNotasInformativas(notas: NotasInformativas) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const notasCollection =
       db.collection<NotasInformativas>("notasInformativas");
     const resDelete = await notasCollection.deleteOne({
@@ -65,7 +65,7 @@ export class NotasInformativasDatabes {
 
   //Eliminacion automatica de las notas informativas por su caducidad y eliminar el storage
   private async deleteNotasInformativasCaducidad() {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const notasCollection =
       db.collection<NotasInformativas>("notasInformativas");
 

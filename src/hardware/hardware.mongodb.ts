@@ -8,7 +8,7 @@ export class HardwareDatabase {
   constructor(private readonly mongoDbService: MongoService) {}
 
   async newHardWare(hardware: HardWareInterface) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const hardwares = db.collection<HardWareInterface>("inventarioHardware");
 
     const resInsert = await hardwares.insertOne(hardware);
@@ -18,14 +18,14 @@ export class HardwareDatabase {
   }
 
   async getHardware() {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const hardwares = db.collection<HardWareInterface>("inventarioHardware");
 
     return await hardwares.find().toArray();
   }
 
   async updateHardware(hardWare: HardWareInterface) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const hInventario = db.collection<HardWareInterface>("inventarioHardware");
     const response = await hInventario.updateOne(
       {
@@ -46,7 +46,7 @@ export class HardwareDatabase {
   }
 
   async updateHardwareAll(hardWare: HardWareInterface) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const hInventario = db.collection<HardWareInterface>("inventarioHardware");
     const response = await hInventario.updateOne(
       {

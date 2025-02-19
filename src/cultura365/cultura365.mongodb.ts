@@ -8,7 +8,7 @@ export class cultura365Mongo {
   constructor(private readonly mongoDbService: MongoService) {}
 
   async nuevoVideo(video: cultura365Interface) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const videosCollect = db.collection<cultura365Interface>("videosCultura");
 
     const resInsert = await videosCollect.insertOne(video);
@@ -19,7 +19,7 @@ export class cultura365Mongo {
   }
 
   async getVideos() {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const videosCollect = db.collection<cultura365Interface>("videosCultura");
     const response = await videosCollect.find({}).toArray();
 
@@ -27,7 +27,7 @@ export class cultura365Mongo {
   }
 
   async updatevideo(video: cultura365Interface) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const videosCollect = db.collection<cultura365Interface>("videosCultura");
 
     const resUpdate = await videosCollect.updateOne(
@@ -47,7 +47,7 @@ export class cultura365Mongo {
   }
 
   async deleteVideo(_id: string) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const videosCollect = db.collection<cultura365Interface>("videosCultura");
 
     const resDelete = await videosCollect.deleteOne({
@@ -58,7 +58,7 @@ export class cultura365Mongo {
   }
 
   async incrementarContadorViews(videoId: string) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const videosCollect = db.collection<cultura365Interface>("videosCultura");
 
     const resUpdate = await videosCollect.updateOne(
@@ -72,7 +72,7 @@ export class cultura365Mongo {
   }
 
   async views() {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const videosCollect = db.collection<cultura365Interface>("videosCultura");
 
     const vistasPorVideo = await videosCollect

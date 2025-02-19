@@ -7,7 +7,7 @@ export class VerifiacacionDatabase {
   constructor(private readonly mongoDbService: MongoService) {}
 
   async nuevaVerificacionMFA(verificacion: VerificacionMFA) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const verificacionCollection =
       db.collection<VerificacionMFA>("verificacionMFA");
 
@@ -19,7 +19,7 @@ export class VerifiacacionDatabase {
   }
 
   async verificacionMFA(uid: string, utilizado: boolean) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const verificacionCollection =
       db.collection<VerificacionMFA>("verificacionMFA");
 
@@ -31,7 +31,7 @@ export class VerifiacacionDatabase {
   }
 
   async deleteVerificacionMFA(_id: string) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const verificacionCollection =
       db.collection<VerificacionMFA>("verificacionMFA");
     const resDelete = await verificacionCollection.deleteOne({

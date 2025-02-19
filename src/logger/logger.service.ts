@@ -9,7 +9,7 @@ export class LoggerService {
 
   async create(data: TLogger) {
     if (data.name && data.action) {
-      const db = (await this.mongoService.getConexion()).db("soluciones");
+      const db = (await this.mongoService.getConexion()).db();
       const loggerCollection = db.collection<TLoggerCollection>("logger");
       await loggerCollection.insertOne({
         action: data.action,
@@ -25,7 +25,7 @@ export class LoggerService {
 
   async getLogs() {
     try {
-      const db = (await this.mongoService.getConexion()).db("soluciones");
+      const db = (await this.mongoService.getConexion()).db();
       const loggerCollection = db.collection<TLoggerCollection>("logger");
       return await loggerCollection.find().toArray();
     } catch (err) {

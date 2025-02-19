@@ -9,7 +9,7 @@ export class IncidenciasDatabase {
 
   async nuevaIncidencia(incidencias: Incidencias) {
     incidencias._id = new ObjectId();
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const incidenciasCollection = db.collection<Incidencias>("incidencias");
     const resInsert = await incidenciasCollection.insertOne(incidencias);
     if (resInsert.acknowledged) return resInsert.insertedId;
@@ -18,7 +18,7 @@ export class IncidenciasDatabase {
   //Incidencia Invitado
   async nuevaIncidenciaInvitado(incidencia: IncidenciasInvitado) {
     incidencia._id = new ObjectId();
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const incidenciasCollection =
       db.collection<IncidenciasInvitado>("incidencias");
     const resInsert = await incidenciasCollection.insertOne(incidencia);
@@ -27,7 +27,7 @@ export class IncidenciasDatabase {
   }
 
   async getIncidencias() {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const incidenciasCollection = db.collection<Incidencias>("incidencias");
     const respIncidencias = await incidenciasCollection.find({}).toArray();
 
@@ -35,7 +35,7 @@ export class IncidenciasDatabase {
   }
 
   async getIncidenciasRrhh() {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const incidenciasCollection = db.collection<Incidencias>("incidencias");
     const respIncidencias = await incidenciasCollection.find({}).toArray();
 
@@ -43,7 +43,7 @@ export class IncidenciasDatabase {
   }
 
   async getIncidenciasByEstado(estado: string) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const incidenciasCollection = db.collection<Incidencias>("incidencias");
     const respIncidencias = await incidenciasCollection
       .find({ estado })
@@ -53,7 +53,7 @@ export class IncidenciasDatabase {
   }
 
   async getIncidenciasEstadoRrhh(estado: string) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const incidenciasCollection = db.collection<Incidencias>("incidencias");
     const respIncidencias = await incidenciasCollection
       .find({ estado })
@@ -63,7 +63,7 @@ export class IncidenciasDatabase {
   }
 
   async getIncidenciasByCategoria(categoria: string) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const incidenciasCollection = db.collection<Incidencias>("incidencias");
     const respIncidencias = await incidenciasCollection
       .find({ categoria })
@@ -73,7 +73,7 @@ export class IncidenciasDatabase {
   }
 
   async getIncidenciasByCategoriaRrhh(categoria: string) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const incidenciasCollection = db.collection<Incidencias>("incidencias");
     const respIncidencias = await incidenciasCollection
       .find({ categoria })
@@ -83,7 +83,7 @@ export class IncidenciasDatabase {
   }
 
   async getIncidenciasByPrioridad(prioridad: string) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const incidenciasCollection = db.collection<Incidencias>("incidencias");
     const respIncidencias = await incidenciasCollection
       .find({ prioridad })
@@ -93,7 +93,7 @@ export class IncidenciasDatabase {
   }
 
   async getIncidenciasByPrioridadRrhh(prioridad: string) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const incidenciasCollection = db.collection<Incidencias>("incidencias");
     const respIncidencias = await incidenciasCollection
       .find({ prioridad })
@@ -104,7 +104,7 @@ export class IncidenciasDatabase {
 
   // cambiar estado
   async updateIncidenciaEstado(incidencias: Incidencias) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const incidenciasCollection = db.collection<Incidencias>("incidencias");
 
     const respIncidencias = await incidenciasCollection.updateOne(
@@ -124,7 +124,7 @@ export class IncidenciasDatabase {
   }
 
   async updateIncidenciaMensajes(incidencias: Incidencias) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const incidenciasCollection = db.collection<Incidencias>("incidencias");
 
     const respIncidencias = await incidenciasCollection.updateOne(
@@ -144,14 +144,14 @@ export class IncidenciasDatabase {
   }
 
   async getIncidenciasByUid(uid: string) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const incidenciasCollection = db.collection<Incidencias>("incidencias");
     const respIncidencias = await incidenciasCollection.find({ uid }).toArray();
     return respIncidencias;
   }
 
   async updateIncidenciaDestinatario(incidencias: Incidencias) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const incidenciasCollection = db.collection<Incidencias>("incidencias");
 
     const respIncidencias = await incidenciasCollection.updateOne(
@@ -171,7 +171,7 @@ export class IncidenciasDatabase {
   }
 
   async deleteIncidencias(_id: string) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const incidenciasCollection = db.collection<Incidencias>("incidencias");
 
     const resDelete = await incidenciasCollection.deleteOne({
