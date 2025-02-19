@@ -5,7 +5,7 @@ import { Injectable } from "@nestjs/common";
 @Injectable()
 export class MongoService {
   private conexion: Promise<MongoClient>;
-  //Nueva direccion de base de datos
+
   constructor(private configService: ConfigService) {
     const mongoHost = "mongo-cluster-d1c18377.mongo.ondigitalocean.com";
     let uri: string;
