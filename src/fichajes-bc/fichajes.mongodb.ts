@@ -24,7 +24,7 @@ export class FichajesDatabase {
     latitud?: number,
     longitud?: number,
   ) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const fichajesCollection = db.collection<FichajeDto>("fichajes");
     const resInsert = await fichajesCollection.insertOne({
       enviado: false,
@@ -54,7 +54,7 @@ export class FichajesDatabase {
     latitud?: number, // Añadir latitud
     longitud?: number, // Añadir longitud
   ) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const fichajesCollection = db.collection<FichajeDto>("fichajes");
     const resInsert = await fichajesCollection.insertOne({
       enviado: false,
@@ -82,7 +82,7 @@ export class FichajesDatabase {
     nombre: string,
     dni: string,
   ) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const fichajesCollection = db.collection<FichajeDto>("fichajes");
     const resInsert = await fichajesCollection.insertOne({
       enviado: false,
@@ -106,7 +106,7 @@ export class FichajesDatabase {
     nombre: string,
     dni: string,
   ) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const fichajesCollection = db.collection<FichajeDto>("fichajes");
     const resInsert = await fichajesCollection.insertOne({
       enviado: false,
@@ -124,7 +124,7 @@ export class FichajesDatabase {
   }
 
   async getFichajesDia(uid: string, fecha: Date) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const fichajesCollection = db.collection<FichajeDto>("fichajes");
     const startOfDay = new Date(fecha);
     startOfDay.setHours(0, 0, 0, 0);
@@ -146,7 +146,7 @@ export class FichajesDatabase {
   }
 
   async getFichajesSincro() {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const fichajesCollection = db.collection<FichajeDto>("fichajes");
 
     return await fichajesCollection.find({ enviado: false }).toArray();
@@ -279,7 +279,7 @@ export class FichajesDatabase {
   }
 
   async insertarFichajesHit(fichajes: FichajeDto[]) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const fichajesCollection = db.collection<FichajeDto>("fichajes");
 
     try {
@@ -301,7 +301,7 @@ export class FichajesDatabase {
   }
 
   async getFichajesByIdSql(idSql: number, validado: boolean) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const fichajesCollection = db.collection<FichajeDto>("fichajes");
 
     return await fichajesCollection
@@ -311,7 +311,7 @@ export class FichajesDatabase {
   }
 
   async getFichajesByUid(uid: string, fechaInicio: Date, fechaFinal: Date) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const fichajesCollection = db.collection<FichajeDto>("fichajes");
 
     return await fichajesCollection
@@ -331,7 +331,7 @@ export class FichajesDatabase {
     fechaInicio: Date,
     fechaFinal: Date,
   ) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const fichajesCollection = db.collection<FichajeDto>("fichajes");
 
     return await fichajesCollection
@@ -351,7 +351,7 @@ export class FichajesDatabase {
     final: DateTime,
     uid: string,
   ) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const fichajesCollection = db.collection<FichajeDto>("fichajes");
 
     return await fichajesCollection
@@ -370,7 +370,7 @@ export class FichajesDatabase {
   }
 
   async updateFichaje(id: string, validado: boolean) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const anuncios = db.collection("fichajes");
     let idEnviar = null;
     if (id?.length === 24) {
@@ -393,7 +393,7 @@ export class FichajesDatabase {
   }
 
   async getPendientesTrabajadorDia(idExterno: number, fecha: DateTime) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const fichajes = db.collection<FichajeDto>("fichajes");
 
     return await fichajes.findOne({
@@ -407,7 +407,7 @@ export class FichajesDatabase {
 
   // Solo para propósitos de rectificación general
   async getAllFichajes() {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const fichajes = db.collection<FichajeDto>("fichajes");
 
     // Solo el último mes (campo "hora")
@@ -422,7 +422,7 @@ export class FichajesDatabase {
 
   // Solo para propósitos de rectificación general. (Borrar primero todo y luego insertar)
   async setAllFichajes(fichajes: FichajeDto[]) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const fichajesCollection = db.collection<FichajeDto>("fichajes");
 
     await fichajesCollection.deleteMany({});
@@ -430,7 +430,7 @@ export class FichajesDatabase {
   }
 
   async validarFichajesAntiguos(inicioSemanaAnterior: DateTime): Promise<any> {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const fichajes = db.collection<FichajeDto>("fichajes");
 
     const response = fichajes.updateMany(
@@ -443,7 +443,7 @@ export class FichajesDatabase {
     return response;
   }
   async getFichajes(idSql: number) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const fichajesCollection = db.collection<FichajeDto>("fichajes");
 
     return await fichajesCollection

@@ -10,7 +10,7 @@ export class MantenimientoController {
   @Post("getEstado")
   async getEstado() {
     try {
-      const db = (await this.mongoDbService.getConexion()).db("soluciones");
+      const db = (await this.mongoDbService.getConexion()).db();
       const mantenimientoCollection =
         db.collection<MantenimientoDto>("mantenimiento");
       const resEstado = await mantenimientoCollection.findOne({
@@ -29,7 +29,7 @@ export class MantenimientoController {
   @UseGuards(SchedulerGuard)
   async activarMantenimiento() {
     try {
-      const db = (await this.mongoDbService.getConexion()).db("soluciones");
+      const db = (await this.mongoDbService.getConexion()).db();
       const mantenimientoCollection =
         db.collection<MantenimientoDto>("mantenimiento");
       const resEstado = await mantenimientoCollection.updateOne(
@@ -51,7 +51,7 @@ export class MantenimientoController {
   @UseGuards(SchedulerGuard)
   async desactivarMantenimiento() {
     try {
-      const db = (await this.mongoDbService.getConexion()).db("soluciones");
+      const db = (await this.mongoDbService.getConexion()).db();
       const mantenimientoCollection =
         db.collection<MantenimientoDto>("mantenimiento");
       const resEstado = await mantenimientoCollection.updateOne(

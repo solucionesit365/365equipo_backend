@@ -9,7 +9,7 @@ export class AusenciasDatabase {
   constructor(private readonly mongoDbService: MongoService) {}
 
   async nuevaAusencia(ausencia: AusenciaInterface) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const ausenciasCollection = db.collection<AusenciaInterface>("ausencias");
 
     const resInsert = await ausenciasCollection.insertOne(ausencia);
@@ -20,7 +20,7 @@ export class AusenciasDatabase {
   }
 
   async deleteAusencia(idAusencia: string) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const ausenciasCollection = db.collection<AusenciaInterface>("ausencias");
 
     const resDelete = await ausenciasCollection.deleteOne({
@@ -36,7 +36,7 @@ export class AusenciasDatabase {
     nuevaFechaFinal: Date,
     tipo: string,
   ) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const collection = db.collection("cuadrantes2");
 
     // Eliminar cuadrantes que ya no caen dentro del nuevo rango de fechas
@@ -53,7 +53,7 @@ export class AusenciasDatabase {
   }
 
   async updateAusencia(ausencia: AusenciaInterface) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const ausenciasCollection = db.collection<AusenciaInterface>("ausencias");
 
     // Verificar si la ausencia tiene 'tienda' como null
@@ -88,7 +88,7 @@ export class AusenciasDatabase {
   }
 
   async updateAusenciaResto(ausencia: AusenciaInterface) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const ausenciasCollection = db.collection<AusenciaInterface>("ausencias");
 
     // Verificar si la ausencia tiene 'tienda' como null
@@ -124,7 +124,7 @@ export class AusenciasDatabase {
   }
 
   async getAusencias() {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const ausenciasCollection = db.collection<AusenciaInterface>("ausencias");
 
     const respAusencia = await ausenciasCollection.find({}).toArray();
@@ -133,7 +133,7 @@ export class AusenciasDatabase {
   }
 
   async getAusenciasIntervalo(fechaInicio: DateTime, fechaFinal: DateTime) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const ausenciasCollection = db.collection<AusenciaInterface>("ausencias");
 
     // Convertir fechas de DateTime a Date de JS si es necesario
@@ -157,14 +157,14 @@ export class AusenciasDatabase {
   }
 
   async getAusenciasById(idAusencia: ObjectId) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const ausenciasCollection = db.collection<AusenciaInterface>("ausencias");
 
     return await ausenciasCollection.findOne({ _id: idAusencia });
   }
 
   async getAusenciasSincro() {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const ausenciasCollection = db.collection<AusenciaInterface>("ausencias");
 
     const respAusencia = await ausenciasCollection
@@ -175,7 +175,7 @@ export class AusenciasDatabase {
   }
 
   async marcarComoEnviada(id: ObjectId) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const ausenciasCollection = db.collection<AusenciaInterface>("ausencias");
 
     const respAusencia = await ausenciasCollection.updateOne(

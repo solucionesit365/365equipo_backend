@@ -11,7 +11,7 @@ export class videosFormacion365Mongo {
   constructor(private readonly mongoDbService: MongoService) {}
 
   async nuevoVideo(video: videosFormacion365Interface) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const videosCollect =
       db.collection<videosFormacion365Interface>("videosFormacion");
 
@@ -23,7 +23,7 @@ export class videosFormacion365Mongo {
   }
 
   async nuevoVistoVideo(videos: videosVistosFormacion365Interface) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const videosCollect = db.collection<videosVistosFormacion365Interface>(
       "videosVistosFormacion",
     );
@@ -36,7 +36,7 @@ export class videosFormacion365Mongo {
   }
 
   async getVideos() {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const videosCollect =
       db.collection<videosFormacion365Interface>("videosFormacion");
     const response = await videosCollect.find({}).toArray();
@@ -45,7 +45,7 @@ export class videosFormacion365Mongo {
   }
 
   async getVideosVistos() {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const videosCollect = db.collection<videosVistosFormacion365Interface>(
       "videosVistosFormacion",
     );
@@ -55,7 +55,7 @@ export class videosFormacion365Mongo {
   }
 
   async findVideoByIdVideo(nombre: string, idVideo: string) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const videosCollect = db.collection<videosVistosFormacion365Interface>(
       "videosVistosFormacion",
     );
@@ -64,7 +64,7 @@ export class videosFormacion365Mongo {
   }
 
   async updatevideo(video: videosFormacion365Interface) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const videosCollect =
       db.collection<videosFormacion365Interface>("videosFormacion");
 
@@ -85,7 +85,7 @@ export class videosFormacion365Mongo {
   }
 
   async deleteVideo(_id: string) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const videosCollect =
       db.collection<videosFormacion365Interface>("videosFormacion");
 
@@ -97,7 +97,7 @@ export class videosFormacion365Mongo {
   }
 
   async incrementarContadorViews(videoId: string) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const videosCollect =
       db.collection<videosFormacion365Interface>("videosFormacion");
 
@@ -112,7 +112,7 @@ export class videosFormacion365Mongo {
   }
 
   async views() {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const videosCollect =
       db.collection<videosFormacion365Interface>("videosFormacion");
 
@@ -124,7 +124,7 @@ export class videosFormacion365Mongo {
   }
 
   async getVideosByCategoria(categoria: string, idTienda: number) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const videosCollect =
       db.collection<videosFormacion365Interface>("videosFormacion");
     const response = await videosCollect

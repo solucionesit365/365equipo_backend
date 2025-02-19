@@ -10,7 +10,7 @@ export class ChatDatabase {
   constructor(private readonly mongoDbService: MongoService) {}
 
   async getMessagesByContact(contactId: number): Promise<Chat[]> {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const chatCollection = db.collection<Chat>("chat");
     return await chatCollection
       .find({
@@ -20,7 +20,7 @@ export class ChatDatabase {
   }
 
   async saveMessage(mensajes: Chat): Promise<Chat[]> {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const chatCollection = db.collection<Chat>("chat");
     mensajes.createdAt = DateTime.now().toJSDate();
     const result = await chatCollection.insertOne(mensajes);
@@ -28,7 +28,7 @@ export class ChatDatabase {
   }
 
   async markMessageAsRead(mensajes: { ids: string[] }) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const chatCollection = db.collection<Chat>("chat");
 
     // Convierte los ids de string a ObjectId
