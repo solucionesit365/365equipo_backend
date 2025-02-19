@@ -14,9 +14,9 @@ export class MongoService {
     };
 
     if (process.env.ENTORNO === "test") {
-      uri = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@${mongoHost}/365equipo_test`;
+      uri = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@${mongoHost}/365equipo_test?authSource=admin`;
     } else {
-      uri = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@${mongoHost}/365equipo`;
+      uri = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@${mongoHost}/365equipo?authSource=admin`;
     }
 
     const client = new MongoClient(uri, options);
