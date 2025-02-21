@@ -23,7 +23,7 @@ export class TiendaDatabaseService {
   }
 
   async geTiendas2() {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const tiendasResponse = db.collection<Tiendas2>("tiendas");
     const respSolicitudes = await tiendasResponse.find({}).toArray();
 
