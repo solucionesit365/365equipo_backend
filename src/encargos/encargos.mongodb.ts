@@ -8,7 +8,7 @@ export class EncargosDatabase {
   constructor(private readonly mongoDbService: MongoService) {}
 
   async newEncargo(encargo: EncargosInterface) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const encargos = db.collection<EncargosInterface>("encargos");
 
     const resInsert = await encargos.insertOne(encargo);
@@ -18,14 +18,14 @@ export class EncargosDatabase {
   }
 
   async getEncargos(idTienda: number) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const encargos = db.collection<EncargosInterface>("encargos");
 
     return await encargos.find({ idTienda: idTienda }).toArray();
   }
 
   async updateEncargo(encargo: EncargosInterface) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const auditoriasCollection = db.collection<EncargosInterface>("encargos");
 
     const response = await auditoriasCollection.updateOne(
@@ -44,7 +44,7 @@ export class EncargosDatabase {
   }
 
   async getAllEncargos() {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const encargos = db.collection<EncargosInterface>("encargos");
     return await encargos.find().toArray();
   }

@@ -9,7 +9,7 @@ export class DistribucionMensajesDatabase {
   constructor(private readonly mongoDbService: MongoService) {}
 
   async insertarMensajeDB(mensaje: DistribucionMensajes) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const disMensajesCollection = db.collection<DistribucionMensajes>(
       "distribucionMensajes",
     );
@@ -22,7 +22,7 @@ export class DistribucionMensajesDatabase {
   }
 
   async getAllMensajeDB() {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const disMensajesCollection = db.collection<DistribucionMensajes>(
       "distribucionMensajes",
     );
@@ -33,7 +33,7 @@ export class DistribucionMensajesDatabase {
   }
 
   async getOneMessage() {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const disMensajesCollection = db.collection<DistribucionMensajes>(
       "distribucionMensajes",
     );
@@ -42,7 +42,7 @@ export class DistribucionMensajesDatabase {
   }
 
   async updateOneMensajes(id: string, activo: boolean) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const disMensajesCollection = db.collection<DistribucionMensajes>(
       "distribucionMensajes",
     );
@@ -59,7 +59,7 @@ export class DistribucionMensajesDatabase {
   }
 
   async deleteMessage(id: string) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const disMensajesCollection = db.collection<DistribucionMensajes>(
       "distribucionMensajes",
     );
@@ -72,7 +72,7 @@ export class DistribucionMensajesDatabase {
   }
 
   async updateMensajeforDate(fechaInicio?: Date, fechaFin?: Date) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const disMensajesCollection = db.collection<DistribucionMensajes>(
       "distribucionMensajes",
     );

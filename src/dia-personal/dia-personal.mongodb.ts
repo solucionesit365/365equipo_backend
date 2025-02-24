@@ -10,7 +10,7 @@ export class diaPersonalMongo {
   //Nueva solicitud de dia personal
   async nuevaSolicitudDiaPersonal(diaPersonal: DiaPersonal) {
     diaPersonal._id = new ObjectId();
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const solicitudDiaPersonalCollection =
       db.collection<DiaPersonal>("diaPersonal");
     const resInsert = await solicitudDiaPersonalCollection.insertOne(
@@ -22,7 +22,7 @@ export class diaPersonalMongo {
 
   //Mostrar todas las solicitudes de los dias personales de los trabajadores
   async getSolicitudes(year: number) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const solicitudDiaPersonalCollection =
       db.collection<DiaPersonal>("diaPersonal");
     const respSolicitudes = await solicitudDiaPersonalCollection
@@ -34,7 +34,7 @@ export class diaPersonalMongo {
 
   //Mostrar Solicitudes de los dias personales de el trabajador por idSql
   async getSolicitudesTrabajadorSqlId(idBeneficiario: number, year: number) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const solicitudDiaPersonalCollection =
       db.collection<DiaPersonal>("diaPersonal");
     // const startDate = DateTime.local(year, 1, 1).toFormat("dd/MM/yyyy");
@@ -48,7 +48,7 @@ export class diaPersonalMongo {
   }
 
   async getSolicitudesById(_id: string) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const solicitudDiaPersonalCollection =
       db.collection<DiaPersonal>("diaPersonal");
 
@@ -63,7 +63,7 @@ export class diaPersonalMongo {
     idAppResponsable: string,
     year: number,
   ) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const solicitudDiaPersonalCollection =
       db.collection<DiaPersonal>("diaPersonal");
     const respSolicitudes = await solicitudDiaPersonalCollection
@@ -75,7 +75,7 @@ export class diaPersonalMongo {
 
   //Borrar solicitud de vacaciones
   async borrarSolicitud(_id: string) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const solicitudDiaPersonalCollection =
       db.collection<DiaPersonal>("diaPersonal");
 
@@ -87,7 +87,7 @@ export class diaPersonalMongo {
 
   //Actualizar estado de la solicitud de Vacaciones
   async updateSolicitudDiaPersonalEstado(diaPersonal: DiaPersonal) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const solicitudDiaPersonalCollection =
       db.collection<DiaPersonal>("diaPersonal");
 
@@ -111,7 +111,7 @@ export class diaPersonalMongo {
   async haySolicitudesParaBeneficiarioDiaPersonal(
     idBeneficiario: number,
   ): Promise<boolean> {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const solicitudDiaPersonalCollection =
       db.collection<DiaPersonal>("diaPersonal");
 
@@ -127,7 +127,7 @@ export class diaPersonalMongo {
     idBeneficiario: number,
     idAppResponsable: string,
   ) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const solicitudDiaPersonalCollection =
       db.collection<DiaPersonal>("diaPersonal");
 

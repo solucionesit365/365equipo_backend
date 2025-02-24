@@ -15,7 +15,7 @@ export class AnunciosDatabaseService {
 
   //Eliminacion automatica de los anuncios por su caducidad
   private async deleteAnunciosCaducidad() {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const anuncios = db.collection<AnuncioDto>("anuncios");
 
     // Creando el índice TTL para la propiedad 'caducidad'
@@ -23,7 +23,7 @@ export class AnunciosDatabaseService {
   }
 
   async getAnuncios(idTienda: number) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const anuncios = db.collection<AnuncioDto>("anuncios");
 
     if (idTienda) {
@@ -35,7 +35,7 @@ export class AnunciosDatabaseService {
   }
 
   async addAnuncio(anuncio: AnuncioDto) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const anuncios = db.collection<AnuncioDto>("anuncios");
 
     const resInsert = await anuncios.insertOne(anuncio);
@@ -45,7 +45,7 @@ export class AnunciosDatabaseService {
   }
 
   async updateAnuncio(anuncio: UpdateAnuncioDto) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const anuncios = db.collection<AnuncioDto>("anuncios");
 
     const resUpdate = await anuncios.updateOne(
@@ -74,7 +74,7 @@ export class AnunciosDatabaseService {
   }
 
   async deleteAnuncio(_id: string) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const anuncios = db.collection<AnuncioDto>("anuncios");
 
     const resDelete = await anuncios.deleteOne({
@@ -85,7 +85,7 @@ export class AnunciosDatabaseService {
   }
 
   // async guardarOfertaAnuncio(ofertas: OfertasAnuncios) {
-  //   const db = (await this.mongoDbService.getConexion()).db("soluciones");
+  //   const db = (await this.mongoDbService.getConexion()).db();
   //   const anunciosOfertas = db.collection<OfertasAnuncios>("ofertasAnuncios");
   //   const resInsert = await anunciosOfertas.insertOne(ofertas);
   //   if (resInsert.acknowledged) return resInsert.insertedId;
@@ -94,7 +94,7 @@ export class AnunciosDatabaseService {
   // }
 
   async getAnuncioById(_id: string) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const anuncios = db.collection<AnuncioDto>("anuncios");
 
     try {

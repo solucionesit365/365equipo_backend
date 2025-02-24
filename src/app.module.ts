@@ -57,8 +57,8 @@ import { QuestionCategoryModule } from "./question-category/question-category.mo
 import { FormacionModule } from "./formacion/formacion.module";
 import { QuestionnaireModule } from "./questionnaire/questionnaire.module";
 import { VisionModule } from "./vision/vision.module";
-import { LoggerModule } from './logger/logger.module';
-import { ParametrosModule } from './parametros/parametros.module';
+import { LoggerModule } from "./logger/logger.module";
+import { ParametrosModule } from "./parametros/parametros.module";
 
 @Module({
   imports: [

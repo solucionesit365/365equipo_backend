@@ -1,6 +1,11 @@
 import { Injectable } from "@nestjs/common";
 import { Auth, getAuth, UserRecord } from "firebase-admin/auth";
-import { App, initializeApp } from "firebase-admin/app";
+import {
+  App,
+  initializeApp,
+  cert,
+  applicationDefault,
+} from "firebase-admin/app";
 import { getStorage, Storage } from "firebase-admin/storage";
 
 @Injectable()
@@ -10,7 +15,17 @@ export class FirebaseService {
   public storage: Storage = null;
 
   constructor() {
-    this.app = initializeApp();
+    if (process.env.FIREBASE_CONFIG) {
+      const firebaseConfig = JSON.parse(process.env.FIREBASE_CONFIG);
+      this.app = initializeApp({
+        credential: cert(firebaseConfig),
+      });
+    } else {
+      this.app = initializeApp({
+        credential: applicationDefault(),
+      });
+    }
+
     this.auth = getAuth(this.app);
     this.storage = getStorage(this.app);
   }

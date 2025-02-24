@@ -13,7 +13,7 @@ export class EvaluacionesDatabase {
   constructor(private readonly mongoDbService: MongoService) {}
 
   async addplantilla(plantilla: CreateEvaluacionesInterfaceDto) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const evaluacionesCollect =
       db.collection<CreateEvaluacionesInterfaceDto>("evaluaciones");
 
@@ -24,7 +24,7 @@ export class EvaluacionesDatabase {
     throw Error("No se ha podido crear la nueva plantilla");
   }
   async getPlantillas(tipo: string) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const evaluacionesCollect =
       db.collection<MostrarEvaluacionDto>("evaluaciones");
     const response = await evaluacionesCollect.find({ tipo }).toArray();
@@ -33,7 +33,7 @@ export class EvaluacionesDatabase {
   }
 
   async getPlantillasAdmin() {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const evaluacionesCollect =
       db.collection<MostrarEvaluacionDto>("evaluaciones");
     const response = await evaluacionesCollect.find({}).toArray();
@@ -42,7 +42,7 @@ export class EvaluacionesDatabase {
   }
 
   async getEvaluacionAdminRespondidas(idSql: number, año: number) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const evaluacionesCollect = db.collection<MostrarEvaluacionDto>(
       "evaluacionesRespuestas",
     );
@@ -57,7 +57,7 @@ export class EvaluacionesDatabase {
   }
 
   async getEvaluaciones() {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const evaluacionesCollect = db.collection<MostrarEvaluacionDto>(
       "evaluacionesRespuestas",
     );
@@ -67,7 +67,7 @@ export class EvaluacionesDatabase {
   }
 
   async getEvaluacionById(_id: string) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const auditoriasCollection =
       db.collection<MostrarEvaluacionDto>("evaluaciones");
     const respAuditorias = await auditoriasCollection
@@ -77,7 +77,7 @@ export class EvaluacionesDatabase {
   }
 
   async deletePlantillaAdmin(_id: string) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const evaluacionesCollect =
       db.collection<MostrarEvaluacionDto>("evaluaciones");
     const respEvaluacion = await evaluacionesCollect.deleteOne({
@@ -88,7 +88,7 @@ export class EvaluacionesDatabase {
   }
 
   async addEvaluacion(evaluacion: CreateEvaluacionesInterfaceDto) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const evaluacionesCollect = db.collection<CreateEvaluacionesInterfaceDto>(
       "evaluacionesRespuestas",
     );
@@ -99,7 +99,7 @@ export class EvaluacionesDatabase {
   }
 
   async getEvaluados(idSql: number, año: number) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const evaluacionesCollect = db.collection<MostrarEvaluacionDto>(
       "evaluacionesRespuestas",
     );
@@ -115,7 +115,7 @@ export class EvaluacionesDatabase {
   }
 
   async getEvaluadosAdminTiendas(tienda: number, año: number) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const evaluacionesCollect = db.collection<MostrarEvaluacionDto>(
       "evaluacionesRespuestas",
     );
@@ -132,7 +132,7 @@ export class EvaluacionesDatabase {
 
   //add ILUO
   async addILUO(plantilla: CrearIluoInterfaceDto) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const iluoCollect = db.collection<CrearIluoInterfaceDto>("iluo");
 
     const resInsert = await iluoCollect.insertOne(plantilla);
@@ -144,7 +144,7 @@ export class EvaluacionesDatabase {
 
   // get ILUO
   async getPlantillasILUO(plantillaAsociada: string) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const iluoCollect = db.collection<MostrarIluoInterfaceDto>("iluo");
     const response = await iluoCollect.find({ plantillaAsociada }).toArray();
 
@@ -153,7 +153,7 @@ export class EvaluacionesDatabase {
 
   //add respuestas iluo
   async addILUORespuestas(iluo: CrearIluoInterfaceDto) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const iluoCollect = db.collection<CrearIluoInterfaceDto>("iluoRespuestas");
 
     const response = await iluoCollect.insertOne(iluo);
@@ -163,7 +163,7 @@ export class EvaluacionesDatabase {
 
   //getILUO respuestas
   async getILUORespuestas(idSql: number, año: number) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const evaluacionesCollect =
       db.collection<MostrarIluoInterfaceDto>("iluoRespuestas");
 
@@ -178,7 +178,7 @@ export class EvaluacionesDatabase {
   }
 
   async updateFirmaEvaluado(_id: string, firmaEvaluado: string) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const evaluacionesCollect = db.collection<MostrarEvaluacionDto>(
       "evaluacionesRespuestas",
     );

@@ -8,7 +8,7 @@ export class ArchivoDigitalDatabase {
   constructor(private readonly mongoDbService: MongoService) {}
 
   async nuevoArchivo(archivo: ArchivoDigitalInterface) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const archivosDigitalCollection =
       db.collection<ArchivoDigitalInterface>("archivoDigital");
 
@@ -20,7 +20,7 @@ export class ArchivoDigitalDatabase {
   }
 
   async getarchivos() {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const archivosDigitalCollection =
       db.collection<ArchivoDigitalInterface>("archivoDigital");
     const respArchivos = await archivosDigitalCollection.find({}).toArray();
@@ -30,7 +30,7 @@ export class ArchivoDigitalDatabase {
 
   //Eliminar
   async deleteArchivo(_id: string) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const archivosDigitalCollection =
       db.collection<ArchivoDigitalInterface>("archivoDigital");
 
@@ -43,7 +43,7 @@ export class ArchivoDigitalDatabase {
 
   //Filtros
   async getArchivosByPropietario(propietario: number) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const archivosDigitalCollection =
       db.collection<ArchivoDigitalInterface>("archivoDigital");
     const respArchivos = await archivosDigitalCollection
@@ -54,7 +54,7 @@ export class ArchivoDigitalDatabase {
   }
 
   async getArchivosByTipo(tipo: string) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const archivosDigitalCollection =
       db.collection<ArchivoDigitalInterface>("archivoDigital");
     const respArchivos = await archivosDigitalCollection
@@ -65,7 +65,7 @@ export class ArchivoDigitalDatabase {
   }
 
   async getArchivosByCreación(creacion: Date) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const archivosDigitalCollection =
       db.collection<ArchivoDigitalInterface>("archivoDigital");
     const respArchivos = await archivosDigitalCollection
@@ -77,7 +77,7 @@ export class ArchivoDigitalDatabase {
 
   //Ver archivos trabajadores
   async getArchivosByPropietarioAndTipo(propietario: number, tipo: string) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const archivosDigitalCollection =
       db.collection<ArchivoDigitalInterface>("archivoDigital");
     const respArchivos = await archivosDigitalCollection

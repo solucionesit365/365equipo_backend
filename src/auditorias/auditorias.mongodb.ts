@@ -11,7 +11,7 @@ export class AuditoriaDatabase {
   constructor(private readonly mongoDbService: MongoService) {}
 
   async nuevaAuditoria(auditorias: AuditoriasInterface) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const auditoriasCollection =
       db.collection<AuditoriasInterface>("auditorias");
 
@@ -23,7 +23,7 @@ export class AuditoriaDatabase {
   }
 
   async getAuditorias() {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const auditoriasCollection =
       db.collection<AuditoriasInterface>("auditorias");
     const respAuditorias = await auditoriasCollection.find({}).toArray();
@@ -32,7 +32,7 @@ export class AuditoriaDatabase {
   }
 
   async getAuditoriasHabilitado(habilitado: boolean) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const auditoriasCollection =
       db.collection<AuditoriasInterface>("auditorias");
     const respAuditorias = await auditoriasCollection
@@ -43,7 +43,7 @@ export class AuditoriaDatabase {
   }
   //Habilitar auditoria
   async updateHabilitarAuditoria(auditorias: AuditoriasInterface) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const auditoriasCollection =
       db.collection<AuditoriasInterface>("auditorias");
     const respAuditorias = await auditoriasCollection.updateOne(
@@ -64,7 +64,7 @@ export class AuditoriaDatabase {
 
   //Deshabilitar auditoria
   async updateDeshabilitarAuditoria(auditorias: AuditoriasInterface) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const auditoriasCollection =
       db.collection<AuditoriasInterface>("auditorias");
     const respAuditorias = await auditoriasCollection.updateOne(
@@ -85,7 +85,7 @@ export class AuditoriaDatabase {
 
   //Respuestas auditorias
   async respuestasAuditorias(auditorias: AuditoriaRespuestas) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const auditoriasCollection = db.collection<AuditoriaRespuestas>(
       "auditoriasRespuestas",
     );
@@ -99,7 +99,7 @@ export class AuditoriaDatabase {
 
   //Ver Respuestas AuditoriasService
   async getRespuestasAuditorias(idAuditoria: string) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const auditoriasCollection = db.collection<AuditoriaRespuestas>(
       "auditoriasRespuestas",
     );
@@ -113,7 +113,7 @@ export class AuditoriaDatabase {
 
   //Mostrar auditorias por idTienda
   async getAuditoriasTienda(tienda: number, habilitado: boolean) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const auditoriasCollection =
       db.collection<AuditoriasInterface>("auditorias");
     const respAuditorias = await auditoriasCollection
@@ -124,7 +124,7 @@ export class AuditoriaDatabase {
   }
 
   async getAuditoriasTiendas(tienda: number) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const auditoriasCollection = db.collection<AuditoriaRespuestas>(
       "auditoriasRespuestas",
     );
@@ -137,7 +137,7 @@ export class AuditoriaDatabase {
 
   //Borrar auditoria
   async deleteAuditoria(auditorias: AuditoriasInterface) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const auditoriasCollection =
       db.collection<AuditoriasInterface>("auditorias");
     const respAuditorias = await auditoriasCollection.deleteOne({
@@ -148,7 +148,7 @@ export class AuditoriaDatabase {
 
   //Update auditoria
   async updateAuditoria(auditoria: AuditoriasInterface) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const auditoriasCollection =
       db.collection<AuditoriasInterface>("auditorias");
 
@@ -176,7 +176,7 @@ export class AuditoriaDatabase {
 
   //Update Auditoria Respuestas
   async updateAuditoriaRespuestas(auditoria: AuditoriaRespuestas) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const auditoriasCollection = db.collection<AuditoriaRespuestas>(
       "auditoriasRespuestas",
     );
@@ -196,7 +196,7 @@ export class AuditoriaDatabase {
   }
 
   async getAuditoriasById(auditoria: AuditoriasInterface) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const auditoriasCollection =
       db.collection<AuditoriasInterface>("auditorias");
     const respAuditorias = await auditoriasCollection

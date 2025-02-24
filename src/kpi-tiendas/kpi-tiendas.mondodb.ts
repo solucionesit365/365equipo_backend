@@ -9,7 +9,7 @@ export class KpiTiendasDatabase {
 
   async nuevoKPI(kpiTienda: KpiTiendasInterface) {
     kpiTienda._id = new ObjectId();
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const kpiTiendaCollection =
       db.collection<KpiTiendasInterface>("kpiTiendas");
     const resInsert = await kpiTiendaCollection.insertOne(kpiTienda);
@@ -17,7 +17,7 @@ export class KpiTiendasDatabase {
     throw Error("No se ha podido insertar la incidencia");
   }
   async getKPIS(semana: number, año: number, tienda: number) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const kpiTiendaCollection =
       db.collection<KpiTiendasInterface>("kpiTiendas");
 
@@ -29,7 +29,7 @@ export class KpiTiendasDatabase {
   }
 
   async getAllKPIs(semana: number, año: number) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const kpiTiendaCollection =
       db.collection<KpiTiendasInterface>("kpiTiendas");
 
@@ -39,7 +39,7 @@ export class KpiTiendasDatabase {
   }
 
   async borrarKPITienda(kpiTienda: KpiTiendasInterface) {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const kpiTiendaCollection =
       db.collection<KpiTiendasInterface>("kpiTiendas");
     const respKPIS = await kpiTiendaCollection.deleteOne({

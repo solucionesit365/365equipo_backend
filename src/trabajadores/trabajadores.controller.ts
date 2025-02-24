@@ -308,4 +308,15 @@ export class TrabajadoresController {
   async enviarEmailAuto(@Body() req: any, @User() user: UserRecord) {
     return await this.trabajadorInstance.enviarEmailAuto(req, user);
   }
+
+  @UseGuards(AuthGuard)
+  @Post("restaurar")
+  async restaurarTrabajador(@Body() req: any) {
+    if (req.empresaId) {
+      req.idEmpresa = req.empresaId;
+      delete req.empresaId;
+    }
+
+    return await this.trabajadorInstance.restaurarTrabajador(req);
+  }
 }
