@@ -20,4 +20,13 @@ export class NotificacionHorasExtrasMongoService {
 
     return await notificacionesCollection.find({}).toArray();
   }
+
+  async getNotificacionHorasExtrasByIdSql(idSql: number) {
+    const db = (await this.mongoDbService.getConexion()).db();
+    const notificacionesCollection = db.collection("notificacionesHorasExtras");
+
+    return await notificacionesCollection
+      .find({ creadorIdsql: idSql })
+      .toArray();
+  }
 }

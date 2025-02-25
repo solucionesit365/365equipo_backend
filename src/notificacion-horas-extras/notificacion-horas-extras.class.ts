@@ -19,4 +19,10 @@ export class NotificacionHorasExtrasClass {
   async getAllNotificacionesHorasExtras() {
     return await this.shNotificacionhorasExtras.getAllNotificacionesHorasExtras();
   }
+
+  async getNotificacionHorasExtrasByIdSql(idSql: number) {
+    return await this.shNotificacionhorasExtras.getNotificacionHorasExtrasByIdSql(
+      idSql,
+    );
+  }
 }
