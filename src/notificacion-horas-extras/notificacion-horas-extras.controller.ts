@@ -16,6 +16,11 @@ export class NotificacionHorasExtrasController {
       return this.shNotificacionhorasExtras.createNotificacionHorasExtras(data);
     } catch (error) {
       console.log(error);
+      return {
+        ok: false,
+        message: "Error al crear la notificacion de horas extras",
+        error: error.message,
+      };
     }
   }
 
@@ -26,6 +31,11 @@ export class NotificacionHorasExtrasController {
       return this.shNotificacionhorasExtras.getAllNotificacionesHorasExtras();
     } catch (error) {
       console.log(error);
+      return {
+        ok: false,
+        message: "Error al obtener todas las notificaciones de horas extras",
+        error: error.message,
+      };
     }
   }
   @UseGuards(AuthGuard)
@@ -39,6 +49,11 @@ export class NotificacionHorasExtrasController {
       );
     } catch (error) {
       console.log(error);
+      return {
+        ok: false,
+        message: "Error al obtener notificaciones de horas extras",
+        error: error.message,
+      };
     }
   }
 }
