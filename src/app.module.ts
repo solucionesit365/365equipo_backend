@@ -58,6 +58,8 @@ import { FormacionModule } from "./formacion/formacion.module";
 import { QuestionnaireModule } from "./questionnaire/questionnaire.module";
 import { VisionModule } from "./vision/vision.module";
 import { LoggerModule } from "./logger/logger.module";
+import { NotificacionHorasExtrasController } from './notificacion-horas-extras/notificacion-horas-extras.controller';
+import { NotificacionHorasExtrasModule } from './notificacion-horas-extras/notificacion-horas-extras.module';
 
 @Module({
   imports: [
@@ -120,7 +122,8 @@ import { LoggerModule } from "./logger/logger.module";
     QuestionnaireModule,
     VisionModule,
     LoggerModule,
+    NotificacionHorasExtrasModule,
   ],
-  controllers: [AppController, KpiTiendasController],
+  controllers: [AppController, KpiTiendasController, NotificacionHorasExtrasController],
 })
 export class AppModule {}
