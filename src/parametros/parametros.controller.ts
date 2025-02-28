@@ -7,8 +7,7 @@ export class ParametrosController {
   constructor(public readonly parametrosService: ParametrosService) {}
 
   @Get("getParametros")
-  async getParametros() {
-    return this.parametrosService.getParametros();
+  async getParametros(name: string): Promise<any> {
+    return this.parametrosService.getParametros(name);
   }
 }
-

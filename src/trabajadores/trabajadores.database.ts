@@ -111,7 +111,7 @@ export class TrabajadorDatabaseService {
           nombre: "Filapeña S.L.U",
         },
         {
-          empresaID: "fb77685d6f90-ef11-8a6b-7c1e5236b0db",
+          empresaID: "fb77685d-6f90-ef11-8a6b-7c1e5236b0db",
           nombre: "Horreols S.L.U",
         },
         {
@@ -129,7 +129,9 @@ export class TrabajadorDatabaseService {
       ];
 
       // Obtener parámetros (incluida la fecha de sincronización)
-      const parametros = await this.parametrosService.getParametros();
+      const parametros = await this.parametrosService.getParametros(
+        "sincro_trabajadores",
+      );
       if (!parametros[0].lastSyncWorkers) {
         // Retornamos un array con el error para que el caller pueda iterar sin problemas.
         return [
@@ -175,53 +177,137 @@ export class TrabajadorDatabaseService {
   async crearTrabajadorOmne(
     reqTrabajador: CreateTrabajadorRequestDto,
   ): Promise<boolean> {
-    const newTrabajador = await this.prisma.trabajador.create({
-      data: {
-        dni: reqTrabajador.dni,
-        nombreApellidos: reqTrabajador.nombreApellidos,
-        displayName: reqTrabajador.displayName,
-        emails: reqTrabajador.emails,
-        direccion: reqTrabajador.direccion,
-        llevaEquipo: reqTrabajador.llevaEquipo,
-        tipoTrabajador: reqTrabajador.tipoTrabajador,
-        ciudad: reqTrabajador.ciudad,
-        telefonos: reqTrabajador.telefonos,
-        codigoPostal: reqTrabajador.codigoPostal,
-        cuentaCorriente: reqTrabajador.cuentaCorriente,
-        fechaNacimiento: reqTrabajador.fechaNacimiento,
-        nacionalidad: reqTrabajador.nacionalidad,
-        displayFoto: reqTrabajador.displayFoto,
-        excedencia: reqTrabajador.excedencia,
-        empresa: {
-          connect: { id: reqTrabajador.idEmpresa },
-        },
-        responsable: reqTrabajador.idResponsable
-          ? { connect: { id: reqTrabajador.idResponsable } }
-          : {},
-        nSeguridadSocial: reqTrabajador.nSeguridadSocial,
-        tienda: reqTrabajador.idTienda
-          ? { connect: { id: reqTrabajador.idTienda } }
-          : {},
-        roles: {
-          connect: reqTrabajador.arrayRoles.map((rol) => ({ id: rol })),
-        },
-      },
+    // 1. Buscar si ya existe el trabajador por DNI
+    const existingWorker = await this.prisma.trabajador.findUnique({
+      where: { dni: reqTrabajador.dni },
     });
 
-    await this.prisma.contrato2.create({
-      data: {
-        Trabajador: { connect: { id: newTrabajador.id } },
-        fechaAlta: reqTrabajador.contrato.fechaAlta,
-        fechaAntiguedad: reqTrabajador.contrato.fechaAntiguedad,
-        horasContrato: reqTrabajador.contrato.horasContrato,
-        inicioContrato: reqTrabajador.contrato.inicioContrato,
-        fechaBaja: reqTrabajador.contrato.fechaBaja,
-        finalContrato: reqTrabajador.contrato.finalContrato,
-      },
-    });
+    // 2. Si existe, hacemos un update; si no, creamos uno nuevo
+    if (existingWorker) {
+      console.log(
+        `[ACTUALIZANDO] Trabajador DNI: ${reqTrabajador.dni} | Nombre: ${reqTrabajador.nombreApellidos}`,
+      );
+      // Actualizamos datos del trabajador
+      const updatedTrabajador = await this.prisma.trabajador.update({
+        where: { dni: reqTrabajador.dni },
+        data: {
+          nombreApellidos: reqTrabajador.nombreApellidos,
+          displayName: reqTrabajador.displayName,
+          emails: reqTrabajador.emails,
+          direccion: reqTrabajador.direccion,
+          llevaEquipo: reqTrabajador.llevaEquipo,
+          tipoTrabajador: reqTrabajador.tipoTrabajador,
+          ciudad: reqTrabajador.ciudad,
+          telefonos: reqTrabajador.telefonos,
+          codigoPostal: reqTrabajador.codigoPostal,
+          cuentaCorriente: reqTrabajador.cuentaCorriente,
+          fechaNacimiento: reqTrabajador.fechaNacimiento,
+          nacionalidad: reqTrabajador.nacionalidad,
+          displayFoto: reqTrabajador.displayFoto,
+          excedencia: reqTrabajador.excedencia,
+          empresa: {
+            connect: { id: reqTrabajador.idEmpresa },
+          },
+          responsable: reqTrabajador.idResponsable
+            ? { connect: { id: reqTrabajador.idResponsable } }
+            : {},
+          nSeguridadSocial: reqTrabajador.nSeguridadSocial,
+          tienda: reqTrabajador.idTienda
+            ? { connect: { id: reqTrabajador.idTienda } }
+            : {},
+          roles: {
+            set: reqTrabajador.arrayRoles.map((rol) => ({ id: rol })),
+          },
+        },
+      });
+
+      // 3. Actualizar o crear el contrato
+      const existingContrato = await this.prisma.contrato2.findFirst({
+        where: { idTrabajador: updatedTrabajador.id },
+      });
+
+      if (existingContrato) {
+        // Hacemos update del contrato
+        await this.prisma.contrato2.update({
+          where: { id: existingContrato.id },
+          data: {
+            fechaAlta: reqTrabajador.contrato.fechaAlta,
+            fechaAntiguedad: reqTrabajador.contrato.fechaAntiguedad,
+            horasContrato: reqTrabajador.contrato.horasContrato,
+            inicioContrato: reqTrabajador.contrato.inicioContrato,
+            fechaBaja: reqTrabajador.contrato.fechaBaja,
+            finalContrato: reqTrabajador.contrato.finalContrato,
+          },
+        });
+      } else {
+        console.log(
+          `[CREANDO] Trabajador DNI: ${reqTrabajador.dni} | Nombre: ${reqTrabajador.nombreApellidos}`,
+        );
+        // Creamos un contrato nuevo
+        await this.prisma.contrato2.create({
+          data: {
+            Trabajador: { connect: { id: updatedTrabajador.id } },
+            fechaAlta: reqTrabajador.contrato.fechaAlta,
+            fechaAntiguedad: reqTrabajador.contrato.fechaAntiguedad,
+            horasContrato: reqTrabajador.contrato.horasContrato,
+            inicioContrato: reqTrabajador.contrato.inicioContrato,
+            fechaBaja: reqTrabajador.contrato.fechaBaja,
+            finalContrato: reqTrabajador.contrato.finalContrato,
+          },
+        });
+      }
+    } else {
+      // Si no existe el trabajador, creamos uno nuevo
+      const newTrabajador = await this.prisma.trabajador.create({
+        data: {
+          dni: reqTrabajador.dni,
+          nombreApellidos: reqTrabajador.nombreApellidos,
+          displayName: reqTrabajador.displayName,
+          emails: reqTrabajador.emails,
+          direccion: reqTrabajador.direccion,
+          llevaEquipo: reqTrabajador.llevaEquipo,
+          tipoTrabajador: reqTrabajador.tipoTrabajador,
+          ciudad: reqTrabajador.ciudad,
+          telefonos: reqTrabajador.telefonos,
+          codigoPostal: reqTrabajador.codigoPostal,
+          cuentaCorriente: reqTrabajador.cuentaCorriente,
+          fechaNacimiento: reqTrabajador.fechaNacimiento,
+          nacionalidad: reqTrabajador.nacionalidad,
+          displayFoto: reqTrabajador.displayFoto,
+          excedencia: reqTrabajador.excedencia,
+          empresa: {
+            connect: { id: reqTrabajador.idEmpresa },
+          },
+          responsable: reqTrabajador.idResponsable
+            ? { connect: { id: reqTrabajador.idResponsable } }
+            : {},
+          nSeguridadSocial: reqTrabajador.nSeguridadSocial,
+          tienda: reqTrabajador.idTienda
+            ? { connect: { id: reqTrabajador.idTienda } }
+            : {},
+          roles: {
+            connect: reqTrabajador.arrayRoles.map((rol) => ({ id: rol })),
+          },
+        },
+      });
+
+      // Creamos el contrato asociado al nuevo trabajador
+      await this.prisma.contrato2.create({
+        data: {
+          Trabajador: { connect: { id: newTrabajador.id } },
+          fechaAlta: reqTrabajador.contrato.fechaAlta,
+          fechaAntiguedad: reqTrabajador.contrato.fechaAntiguedad,
+          horasContrato: reqTrabajador.contrato.horasContrato,
+          inicioContrato: reqTrabajador.contrato.inicioContrato,
+          fechaBaja: reqTrabajador.contrato.fechaBaja,
+          finalContrato: reqTrabajador.contrato.finalContrato,
+        },
+      });
+    }
 
     return true;
   }
+
   // Función que une ambos procesos: obtener los trabajadores y guardarlos en la BD
   async sincronizarTrabajadores(): Promise<
     { message: string } | { error: string }
@@ -255,8 +341,7 @@ export class TrabajadorDatabaseService {
             nacionalidad: trabajador.codPaisNacionalidad,
             displayFoto: null,
             excedencia: false,
-            // Se asume que la empresa a conectar es fija o se mapea según la empresa de origen
-            idEmpresa: "a9357dca-f201-49b9-ae53-a7aba2f654c5",
+            idEmpresa: "a9357dca-f201-49b9-ae53-a7aba2f654c5", //POR DEFECTO ARRAZAOS
             idResponsable: null,
             nSeguridadSocial: trabajador.noAfiliacion,
             idTienda: null,
@@ -265,12 +350,22 @@ export class TrabajadorDatabaseService {
             arrayRoles: ["b3f04be2-35f5-46d0-842b-5be49014a2ef"],
             // Mapeo del contrato; ajusta según la estructura real
             contrato: {
-              fechaAlta: trabajador.altaContrato || new Date(),
-              fechaAntiguedad: trabajador.antiguedadEmpresa || new Date(),
-              horasContrato: trabajador.tipoContrato || 0,
-              inicioContrato: trabajador.altaContrato || new Date(),
-              fechaBaja: trabajador.bajaEmpresa || null,
-              finalContrato: trabajador.bajaEmpresa || null,
+              fechaAlta: trabajador.altaContrato
+                ? new Date(trabajador.altaContrato)
+                : new Date(),
+              fechaAntiguedad: trabajador.antiguedadEmpresa
+                ? new Date(trabajador.antiguedadEmpresa)
+                : new Date(),
+              horasContrato: trabajador.horassemana || 0,
+              inicioContrato: trabajador.altaContrato
+                ? new Date(trabajador.altaContrato)
+                : new Date(),
+              fechaBaja: trabajador.bajaEmpresa
+                ? new Date(trabajador.bajaEmpresa)
+                : null,
+              finalContrato: trabajador.bajaEmpresa
+                ? new Date(trabajador.bajaEmpresa)
+                : null,
             },
           };
 
@@ -289,6 +384,21 @@ export class TrabajadorDatabaseService {
       }
     }
 
+    const newSyncDate = new Date().toISOString();
+    try {
+      // Supongamos que en tu parametrosService tienes un método updateParametros o updateLastSyncWorkers
+      await this.parametrosService.updateParametros(
+        "sincro_trabajadores",
+        newSyncDate,
+      );
+      console.log(`Fecha de sincronización actualizada a: ${newSyncDate}`);
+    } catch (error) {
+      console.error(
+        "Error al actualizar la fecha de sincronización:",
+        error.message,
+      );
+      return { error: "Error al actualizar la fecha de sincronización." };
+    }
     return { message: "Sincronización completada" };
   }
 

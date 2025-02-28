@@ -5,8 +5,11 @@ import { ParametrosDatabase } from "./parametros.mongodb";
 @Injectable()
 export class ParametrosService {
   constructor(private readonly Database: ParametrosDatabase) {}
-  async getParametros() {
-    return await this.Database.getParametros();
+  async getParametros(name: string) {
+    return await this.Database.getParametros(name);
+  }
+
+  async updateParametros(name, parametros) {
+    return await this.Database.updateParametros(name, parametros);
   }
 }
-
