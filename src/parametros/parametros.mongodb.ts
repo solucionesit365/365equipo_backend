@@ -8,7 +8,7 @@ export class ParametrosDatabase {
   constructor(private readonly mongoDbService: MongoService) {}
 
   async getParametros() {
-    const db = (await this.mongoDbService.getConexion()).db("soluciones");
+    const db = (await this.mongoDbService.getConexion()).db();
     const parametrosCollection = db.collection<ParametrosDTO>("parametros");
     return await parametrosCollection.find().toArray();
   }

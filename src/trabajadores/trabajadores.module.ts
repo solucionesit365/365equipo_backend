@@ -6,11 +6,15 @@ import { EmailModule } from "../email/email.module";
 import { SolicitudVacacionesModule } from "../solicitud-vacaciones/solicitud-vacaciones.module";
 import { TrabajadoresController } from "./trabajadores.controller";
 import { DiaPersonalModule } from "../dia-personal/dia-personal.module";
+import { MBCTokenModule } from "src/bussinesCentral/services/mbctoken/mbctoken.service.module";
+import { ParametrosModule } from "src/parametros/parametros.module";
 
 @Module({
   imports: [
     PermisosModule,
     EmailModule,
+    MBCTokenModule,
+    ParametrosModule,
     forwardRef(() => SolicitudVacacionesModule),
     forwardRef(() => DiaPersonalModule),
   ],

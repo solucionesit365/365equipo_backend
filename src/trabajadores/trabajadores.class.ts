@@ -36,6 +36,10 @@ export class TrabajadorService {
     return await this.schTrabajadores.crearTrabajador(reqTrabajador);
   }
 
+  async guardarTrabajadoresOmne() {
+    return await this.schTrabajadores.guardarTrabajadoresOmne();
+  }
+
   async eliminarTrabajador(idSql: number) {
     try {
       return await this.schTrabajadores.deleteTrabajador(idSql);
@@ -137,93 +141,6 @@ export class TrabajadorService {
     if (resUser) return resUser;
     throw Error("No se ha podido obtener la información del usuario");
   }
-
-  // XXXX antes era hit, en el futuro será BC, por eso no la borro
-  // async sincronizarConXXXX() {
-  //   const usuariosApp = await this.getTrabajadores();
-  //   const usuariosHit = await this.descargarTrabajadoresHit();
-
-  //   const modificarEnApp = [];
-  //   const modificarEnHit = [];
-  //   const usuariosNuevos = [];
-  //   const arrayEliminar = [];
-
-  //   usuariosHit.forEach((usuarioHit) => {
-  //     const usuarioApp = usuariosApp.find(
-  //       (usuario) => usuario.id === usuarioHit.id,
-  //     );
-
-  //     if (usuarioApp) {
-  //       const camposApp = [
-  //         "nombreApellidos",
-  //         "displayName",
-  //         "direccion",
-  //         "ciudad",
-  //         "fechaNacimiento",
-  //         "nSeguridadSocial",
-  //         "codigoPostal",
-  //         "cuentaCorriente",
-  //       ];
-  //       const camposHit = [
-  //         "dni",
-  //         "inicioContrato",
-  //         "finalContrato",
-  //         "antiguedad",
-  //         "idEmpresa",
-  //       ];
-
-  //       let cambiosApp = false;
-  //       let cambiosHit = false;
-
-  //       camposApp.forEach((campo) => {
-  //         if (usuarioApp[campo] !== usuarioHit[campo]) {
-  //           cambiosApp = true;
-  //           return;
-  //         }
-  //       });
-
-  //       camposHit.forEach((campo) => {
-  //         if (usuarioApp[campo] !== usuarioHit[campo]) {
-  //           cambiosHit = true;
-  //           return;
-  //         }
-  //       });
-
-  //       if (cambiosApp) {
-  //         modificarEnHit.push(usuarioApp);
-  //       }
-
-  //       if (cambiosHit) {
-  //         modificarEnApp.push(usuarioHit);
-  //       }
-  //     } else {
-  //       usuariosNuevos.push(usuarioHit);
-  //     }
-  //   });
-
-  //   usuariosApp.forEach((usuarioApp) => {
-  //     const usuarioHit = usuariosHit.find(
-  //       (usuario) => usuario.id === usuarioApp.id,
-  //     );
-
-  //     if (!usuarioHit) {
-  //       arrayEliminar.push(usuarioApp);
-  //     }
-  //   });
-
-  //   await this.schTrabajadores.actualizarUsuarios(
-  //     usuariosNuevos,
-  //     modificarEnApp,
-  //   );
-
-  //   // Excluir usuario de test id: 999999
-  //   await this.schTrabajadores.eliminarUsuarios(arrayEliminar);
-
-  //   return {
-  //     totalModificarApp: modificarEnApp.length,
-  //     modificarEnApp,
-  //   };
-  // }
 
   async registrarUsuario(dni: string, password: string) {
     dni = dni.trim().toUpperCase();
