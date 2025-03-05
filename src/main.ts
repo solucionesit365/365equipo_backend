@@ -18,6 +18,7 @@ async function bootstrap() {
   app.enableCors({
     origin: [
       "http://localhost:8080",
+      "http://localhost:5173",
       "https://silema.web.app",
       "https://365equipo.com",
       "https://club365obrador.web.app",
