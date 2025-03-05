@@ -56,4 +56,59 @@ export class NotificacionHorasExtrasController {
       };
     }
   }
+
+  @UseGuards(AuthGuard)
+  @Post("updateNotificacionHorasExtrasRevision")
+  updateNotificacionHorasExtrasRevision(
+    @Body()
+    data: {
+      id: string;
+      horaExtraId: string;
+      revision?: boolean;
+    },
+  ) {
+    try {
+      // data.id, data.horaExtraId, data.revision, data.apagar
+      return this.shNotificacionhorasExtras.updateNotificacionHorasExtrasRevision(
+        data.id,
+        data.horaExtraId,
+        data,
+      );
+    } catch (error) {
+      console.log(error);
+      return {
+        ok: false,
+        message:
+          "Error al actualizar la notificacion de horas extras a revisar",
+        error: error.message,
+      };
+    }
+  }
+
+  @UseGuards(AuthGuard)
+  @Post("updateNotificacionHorasExtrasApagar")
+  updateNotificacionHorasExtrasApagar(
+    @Body()
+    data: {
+      id: string;
+      horaExtraId: string;
+      apagar?: boolean;
+    },
+  ) {
+    try {
+      // data.id, data.horaExtraId, data.revision, data.apagar
+      return this.shNotificacionhorasExtras.updateNotificacionHorasExtrasApagar(
+        data.id,
+        data.horaExtraId,
+        data,
+      );
+    } catch (error) {
+      console.log(error);
+      return {
+        ok: false,
+        message: "Error al actualizar la notificacion de horas extras a pagar",
+        error: error.message,
+      };
+    }
+  }
 }
