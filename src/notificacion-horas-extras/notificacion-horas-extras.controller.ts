@@ -68,7 +68,6 @@ export class NotificacionHorasExtrasController {
     },
   ) {
     try {
-      // data.id, data.horaExtraId, data.revision, data.apagar
       return this.shNotificacionhorasExtras.updateNotificacionHorasExtrasRevision(
         data.id,
         data.horaExtraId,
@@ -96,7 +95,6 @@ export class NotificacionHorasExtrasController {
     },
   ) {
     try {
-      // data.id, data.horaExtraId, data.revision, data.apagar
       return this.shNotificacionhorasExtras.updateNotificacionHorasExtrasApagar(
         data.id,
         data.horaExtraId,
