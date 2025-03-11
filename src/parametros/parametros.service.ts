@@ -10,6 +10,8 @@ export class ParametrosService {
   }
 
   async updateParametros(name, parametros) {
+    console.log(parametros);
+
     return await this.Database.updateParametros(name, parametros);
   }
 }

@@ -17,7 +17,7 @@ export class ParametrosDatabase {
     const parametrosCollection = db.collection<ParametrosDTO>("parametros");
     const result = await parametrosCollection.updateOne(
       { name: name },
-      { $set: { lastSyncWorkers: parametros.newSyncDate } },
+      { $set: { lastSyncWorkers: parametros } },
     );
 
     return result;

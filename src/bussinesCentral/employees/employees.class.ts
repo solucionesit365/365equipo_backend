@@ -9,7 +9,10 @@ export class EmployeesClass {
 
   async getEmployees() {
     try {
-      const token = await this.mbctokenService.getToken();
+      const token = await this.mbctokenService.getToken(
+        process.env.MBC_TOKEN_APPHITBC,
+        process.env.MBC_TOKEN_APPHITBC_CLIENT_SECRET,
+      );
 
       //get Employees ?$filter=number eq '4071'
       const response = await axios.get(

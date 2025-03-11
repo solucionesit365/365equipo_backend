@@ -154,7 +154,10 @@ export class FichajesDatabase {
 
   async enviarFichajesBC(fichajes: FichajeDto[]) {
     try {
-      const token = await this.mbctokenService.getToken();
+      const token = await this.mbctokenService.getToken(
+        process.env.MBC_TOKEN_CLIENTID,
+        process.env.MBC_TOKEN_CLIENT_SECRET,
+      );
 
       if (fichajes.length > 0) {
         for (let i = 0; i < fichajes.length; i += 1) {
@@ -219,8 +222,10 @@ export class FichajesDatabase {
 
   async getFichajesBC() {
     try {
-      const token = await this.mbctokenService.getToken();
-      console.log(token);
+      const token = await this.mbctokenService.getToken(
+        process.env.MBC_TOKEN_CLIENTID,
+        process.env.MBC_TOKEN_CLIENT_SECRET,
+      );
 
       // Obtener la fecha y hora actual en UTC
       const now = DateTime.utc();
@@ -253,7 +258,10 @@ export class FichajesDatabase {
   }
 
   async getNominas() {
-    const token = await this.mbctokenService.getToken();
+    const token = await this.mbctokenService.getToken(
+      process.env.MBC_TOKEN_CLIENTID,
+      process.env.MBC_TOKEN_CLIENT_SECRET,
+    );
 
     const response = await axios.get(
       `https://api.businesscentral.dynamics.com/v2.0/${process.env.MBC_TOKEN_TENANT}/Production/ODataV4/Company('${process.env.MBC_COMPANY_NAME_PROD}')/archivo`,

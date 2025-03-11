@@ -4,6 +4,7 @@ import { DateTime } from "luxon";
 import { Prisma } from "@prisma/client";
 import { ParametrosService } from "../parametros/parametros.service";
 import { MbctokenService } from "src/bussinesCentral/services/mbctoken/mbctoken.service";
+import { Tienda } from "src/tiendas/tiendas.class";
 import {
   CreateTrabajadorRequestDto,
   TrabajadorFormRequest,
@@ -16,6 +17,7 @@ export class TrabajadorDatabaseService {
     private prisma: PrismaService,
     private readonly parametrosService: ParametrosService,
     private readonly mbctokenService: MbctokenService,
+    private readonly tiendaInstance: Tienda,
   ) {}
 
   async crearTrabajador(reqTrabajador: CreateTrabajadorRequestDto) {
@@ -132,6 +134,10 @@ export class TrabajadorDatabaseService {
       const parametros = await this.parametrosService.getParametros(
         "sincro_trabajadores",
       );
+      console.log(
+        "Última fecha de sincronización: " + parametros[0].lastSyncWorkers,
+      );
+
       if (!parametros[0].lastSyncWorkers) {
         // Retornamos un array con el error para que el caller pueda iterar sin problemas.
         return [
@@ -140,7 +146,10 @@ export class TrabajadorDatabaseService {
       }
 
       // Obtener el token de autenticación
-      const token = await this.mbctokenService.getToken();
+      const token = await this.mbctokenService.getToken(
+        process.env.MBC_TOKEN_APPHITBC,
+        process.env.MBC_TOKEN_APPHITBC_CLIENT_SECRET,
+      );
       if (!token) {
         throw new Error("Error obteniendo el token de autenticación.");
       }
@@ -150,7 +159,7 @@ export class TrabajadorDatabaseService {
         empresas.map(async ({ empresaID, nombre }) => {
           try {
             const response = await axios.get(
-              `https://api.businesscentral.dynamics.com/v2.0/${process.env.MBC_TOKEN_TENANT}/${process.env.MCB_ENVIRONMENT_DEV2}/api/Miguel/365ObradorAPI/v1.0/companies(${empresaID})/perceptoresQuery?$filter=SystemModifiedAt gt ${parametros[0].lastSyncWorkers}`,
+              `https://api.businesscentral.dynamics.com/v2.0/${process.env.MBC_TOKEN_TENANT}/Production/api/Miguel/365ObradorAPI/v1.0/companies(${empresaID})/perceptoresQuery?$filter=SystemCreatedAt gt ${parametros[0].lastSyncWorkers}`,
               { headers: { Authorization: `Bearer ${token}` } },
             );
 
@@ -191,33 +200,9 @@ export class TrabajadorDatabaseService {
       const updatedTrabajador = await this.prisma.trabajador.update({
         where: { dni: reqTrabajador.dni },
         data: {
-          nombreApellidos: reqTrabajador.nombreApellidos,
-          displayName: reqTrabajador.displayName,
-          emails: reqTrabajador.emails,
-          direccion: reqTrabajador.direccion,
-          llevaEquipo: reqTrabajador.llevaEquipo,
-          tipoTrabajador: reqTrabajador.tipoTrabajador,
-          ciudad: reqTrabajador.ciudad,
-          telefonos: reqTrabajador.telefonos,
-          codigoPostal: reqTrabajador.codigoPostal,
-          cuentaCorriente: reqTrabajador.cuentaCorriente,
-          fechaNacimiento: reqTrabajador.fechaNacimiento,
-          nacionalidad: reqTrabajador.nacionalidad,
-          displayFoto: reqTrabajador.displayFoto,
-          excedencia: reqTrabajador.excedencia,
-          empresa: {
-            connect: { id: reqTrabajador.idEmpresa },
-          },
-          responsable: reqTrabajador.idResponsable
-            ? { connect: { id: reqTrabajador.idResponsable } }
-            : {},
-          nSeguridadSocial: reqTrabajador.nSeguridadSocial,
           tienda: reqTrabajador.idTienda
             ? { connect: { id: reqTrabajador.idTienda } }
             : {},
-          roles: {
-            set: reqTrabajador.arrayRoles.map((rol) => ({ id: rol })),
-          },
         },
       });
 
@@ -313,6 +298,7 @@ export class TrabajadorDatabaseService {
     { message: string } | { error: string }
   > {
     const resultados = await this.getTrabajadoresOmne();
+    const tiendas = await this.tiendaInstance.getTiendas();
 
     if (!Array.isArray(resultados)) {
       console.error("Error al obtener los resultados:", resultados);
@@ -325,6 +311,24 @@ export class TrabajadorDatabaseService {
       if ("trabajadores" in resultado && resultado.trabajadores) {
         // Iteramos cada trabajador obtenido para mapear los datos y guardarlos
         for (const trabajador of resultado.trabajadores) {
+          let tiendaId: number | null = null;
+          if (trabajador.descripcionCentro) {
+            // Reemplazamos el primer guion simple por dos guiones.
+            const transformedDescripcion = trabajador.descripcionCentro.replace(
+              /-/,
+              "--",
+            );
+            // Buscamos la tienda que coincida (comparación sin distinción de mayúsculas/minúsculas)
+            const foundTienda = tiendas.find(
+              (tienda) =>
+                tienda.nombre.toLowerCase() ===
+                transformedDescripcion.toLowerCase(),
+            );
+            if (foundTienda) {
+              tiendaId = foundTienda.id;
+            }
+          }
+
           const nuevoTrabajador: CreateTrabajadorRequestDto = {
             dni: trabajador.documento,
             nombreApellidos: trabajador.apellidosYNombre,
@@ -344,7 +348,7 @@ export class TrabajadorDatabaseService {
             idEmpresa: "a9357dca-f201-49b9-ae53-a7aba2f654c5", //POR DEFECTO ARRAZAOS
             idResponsable: null,
             nSeguridadSocial: trabajador.noAfiliacion,
-            idTienda: null,
+            idTienda: tiendaId, // asignamos el id obtenido (o null si no se encontró)
             tokenQR: "",
             // Asignación de rol fijo; si es dinámico, ajusta el mapeo
             arrayRoles: ["b3f04be2-35f5-46d0-842b-5be49014a2ef"],
@@ -404,6 +408,7 @@ export class TrabajadorDatabaseService {
 
   async guardarTrabajadoresOmne() {
     return await this.sincronizarTrabajadores();
+    // return this.tiendaInstance.getTiendas();
   }
 
   async getTrabajadorByAppId(uid: string) {
