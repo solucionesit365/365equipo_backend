@@ -60,6 +60,8 @@ import { VisionModule } from "./vision/vision.module";
 import { LoggerModule } from "./logger/logger.module";
 import { NotificacionHorasExtrasController } from './notificacion-horas-extras/notificacion-horas-extras.controller';
 import { NotificacionHorasExtrasModule } from './notificacion-horas-extras/notificacion-horas-extras.module';
+import { ParametrosModule } from "./parametros/parametros.module";
+
 
 @Module({
   imports: [
@@ -123,6 +125,7 @@ import { NotificacionHorasExtrasModule } from './notificacion-horas-extras/notif
     VisionModule,
     LoggerModule,
     NotificacionHorasExtrasModule,
+    ParametrosModule,
   ],
   controllers: [AppController, KpiTiendasController, NotificacionHorasExtrasController],
 })

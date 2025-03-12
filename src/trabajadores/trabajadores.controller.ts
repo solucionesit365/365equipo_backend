@@ -37,6 +37,11 @@ export class TrabajadoresController {
       };
     });
   }
+  @Get("sincroTrabajadoresOmne")
+  async sincroTrabajadoresOmne() {
+    const res = await this.trabajadorInstance.guardarTrabajadoresOmne();
+    return res;
+  }
 
   @UseGuards(AuthGuard)
   @Get("getTrabajadorByAppId")

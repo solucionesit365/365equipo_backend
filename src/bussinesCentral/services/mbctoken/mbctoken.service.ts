@@ -4,14 +4,14 @@ import axios from "axios";
 
 @Injectable()
 export class MbctokenService {
-  async getToken() {
+  async getToken(clientID: string, clientSecret: string) {
     const params = new URLSearchParams();
     //preparando parametros
     params.append("tenant", process.env.MBC_TOKEN_TENANT);
     params.append("token_type", "Bearer");
     params.append("grant_type", "client_credentials");
-    params.append("client_id", process.env.MBC_TOKEN_CLIENTID);
-    params.append("client_secret", process.env.MBC_TOKEN_CLIENT_SECRET);
+    params.append("client_id", clientID);
+    params.append("client_secret", clientSecret);
     params.append("scope", "https://api.businesscentral.dynamics.com/.default");
 
     const response = await axios.post(
