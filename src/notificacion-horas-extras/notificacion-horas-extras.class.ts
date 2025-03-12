@@ -25,4 +25,28 @@ export class NotificacionHorasExtrasClass {
       idSql,
     );
   }
+
+  async updateNotificacionHorasExtrasRevision(
+    id: string,
+    horaExtraId: string,
+    data: { revision?: boolean },
+  ) {
+    return await this.shNotificacionhorasExtras.updateNotificacionHorasExtrasRevision(
+      id,
+      horaExtraId,
+      data,
+    );
+  }
+
+  async updateNotificacionHorasExtrasApagar(
+    id: string,
+    horaExtraId: string,
+    data: { apagar?: boolean },
+  ) {
+    return await this.shNotificacionhorasExtras.updateNotificacionHorasExtrasApagar(
+      id,
+      horaExtraId,
+      data,
+    );
+  }
 }

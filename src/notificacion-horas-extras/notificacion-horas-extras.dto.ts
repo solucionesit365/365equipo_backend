@@ -1,7 +1,18 @@
-import { IsNumber, IsString, ValidateNested, IsArray } from "class-validator";
+import {
+  IsNumber,
+  IsString,
+  ValidateNested,
+  IsArray,
+  IsBoolean,
+  IsOptional,
+} from "class-validator";
 import { Type } from "class-transformer";
 
 class THoraExtra {
+  @IsOptional()
+  @IsString()
+  _id?: string;
+
   @IsNumber()
   tienda: number;
 
@@ -16,6 +27,12 @@ class THoraExtra {
 
   @IsString()
   horaFinal: string;
+
+  @IsBoolean()
+  apagar: boolean;
+
+  @IsBoolean()
+  revision: boolean;
 }
 
 export class TNotificacionHorasExtras {
