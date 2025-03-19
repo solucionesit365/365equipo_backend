@@ -107,12 +107,18 @@ export class CuadrantesController {
   @Get("individual")
   async getCuadrantesIndividual(
     @Query()
-    { idTrabajador, fecha }: { fecha: string; idTrabajador: string },
+    {
+      idTrabajador,
+      fecha,
+      uid,
+    }: { fecha: string; idTrabajador: string; uid?: string },
     @User() user: UserRecord,
   ) {
     try {
+      // Usa el UID de la Coordinadora_A si lo recibe en la petición, sino usa el del usuario actual
+      const uidParaConsultar = uid || user.uid;
       const usuarioCompleto =
-        await this.trabajadoresInstance.getTrabajadorByAppId(user.uid);
+        await this.trabajadoresInstance.getTrabajadorByAppId(uidParaConsultar);
 
       if (!fecha || !idTrabajador) throw Error("Faltan datos");
 
@@ -269,13 +275,16 @@ export class CuadrantesController {
   @UseGuards(AuthGuard)
   @Post("saveCuadrante")
   async saveCuadrante(
+    @Body("uid") uid: string,
     @Body() reqCuadrante: TRequestCuadrante,
     @CompleteUser() user: Trabajador,
   ) {
     try {
       if (!reqCuadrante) throw Error("Faltan datos");
+      const uidParaConsultar = uid || user.idApp;
       const usuarioCompleto =
-        await this.trabajadoresInstance.getTrabajadorByAppId(user.idApp);
+        await this.trabajadoresInstance.getTrabajadorByAppId(uidParaConsultar);
+
       const trabajadorEditado =
         await this.trabajadoresInstance.getTrabajadorBySqlId(
           reqCuadrante.idTrabajador,
@@ -375,19 +384,19 @@ export class CuadrantesController {
               reqCuadrante.idTrabajador,
             );
 
-          if (trabajadorID.idApp) {
-            const token = await this.notificacionesInstance.getFCMToken(
-              trabajadorID.idApp,
-            );
-            if (token && token.token) {
-              await this.notificacionesInstance.sendNotificationToDevice(
-                token.token,
-                "NUEVO CUADRANTE CREADO",
-                `Se ha creado el cuadrate de la semana ${fechaInicio.weekNumber}`,
-                "/cuadrantes-tienda",
-              );
-            }
-          }
+          // if (trabajadorID.idApp) {
+          //   const token = await this.notificacionesInstance.getFCMToken(
+          //     trabajadorID.idApp,
+          //   );
+          //   if (token && token.token) {
+          //     await this.notificacionesInstance.sendNotificationToDevice(
+          //       token.token,
+          //       "NUEVO CUADRANTE CREADO",
+          //       `Se ha creado el cuadrate de la semana ${fechaInicio.weekNumber}`,
+          //       "/cuadrantes-tienda",
+          //     );
+          //   }
+          // }
 
           this.loggerService.create({
             action: "Crea un cuadrante",
