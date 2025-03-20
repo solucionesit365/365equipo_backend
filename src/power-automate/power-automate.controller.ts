@@ -1,5 +1,4 @@
 import { Body, Controller, Post } from "@nestjs/common";
-import { TestDto } from "./power-automate.dto";
 import { MongoService } from "../mongo/mongo.service";
 import { PowerAutomateService } from "./power-automate.service";
 import { Req, UseInterceptors, UploadedFile } from "@nestjs/common";
