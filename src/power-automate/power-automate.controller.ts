@@ -58,6 +58,7 @@ export class PowerAutomateController {
         parsedData.email,
         {
           nombre: parsedData.nombre,
+          empresa: parsedData.empresa,
         },
         qr,
       );

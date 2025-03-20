@@ -78,30 +78,13 @@ export class EmailService {
       motivo?: string;
     },
     qrCodeBase64: string,
-    visitDate?: Date,
   ) {
     const nombre = visitorData.nombre;
     const apellido = visitorData.apellido || "";
     const nombreCompleto = `${nombre} ${apellido}`.trim();
-
-    // Formatear la fecha si está disponible
-    let fechaVisita = "";
-    if (visitDate) {
-      const options: Intl.DateTimeFormatOptions = {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      };
-      fechaVisita = new Date(visitDate).toLocaleDateString("es-ES", options);
-    }
-
     const htmlContent = this.generarEmailVisitaTemplate(
       nombreCompleto,
       visitorData.empresa || "N/A",
-      visitorData.motivo || "Visita a fábrica",
-      fechaVisita,
     );
 
     const asunto = `Pase de visita - 365Obrador`;
@@ -205,12 +188,7 @@ export class EmailService {
   /**
    * Genera una plantilla HTML para emails de visita a fábrica con código QR
    */
-  generarEmailVisitaTemplate(
-    nombreVisitante: string,
-    empresa: string,
-    motivo: string,
-    fechaVisita: string,
-  ): string {
+  generarEmailVisitaTemplate(nombreVisitante: string, empresa: string): string {
     return `
       <!DOCTYPE html>
       <html>
@@ -314,7 +292,7 @@ export class EmailService {
               </div>
               <div class="email-content">
                   <p>Estimado/a <strong>${nombreVisitante}</strong>,</p>
-                  <p>Su visita a nuestras instalaciones ha sido confirmada. Adjunto encontrará un código QR que deberá presentar al llegar a nuestra fábrica para agilizar el proceso de registro.</p>
+                  <p>Su visita a nuestras instalaciones ha sido confirmada. A continuación encontrará un código QR que deberá mostrar al llegar a nuestra fábrica.</p>
                   
                   <div class="visitor-info">
                       <div class="info-row">
@@ -323,16 +301,6 @@ export class EmailService {
                       <div class="info-row">
                           <strong>Empresa:</strong> ${empresa}
                       </div>
-                      <div class="info-row">
-                          <strong>Motivo de visita:</strong> ${motivo}
-                      </div>
-                      ${
-                        fechaVisita
-                          ? `<div class="info-row">
-                          <strong>Fecha y hora:</strong> ${fechaVisita}
-                      </div>`
-                          : ""
-                      }
                   </div>
                   
                   <div class="qr-container">
@@ -343,13 +311,12 @@ export class EmailService {
                   <div class="qr-instructions">
                       <p><strong>Instrucciones:</strong></p>
                       <p>1. Guarde este email o descargue el código QR.</p>
-                      <p>2. Al llegar a nuestras instalaciones, presente este código al personal de seguridad.</p>
-                      <p>3. Por favor, llegue con 10 minutos de antelación para completar el proceso de registro.</p>
+                      <p>2. Muestre este código QR al personal de seguridad al llegar a nuestras instalaciones.</p>
                   </div>
               </div>
               
               <div class="footer">
-                  <p>Si tiene cualquier duda o necesita modificar su visita, no dude en contactarnos.</p>
+                  <p>Si tiene cualquier duda sobre su visita, no dude en contactarnos.</p>
                   <a href="tel:34722495410" class="button">Llamar: +34 722 49 54 10</a>
                   <p>© 365Obrador - Todos los derechos reservados</p>
               </div>
@@ -358,7 +325,6 @@ export class EmailService {
       </html>
     `;
   }
-
   private async compileTemplate(
     templateName: string,
     data: any,
