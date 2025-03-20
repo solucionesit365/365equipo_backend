@@ -1,33 +1,40 @@
-import {
-  Controller,
-  Post,
-  Req,
-  UseInterceptors,
-  UploadedFile,
-} from "@nestjs/common";
+import { Body, Controller, Post } from "@nestjs/common";
+import { MongoService } from "../mongo/mongo.service";
+import { PowerAutomateService } from "./power-automate.service";
+import { Req, UseInterceptors, UploadedFile } from "@nestjs/common";
 import { Request } from "express";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { simpleParser } from "mailparser";
-import { LoggerService } from "../logger/logger.service";
 
-@Controller("test")
-export class TestController {
-  constructor(private readonly loggerService: LoggerService) {}
+@Controller("power-automate")
+export class PowerAutomateController {
+  constructor(
+    private readonly mongoService: MongoService,
+    private readonly powerAutomateService: PowerAutomateService,
+  ) {}
+
+  @Post("test")
+  async test(@Body() req: { text: string }) {
+    try {
+      return this.powerAutomateService.getTag("action", req.text);
+    } catch (err) {
+      console.log(err);
+      return false;
+    }
+  }
 
   @Post("email")
-  @UseInterceptors(FileInterceptor("email")) // Capturamos el archivo `email` si existe
+  @UseInterceptors(FileInterceptor("email"))
   async receiveEmail(
     @Req() req: Request,
     @UploadedFile() file?: Express.Multer.File,
   ) {
     try {
-      let parsedEmail;
+      let parsedEmail: any;
 
       if (file) {
-        // 📩 1️⃣ Si se recibe un archivo adjunto, parsearlo normalmente
         parsedEmail = await simpleParser(file.buffer);
       } else {
-        // 🔎 2️⃣ Si no hay archivo, intentar extraerlo desde `req.body`
         parsedEmail = await simpleParser(req.body["email"]);
       }
 
@@ -35,30 +42,24 @@ export class TestController {
         throw new Error("No se pudo parsear el email.");
       }
 
-      // 📌 3️⃣ Extraer información clave
       const emailData = {
         from: parsedEmail.from?.text || "No especificado",
         to: parsedEmail.to?.text || "No especificado",
         subject: parsedEmail.subject || "Sin asunto",
         text: parsedEmail.text || "Sin contenido",
-        html: parsedEmail.html || "Sin contenido HTML",
-        attachments: parsedEmail.attachments.map((att) => ({
-          filename: att.filename,
-          contentType: att.contentType,
-          size: att.size,
-        })),
       };
 
-      // 📝 4️⃣ Guardar en logs
-      await this.loggerService.create({
-        action: "Email recibido",
-        name: "Sistema",
+      const action = this.powerAutomateService.getTag("action", emailData.text);
+
+      await this.powerAutomateService.saveInPowerAutomateCollection({
+        action,
+        name: "Tarea",
         extraData: emailData,
       });
 
       return { message: "Correo procesado", ...emailData };
     } catch (error) {
-      await this.loggerService.create({
+      await this.powerAutomateService.saveInPowerAutomateCollection({
         action: "Error procesando email",
         name: "Sistema",
         extraData: { error: error.message, stack: error.stack },
