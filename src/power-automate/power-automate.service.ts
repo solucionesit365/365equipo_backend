@@ -1,5 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { MongoService } from "../mongo/mongo.service";
+import * as QRCode from "qrcode";
 
 @Injectable()
 export class PowerAutomateService {
@@ -21,8 +22,32 @@ export class PowerAutomateService {
   }
 
   async saveInPowerAutomateCollection(data: any) {
-    const db = (await this.mongoService.getConexion()).db("soluciones");
+    const db = (await this.mongoService.getConexion()).db();
     const powerAutomateCache = db.collection("power-automate-cache");
     await powerAutomateCache.insertOne(data);
+  }
+
+  /* Crea un QR con los datos del parámetro parsedData */
+  async createGreenPass(parsedData: any): Promise<string> {
+    try {
+      // Convertir los datos a una cadena JSON para codificarlos en el QR
+      const qrData = JSON.stringify(parsedData);
+
+      // Generar el código QR como una imagen base64
+      const qrCodeBase64 = await QRCode.toDataURL(qrData, {
+        errorCorrectionLevel: "H",
+        type: "image/png",
+        margin: 1,
+        color: {
+          dark: "#1DA851", // Color verde para mantener la estética de la empresa
+          light: "#FFFFFF",
+        },
+      });
+
+      return qrCodeBase64;
+    } catch (error) {
+      console.error("Error al generar el código QR:", error);
+      throw new Error(`Error al generar código QR: ${error.message}`);
+    }
   }
 }

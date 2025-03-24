@@ -5,12 +5,14 @@ import { Req, UseInterceptors, UploadedFile } from "@nestjs/common";
 import { Request } from "express";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { simpleParser } from "mailparser";
+import { EmailService } from "../email/email.class";
 
 @Controller("power-automate")
 export class PowerAutomateController {
   constructor(
     private readonly mongoService: MongoService,
     private readonly powerAutomateService: PowerAutomateService,
+    private readonly emailService: EmailService,
   ) {}
 
   @Post("test")
@@ -50,11 +52,20 @@ export class PowerAutomateController {
       };
 
       const action = this.powerAutomateService.getTag("action", emailData.text);
-
+      const parsedData = JSON.parse(emailData.text);
+      const qr = await this.powerAutomateService.createGreenPass(parsedData);
+      await this.emailService.sendFactoryVisitEmail(
+        parsedData.email,
+        {
+          nombre: parsedData.nombre,
+          empresa: parsedData.empresa,
+        },
+        qr,
+      );
       await this.powerAutomateService.saveInPowerAutomateCollection({
         action,
         name: "Tarea",
-        extraData: emailData,
+        extraData: parsedData,
       });
 
       return { message: "Correo procesado", ...emailData };
