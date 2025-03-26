@@ -2,6 +2,7 @@ import { Controller, Body, UseGuards, Post, Get } from "@nestjs/common";
 import { HardWareInterface } from "./hardWare.interface";
 import { HardwareService } from "./hardware.service";
 import { AuthGuard } from "../guards/auth.guard";
+import { HardwareToolGuard } from "../guards/hardwareTool.guard";
 
 @Controller("hardware")
 export class HardwareController {
@@ -16,6 +17,12 @@ export class HardwareController {
       console.log(err);
       return { ok: false, message: err.message };
     }
+  }
+
+  @UseGuards(HardwareToolGuard)
+  @Post("newFromHardwareTool")
+  async addAnuncioFromHardwareTool(@Body() hardware: HardWareInterface) {
+    return await this.hardwareService.newHardware(hardware);
   }
 
   @UseGuards(AuthGuard)
