@@ -6,14 +6,28 @@ import {
   RemovePermissionDto,
 } from "./role.dto";
 import { AuthGuard } from "../guards/auth.guard";
+import { LoggerService } from "src/logger/logger.service";
+import { CompleteUser } from "src/decorators/getCompleteUser.decorator";
+import { Trabajador } from "@prisma/client";
 
 @Controller("role")
 export class RoleController {
-  constructor(private readonly roleService: RoleService) {}
+  constructor(
+    private readonly roleService: RoleService,
+    private readonly loggerService: LoggerService,
+  ) {}
 
   @UseGuards(AuthGuard)
   @Post("create")
-  async createRole(@Body() roleData: CreateRoleDto) {
+  async createRole(
+    @Body() roleData: CreateRoleDto,
+    @CompleteUser() user: Trabajador,
+  ) {
+    this.loggerService.create({
+      action: "Crear permiso",
+      name: user.nombreApellidos,
+      extraData: roleData.name,
+    });
     return this.roleService.createRole(roleData);
   }
 
@@ -25,13 +39,29 @@ export class RoleController {
 
   @UseGuards(AuthGuard)
   @Post("addPermission")
-  async addPermission(@Body() roleData: AddPermissionDto) {
+  async addPermission(
+    @Body() roleData: AddPermissionDto,
+    @CompleteUser() user: Trabajador,
+  ) {
+    this.loggerService.create({
+      action: "Añadir permiso",
+      name: user.nombreApellidos,
+      extraData: roleData,
+    });
     return await this.roleService.addPermission(roleData);
   }
 
   @UseGuards(AuthGuard)
   @Post("removePermission")
-  async removePermission(@Body() roleData: RemovePermissionDto) {
+  async removePermission(
+    @Body() roleData: RemovePermissionDto,
+    @CompleteUser() user: Trabajador,
+  ) {
+    this.loggerService.create({
+      action: "Borrar permiso",
+      name: user.nombreApellidos,
+      extraData: roleData,
+    });
     return await this.roleService.removePermission(roleData);
   }
 
