@@ -191,9 +191,7 @@ export class FichajesDatabase {
             if (response.status == 201) {
               console.log(response);
 
-              const db = (await this.mongoDbService.getConexion()).db(
-                "soluciones",
-              );
+              const db = (await this.mongoDbService.getConexion()).db();
               const fichajesCollection = db.collection<FichajeDto>("fichajes");
               const resp = await fichajesCollection.updateOne(
                 { _id: fichajes[i]._id },

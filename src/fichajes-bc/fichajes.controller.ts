@@ -238,11 +238,15 @@ export class FichajesController {
 
   @UseGuards(AuthGuard)
   @Get("sinValidar")
-  async getSinValidar(@User() user: UserRecord) {
+  async getSinValidar(@Query("uid") uid: string, @User() user: UserRecord) {
     try {
+      // Usa el UID de la Coordinadora_A si lo recibe en la petición, sino usa el del usuario actual
+      const uidParaConsultar = uid || user.uid;
       const arraySubordinados = await this.trabajadoresInstance.getSubordinados(
-        user.uid,
+        uidParaConsultar,
       );
+
+      console.log(arraySubordinados);
 
       return {
         ok: true,
