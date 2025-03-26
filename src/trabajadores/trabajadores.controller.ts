@@ -324,4 +324,40 @@ export class TrabajadoresController {
 
     return await this.trabajadorInstance.restaurarTrabajador(req);
   }
+  @UseGuards(AuthGuard)
+  @Post("validarCodigo")
+  async validarCodigo(@Body() { codigoEmpleado }: { codigoEmpleado: string }) {
+    try {
+      if (!codigoEmpleado) {
+        throw new Error("El código de empleado es obligatorio");
+      }
+
+      // Buscar trabajador por código de empleado (ID)
+      const trabajador = await this.trabajadorInstance.getTrabajadorByCodigo(
+        codigoEmpleado,
+      );
+
+      if (!trabajador) {
+        return { ok: false, message: "Código de empleado inválido" };
+      }
+
+      // Verificar si el trabajador tiene el rol de Coordinadora_A
+      if (trabajador.roles[0].name !== "Coordinadora_A") {
+        return { ok: false, message: "No tienes permisos para esta acción" };
+      }
+
+      return {
+        ok: true,
+        usuario: {
+          idSql: trabajador.id,
+          uid: trabajador.idApp,
+          nombre: trabajador.nombreApellidos,
+          rol: trabajador.roles[0].name,
+        },
+      };
+    } catch (error) {
+      console.error(error);
+      return { ok: false, message: error.message };
+    }
+  }
 }

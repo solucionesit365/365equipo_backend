@@ -394,4 +394,18 @@ export class TrabajadorService {
   async restaurarTrabajador(reqTrabajador: CreateTrabajadorRequestDto) {
     return await this.schTrabajadores.crearTrabajador(reqTrabajador);
   }
+  async getTrabajadorByCodigo(codigoEmpleado: string) {
+    const trabajadores = await this.getTrabajadores(); // Obtener todos los trabajadores
+
+    // Buscar el trabajador con el código de empleado proporcionado
+    const trabajadorEncontrado = trabajadores.find(
+      (trabajador) => trabajador.id.toString() === codigoEmpleado,
+    );
+
+    if (!trabajadorEncontrado) {
+      return null; // Si no existe, devolver null
+    }
+
+    return trabajadorEncontrado;
+  }
 }
