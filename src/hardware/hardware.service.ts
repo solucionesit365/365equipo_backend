@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, InternalServerErrorException } from "@nestjs/common";
 import { HardwareDatabase } from "./hardware.mongodb";
 import { HardWareInterface } from "./hardWare.interface";
 
@@ -7,11 +7,17 @@ export class HardwareService {
   constructor(private readonly hardwareDatabase: HardwareDatabase) {}
 
   async newHardware(hardWare: HardWareInterface) {
-    this.hardwareDatabase.newHardWare(hardWare);
-    return {
-      ok: true,
-      data: "Dispositivo creado",
-    };
+    try {
+      await this.hardwareDatabase.newHardWare(hardWare);
+
+      return {
+        ok: true,
+        data: "Dispositivo creado",
+      };
+    } catch (err) {
+      console.log(err);
+      throw new InternalServerErrorException();
+    }
   }
 
   async getHardware() {
