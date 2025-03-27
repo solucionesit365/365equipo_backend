@@ -427,7 +427,12 @@ export class TrabajadorDatabaseService {
           take: 1, // Toma solo el contrato más reciente
         },
         tienda: true,
-        roles: true,
+        roles: {
+          include: {
+            permissions: true,
+          },
+        },
+        permisos: true,
         responsable: true,
       },
     });

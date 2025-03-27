@@ -46,14 +46,9 @@ export class TrabajadoresController {
   @UseGuards(AuthGuard)
   @Get("getTrabajadorByAppId")
   async getTrabajadorByAppId(@Query() { uid }) {
-    try {
-      const resUser = await this.trabajadorInstance.getTrabajadorByAppId(uid);
-      // console.log(resUser);
-      return { ok: true, data: resUser };
-    } catch (err) {
-      console.log(err);
-      return { ok: false, message: err.message };
-    }
+    const resUser = await this.trabajadorInstance.getTrabajadorByAppId(uid);
+
+    return { ok: true, data: resUser };
   }
 
   @UseGuards(AuthGuard)
