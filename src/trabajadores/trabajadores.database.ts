@@ -427,7 +427,12 @@ export class TrabajadorDatabaseService {
           take: 1, // Toma solo el contrato más reciente
         },
         tienda: true,
-        roles: true,
+        roles: {
+          include: {
+            permissions: true,
+          },
+        },
+        permisos: true,
         responsable: true,
       },
     });
@@ -1088,10 +1093,11 @@ export class TrabajadorDatabaseService {
   }
 
   async getNivelMenosUno(idSql: number) {
-    const resResponsable = await this.prisma.trabajador.findFirst({
+    const resResponsable = await this.prisma.trabajador.findUnique({
       where: {
         id: idSql,
       },
+
       select: {
         idResponsable: true,
       },
@@ -1112,6 +1118,9 @@ export class TrabajadorDatabaseService {
     return await this.prisma.trabajador.findMany({
       where: {
         idResponsable: idSql,
+      },
+      include: {
+        tienda: true,
       },
     });
   }

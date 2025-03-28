@@ -12,11 +12,15 @@ import { SolicitudesVacacionesService } from "../solicitud-vacaciones/solicitud-
 import { DiaPersonalClass } from "../dia-personal/dia-personal.class";
 import { TrabajadorDatabaseService } from "./trabajadores.database";
 import { UserRecord } from "firebase-admin/auth";
-import { Prisma } from "@prisma/client";
+import { Prisma, Role, Permiso } from "@prisma/client";
 import {
   CreateTrabajadorRequestDto,
   TrabajadorFormRequest,
 } from "./trabajadores.dto";
+
+type RoleWithPermissions = Prisma.RoleGetPayload<{
+  include: { permissions: true };
+}>;
 
 @Injectable()
 export class TrabajadorService {
@@ -50,11 +54,31 @@ export class TrabajadorService {
   }
 
   async getTrabajadorByAppId(uid: string) {
-    const resUser = await this.schTrabajadores.getTrabajadorByAppId(uid);
-    if (resUser) return resUser;
-    throw new InternalServerErrorException(
-      "No se ha podido obtener la información del usuario",
-    );
+    try {
+      const resUser = await this.schTrabajadores.getTrabajadorByAppId(uid);
+
+      const totalPermissions: Permiso[] = [
+        ...this.getAllPermissionsFromRoles(resUser.roles),
+        ...resUser.permisos,
+      ];
+
+      resUser.permisos = totalPermissions;
+
+      if (resUser) return resUser;
+      throw new Error();
+    } catch (err) {
+      console.log(err);
+      throw new InternalServerErrorException("Error al obtener el trabajador");
+    }
+  }
+
+  private getAllPermissionsFromRoles(roles: RoleWithPermissions[]): Permiso[] {
+    const permissions = [];
+
+    for (const role of roles) {
+      permissions.push(...role.permissions);
+    }
+    return permissions;
   }
 
   async getTrabajadoresByTienda(idTienda: number) {
@@ -393,5 +417,19 @@ export class TrabajadorService {
 
   async restaurarTrabajador(reqTrabajador: CreateTrabajadorRequestDto) {
     return await this.schTrabajadores.crearTrabajador(reqTrabajador);
+  }
+  async getTrabajadorByCodigo(codigoEmpleado: string) {
+    const trabajadores = await this.getTrabajadores(); // Obtener todos los trabajadores
+
+    // Buscar el trabajador con el código de empleado proporcionado
+    const trabajadorEncontrado = trabajadores.find(
+      (trabajador) => trabajador.id.toString() === codigoEmpleado,
+    );
+
+    if (!trabajadorEncontrado) {
+      return null; // Si no existe, devolver null
+    }
+
+    return trabajadorEncontrado;
   }
 }

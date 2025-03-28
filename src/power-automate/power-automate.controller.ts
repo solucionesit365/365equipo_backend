@@ -50,10 +50,10 @@ export class PowerAutomateController {
         subject: parsedEmail.subject || "Sin asunto",
         text: parsedEmail.text || "Sin contenido",
       };
-
       const action = this.powerAutomateService.getTag("action", emailData.text);
       const parsedData = JSON.parse(emailData.text);
       const qr = await this.powerAutomateService.createGreenPass(parsedData);
+
       await this.emailService.sendFactoryVisitEmail(
         parsedData.email,
         {
