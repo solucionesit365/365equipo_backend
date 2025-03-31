@@ -240,7 +240,7 @@ export class Fichajes {
         fichajesPretty.push({
           _id: fichajesBC[i].idr,
           hora: DateTime.fromJSDate(new Date(fichajesBC[i].tmst)).minus({
-            hours: 1,
+            hours: this.getHoraDiferenciaSpain(),
           }),
           uid: idApp,
           tipo: "ENTRADA",
@@ -255,7 +255,7 @@ export class Fichajes {
         fichajesPretty.push({
           _id: fichajesBC[i].idr,
           hora: DateTime.fromJSDate(new Date(fichajesBC[i].tmst)).minus({
-            hours: 1,
+            hours: this.getHoraDiferenciaSpain(),
           }),
           uid: idApp,
           tipo: "SALIDA",
@@ -559,5 +559,13 @@ export class Fichajes {
 
   async getFichajes(idSql: number) {
     return this.schFichajes.getFichajes(idSql);
+  }
+
+  private getHoraDiferenciaSpain(): number {
+    const dt = DateTime.now();
+    const dtMadrid = dt.setZone("Europe/Madrid");
+    const isDST = dtMadrid.isInDST;
+
+    return isDST ? 2 : 1;
   }
 }
