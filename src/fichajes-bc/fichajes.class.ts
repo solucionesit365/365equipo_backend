@@ -239,9 +239,7 @@ export class Fichajes {
       if (fichajesBC[i].accio === 1) {
         fichajesPretty.push({
           _id: fichajesBC[i].idr,
-          hora: DateTime.fromJSDate(new Date(fichajesBC[i].tmst)).minus({
-            hours: this.getHoraDiferenciaSpain(),
-          }),
+          hora: DateTime.fromJSDate(new Date(fichajesBC[i].tmst)),
           uid: idApp,
           tipo: "ENTRADA",
           enviado: true,
@@ -254,9 +252,7 @@ export class Fichajes {
       } else if (fichajesBC[i].accio === 2) {
         fichajesPretty.push({
           _id: fichajesBC[i].idr,
-          hora: DateTime.fromJSDate(new Date(fichajesBC[i].tmst)).minus({
-            hours: this.getHoraDiferenciaSpain(),
-          }),
+          hora: DateTime.fromJSDate(new Date(fichajesBC[i].tmst)),
           uid: idApp,
           tipo: "SALIDA",
           enviado: true,
