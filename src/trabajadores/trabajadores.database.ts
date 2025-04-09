@@ -549,11 +549,11 @@ export class TrabajadorDatabaseService {
       },
     });
 
-    if (trabajador.tokenQR === tokenQR) {
-      return true;
-    } else {
-      return false;
+    if (!trabajador || trabajador.tokenQR !== tokenQR) {
+      return null;
     }
+
+    return trabajador;
   }
 
   async getTrabajadoresByTienda(idTienda: number) {
