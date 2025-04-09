@@ -159,7 +159,7 @@ export class TrabajadorDatabaseService {
         empresas.map(async ({ empresaID, nombre }) => {
           try {
             const response = await axios.get(
-              `https://api.businesscentral.dynamics.com/v2.0/${process.env.MBC_TOKEN_TENANT}/Production/api/Miguel/365ObradorAPI/v1.0/companies(${empresaID})/perceptoresQuery?$filter=SystemCreatedAt gt ${parametros[0].lastSyncWorkers}`,
+              `https://api.businesscentral.dynamics.com/v2.0/${process.env.MBC_TOKEN_TENANT}/Production/api/Miguel/365ObradorAPI/v1.0/companies(${empresaID})/perceptoresQuery?$filter=SystemModifiedAt gt ${parametros[0].lastSyncWorkers}`,
               { headers: { Authorization: `Bearer ${token}` } },
             );
 
