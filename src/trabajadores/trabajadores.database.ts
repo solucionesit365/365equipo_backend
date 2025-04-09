@@ -360,16 +360,25 @@ export class TrabajadorDatabaseService {
               fechaAntiguedad: trabajador.antiguedadEmpresa
                 ? new Date(trabajador.antiguedadEmpresa)
                 : new Date(),
-              horasContrato: trabajador.horassemana || 0,
+              horasContrato:
+                trabajador.horassemana && trabajador.horassemana > 0
+                  ? Math.round((trabajador.horassemana * 100) / 40)
+                  : 100,
+
               inicioContrato: trabajador.altaContrato
                 ? new Date(trabajador.altaContrato)
                 : new Date(),
-              fechaBaja: trabajador.bajaEmpresa
-                ? new Date(trabajador.bajaEmpresa)
-                : null,
-              finalContrato: trabajador.bajaEmpresa
-                ? new Date(trabajador.bajaEmpresa)
-                : null,
+              fechaBaja:
+                trabajador.bajaEmpresa &&
+                trabajador.bajaEmpresa.includes("0001-01-01")
+                  ? null
+                  : new Date(trabajador.bajaEmpresa),
+
+              finalContrato:
+                trabajador.bajaEmpresa &&
+                trabajador.bajaEmpresa.includes("0001-01-01")
+                  ? null
+                  : new Date(trabajador.bajaEmpresa),
             },
           };
 
