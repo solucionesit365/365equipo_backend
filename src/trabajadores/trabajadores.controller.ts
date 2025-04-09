@@ -37,6 +37,7 @@ export class TrabajadoresController {
       };
     });
   }
+  @UseGuards(SchedulerGuard)
   @Get("sincroTrabajadoresOmne")
   async sincroTrabajadoresOmne() {
     const res = await this.trabajadorInstance.guardarTrabajadoresOmne();
