@@ -103,6 +103,7 @@ export class TrabajadorDatabaseService {
     >
   > {
     try {
+      // Estas empresas hay que guardarlas desde la base de datos
       const empresas: Array<{ empresaID: string; nombre: string }> = [
         {
           empresaID: "84290dc4-6e90-ef11-8a6b-7c1e5236b0db",
