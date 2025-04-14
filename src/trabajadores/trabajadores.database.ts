@@ -151,6 +151,7 @@ export class TrabajadorDatabaseService {
         process.env.MBC_TOKEN_APPHITBC,
         process.env.MBC_TOKEN_APPHITBC_CLIENT_SECRET,
       );
+
       if (!token) {
         throw new Error("Error obteniendo el token de autenticación.");
       }
