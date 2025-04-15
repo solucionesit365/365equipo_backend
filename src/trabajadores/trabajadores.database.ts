@@ -9,7 +9,6 @@ import {
   CreateTrabajadorRequestDto,
   TrabajadorFormRequest,
 } from "./trabajadores.dto";
-import axios from "axios";
 import { axiosBCInstance } from "src/axios/axiosBC";
 
 @Injectable()
