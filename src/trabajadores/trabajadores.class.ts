@@ -36,6 +36,125 @@ export class TrabajadorService {
     return await this.schTrabajadores.crearTrabajador(reqTrabajador);
   }
 
+  async getTrabajadoresModificadosOmne() {
+    const trabajadoresRaw = await this.schTrabajadores.getTrabajadoresOmne();
+    return this.crearArrayTrabajadores(trabajadoresRaw);
+  }
+
+  private crearArrayTrabajadores(trabajadoresRaw: any) {
+    return trabajadoresRaw.flatMap((empresa: any) => {
+      if (empresa.trabajadores && Array.isArray(empresa.trabajadores)) {
+        return empresa.trabajadores.map((trabajador) => ({
+          ...trabajador,
+          empresaID: empresa.empresaID,
+        }));
+      } else {
+        return [];
+      }
+    });
+  }
+
+  getTrabajadoresPorDNI(arrayDNIs: string[]) {
+    return this.schTrabajadores.getTrabajadoresPorDNI(arrayDNIs);
+  }
+
+  createArrayDNI(trabajadores: any[]): string[] {
+    const dniSet = new Set();
+    trabajadores.forEach((trabajador) => {
+      dniSet.add(trabajador.documento);
+    });
+    return Array.from(dniSet) as string[];
+  }
+
+  compararTrabajadores(trabajadoresAppInvocados, trabajadoresOmneModificados) {
+    const trabajadoresParaModificar = [];
+    const trabajadoresParaCrear = [];
+
+    const appTrabajadoresPorDNI = trabajadoresAppInvocados.reduce((acc, t) => {
+      acc[t.dni] = t;
+      return acc;
+    }, {});
+
+    // Agrupar por DNI para manejar múltiples contratos
+    const omneTrabajadoresAgrupados = trabajadoresOmneModificados.reduce(
+      (acc, trabajador) => {
+        const dni = trabajador.documento;
+        if (!acc[dni]) acc[dni] = [];
+        acc[dni].push(trabajador);
+        return acc;
+      },
+      {},
+    );
+
+    Object.entries(omneTrabajadoresAgrupados).forEach(
+      ([dni, trabajadoresOmne]) => {
+        const trabajadorApp = appTrabajadoresPorDNI[dni];
+
+        if (trabajadorApp) {
+          const cambios = {};
+          const primerTrabajadorOmne = trabajadoresOmne[0];
+
+          // Propiedades a comparar (clave Omne : clave App)
+          const propiedades = {
+            apellidosYNombre: "nombreApellidos",
+            nombre: "displayName",
+            email: "emails",
+            documento: "dni",
+            telefonos: "telefonos",
+            viaPublica: "direccion",
+            poblacion: "ciudad",
+            noAfiliacion: "nSeguridadSocial",
+            codPaisNacionalidad: "nacionalidad",
+            cp: "codigoPostal",
+            empresaID: "empresaId",
+          };
+
+          Object.entries(propiedades).forEach(([keyOmne, keyApp]) => {
+            let valorOmne = primerTrabajadorOmne[keyOmne];
+            let valorApp = trabajadorApp[keyApp];
+
+            if (keyOmne === "viaPublica") {
+              valorOmne = `${primerTrabajadorOmne.viaPublica} ${
+                primerTrabajadorOmne.numero
+              }${
+                primerTrabajadorOmne.piso
+                  ? ", " + primerTrabajadorOmne.piso
+                  : ""
+              }`.trim();
+            }
+
+            if (keyOmne === "codPaisNacionalidad") {
+              valorOmne = primerTrabajadorOmne.codPaisNacionalidad || "";
+              valorApp = trabajadorApp.nacionalidad || "";
+            }
+
+            if (valorOmne !== valorApp) {
+              cambios[keyApp] = valorOmne;
+            }
+          });
+
+          if (Object.keys(cambios).length > 0) {
+            trabajadoresParaModificar.push({
+              dni: trabajadorApp.dni,
+              cambios: cambios,
+            });
+          }
+        } else {
+          // El trabajador no existe en la App, se debe crear
+          trabajadoresParaCrear.push({
+            dni,
+            datos: trabajadoresOmne, // Puede haber más de un contrato por trabajador
+          });
+        }
+      },
+    );
+
+    return {
+      modificar: trabajadoresParaModificar,
+      crear: trabajadoresParaCrear,
+    };
+  }
+
   async guardarTrabajadoresOmne() {
     return await this.schTrabajadores.guardarTrabajadoresOmne();
   }

@@ -39,8 +39,22 @@ export class TrabajadoresController {
   }
   @Get("sincroTrabajadoresOmne")
   async sincroTrabajadoresOmne() {
-    const res = await this.trabajadorInstance.guardarTrabajadoresOmne();
-    return res;
+    const trabajadoresOmneModificados =
+      await this.trabajadorInstance.getTrabajadoresModificadosOmne();
+
+    const arrayDNIModificadosOmne = this.trabajadorInstance.createArrayDNI(
+      trabajadoresOmneModificados,
+    );
+
+    const trabajadoresAppInvocados =
+      await this.trabajadorInstance.getTrabajadoresPorDNI(
+        arrayDNIModificadosOmne,
+      );
+
+    return this.trabajadorInstance.compararTrabajadores(
+      trabajadoresAppInvocados,
+      trabajadoresOmneModificados,
+    );
   }
 
   @UseGuards(AuthGuard)

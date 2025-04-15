@@ -10,6 +10,7 @@ import {
   TrabajadorFormRequest,
 } from "./trabajadores.dto";
 import axios from "axios";
+import { axiosBCInstance } from "src/axios/axiosBC";
 
 @Injectable()
 export class TrabajadorDatabaseService {
@@ -146,23 +147,12 @@ export class TrabajadorDatabaseService {
         ];
       }
 
-      // Obtener el token de autenticación
-      const token = await this.mbctokenService.getToken(
-        process.env.MBC_TOKEN_APPHITBC,
-        process.env.MBC_TOKEN_APPHITBC_CLIENT_SECRET,
-      );
-
-      if (!token) {
-        throw new Error("Error obteniendo el token de autenticación.");
-      }
-
       // Ejecutar las consultas en paralelo para cada empresa
       const resultados = await Promise.all(
         empresas.map(async ({ empresaID, nombre }) => {
           try {
-            const response = await axios.get(
-              `https://api.businesscentral.dynamics.com/v2.0/${process.env.MBC_TOKEN_TENANT}/Production/api/Miguel/365ObradorAPI/v1.0/companies(${empresaID})/perceptoresQuery?$filter=SystemModifiedAt gt ${parametros[0].lastSyncWorkers}`,
-              { headers: { Authorization: `Bearer ${token}` } },
+            const response = await axiosBCInstance.get(
+              `Production/api/Miguel/365ObradorAPI/v1.0/companies(${empresaID})/perceptoresQuery?$filter=SystemModifiedAt gt ${parametros[0].lastSyncWorkers}`,
             );
 
             const trabajadores = response.data.value;
@@ -184,6 +174,15 @@ export class TrabajadorDatabaseService {
       return [{ error: error.message }];
     }
   }
+
+  getTrabajadoresPorDNI(dnisArray: string[]) {
+    return this.prisma.trabajador.findMany({
+      where: {
+        dni: { in: dnisArray },
+      },
+    });
+  }
+
   // Función que inserta un trabajador en la base de datos
   async crearTrabajadorOmne(
     reqTrabajador: CreateTrabajadorRequestDto,
