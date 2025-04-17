@@ -37,6 +37,7 @@ export class TrabajadoresController {
       };
     });
   }
+
   @Get("sincroTrabajadoresOmne")
   async sincroTrabajadoresOmne() {
     const trabajadoresOmneModificados =
@@ -51,10 +52,22 @@ export class TrabajadoresController {
         arrayDNIModificadosOmne,
       );
 
-    return this.trabajadorInstance.compararTrabajadores(
+    const cambiosDetectados = this.trabajadorInstance.cambiosDetectados(
       trabajadoresAppInvocados,
       trabajadoresOmneModificados,
     );
+
+    // return trabajadoresOmneModificados;
+
+    await this.trabajadorInstance.updateManyTrabajadores(
+      cambiosDetectados.modificar,
+    );
+
+    return {
+      cambiosDetectados,
+      trabajadoresAppInvocados,
+      trabajadoresOmneModificados,
+    };
   }
 
   @UseGuards(AuthGuard)

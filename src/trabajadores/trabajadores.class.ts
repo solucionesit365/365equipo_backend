@@ -66,7 +66,12 @@ export class TrabajadorService {
     return Array.from(dniSet) as string[];
   }
 
-  compararTrabajadores(trabajadoresAppInvocados, trabajadoresOmneModificados) {
+  // Update Many con diferentes valores a modificar
+  updateManyTrabajadores(modificaciones: any[]) {
+    return this.schTrabajadores.updateManyTrabajadores(modificaciones);
+  }
+
+  cambiosDetectados(trabajadoresAppInvocados, trabajadoresOmneModificados) {
     const trabajadoresParaModificar = [];
     const trabajadoresParaCrear = [];
 

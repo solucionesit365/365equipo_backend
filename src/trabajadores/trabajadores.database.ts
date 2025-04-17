@@ -3,7 +3,6 @@ import { PrismaService } from "../prisma/prisma.service";
 import { DateTime } from "luxon";
 import { Prisma } from "@prisma/client";
 import { ParametrosService } from "../parametros/parametros.service";
-import { MbctokenService } from "src/bussinesCentral/services/mbctoken/mbctoken.service";
 import { Tienda } from "src/tiendas/tiendas.class";
 import {
   CreateTrabajadorRequestDto,
@@ -16,7 +15,6 @@ export class TrabajadorDatabaseService {
   constructor(
     private prisma: PrismaService,
     private readonly parametrosService: ParametrosService,
-    private readonly mbctokenService: MbctokenService,
     private readonly tiendaInstance: Tienda,
   ) {}
 
@@ -136,7 +134,8 @@ export class TrabajadorDatabaseService {
         "sincro_trabajadores",
       );
       console.log(
-        "Última fecha de sincronización: " + parametros[0].lastSyncWorkers,
+        "Última fecha de sincronización: " +
+          DateTime.fromJSDate(parametros[0].lastSyncWorkers).toISO(),
       );
 
       if (!parametros[0].lastSyncWorkers) {
@@ -150,11 +149,22 @@ export class TrabajadorDatabaseService {
       const resultados = await Promise.all(
         empresas.map(async ({ empresaID, nombre }) => {
           try {
-            const response = await axiosBCInstance.get(
-              `Production/api/Miguel/365ObradorAPI/v1.0/companies(${empresaID})/perceptoresQuery?$filter=SystemModifiedAt gt ${parametros[0].lastSyncWorkers}`,
+            const lastSyncWorkers = DateTime.fromJSDate(
+              parametros[0].lastSyncWorkers,
             );
 
+            if (!lastSyncWorkers.isValid) {
+              throw new Error("Fecha de sincronización no válida.");
+            }
+
+            const response = await axiosBCInstance.get(
+              `Production/api/Miguel/365ObradorAPI/v1.0/companies(${empresaID})/perceptoresQuery`,
+              // ?$filter=SystemModifiedAt gt ${lastSyncWorkers
+              //   .toUTC()
+              //   .toISO()}`,
+            );
             const trabajadores = response.data.value;
+
             return trabajadores.length === 0
               ? {
                   empresaID,
@@ -172,6 +182,18 @@ export class TrabajadorDatabaseService {
     } catch (error) {
       return [{ error: error.message }];
     }
+  }
+
+  // Update Many con diferentes valores a modificar
+  async updateManyTrabajadores(modificaciones: any[]) {
+    return await this.prisma.$transaction(
+      modificaciones.map(({ dni, cambios }) =>
+        this.prisma.trabajador.update({
+          where: { dni },
+          data: cambios,
+        }),
+      ),
+    );
   }
 
   getTrabajadoresPorDNI(dnisArray: string[]) {
@@ -397,13 +419,13 @@ export class TrabajadorDatabaseService {
       }
     }
 
-    const newSyncDate = new Date().toISOString();
+    const newSyncDate = DateTime.now().toJSDate();
+
     try {
       // Supongamos que en tu parametrosService tienes un método updateParametros o updateLastSyncWorkers
-      await this.parametrosService.updateParametros(
-        "sincro_trabajadores",
-        newSyncDate,
-      );
+      await this.parametrosService.updateParametros("sincro_trabajadores", {
+        lastSyncWorkers: newSyncDate,
+      });
       console.log(`Fecha de sincronización actualizada a: ${newSyncDate}`);
     } catch (error) {
       console.error(
