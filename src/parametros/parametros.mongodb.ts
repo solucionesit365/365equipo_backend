@@ -1,7 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { MongoService } from "../mongo/mongo.service";
 import { ParametrosDTO } from "./parametros.dto";
-// import { HitMssqlService } from "../hit-mssql/hit-mssql.service";
 
 @Injectable()
 export class ParametrosDatabase {
@@ -12,12 +11,15 @@ export class ParametrosDatabase {
     const parametrosCollection = db.collection<ParametrosDTO>("parametros");
     return await parametrosCollection.find({ name: name }).toArray();
   }
-  async updateParametros(name: string, parametros) {
+
+  async updateParametros(name: string, parametros: Partial<ParametrosDTO>) {
+    if (parametros?._id) delete parametros._id;
+
     const db = (await this.mongoDbService.getConexion()).db();
     const parametrosCollection = db.collection<ParametrosDTO>("parametros");
     const result = await parametrosCollection.updateOne(
       { name: name },
-      { $set: { lastSyncWorkers: parametros } },
+      { $set: parametros },
     );
 
     return result;

@@ -1,17 +1,16 @@
-/* eslint-disable prettier/prettier */
 import { Injectable } from "@nestjs/common";
 import { ParametrosDatabase } from "./parametros.mongodb";
+import { ParametrosDTO } from "./parametros.dto";
 
 @Injectable()
 export class ParametrosService {
-  constructor(private readonly Database: ParametrosDatabase) {}
+  constructor(private readonly parametrosDatabase: ParametrosDatabase) {}
+
   async getParametros(name: string) {
-    return await this.Database.getParametros(name);
+    return await this.parametrosDatabase.getParametros(name);
   }
 
-  async updateParametros(name, parametros) {
-    console.log(parametros);
-
-    return await this.Database.updateParametros(name, parametros);
+  async updateParametros(name: string, parametros: Partial<ParametrosDTO>) {
+    return await this.parametrosDatabase.updateParametros(name, parametros);
   }
 }

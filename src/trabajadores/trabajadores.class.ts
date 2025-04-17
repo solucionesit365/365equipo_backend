@@ -10,7 +10,10 @@ import { PermisosService } from "../permisos/permisos.class";
 import { DateTime } from "luxon";
 import { SolicitudesVacacionesService } from "../solicitud-vacaciones/solicitud-vacaciones.class";
 import { DiaPersonalClass } from "../dia-personal/dia-personal.class";
-import { TrabajadorDatabaseService } from "./trabajadores.database";
+import {
+  TIncludeTrabajador,
+  TrabajadorDatabaseService,
+} from "./trabajadores.database";
 import { UserRecord } from "firebase-admin/auth";
 import { Prisma } from "@prisma/client";
 import {
@@ -34,6 +37,138 @@ export class TrabajadorService {
 
   async crearTrabajador(reqTrabajador: CreateTrabajadorRequestDto) {
     return await this.schTrabajadores.crearTrabajador(reqTrabajador);
+  }
+
+  async getTrabajadoresModificadosOmne() {
+    const trabajadoresRaw = await this.schTrabajadores.getTrabajadoresOmne();
+    return this.crearArrayTrabajadores(trabajadoresRaw);
+  }
+
+  private crearArrayTrabajadores(trabajadoresRaw: any): any[] {
+    return trabajadoresRaw.flatMap((empresa: any) => {
+      if (empresa.trabajadores && Array.isArray(empresa.trabajadores)) {
+        return empresa.trabajadores.map((trabajador: any) => {
+          // Convertir documento a string, pasar a mayúsculas y quitar espacios
+          const documentoNormalizado = String(trabajador.documento)
+            .toUpperCase()
+            .replace(/\s+/g, "");
+          return {
+            ...trabajador,
+            documento: documentoNormalizado,
+            empresaID: empresa.empresaID,
+          };
+        });
+      }
+      return [];
+    });
+  }
+
+  getAllTrabajadores(include: TIncludeTrabajador) {
+    return this.schTrabajadores.getAllTrabajadores(include);
+  }
+
+  createArrayDNI(trabajadores: any[]): string[] {
+    const dniSet = new Set();
+    trabajadores.forEach((trabajador) => {
+      dniSet.add(trabajador.documento);
+    });
+    return Array.from(dniSet) as string[];
+  }
+
+  // Update Many con diferentes valores a modificar
+  updateManyTrabajadores(modificaciones: any[]) {
+    return this.schTrabajadores.updateManyTrabajadores(modificaciones);
+  }
+
+  deleteManyTrabajadores(dnis: { dni: string }[]) {
+    return this.schTrabajadores.deleteManyTrabajadores(dnis);
+  }
+
+  cambiosDetectados(trabajadoresAppInvocados, trabajadoresOmneModificados) {
+    const trabajadoresParaModificar = [];
+    const trabajadoresParaCrear = [];
+    const trabajadoresParaEliminar = [];
+
+    // 1) Mapa de empleados en la App, por DNI
+    const appPorDNI = trabajadoresAppInvocados.reduce((acc, t) => {
+      acc[t.dni] = t;
+      return acc;
+    }, {});
+
+    // 2) Agrupar datos de Omne por DNI (puede haber varios contratos)
+    const omnePorDNI = trabajadoresOmneModificados.reduce((acc, t) => {
+      const dni = t.documento;
+      if (!acc[dni]) acc[dni] = [];
+      acc[dni].push(t);
+      return acc;
+    }, {});
+
+    // 3) Recorrer cada DNI que viene de Omne
+    Object.entries(omnePorDNI).forEach(([dni, contratosOmne]) => {
+      const app = appPorDNI[dni];
+
+      if (app) {
+        // — existe en ambos → ¿datos distintos?
+        const cambios = {};
+        const primero = contratosOmne[0];
+        const propsMap = {
+          apellidosYNombre: "nombreApellidos",
+          nombre: "displayName",
+          email: "emails",
+          documento: "dni",
+          telefonos: "telefonos",
+          viaPublica: "direccion",
+          poblacion: "ciudad",
+          noAfiliacion: "nSeguridadSocial",
+          codPaisNacionalidad: "nacionalidad",
+          cp: "codigoPostal",
+          empresaID: "empresaId",
+        };
+
+        Object.entries(propsMap).forEach(([kOmne, kApp]) => {
+          let vOmne = primero[kOmne];
+          let vApp = app[kApp];
+
+          if (kOmne === "viaPublica") {
+            vOmne = `${primero.viaPublica} ${primero.numero}${
+              primero.piso ? ", " + primero.piso : ""
+            }`.trim();
+          }
+          if (kOmne === "codPaisNacionalidad") {
+            vOmne = primero.codPaisNacionalidad || "";
+            vApp = app.nacionalidad || "";
+          }
+
+          if (vOmne !== vApp) {
+            cambios[kApp] = vOmne;
+          }
+        });
+
+        if (Object.keys(cambios).length) {
+          trabajadoresParaModificar.push({ dni, cambios });
+        }
+      } else {
+        // — existe en Omne pero no en la App → crear
+        trabajadoresParaCrear.push({ dni, datos: contratosOmne });
+      }
+    });
+
+    // 4) Detectar eliminaciones: cualquier empleado en la App
+    //    cuyo DNI NO aparezca en Omne
+    const todosDNIomne = new Set(
+      trabajadoresOmneModificados.map((t) => t.documento),
+    );
+    Object.keys(appPorDNI).forEach((dniApp) => {
+      if (!todosDNIomne.has(dniApp)) {
+        trabajadoresParaEliminar.push({ dni: dniApp });
+      }
+    });
+
+    return {
+      modificar: trabajadoresParaModificar,
+      crear: trabajadoresParaCrear,
+      eliminar: trabajadoresParaEliminar,
+    };
   }
 
   async guardarTrabajadoresOmne() {
@@ -185,6 +320,10 @@ export class TrabajadorService {
 
   async resolverCaptcha(): Promise<boolean> {
     return true;
+  }
+
+  normalizarDNIs() {
+    return this.schTrabajadores.normalizarDNIs();
   }
 
   async getResponsableTienda(idTienda: number) {
