@@ -1,4 +1,12 @@
-import { Controller, Get, Query, UseGuards, Post, Body } from "@nestjs/common";
+import {
+  Controller,
+  Get,
+  Query,
+  UseGuards,
+  Post,
+  Body,
+  InternalServerErrorException,
+} from "@nestjs/common";
 import { SchedulerGuard } from "../guards/scheduler.guard";
 import { TrabajadorService } from "./trabajadores.class";
 import { AuthGuard } from "../guards/auth.guard";
@@ -43,25 +51,30 @@ export class TrabajadoresController {
     const trabajadoresOmneModificados =
       await this.trabajadorInstance.getTrabajadoresModificadosOmne();
 
-    const arrayDNIModificadosOmne = this.trabajadorInstance.createArrayDNI(
-      trabajadoresOmneModificados,
-    );
+    // const arrayDNIModificadosOmne = this.trabajadorInstance.createArrayDNI(
+    //   trabajadoresOmneModificados,
+    // );
 
     const trabajadoresAppInvocados =
-      await this.trabajadorInstance.getTrabajadoresPorDNI(
-        arrayDNIModificadosOmne,
-      );
+      await this.trabajadorInstance.getAllTrabajadores({});
 
     const cambiosDetectados = this.trabajadorInstance.cambiosDetectados(
       trabajadoresAppInvocados,
       trabajadoresOmneModificados,
     );
 
-    // return trabajadoresOmneModificados;
-
     await this.trabajadorInstance.updateManyTrabajadores(
       cambiosDetectados.modificar,
     );
+
+    await this.trabajadorInstance.deleteManyTrabajadores(
+      cambiosDetectados.eliminar,
+    );
+
+    // Falta el crear, que se necesitan los contratos obligatoriamente.
+    // await this.trabajadorInstance.createManyTrabajadores(
+    //   cambiosDetectados.crear,
+    // );
 
     return {
       cambiosDetectados,
@@ -180,6 +193,20 @@ export class TrabajadoresController {
     } catch (err) {
       console.log(err);
       return { ok: false, message: err.message };
+    }
+  }
+
+  @UseGuards(SchedulerGuard)
+  @Post("normalizarDNIs")
+  async normalizarDNIs() {
+    try {
+      console.log(await this.trabajadorInstance.normalizarDNIs());
+      return;
+    } catch (err) {
+      console.log(err);
+      throw new InternalServerErrorException(
+        "Error al normalizar los DNIs de los trabajadores",
+      );
     }
   }
 

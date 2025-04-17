@@ -10,6 +10,15 @@ import {
 } from "./trabajadores.dto";
 import { axiosBCInstance } from "src/axios/axiosBC";
 
+export interface TIncludeTrabajador {
+  contratos?: boolean;
+  responsable?: boolean;
+  tienda?: boolean;
+  roles?: boolean;
+  permisos?: boolean;
+  empresa?: boolean;
+}
+
 @Injectable()
 export class TrabajadorDatabaseService {
   constructor(
@@ -196,12 +205,72 @@ export class TrabajadorDatabaseService {
     );
   }
 
+  deleteManyTrabajadores(dnis: { dni: string }[]) {
+    return this.prisma.trabajador.deleteMany({
+      where: {
+        dni: { in: dnis.map((dni) => dni.dni) },
+      },
+    });
+  }
+
+  normalizarDNIs() {
+    return this.prisma.$executeRawUnsafe(`
+      UPDATE "Trabajador"
+      SET "dni" = UPPER(
+        REGEXP_REPLACE("dni", '\\s+', '', 'g')
+      );
+    `);
+    //   return this.prisma.$queryRaw`
+    // SELECT UPPER(REGEXP_REPLACE(dni, '\\s+', '', 'g')) AS norm,
+    //        COUNT(*) AS cnt
+    // FROM "Trabajador"
+    // GROUP BY norm
+    // HAVING COUNT(*) > 1;
+    // `;
+  }
+
   getTrabajadoresPorDNI(dnisArray: string[]) {
     return this.prisma.trabajador.findMany({
       where: {
         dni: { in: dnisArray },
       },
     });
+  }
+
+  async getAllTrabajadores(include: TIncludeTrabajador) {
+    const trabajadores = await this.prisma.trabajador.findMany({
+      where: {
+        // Filtra para incluir solo trabajadores con al menos un contrato vigente
+        contratos: {
+          some: {
+            fechaBaja: null, // Contrato aún vigente
+          },
+        },
+      },
+      include: {
+        contratos: include.contratos
+          ? {
+              where: {
+                fechaBaja: null, // Para contratos aún vigentes
+              },
+              orderBy: {
+                fechaAlta: "desc", // Ordena por la fecha más reciente
+              },
+              take: 1, // Toma solo el contrato más reciente
+            }
+          : false,
+        responsable: include.responsable || false,
+        tienda: include.tienda || false,
+        roles: include.roles || false,
+        permisos: include.permisos || false,
+        empresa: include.empresa || false,
+      },
+      orderBy: {
+        nombreApellidos: "asc",
+      },
+    });
+
+    return trabajadores;
   }
 
   // Función que inserta un trabajador en la base de datos
