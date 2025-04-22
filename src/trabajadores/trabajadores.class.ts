@@ -21,6 +21,40 @@ import {
   TrabajadorFormRequest,
 } from "./trabajadores.dto";
 
+interface TOmneTrabajador {
+  noPerceptor: string;
+  apellidosYNombre: string;
+  nombre: string;
+  email: string;
+  documento: string;
+  viaPublica: string;
+  numero: string;
+  piso: string;
+  poblacion: string;
+  noTelfMovilPersonal: string;
+  nacionalidad: number;
+  codPaisNacionalidad: string;
+  noAfiliacion: string;
+  cp: string;
+  centroTrabajo: string;
+  antiguedadEmpresa: string;
+  altaContrato: string;
+  bajaEmpresa: string;
+  cambioAntiguedad: string;
+  categoria: string;
+  fechaCalculoAntiguedad: string;
+  tipoContrato: string;
+  systemModifiedAt: string;
+  systemCreatedAt: string;
+  horassemana: number;
+  descripcionCentro: string;
+  auxiliaryIndex1: string;
+  auxiliaryIndex2: number;
+  auxiliaryIndex3: string;
+  auxiliaryIndex4: string;
+  empresaID: string;
+}
+
 @Injectable()
 export class TrabajadorService {
   constructor(
@@ -84,7 +118,12 @@ export class TrabajadorService {
     return this.schTrabajadores.deleteManyTrabajadores(dnis);
   }
 
-  cambiosDetectados(trabajadoresAppInvocados, trabajadoresOmneModificados) {
+  cambiosDetectados(
+    trabajadoresAppInvocados: Prisma.TrabajadorGetPayload<{
+      include: { contratos: true };
+    }>[],
+    trabajadoresOmneModificados: TOmneTrabajador[],
+  ) {
     const trabajadoresParaModificar = [];
     const trabajadoresParaCrear = [];
     const trabajadoresParaEliminar = [];
@@ -134,12 +173,21 @@ export class TrabajadorService {
               primero.piso ? ", " + primero.piso : ""
             }`.trim();
           }
+
           if (kOmne === "codPaisNacionalidad") {
             vOmne = primero.codPaisNacionalidad || "";
             vApp = app.nacionalidad || "";
           }
 
-          if (vOmne !== vApp) {
+          if (kOmne === "horassemana") {
+            vOmne = this.conversorHorasContratoAPorcentaje(vOmne);
+
+            if (vApp.contratos[0] && vApp.contratos[0].horasContrato) {
+              if (vOmne != vApp.contratos[0]?.horasContrato) {
+                cambios[kApp] = vOmne;
+              }
+            }
+          } else if (vOmne !== vApp) {
             cambios[kApp] = vOmne;
           }
         });
@@ -169,6 +217,14 @@ export class TrabajadorService {
       crear: trabajadoresParaCrear,
       eliminar: trabajadoresParaEliminar,
     };
+  }
+
+  private conversorHorasContratoAPorcentaje(horasContrato: number) {
+    if (horasContrato > 0) {
+      return Math.round((horasContrato / 40) * 100 * 100) / 100;
+    } else {
+      return 0;
+    }
   }
 
   async guardarTrabajadoresOmne() {

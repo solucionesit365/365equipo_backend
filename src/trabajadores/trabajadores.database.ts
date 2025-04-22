@@ -138,60 +138,53 @@ export class TrabajadorDatabaseService {
         },
       ];
 
-      // Obtener parámetros (incluida la fecha de sincronización)
-      const parametros = await this.parametrosService.getParametros(
-        "sincro_trabajadores",
-      );
-      console.log(
-        "Última fecha de sincronización: " +
-          DateTime.fromJSDate(parametros[0].lastSyncWorkers).toISO(),
-      );
+      // // Obtener parámetros (incluida la fecha de sincronización)
+      // const parametros = await this.parametrosService.getParametros(
+      //   "sincro_trabajadores",
+      // );
+      // console.log(
+      //   "Última fecha de sincronización: " +
+      //     DateTime.fromJSDate(parametros[0].lastSyncWorkers).toISO(),
+      // );
 
-      if (!parametros[0].lastSyncWorkers) {
-        // Retornamos un array con el error para que el caller pueda iterar sin problemas.
-        return [
-          { error: "No se ha encontrado la última fecha de sincronización." },
-        ];
-      }
+      // if (!parametros[0].lastSyncWorkers) {
+      //   // Retornamos un array con el error para que el caller pueda iterar sin problemas.
+      //   return [
+      //     { error: "No se ha encontrado la última fecha de sincronización." },
+      //   ];
+      // }
 
       // Ejecutar las consultas en paralelo para cada empresa
       const resultados = await Promise.all(
         empresas.map(async ({ empresaID, nombre }) => {
-          try {
-            const lastSyncWorkers = DateTime.fromJSDate(
-              parametros[0].lastSyncWorkers,
-            );
+          const response = await axiosBCInstance.get(
+            `Production/api/Miguel/365ObradorAPI/v1.0/companies(${empresaID})/perceptoresQuery`,
+            // ?$filter=SystemModifiedAt gt ${lastSyncWorkers
+            //   .toUTC()
+            //   .toISO()}`,
+          );
+          const trabajadores = response.data.value;
 
-            if (!lastSyncWorkers.isValid) {
-              throw new Error("Fecha de sincronización no válida.");
-            }
-
-            const response = await axiosBCInstance.get(
-              `Production/api/Miguel/365ObradorAPI/v1.0/companies(${empresaID})/perceptoresQuery`,
-              // ?$filter=SystemModifiedAt gt ${lastSyncWorkers
-              //   .toUTC()
-              //   .toISO()}`,
-            );
-            const trabajadores = response.data.value;
-
-            return trabajadores.length === 0
-              ? {
-                  empresaID,
-                  nombre,
-                  mensaje: "No hay trabajadores nuevos ni actualizaciones.",
-                }
-              : { empresaID, nombre, trabajadores };
-          } catch (error) {
-            return { empresaID, nombre, error: error.message };
-          }
+          return trabajadores.length === 0
+            ? {
+                empresaID,
+                nombre,
+                mensaje: "No hay trabajadores nuevos ni actualizaciones.",
+              }
+            : { empresaID, nombre, trabajadores };
         }),
       );
 
       return resultados;
     } catch (error) {
-      return [{ error: error.message }];
+      console.log(error);
+      throw new InternalServerErrorException();
     }
   }
+
+  // async getPerceptoresExtraData() {
+
+  // }
 
   // Update Many con diferentes valores a modificar
   async updateManyTrabajadores(modificaciones: any[]) {
@@ -237,7 +230,18 @@ export class TrabajadorDatabaseService {
     });
   }
 
-  async getAllTrabajadores(include: TIncludeTrabajador) {
+  async getAllTrabajadores(include: TIncludeTrabajador): Promise<
+    Prisma.TrabajadorGetPayload<{
+      include: {
+        contratos?: true;
+        responsable?: true;
+        tienda?: true;
+        roles?: true;
+        permisos?: true;
+        empresa?: true;
+      };
+    }>[]
+  > {
     const trabajadores = await this.prisma.trabajador.findMany({
       where: {
         // Filtra para incluir solo trabajadores con al menos un contrato vigente

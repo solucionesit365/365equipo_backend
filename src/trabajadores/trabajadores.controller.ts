@@ -13,6 +13,7 @@ import { AuthGuard } from "../guards/auth.guard";
 import { Roles } from "../decorators/role.decorator";
 import { User } from "../decorators/get-user.decorator";
 import { UserRecord } from "firebase-admin/auth";
+import { Prisma } from "@prisma/client";
 import {
   CreateTrabajadorRequestDto,
   DeleteTrabajadorDto,
@@ -56,7 +57,11 @@ export class TrabajadoresController {
     // );
 
     const trabajadoresAppInvocados =
-      await this.trabajadorInstance.getAllTrabajadores({});
+      (await this.trabajadorInstance.getAllTrabajadores({
+        contratos: true,
+      })) as Array<
+        Prisma.TrabajadorGetPayload<{ include: { contratos: true } }>
+      >;
 
     const cambiosDetectados = this.trabajadorInstance.cambiosDetectados(
       trabajadoresAppInvocados,
