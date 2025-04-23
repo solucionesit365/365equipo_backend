@@ -15,7 +15,7 @@ import {
   TrabajadorDatabaseService,
 } from "./trabajadores.database";
 import { UserRecord } from "firebase-admin/auth";
-import { Prisma } from "@prisma/client";
+import { Prisma, Trabajador } from "@prisma/client";
 import {
   CreateTrabajadorRequestDto,
   TrabajadorFormRequest,
@@ -114,8 +114,121 @@ export class TrabajadorService {
     return this.schTrabajadores.updateManyTrabajadores(modificaciones);
   }
 
+  // Método para actualizar contratos
+  updateManyContratos(
+    contratosModificaciones: Array<{
+      contratoId: string;
+      horasContrato: number;
+    }>,
+  ) {
+    return this.schTrabajadores.updateManyContratos(contratosModificaciones);
+  }
+
   deleteManyTrabajadores(dnis: { dni: string }[]) {
     return this.schTrabajadores.deleteManyTrabajadores(dnis);
+  }
+
+  // Todo a mayúsculas y quitar espacios en blanco
+  private normalizarDNI(dni: string) {
+    return String(dni).toUpperCase().replace(/\s+/g, "");
+  }
+
+  getCambiosDetectados(
+    trabajadoresApp: Prisma.TrabajadorGetPayload<{
+      include: { contratos: true };
+    }>[],
+    trabajadoresOmne: TOmneTrabajador[],
+  ) {
+    const arrayCambios: { dni: string; cambios: Partial<Trabajador> }[] = [];
+
+    for (let i = 0; i < trabajadoresOmne.length; i += 1) {
+      for (let j = 0; j < trabajadoresApp.length; j += 1) {
+        if (
+          this.normalizarDNI(trabajadoresOmne[i].documento) ===
+          this.normalizarDNI(trabajadoresApp[j].dni)
+        ) {
+          // Nombre y apellidos
+          if (
+            trabajadoresOmne[i].apellidosYNombre !=
+            trabajadoresApp[j].nombreApellidos
+          ) {
+            arrayCambios.push({
+              dni: this.normalizarDNI(trabajadoresOmne[i].documento),
+              cambios: {
+                nombreApellidos: trabajadoresOmne[i].apellidosYNombre,
+              },
+            });
+          }
+
+          // Email
+          if (trabajadoresOmne[i].email != trabajadoresApp[j].emails) {
+            arrayCambios.push({
+              dni: this.normalizarDNI(trabajadoresOmne[i].documento),
+              cambios: { emails: trabajadoresOmne[i].email },
+            });
+          }
+
+          // Teléfono
+          if (
+            trabajadoresOmne[i].noTelfMovilPersonal !=
+            trabajadoresApp[j].telefonos
+          ) {
+            arrayCambios.push({
+              dni: this.normalizarDNI(trabajadoresOmne[i].documento),
+              cambios: { telefonos: trabajadoresOmne[i].noTelfMovilPersonal },
+            });
+          }
+
+          // Dirección
+          if (trabajadoresOmne[i].viaPublica != trabajadoresApp[j].direccion) {
+            arrayCambios.push({
+              dni: this.normalizarDNI(trabajadoresOmne[i].documento),
+              cambios: { direccion: trabajadoresOmne[i].viaPublica },
+            });
+          }
+
+          // Ciudad
+          if (trabajadoresOmne[i].poblacion != trabajadoresApp[j].ciudad) {
+            arrayCambios.push({
+              dni: this.normalizarDNI(trabajadoresOmne[i].documento),
+              cambios: { ciudad: trabajadoresOmne[i].poblacion },
+            });
+          }
+
+          // Nacionalidad
+          if (
+            trabajadoresOmne[i].codPaisNacionalidad !=
+            trabajadoresApp[j].nacionalidad
+          ) {
+            arrayCambios.push({
+              dni: this.normalizarDNI(trabajadoresOmne[i].documento),
+              cambios: {
+                nacionalidad: trabajadoresOmne[i].codPaisNacionalidad,
+              },
+            });
+          }
+
+          // Código postal
+          if (trabajadoresOmne[i].cp != trabajadoresApp[j].codigoPostal) {
+            arrayCambios.push({
+              dni: this.normalizarDNI(trabajadoresOmne[i].documento),
+              cambios: { codigoPostal: trabajadoresOmne[i].cp },
+            });
+          }
+
+          // Número de la seguridad social
+          if (
+            trabajadoresOmne[i].noAfiliacion !=
+            trabajadoresApp[j].nSeguridadSocial
+          ) {
+            arrayCambios.push({
+              dni: this.normalizarDNI(trabajadoresOmne[i].documento),
+              cambios: { nSeguridadSocial: trabajadoresOmne[i].noAfiliacion },
+            });
+          }
+        }
+      }
+    }
   }
 
   cambiosDetectados(
@@ -127,6 +240,10 @@ export class TrabajadorService {
     const trabajadoresParaModificar = [];
     const trabajadoresParaCrear = [];
     const trabajadoresParaEliminar = [];
+    const contratosParaActualizar = []; // Nueva estructura para cambios en contratos
+
+    console.log(`Trabajadores App: ${trabajadoresAppInvocados.length}`);
+    console.log(`Trabajadores Omne: ${trabajadoresOmneModificados.length}`);
 
     // 1) Mapa de empleados en la App, por DNI
     const appPorDNI = trabajadoresAppInvocados.reduce((acc, t) => {
@@ -136,11 +253,19 @@ export class TrabajadorService {
 
     // 2) Agrupar datos de Omne por DNI (puede haber varios contratos)
     const omnePorDNI = trabajadoresOmneModificados.reduce((acc, t) => {
-      const dni = t.documento;
+      // Normalizar el documento para asegurar consistencia
+      const dni = String(t.documento || "")
+        .toUpperCase()
+        .replace(/\s+/g, "");
+      if (!dni) return acc; // Ignorar registros sin DNI
+
       if (!acc[dni]) acc[dni] = [];
       acc[dni].push(t);
       return acc;
     }, {});
+
+    console.log(`DNIs únicos en App: ${Object.keys(appPorDNI).length}`);
+    console.log(`DNIs únicos en Omne: ${Object.keys(omnePorDNI).length}`);
 
     // 3) Recorrer cada DNI que viene de Omne
     Object.entries(omnePorDNI).forEach(([dni, contratosOmne]) => {
@@ -162,41 +287,70 @@ export class TrabajadorService {
           codPaisNacionalidad: "nacionalidad",
           cp: "codigoPostal",
           empresaID: "empresaId",
+          // Eliminar horasContrato del mapeo ya que pertenece al contrato, no al trabajador
         };
 
         Object.entries(propsMap).forEach(([kOmne, kApp]) => {
           let vOmne = primero[kOmne];
           let vApp = app[kApp];
 
+          // Normalizar valores para comparación segura
+          if (vOmne === undefined || vOmne === null) vOmne = "";
+          if (vApp === undefined || vApp === null) vApp = "";
+
+          // Normalizar a string para comparaciones consistentes
+          vOmne = String(vOmne);
+
+          // Caso especial: combinación de campos para formar dirección
           if (kOmne === "viaPublica") {
-            vOmne = `${primero.viaPublica} ${primero.numero}${
+            vOmne = `${primero.viaPublica || ""} ${primero.numero || ""}${
               primero.piso ? ", " + primero.piso : ""
             }`.trim();
           }
 
+          // Caso especial: nacionalidad
           if (kOmne === "codPaisNacionalidad") {
-            vOmne = primero.codPaisNacionalidad || "";
-            vApp = app.nacionalidad || "";
+            vOmne = String(primero.codPaisNacionalidad || "");
+            vApp = String(app.nacionalidad || "");
           }
 
-          if (kOmne === "horassemana") {
-            vOmne = this.conversorHorasContratoAPorcentaje(vOmne);
-
-            if (vApp.contratos[0] && vApp.contratos[0].horasContrato) {
-              if (vOmne != vApp.contratos[0]?.horasContrato) {
-                cambios[kApp] = vOmne;
-              }
-            }
-          } else if (vOmne !== vApp) {
+          // Comparación general para otros campos
+          if (String(vOmne) !== String(vApp)) {
             cambios[kApp] = vOmne;
           }
         });
 
+        // Caso especial: horas contrato - Manejo separado para actualizaciones de contrato
+        if (
+          primero.horassemana !== undefined &&
+          app.contratos &&
+          app.contratos.length > 0
+        ) {
+          const horasContratoPorcentaje =
+            this.conversorHorasContratoAPorcentaje(
+              parseFloat(String(primero.horassemana)) || 0,
+            );
+
+          const appHorasContrato = app.contratos[0].horasContrato || 0;
+          const contratoId = app.contratos[0].id;
+
+          // Si hay diferencia en las horas, registrar para actualización separada
+          if (Math.abs(horasContratoPorcentaje - appHorasContrato) > 0.01) {
+            contratosParaActualizar.push({
+              contratoId,
+              horasContrato: horasContratoPorcentaje,
+              trabajadorId: app.id,
+            });
+          }
+        }
+
         if (Object.keys(cambios).length) {
+          console.log(`Cambios detectados para DNI ${dni}:`, cambios);
           trabajadoresParaModificar.push({ dni, cambios });
         }
       } else {
         // — existe en Omne pero no en la App → crear
+        console.log(`Trabajador nuevo con DNI ${dni}`);
         trabajadoresParaCrear.push({ dni, datos: contratosOmne });
       }
     });
@@ -204,18 +358,30 @@ export class TrabajadorService {
     // 4) Detectar eliminaciones: cualquier empleado en la App
     //    cuyo DNI NO aparezca en Omne
     const todosDNIomne = new Set(
-      trabajadoresOmneModificados.map((t) => t.documento),
+      trabajadoresOmneModificados
+        .filter((t) => t.documento) // Filtrar registros sin documento
+        .map((t) => String(t.documento).toUpperCase().replace(/\s+/g, "")),
     );
+
     Object.keys(appPorDNI).forEach((dniApp) => {
       if (!todosDNIomne.has(dniApp)) {
+        console.log(`Trabajador a eliminar con DNI ${dniApp}`);
         trabajadoresParaEliminar.push({ dni: dniApp });
       }
     });
+
+    console.log(
+      `Trabajadores a modificar: ${trabajadoresParaModificar.length}`,
+    );
+    console.log(`Trabajadores a crear: ${trabajadoresParaCrear.length}`);
+    console.log(`Trabajadores a eliminar: ${trabajadoresParaEliminar.length}`);
+    console.log(`Contratos a actualizar: ${contratosParaActualizar.length}`);
 
     return {
       modificar: trabajadoresParaModificar,
       crear: trabajadoresParaCrear,
       eliminar: trabajadoresParaEliminar,
+      actualizarContratos: contratosParaActualizar, // Nueva propiedad
     };
   }
 

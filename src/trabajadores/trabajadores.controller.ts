@@ -49,29 +49,41 @@ export class TrabajadoresController {
 
   @Get("sincroTrabajadoresOmne")
   async sincroTrabajadoresOmne() {
-    const trabajadoresOmneModificados =
+    const trabajadoresOmne =
       await this.trabajadorInstance.getTrabajadoresModificadosOmne();
 
     // const arrayDNIModificadosOmne = this.trabajadorInstance.createArrayDNI(
     //   trabajadoresOmneModificados,
     // );
 
-    const trabajadoresAppInvocados =
-      (await this.trabajadorInstance.getAllTrabajadores({
-        contratos: true,
-      })) as Array<
-        Prisma.TrabajadorGetPayload<{ include: { contratos: true } }>
-      >;
-
+    const trabajadoresApp = (await this.trabajadorInstance.getAllTrabajadores({
+      contratos: true,
+    })) as Array<Prisma.TrabajadorGetPayload<{ include: { contratos: true } }>>;
+    return {
+      trabajadoresOmne,
+      trabajadoresApp,
+    };
     const cambiosDetectados = this.trabajadorInstance.cambiosDetectados(
-      trabajadoresAppInvocados,
-      trabajadoresOmneModificados,
+      trabajadoresApp,
+      trabajadoresOmne,
     );
 
+    // Actualizar trabajadores
     await this.trabajadorInstance.updateManyTrabajadores(
       cambiosDetectados.modificar,
     );
 
+    // Actualizar contratos - Nuevo paso
+    if (
+      cambiosDetectados.actualizarContratos &&
+      cambiosDetectados.actualizarContratos.length > 0
+    ) {
+      await this.trabajadorInstance.updateManyContratos(
+        cambiosDetectados.actualizarContratos,
+      );
+    }
+
+    // Eliminar trabajadores
     await this.trabajadorInstance.deleteManyTrabajadores(
       cambiosDetectados.eliminar,
     );
@@ -83,8 +95,8 @@ export class TrabajadoresController {
 
     return {
       cambiosDetectados,
-      trabajadoresAppInvocados,
-      trabajadoresOmneModificados,
+      trabajadoresApp,
+      trabajadoresOmne,
     };
   }
 

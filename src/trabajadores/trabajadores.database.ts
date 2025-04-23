@@ -198,6 +198,27 @@ export class TrabajadorDatabaseService {
     );
   }
 
+  // Método para actualizar contratos
+  async updateManyContratos(
+    contratosModificaciones: Array<{
+      contratoId: string;
+      horasContrato: number;
+    }>,
+  ) {
+    if (!contratosModificaciones || contratosModificaciones.length === 0) {
+      return [];
+    }
+
+    return await this.prisma.$transaction(
+      contratosModificaciones.map(({ contratoId, horasContrato }) =>
+        this.prisma.contrato2.update({
+          where: { id: contratoId },
+          data: { horasContrato },
+        }),
+      ),
+    );
+  }
+
   deleteManyTrabajadores(dnis: { dni: string }[]) {
     return this.prisma.trabajador.deleteMany({
       where: {
