@@ -94,10 +94,6 @@ export class NotificacionHorasExtrasMongoService {
     const db = (await this.mongoDbService.getConexion()).db();
     const notificacionesCollection = db.collection("notificacionesHorasExtras");
 
-    console.log("ID principal:", id);
-    console.log("Hora extra ID:", horaExtraId);
-    console.log("Datos:", data);
-
     const horaExtra = data.horasExtras?.[0];
     if (!horaExtra) {
       return {
@@ -122,7 +118,6 @@ export class NotificacionHorasExtrasMongoService {
         },
       },
     );
-    console.log("Resultado del update:", result);
 
     return {
       ok: result.modifiedCount > 0,
