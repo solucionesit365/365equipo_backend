@@ -74,4 +74,62 @@ export class NotificacionHorasExtrasMongoService {
       },
     );
   }
+
+  //Eliminar una notificacion de horas extras
+  async deleteNotificacionHorasExtras(idHorasExtras: string) {
+    const db = (await this.mongoDbService.getConexion()).db();
+    const notificacionesCollection = db.collection("notificacionesHorasExtras");
+
+    return await notificacionesCollection.deleteOne({
+      _id: new ObjectId(idHorasExtras),
+    });
+  }
+
+  //Update una notificacion de horas extras
+  async updateNotificacionHorasExtras(
+    id: string,
+    horaExtraId: string,
+    data: TNotificacionHorasExtras,
+  ) {
+    const db = (await this.mongoDbService.getConexion()).db();
+    const notificacionesCollection = db.collection("notificacionesHorasExtras");
+
+    console.log("ID principal:", id);
+    console.log("Hora extra ID:", horaExtraId);
+    console.log("Datos:", data);
+
+    const horaExtra = data.horasExtras?.[0];
+    if (!horaExtra) {
+      return {
+        ok: false,
+        message: "No se proporcionó información válida para la hora extra",
+      };
+    }
+
+    const result = await notificacionesCollection.updateOne(
+      {
+        _id: new ObjectId(id),
+        "horasExtras._id": horaExtraId,
+      },
+      {
+        $set: {
+          trabajador: data.trabajador,
+          motivo: data.motivo,
+
+          "horasExtras.$.fecha": horaExtra.fecha,
+          "horasExtras.$.horaInicio": horaExtra.horaInicio,
+          "horasExtras.$.horaFinal": horaExtra.horaFinal,
+        },
+      },
+    );
+    console.log("Resultado del update:", result);
+
+    return {
+      ok: result.modifiedCount > 0,
+      message:
+        result.modifiedCount > 0
+          ? "Datos actualizados correctamente"
+          : "No se encontró o no se modificó nada",
+    };
+  }
 }

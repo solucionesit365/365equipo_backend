@@ -49,4 +49,22 @@ export class NotificacionHorasExtrasClass {
       data,
     );
   }
+
+  async deleteNotificacionHorasExtras(idHorasExtras: string) {
+    return await this.shNotificacionhorasExtras.deleteNotificacionHorasExtras(
+      idHorasExtras,
+    );
+  }
+
+  async updateNotificacionHorasExtras(
+    id: string,
+    horaExtraId: string,
+    data: TNotificacionHorasExtras,
+  ) {
+    return await this.shNotificacionhorasExtras.updateNotificacionHorasExtras(
+      id,
+      horaExtraId,
+      data,
+    );
+  }
 }
