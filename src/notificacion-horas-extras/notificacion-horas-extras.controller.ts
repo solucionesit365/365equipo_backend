@@ -152,4 +152,54 @@ export class NotificacionHorasExtrasController {
       };
     }
   }
+
+  @UseGuards(AuthGuard)
+  @Post("updateNotificacionHorasExtrasComentario")
+  updateNotificacionHorasExtrasComentario(
+    @Body()
+    body: {
+      id: string;
+      horaExtraId: string;
+      comentario?: {
+        fechaRespuesta: Date;
+        mensaje: string;
+        nombre: string;
+      }[];
+    },
+  ) {
+    try {
+      return this.shNotificacionhorasExtras.updateComentarioHorasExtras(
+        body.id,
+        body.horaExtraId,
+        body.comentario?.map((c) => ({
+          ...c,
+          fechaRespuesta: new Date(c.fechaRespuesta).toISOString(),
+        })),
+      );
+    } catch (error) {
+      console.log(error);
+      return {
+        ok: false,
+        message: "Error al actualizar la notificación de horas extras",
+        error: error.message,
+      };
+    }
+  }
+  @Post("updateUltimoLeido")
+  async marcarLeido(
+    @Body()
+    body: {
+      id: string;
+      horaExtraId: string;
+      usuarioId: string;
+      fecha: string;
+    },
+  ) {
+    return await this.shNotificacionhorasExtras.marcarComentariosComoLeidos(
+      body.id,
+      body.horaExtraId,
+      body.usuarioId,
+      body.fecha,
+    );
+  }
 }

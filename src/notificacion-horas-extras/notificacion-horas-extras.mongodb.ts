@@ -127,4 +127,51 @@ export class NotificacionHorasExtrasMongoService {
           : "No se encontró o no se modificó nada",
     };
   }
+
+  //update comentario
+  async updateComentarioHorasExtras(
+    id: string,
+    horaExtraId: string,
+    comentario: {
+      nombre: string;
+      fechaRespuesta: string;
+      mensaje: string;
+    }[],
+  ) {
+    const db = (await this.mongoDbService.getConexion()).db();
+    const notificacionesCollection = db.collection("notificacionesHorasExtras");
+
+    return await notificacionesCollection.updateOne(
+      { _id: new ObjectId(id), "horasExtras._id": horaExtraId },
+      {
+        $push: {
+          "horasExtras.$.comentario": {
+            $each: comentario,
+          },
+        },
+      },
+    );
+  }
+
+  async marcarComentariosComoLeidos(
+    id: string,
+    horaExtraId: string,
+    usuarioId: string,
+    fecha: string,
+  ) {
+    const db = (await this.mongoDbService.getConexion()).db();
+    const notificacionesCollection = db.collection("notificacionesHorasExtras");
+
+    return await notificacionesCollection.updateOne(
+      {
+        _id: new ObjectId(id),
+        "horasExtras._id": horaExtraId,
+      },
+      {
+        $set: {
+          [`horasExtras.$.ultimosLeidos.${usuarioId}`]: fecha,
+        },
+      },
+    );
+  }
 }

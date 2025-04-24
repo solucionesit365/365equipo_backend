@@ -33,6 +33,13 @@ class THoraExtra {
 
   @IsBoolean()
   revision: boolean;
+
+  @IsString()
+  comentario?: {
+    fechaRespuesta: Date;
+    mensaje: string;
+    nombre: string;
+  }[];
 }
 
 export class TNotificacionHorasExtras {
