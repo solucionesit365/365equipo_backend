@@ -64,41 +64,43 @@ export class TrabajadoresController {
     //   trabajadoresOmne,
     //   trabajadoresApp,
     // };
-    const cambiosDetectados = this.trabajadorInstance.cambiosDetectados(
+    const cambiosDetectados = this.trabajadorInstance.getCambiosDetectados(
       trabajadoresApp,
       trabajadoresOmne,
     );
 
-    // Actualizar trabajadores
-    await this.trabajadorInstance.updateManyTrabajadores(
-      cambiosDetectados.modificar,
-    );
+    return cambiosDetectados;
 
-    // Actualizar contratos - Nuevo paso
-    if (
-      cambiosDetectados.actualizarContratos &&
-      cambiosDetectados.actualizarContratos.length > 0
-    ) {
-      await this.trabajadorInstance.updateManyContratos(
-        cambiosDetectados.actualizarContratos,
-      );
-    }
-
-    // Eliminar trabajadores
-    await this.trabajadorInstance.deleteManyTrabajadores(
-      cambiosDetectados.eliminar,
-    );
-
-    // Falta el crear, que se necesitan los contratos obligatoriamente.
-    // await this.trabajadorInstance.createManyTrabajadores(
-    //   cambiosDetectados.crear,
+    // // Actualizar trabajadores
+    // await this.trabajadorInstance.updateManyTrabajadores(
+    //   cambiosDetectados.modificar,
     // );
 
-    return {
-      cambiosDetectados,
-      trabajadoresApp,
-      trabajadoresOmne,
-    };
+    // // Actualizar contratos - Nuevo paso
+    // if (
+    //   cambiosDetectados.actualizarContratos &&
+    //   cambiosDetectados.actualizarContratos.length > 0
+    // ) {
+    //   await this.trabajadorInstance.updateManyContratos(
+    //     cambiosDetectados.actualizarContratos,
+    //   );
+    // }
+
+    // // Eliminar trabajadores
+    // await this.trabajadorInstance.deleteManyTrabajadores(
+    //   cambiosDetectados.eliminar,
+    // );
+
+    // // Falta el crear, que se necesitan los contratos obligatoriamente.
+    // // await this.trabajadorInstance.createManyTrabajadores(
+    // //   cambiosDetectados.crear,
+    // // );
+
+    // return {
+    //   cambiosDetectados,
+    //   trabajadoresApp,
+    //   trabajadoresOmne,
+    // };
   }
 
   @UseGuards(AuthGuard)

@@ -146,6 +146,7 @@ export class TrabajadorService {
     }[] = [];
 
     const arrayCrear: Prisma.TrabajadorCreateInput[] = [];
+    const arrayEliminar: { dni: string }[] = []; // Los que no estén en omne pero sí en la app
 
     for (let i = 0; i < trabajadoresOmne.length; i += 1) {
       for (let j = 0; j < trabajadoresApp.length; j += 1) {
@@ -235,7 +236,8 @@ export class TrabajadorService {
 
           // Fecha de nacimiento
           if (
-            DateTime.fromJSDate(trabajadoresApp[j].fechaNacimiento).hasSame(
+            trabajadoresOmne[i].fechaNacimiento &&
+            DateTime.fromJSDate(trabajadoresApp[j].fechaNacimiento)?.hasSame(
               trabajadoresOmne[i].fechaNacimiento,
               "day",
             ) === false
@@ -285,18 +287,60 @@ export class TrabajadorService {
                 horasContrato: this.conversorHorasContratoAPorcentaje(
                   parseFloat(String(trabajadoresOmne[i].horassemana)) || 0,
                 ),
-                inicioContrato: // ERROR, NO TENEMOS ESTA FECHA EN OMNE!! NO LA CORRECTA AL MENOS
-                fechaFin: trabajadoresOmne[i].bajaEmpresa,
-                fechaCalculoAntiguedad:
-                  trabajadoresOmne[i].fechaCalculoAntiguedad,
-                antiguedadEmpresa:
-                  trabajadoresOmne[i].antiguedadEmpresa.toString(),
+                inicioContrato:
+                  trabajadoresOmne[i].altaContrato === "0001-01-01"
+                    ? null
+                    : DateTime.fromFormat(
+                        trabajadoresOmne[i].altaContrato,
+                        "yyyy-MM-dd",
+                      ).toJSDate(),
+                fechaBaja:
+                  trabajadoresOmne[i].bajaEmpresa === "0001-01-01"
+                    ? null
+                    : DateTime.fromFormat(
+                        trabajadoresOmne[i].bajaEmpresa,
+                        "yyyy-MM-dd",
+                      ).toJSDate(),
+                finalContrato:
+                  trabajadoresOmne[i].bajaEmpresa === "0001-01-01"
+                    ? null
+                    : DateTime.fromFormat(
+                        trabajadoresOmne[i].bajaEmpresa,
+                        "yyyy-MM-dd",
+                      ).toJSDate(),
+                id: trabajadoresOmne[i].empresaID,
               },
             },
           });
         }
       }
     }
+
+    // Si el trabajador no está en Omne pero sí en la app, se considera para eliminar
+    for (let j = 0; j < trabajadoresApp.length; j += 1) {
+      let existe = false;
+      for (let i = 0; i < trabajadoresOmne.length; i += 1) {
+        if (
+          this.normalizarDNI(trabajadoresOmne[i].documento) ===
+          this.normalizarDNI(trabajadoresApp[j].dni)
+        ) {
+          existe = true;
+          break;
+        }
+      }
+
+      if (!existe) {
+        arrayEliminar.push({
+          dni: this.normalizarDNI(trabajadoresApp[j].dni),
+        });
+      }
+    }
+
+    return {
+      modificar: arrayCambios,
+      crear: arrayCrear,
+      eliminar: arrayEliminar,
+    };
   }
 
   cambiosDetectados(
