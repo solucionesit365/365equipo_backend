@@ -9,6 +9,7 @@ import { Request } from "express";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { simpleParser } from "mailparser";
 import { LoggerService } from "../logger/logger.service";
+import { axiosBCInstance } from "src/axios/axiosBC";
 
 @Controller("test")
 export class TestController {
@@ -64,6 +65,22 @@ export class TestController {
         extraData: { error: error.message, stack: error.stack },
       });
       return { message: "Error interno", error: error.message };
+    }
+  }
+
+  @Post("apieze")
+  async apieze() {
+    try {
+      const empresaID = "84290dc4-6e90-ef11-8a6b-7c1e5236b0db";
+      const data = await axiosBCInstance.get(
+        `Production/api/Miguel/365ObradorAPI/v1.0/companies(${empresaID})/perceptoresQuery`,
+        // `Production/api/eze/365ObradorAPI/v1.0/companies(${empresaID})/PerceptorsExtraData`,
+      );
+
+      return data.data;
+    } catch (err) {
+      console.log(err);
+      return;
     }
   }
 }
