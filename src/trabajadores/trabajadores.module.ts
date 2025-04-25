@@ -6,9 +6,9 @@ import { EmailModule } from "../email/email.module";
 import { SolicitudVacacionesModule } from "../solicitud-vacaciones/solicitud-vacaciones.module";
 import { TrabajadoresController } from "./trabajadores.controller";
 import { DiaPersonalModule } from "../dia-personal/dia-personal.module";
-import { MBCTokenModule } from "src/bussinesCentral/services/mbctoken/mbctoken.service.module";
-import { ParametrosModule } from "src/parametros/parametros.module";
-import { TiendasModule } from "src/tiendas/tiendas.module";
+import { MBCTokenModule } from "../bussinesCentral/services/mbctoken/mbctoken.service.module";
+import { ParametrosModule } from "../parametros/parametros.module";
+import { TiendasModule } from "../tiendas/tiendas.module";
 
 @Module({
   imports: [

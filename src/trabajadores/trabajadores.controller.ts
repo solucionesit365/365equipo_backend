@@ -47,6 +47,7 @@ export class TrabajadoresController {
     });
   }
 
+  // @UseGuards(AuthGuard)
   @Get("sincroTrabajadoresOmne")
   async sincroTrabajadoresOmne() {
     const trabajadoresOmne =
@@ -59,10 +60,10 @@ export class TrabajadoresController {
     const trabajadoresApp = (await this.trabajadorInstance.getAllTrabajadores({
       contratos: true,
     })) as Array<Prisma.TrabajadorGetPayload<{ include: { contratos: true } }>>;
-    return {
-      trabajadoresOmne,
-      trabajadoresApp,
-    };
+    // return {
+    //   trabajadoresOmne,
+    //   trabajadoresApp,
+    // };
     const cambiosDetectados = this.trabajadorInstance.cambiosDetectados(
       trabajadoresApp,
       trabajadoresOmne,

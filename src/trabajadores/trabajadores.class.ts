@@ -53,6 +53,7 @@ interface TOmneTrabajador {
   auxiliaryIndex3: string;
   auxiliaryIndex4: string;
   empresaID: string;
+  fechaNacimiento: DateTime | null;
 }
 
 @Injectable()
@@ -139,7 +140,12 @@ export class TrabajadorService {
     }>[],
     trabajadoresOmne: TOmneTrabajador[],
   ) {
-    const arrayCambios: { dni: string; cambios: Partial<Trabajador> }[] = [];
+    const arrayCambios: {
+      dni: string;
+      cambios: Partial<Trabajador>;
+    }[] = [];
+
+    const arrayCrear: Prisma.TrabajadorCreateInput[] = [];
 
     for (let i = 0; i < trabajadoresOmne.length; i += 1) {
       for (let j = 0; j < trabajadoresApp.length; j += 1) {
@@ -226,6 +232,68 @@ export class TrabajadorService {
               cambios: { nSeguridadSocial: trabajadoresOmne[i].noAfiliacion },
             });
           }
+
+          // Fecha de nacimiento
+          if (
+            DateTime.fromJSDate(trabajadoresApp[j].fechaNacimiento).hasSame(
+              trabajadoresOmne[i].fechaNacimiento,
+              "day",
+            ) === false
+          ) {
+            arrayCambios.push({
+              dni: this.normalizarDNI(trabajadoresOmne[i].documento),
+              cambios: {
+                fechaNacimiento: trabajadoresOmne[i].fechaNacimiento
+                  ? trabajadoresOmne[i].fechaNacimiento.toJSDate()
+                  : null,
+              },
+            });
+          }
+        } else {
+          // Si no hay coincidencia, se puede considerar que el trabajador no existe en la app
+          arrayCrear.push({
+            dni: this.normalizarDNI(trabajadoresOmne[i].documento),
+            nombreApellidos: trabajadoresOmne[i].apellidosYNombre,
+            emails: trabajadoresOmne[i].email,
+            telefonos: trabajadoresOmne[i].noTelfMovilPersonal,
+            direccion: trabajadoresOmne[i].viaPublica,
+            ciudad: trabajadoresOmne[i].poblacion,
+            nacionalidad: trabajadoresOmne[i].codPaisNacionalidad,
+            codigoPostal: trabajadoresOmne[i].cp,
+            nSeguridadSocial: trabajadoresOmne[i].noAfiliacion,
+            fechaNacimiento:
+              trabajadoresOmne[i].fechaNacimiento?.toJSDate() || null,
+            llevaEquipo: false,
+            tipoTrabajador: "Trabajador",
+            contratos: {
+              create: {
+                idEmpresa: trabajadoresOmne[i].empresaID,
+                fechaAlta:
+                  trabajadoresOmne[i].altaContrato === "0001-01-01"
+                    ? null
+                    : DateTime.fromFormat(
+                        trabajadoresOmne[i].altaContrato,
+                        "yyyy-MM-dd",
+                      ).toJSDate(),
+                fechaAntiguedad:
+                  trabajadoresOmne[i].antiguedadEmpresa === "0001-01-01"
+                    ? null
+                    : DateTime.fromFormat(
+                        trabajadoresOmne[i].antiguedadEmpresa,
+                        "yyyy-MM-dd",
+                      ).toJSDate(),
+                horasContrato: this.conversorHorasContratoAPorcentaje(
+                  parseFloat(String(trabajadoresOmne[i].horassemana)) || 0,
+                ),
+                inicioContrato: // ERROR, NO TENEMOS ESTA FECHA EN OMNE!! NO LA CORRECTA AL MENOS
+                fechaFin: trabajadoresOmne[i].bajaEmpresa,
+                fechaCalculoAntiguedad:
+                  trabajadoresOmne[i].fechaCalculoAntiguedad,
+                antiguedadEmpresa:
+                  trabajadoresOmne[i].antiguedadEmpresa.toString(),
+              },
+            },
+          });
         }
       }
     }

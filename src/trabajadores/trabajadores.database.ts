@@ -3,12 +3,12 @@ import { PrismaService } from "../prisma/prisma.service";
 import { DateTime } from "luxon";
 import { Prisma } from "@prisma/client";
 import { ParametrosService } from "../parametros/parametros.service";
-import { Tienda } from "src/tiendas/tiendas.class";
+import { Tienda } from "../tiendas/tiendas.class";
 import {
   CreateTrabajadorRequestDto,
   TrabajadorFormRequest,
 } from "./trabajadores.dto";
-import { axiosBCInstance } from "src/axios/axiosBC";
+import { AxiosBcService } from "../axios/axios-bc.service";
 
 export interface TIncludeTrabajador {
   contratos?: boolean;
@@ -25,6 +25,7 @@ export class TrabajadorDatabaseService {
     private prisma: PrismaService,
     private readonly parametrosService: ParametrosService,
     private readonly tiendaInstance: Tienda,
+    private readonly axiosBCService: AxiosBcService,
   ) {}
 
   async crearTrabajador(reqTrabajador: CreateTrabajadorRequestDto) {
@@ -157,14 +158,41 @@ export class TrabajadorDatabaseService {
       // Ejecutar las consultas en paralelo para cada empresa
       const resultados = await Promise.all(
         empresas.map(async ({ empresaID, nombre }) => {
-          const response = await axiosBCInstance.get(
+          const response = await this.axiosBCService.getAxios().get(
             `Production/api/Miguel/365ObradorAPI/v1.0/companies(${empresaID})/perceptoresQuery`,
             // ?$filter=SystemModifiedAt gt ${lastSyncWorkers
             //   .toUTC()
             //   .toISO()}`,
           );
-          const trabajadores = response.data.value;
 
+          const responseFechaNacimiento = await this.axiosBCService
+            .getAxios()
+            .get(
+              `Production/api/eze/365ObradorAPI/v1.0/companies(${empresaID})/PerceptorsExtraData`,
+            );
+
+          const trabajadores = response.data.value.map((trabajador) => {
+            const trabajadorRelacionado =
+              responseFechaNacimiento.data.value.find(
+                (extraData) => extraData.noPerceptor === trabajador.noPerceptor,
+              );
+
+            let fechaNacimiento = null;
+
+            if (trabajadorRelacionado.fechaNacimiento) {
+              if (trabajadorRelacionado.fechaNacimiento != "0001-01-01") {
+                fechaNacimiento = DateTime.fromFormat(
+                  trabajadorRelacionado.fechaNacimiento,
+                  "yyyy-MM-dd",
+                );
+              }
+            }
+
+            return {
+              ...trabajador,
+              fechaNacimiento,
+            };
+          });
           return trabajadores.length === 0
             ? {
                 empresaID,
