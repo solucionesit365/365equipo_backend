@@ -94,7 +94,10 @@ export class NotificacionHorasExtrasMongoService {
     const db = (await this.mongoDbService.getConexion()).db();
     const notificacionesCollection = db.collection("notificacionesHorasExtras");
 
-    const horaExtra = data.horasExtras?.[0];
+    const horaExtra = data.horasExtras?.find(
+      (h) => h._id.toString() === horaExtraId,
+    );
+
     if (!horaExtra) {
       return {
         ok: false,
@@ -110,8 +113,7 @@ export class NotificacionHorasExtrasMongoService {
       {
         $set: {
           trabajador: data.trabajador,
-          motivo: data.motivo,
-
+          "horasExtras.$.motivo": horaExtra.motivo,
           "horasExtras.$.fecha": horaExtra.fecha,
           "horasExtras.$.horaInicio": horaExtra.horaInicio,
           "horasExtras.$.horaFinal": horaExtra.horaFinal,
