@@ -4,6 +4,7 @@ import { DateTime } from "luxon";
 import { Prisma } from "@prisma/client";
 import { ParametrosService } from "../parametros/parametros.service";
 import { Tienda } from "../tiendas/tiendas.class";
+import pMap from "p-map";
 import {
   CreateTrabajadorRequestDto,
   TrabajadorFormRequest,
@@ -96,6 +97,21 @@ export class TrabajadorDatabaseService {
     });
 
     return true;
+  }
+
+  createManyTrabajadores(
+    arrayNuevosTrabajadores: Prisma.TrabajadorCreateInput[],
+  ) {
+    try {
+      return this.prisma.trabajador.createMany({
+        data: arrayNuevosTrabajadores,
+      });
+    } catch (err) {
+      console.log(err);
+      throw new InternalServerErrorException(
+        "Error al crear los trabajadores en la base de datos.",
+      );
+    }
   }
 
   // Función que obtiene los trabajadores desde Business Central
@@ -215,15 +231,56 @@ export class TrabajadorDatabaseService {
   // }
 
   // Update Many con diferentes valores a modificar
-  async updateManyTrabajadores(modificaciones: any[]) {
-    return await this.prisma.$transaction(
-      modificaciones.map(({ dni, cambios }) =>
-        this.prisma.trabajador.update({
-          where: { dni },
-          data: cambios,
-        }),
-      ),
+
+  async updateManyTrabajadores(
+    modificaciones: {
+      dni: string;
+      cambios: Omit<Prisma.TrabajadorUpdateInput, "contratos">;
+      nuevoContrato: Prisma.Contrato2CreateInput;
+    }[],
+  ) {
+    const CHUNK_SIZE = 300;
+    const CONCURRENCY = 3;
+
+    // Fragmenta el array en trozos de CHUNK_SIZE
+    const chunks: (typeof modificaciones)[] = [];
+    for (let i = 0; i < modificaciones.length; i += CHUNK_SIZE) {
+      chunks.push(modificaciones.slice(i, i + CHUNK_SIZE));
+    }
+
+    // Procesa cada chunk en paralelo (máx CONCURRENCY pendientes)
+    await pMap(
+      chunks,
+      async (chunk) => {
+        await this.prisma.$transaction(
+          chunk.map(({ dni, cambios, nuevoContrato }) =>
+            this.prisma.trabajador.update({
+              where: { dni },
+              data: {
+                ...cambios,
+                contratos: {
+                  // borra los antiguos
+                  deleteMany: {},
+                  // crea el nuevo contrato
+                  create: {
+                    fechaAlta: nuevoContrato.fechaAlta,
+                    fechaAntiguedad: nuevoContrato.fechaAntiguedad,
+                    horasContrato: nuevoContrato.horasContrato,
+                    inicioContrato: nuevoContrato.inicioContrato,
+                    fechaBaja: nuevoContrato.fechaBaja ?? null,
+                    finalContrato: nuevoContrato.finalContrato ?? null,
+                    // …otros campos si los hubiera
+                  },
+                },
+              },
+            }),
+          ),
+        );
+      },
+      { concurrency: CONCURRENCY },
     );
+
+    return { updated: modificaciones.length };
   }
 
   // Método para actualizar contratos

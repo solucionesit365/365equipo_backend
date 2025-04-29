@@ -111,7 +111,13 @@ export class TrabajadorService {
   }
 
   // Update Many con diferentes valores a modificar
-  updateManyTrabajadores(modificaciones: any[]) {
+  updateManyTrabajadores(
+    modificaciones: {
+      dni: string;
+      cambios: Omit<Prisma.TrabajadorUpdateInput, "contratos">;
+      nuevoContrato: Prisma.Contrato2CreateInput;
+    }[],
+  ) {
     return this.schTrabajadores.updateManyTrabajadores(modificaciones);
   }
 
@@ -123,6 +129,12 @@ export class TrabajadorService {
     }>,
   ) {
     return this.schTrabajadores.updateManyContratos(contratosModificaciones);
+  }
+
+  createManyTrabajadores(
+    arrayNuevosTrabajadores: Prisma.TrabajadorCreateInput[],
+  ) {
+    return this.schTrabajadores.createManyTrabajadores(arrayNuevosTrabajadores);
   }
 
   deleteManyTrabajadores(dnis: { dni: string }[]) {
@@ -140,175 +152,182 @@ export class TrabajadorService {
     }>[],
     trabajadoresOmne: TOmneTrabajador[],
   ) {
+    // 1) Construyo un Map de App por DNI
+    const appMap = new Map<string, (typeof trabajadoresApp)[0]>();
+    for (const appTrab of trabajadoresApp) {
+      const dniNorm = this.normalizarDNI(appTrab.dni);
+      appMap.set(dniNorm, appTrab);
+    }
+
+    // 2) Arrays de resultado
     const arrayCambios: {
       dni: string;
       cambios: Partial<Trabajador>;
+      contrato: {
+        fechaAlta: Date | null;
+        fechaAntiguedad: Date | null;
+        horasContrato: number;
+        inicioContrato: Date | null;
+        fechaBaja: Date | null;
+        finalContrato: Date | null;
+        id: string;
+      };
     }[] = [];
-
     const arrayCrear: Prisma.TrabajadorCreateInput[] = [];
-    const arrayEliminar: { dni: string }[] = []; // Los que no estén en omne pero sí en la app
 
-    for (let i = 0; i < trabajadoresOmne.length; i += 1) {
-      for (let j = 0; j < trabajadoresApp.length; j += 1) {
-        if (
-          this.normalizarDNI(trabajadoresOmne[i].documento) ===
-          this.normalizarDNI(trabajadoresApp[j].dni)
-        ) {
-          // Nombre y apellidos
-          if (
-            trabajadoresOmne[i].apellidosYNombre !=
-            trabajadoresApp[j].nombreApellidos
-          ) {
-            arrayCambios.push({
-              dni: this.normalizarDNI(trabajadoresOmne[i].documento),
-              cambios: {
-                nombreApellidos: trabajadoresOmne[i].apellidosYNombre,
-              },
-            });
-          }
+    // 3) Recorro Omne una sola vez
+    for (const omneTrab of trabajadoresOmne) {
+      const dniNorm = this.normalizarDNI(omneTrab.documento);
+      const appTrab = appMap.get(dniNorm);
 
-          // Email
-          if (trabajadoresOmne[i].email != trabajadoresApp[j].emails) {
-            arrayCambios.push({
-              dni: this.normalizarDNI(trabajadoresOmne[i].documento),
-              cambios: { emails: trabajadoresOmne[i].email },
-            });
-          }
+      if (appTrab) {
+        // Comparo campos y acumulo diferencias
+        const cambios: Partial<Trabajador> = {};
 
-          // Teléfono
-          if (
-            trabajadoresOmne[i].noTelfMovilPersonal !=
-            trabajadoresApp[j].telefonos
-          ) {
-            arrayCambios.push({
-              dni: this.normalizarDNI(trabajadoresOmne[i].documento),
-              cambios: { telefonos: trabajadoresOmne[i].noTelfMovilPersonal },
-            });
+        if (omneTrab.apellidosYNombre !== appTrab.nombreApellidos) {
+          cambios.nombreApellidos = omneTrab.apellidosYNombre;
+        }
+        if (omneTrab.email !== appTrab.emails) {
+          cambios.emails = omneTrab.email;
+        }
+        if (omneTrab.noTelfMovilPersonal !== appTrab.telefonos) {
+          cambios.telefonos = omneTrab.noTelfMovilPersonal;
+        }
+        if (omneTrab.viaPublica !== appTrab.direccion) {
+          cambios.direccion = omneTrab.viaPublica;
+        }
+        if (omneTrab.poblacion !== appTrab.ciudad) {
+          cambios.ciudad = omneTrab.poblacion;
+        }
+        if (omneTrab.codPaisNacionalidad !== appTrab.nacionalidad) {
+          cambios.nacionalidad = omneTrab.codPaisNacionalidad;
+        }
+        if (omneTrab.cp !== appTrab.codigoPostal) {
+          cambios.codigoPostal = omneTrab.cp;
+        }
+        if (omneTrab.noAfiliacion !== appTrab.nSeguridadSocial) {
+          cambios.nSeguridadSocial = omneTrab.noAfiliacion;
+        }
+        // Fecha: convierto ambas a Date y comparo getTime()
+        if (omneTrab.fechaNacimiento) {
+          const appDate = appTrab.fechaNacimiento?.getTime() ?? null;
+          const omneDate = omneTrab.fechaNacimiento.toJSDate().getTime();
+          if (appDate !== omneDate) {
+            cambios.fechaNacimiento = omneTrab.fechaNacimiento.toJSDate();
           }
+        }
 
-          // Dirección
-          if (trabajadoresOmne[i].viaPublica != trabajadoresApp[j].direccion) {
-            arrayCambios.push({
-              dni: this.normalizarDNI(trabajadoresOmne[i].documento),
-              cambios: { direccion: trabajadoresOmne[i].viaPublica },
-            });
-          }
+        const contrato = {
+          fechaAlta:
+            omneTrab.altaContrato === "0001-01-01"
+              ? null
+              : DateTime.fromFormat(
+                  omneTrab.altaContrato,
+                  "yyyy-MM-dd",
+                ).toJSDate(),
+          fechaAntiguedad:
+            omneTrab.antiguedadEmpresa === "0001-01-01"
+              ? null
+              : DateTime.fromFormat(
+                  omneTrab.antiguedadEmpresa,
+                  "yyyy-MM-dd",
+                ).toJSDate(),
+          horasContrato: this.conversorHorasContratoAPorcentaje(
+            parseFloat(String(omneTrab.horassemana)) || 0,
+          ),
+          inicioContrato:
+            omneTrab.altaContrato === "0001-01-01"
+              ? null
+              : DateTime.fromFormat(
+                  omneTrab.altaContrato,
+                  "yyyy-MM-dd",
+                ).toJSDate(),
+          fechaBaja:
+            omneTrab.bajaEmpresa === "0001-01-01"
+              ? null
+              : DateTime.fromFormat(
+                  omneTrab.bajaEmpresa,
+                  "yyyy-MM-dd",
+                ).toJSDate(),
+          finalContrato:
+            omneTrab.bajaEmpresa === "0001-01-01"
+              ? null
+              : DateTime.fromFormat(
+                  omneTrab.bajaEmpresa,
+                  "yyyy-MM-dd",
+                ).toJSDate(),
+          id: omneTrab.empresaID,
+        };
 
-          // Ciudad
-          if (trabajadoresOmne[i].poblacion != trabajadoresApp[j].ciudad) {
-            arrayCambios.push({
-              dni: this.normalizarDNI(trabajadoresOmne[i].documento),
-              cambios: { ciudad: trabajadoresOmne[i].poblacion },
-            });
-          }
+        // Si hay algún cambio y hay fecha de alta, lo registro en un solo push
+        if (Object.keys(cambios).length > 0 && contrato.fechaAlta !== null) {
+          arrayCambios.push({
+            dni: dniNorm,
+            cambios,
+            contrato,
+          });
+        }
+      } else {
+        // No existe en App → crear
+        const horasContrato = this.conversorHorasContratoAPorcentaje(
+          parseFloat(String(omneTrab.horassemana)) || 0,
+        );
+        const fechaAlta =
+          omneTrab.altaContrato === "0001-01-01"
+            ? null
+            : DateTime.fromFormat(
+                omneTrab.altaContrato,
+                "yyyy-MM-dd",
+              ).toJSDate();
+        const fechaAntiguedad =
+          omneTrab.antiguedadEmpresa === "0001-01-01"
+            ? null
+            : DateTime.fromFormat(
+                omneTrab.antiguedadEmpresa,
+                "yyyy-MM-dd",
+              ).toJSDate();
 
-          // Nacionalidad
-          if (
-            trabajadoresOmne[i].codPaisNacionalidad !=
-            trabajadoresApp[j].nacionalidad
-          ) {
-            arrayCambios.push({
-              dni: this.normalizarDNI(trabajadoresOmne[i].documento),
-              cambios: {
-                nacionalidad: trabajadoresOmne[i].codPaisNacionalidad,
-              },
-            });
-          }
-
-          // Código postal
-          if (trabajadoresOmne[i].cp != trabajadoresApp[j].codigoPostal) {
-            arrayCambios.push({
-              dni: this.normalizarDNI(trabajadoresOmne[i].documento),
-              cambios: { codigoPostal: trabajadoresOmne[i].cp },
-            });
-          }
-
-          // Número de la seguridad social
-          if (
-            trabajadoresOmne[i].noAfiliacion !=
-            trabajadoresApp[j].nSeguridadSocial
-          ) {
-            arrayCambios.push({
-              dni: this.normalizarDNI(trabajadoresOmne[i].documento),
-              cambios: { nSeguridadSocial: trabajadoresOmne[i].noAfiliacion },
-            });
-          }
-
-          // Fecha de nacimiento
-          if (
-            trabajadoresOmne[i].fechaNacimiento &&
-            DateTime.fromJSDate(trabajadoresApp[j].fechaNacimiento)?.hasSame(
-              trabajadoresOmne[i].fechaNacimiento,
-              "day",
-            ) === false
-          ) {
-            arrayCambios.push({
-              dni: this.normalizarDNI(trabajadoresOmne[i].documento),
-              cambios: {
-                fechaNacimiento: trabajadoresOmne[i].fechaNacimiento
-                  ? trabajadoresOmne[i].fechaNacimiento.toJSDate()
-                  : null,
-              },
-            });
-          }
-        } else {
-          // Si no hay coincidencia, se puede considerar que el trabajador no existe en la app
+        if (horasContrato && fechaAlta && fechaAntiguedad) {
           arrayCrear.push({
-            dni: this.normalizarDNI(trabajadoresOmne[i].documento),
-            nombreApellidos: trabajadoresOmne[i].apellidosYNombre,
-            emails: trabajadoresOmne[i].email,
-            telefonos: trabajadoresOmne[i].noTelfMovilPersonal,
-            direccion: trabajadoresOmne[i].viaPublica,
-            ciudad: trabajadoresOmne[i].poblacion,
-            nacionalidad: trabajadoresOmne[i].codPaisNacionalidad,
-            codigoPostal: trabajadoresOmne[i].cp,
-            nSeguridadSocial: trabajadoresOmne[i].noAfiliacion,
-            fechaNacimiento:
-              trabajadoresOmne[i].fechaNacimiento?.toJSDate() || null,
+            dni: dniNorm,
+            nombreApellidos: omneTrab.apellidosYNombre,
+            emails: omneTrab.email,
+            telefonos: omneTrab.noTelfMovilPersonal,
+            direccion: omneTrab.viaPublica,
+            ciudad: omneTrab.poblacion,
+            nacionalidad: omneTrab.codPaisNacionalidad,
+            codigoPostal: omneTrab.cp,
+            nSeguridadSocial: omneTrab.noAfiliacion,
+            fechaNacimiento: omneTrab.fechaNacimiento?.toJSDate() ?? null,
             llevaEquipo: false,
             tipoTrabajador: "Trabajador",
             contratos: {
               create: {
-                idEmpresa: trabajadoresOmne[i].empresaID,
-                fechaAlta:
-                  trabajadoresOmne[i].altaContrato === "0001-01-01"
-                    ? null
-                    : DateTime.fromFormat(
-                        trabajadoresOmne[i].altaContrato,
-                        "yyyy-MM-dd",
-                      ).toJSDate(),
-                fechaAntiguedad:
-                  trabajadoresOmne[i].antiguedadEmpresa === "0001-01-01"
-                    ? null
-                    : DateTime.fromFormat(
-                        trabajadoresOmne[i].antiguedadEmpresa,
-                        "yyyy-MM-dd",
-                      ).toJSDate(),
-                horasContrato: this.conversorHorasContratoAPorcentaje(
-                  parseFloat(String(trabajadoresOmne[i].horassemana)) || 0,
-                ),
+                fechaAlta,
+                fechaAntiguedad,
+                horasContrato,
                 inicioContrato:
-                  trabajadoresOmne[i].altaContrato === "0001-01-01"
+                  omneTrab.altaContrato === "0001-01-01"
                     ? null
                     : DateTime.fromFormat(
-                        trabajadoresOmne[i].altaContrato,
+                        omneTrab.altaContrato,
                         "yyyy-MM-dd",
                       ).toJSDate(),
                 fechaBaja:
-                  trabajadoresOmne[i].bajaEmpresa === "0001-01-01"
+                  omneTrab.bajaEmpresa === "0001-01-01"
                     ? null
                     : DateTime.fromFormat(
-                        trabajadoresOmne[i].bajaEmpresa,
+                        omneTrab.bajaEmpresa,
                         "yyyy-MM-dd",
                       ).toJSDate(),
                 finalContrato:
-                  trabajadoresOmne[i].bajaEmpresa === "0001-01-01"
+                  omneTrab.bajaEmpresa === "0001-01-01"
                     ? null
                     : DateTime.fromFormat(
-                        trabajadoresOmne[i].bajaEmpresa,
+                        omneTrab.bajaEmpresa,
                         "yyyy-MM-dd",
                       ).toJSDate(),
-                id: trabajadoresOmne[i].empresaID,
+                id: omneTrab.empresaID,
               },
             },
           });
@@ -316,25 +335,14 @@ export class TrabajadorService {
       }
     }
 
-    // Si el trabajador no está en Omne pero sí en la app, se considera para eliminar
-    for (let j = 0; j < trabajadoresApp.length; j += 1) {
-      let existe = false;
-      for (let i = 0; i < trabajadoresOmne.length; i += 1) {
-        if (
-          this.normalizarDNI(trabajadoresOmne[i].documento) ===
-          this.normalizarDNI(trabajadoresApp[j].dni)
-        ) {
-          existe = true;
-          break;
-        }
-      }
-
-      if (!existe) {
-        arrayEliminar.push({
-          dni: this.normalizarDNI(trabajadoresApp[j].dni),
-        });
-      }
-    }
+    // 4) Detectar eliminaciones en una pasada
+    const omneDnis = new Set(
+      trabajadoresOmne.map((t) => this.normalizarDNI(t.documento)),
+    );
+    const arrayEliminar = trabajadoresApp
+      .map((t) => this.normalizarDNI(t.dni))
+      .filter((dni) => !omneDnis.has(dni))
+      .map((dni) => ({ dni }));
 
     return {
       modificar: arrayCambios,

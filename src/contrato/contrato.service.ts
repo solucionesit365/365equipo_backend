@@ -127,9 +127,6 @@ export class ContratoService {
             dni: dni,
           },
         },
-        include: {
-          Empresa: true,
-        },
       });
 
       if (resContrato.length === 0) return null;

@@ -53,54 +53,44 @@ export class TrabajadoresController {
     const trabajadoresOmne =
       await this.trabajadorInstance.getTrabajadoresModificadosOmne();
 
-    // const arrayDNIModificadosOmne = this.trabajadorInstance.createArrayDNI(
-    //   trabajadoresOmneModificados,
-    // );
-
     const trabajadoresApp = (await this.trabajadorInstance.getAllTrabajadores({
       contratos: true,
     })) as Array<Prisma.TrabajadorGetPayload<{ include: { contratos: true } }>>;
-    // return {
-    //   trabajadoresOmne,
-    //   trabajadoresApp,
-    // };
+
     const cambiosDetectados = this.trabajadorInstance.getCambiosDetectados(
       trabajadoresApp,
       trabajadoresOmne,
     );
 
-    return cambiosDetectados;
+    // Actualizar trabajadores
+    await this.trabajadorInstance.updateManyTrabajadores(
+      cambiosDetectados.modificar.map((modificacion) => ({
+        ...modificacion,
+        nuevoContrato: {
+          fechaAlta: modificacion.contrato.fechaAlta,
+          fechaAntiguedad: modificacion.contrato.fechaAntiguedad,
+          horasContrato: modificacion.contrato.horasContrato,
+          inicioContrato: modificacion.contrato.inicioContrato,
+          Trabajador: { connect: { dni: modificacion.dni } },
+        },
+      })),
+    );
 
-    // // Actualizar trabajadores
-    // await this.trabajadorInstance.updateManyTrabajadores(
-    //   cambiosDetectados.modificar,
-    // );
+    // Eliminar trabajadores
+    await this.trabajadorInstance.deleteManyTrabajadores(
+      cambiosDetectados.eliminar,
+    );
 
-    // // Actualizar contratos - Nuevo paso
-    // if (
-    //   cambiosDetectados.actualizarContratos &&
-    //   cambiosDetectados.actualizarContratos.length > 0
-    // ) {
-    //   await this.trabajadorInstance.updateManyContratos(
-    //     cambiosDetectados.actualizarContratos,
-    //   );
-    // }
+    // Crear trabajadores
+    await this.trabajadorInstance.createManyTrabajadores(
+      cambiosDetectados.crear,
+    );
 
-    // // Eliminar trabajadores
-    // await this.trabajadorInstance.deleteManyTrabajadores(
-    //   cambiosDetectados.eliminar,
-    // );
-
-    // // Falta el crear, que se necesitan los contratos obligatoriamente.
-    // // await this.trabajadorInstance.createManyTrabajadores(
-    // //   cambiosDetectados.crear,
-    // // );
-
-    // return {
-    //   cambiosDetectados,
-    //   trabajadoresApp,
-    //   trabajadoresOmne,
-    // };
+    return {
+      cambiosDetectados,
+      trabajadoresApp,
+      trabajadoresOmne,
+    };
   }
 
   @UseGuards(AuthGuard)
