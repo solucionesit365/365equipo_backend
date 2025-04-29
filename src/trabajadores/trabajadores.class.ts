@@ -286,8 +286,15 @@ export class TrabajadorService {
                 omneTrab.antiguedadEmpresa,
                 "yyyy-MM-dd",
               ).toJSDate();
+        const fechaBaja =
+          omneTrab.bajaEmpresa === "0001-01-01"
+            ? null
+            : DateTime.fromFormat(
+                omneTrab.bajaEmpresa,
+                "yyyy-MM-dd",
+              ).toJSDate();
 
-        if (horasContrato && fechaAlta && fechaAntiguedad) {
+        if (horasContrato && fechaAlta && fechaAntiguedad && !fechaBaja) {
           arrayCrear.push({
             dni: dniNorm,
             nombreApellidos: omneTrab.apellidosYNombre,
