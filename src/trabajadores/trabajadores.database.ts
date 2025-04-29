@@ -164,6 +164,8 @@ export class TrabajadorDatabaseService {
             );
 
             const trabajadores = response.data.value;
+            console.log(trabajadores);
+
             return trabajadores.length === 0
               ? {
                   empresaID,
@@ -440,6 +442,7 @@ export class TrabajadorDatabaseService {
         responsable: true,
       },
     });
+    console.log(trabajador);
 
     return trabajador;
   }
