@@ -123,6 +123,12 @@ export class TrabajadorDatabaseService {
 
       let allResults = [];
 
+      // Counters for different actions
+      let created = 0;
+      let updated = 0;
+      let unchanged = 0;
+      let failed = 0;
+
       // Process each batch sequentially
       for (const batch of batches) {
         const batchResults = await Promise.all(
@@ -132,79 +138,159 @@ export class TrabajadorDatabaseService {
               const existingTrabajador =
                 await this.prisma.trabajador.findUnique({
                   where: { dni: trabajador.dni },
+                  include: { contratos: true },
                 });
 
               if (existingTrabajador) {
-                console.log(
-                  `Trabajador with DNI ${trabajador.dni} already exists. Updating...`,
-                );
+                // Check if the data has actually changed
+                let hasChanges = false;
+                const fieldsToCompare = [
+                  "nombreApellidos",
+                  "emails",
+                  "telefonos",
+                  "direccion",
+                  "ciudad",
+                  "nacionalidad",
+                  "codigoPostal",
+                  "nSeguridadSocial",
+                  "tipoTrabajador",
+                ];
 
-                // Extract contract data
-                const contratoData = trabajador.contratos.create;
-
-                // Update existing trabajador (without changing DNI)
-                const updatedTrabajador = await this.prisma.trabajador.update({
-                  where: { dni: trabajador.dni },
-                  data: {
-                    nombreApellidos: trabajador.nombreApellidos,
-                    emails: trabajador.emails,
-                    telefonos: trabajador.telefonos,
-                    direccion: trabajador.direccion,
-                    ciudad: trabajador.ciudad,
-                    nacionalidad: trabajador.nacionalidad,
-                    codigoPostal: trabajador.codigoPostal,
-                    nSeguridadSocial: trabajador.nSeguridadSocial,
-                    fechaNacimiento: trabajador.fechaNacimiento,
-                    llevaEquipo: trabajador.llevaEquipo,
-                    tipoTrabajador: trabajador.tipoTrabajador,
-                  },
-                });
-
-                // Create or update contract
-                if (contratoData) {
-                  const existingContrato =
-                    await this.prisma.contrato2.findFirst({
-                      where: { idTrabajador: existingTrabajador.id },
-                    });
-
-                  if (existingContrato) {
-                    await this.prisma.contrato2.update({
-                      where: { id: existingContrato.id },
-                      data: {
-                        fechaAlta: contratoData.fechaAlta,
-                        fechaAntiguedad: contratoData.fechaAntiguedad,
-                        horasContrato: contratoData.horasContrato,
-                        inicioContrato: contratoData.inicioContrato,
-                        fechaBaja: contratoData.fechaBaja,
-                        finalContrato: contratoData.finalContrato,
-                      },
-                    });
-                  } else {
-                    // Create new contract but generate a new UUID instead of using the one provided
-                    await this.prisma.contrato2.create({
-                      data: {
-                        // Exclude the id field to let Prisma generate a new one
-                        Trabajador: {
-                          connect: { id: existingTrabajador.id },
-                        },
-                        fechaAlta: contratoData.fechaAlta,
-                        fechaAntiguedad: contratoData.fechaAntiguedad,
-                        horasContrato: contratoData.horasContrato,
-                        inicioContrato: contratoData.inicioContrato,
-                        fechaBaja: contratoData.fechaBaja,
-                        finalContrato: contratoData.finalContrato,
-                      },
-                    });
+                for (const field of fieldsToCompare) {
+                  if (
+                    trabajador[field] !== undefined &&
+                    trabajador[field] !== null &&
+                    existingTrabajador[field] !== trabajador[field]
+                  ) {
+                    hasChanges = true;
+                    break;
                   }
                 }
 
-                return {
-                  success: true,
-                  dni: trabajador.dni,
-                  action: "updated",
-                };
+                // Check if contract data has changed
+                const contratoData = trabajador.contratos?.create;
+                const existingContrato = existingTrabajador.contratos?.[0];
+
+                let contratoHasChanges = false;
+                if (contratoData && existingContrato) {
+                  const contractFieldsToCompare = [
+                    ["fechaAlta", "fechaAlta"],
+                    ["fechaAntiguedad", "fechaAntiguedad"],
+                    ["horasContrato", "horasContrato"],
+                    ["inicioContrato", "inicioContrato"],
+                    ["fechaBaja", "fechaBaja"],
+                    ["finalContrato", "finalContrato"],
+                  ];
+
+                  for (const [
+                    newField,
+                    existingField,
+                  ] of contractFieldsToCompare) {
+                    // Compare dates by timestamp or direct comparison for numbers
+                    const newValue =
+                      contratoData[newField] instanceof Date
+                        ? contratoData[newField].getTime()
+                        : contratoData[newField];
+
+                    const existingValue =
+                      existingContrato[existingField] instanceof Date
+                        ? existingContrato[existingField].getTime()
+                        : existingContrato[existingField];
+
+                    if (
+                      newValue !== existingValue &&
+                      !(newValue === null && existingValue === null)
+                    ) {
+                      contratoHasChanges = true;
+                      break;
+                    }
+                  }
+                } else if (contratoData && !existingContrato) {
+                  // No existing contract but we have contract data to add
+                  contratoHasChanges = true;
+                }
+
+                if (hasChanges || contratoHasChanges) {
+                  console.log(
+                    `Trabajador with DNI ${trabajador.dni} has changes. Updating...`,
+                  );
+
+                  // Update existing trabajador only if there are changes
+                  if (hasChanges) {
+                    await this.prisma.trabajador.update({
+                      where: { dni: trabajador.dni },
+                      data: {
+                        nombreApellidos: trabajador.nombreApellidos,
+                        emails: trabajador.emails,
+                        telefonos: trabajador.telefonos,
+                        direccion: trabajador.direccion,
+                        ciudad: trabajador.ciudad,
+                        nacionalidad: trabajador.nacionalidad,
+                        codigoPostal: trabajador.codigoPostal,
+                        nSeguridadSocial: trabajador.nSeguridadSocial,
+                        fechaNacimiento: trabajador.fechaNacimiento,
+                        llevaEquipo: trabajador.llevaEquipo,
+                        tipoTrabajador: trabajador.tipoTrabajador,
+                      },
+                    });
+                  }
+
+                  // Create or update contract if there are changes
+                  if (contratoData && contratoHasChanges) {
+                    if (existingContrato) {
+                      await this.prisma.contrato2.update({
+                        where: { id: existingContrato.id },
+                        data: {
+                          fechaAlta: contratoData.fechaAlta,
+                          fechaAntiguedad: contratoData.fechaAntiguedad,
+                          horasContrato: contratoData.horasContrato,
+                          inicioContrato: contratoData.inicioContrato,
+                          fechaBaja: contratoData.fechaBaja,
+                          finalContrato: contratoData.finalContrato,
+                        },
+                      });
+                    } else {
+                      // Create new contract but generate a new UUID instead of using the one provided
+                      await this.prisma.contrato2.create({
+                        data: {
+                          // Exclude the id field to let Prisma generate a new one
+                          Trabajador: {
+                            connect: { id: existingTrabajador.id },
+                          },
+                          fechaAlta: contratoData.fechaAlta,
+                          fechaAntiguedad: contratoData.fechaAntiguedad,
+                          horasContrato: contratoData.horasContrato,
+                          inicioContrato: contratoData.inicioContrato,
+                          fechaBaja: contratoData.fechaBaja,
+                          finalContrato: contratoData.finalContrato,
+                        },
+                      });
+                    }
+                  }
+
+                  updated++;
+                  return {
+                    success: true,
+                    dni: trabajador.dni,
+                    action: "updated",
+                  };
+                } else {
+                  console.log(
+                    `Trabajador with DNI ${trabajador.dni} already exists and no changes detected.`,
+                  );
+                  unchanged++;
+                  return {
+                    success: true,
+                    dni: trabajador.dni,
+                    action: "unchanged",
+                  };
+                }
               } else {
                 // Create new trabajador without using transaction to avoid timeouts
+                console.log(
+                  `Creating new trabajador with DNI ${trabajador.dni}`,
+                );
+
                 // 1. Create the trabajador
                 const newTrabajador = await this.prisma.trabajador.create({
                   data: {
@@ -252,6 +338,7 @@ export class TrabajadorDatabaseService {
                   });
                 }
 
+                created++;
                 return {
                   success: true,
                   dni: trabajador.dni,
@@ -264,6 +351,7 @@ export class TrabajadorDatabaseService {
                 `Error processing trabajador with DNI ${trabajador.dni}:`,
                 error,
               );
+              failed++;
               return {
                 success: false,
                 dni: trabajador.dni,
@@ -279,17 +367,14 @@ export class TrabajadorDatabaseService {
         await new Promise((resolve) => setTimeout(resolve, 50));
       }
 
-      // Count successes and failures
-      const successful = allResults.filter((r) => r.success).length;
-      const failed = allResults.filter((r) => !r.success).length;
-
       console.log(
-        `Completed batch operation: ${successful} successful, ${failed} failed`,
+        `Completed batch operation: ${created} created, ${updated} updated, ${unchanged} unchanged, ${failed} failed`,
       );
 
       return {
-        message: `Processed ${allResults.length} workers: ${successful} successful, ${failed} failed`,
+        message: `Processed ${allResults.length} workers: ${created} created, ${updated} updated, ${unchanged} unchanged, ${failed} failed`,
         details: allResults,
+        stats: { created, updated, unchanged, failed },
       };
     } catch (error) {
       console.error("Error in createManyTrabajadores:", error);
@@ -298,7 +383,104 @@ export class TrabajadorDatabaseService {
       );
     }
   }
+  async actualizarTrabajadoresLote(
+    trabajadoresData: Array<{
+      dni: string;
+      cambios?: any;
+      nuevoContrato?: any;
+    }>,
+  ) {
+    try {
+      // Dividir en lotes pequeños para evitar sobrecarga
+      const BATCH_SIZE = 5;
+      const chunks = [];
 
+      for (let i = 0; i < trabajadoresData.length; i += BATCH_SIZE) {
+        chunks.push(trabajadoresData.slice(i, i + BATCH_SIZE));
+      }
+
+      const results = {
+        successful: 0,
+        failed: 0,
+        errors: [],
+        details: [],
+      };
+
+      // Procesar cada lote secuencialmente, nunca en paralelo
+      for (const chunk of chunks) {
+        // Para cada trabajador en el lote, procesar uno por uno (no en transacción)
+        for (const { dni, cambios, nuevoContrato } of chunk) {
+          try {
+            // 1. Buscar el trabajador
+            const trabajador = await this.prisma.trabajador.findUnique({
+              where: { dni },
+              include: { contratos: true },
+            });
+
+            if (!trabajador) {
+              results.failed++;
+              results.errors.push({
+                dni,
+                error: `Trabajador con DNI ${dni} no encontrado`,
+              });
+              continue;
+            }
+
+            // 2. Actualizar el trabajador si hay cambios
+            if (cambios && Object.keys(cambios).length > 0) {
+              await this.prisma.trabajador.update({
+                where: { dni },
+                data: cambios,
+              });
+            }
+
+            // 3. Crear o actualizar contrato si es necesario
+            if (nuevoContrato) {
+              const contratoExistente = trabajador.contratos?.[0];
+
+              if (contratoExistente) {
+                // Actualizar contrato existente
+                await this.prisma.contrato2.update({
+                  where: { id: contratoExistente.id },
+                  data: nuevoContrato,
+                });
+              } else {
+                // Crear nuevo contrato
+                await this.prisma.contrato2.create({
+                  data: {
+                    ...nuevoContrato,
+                    Trabajador: {
+                      connect: { id: trabajador.id },
+                    },
+                  },
+                });
+              }
+            }
+
+            results.successful++;
+            results.details.push({ dni, status: "success" });
+          } catch (error) {
+            console.error(`Error al actualizar trabajador ${dni}:`, error);
+            results.failed++;
+            results.errors.push({ dni, error: error.message });
+          }
+
+          // Pequeña pausa entre actualizaciones para reducir carga en DB
+          await new Promise((resolve) => setTimeout(resolve, 20));
+        }
+
+        // Pausa entre lotes
+        await new Promise((resolve) => setTimeout(resolve, 50));
+      }
+
+      return results;
+    } catch (error) {
+      console.error("Error en actualizarTrabajadoresLote:", error);
+      throw new InternalServerErrorException(
+        `Error al actualizar trabajadores: ${error.message}`,
+      );
+    }
+  }
   // Función que obtiene los trabajadores desde Business Central
   async getTrabajadoresOmne(): Promise<
     Array<

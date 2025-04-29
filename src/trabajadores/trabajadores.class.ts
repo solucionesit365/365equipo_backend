@@ -118,7 +118,7 @@ export class TrabajadorService {
       nuevoContrato: Prisma.Contrato2CreateInput;
     }[],
   ) {
-    return this.schTrabajadores.updateManyTrabajadores(modificaciones);
+    return this.schTrabajadores.actualizarTrabajadoresLote(modificaciones);
   }
 
   // Método para actualizar contratos
