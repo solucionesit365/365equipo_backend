@@ -76,12 +76,12 @@ export class DistribucionMensajesController {
             );
 
           // Enviar la notificación si el mensaje está activo
-          await this.notificaciones.sendNotificationToTopic(
-            "NUEVO MENSAJE DE DISTRIBUCION",
-            `Disponible en la app.`,
-            "notificaciones_generales",
-            "/",
-          );
+          // await this.notificaciones.sendNotificationToTopic(
+          //   "NUEVO MENSAJE DE DISTRIBUCION",
+          //   `Disponible en la app.`,
+          //   "notificaciones_generales",
+          //   "/",
+          // );
           return {
             ok: true,
             data: response,
