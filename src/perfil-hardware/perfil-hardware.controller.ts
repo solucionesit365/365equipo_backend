@@ -38,7 +38,6 @@ export class PerfilHardwareController {
     try {
       const respAusencias = await this.perfilHardwareService.getPerfiles();
       if (respAusencias) return { ok: true, data: respAusencias };
-      console.log(respAusencias);
     } catch (err) {
       console.log(err);
     }

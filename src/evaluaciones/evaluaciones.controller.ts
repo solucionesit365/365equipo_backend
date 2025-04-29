@@ -268,9 +268,8 @@ export class EvaluacionesController {
         _id,
         firmaEvaluado,
       );
-      console.log(response);
+
       if (response) {
-        console.log("Dentro de response", response);
         return {
           ok: true,
           data: response,

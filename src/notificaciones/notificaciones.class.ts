@@ -91,10 +91,10 @@ export class Notificaciones {
         url: url || "/", // Acciones para cuando se hace clic en la notificación
       },
     };
-    console.log("URL enviada:", url);
+
     try {
       const response = await admin.messaging().send(payload);
-      console.log("Notificación enviada:", response);
+
       return response;
     } catch (error) {
       console.error("Error al enviar la notificación:", error);

@@ -132,8 +132,6 @@ export class Cuadrantes {
 
   // Cuadrantes 2.0
   async getBolsaInicial(idTrabajador: number, lunesActual: DateTime) {
-    console.log("entra aqui");
-
     const lunesAnterior = lunesActual.minus({ days: 7 }).startOf("week");
     const domingoAnterior = lunesActual.minus({ days: 1 }).endOf("week");
 
@@ -153,8 +151,6 @@ export class Cuadrantes {
         fichajesValidados[i].horasCoordinacion;
       horasCuadranteTotal = horasMasMenos;
     }
-
-    console.log(horasMasMenos);
 
     return {
       horasCuadranteTotal,
@@ -268,8 +264,6 @@ export class Cuadrantes {
     });
 
     const cuadrantesUnicos = Array.from(uniqueMap.values());
-
-    console.log(allCuadrantes);
 
     return cuadrantesUnicos;
   }

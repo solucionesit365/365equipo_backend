@@ -42,8 +42,6 @@ export class NotificacionHorasExtrasController {
   @Get("getNotificacionHorasExtrasByIdSql")
   getNotificacionHorasExtrasByIdSql(@Query() { idSql }) {
     try {
-      // console.log(idSql)
-
       return this.shNotificacionhorasExtras.getNotificacionHorasExtrasByIdSql(
         Number(idSql),
       );

@@ -139,8 +139,6 @@ export class FichajesController {
   @Post("getFichajesBC")
   async getFichajesBC() {
     try {
-      console.log("Causa");
-
       return {
         ok: true,
         data: await this.fichajesInstance.fusionarFichajesBC(),
@@ -245,8 +243,6 @@ export class FichajesController {
       const arraySubordinados = await this.trabajadoresInstance.getSubordinados(
         uidParaConsultar,
       );
-
-      console.log(arraySubordinados);
 
       return {
         ok: true,

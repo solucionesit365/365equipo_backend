@@ -81,7 +81,6 @@ export class DistribucionMensajesDatabase {
     const mensaje = await disMensajesCollection.findOne({ activo: true });
 
     if (!mensaje) {
-      console.log("Mensaje activo no encontrado en la base de datos");
       return; //salir de la función si no hay ningun mensaje activo
     }
 
@@ -111,7 +110,6 @@ export class DistribucionMensajesDatabase {
         },
       );
     } else {
-      console.log("Hoy no está dentro del rango de fechas especificado.");
       return null;
     }
   }

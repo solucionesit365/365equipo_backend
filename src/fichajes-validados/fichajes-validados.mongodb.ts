@@ -105,7 +105,6 @@ export class FichajesValidadosDatabase {
         },
       })
       .toArray();
-    console.log(fechajesValidados);
 
     return fechajesValidados;
   }
@@ -292,10 +291,6 @@ export class FichajesValidadosDatabase {
     fechaInicio: DateTime,
     fechaFinal: DateTime,
   ) {
-    if (idTrabajador === 4963) {
-      console.log("llegamos");
-    }
-
     // Convertir fechas a UTC
     const fechaInicioUTC = fechaInicio.toUTC();
     const fechaFinalUTC = fechaFinal.toUTC();

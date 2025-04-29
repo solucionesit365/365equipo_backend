@@ -123,7 +123,7 @@ export class TrabajadoresController {
   async getTrabajadorByAppId(@Query() { uid }) {
     try {
       const resUser = await this.trabajadorInstance.getTrabajadorByAppId(uid);
-      // console.log(resUser);
+
       return { ok: true, data: resUser };
     } catch (err) {
       console.log(err);
@@ -235,7 +235,7 @@ export class TrabajadoresController {
   @Post("normalizarDNIs")
   async normalizarDNIs() {
     try {
-      console.log(await this.trabajadorInstance.normalizarDNIs());
+      await this.trabajadorInstance.normalizarDNIs();
       return;
     } catch (err) {
       console.log(err);

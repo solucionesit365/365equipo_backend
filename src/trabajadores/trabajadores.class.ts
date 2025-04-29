@@ -369,9 +369,6 @@ export class TrabajadorService {
     const trabajadoresParaEliminar = [];
     const contratosParaActualizar = []; // Nueva estructura para cambios en contratos
 
-    console.log(`Trabajadores App: ${trabajadoresAppInvocados.length}`);
-    console.log(`Trabajadores Omne: ${trabajadoresOmneModificados.length}`);
-
     // 1) Mapa de empleados en la App, por DNI
     const appPorDNI = trabajadoresAppInvocados.reduce((acc, t) => {
       acc[t.dni] = t;
@@ -390,9 +387,6 @@ export class TrabajadorService {
       acc[dni].push(t);
       return acc;
     }, {});
-
-    console.log(`DNIs únicos en App: ${Object.keys(appPorDNI).length}`);
-    console.log(`DNIs únicos en Omne: ${Object.keys(omnePorDNI).length}`);
 
     // 3) Recorrer cada DNI que viene de Omne
     Object.entries(omnePorDNI).forEach(([dni, contratosOmne]) => {
@@ -472,12 +466,11 @@ export class TrabajadorService {
         }
 
         if (Object.keys(cambios).length) {
-          console.log(`Cambios detectados para DNI ${dni}:`, cambios);
           trabajadoresParaModificar.push({ dni, cambios });
         }
       } else {
         // — existe en Omne pero no en la App → crear
-        console.log(`Trabajador nuevo con DNI ${dni}`);
+
         trabajadoresParaCrear.push({ dni, datos: contratosOmne });
       }
     });
@@ -492,17 +485,9 @@ export class TrabajadorService {
 
     Object.keys(appPorDNI).forEach((dniApp) => {
       if (!todosDNIomne.has(dniApp)) {
-        console.log(`Trabajador a eliminar con DNI ${dniApp}`);
         trabajadoresParaEliminar.push({ dni: dniApp });
       }
     });
-
-    console.log(
-      `Trabajadores a modificar: ${trabajadoresParaModificar.length}`,
-    );
-    console.log(`Trabajadores a crear: ${trabajadoresParaCrear.length}`);
-    console.log(`Trabajadores a eliminar: ${trabajadoresParaEliminar.length}`);
-    console.log(`Contratos a actualizar: ${contratosParaActualizar.length}`);
 
     return {
       modificar: trabajadoresParaModificar,

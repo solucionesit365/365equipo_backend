@@ -94,7 +94,6 @@ export class AuditoriasController {
           ok: true,
           data: respAuditoria,
         };
-      console.log(respAuditoria);
 
       throw Error("No se ha podido habilitar la auditoria");
     } catch (err) {

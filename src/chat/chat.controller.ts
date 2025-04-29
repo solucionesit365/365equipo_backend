@@ -55,8 +55,6 @@ export class ChatController {
   @UseGuards(AuthGuard)
   @Post("markAsRead")
   async markMessagesAsRead(@Body() body: { ids: string[] }) {
-    console.log("Datos recibidos para marcar como leídos:", body);
-
     // Llama al servicio para marcar los mensajes como leídos
     return await this.chatInstance.markMessageAsRead(body);
   }

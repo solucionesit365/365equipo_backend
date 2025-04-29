@@ -176,7 +176,7 @@ export class CuadrantesDatabase {
     const resCuadrantes = await cuadrantesCollection.deleteOne({
       idPlan: idPlan,
     });
-    console.log(resCuadrantes);
+
     return resCuadrantes.acknowledged;
   }
 
@@ -330,7 +330,6 @@ export class CuadrantesDatabase {
     }
 
     return sqlBorrar;
-    // console.log("sqlBorrar", sqlBorrar);
     // await recHit("Fac_Tena", sqlBorrar);
   }
 
@@ -401,8 +400,6 @@ export class CuadrantesDatabase {
       inicio: { $gte: fechaInicio },
       final: { $lte: fechaFinal },
     });
-
-    console.log(result);
 
     // Si deletedCount es mayor que 0, entonces se borraron documentos, de lo contrario, no
     return result.deletedCount > 0;

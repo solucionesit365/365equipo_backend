@@ -115,7 +115,6 @@ export class SolicitudVacacionesController {
         user.idApp,
       );
 
-      console.log(userToken);
       if (userToken) {
         //enviar notificacion
         await this.notificacionesInstance.sendNotificationToDevice(

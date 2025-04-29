@@ -118,7 +118,6 @@ export class diaPersonalMongo {
     const cuenta = await solicitudDiaPersonalCollection.countDocuments({
       idBeneficiario,
     });
-    console.log(cuenta);
 
     return cuenta > 0;
   }

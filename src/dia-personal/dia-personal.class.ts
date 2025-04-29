@@ -74,7 +74,7 @@ export class DiaPersonalClass {
     if (!vacacionesToDelete) {
       throw new Error("Vacaciones no encontrada");
     }
-    console.log(_id);
+
     await this.schdiaPersonal.borrarSolicitud(_id);
     return true;
   }

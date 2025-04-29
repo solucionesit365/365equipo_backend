@@ -30,8 +30,6 @@ export class TrabajadorDatabaseService {
   ) {}
 
   async crearTrabajador(reqTrabajador: CreateTrabajadorRequestDto) {
-    console.log(reqTrabajador);
-
     const newTrabajador = await this.prisma.trabajador.create({
       data: {
         dni: reqTrabajador.dni,
@@ -1008,7 +1006,6 @@ export class TrabajadorDatabaseService {
         responsable: true,
       },
     });
-    console.log(trabajador);
 
     return trabajador;
   }

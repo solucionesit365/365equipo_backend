@@ -65,7 +65,6 @@
 //       requestTimeout: 20000,
 //     };
 
-//     // console.log(consultaSQL);
 //     const pool = await new sql.ConnectionPool(config).connect();
 //     const result = await pool.request().query(consultaSQL);
 //     pool.close();

@@ -302,8 +302,6 @@ export class Fichajes {
   }
 
   async updateFichaje(id: string, validado: boolean) {
-    if (typeof id === "string") console.log(id + " - " + validado);
-
     return await this.schFichajes.updateFichaje(id, validado);
   }
 
@@ -503,8 +501,6 @@ export class Fichajes {
   }
 
   async hayFichajesPendientes(ids: number[], fecha: DateTime) {
-    console.log("Entro causa");
-
     const lunes = fecha.startOf("week");
     // const ids: number[] = [3608, 5740, 975];
 
@@ -542,13 +538,8 @@ export class Fichajes {
     const inicioSemanaActual = ahora.startOf("week");
     const inicioSemanaAnterior = inicioSemanaActual.minus({ weeks: 1 });
 
-    console.log(inicioSemanaActual);
-    console.log(inicioSemanaAnterior);
-
     const response =
       this.schFichajes.validarFichajesAntiguos(inicioSemanaAnterior);
-
-    console.log(response);
 
     return response;
   }
