@@ -60,21 +60,7 @@ model Empresa {
   cif            String
   idExterno      Int?
   autogestionada Boolean      @default(false)
-  contratos      Contrato2[]
   Trabajador     Trabajador[]
-}
-
-model Contrato {
-  id              Int       @id @default(autoincrement())
-  horasContrato   Float
-  inicioContrato  DateTime
-  finalContrato   DateTime?
-  fechaAlta       DateTime
-  fechaAntiguedad DateTime
-  fechaBaja       DateTime?
-  dni             String
-  idEmpresa       String?
-  idTrabajador    Int
 }
 
 model Contrato2 {
@@ -85,9 +71,7 @@ model Contrato2 {
   fechaAlta       DateTime
   fechaAntiguedad DateTime
   fechaBaja       DateTime?
-  idEmpresa       String?
   idTrabajador    Int
-  Empresa         Empresa?   @relation(fields: [idEmpresa], references: [id])
   Trabajador      Trabajador @relation(fields: [idTrabajador], references: [id], onDelete: Cascade)
 }
 

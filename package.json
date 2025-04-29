@@ -50,6 +50,7 @@
     "nest.js": "^1.0.8",
     "nodemailer": "^6.9.2",
     "openpgp": "^5.9.0",
+    "p-map": "^7.0.3",
     "pdf-lib": "^1.17.1",
     "pdfkit": "^0.15.0",
     "puppeteer": "^23.5.2",

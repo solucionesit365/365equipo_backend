@@ -100,4 +100,10 @@ export class FirebaseService {
       console.error("Error al borrar los archivos:", error);
     }
   }
+
+  test() {
+    this.auth.updateUser("userUID", {
+      email: "ezequielcarissimo@gmail.com",
+    });
+  }
 }

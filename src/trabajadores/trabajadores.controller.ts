@@ -1,10 +1,20 @@
-import { Controller, Get, Query, UseGuards, Post, Body } from "@nestjs/common";
+import {
+  Controller,
+  Get,
+  Query,
+  UseGuards,
+  Post,
+  Body,
+  InternalServerErrorException,
+} from "@nestjs/common";
 import { SchedulerGuard } from "../guards/scheduler.guard";
 import { TrabajadorService } from "./trabajadores.class";
 import { AuthGuard } from "../guards/auth.guard";
 import { Roles } from "../decorators/role.decorator";
 import { User } from "../decorators/get-user.decorator";
 import { UserRecord } from "firebase-admin/auth";
+import { Prisma } from "@prisma/client";
+import pMap from "p-map";
 import {
   CreateTrabajadorRequestDto,
   DeleteTrabajadorDto,
@@ -16,6 +26,13 @@ import {
 
 import { RoleGuard } from "../guards/role.guard";
 import { LoggerService } from "src/logger/logger.service";
+
+// Función auxiliar para dividir arrays en chunks pequeños
+function chunkArray<T>(arr: T[], size: number): T[][] {
+  return Array.from({ length: Math.ceil(arr.length / size) }, (_, i) =>
+    arr.slice(i * size, i * size + size),
+  );
+}
 
 @Controller("trabajadores")
 export class TrabajadoresController {
@@ -37,10 +54,68 @@ export class TrabajadoresController {
       };
     });
   }
+
+  @UseGuards(SchedulerGuard)
   @Get("sincroTrabajadoresOmne")
   async sincroTrabajadoresOmne() {
-    const res = await this.trabajadorInstance.guardarTrabajadoresOmne();
-    return res;
+    const trabajadoresOmne =
+      await this.trabajadorInstance.getTrabajadoresModificadosOmne();
+
+    const trabajadoresApp = (await this.trabajadorInstance.getAllTrabajadores({
+      contratos: true,
+    })) as Array<Prisma.TrabajadorGetPayload<{ include: { contratos: true } }>>;
+
+    const cambiosDetectados = this.trabajadorInstance.getCambiosDetectados(
+      trabajadoresApp,
+      trabajadoresOmne,
+    );
+
+    const BATCH_SIZE = 50;
+
+    // Procesa updates en lotes pequeños
+    await pMap(
+      chunkArray(cambiosDetectados.modificar, BATCH_SIZE),
+      async (batch) => {
+        await this.trabajadorInstance.updateManyTrabajadores(
+          batch.map((modificacion) => ({
+            dni: modificacion.dni,
+            cambios: modificacion.cambios,
+            nuevoContrato: {
+              ...modificacion.contrato,
+              Trabajador: { connect: { dni: modificacion.dni } },
+            },
+          })),
+        );
+      },
+      { concurrency: 2 },
+    );
+
+    // Procesa deletes en lotes pequeños
+    await pMap(
+      chunkArray(cambiosDetectados.eliminar, BATCH_SIZE),
+      async (batch) => {
+        await this.trabajadorInstance.deleteManyTrabajadores(batch);
+      },
+      { concurrency: 2 },
+    );
+
+    // Procesa creates en lotes pequeños
+    await pMap(
+      chunkArray(cambiosDetectados.crear, BATCH_SIZE),
+      async (batch) => {
+        await this.trabajadorInstance.createManyTrabajadores(batch);
+      },
+      { concurrency: 2 },
+    );
+
+    return {
+      message: "Sincronización completada exitosamente",
+      resumen: {
+        modificados: cambiosDetectados.modificar.length,
+        eliminados: cambiosDetectados.eliminar.length,
+        creados: cambiosDetectados.crear.length,
+      },
+    };
   }
 
   @UseGuards(AuthGuard)
@@ -153,6 +228,20 @@ export class TrabajadoresController {
     } catch (err) {
       console.log(err);
       return { ok: false, message: err.message };
+    }
+  }
+
+  @UseGuards(SchedulerGuard)
+  @Post("normalizarDNIs")
+  async normalizarDNIs() {
+    try {
+      console.log(await this.trabajadorInstance.normalizarDNIs());
+      return;
+    } catch (err) {
+      console.log(err);
+      throw new InternalServerErrorException(
+        "Error al normalizar los DNIs de los trabajadores",
+      );
     }
   }
 

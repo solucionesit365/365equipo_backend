@@ -9,10 +9,14 @@ import { Request } from "express";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { simpleParser } from "mailparser";
 import { LoggerService } from "../logger/logger.service";
+import { AxiosBcService } from "../axios/axios-bc.service";
 
 @Controller("test")
 export class TestController {
-  constructor(private readonly loggerService: LoggerService) {}
+  constructor(
+    private readonly loggerService: LoggerService,
+    private readonly axiosBCService: AxiosBcService,
+  ) {}
 
   @Post("email")
   @UseInterceptors(FileInterceptor("email")) // Capturamos el archivo `email` si existe
@@ -64,6 +68,22 @@ export class TestController {
         extraData: { error: error.message, stack: error.stack },
       });
       return { message: "Error interno", error: error.message };
+    }
+  }
+
+  @Post("apieze")
+  async apieze() {
+    try {
+      const empresaID = "84290dc4-6e90-ef11-8a6b-7c1e5236b0db";
+      const data = await this.axiosBCService.getAxios().get(
+        // `Production/api/Miguel/365ObradorAPI/v1.0/companies(${empresaID})/perceptoresQuery`,
+        `Production/api/eze/365ObradorAPI/v1.0/companies(${empresaID})/PerceptorsExtraData`,
+      );
+      console.log(data.data);
+      return data.data;
+    } catch (err) {
+      console.log(err);
+      return;
     }
   }
 }
