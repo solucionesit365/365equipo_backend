@@ -102,7 +102,7 @@ export class FirebaseService {
   }
 
   test() {
-    this.auth.updateUser("DKpQSPwEjeYUqYuENpwonNOVCqX2", {
+    this.auth.updateUser("userUID", {
       email: "ezequielcarissimo@gmail.com",
     });
   }
