@@ -55,7 +55,7 @@ export class TrabajadoresController {
     });
   }
 
-  // @UseGuards(AuthGuard)
+  @UseGuards(SchedulerGuard)
   @Get("sincroTrabajadoresOmne")
   async sincroTrabajadoresOmne() {
     const trabajadoresOmne =
