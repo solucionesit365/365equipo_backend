@@ -99,17 +99,202 @@ export class TrabajadorDatabaseService {
     return true;
   }
 
-  createManyTrabajadores(
-    arrayNuevosTrabajadores: Prisma.TrabajadorCreateInput[],
-  ) {
+  async createManyTrabajadores(arrayNuevosTrabajadores: any[]) {
     try {
-      return this.prisma.trabajador.createMany({
-        data: arrayNuevosTrabajadores,
-      });
-    } catch (err) {
-      console.log(err);
+      // Filter out duplicates by DNI to avoid unique constraint violations
+      const uniqueDnisMap = new Map();
+      const filteredTrabajadores = [];
+
+      for (const trabajador of arrayNuevosTrabajadores) {
+        if (!uniqueDnisMap.has(trabajador.dni)) {
+          uniqueDnisMap.set(trabajador.dni, trabajador);
+          filteredTrabajadores.push(trabajador);
+        } else {
+          console.log(`Skipping duplicate DNI: ${trabajador.dni}`);
+        }
+      }
+
+      // Process in smaller batches to avoid transaction timeouts
+      const BATCH_SIZE = 10;
+      const batches = [];
+      for (let i = 0; i < filteredTrabajadores.length; i += BATCH_SIZE) {
+        batches.push(filteredTrabajadores.slice(i, i + BATCH_SIZE));
+      }
+
+      let allResults = [];
+
+      // Process each batch sequentially
+      for (const batch of batches) {
+        const batchResults = await Promise.all(
+          batch.map(async (trabajador) => {
+            try {
+              // Check if trabajador already exists with this DNI
+              const existingTrabajador =
+                await this.prisma.trabajador.findUnique({
+                  where: { dni: trabajador.dni },
+                });
+
+              if (existingTrabajador) {
+                console.log(
+                  `Trabajador with DNI ${trabajador.dni} already exists. Updating...`,
+                );
+
+                // Extract contract data
+                const contratoData = trabajador.contratos.create;
+
+                // Update existing trabajador (without changing DNI)
+                const updatedTrabajador = await this.prisma.trabajador.update({
+                  where: { dni: trabajador.dni },
+                  data: {
+                    nombreApellidos: trabajador.nombreApellidos,
+                    emails: trabajador.emails,
+                    telefonos: trabajador.telefonos,
+                    direccion: trabajador.direccion,
+                    ciudad: trabajador.ciudad,
+                    nacionalidad: trabajador.nacionalidad,
+                    codigoPostal: trabajador.codigoPostal,
+                    nSeguridadSocial: trabajador.nSeguridadSocial,
+                    fechaNacimiento: trabajador.fechaNacimiento,
+                    llevaEquipo: trabajador.llevaEquipo,
+                    tipoTrabajador: trabajador.tipoTrabajador,
+                  },
+                });
+
+                // Create or update contract
+                if (contratoData) {
+                  const existingContrato =
+                    await this.prisma.contrato2.findFirst({
+                      where: { idTrabajador: existingTrabajador.id },
+                    });
+
+                  if (existingContrato) {
+                    await this.prisma.contrato2.update({
+                      where: { id: existingContrato.id },
+                      data: {
+                        fechaAlta: contratoData.fechaAlta,
+                        fechaAntiguedad: contratoData.fechaAntiguedad,
+                        horasContrato: contratoData.horasContrato,
+                        inicioContrato: contratoData.inicioContrato,
+                        fechaBaja: contratoData.fechaBaja,
+                        finalContrato: contratoData.finalContrato,
+                      },
+                    });
+                  } else {
+                    // Create new contract but generate a new UUID instead of using the one provided
+                    await this.prisma.contrato2.create({
+                      data: {
+                        // Exclude the id field to let Prisma generate a new one
+                        Trabajador: {
+                          connect: { id: existingTrabajador.id },
+                        },
+                        fechaAlta: contratoData.fechaAlta,
+                        fechaAntiguedad: contratoData.fechaAntiguedad,
+                        horasContrato: contratoData.horasContrato,
+                        inicioContrato: contratoData.inicioContrato,
+                        fechaBaja: contratoData.fechaBaja,
+                        finalContrato: contratoData.finalContrato,
+                      },
+                    });
+                  }
+                }
+
+                return {
+                  success: true,
+                  dni: trabajador.dni,
+                  action: "updated",
+                };
+              } else {
+                // Create new trabajador without using transaction to avoid timeouts
+                // 1. Create the trabajador
+                const newTrabajador = await this.prisma.trabajador.create({
+                  data: {
+                    dni: trabajador.dni,
+                    nombreApellidos: trabajador.nombreApellidos,
+                    emails: trabajador.emails,
+                    telefonos: trabajador.telefonos,
+                    direccion: trabajador.direccion,
+                    ciudad: trabajador.ciudad,
+                    nacionalidad: trabajador.nacionalidad,
+                    codigoPostal: trabajador.codigoPostal,
+                    nSeguridadSocial: trabajador.nSeguridadSocial,
+                    fechaNacimiento: trabajador.fechaNacimiento,
+                    llevaEquipo:
+                      trabajador.llevaEquipo !== undefined
+                        ? trabajador.llevaEquipo
+                        : false,
+                    tipoTrabajador: trabajador.tipoTrabajador,
+                    empresa: trabajador.idEmpresa
+                      ? {
+                          connect: { id: trabajador.idEmpresa },
+                        }
+                      : undefined,
+                  },
+                });
+
+                // 2. Create the contrato if it exists
+                if (trabajador.contratos && trabajador.contratos.create) {
+                  const contratoData = trabajador.contratos.create;
+
+                  // Create contract with a new UUID, not using the provided ID
+                  await this.prisma.contrato2.create({
+                    data: {
+                      // Do NOT use contratoData.id - let Prisma generate a new UUID
+                      Trabajador: {
+                        connect: { id: newTrabajador.id },
+                      },
+                      fechaAlta: contratoData.fechaAlta,
+                      fechaAntiguedad: contratoData.fechaAntiguedad,
+                      horasContrato: contratoData.horasContrato,
+                      inicioContrato: contratoData.inicioContrato,
+                      fechaBaja: contratoData.fechaBaja,
+                      finalContrato: contratoData.finalContrato,
+                    },
+                  });
+                }
+
+                return {
+                  success: true,
+                  dni: trabajador.dni,
+                  action: "created",
+                  id: newTrabajador.id,
+                };
+              }
+            } catch (error) {
+              console.error(
+                `Error processing trabajador with DNI ${trabajador.dni}:`,
+                error,
+              );
+              return {
+                success: false,
+                dni: trabajador.dni,
+                error: error.message,
+              };
+            }
+          }),
+        );
+
+        allResults = [...allResults, ...batchResults];
+
+        // Add a small delay between batches to prevent database overload
+        await new Promise((resolve) => setTimeout(resolve, 50));
+      }
+
+      // Count successes and failures
+      const successful = allResults.filter((r) => r.success).length;
+      const failed = allResults.filter((r) => !r.success).length;
+
+      console.log(
+        `Completed batch operation: ${successful} successful, ${failed} failed`,
+      );
+
+      return {
+        message: `Processed ${allResults.length} workers: ${successful} successful, ${failed} failed`,
+        details: allResults,
+      };
+    } catch (error) {
+      console.error("Error in createManyTrabajadores:", error);
       throw new InternalServerErrorException(
-        "Error al crear los trabajadores en la base de datos.",
+        `Failed to create/update workers: ${error.message}`,
       );
     }
   }
