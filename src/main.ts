@@ -34,7 +34,16 @@ async function bootstrap() {
   app.setViewEngine("hbs");
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
-  await app.listen(3000);
+
+  // Usar variables de entorno o valores por defecto
+  const port = process.env.PORT || 3000;
+  const host = process.env.HOST || "0.0.0.0";
+
+  await app.listen(port, host);
+  console.log(`Application is running on: ${await app.getUrl()}`);
 }
 
-bootstrap();
+bootstrap().catch((err) => {
+  console.error("Error starting the application:", err);
+  process.exit(1);
+});

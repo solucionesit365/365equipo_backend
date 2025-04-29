@@ -4,7 +4,7 @@ import { DateTime } from "luxon";
 import { Prisma } from "@prisma/client";
 import { ParametrosService } from "../parametros/parametros.service";
 import { Tienda } from "../tiendas/tiendas.class";
-import pMap from "p-map";
+import pMap = require("p-map");
 import {
   CreateTrabajadorRequestDto,
   TrabajadorFormRequest,
