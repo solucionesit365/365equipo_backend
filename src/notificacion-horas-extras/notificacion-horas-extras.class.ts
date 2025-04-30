@@ -67,4 +67,34 @@ export class NotificacionHorasExtrasClass {
       data,
     );
   }
+
+  async updateComentarioHorasExtras(
+    id: string,
+    horaExtraId: string,
+    comentario: {
+      nombre: string;
+      fechaRespuesta: string;
+      mensaje: string;
+    }[],
+  ) {
+    return await this.shNotificacionhorasExtras.updateComentarioHorasExtras(
+      id,
+      horaExtraId,
+      comentario,
+    );
+  }
+
+  async marcarComentariosComoLeidos(
+    id: string,
+    horaExtraId: string,
+    usuarioId: string,
+    fecha: string,
+  ) {
+    return await this.shNotificacionhorasExtras.marcarComentariosComoLeidos(
+      id,
+      horaExtraId,
+      usuarioId,
+      fecha,
+    );
+  }
 }
