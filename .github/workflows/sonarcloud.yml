@@ -33,6 +33,6 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
           args: >
-            -Dsonar.organization=365it
+            -Dsonar.organization=solucionesit365
             -Dsonar.projectKey=365equipo_backend
             -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
