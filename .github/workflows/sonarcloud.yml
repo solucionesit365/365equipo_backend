@@ -1,38 +1,23 @@
-name: SonarCloud Scan
-
+name: Build
 on:
-  push:
-    branches:
-      - master
-  pull_request:
-    types: [opened, synchronize, reopened]
-
+ push:
+   branches:
+     - master
+ pull_request:
+   types: [opened, synchronize, reopened]
 jobs:
-  sonarcloud:
+  sonarqube:
+    name: SonarQube
     runs-on: ubuntu-latest
-
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v2
         with:
-          fetch-depth: 0
-
-      - name: Setup Node.js (ejemplo con Jest)
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-
-      - name: Instalar dependencias
-        run: npm install
-
-      - name: Ejecutar tests y cobertura
-        run: npm run test -- --coverage
-
-      - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@master
+          fetch-depth: 0 
+      - name: Install dependencies
+        run: yarn
+      - name: Test and coverage
+        run: yarn jest --coverage
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v4
         env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        with:
-          args: >
-            -Dsonar.organization=solucionesit365
-            -Dsonar.projectKey=365equipo_backend
-            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+          SONAR_TOKEN: ${{ secrets. SONARCLOUD_TOKEN }}
