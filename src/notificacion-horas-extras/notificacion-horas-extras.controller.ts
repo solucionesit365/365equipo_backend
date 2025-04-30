@@ -55,6 +55,7 @@ export class NotificacionHorasExtrasController {
     }
   }
 
+  //Check de revision
   @UseGuards(AuthGuard)
   @Post("updateNotificacionHorasExtrasRevision")
   updateNotificacionHorasExtrasRevision(
@@ -82,6 +83,7 @@ export class NotificacionHorasExtrasController {
     }
   }
 
+  //Check de apagar
   @UseGuards(AuthGuard)
   @Post("updateNotificacionHorasExtrasApagar")
   updateNotificacionHorasExtrasApagar(
@@ -103,6 +105,47 @@ export class NotificacionHorasExtrasController {
       return {
         ok: false,
         message: "Error al actualizar la notificacion de horas extras a pagar",
+        error: error.message,
+      };
+    }
+  }
+  @UseGuards(AuthGuard)
+  @Post("deleteNotificacionHorasExtras")
+  deleteNotificacionHorasExtras(@Body() { idHorasExtras }) {
+    try {
+      return this.shNotificacionhorasExtras.deleteNotificacionHorasExtras(
+        idHorasExtras,
+      );
+    } catch (error) {
+      console.log(error);
+      return {
+        ok: false,
+        message: "Error al eliminar la notificacion de horas extras",
+        error: error.message,
+      };
+    }
+  }
+  @UseGuards(AuthGuard)
+  @Post("updateNotificacionHorasExtras")
+  updateNotificacionHorasExtras(
+    @Body()
+    body: {
+      id: string;
+      horaExtraId: string;
+      data: TNotificacionHorasExtras;
+    },
+  ) {
+    try {
+      return this.shNotificacionhorasExtras.updateNotificacionHorasExtras(
+        body.id,
+        body.horaExtraId,
+        body.data,
+      );
+    } catch (error) {
+      console.log(error);
+      return {
+        ok: false,
+        message: "Error al actualizar la notificación de horas extras",
         error: error.message,
       };
     }
