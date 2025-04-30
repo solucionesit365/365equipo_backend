@@ -239,12 +239,12 @@ export class TrabajadorDatabaseService {
                       await this.prisma.contrato2.update({
                         where: { id: existingContrato.id },
                         data: {
-                          fechaAlta: contratoData.fechaAlta,
-                          fechaAntiguedad: contratoData.fechaAntiguedad,
                           horasContrato: contratoData.horasContrato,
                           inicioContrato: contratoData.inicioContrato,
-                          fechaBaja: contratoData.fechaBaja,
                           finalContrato: contratoData.finalContrato,
+                          fechaAlta: contratoData.fechaAlta,
+                          fechaAntiguedad: contratoData.fechaAntiguedad,
+                          fechaBaja: contratoData.fechaBaja,
                         },
                       });
                     } else {
@@ -440,7 +440,14 @@ export class TrabajadorDatabaseService {
                 // Actualizar contrato existente
                 await this.prisma.contrato2.update({
                   where: { id: contratoExistente.id },
-                  data: nuevoContrato,
+                  data: {
+                    horasContrato: nuevoContrato.horasContrato,
+                    inicioContrato: nuevoContrato.inicioContrato,
+                    finalContrato: nuevoContrato.finalContrato,
+                    fechaAlta: nuevoContrato.fechaAlta,
+                    fechaAntiguedad: nuevoContrato.fechaAntiguedad,
+                    fechaBaja: nuevoContrato.fechaBaja,
+                  },
                 });
               } else {
                 // Crear nuevo contrato
@@ -1736,5 +1743,23 @@ export class TrabajadorDatabaseService {
         id: idSql,
       },
     });
+  }
+
+  async borrarConFechaBaja() {
+    try {
+      return await this.prisma.trabajador.deleteMany({
+        where: {
+          contratos: {
+            some: {
+              fechaBaja: {
+                not: null,
+              },
+            },
+          },
+        },
+      });
+    } catch (error) {
+      console.log(error);
+    }
   }
 }
