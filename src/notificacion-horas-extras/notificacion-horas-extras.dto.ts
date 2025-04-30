@@ -43,7 +43,7 @@ class THoraExtra {
   @IsBoolean()
   revision: boolean;
 
-  @IsString()
+  @IsOptional()
   comentario?: {
     fechaRespuesta: Date;
     mensaje: string;
