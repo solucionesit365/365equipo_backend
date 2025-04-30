@@ -112,18 +112,9 @@ export class NotificacionHorasExtrasController {
   @UseGuards(AuthGuard)
   @Post("deleteNotificacionHorasExtras")
   deleteNotificacionHorasExtras(@Body() { idHorasExtras }) {
-    try {
-      return this.shNotificacionhorasExtras.deleteNotificacionHorasExtras(
-        idHorasExtras,
-      );
-    } catch (error) {
-      console.log(error);
-      return {
-        ok: false,
-        message: "Error al eliminar la notificacion de horas extras",
-        error: error.message,
-      };
-    }
+    return this.shNotificacionhorasExtras.deleteNotificacionHorasExtras(
+      idHorasExtras,
+    );
   }
   @UseGuards(AuthGuard)
   @Post("updateNotificacionHorasExtras")
@@ -135,20 +126,11 @@ export class NotificacionHorasExtrasController {
       data: TNotificacionHorasExtras;
     },
   ) {
-    try {
-      return this.shNotificacionhorasExtras.updateNotificacionHorasExtras(
-        body.id,
-        body.horaExtraId,
-        body.data,
-      );
-    } catch (error) {
-      console.log(error);
-      return {
-        ok: false,
-        message: "Error al actualizar la notificación de horas extras",
-        error: error.message,
-      };
-    }
+    return this.shNotificacionhorasExtras.updateNotificacionHorasExtras(
+      body.id,
+      body.horaExtraId,
+      body.data,
+    );
   }
 
   @UseGuards(AuthGuard)
@@ -165,23 +147,14 @@ export class NotificacionHorasExtrasController {
       }[];
     },
   ) {
-    try {
-      return this.shNotificacionhorasExtras.updateComentarioHorasExtras(
-        body.id,
-        body.horaExtraId,
-        body.comentario?.map((c) => ({
-          ...c,
-          fechaRespuesta: new Date(c.fechaRespuesta).toISOString(),
-        })),
-      );
-    } catch (error) {
-      console.log(error);
-      return {
-        ok: false,
-        message: "Error al actualizar la notificación de horas extras",
-        error: error.message,
-      };
-    }
+    return this.shNotificacionhorasExtras.updateComentarioHorasExtras(
+      body.id,
+      body.horaExtraId,
+      body.comentario?.map((c) => ({
+        ...c,
+        fechaRespuesta: new Date(c.fechaRespuesta).toISOString(),
+      })),
+    );
   }
   @Post("updateUltimoLeido")
   async marcarLeido(

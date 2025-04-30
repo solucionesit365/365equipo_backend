@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, InternalServerErrorException } from "@nestjs/common";
 import { MongoService } from "../mongo/mongo.service";
 import { TNotificacionHorasExtras } from "./notificacion-horas-extras.dto";
 import { ObjectId } from "mongodb";
@@ -94,38 +94,45 @@ export class NotificacionHorasExtrasMongoService {
     const db = (await this.mongoDbService.getConexion()).db();
     const notificacionesCollection = db.collection("notificacionesHorasExtras");
 
-    const horaExtra = data.horasExtras?.[0];
+    // Encontrar la hora extra que se quiere modificar (según el _id que es string)
+    const horaExtra = data.horasExtras?.find((h) => h._id === horaExtraId);
+
     if (!horaExtra) {
-      return {
-        ok: false,
-        message: "No se proporcionó información válida para la hora extra",
-      };
+      throw new InternalServerErrorException(
+        "Hora extra no válida o no encontrada",
+      );
     }
 
-    const result = await notificacionesCollection.updateOne(
-      {
-        _id: new ObjectId(id),
-        "horasExtras._id": horaExtraId,
-      },
+    // 1. Actualizar el campo 'trabajador' directamente (sin depender de horasExtras)
+    const res1 = await notificacionesCollection.updateOne(
+      { _id: new ObjectId(id) },
+      { $set: { trabajador: data.trabajador } },
+    );
+
+    // 2. Actualizar los campos dentro del subdocumento `horasExtras`
+    const res2 = await notificacionesCollection.updateOne(
+      { _id: new ObjectId(id) },
       {
         $set: {
-          trabajador: data.trabajador,
-          motivo: data.motivo,
-
-          "horasExtras.$.fecha": horaExtra.fecha,
-          "horasExtras.$.horaInicio": horaExtra.horaInicio,
-          "horasExtras.$.horaFinal": horaExtra.horaFinal,
+          "horasExtras.$[elem].motivo": horaExtra.motivo,
+          "horasExtras.$[elem].fecha": horaExtra.fecha,
+          "horasExtras.$[elem].horaInicio": horaExtra.horaInicio,
+          "horasExtras.$[elem].horaFinal": horaExtra.horaFinal,
         },
+      },
+      {
+        arrayFilters: [{ "elem._id": horaExtraId }], // ⬅ importante: el ID es string
       },
     );
 
-    return {
-      ok: result.modifiedCount > 0,
-      message:
-        result.modifiedCount > 0
-          ? "Datos actualizados correctamente"
-          : "No se encontró o no se modificó nada",
-    };
+    const actualizoAlgo = res1.modifiedCount > 0 || res2.modifiedCount > 0;
+    if (!actualizoAlgo) {
+      throw new InternalServerErrorException(
+        "No se actualizó ningún campo del documento",
+      );
+    }
+
+    return { message: "Datos actualizados correctamente" };
   }
 
   //update comentario

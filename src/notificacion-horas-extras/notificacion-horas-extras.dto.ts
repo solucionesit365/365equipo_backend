@@ -28,6 +28,15 @@ class THoraExtra {
   @IsString()
   horaFinal: string;
 
+  @IsString()
+  motivo: string;
+
+  @IsString()
+  formacion: string;
+
+  @IsString()
+  incrementoTrabajo: string;
+
   @IsBoolean()
   apagar: boolean;
 
@@ -65,15 +74,6 @@ export class TNotificacionHorasExtras {
   @ValidateNested({ each: true })
   @Type(() => THoraExtra)
   horasExtras: THoraExtra[];
-
-  @IsString()
-  motivo: string;
-
-  @IsString()
-  formacion: string;
-
-  @IsString()
-  incrementoTrabajo: string;
 
   @IsString()
   fechaCreacion: string;
