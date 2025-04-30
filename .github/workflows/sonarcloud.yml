@@ -14,7 +14,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Necesario para SonarCloud
+          fetch-depth: 0
 
       - name: Setup Node.js (ejemplo con Jest)
         uses: actions/setup-node@v4
