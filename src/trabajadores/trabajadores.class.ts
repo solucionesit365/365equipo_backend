@@ -509,6 +509,10 @@ export class TrabajadorService {
     return await this.schTrabajadores.guardarTrabajadoresOmne();
   }
 
+  async limpiarTrabajadoresConFinalContrato() {
+    return await this.schTrabajadores.borrarConFechaBaja();
+  }
+
   async eliminarTrabajador(idSql: number) {
     try {
       return await this.schTrabajadores.deleteTrabajador(idSql);

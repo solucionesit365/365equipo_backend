@@ -14,7 +14,7 @@ import { Roles } from "../decorators/role.decorator";
 import { User } from "../decorators/get-user.decorator";
 import { UserRecord } from "firebase-admin/auth";
 import { Prisma } from "@prisma/client";
-import pMap from "p-map";
+import pMap = require("p-map");
 import {
   CreateTrabajadorRequestDto,
   DeleteTrabajadorDto,
@@ -116,6 +116,12 @@ export class TrabajadoresController {
         creados: cambiosDetectados.crear.length,
       },
     };
+  }
+
+  @UseGuards(SchedulerGuard)
+  @Post("limpiezaTrabajadores")
+  async limpiezaTrabajadores() {
+    return await this.trabajadorInstance.limpiarTrabajadoresConFinalContrato();
   }
 
   @UseGuards(AuthGuard)
