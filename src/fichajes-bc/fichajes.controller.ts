@@ -377,4 +377,14 @@ export class FichajesController {
       return { ok: false, message: error.message };
     }
   }
+
+  @UseGuards(AuthGuard)
+  @Get("historialFichajesDelDia")
+  async getHistorialFichajesDelDia(@Query("uid") uid: string) {
+    const hoy = new Date();
+    const inicio = new Date(hoy.setHours(0, 0, 0, 0));
+    const fin = new Date(hoy.setHours(23, 59, 59, 999));
+
+    return this.fichajesInstance.getFichajesByUid(uid, inicio, fin);
+  }
 }
