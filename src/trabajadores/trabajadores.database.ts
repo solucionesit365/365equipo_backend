@@ -870,122 +870,141 @@ export class TrabajadorDatabaseService {
   async sincronizarTrabajadores(): Promise<
     { message: string } | { error: string }
   > {
-    const resultados = await this.getTrabajadoresOmne();
-    const tiendas = await this.tiendaInstance.getTiendas();
+    try {
+      const resultados = await this.getTrabajadoresOmne();
+      const tiendas = await this.tiendaInstance.getTiendas();
 
-    if (!Array.isArray(resultados)) {
-      console.error("Error al obtener los resultados:", resultados);
-      return {
-        error: "No se han podido obtener los resultados correctamente.",
-      };
-    }
+      if (!Array.isArray(resultados)) {
+        console.error("Error al obtener los resultados:", resultados);
+        return {
+          error: "No se han podido obtener los resultados correctamente.",
+        };
+      }
 
-    for (const resultado of resultados) {
-      if ("trabajadores" in resultado && resultado.trabajadores) {
-        // Iteramos cada trabajador obtenido para mapear los datos y guardarlos
-        for (const trabajador of resultado.trabajadores) {
-          let tiendaId: number | null = null;
-          if (trabajador.descripcionCentro) {
-            // Reemplazamos el primer guion simple por dos guiones.
-            const transformedDescripcion = trabajador.descripcionCentro.replace(
-              /-/,
-              "--",
-            );
-            // Buscamos la tienda que coincida (comparación sin distinción de mayúsculas/minúsculas)
-            const foundTienda = tiendas.find(
-              (tienda) =>
-                tienda.nombre.toLowerCase() ===
-                transformedDescripcion.toLowerCase(),
-            );
-            if (foundTienda) {
-              tiendaId = foundTienda.id;
+      // Preparar todos los trabajadores para procesamiento
+      const trabajadoresParaProcesar = [];
+      for (const resultado of resultados) {
+        if ("trabajadores" in resultado && resultado.trabajadores) {
+          for (const trabajador of resultado.trabajadores) {
+            let tiendaId: number | null = null;
+            if (trabajador.descripcionCentro) {
+              const transformedDescripcion =
+                trabajador.descripcionCentro.replace(/-/, "--");
+              const foundTienda = tiendas.find(
+                (tienda) =>
+                  tienda.nombre.toLowerCase() ===
+                  transformedDescripcion.toLowerCase(),
+              );
+              if (foundTienda) {
+                tiendaId = foundTienda.id;
+              }
             }
-          }
 
-          const nuevoTrabajador: CreateTrabajadorRequestDto = {
-            dni: trabajador.documento,
-            nombreApellidos: trabajador.apellidosYNombre,
-            displayName: trabajador.nombre,
-            emails: trabajador.email,
-            direccion: `${trabajador.viaPublica} ${trabajador.numero} ${trabajador.numero} ${trabajador.piso}`,
-            llevaEquipo: false,
-            tipoTrabajador: "DEPENDENTA",
-            ciudad: trabajador.poblacion,
-            telefonos: trabajador.noTelfMovilPersonal,
-            codigoPostal: trabajador.cp,
-            cuentaCorriente: "0",
-            fechaNacimiento: null,
-            nacionalidad: trabajador.codPaisNacionalidad,
-            displayFoto: null,
-            excedencia: false,
-            idEmpresa: "a9357dca-f201-49b9-ae53-a7aba2f654c5", //POR DEFECTO ARRAZAOS
-            idResponsable: null,
-            nSeguridadSocial: trabajador.noAfiliacion,
-            idTienda: tiendaId, // asignamos el id obtenido (o null si no se encontró)
-            tokenQR: "",
-            // Asignación de rol fijo; si es dinámico, ajusta el mapeo
-            arrayRoles: ["b3f04be2-35f5-46d0-842b-5be49014a2ef"],
-            // Mapeo del contrato; ajusta según la estructura real
-            contrato: {
-              fechaAlta: trabajador.altaContrato
-                ? new Date(trabajador.altaContrato)
-                : new Date(),
-              fechaAntiguedad: trabajador.antiguedadEmpresa
-                ? new Date(trabajador.antiguedadEmpresa)
-                : new Date(),
-              horasContrato:
-                trabajador.horassemana && trabajador.horassemana > 0
-                  ? Math.round((trabajador.horassemana * 100) / 40)
-                  : 100,
-
-              inicioContrato: trabajador.altaContrato
-                ? new Date(trabajador.altaContrato)
-                : new Date(),
-              fechaBaja:
-                trabajador.bajaEmpresa &&
-                trabajador.bajaEmpresa.includes("0001-01-01")
-                  ? null
-                  : new Date(trabajador.bajaEmpresa),
-
-              finalContrato:
-                trabajador.bajaEmpresa &&
-                trabajador.bajaEmpresa.includes("0001-01-01")
-                  ? null
-                  : new Date(trabajador.bajaEmpresa),
-            },
-          };
-
-          try {
-            await this.crearTrabajadorOmne(nuevoTrabajador);
-          } catch (error) {
-            console.error("Error al crear trabajador:", error.message);
+            trabajadoresParaProcesar.push({
+              dni: trabajador.documento,
+              nombreApellidos: trabajador.apellidosYNombre,
+              displayName: trabajador.nombre,
+              emails: trabajador.email,
+              direccion: `${trabajador.viaPublica} ${trabajador.numero} ${trabajador.numero} ${trabajador.piso}`,
+              llevaEquipo: false,
+              tipoTrabajador: "DEPENDENTA",
+              ciudad: trabajador.poblacion,
+              telefonos: trabajador.noTelfMovilPersonal,
+              codigoPostal: trabajador.cp,
+              cuentaCorriente: "0",
+              fechaNacimiento: null,
+              nacionalidad: trabajador.codPaisNacionalidad,
+              displayFoto: null,
+              excedencia: false,
+              idEmpresa: "a9357dca-f201-49b9-ae53-a7aba2f654c5",
+              idResponsable: null,
+              nSeguridadSocial: trabajador.noAfiliacion,
+              idTienda: tiendaId,
+              tokenQR: "",
+              arrayRoles: ["b3f04be2-35f5-46d0-842b-5be49014a2ef"],
+              contrato: {
+                fechaAlta: trabajador.altaContrato
+                  ? new Date(trabajador.altaContrato)
+                  : new Date(),
+                fechaAntiguedad: trabajador.antiguedadEmpresa
+                  ? new Date(trabajador.antiguedadEmpresa)
+                  : new Date(),
+                horasContrato:
+                  trabajador.horassemana && trabajador.horassemana > 0
+                    ? Math.round((trabajador.horassemana * 100) / 40)
+                    : 100,
+                inicioContrato: trabajador.altaContrato
+                  ? new Date(trabajador.altaContrato)
+                  : new Date(),
+                fechaBaja:
+                  trabajador.bajaEmpresa &&
+                  trabajador.bajaEmpresa.includes("0001-01-01")
+                    ? null
+                    : new Date(trabajador.bajaEmpresa),
+                finalContrato:
+                  trabajador.bajaEmpresa &&
+                  trabajador.bajaEmpresa.includes("0001-01-01")
+                    ? null
+                    : new Date(trabajador.bajaEmpresa),
+              },
+            });
           }
         }
-      } else {
-        console.log(
-          `Empresa ${resultado.nombre}: ${
-            "error" in resultado ? resultado.error : resultado.mensaje
-          }`,
-        );
       }
-    }
 
-    const newSyncDate = DateTime.now().toJSDate();
+      // Procesar por lotes
+      const BATCH_SIZE = 50;
+      const batches = [];
+      for (let i = 0; i < trabajadoresParaProcesar.length; i += BATCH_SIZE) {
+        batches.push(trabajadoresParaProcesar.slice(i, i + BATCH_SIZE));
+      }
 
-    try {
-      // Supongamos que en tu parametrosService tienes un método updateParametros o updateLastSyncWorkers
+      let processedCount = 0;
+      let errorCount = 0;
+
+      // Procesar cada lote
+      for (const batch of batches) {
+        try {
+          // Usar transacción para cada lote
+          await this.prisma.$transaction(async (tx) => {
+            for (const trabajador of batch) {
+              try {
+                await this.crearTrabajadorOmne(trabajador);
+                processedCount++;
+              } catch (error) {
+                console.error(
+                  `Error al procesar trabajador ${trabajador.dni}:`,
+                  error,
+                );
+                errorCount++;
+              }
+            }
+          });
+
+          // Pequeña pausa entre lotes para evitar sobrecarga
+          await new Promise((resolve) => setTimeout(resolve, 100));
+        } catch (error) {
+          console.error("Error en el procesamiento del lote:", error);
+          errorCount += batch.length;
+        }
+      }
+
+      // Actualizar fecha de sincronización
+      const newSyncDate = DateTime.now().toJSDate();
       await this.parametrosService.updateParametros("sincro_trabajadores", {
         lastSyncWorkers: newSyncDate,
       });
-      console.log(`Fecha de sincronización actualizada a: ${newSyncDate}`);
+
+      return {
+        message: `Sincronización completada. Procesados: ${processedCount}, Errores: ${errorCount}`,
+      };
     } catch (error) {
-      console.error(
-        "Error al actualizar la fecha de sincronización:",
-        error.message,
-      );
-      return { error: "Error al actualizar la fecha de sincronización." };
+      console.error("Error en sincronizarTrabajadores:", error);
+      return { error: `Error en la sincronización: ${error.message}` };
+    } finally {
+      // Asegurar que las conexiones se cierren
+      await this.prisma.$disconnect();
     }
-    return { message: "Sincronización completada" };
   }
 
   async guardarTrabajadoresOmne() {
