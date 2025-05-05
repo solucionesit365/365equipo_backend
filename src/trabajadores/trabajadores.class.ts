@@ -199,6 +199,11 @@ export class TrabajadorService {
         if (omneTrab.poblacion !== appTrab.ciudad) {
           cambios.ciudad = omneTrab.poblacion;
         }
+
+        if (omneTrab.nombre !== appTrab.displayName) {
+          cambios.displayName = omneTrab.nombre;
+        }
+
         if (omneTrab.codPaisNacionalidad !== appTrab.nacionalidad) {
           cambios.nacionalidad = omneTrab.codPaisNacionalidad;
         }
