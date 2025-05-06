@@ -98,7 +98,6 @@ export class NotificacionHorasExtrasMongoService {
       horasExtras: { $exists: true },
       "horasExtras.0": { $exists: false },
     });
-    console.log(emptyDoc);
 
     if (emptyDoc) {
       await notificacionesCollection.deleteOne({ _id: emptyDoc._id });
