@@ -80,9 +80,38 @@ export class NotificacionHorasExtrasMongoService {
     const db = (await this.mongoDbService.getConexion()).db();
     const notificacionesCollection = db.collection("notificacionesHorasExtras");
 
-    return await notificacionesCollection.deleteOne({
-      _id: new ObjectId(idHorasExtras),
+    // Paso 1: Eliminar solo el objeto del array horasExtras
+    const result = await notificacionesCollection.updateOne(
+      { "horasExtras._id": idHorasExtras },
+      { $pull: { horasExtras: { _id: idHorasExtras } } },
+    );
+
+    if (result.modifiedCount === 0) {
+      return {
+        deleted: false,
+        message: "No se encontró la notificación con ese ID.",
+      };
+    }
+
+    // Paso 2: Ver si el documento quedó con horasExtras vacío
+    const emptyDoc = await notificacionesCollection.findOne({
+      horasExtras: { $exists: true },
+      "horasExtras.0": { $exists: false },
     });
+    console.log(emptyDoc);
+
+    if (emptyDoc) {
+      await notificacionesCollection.deleteOne({ _id: emptyDoc._id });
+      return {
+        deleted: true,
+        message: "Objeto eliminado y documento borrado por estar vacío.",
+      };
+    }
+
+    return {
+      deleted: true,
+      message: "Objeto eliminado del array horasExtras.",
+    };
   }
 
   //Update una notificacion de horas extras
@@ -180,5 +209,48 @@ export class NotificacionHorasExtrasMongoService {
         },
       },
     );
+  }
+
+  async buscarCoincidenciasHorasExtras(
+    dniTrabajador: string,
+    horasExtras: {
+      tienda: string;
+      fecha: string;
+      horaInicio: string;
+      horaFinal: string;
+    }[],
+  ) {
+    const db = (await this.mongoDbService.getConexion()).db();
+    const notificacionesCollection = db.collection("notificacionesHorasExtras");
+
+    const condiciones = horasExtras.map((h) => ({
+      horasExtras: {
+        $elemMatch: {
+          tienda: h.tienda,
+          fecha: h.fecha,
+          $or: [
+            {
+              $and: [
+                { horaInicio: { $lte: h.horaInicio } },
+                { horaFinal: { $gte: h.horaInicio } },
+              ],
+            },
+            {
+              $and: [
+                { horaInicio: { $lte: h.horaFinal } },
+                { horaFinal: { $gte: h.horaFinal } },
+              ],
+            },
+          ],
+        },
+      },
+    }));
+
+    return await notificacionesCollection
+      .find({
+        dniTrabajador: dniTrabajador,
+        $or: condiciones,
+      })
+      .toArray();
   }
 }
