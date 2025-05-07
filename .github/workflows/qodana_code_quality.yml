@@ -43,3 +43,4 @@ jobs:
         env:
           QODANA_TOKEN: ${{ secrets.QODANA_TOKEN_1819043438 }}
           QODANA_ENDPOINT: 'https://qodana.cloud'
+        timeout-minutes: 5
