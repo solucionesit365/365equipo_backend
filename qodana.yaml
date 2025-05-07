@@ -28,7 +28,6 @@ dependencyOverrides:
   - name: qodana-js
     version: "2024.3"
 coverage:
-  enabled: true
   sources:
     - src
   reports:
