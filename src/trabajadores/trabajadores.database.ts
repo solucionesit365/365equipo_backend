@@ -728,6 +728,7 @@ export class TrabajadorDatabaseService {
             fechaBaja: null, // Contrato aún vigente
           },
         },
+        esTienda: false,
       },
       include: {
         contratos: include.contratos
