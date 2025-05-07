@@ -1,5 +1,6 @@
 // This test file is designed to be basic and not import actual modules
 // which could cause path resolution issues
+import { TrabajadorService } from "./trabajadores.class";
 
 describe("TrabajadorService", () => {
   it("should be defined", () => {
@@ -28,5 +29,22 @@ describe("TrabajadorService", () => {
   });
   it("should be defined", () => {
     expect(9).toBeDefined();
+  });
+
+  describe("TrabajadorService", () => {
+    it("should create a service instance", () => {
+      const mockService = jest.fn();
+
+      const service = new TrabajadorService(
+        mockService(), // firebaseService
+        mockService(), // permisosInstance
+        mockService(), // emailInstance
+        mockService(), // solicitudesVacaciones
+        mockService(), // solicitudesDiaPersonal
+        mockService(), // schTrabajadores
+      );
+
+      expect(service).toBeDefined();
+    });
   });
 });
