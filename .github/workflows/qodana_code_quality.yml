@@ -30,7 +30,10 @@ jobs:
         run: npm ci
         
       - name: Run tests with coverage
-        run: npm run test:cov
+        run:  | 
+            npm run test:cov
+            mkdir -p .qodana/code-coverage
+            cp coverage/lcov.info .qodana/code-coverage/lcov.info
         
       - name: 'Qodana Scan'
         uses: JetBrains/qodana-action@v2024.3

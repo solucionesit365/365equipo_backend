@@ -27,8 +27,3 @@ licenseRules:
 dependencyOverrides:
   - name: qodana-js
     version: "2024.3"
-coverage:
-  sources:
-    - src
-  reports:
-    - coverage/lcov.info
