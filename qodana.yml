@@ -4,21 +4,21 @@ profile:
   name: qodana.recommended
 include:
   - name: CheckDependencyLicenses
-bootstrap: npm ci && npm run test:cov
+bootstrap: npm ci && npm run test
 exclude:
   - paths:
       - dist/**
       - node_modules/**
       - coverage/**
 licenseRules:
-  - name: "allow-common-licenses"
-    allowed:
+  - keys:
       - MIT
       - ISC
       - Apache-2.0
       - 0BSD
       - BSD-2-Clause
       - BSD-3-Clause
+    allowed: true
 coverage:
   report:
     lcov:
