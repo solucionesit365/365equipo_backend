@@ -31,6 +31,7 @@ model Trabajador {
   excedencia       Boolean      @default(false)
   dispositivo      String?
   empresaId        String?
+  esTienda         Boolean      @default(false)
   contratos        Contrato2[]
   empresa          Empresa?     @relation(fields: [empresaId], references: [id])
   responsable      Trabajador?  @relation("Responsable", fields: [idResponsable], references: [id])
