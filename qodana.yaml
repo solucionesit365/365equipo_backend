@@ -6,14 +6,10 @@ include:
   - name: CheckDependencyLicenses
 bootstrap: npm ci
 exclude:
-  - name: All
-    paths:
-      - dist
-      - node_modules
-      - coverage
-  - name: "ExampleInspection"
-    patterns:
-      - "*.spec.ts"
+  - paths:
+      - dist/**
+      - node_modules/**
+      - coverage/**
 licenseRules:
   - keys:
       - MIT
@@ -22,8 +18,7 @@ licenseRules:
       - 0BSD
       - BSD-2-Clause
       - BSD-3-Clause
-    allowed:
-      - true
+    allowed: true
 dependencyOverrides:
   - name: qodana-js
     version: "2024.3"
