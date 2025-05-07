@@ -25,10 +25,7 @@ licenseRules:
       - 0BSD
       - BSD-2-Clause
       - BSD-3-Clause
-coverage:
-  report:
-    lcov:
-      path: coverage/lcov.info
+      
 dependencyOverrides:
   - name: qodana-js
     version: "2024.3"
