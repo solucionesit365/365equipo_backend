@@ -1,0 +1,32 @@
+version: "1.0"
+linter: jetbrains/qodana-js:latest
+profile:
+  name: qodana.recommended
+include:
+  - name: CheckDependencyLicenses
+bootstrap: npm ci
+exclude:
+  - name: All
+    paths:
+      - dist
+      - node_modules
+      - coverage
+  - id: 1234567
+licenseRules:
+  - keys:
+      - MIT
+      - ISC
+      - Apache-2.0
+      - 0BSD
+      - BSD-2-Clause
+      - BSD-3-Clause
+    allowed: true
+dependencyOverrides:
+  - name: qodana-js
+    version: latest
+coverage:
+  enabled: true
+  sources:
+    - src
+  reports:
+    - coverage/lcov.info
