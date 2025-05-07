@@ -62,7 +62,7 @@ import { NotificacionHorasExtrasController } from "./notificacion-horas-extras/n
 import { NotificacionHorasExtrasModule } from "./notificacion-horas-extras/notificacion-horas-extras.module";
 import { ParametrosModule } from "./parametros/parametros.module";
 import { PowerAutomateModule } from "./power-automate/power-automate.module";
-import { AxiosModule } from './axios/axios.module';
+import { AxiosModule } from "./axios/axios.module";
 
 @Module({
   imports: [
