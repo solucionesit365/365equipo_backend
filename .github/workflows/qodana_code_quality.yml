@@ -34,7 +34,7 @@ jobs:
         with:
           pr-mode: false
           use-caches: false
-          args: --coverage-report-dir=coverage
+          args: --coverage-dir=coverage
         env:
           QODANA_TOKEN: ${{ secrets.QODANA_TOKEN_1819043438 }}
           QODANA_ENDPOINT: "https://qodana.cloud"

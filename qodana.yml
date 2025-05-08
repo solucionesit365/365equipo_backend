@@ -1,33 +1,41 @@
+name: Qodana
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches:
+      - main
+      - test
+      - "releases/*"
 
-version: "1.0"
-linter: jetbrains/qodana-js:2024.3
-profile:
-  name: qodana.recommended
-include:
-  - name: CheckDependencyLicenses
-bootstrap: npm ci && npm run test:cov
-coverage:
-  report_dir: coverage
-exclude:
-  - paths:
-      - dist/**
-      - node_modules/**
-licenseRules:
-  - keys:
-      - MIT
-      - ISC
-      - Apache-2.0
-      - 0BSD
-      - BSD-2-Clause
-      - BSD-3-Clause
-    allowed:
-      - MIT
-      - ISC
-      - Apache-2.0
-      - 0BSD
-      - BSD-2-Clause
-      - BSD-3-Clause
-      
-dependencyOverrides:
-  - name: qodana-js
-    version: "2024.3"
+jobs:
+  qodana:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      checks: write
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: "Qodana Scan"
+        uses: JetBrains/qodana-action@v2024.3
+        with:
+          pr-mode: false
+          use-caches: false
+          args: --coverage-dir=coverage
+        env:
+          QODANA_TOKEN: ${{ secrets.QODANA_TOKEN_1819043438 }}
+          QODANA_ENDPOINT: "https://qodana.cloud"
+        timeout-minutes: 5
