@@ -1,7 +1,7 @@
-import { Module } from '@nestjs/common';
-import { BorrarmoduloService } from './borrarmodulo.service';
+import { Module } from "@nestjs/common";
+import { BorrarmoduloService } from "./borrarmodulo.service";
 
 @Module({
-  providers: [BorrarmoduloService]
+  providers: [BorrarmoduloService],
 })
 export class BorrarmoduloModule {}

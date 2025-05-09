@@ -63,7 +63,7 @@ import { NotificacionHorasExtrasModule } from "./notificacion-horas-extras/notif
 import { ParametrosModule } from "./parametros/parametros.module";
 import { PowerAutomateModule } from "./power-automate/power-automate.module";
 import { AxiosModule } from "./axios/axios.module";
-import { BorrarmoduloModule } from './borrarmodulo/borrarmodulo.module';
+import { BorrarmoduloModule } from "./borrarmodulo/borrarmodulo.module";
 
 @Module({
   imports: [
