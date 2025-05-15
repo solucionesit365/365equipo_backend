@@ -1,7 +1,5 @@
-import { Controller, Post, Get } from "@nestjs/common";
+import { Controller, Post, Get, Query } from "@nestjs/common";
 import { GraphService } from "./graph.service";
-import { DateTime } from "luxon";
-
 @Controller("graph")
 export class GraphController {
   constructor(private readonly graphService: GraphService) {}
@@ -17,14 +15,17 @@ export class GraphController {
   }
 
   @Get("checkDisponibilidadRoom")
-  async checkDisponibilidadRoom() {
-    const roomEmail = "box1@grupohorreols.com";
-    const startDate = DateTime.fromFormat(
-      "2025-05-09 07:00",
-      "yyyy-MM-dd HH:mm",
-    );
+  async checkDisponibilidadRoom(@Query() { roomEmail, startDate, endDate }) {
+    console.log(startDate);
+    console.log(endDate);
 
-    const endDate = DateTime.fromFormat("2025-05-10 23:00", "yyyy-MM-dd HH:mm");
+    // const roomEmail = "box1@grupohorreols.com";
+    // const startDate = DateTime.fromFormat(
+    //   "2025-05-12 07:00",
+    //   "yyyy-MM-dd HH:mm",
+    // );
+
+    // const endDate = DateTime.fromFormat("2025-05-12 23:00", "yyyy-MM-dd HH:mm");
     return this.graphService.getRoomAvailability(roomEmail, startDate, endDate);
   }
 }
