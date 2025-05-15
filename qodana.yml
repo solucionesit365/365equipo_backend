@@ -1,0 +1,26 @@
+version: "1.0"
+linter: jetbrains/qodana-js:2024.3
+profile:
+  name: qodana.recommended
+include:
+  - name: CheckDependencyLicenses
+bootstrap: npm ci && npm run test:cov
+exclude:
+  - paths:
+      - dist/**
+      - node_modules/**
+licenseRules:
+  - keys:
+      - MIT
+      - ISC
+      - Apache-2.0
+      - 0BSD
+      - BSD-2-Clause
+      - BSD-3-Clause
+    allowed:
+      - MIT
+      - ISC
+      - Apache-2.0
+      - 0BSD
+      - BSD-2-Clause
+      - BSD-3-Clause

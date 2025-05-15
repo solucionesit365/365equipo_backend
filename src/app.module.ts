@@ -64,6 +64,7 @@ import { ParametrosModule } from "./parametros/parametros.module";
 import { PowerAutomateModule } from "./power-automate/power-automate.module";
 import { AxiosModule } from "./axios/axios.module";
 import { GraphModule } from "./graph/graph.module";
+import { BorrarmoduloModule } from "./borrarmodulo/borrarmodulo.module";
 
 @Module({
   imports: [
@@ -131,6 +132,7 @@ import { GraphModule } from "./graph/graph.module";
     ParametrosModule,
     PowerAutomateModule,
     AxiosModule,
+    BorrarmoduloModule,
   ],
   controllers: [
     AppController,
