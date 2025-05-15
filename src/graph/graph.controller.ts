@@ -19,12 +19,6 @@ export class GraphController {
     console.log(startDate);
     console.log(endDate);
 
-    // const roomEmail = "box1@grupohorreols.com";
-    // const startDate = DateTime.fromFormat(
-    //   "2025-05-12 07:00",
-    //   "yyyy-MM-dd HH:mm",
-    // );
-
     // const endDate = DateTime.fromFormat("2025-05-12 23:00", "yyyy-MM-dd HH:mm");
     return this.graphService.getRoomAvailability(roomEmail, startDate, endDate);
   }
