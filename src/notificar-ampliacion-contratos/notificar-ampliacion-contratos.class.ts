@@ -38,12 +38,36 @@ export class NotificarAmpliacionContratosClass {
     );
   }
 
-  async updateNotificarAmpliacionCointratosVueltaJornada(
+  async updateNotificarAmpliacionContratosVueltaJornada(
     id: string,
     horaExtraId: string,
     data: { vueltaJornada?: boolean },
   ) {
-    return await this.shNotificacionhorasExtras.updateNotificarAmpliacionCointratosVueltaJornada(
+    return await this.shNotificacionhorasExtras.updateNotificarAmpliacionContratosVueltaJornada(
+      id,
+      horaExtraId,
+      data,
+    );
+  }
+
+  async updateNotificarAmpliacionContratosFirmaGuardado(
+    id: string,
+    horaExtraId: string,
+    data: { firmaGuardado?: boolean },
+  ) {
+    return await this.shNotificacionhorasExtras.updateNotificarAmpliacionContratosFirmaGuardado(
+      id,
+      horaExtraId,
+      data,
+    );
+  }
+
+  async updateNotificarAmpliacionContratosEscritoEnviado(
+    id: string,
+    horaExtraId: string,
+    data: { escritoEnviado?: boolean },
+  ) {
+    return await this.shNotificacionhorasExtras.updateNotificarAmpliacionContratosEscritoEnviado(
       id,
       horaExtraId,
       data,

@@ -58,7 +58,7 @@ export class NotificarAmpliacionContratosController {
     }
   }
 
-  //Check de revision
+  //Check de ampliacion
   @UseGuards(AuthGuard)
   @Post("updateNotificarAmpliacionContratosAmpliacion")
   updateNotificarAmpliacionContratosAmpliacion(
@@ -80,16 +80,16 @@ export class NotificarAmpliacionContratosController {
       return {
         ok: false,
         message:
-          "Error al actualizar la notificacion de horas extras a revisar",
+          "Error al actualizar la notificacion de ampliacion de contratos ampliacion",
         error: error.message,
       };
     }
   }
 
-  //Check de apagar
+  //Check de vueltaJornada
   @UseGuards(AuthGuard)
-  @Post("updateNotificarAmpliacionCointratosVueltaJornada")
-  updateNotificarAmpliacionCointratosVueltaJornada(
+  @Post("updateNotificarAmpliacionContratosVueltaJornada")
+  updateNotificarAmpliacionContratosVueltaJornada(
     @Body()
     data: {
       id: string;
@@ -98,7 +98,7 @@ export class NotificarAmpliacionContratosController {
     },
   ) {
     try {
-      return this.shNotificacionhorasExtras.updateNotificarAmpliacionCointratosVueltaJornada(
+      return this.shNotificacionhorasExtras.updateNotificarAmpliacionContratosVueltaJornada(
         data.id,
         data.horaExtraId,
         data,
@@ -107,11 +107,68 @@ export class NotificarAmpliacionContratosController {
       console.log(error);
       return {
         ok: false,
-        message: "Error al actualizar la notificacion de horas extras a pagar",
+        message:
+          "Error al actualizar la notificacion de ampliacion de contratos vueltaJornada",
         error: error.message,
       };
     }
   }
+  //Check de firma guardado
+  @UseGuards(AuthGuard)
+  @Post("updateNotificarAmpliacionContratosFirmaGuardado")
+  updateNotificarAmpliacionContratosFirmaGuardado(
+    @Body()
+    data: {
+      id: string;
+      horaExtraId: string;
+      firmaGuardado?: boolean;
+    },
+  ) {
+    try {
+      return this.shNotificacionhorasExtras.updateNotificarAmpliacionContratosFirmaGuardado(
+        data.id,
+        data.horaExtraId,
+        data,
+      );
+    } catch (error) {
+      console.log(error);
+      return {
+        ok: false,
+        message:
+          "Error al actualizar la notificacion de ampliacion de contratos firmaGuardado",
+        error: error.message,
+      };
+    }
+  }
+
+  //Check de escrito enviado
+  @UseGuards(AuthGuard)
+  @Post("updateNotificarAmpliacionContratosEscritoEnviado")
+  updateNotificarAmpliacionContratosEscritoEnviado(
+    @Body()
+    data: {
+      id: string;
+      horaExtraId: string;
+      escritoEnviado?: boolean;
+    },
+  ) {
+    try {
+      return this.shNotificacionhorasExtras.updateNotificarAmpliacionContratosEscritoEnviado(
+        data.id,
+        data.horaExtraId,
+        data,
+      );
+    } catch (error) {
+      console.log(error);
+      return {
+        ok: false,
+        message:
+          "Error al actualizar la notificacion de ampliacion de contratos escritoEnviado",
+        error: error.message,
+      };
+    }
+  }
+
   @UseGuards(AuthGuard)
   @Post("deleteNotificarAmpliacionContratos")
   deleteNotificarAmpliacionContratos(@Body() { idHorasExtras }) {
@@ -119,6 +176,7 @@ export class NotificarAmpliacionContratosController {
       idHorasExtras,
     );
   }
+
   @UseGuards(AuthGuard)
   @Post("updateNotificarAmpliacionContratos")
   updateNotificarAmpliacionContratos(
@@ -159,6 +217,7 @@ export class NotificarAmpliacionContratosController {
       })),
     );
   }
+
   @Post("updateUltimoLeido")
   async marcarLeido(
     @Body()
