@@ -19,6 +19,7 @@ export class FirebaseService {
       const firebaseConfig = JSON.parse(process.env.FIREBASE_CONFIG);
       this.app = initializeApp({
         credential: cert(firebaseConfig),
+        projectId: "silema",
       });
     } else {
       this.app = initializeApp({
@@ -102,8 +103,8 @@ export class FirebaseService {
   }
 
   test() {
-    this.auth.updateUser("userUID", {
-      email: "ezequielcarissimo@gmail.com",
+    this.auth.updateUser("orxqZhEQfpel9V51OEGy8rEaV6v1", {
+      email: "maryuryrodriguez@grupohorreols.com",
     });
   }
 }

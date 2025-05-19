@@ -10,4 +10,3 @@ import { ParametrosDatabase } from "./parametros.mongodb";
   exports: [ParametrosService],
 })
 export class ParametrosModule {}
-
