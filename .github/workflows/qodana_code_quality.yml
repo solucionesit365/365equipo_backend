@@ -39,3 +39,13 @@ jobs:
           QODANA_TOKEN: ${{ secrets.QODANA_TOKEN_1819043438 }}
           QODANA_ENDPOINT: "https://qodana.cloud"
         timeout-minutes: 5
+
+      - name: Install doctl
+        run: |
+          curl -sL https://github.com/digitalocean/doctl/releases/download/v1.104.0/doctl-1.104.0-linux-amd64.tar.gz | tar -xz
+          sudo mv doctl /usr/local/bin
+      - name: Authenticate with DigitalOcean
+        run: doctl auth init -t ${{ secrets.DO_API_TOKEN }}
+
+      - name: Trigger deploy in App Platform
+        run: doctl apps create-deployment b2fc5d2c-dea5-489c-be85-838da272da74
