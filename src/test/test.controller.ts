@@ -79,7 +79,7 @@ export class TestController {
         // `Production/api/Miguel/365ObradorAPI/v1.0/companies(${empresaID})/perceptoresQuery`,
         `Production/api/eze/365ObradorAPI/v1.0/companies(${empresaID})/PerceptorsExtraData`,
       );
-
+      // Cambio sin importancia
       return data.data;
     } catch (err) {
       console.log(err);
