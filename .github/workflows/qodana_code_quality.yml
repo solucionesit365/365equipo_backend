@@ -55,9 +55,9 @@ jobs:
           BRANCH="${GITHUB_HEAD_REF:-${GITHUB_REF##*/}}"
           echo "Branch detectada: $BRANCH"
           if [[ "$BRANCH" == "master" ]]; then
-            echo "APP_ID=${{ secrets.DO_APP_ID_PROD }}" >> $GITHUB_ENV
+            echo "APP_ID=$DO_APP_ID_PROD" >> $GITHUB_ENV
           elif [[ "$BRANCH" == "test" ]]; then
-            echo "APP_ID=${{ secrets.DO_APP_ID_STAGING }}" >> $GITHUB_ENV
+            echo "APP_ID=$DO_APP_ID_STAGING" >> $GITHUB_ENV
           else
             echo "APP_ID=" >> $GITHUB_ENV
           fi
