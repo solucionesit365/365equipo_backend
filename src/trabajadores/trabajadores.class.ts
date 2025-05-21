@@ -886,23 +886,10 @@ export class TrabajadorService {
     return trabajadorEncontrado;
   }
 
-  /**
-   * Comprueba si existe el email en la base de datos. Si existe, devuelve true (para permitir el registro), sino devuelve false.
-   * Hay que comprobar en el campo "emails" que pueden tener varios emails separados por ;
-   */
   async permitirRegistro(email: string) {
-    const trabajadores = await this.getTrabajadores(); // Obtener todos los trabajadores
-
-    // Buscar el trabajador con el email proporcionado
-    const trabajadorEncontrado = trabajadores.find((trabajador) => {
-      const emails = trabajador.emails.split(";").map((email) => email.trim());
-      return emails.includes(email);
-    });
-
-    if (!trabajadorEncontrado) {
-      return true; // Si no existe, devolver true (permitir registro)
-    }
-
-    return false; // Si existe, devolver false (no permitir registro)
+    const trabajador = await this.schTrabajadores.findTrabajadorByEmailLike(
+      email.trim().toLowerCase(),
+    );
+    return trabajador.length > 0;
   }
 }
