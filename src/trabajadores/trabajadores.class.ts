@@ -505,9 +505,9 @@ export class TrabajadorService {
     }
   }
 
-  async guardarTrabajadoresOmne() {
-    return await this.schTrabajadores.guardarTrabajadoresOmne();
-  }
+  // async guardarTrabajadoresOmne() {
+  //   return await this.schTrabajadores.guardarTrabajadoresOmne();
+  // }
 
   async limpiarTrabajadoresConFinalContrato() {
     return await this.schTrabajadores.borrarConFechaBaja();
