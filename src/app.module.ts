@@ -58,12 +58,12 @@ import { FormacionModule } from "./formacion/formacion.module";
 import { QuestionnaireModule } from "./questionnaire/questionnaire.module";
 import { VisionModule } from "./vision/vision.module";
 import { LoggerModule } from "./logger/logger.module";
-import { NotificacionHorasExtrasController } from "./notificacion-horas-extras/notificacion-horas-extras.controller";
 import { NotificacionHorasExtrasModule } from "./notificacion-horas-extras/notificacion-horas-extras.module";
 import { ParametrosModule } from "./parametros/parametros.module";
 import { PowerAutomateModule } from "./power-automate/power-automate.module";
 import { AxiosModule } from "./axios/axios.module";
 import { BorrarmoduloModule } from "./borrarmodulo/borrarmodulo.module";
+import { NotificarAmpliacionContratosModule } from "./notificar-ampliacion-contratos/notificar-ampliacion-contratos.module";
 
 @Module({
   imports: [
@@ -131,11 +131,8 @@ import { BorrarmoduloModule } from "./borrarmodulo/borrarmodulo.module";
     PowerAutomateModule,
     AxiosModule,
     BorrarmoduloModule,
+    NotificarAmpliacionContratosModule,
   ],
-  controllers: [
-    AppController,
-    KpiTiendasController,
-    NotificacionHorasExtrasController,
-  ],
+  controllers: [AppController, KpiTiendasController],
 })
 export class AppModule {}
