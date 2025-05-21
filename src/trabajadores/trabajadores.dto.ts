@@ -308,3 +308,9 @@ export class GetTrabajadorBySqlIdDto {
   @IsString()
   id: string;
 }
+
+export class PermitirRegistroDto {
+  @IsNotEmpty()
+  @IsString()
+  email: string;
+}
