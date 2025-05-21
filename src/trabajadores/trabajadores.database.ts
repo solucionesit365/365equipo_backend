@@ -1782,4 +1782,25 @@ export class TrabajadorDatabaseService {
       console.log(error);
     }
   }
+
+  async findTrabajadorByEmailLike(email: string) {
+    return await this.prisma.trabajador.findMany({
+      where: {
+        emails: {
+          contains: email,
+        },
+      },
+      // include: {
+      //   contratos: {
+      //     where: {
+      //       fechaBaja: null,
+      //     },
+      //     orderBy: {
+      //       fechaAlta: "desc",
+      //     },
+      //     take: 1,
+      //   },
+      // },
+    });
+  }
 }

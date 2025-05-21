@@ -890,4 +890,11 @@ export class TrabajadorService {
 
     return trabajadorEncontrado;
   }
+
+  async permitirRegistro(email: string) {
+    const trabajador = await this.schTrabajadores.findTrabajadorByEmailLike(
+      email.trim().toLowerCase(),
+    );
+    return trabajador.length > 0;
+  }
 }

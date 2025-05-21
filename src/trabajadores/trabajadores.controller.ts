@@ -20,6 +20,7 @@ import {
   DeleteTrabajadorDto,
   GetSubordinadosDto,
   GetTrabajadorBySqlIdDto,
+  PermitirRegistroDto,
   RegisterDto,
   TrabajadorFormRequest,
 } from "./trabajadores.dto";
@@ -454,5 +455,11 @@ export class TrabajadoresController {
       console.error(error);
       return { ok: false, message: error.message };
     }
+  }
+
+  @UseGuards(SchedulerGuard)
+  @Post("permitirRegistro")
+  async permitirRegistro(@Body() req: PermitirRegistroDto) {
+    return await this.trabajadorInstance.permitirRegistro(req.email);
   }
 }
