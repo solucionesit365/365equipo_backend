@@ -173,4 +173,24 @@ export class NotificacionHorasExtrasController {
       body.fecha,
     );
   }
+
+  @UseGuards(AuthGuard)
+  @Post("validarNotificacionesHorasExtrasDuplicadas")
+  async validarNotificacionesHorasExtrasDuplicadas(
+    @Body()
+    body: {
+      dniTrabajador: string;
+      horasExtras: {
+        tienda: string;
+        fecha: string;
+        horaInicio: string;
+        horaFinal: string;
+      }[];
+    },
+  ) {
+    return await this.shNotificacionhorasExtras.validarDuplicadosHorasExtras(
+      body.dniTrabajador,
+      body.horasExtras,
+    );
+  }
 }
