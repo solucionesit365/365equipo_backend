@@ -62,8 +62,8 @@ import { NotificacionHorasExtrasModule } from "./notificacion-horas-extras/notif
 import { ParametrosModule } from "./parametros/parametros.module";
 import { PowerAutomateModule } from "./power-automate/power-automate.module";
 import { AxiosModule } from "./axios/axios.module";
-import { BorrarmoduloModule } from "./borrarmodulo/borrarmodulo.module";
 import { NotificarAmpliacionContratosModule } from "./notificar-ampliacion-contratos/notificar-ampliacion-contratos.module";
+import { GraphModule } from "./graph/graph.module";
 
 @Module({
   imports: [
@@ -118,6 +118,7 @@ import { NotificarAmpliacionContratosModule } from "./notificar-ampliacion-contr
     TwilioModule,
     PdfModule,
     StorageModule,
+    GraphModule,
     VideosModule,
     PresentationModule,
     QuestionModule,
@@ -130,7 +131,6 @@ import { NotificarAmpliacionContratosModule } from "./notificar-ampliacion-contr
     ParametrosModule,
     PowerAutomateModule,
     AxiosModule,
-    BorrarmoduloModule,
     NotificarAmpliacionContratosModule,
   ],
   controllers: [AppController, KpiTiendasController],
