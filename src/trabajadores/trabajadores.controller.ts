@@ -459,7 +459,7 @@ export class TrabajadoresController {
 
   @UseGuards(SchedulerGuard)
   @Post("permitirRegistro")
-  permitirRegistro(@Body() req: PermitirRegistroDto) {
-    return this.trabajadorInstance.permitirRegistro(req.email);
+  async permitirRegistro(@Body() req: PermitirRegistroDto) {
+    return await this.trabajadorInstance.permitirRegistro(req.email);
   }
 }
