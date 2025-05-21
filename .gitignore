@@ -37,3 +37,4 @@ lerna-debug.log*
 # Secrets
 secrets.*
 *.env
+**/.claude/settings.local.json

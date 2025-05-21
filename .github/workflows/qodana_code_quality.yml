@@ -1,0 +1,65 @@
+name: Qodana
+
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches:
+      - master
+      - test
+      - "releases/*"
+
+jobs:
+  qodana:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      checks: write
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "22"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: "Qodana Scan"
+        uses: JetBrains/qodana-action@v2024.3
+        with:
+          pr-mode: false
+          use-caches: false
+          args: --coverage-dir=coverage
+        env:
+          QODANA_TOKEN: ${{ secrets.QODANA_TOKEN_1819043438 }}
+          QODANA_ENDPOINT: "https://qodana.cloud"
+        timeout-minutes: 5
+
+      - name: Install doctl
+        run: |
+          curl -sL https://github.com/digitalocean/doctl/releases/download/v1.104.0/doctl-1.104.0-linux-amd64.tar.gz | tar -xz
+          sudo mv doctl /usr/local/bin
+
+      - name: Authenticate with DigitalOcean
+        run: doctl auth init -t ${{ secrets.DO_API_TOKEN }}
+
+      - name: Set APP_ID by branch
+        id: set_app_id
+        run: |
+          if [[ "${GITHUB_REF##*/}" == "master" ]]; then
+            echo "APP_ID=${{ secrets.DO_APP_ID_PROD }}" >> $GITHUB_ENV
+          elif [[ "${GITHUB_REF##*/}" == "test" ]]; then
+            echo "APP_ID=${{ secrets.DO_APP_ID_STAGING }}" >> $GITHUB_ENV
+          else
+            echo "APP_ID=" >> $GITHUB_ENV
+          fi
+
+      - name: Trigger deploy in App Platform
+        if: env.APP_ID != ''
+        run: doctl apps create-deployment $APP_ID
