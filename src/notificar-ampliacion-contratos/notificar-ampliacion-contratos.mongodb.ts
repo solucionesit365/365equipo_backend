@@ -47,7 +47,6 @@ export class NotificarAmpliacionContratosMongoService {
       .toArray();
   }
 
-  //Actualizar una notificacion de horas extras
   async updateNotificarAmpliacionContratosAmpliacion(
     id: string,
     horaExtraId: string,
@@ -68,7 +67,7 @@ export class NotificarAmpliacionContratosMongoService {
     );
   }
 
-  async updateNotificarAmpliacionCointratosVueltaJornada(
+  async updateNotificarAmpliacionContratosVueltaJornada(
     id: string,
     horaExtraId: string,
     data: { vueltaJornada?: boolean },
@@ -82,6 +81,44 @@ export class NotificarAmpliacionContratosMongoService {
       {
         $set: {
           "ampliacionJornada.$.vueltaJornada": data.vueltaJornada,
+        },
+      },
+    );
+  }
+
+  async updateNotificarAmpliacionContratosFirmaGuardado(
+    id: string,
+    horaExtraId: string,
+    data: { firmaGuardado?: boolean },
+  ) {
+    const db = (await this.mongoDbService.getConexion()).db();
+    const notificacionesCollection = db.collection(
+      "notificarAmpliacionContratos",
+    );
+    return await notificacionesCollection.updateOne(
+      { _id: new ObjectId(id), "ampliacionJornada._id": horaExtraId },
+      {
+        $set: {
+          "ampliacionJornada.$.firmaGuardado": data.firmaGuardado,
+        },
+      },
+    );
+  }
+
+  async updateNotificarAmpliacionContratosEscritoEnviado(
+    id: string,
+    horaExtraId: string,
+    data: { escritoEnviado?: boolean },
+  ) {
+    const db = (await this.mongoDbService.getConexion()).db();
+    const notificacionesCollection = db.collection(
+      "notificarAmpliacionContratos",
+    );
+    return await notificacionesCollection.updateOne(
+      { _id: new ObjectId(id), "ampliacionJornada._id": horaExtraId },
+      {
+        $set: {
+          "ampliacionJornada.$.escritoEnviado": data.escritoEnviado,
         },
       },
     );
@@ -160,15 +197,16 @@ export class NotificarAmpliacionContratosMongoService {
       { _id: new ObjectId(id) },
       {
         $set: {
+          "ampliacionJornada.$[elem].tipoModificacion":
+            horaExtra.tipoModificacion,
+          "ampliacionJornada.$[elem].tipoAmpliacion": horaExtra.tipoAmpliacion,
           "ampliacionJornada.$[elem].motivo": horaExtra.motivo,
           "ampliacionJornada.$[elem].fechaInicioAmpliacion":
             horaExtra.fechaInicioAmpliacion,
           "ampliacionJornada.$[elem].fechaFinAmpliacion":
             horaExtra.fechaFinAmpliacion,
-          "ampliacionJornada.$[elem].fechaInicioReduccion":
-            horaExtra.fechaInicioReduccion,
-          "ampliacionJornada.$[elem].fechaFinReduccion":
-            horaExtra.fechaFinReduccion,
+          "ampliacionJornada.$[elem].jornadaActual": horaExtra.jornadaActual,
+          "ampliacionJornada.$[elem].nuevaJornada": horaExtra.nuevaJornada,
         },
       },
       {
