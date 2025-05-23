@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - master
+      - release
       - test
 
 jobs:
@@ -50,7 +50,7 @@ jobs:
       - name: Set APP_ID by branch
         id: set_app_id
         run: |
-          if [[ "${GITHUB_REF##*/}" == "master" ]]; then
+          if [[ "${GITHUB_REF##*/}" == "release" ]]; then
             echo "APP_ID=${{ secrets.DO_APP_ID_PROD }}" >> $GITHUB_ENV
           elif [[ "${GITHUB_REF##*/}" == "test" ]]; then
             echo "APP_ID=${{ secrets.DO_APP_ID_STAGING }}" >> $GITHUB_ENV
