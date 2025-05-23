@@ -1,89 +1,140 @@
 import { Injectable, InternalServerErrorException } from "@nestjs/common";
 import { MongoService } from "../mongo/mongo.service";
-import { TNotificacionHorasExtras } from "./notificacion-horas-extras.dto";
+import { TNotificarAmpliacionContratos } from "./notificar-ampliacion-contratos.dto";
 import { ObjectId } from "mongodb";
 
 @Injectable()
-export class NotificacionHorasExtrasMongoService {
+export class NotificarAmpliacionContratosMongoService {
   constructor(private readonly mongoDbService: MongoService) {}
 
   //Nueva notificacion de horas extras
-  async createNotificacionHorasExtras(data: TNotificacionHorasExtras) {
+  async createNotificarAmpliacionContratos(
+    data: TNotificarAmpliacionContratos,
+  ) {
     // Asegurarse de que cada elemento en horasExtras tenga un _id en formato string
-    if (Array.isArray(data.horasExtras)) {
-      data.horasExtras = data.horasExtras.map((horaExtra) => ({
+    if (Array.isArray(data.ampliacionJornada)) {
+      data.ampliacionJornada = data.ampliacionJornada.map((horaExtra) => ({
         _id: horaExtra._id || new ObjectId().toHexString(),
         ...horaExtra,
       }));
     }
     const db = (await this.mongoDbService.getConexion()).db();
-    const notificacionesCollection = db.collection("notificacionesHorasExtras");
+    const notificacionesCollection = db.collection(
+      "notificarAmpliacionContratos",
+    );
 
     return await notificacionesCollection.insertOne(data);
   }
 
   //Obtener todas las notificaciones de horas extras
-  async getAllNotificacionesHorasExtras() {
+  async getAllNotificarAmpliacionContratos() {
     const db = (await this.mongoDbService.getConexion()).db();
-    const notificacionesCollection = db.collection("notificacionesHorasExtras");
+    const notificacionesCollection = db.collection(
+      "notificarAmpliacionContratos",
+    );
 
     return await notificacionesCollection.find({}).toArray();
   }
 
-  async getNotificacionHorasExtrasByIdSql(idSql: number) {
+  async getNotificarAmpliacionContratosByIdSql(idSql: number) {
     const db = (await this.mongoDbService.getConexion()).db();
-    const notificacionesCollection = db.collection("notificacionesHorasExtras");
+    const notificacionesCollection = db.collection(
+      "notificarAmpliacionContratos",
+    );
 
     return await notificacionesCollection
       .find({ creadorIdsql: idSql })
       .toArray();
   }
 
-  //Actualizar una notificacion de horas extras
-  async updateNotificacionHorasExtrasRevision(
+  async updateNotificarAmpliacionContratosAmpliacion(
     id: string,
     horaExtraId: string,
-    data: { revision?: boolean },
+    data: { ampliacion?: boolean },
   ) {
     const db = (await this.mongoDbService.getConexion()).db();
-    const notificacionesCollection = db.collection("notificacionesHorasExtras");
+    const notificacionesCollection = db.collection(
+      "notificarAmpliacionContratos",
+    );
 
     return await notificacionesCollection.updateOne(
-      { _id: new ObjectId(id), "horasExtras._id": horaExtraId },
+      { _id: new ObjectId(id), "ampliacionJornada._id": horaExtraId },
       {
         $set: {
-          "horasExtras.$.revision": data.revision,
+          "ampliacionJornada.$.ampliacion": data.ampliacion,
         },
       },
     );
   }
 
-  async updateNotificacionHorasExtrasApagar(
+  async updateNotificarAmpliacionContratosVueltaJornada(
     id: string,
     horaExtraId: string,
-    data: { apagar?: boolean },
+    data: { vueltaJornada?: boolean },
   ) {
     const db = (await this.mongoDbService.getConexion()).db();
-    const notificacionesCollection = db.collection("notificacionesHorasExtras");
+    const notificacionesCollection = db.collection(
+      "notificarAmpliacionContratos",
+    );
     return await notificacionesCollection.updateOne(
-      { _id: new ObjectId(id), "horasExtras._id": horaExtraId },
+      { _id: new ObjectId(id), "ampliacionJornada._id": horaExtraId },
       {
         $set: {
-          "horasExtras.$.apagar": data.apagar,
+          "ampliacionJornada.$.vueltaJornada": data.vueltaJornada,
+        },
+      },
+    );
+  }
+
+  async updateNotificarAmpliacionContratosFirmaGuardado(
+    id: string,
+    horaExtraId: string,
+    data: { firmaGuardado?: boolean },
+  ) {
+    const db = (await this.mongoDbService.getConexion()).db();
+    const notificacionesCollection = db.collection(
+      "notificarAmpliacionContratos",
+    );
+    return await notificacionesCollection.updateOne(
+      { _id: new ObjectId(id), "ampliacionJornada._id": horaExtraId },
+      {
+        $set: {
+          "ampliacionJornada.$.firmaGuardado": data.firmaGuardado,
+        },
+      },
+    );
+  }
+
+  async updateNotificarAmpliacionContratosEscritoEnviado(
+    id: string,
+    horaExtraId: string,
+    data: { escritoEnviado?: boolean },
+  ) {
+    const db = (await this.mongoDbService.getConexion()).db();
+    const notificacionesCollection = db.collection(
+      "notificarAmpliacionContratos",
+    );
+    return await notificacionesCollection.updateOne(
+      { _id: new ObjectId(id), "ampliacionJornada._id": horaExtraId },
+      {
+        $set: {
+          "ampliacionJornada.$.escritoEnviado": data.escritoEnviado,
         },
       },
     );
   }
 
   //Eliminar una notificacion de horas extras
-  async deleteNotificacionHorasExtras(idHorasExtras: string) {
+  async deleteNotificarAmpliacionContratos(idHorasExtras: string) {
     const db = (await this.mongoDbService.getConexion()).db();
-    const notificacionesCollection = db.collection("notificacionesHorasExtras");
+    const notificacionesCollection = db.collection(
+      "notificarAmpliacionContratos",
+    );
 
     // Paso 1: Eliminar solo el objeto del array horasExtras
     const result = await notificacionesCollection.updateOne(
-      { "horasExtras._id": idHorasExtras },
-      { $pull: { horasExtras: { _id: idHorasExtras } } },
+      { "ampliacionJornada._id": idHorasExtras },
+      { $pull: { ampliacionJornada: { _id: idHorasExtras } } },
     );
 
     if (result.modifiedCount === 0) {
@@ -95,8 +146,8 @@ export class NotificacionHorasExtrasMongoService {
 
     // Paso 2: Ver si el documento quedó con horasExtras vacío
     const emptyDoc = await notificacionesCollection.findOne({
-      horasExtras: { $exists: true },
-      "horasExtras.0": { $exists: false },
+      ampliacionJornada: { $exists: true },
+      "ampliacionJornada.0": { $exists: false },
     });
 
     if (emptyDoc) {
@@ -109,21 +160,25 @@ export class NotificacionHorasExtrasMongoService {
 
     return {
       deleted: true,
-      message: "Objeto eliminado del array horasExtras.",
+      message: "Objeto eliminado del array ampliacionJornadaF.",
     };
   }
 
   //Update una notificacion de horas extras
-  async updateNotificacionHorasExtras(
+  async updateNotificarAmpliacionContratos(
     id: string,
     horaExtraId: string,
-    data: TNotificacionHorasExtras,
+    data: TNotificarAmpliacionContratos,
   ) {
     const db = (await this.mongoDbService.getConexion()).db();
-    const notificacionesCollection = db.collection("notificacionesHorasExtras");
+    const notificacionesCollection = db.collection(
+      "notificarAmpliacionContratos",
+    );
 
     // Encontrar la hora extra que se quiere modificar (según el _id que es string)
-    const horaExtra = data.horasExtras?.find((h) => h._id === horaExtraId);
+    const horaExtra = data.ampliacionJornada?.find(
+      (h) => h._id === horaExtraId,
+    );
 
     if (!horaExtra) {
       throw new InternalServerErrorException(
@@ -142,10 +197,16 @@ export class NotificacionHorasExtrasMongoService {
       { _id: new ObjectId(id) },
       {
         $set: {
-          "horasExtras.$[elem].motivo": horaExtra.motivo,
-          "horasExtras.$[elem].fecha": horaExtra.fecha,
-          "horasExtras.$[elem].horaInicio": horaExtra.horaInicio,
-          "horasExtras.$[elem].horaFinal": horaExtra.horaFinal,
+          "ampliacionJornada.$[elem].tipoModificacion":
+            horaExtra.tipoModificacion,
+          "ampliacionJornada.$[elem].tipoAmpliacion": horaExtra.tipoAmpliacion,
+          "ampliacionJornada.$[elem].motivo": horaExtra.motivo,
+          "ampliacionJornada.$[elem].fechaInicioAmpliacion":
+            horaExtra.fechaInicioAmpliacion,
+          "ampliacionJornada.$[elem].fechaFinAmpliacion":
+            horaExtra.fechaFinAmpliacion,
+          "ampliacionJornada.$[elem].jornadaActual": horaExtra.jornadaActual,
+          "ampliacionJornada.$[elem].nuevaJornada": horaExtra.nuevaJornada,
         },
       },
       {
@@ -164,7 +225,7 @@ export class NotificacionHorasExtrasMongoService {
   }
 
   //update comentario
-  async updateComentarioHorasExtras(
+  async updateComentarioNotificarAmpliacionContratos(
     id: string,
     horaExtraId: string,
     comentario: {
@@ -174,13 +235,15 @@ export class NotificacionHorasExtrasMongoService {
     }[],
   ) {
     const db = (await this.mongoDbService.getConexion()).db();
-    const notificacionesCollection = db.collection("notificacionesHorasExtras");
+    const notificacionesCollection = db.collection(
+      "notificarAmpliacionContratos",
+    );
 
     return await notificacionesCollection.updateOne(
-      { _id: new ObjectId(id), "horasExtras._id": horaExtraId },
+      { _id: new ObjectId(id), "ampliacionJornada._id": horaExtraId },
       {
         $push: {
-          "horasExtras.$.comentario": {
+          "ampliacionJornada.$.comentario": {
             $each: comentario,
           },
         },
@@ -195,24 +258,26 @@ export class NotificacionHorasExtrasMongoService {
     fecha: string,
   ) {
     const db = (await this.mongoDbService.getConexion()).db();
-    const notificacionesCollection = db.collection("notificacionesHorasExtras");
+    const notificacionesCollection = db.collection(
+      "notificarAmpliacionContratos",
+    );
 
     return await notificacionesCollection.updateOne(
       {
         _id: new ObjectId(id),
-        "horasExtras._id": horaExtraId,
+        "ampliacionJornada._id": horaExtraId,
       },
       {
         $set: {
-          [`horasExtras.$.ultimosLeidos.${usuarioId}`]: fecha,
+          [`ampliacionJornada.$.ultimosLeidos.${usuarioId}`]: fecha,
         },
       },
     );
   }
 
-  async buscarCoincidenciasHorasExtras(
+  async buscarCoincidenciasAmpliacionContratos(
     dniTrabajador: string,
-    horasExtras: {
+    ampliacionJornada: {
       tienda: string;
       fecha: string;
       horaInicio: string;
@@ -220,10 +285,12 @@ export class NotificacionHorasExtrasMongoService {
     }[],
   ) {
     const db = (await this.mongoDbService.getConexion()).db();
-    const notificacionesCollection = db.collection("notificacionesHorasExtras");
+    const notificacionesCollection = db.collection(
+      "notificarAmpliacionContratos",
+    );
 
-    const condiciones = horasExtras.map((h) => ({
-      horasExtras: {
+    const condiciones = ampliacionJornada.map((h) => ({
+      ampliacionJornada: {
         $elemMatch: {
           tienda: h.tienda,
           fecha: h.fecha,

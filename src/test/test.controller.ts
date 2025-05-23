@@ -10,12 +10,14 @@ import { FileInterceptor } from "@nestjs/platform-express";
 import { simpleParser } from "mailparser";
 import { LoggerService } from "../logger/logger.service";
 import { AxiosBcService } from "../axios/axios-bc.service";
+import { PrismaService } from "../prisma/prisma.service";
 
 @Controller("test")
 export class TestController {
   constructor(
     private readonly loggerService: LoggerService,
     private readonly axiosBCService: AxiosBcService,
+    private readonly prisma: PrismaService,
   ) {}
 
   @Post("email")
@@ -86,4 +88,26 @@ export class TestController {
       return;
     }
   }
+
+  // @Post("experimentoRompible")
+  // async experimentoRompible() {
+  //   const DEFAULT_ROLE_ID = "b3f04be2-35f5-46d0-842b-5be49014a2ef";
+  //   const trabajadoresSinRoles = await this.prisma.trabajador.findMany({
+  //     where: {
+  //       roles: { none: {} },
+  //     },
+  //     select: { id: true },
+  //   });
+  //   // return trabajadoresSinRoles;
+  //   for (const trabajador of trabajadoresSinRoles) {
+  //     await this.prisma.trabajador.update({
+  //       where: { id: trabajador.id },
+  //       data: {
+  //         roles: {
+  //           connect: [{ id: DEFAULT_ROLE_ID }],
+  //         },
+  //       },
+  //     });
+  //   }
+  // }
 }

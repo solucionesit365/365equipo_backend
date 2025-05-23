@@ -487,71 +487,18 @@ export class TrabajadorDatabaseService {
     }
   }
   // Función que obtiene los trabajadores desde Business Central
-  async getTrabajadoresOmne(): Promise<
-    Array<
-      | {
-          empresaID: string;
-          nombre: string;
-          mensaje?: string;
-          trabajadores?: any;
-        }
-      | { empresaID?: string; nombre?: string; error: string }
-    >
-  > {
+  async getTrabajadoresOmne() {
     try {
-      // Estas empresas hay que guardarlas desde la base de datos
-      const empresas: Array<{ empresaID: string; nombre: string }> = [
-        {
-          empresaID: "84290dc4-6e90-ef11-8a6b-7c1e5236b0db",
-          nombre: "Arrazaos S.L.U",
-        },
-        {
-          empresaID: "86ee4d52-801e-ef11-9f88-0022489dfd5d",
-          nombre: "Filapeña S.L.U",
-        },
-        {
-          empresaID: "fb77685d-6f90-ef11-8a6b-7c1e5236b0db",
-          nombre: "Horreols S.L.U",
-        },
-        {
-          empresaID: "d2a97ec2-654e-ef11-bfe4-7c1e5234e806",
-          nombre: "IME Mil S.L.U",
-        },
-        {
-          empresaID: "e60b9619-6f90-ef11-8a6b-7c1e5236b0db",
-          nombre: "Pomposo S.L.U",
-        },
-        {
-          empresaID: "f81d2993-7e1e-ef11-9f88-000d3ab5a7ff",
-          nombre: "Silema S.L.U",
-        },
-      ];
-
-      // // Obtener parámetros (incluida la fecha de sincronización)
-      // const parametros = await this.parametrosService.getParametros(
-      //   "sincro_trabajadores",
-      // );
-      // console.log(
-      //   "Última fecha de sincronización: " +
-      //     DateTime.fromJSDate(parametros[0].lastSyncWorkers).toISO(),
-      // );
-
-      // if (!parametros[0].lastSyncWorkers) {
-      //   // Retornamos un array con el error para que el caller pueda iterar sin problemas.
-      //   return [
-      //     { error: "No se ha encontrado la última fecha de sincronización." },
-      //   ];
-      // }
+      const empresas = await this.prisma.empresa.findMany({});
 
       // Ejecutar las consultas en paralelo para cada empresa
       const resultados = await Promise.all(
-        empresas.map(async ({ empresaID, nombre }) => {
-          const response = await this.axiosBCService.getAxios().get(
-            `Production/api/Miguel/365ObradorAPI/v1.0/companies(${empresaID})/perceptoresQuery`,
-            // ?$filter=SystemModifiedAt gt ${lastSyncWorkers
-            //   .toUTC()
-            //   .toISO()}`,
-          );
+        empresas.map(async ({ id: empresaID, nombre }) => {
+          const response = await this.axiosBCService
+            .getAxios()
+            .get(
+              `Production/api/Miguel/365ObradorAPI/v1.0/companies(${empresaID})/perceptoresQuery`,
+            );
 
           const responseFechaNacimiento = await this.axiosBCService
             .getAxios()
@@ -728,6 +675,7 @@ export class TrabajadorDatabaseService {
             fechaBaja: null, // Contrato aún vigente
           },
         },
+        esTienda: false,
       },
       include: {
         contratos: include.contratos
@@ -844,7 +792,7 @@ export class TrabajadorDatabaseService {
             ? { connect: { id: reqTrabajador.idTienda } }
             : {},
           roles: {
-            connect: reqTrabajador.arrayRoles.map((rol) => ({ id: rol })),
+            connect: { id: "b3f04be2-35f5-46d0-842b-5be49014a2ef" }, // Rol dependienta
           },
         },
       });
@@ -866,151 +814,151 @@ export class TrabajadorDatabaseService {
     return true;
   }
 
-  // Función que une ambos procesos: obtener los trabajadores y guardarlos en la BD
-  async sincronizarTrabajadores(): Promise<
-    { message: string } | { error: string }
-  > {
-    try {
-      const resultados = await this.getTrabajadoresOmne();
-      const tiendas = await this.tiendaInstance.getTiendas();
+  // // Función que une ambos procesos: obtener los trabajadores y guardarlos en la BD
+  // async sincronizarTrabajadores(): Promise<
+  //   { message: string } | { error: string }
+  // > {
+  //   try {
+  //     const resultados = await this.getTrabajadoresOmne();
+  //     const tiendas = await this.tiendaInstance.getTiendas();
 
-      if (!Array.isArray(resultados)) {
-        console.error("Error al obtener los resultados:", resultados);
-        return {
-          error: "No se han podido obtener los resultados correctamente.",
-        };
-      }
+  //     if (!Array.isArray(resultados)) {
+  //       console.error("Error al obtener los resultados:", resultados);
+  //       return {
+  //         error: "No se han podido obtener los resultados correctamente.",
+  //       };
+  //     }
 
-      // Preparar todos los trabajadores para procesamiento
-      const trabajadoresParaProcesar = [];
-      for (const resultado of resultados) {
-        if ("trabajadores" in resultado && resultado.trabajadores) {
-          for (const trabajador of resultado.trabajadores) {
-            let tiendaId: number | null = null;
-            if (trabajador.descripcionCentro) {
-              const transformedDescripcion =
-                trabajador.descripcionCentro.replace(/-/, "--");
-              const foundTienda = tiendas.find(
-                (tienda) =>
-                  tienda.nombre.toLowerCase() ===
-                  transformedDescripcion.toLowerCase(),
-              );
-              if (foundTienda) {
-                tiendaId = foundTienda.id;
-              }
-            }
+  //     // Preparar todos los trabajadores para procesamiento
+  //     const trabajadoresParaProcesar = [];
+  //     for (const resultado of resultados) {
+  //       if ("trabajadores" in resultado && resultado.trabajadores) {
+  //         for (const trabajador of resultado.trabajadores) {
+  //           let tiendaId: number | null = null;
+  //           if (trabajador.descripcionCentro) {
+  //             const transformedDescripcion =
+  //               trabajador.descripcionCentro.replace(/-/, "--");
+  //             const foundTienda = tiendas.find(
+  //               (tienda) =>
+  //                 tienda.nombre.toLowerCase() ===
+  //                 transformedDescripcion.toLowerCase(),
+  //             );
+  //             if (foundTienda) {
+  //               tiendaId = foundTienda.id;
+  //             }
+  //           }
 
-            trabajadoresParaProcesar.push({
-              dni: trabajador.documento,
-              nombreApellidos: trabajador.apellidosYNombre,
-              displayName: trabajador.nombre,
-              emails: trabajador.email,
-              direccion: `${trabajador.viaPublica} ${trabajador.numero} ${trabajador.numero} ${trabajador.piso}`,
-              llevaEquipo: false,
-              tipoTrabajador: "DEPENDENTA",
-              ciudad: trabajador.poblacion,
-              telefonos: trabajador.noTelfMovilPersonal,
-              codigoPostal: trabajador.cp,
-              cuentaCorriente: "0",
-              fechaNacimiento: null,
-              nacionalidad: trabajador.codPaisNacionalidad,
-              displayFoto: null,
-              excedencia: false,
-              idEmpresa: "a9357dca-f201-49b9-ae53-a7aba2f654c5",
-              idResponsable: null,
-              nSeguridadSocial: trabajador.noAfiliacion,
-              idTienda: tiendaId,
-              tokenQR: "",
-              arrayRoles: ["b3f04be2-35f5-46d0-842b-5be49014a2ef"],
-              contrato: {
-                fechaAlta: trabajador.altaContrato
-                  ? new Date(trabajador.altaContrato)
-                  : new Date(),
-                fechaAntiguedad: trabajador.antiguedadEmpresa
-                  ? new Date(trabajador.antiguedadEmpresa)
-                  : new Date(),
-                horasContrato:
-                  trabajador.horassemana && trabajador.horassemana > 0
-                    ? Math.round((trabajador.horassemana * 100) / 40)
-                    : 100,
-                inicioContrato: trabajador.altaContrato
-                  ? new Date(trabajador.altaContrato)
-                  : new Date(),
-                fechaBaja:
-                  trabajador.bajaEmpresa &&
-                  trabajador.bajaEmpresa.includes("0001-01-01")
-                    ? null
-                    : new Date(trabajador.bajaEmpresa),
-                finalContrato:
-                  trabajador.bajaEmpresa &&
-                  trabajador.bajaEmpresa.includes("0001-01-01")
-                    ? null
-                    : new Date(trabajador.bajaEmpresa),
-              },
-            });
-          }
-        }
-      }
+  //           trabajadoresParaProcesar.push({
+  //             dni: trabajador.documento,
+  //             nombreApellidos: trabajador.apellidosYNombre,
+  //             displayName: trabajador.nombre,
+  //             emails: trabajador.email,
+  //             direccion: `${trabajador.viaPublica} ${trabajador.numero} ${trabajador.numero} ${trabajador.piso}`,
+  //             llevaEquipo: false,
+  //             tipoTrabajador: "DEPENDENTA",
+  //             ciudad: trabajador.poblacion,
+  //             telefonos: trabajador.noTelfMovilPersonal,
+  //             codigoPostal: trabajador.cp,
+  //             cuentaCorriente: "0",
+  //             fechaNacimiento: null,
+  //             nacionalidad: trabajador.codPaisNacionalidad,
+  //             displayFoto: null,
+  //             excedencia: false,
+  //             idEmpresa: "a9357dca-f201-49b9-ae53-a7aba2f654c5",
+  //             idResponsable: null,
+  //             nSeguridadSocial: trabajador.noAfiliacion,
+  //             idTienda: tiendaId,
+  //             tokenQR: "",
+  //             arrayRoles: ["b3f04be2-35f5-46d0-842b-5be49014a2ef"],
+  //             contrato: {
+  //               fechaAlta: trabajador.altaContrato
+  //                 ? new Date(trabajador.altaContrato)
+  //                 : new Date(),
+  //               fechaAntiguedad: trabajador.antiguedadEmpresa
+  //                 ? new Date(trabajador.antiguedadEmpresa)
+  //                 : new Date(),
+  //               horasContrato:
+  //                 trabajador.horassemana && trabajador.horassemana > 0
+  //                   ? Math.round((trabajador.horassemana * 100) / 40)
+  //                   : 100,
+  //               inicioContrato: trabajador.altaContrato
+  //                 ? new Date(trabajador.altaContrato)
+  //                 : new Date(),
+  //               fechaBaja:
+  //                 trabajador.bajaEmpresa &&
+  //                 trabajador.bajaEmpresa.includes("0001-01-01")
+  //                   ? null
+  //                   : new Date(trabajador.bajaEmpresa),
+  //               finalContrato:
+  //                 trabajador.bajaEmpresa &&
+  //                 trabajador.bajaEmpresa.includes("0001-01-01")
+  //                   ? null
+  //                   : new Date(trabajador.bajaEmpresa),
+  //             },
+  //           });
+  //         }
+  //       }
+  //     }
 
-      // Procesar por lotes
-      const BATCH_SIZE = 50;
-      const batches = [];
-      for (let i = 0; i < trabajadoresParaProcesar.length; i += BATCH_SIZE) {
-        batches.push(trabajadoresParaProcesar.slice(i, i + BATCH_SIZE));
-      }
+  //     // Procesar por lotes
+  //     const BATCH_SIZE = 50;
+  //     const batches = [];
+  //     for (let i = 0; i < trabajadoresParaProcesar.length; i += BATCH_SIZE) {
+  //       batches.push(trabajadoresParaProcesar.slice(i, i + BATCH_SIZE));
+  //     }
 
-      let processedCount = 0;
-      let errorCount = 0;
+  //     let processedCount = 0;
+  //     let errorCount = 0;
 
-      // Procesar cada lote
-      for (const batch of batches) {
-        try {
-          // Usar transacción para cada lote
-          await this.prisma.$transaction(async (tx) => {
-            for (const trabajador of batch) {
-              try {
-                await this.crearTrabajadorOmne(trabajador);
-                processedCount++;
-              } catch (error) {
-                console.error(
-                  `Error al procesar trabajador ${trabajador.dni}:`,
-                  error,
-                );
-                errorCount++;
-              }
-            }
-          });
+  //     // Procesar cada lote
+  //     for (const batch of batches) {
+  //       try {
+  //         // Usar transacción para cada lote
+  //         await this.prisma.$transaction(async (tx) => {
+  //           for (const trabajador of batch) {
+  //             try {
+  //               await this.crearTrabajadorOmne(trabajador);
+  //               processedCount++;
+  //             } catch (error) {
+  //               console.error(
+  //                 `Error al procesar trabajador ${trabajador.dni}:`,
+  //                 error,
+  //               );
+  //               errorCount++;
+  //             }
+  //           }
+  //         });
 
-          // Pequeña pausa entre lotes para evitar sobrecarga
-          await new Promise((resolve) => setTimeout(resolve, 100));
-        } catch (error) {
-          console.error("Error en el procesamiento del lote:", error);
-          errorCount += batch.length;
-        }
-      }
+  //         // Pequeña pausa entre lotes para evitar sobrecarga
+  //         await new Promise((resolve) => setTimeout(resolve, 100));
+  //       } catch (error) {
+  //         console.error("Error en el procesamiento del lote:", error);
+  //         errorCount += batch.length;
+  //       }
+  //     }
 
-      // Actualizar fecha de sincronización
-      const newSyncDate = DateTime.now().toJSDate();
-      await this.parametrosService.updateParametros("sincro_trabajadores", {
-        lastSyncWorkers: newSyncDate,
-      });
+  //     // Actualizar fecha de sincronización
+  //     const newSyncDate = DateTime.now().toJSDate();
+  //     await this.parametrosService.updateParametros("sincro_trabajadores", {
+  //       lastSyncWorkers: newSyncDate,
+  //     });
 
-      return {
-        message: `Sincronización completada. Procesados: ${processedCount}, Errores: ${errorCount}`,
-      };
-    } catch (error) {
-      console.error("Error en sincronizarTrabajadores:", error);
-      return { error: `Error en la sincronización: ${error.message}` };
-    } finally {
-      // Asegurar que las conexiones se cierren
-      await this.prisma.$disconnect();
-    }
-  }
+  //     return {
+  //       message: `Sincronización completada. Procesados: ${processedCount}, Errores: ${errorCount}`,
+  //     };
+  //   } catch (error) {
+  //     console.error("Error en sincronizarTrabajadores:", error);
+  //     return { error: `Error en la sincronización: ${error.message}` };
+  //   } finally {
+  //     // Asegurar que las conexiones se cierren
+  //     await this.prisma.$disconnect();
+  //   }
+  // }
 
-  async guardarTrabajadoresOmne() {
-    return await this.sincronizarTrabajadores();
-    // return this.tiendaInstance.getTiendas();
-  }
+  // async guardarTrabajadoresOmne() {
+  //   return await this.sincronizarTrabajadores();
+  //   // return this.tiendaInstance.getTiendas();
+  // }
 
   async getTrabajadorByAppId(uid: string) {
     const trabajador = await this.prisma.trabajador.findUnique({

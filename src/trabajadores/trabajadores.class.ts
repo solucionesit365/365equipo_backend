@@ -187,6 +187,11 @@ export class TrabajadorService {
         if (omneTrab.apellidosYNombre !== appTrab.nombreApellidos) {
           cambios.nombreApellidos = omneTrab.apellidosYNombre;
         }
+
+        if (Number(omneTrab.noPerceptor) !== appTrab.nPerceptor) {
+          cambios.nPerceptor = Number(omneTrab.noPerceptor);
+        }
+
         if (omneTrab.email !== appTrab.emails) {
           cambios.emails = omneTrab.email;
         }
@@ -199,6 +204,11 @@ export class TrabajadorService {
         if (omneTrab.poblacion !== appTrab.ciudad) {
           cambios.ciudad = omneTrab.poblacion;
         }
+
+        if (omneTrab.nombre !== appTrab.displayName) {
+          cambios.displayName = omneTrab.nombre;
+        }
+
         if (omneTrab.codPaisNacionalidad !== appTrab.nacionalidad) {
           cambios.nacionalidad = omneTrab.codPaisNacionalidad;
         }
@@ -208,6 +218,11 @@ export class TrabajadorService {
         if (omneTrab.noAfiliacion !== appTrab.nSeguridadSocial) {
           cambios.nSeguridadSocial = omneTrab.noAfiliacion;
         }
+
+        if (omneTrab.empresaID !== appTrab.empresaId) {
+          cambios.empresaId = omneTrab.empresaID;
+        }
+
         // Fecha: convierto ambas a Date y comparo getTime()
         if (omneTrab.fechaNacimiento) {
           const appDate = appTrab.fechaNacimiento?.getTime() ?? null;
@@ -304,10 +319,16 @@ export class TrabajadorService {
             ciudad: omneTrab.poblacion,
             nacionalidad: omneTrab.codPaisNacionalidad,
             codigoPostal: omneTrab.cp,
+            nPerceptor: Number(omneTrab.noPerceptor),
             nSeguridadSocial: omneTrab.noAfiliacion,
             fechaNacimiento: omneTrab.fechaNacimiento?.toJSDate() ?? null,
             llevaEquipo: false,
             tipoTrabajador: "Trabajador",
+            empresa: {
+              connect: {
+                id: omneTrab.empresaID,
+              },
+            },
             contratos: {
               create: {
                 fechaAlta,
@@ -505,9 +526,9 @@ export class TrabajadorService {
     }
   }
 
-  async guardarTrabajadoresOmne() {
-    return await this.schTrabajadores.guardarTrabajadoresOmne();
-  }
+  // async guardarTrabajadoresOmne() {
+  //   return await this.schTrabajadores.guardarTrabajadoresOmne();
+  // }
 
   async limpiarTrabajadoresConFinalContrato() {
     return await this.schTrabajadores.borrarConFechaBaja();

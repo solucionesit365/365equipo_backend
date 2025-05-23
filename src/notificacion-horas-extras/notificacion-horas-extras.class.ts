@@ -97,4 +97,18 @@ export class NotificacionHorasExtrasClass {
       fecha,
     );
   }
+  async validarDuplicadosHorasExtras(
+    dniTrabajador: string,
+    horasExtras: {
+      tienda: string;
+      fecha: string;
+      horaInicio: string;
+      horaFinal: string;
+    }[],
+  ) {
+    return await this.shNotificacionhorasExtras.buscarCoincidenciasHorasExtras(
+      dniTrabajador,
+      horasExtras,
+    );
+  }
 }
