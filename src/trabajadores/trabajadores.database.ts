@@ -1065,6 +1065,7 @@ export class TrabajadorDatabaseService {
         },
         responsable: true,
         tienda: true,
+        roles: true,
       },
     });
 
