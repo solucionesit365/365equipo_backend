@@ -487,71 +487,18 @@ export class TrabajadorDatabaseService {
     }
   }
   // Función que obtiene los trabajadores desde Business Central
-  async getTrabajadoresOmne(): Promise<
-    Array<
-      | {
-          empresaID: string;
-          nombre: string;
-          mensaje?: string;
-          trabajadores?: any;
-        }
-      | { empresaID?: string; nombre?: string; error: string }
-    >
-  > {
+  async getTrabajadoresOmne() {
     try {
-      // Estas empresas hay que guardarlas desde la base de datos
-      const empresas: Array<{ empresaID: string; nombre: string }> = [
-        {
-          empresaID: "84290dc4-6e90-ef11-8a6b-7c1e5236b0db",
-          nombre: "Arrazaos S.L.U",
-        },
-        {
-          empresaID: "86ee4d52-801e-ef11-9f88-0022489dfd5d",
-          nombre: "Filapeña S.L.U",
-        },
-        {
-          empresaID: "fb77685d-6f90-ef11-8a6b-7c1e5236b0db",
-          nombre: "Horreols S.L.U",
-        },
-        {
-          empresaID: "d2a97ec2-654e-ef11-bfe4-7c1e5234e806",
-          nombre: "IME Mil S.L.U",
-        },
-        {
-          empresaID: "e60b9619-6f90-ef11-8a6b-7c1e5236b0db",
-          nombre: "Pomposo S.L.U",
-        },
-        {
-          empresaID: "f81d2993-7e1e-ef11-9f88-000d3ab5a7ff",
-          nombre: "Silema S.L.U",
-        },
-      ];
-
-      // // Obtener parámetros (incluida la fecha de sincronización)
-      // const parametros = await this.parametrosService.getParametros(
-      //   "sincro_trabajadores",
-      // );
-      // console.log(
-      //   "Última fecha de sincronización: " +
-      //     DateTime.fromJSDate(parametros[0].lastSyncWorkers).toISO(),
-      // );
-
-      // if (!parametros[0].lastSyncWorkers) {
-      //   // Retornamos un array con el error para que el caller pueda iterar sin problemas.
-      //   return [
-      //     { error: "No se ha encontrado la última fecha de sincronización." },
-      //   ];
-      // }
+      const empresas = await this.prisma.empresa.findMany({});
 
       // Ejecutar las consultas en paralelo para cada empresa
       const resultados = await Promise.all(
-        empresas.map(async ({ empresaID, nombre }) => {
-          const response = await this.axiosBCService.getAxios().get(
-            `Production/api/Miguel/365ObradorAPI/v1.0/companies(${empresaID})/perceptoresQuery`,
-            // ?$filter=SystemModifiedAt gt ${lastSyncWorkers
-            //   .toUTC()
-            //   .toISO()}`,
-          );
+        empresas.map(async ({ id: empresaID, nombre }) => {
+          const response = await this.axiosBCService
+            .getAxios()
+            .get(
+              `Production/api/Miguel/365ObradorAPI/v1.0/companies(${empresaID})/perceptoresQuery`,
+            );
 
           const responseFechaNacimiento = await this.axiosBCService
             .getAxios()

@@ -31,6 +31,7 @@ model Trabajador {
   excedencia       Boolean      @default(false)
   dispositivo      String?
   empresaId        String?
+  nPerceptor       Int? // Nuevo campo
   esTienda         Boolean      @default(false)
   contratos        Contrato2[]
   empresa          Empresa?     @relation(fields: [empresaId], references: [id])
@@ -39,6 +40,9 @@ model Trabajador {
   tienda           Tienda?      @relation(fields: [idTienda], references: [id])
   permisos         Permiso[]    @relation("PermisoToTrabajador")
   roles            Role[]       @relation("RoleToTrabajador")
+
+  // Índice único compuesto
+  @@unique([empresaId, nPerceptor])
 }
 
 model Tienda {
