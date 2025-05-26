@@ -2,9 +2,8 @@ name: MongoDB Daily Backup
 
 on:
   schedule:
-    # Ejecutar todos los días a las 23:30 (hora UTC)
-    - cron: '30 22 * * *'  # Ajusta según tu zona horaria
-  workflow_dispatch: # Permite ejecución manual
+    - cron: '30 22 * * *'
+  workflow_dispatch:
 
 jobs:
   backup-database:
@@ -14,12 +13,12 @@ jobs:
     - name: Checkout código
       uses: actions/checkout@v3
     
-    - name: Instalar MongoDB Tools
+    - name: Instalar MongoDB Database Tools
       run: |
-        wget -qO - https://www.mongodb.org/static/pgp/server-7.0.asc | sudo apt-key add -
-        echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/7.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-7.0.list
-        sudo apt-get update
-        sudo apt-get install -y mongodb-database-tools
+        wget https://fastdl.mongodb.org/tools/db/mongodb-database-tools-ubuntu2004-x86_64-100.9.0.deb
+        sudo dpkg -i mongodb-database-tools-ubuntu2004-x86_64-100.9.0.deb
+        mongodump --version
+        mongorestore --version
     
     - name: Crear backup de producción
       env:
@@ -30,36 +29,21 @@ jobs:
           --out=./backup \
           --gzip
         echo "Backup completado"
-    
-    - name: Limpiar base de datos de test
-      env:
-        MONGO_URI_TEST: ${{ secrets.MONGO_URI_TEST }}
-      run: |
-        echo "Limpiando base de datos de test..."
-        # Crear script para eliminar la base de datos
-        cat > drop_db.js << EOF
-        db.dropDatabase()
-        EOF
-        
-        mongosh "${MONGO_URI_TEST}" --file drop_db.js
+        echo "Contenido del backup:"
+        ls -la ./backup/365equipo/
     
     - name: Restaurar en base de datos de test
       env:
         MONGO_URI_TEST: ${{ secrets.MONGO_URI_TEST }}
       run: |
         echo "Restaurando backup en base de datos de test..."
+        # El flag --drop elimina las colecciones existentes antes de restaurar
         mongorestore --uri="${MONGO_URI_TEST}" \
           --gzip \
           --dir=./backup/365equipo \
           --nsInclude="365equipo.*" \
           --nsFrom="365equipo.*" \
           --nsTo="365equipo_test.*" \
-          --drop
+          --drop \
+          --verbose
         echo "Restauración completada"
-    
-    - name: Verificar restauración
-      env:
-        MONGO_URI_TEST: ${{ secrets.MONGO_URI_TEST }}
-      run: |
-        echo "Verificando restauración..."
-        mongosh "${MONGO_URI_TEST}" --eval "db.stats()"
