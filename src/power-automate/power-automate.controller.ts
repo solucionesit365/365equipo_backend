@@ -51,19 +51,9 @@ export class PowerAutomateController {
         text: parsedEmail.text || "Sin contenido",
       };
 
-      const action = this.powerAutomateService.getTag("action", emailData.text);
       const parsedData = JSON.parse(emailData.text);
-      const qr = await this.powerAutomateService.createGreenPass(parsedData);
-      await this.emailService.sendFactoryVisitEmail(
-        parsedData.email,
-        {
-          nombre: parsedData.nombre,
-          empresa: parsedData.empresa,
-        },
-        qr,
-      );
+
       await this.powerAutomateService.saveInPowerAutomateCollection({
-        action,
         name: "Tarea",
         extraData: parsedData,
       });
@@ -71,7 +61,6 @@ export class PowerAutomateController {
       return { message: "Correo procesado", ...emailData };
     } catch (error) {
       await this.powerAutomateService.saveInPowerAutomateCollection({
-        action: "Error procesando email",
         name: "Sistema",
         extraData: { error: error.message, stack: error.stack },
       });
