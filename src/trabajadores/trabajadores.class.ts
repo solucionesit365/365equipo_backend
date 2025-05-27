@@ -61,7 +61,6 @@ export class TrabajadorService {
   constructor(
     @Inject(forwardRef(() => FirebaseService))
     private readonly firebaseService: FirebaseService,
-    private readonly permisosInstance: PermisosService,
     private readonly emailInstance: EmailService,
     @Inject(forwardRef(() => SolicitudesVacacionesService))
     private readonly solicitudesVacaciones: SolicitudesVacacionesService,
