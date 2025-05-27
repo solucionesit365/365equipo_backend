@@ -1,12 +1,13 @@
 import { MongoClient, MongoClientOptions } from "mongodb";
-import { ConfigService } from "@nestjs/config";
 import { Injectable } from "@nestjs/common";
+import { IMongoService } from "./mongo.interface";
 
 @Injectable()
-export class MongoService {
+export class MongoService extends IMongoService {
   private conexion: Promise<MongoClient>;
 
-  constructor(private configService: ConfigService) {
+  constructor() {
+    super();
     const mongoHost = "mongo-cluster-d1c18377.mongo.ondigitalocean.com";
     let uri: string;
     const options: MongoClientOptions = {

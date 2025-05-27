@@ -20,11 +20,13 @@ export interface TIncludeTrabajador {
 }
 
 @Injectable()
-export class TrabajadorDatabaseService implements ITrabajadorDatabaseService {
+export class TrabajadorDatabaseService extends ITrabajadorDatabaseService {
   constructor(
     private prisma: PrismaService,
     private readonly axiosBCService: AxiosBcService,
-  ) {}
+  ) {
+    super();
+  }
 
   async crearTrabajador(reqTrabajador: CreateTrabajadorRequestDto) {
     const newTrabajador = await this.prisma.trabajador.create({

@@ -20,8 +20,9 @@ import {
   CreateTrabajadorRequestDto,
   TrabajadorFormRequest,
 } from "./trabajadores.dto";
+import { ITrabajadorDatabaseService } from "./trabajadores.interface";
 
-interface TOmneTrabajador {
+export interface TOmneTrabajador {
   noPerceptor: string;
   apellidosYNombre: string;
   nombre: string;
@@ -66,7 +67,7 @@ export class TrabajadorService {
     private readonly solicitudesVacaciones: SolicitudesVacacionesService,
     @Inject(forwardRef(() => DiaPersonalClass))
     private readonly solicitudesDiaPersonal: DiaPersonalClass,
-    private readonly schTrabajadores: TrabajadorDatabaseService,
+    private readonly schTrabajadores: ITrabajadorDatabaseService,
   ) {}
 
   async crearTrabajador(reqTrabajador: CreateTrabajadorRequestDto) {

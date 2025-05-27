@@ -9,6 +9,7 @@ import { DiaPersonalModule } from "../dia-personal/dia-personal.module";
 import { MBCTokenModule } from "../bussinesCentral/services/mbctoken/mbctoken.service.module";
 import { ParametrosModule } from "../parametros/parametros.module";
 import { TiendasModule } from "../tiendas/tiendas.module";
+import { ITrabajadorDatabaseService } from "./trabajadores.interface";
 
 @Module({
   imports: [
@@ -20,7 +21,13 @@ import { TiendasModule } from "../tiendas/tiendas.module";
     forwardRef(() => SolicitudVacacionesModule),
     forwardRef(() => DiaPersonalModule),
   ],
-  providers: [TrabajadorService, TrabajadorDatabaseService],
+  providers: [
+    TrabajadorService,
+    {
+      provide: ITrabajadorDatabaseService,
+      useClass: TrabajadorDatabaseService,
+    },
+  ],
   exports: [TrabajadorService],
   controllers: [TrabajadoresController],
 })

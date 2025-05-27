@@ -4,6 +4,7 @@ import { Controller, Get } from "@nestjs/common";
 export class AppController {
   @Get()
   getHello(): string {
+    console.log("esto guau");
     return "365Equipo API";
   }
 }
