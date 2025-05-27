@@ -4,7 +4,7 @@ import { IMongoService } from "./mongo.interface";
 
 @Global()
 @Module({
-  providers: [{ provide: IMongoService, useClass: MongoService }],
-  exports: [MongoService],
+  providers: [MongoService, { provide: IMongoService, useClass: MongoService }],
+  exports: [IMongoService, MongoService],
 })
 export class MongoModule {}
