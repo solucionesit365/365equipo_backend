@@ -8,7 +8,7 @@ import {
   InternalServerErrorException,
 } from "@nestjs/common";
 import { SchedulerGuard } from "../guards/scheduler.guard";
-import { TrabajadorService } from "./trabajadores.class";
+import { TrabajadorService } from "./trabajador.service";
 import { AuthGuard } from "../guards/auth.guard";
 import { Roles } from "../decorators/role.decorator";
 import { User } from "../decorators/get-user.decorator";
@@ -23,7 +23,7 @@ import {
   PermitirRegistroDto,
   RegisterDto,
   TrabajadorFormRequest,
-} from "./trabajadores.dto";
+} from "./trabajador.dto";
 
 import { RoleGuard } from "../guards/role.guard";
 import { LoggerService } from "src/logger/logger.service";
@@ -420,6 +420,7 @@ export class TrabajadoresController {
 
     return await this.trabajadorInstance.restaurarTrabajador(req);
   }
+
   @UseGuards(AuthGuard)
   @Post("validarCodigo")
   async validarCodigo(@Body() { codigoEmpleado }: { codigoEmpleado: string }) {
@@ -455,11 +456,5 @@ export class TrabajadoresController {
       console.error(error);
       return { ok: false, message: error.message };
     }
-  }
-
-  @UseGuards(SchedulerGuard)
-  @Post("permitirRegistro")
-  async permitirRegistro(@Body() req: PermitirRegistroDto) {
-    return await this.trabajadorInstance.permitirRegistro(req.email);
   }
 }

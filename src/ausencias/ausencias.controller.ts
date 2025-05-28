@@ -8,7 +8,7 @@ import { CompleteUser } from "../decorators/getCompleteUser.decorator";
 import { Trabajador } from "@prisma/client";
 import { UserRecord } from "firebase-admin/auth";
 import { User } from "../decorators/get-user.decorator";
-import { TrabajadorService } from "../trabajadores/trabajadores.class";
+import { TrabajadorService } from "../trabajador/trabajador.service";
 import { ObjectId } from "mongodb";
 
 @Controller("ausencias")

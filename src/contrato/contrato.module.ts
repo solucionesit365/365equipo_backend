@@ -1,12 +1,11 @@
 import { Module, forwardRef } from "@nestjs/common";
 import { ContratoService } from "./contrato.service";
-import { ContratoController } from "./contrato.controller";
-import { TrabajadoresModule } from "../trabajadores/trabajadores.module";
+import { TrabajadorModule } from "../trabajador/trabajador.module";
+import { IContratoDatabaseService } from "./contrato.interface";
 
 @Module({
-  imports: [forwardRef(() => TrabajadoresModule)],
-  providers: [ContratoService],
-  controllers: [ContratoController],
+  imports: [forwardRef(() => TrabajadorModule)],
+  providers: [{ provide: IContratoDatabaseService, useClass: ContratoService }],
   exports: [ContratoService],
 })
 export class ContratoModule {}

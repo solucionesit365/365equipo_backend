@@ -3,9 +3,9 @@ import * as moment from "moment";
 import { CuadrantesDatabase } from "./cuadrantes.mongodb";
 import { ObjectId, WithId } from "mongodb";
 import { TCuadrante } from "./cuadrantes.interface";
-import { Tienda } from "../tiendas/tiendas.class";
+import { Tienda } from "../tienda/tienda.service";
 import { AusenciaInterface } from "../ausencias/ausencias.interface";
-import { TrabajadorService } from "../trabajadores/trabajadores.class";
+import { TrabajadorService } from "../trabajador/trabajador.service";
 import { FichajesValidadosService } from "../fichajes-validados/fichajes-validados.class";
 import { DateTime } from "luxon";
 import { ContratoService } from "../contrato/contrato.service";
@@ -77,7 +77,7 @@ export class Cuadrantes {
     let diaActual = inicioSemana;
     const diasCompletos: WithId<TCuadrante>[] = [];
 
-    const horasContrato = await this.contratoService.getHorasContratoByIdNew(
+    const horasContrato = await this.contratoService.getHorasContrato(
       idTrabajador,
       inicioSemana,
     );
@@ -303,7 +303,7 @@ export class Cuadrantes {
       const usuarioActual =
         await this.trabajadoresInstance.getTrabajadorBySqlId(idSql);
       const horasContratoCurrentUser =
-        await this.contratoService.getHorasContratoByIdNew(
+        await this.contratoService.getHorasContrato(
           idSql,
           fechaInicioSemana,
         );

@@ -5,8 +5,8 @@ import {
   InternalServerErrorException,
 } from "@nestjs/common";
 import { Trabajador, Tienda as TTienda } from "@prisma/client";
-import { TrabajadorService } from "../trabajadores/trabajadores.class";
-import { TiendaDatabaseService } from "./tiendas.database";
+import { TrabajadorService } from "../trabajador/trabajador.service";
+import { TiendaDatabaseService } from "./tienda.database";
 
 @Injectable()
 export class Tienda {

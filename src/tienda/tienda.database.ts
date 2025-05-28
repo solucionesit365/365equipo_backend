@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { Prisma } from "@prisma/client";
 import { PrismaService } from "../prisma/prisma.service";
-import { Tiendas2 } from "./tiendas.dto";
+import { Tiendas2 } from "./tienda.dto";
 import { IMongoService } from "../mongo/mongo.interface";
 
 @Injectable()

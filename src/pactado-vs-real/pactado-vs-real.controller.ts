@@ -10,7 +10,7 @@ import { PactadoVsRealService } from "./pactado-vs-real.service";
 import { AuthGuard } from "../guards/auth.guard";
 import { User } from "../decorators/get-user.decorator";
 import { UserRecord } from "firebase-admin/auth";
-import { TrabajadorService } from "../trabajadores/trabajadores.class";
+import { TrabajadorService } from "../trabajador/trabajador.service";
 import { GetPactadoVsRealRequestDto } from "./pactado-vs-real.dto";
 
 @Controller("pactado-vs-real")

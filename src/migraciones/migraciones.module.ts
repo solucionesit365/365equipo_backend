@@ -1,7 +1,7 @@
 import { Module } from "@nestjs/common";
 // import { MigracionesService } from "./migraciones.service";
-import { TiendasModule } from "../tiendas/tiendas.module";
-import { TrabajadoresModule } from "../trabajadores/trabajadores.module";
+import { TiendasModule } from "../tienda/tienda.module";
+import { TrabajadoresModule } from "../trabajador/trabajador.module";
 // import { MigracionesController } from "./migraciones.controller";
 
 @Module({

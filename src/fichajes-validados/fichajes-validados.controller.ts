@@ -9,7 +9,7 @@ import {
   GetTiendaRangoRequestDto,
 } from "./fichajes-validados.dto";
 import { Notificaciones } from "../notificaciones/notificaciones.class";
-import { TrabajadorService } from "../trabajadores/trabajadores.class";
+import { TrabajadorService } from "../trabajador/trabajador.service";
 import { AuthGuard } from "../guards/auth.guard";
 import { SchedulerGuard } from "../guards/scheduler.guard";
 import { DateTime } from "luxon";

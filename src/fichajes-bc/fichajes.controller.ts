@@ -2,7 +2,7 @@ import { Controller, Post, UseGuards, Get, Query, Body } from "@nestjs/common";
 import { AuthGuard } from "../guards/auth.guard";
 import { Fichajes } from "./fichajes.class";
 import { SchedulerGuard } from "../guards/scheduler.guard";
-import { TrabajadorService } from "../trabajadores/trabajadores.class";
+import { TrabajadorService } from "../trabajador/trabajador.service";
 import { DateTime } from "luxon";
 import { User } from "../decorators/get-user.decorator";
 import { UserRecord } from "firebase-admin/auth";

@@ -12,7 +12,7 @@ import { AuthGuard } from "../guards/auth.guard";
 import { Cuadrantes } from "./cuadrantes.class";
 import { TCuadrante, TRequestCuadrante } from "./cuadrantes.interface";
 import { SchedulerGuard } from "../guards/scheduler.guard";
-import { TrabajadorService } from "../trabajadores/trabajadores.class";
+import { TrabajadorService } from "../trabajador/trabajador.service";
 import { DateTime } from "luxon";
 import { ObjectId } from "mongodb";
 import { ContratoService } from "../contrato/contrato.service";
@@ -328,7 +328,7 @@ export class CuadrantesController {
           }
 
           const horasContractuales =
-            (await this.contratoService.getHorasContratoByIdNew(
+            (await this.contratoService.getHorasContrato(
               reqCuadrante.idTrabajador,
               fechaInicio,
             )) as number;

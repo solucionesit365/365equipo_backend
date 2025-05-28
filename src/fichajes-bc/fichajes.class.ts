@@ -1,6 +1,6 @@
 import { Injectable, InternalServerErrorException } from "@nestjs/common";
 import { FichajesDatabase } from "./fichajes.mongodb";
-import { TrabajadorService } from "../trabajadores/trabajadores.class";
+import { TrabajadorService } from "../trabajador/trabajador.service";
 import { Trabajador } from "@prisma/client";
 import { ObjectId, WithId } from "mongodb";
 import { FichajeDto, ParFichaje } from "./fichajes.interface";

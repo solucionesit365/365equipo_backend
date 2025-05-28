@@ -1,7 +1,7 @@
 import { Controller, Get, Query, UseGuards } from "@nestjs/common";
-import { Tienda } from "./tiendas.class";
+import { Tienda } from "./tienda.service";
 import { AuthGuard } from "../guards/auth.guard";
-import { TrabajadorService } from "../trabajadores/trabajadores.class";
+import { TrabajadorService } from "../trabajador/trabajador.service";
 import { FirebaseService } from "../firebase/firebase.service";
 
 @Controller("tiendas")

@@ -1,7 +1,7 @@
 import { Controller, Post, Get, Body, UseGuards } from "@nestjs/common";
 import { AnunciosService } from "./anuncios.class";
 import { AnuncioDto, UpdateAnuncioDto } from "./anuncios.dto";
-import { TrabajadorService } from "../trabajadores/trabajadores.class";
+import { TrabajadorService } from "../trabajador/trabajador.service";
 import { Notificaciones } from "../notificaciones/notificaciones.class";
 import { AuthGuard } from "../guards/auth.guard";
 import { User } from "../decorators/get-user.decorator";

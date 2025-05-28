@@ -2,8 +2,8 @@ import { forwardRef, Module } from "@nestjs/common";
 import { AuditoriasService } from "./auditorias.class";
 import { AuditoriaDatabase } from "./auditorias.mongodb";
 import { AuditoriasController } from "./auditorias.controller";
-import { TiendasModule } from "../tiendas/tiendas.module";
-import { TrabajadoresModule } from "src/trabajadores/trabajadores.module";
+import { TiendasModule } from "../tienda/tienda.module";
+import { TrabajadoresModule } from "src/trabajador/trabajador.module";
 
 @Module({
   imports: [TiendasModule, forwardRef(() => TrabajadoresModule)],

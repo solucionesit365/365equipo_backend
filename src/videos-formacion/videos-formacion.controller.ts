@@ -5,7 +5,7 @@ import {
   videosFormacion365Interface,
   videosVistosFormacion365Interface,
 } from "./videos-formacion.interface";
-import { TrabajadorService } from "src/trabajadores/trabajadores.class";
+import { TrabajadorService } from "src/trabajador/trabajador.service";
 import { Notificaciones } from "src/notificaciones/notificaciones.class";
 
 @Controller("videos-formacion")

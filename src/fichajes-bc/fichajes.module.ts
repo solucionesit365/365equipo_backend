@@ -1,7 +1,7 @@
 import { Module } from "@nestjs/common";
 import { Fichajes } from "./fichajes.class";
 import { FichajesDatabase } from "./fichajes.mongodb";
-import { TrabajadoresModule } from "../trabajadores/trabajadores.module";
+import { TrabajadoresModule } from "../trabajador/trabajador.module";
 import { CuadrantesModule } from "../cuadrantes/cuadrantes.module";
 import { FichajesController } from "./fichajes.controller";
 import { MBCTokenModule } from "src/bussinesCentral/services/mbctoken/mbctoken.service.module";

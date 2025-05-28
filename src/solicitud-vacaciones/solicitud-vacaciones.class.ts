@@ -2,7 +2,7 @@ import { Injectable, Inject, forwardRef } from "@nestjs/common";
 import { SolicitudVacacionesDatabase } from "./solicitud-vacaciones.mongodb";
 import { SolicitudVacaciones } from "./solicitud-vacaciones.interface";
 import { EmailService } from "../email/email.class";
-import { TrabajadorService } from "../trabajadores/trabajadores.class";
+import { TrabajadorService } from "../trabajador/trabajador.service";
 import { Cuadrantes } from "../cuadrantes/cuadrantes.class";
 import { DateTime } from "luxon";
 import { ContratoService } from "../contrato/contrato.service";
@@ -22,7 +22,7 @@ export class SolicitudesVacacionesService {
   //Nueva solicitud de vacaciones
   async nuevaSolicitudVacaciones(solicitudVacaciones: SolicitudVacaciones) {
     try {
-      const horasContrato = await this.contratoService.getHorasContratoByIdNew(
+      const horasContrato = await this.contratoService.getHorasContrato(
         solicitudVacaciones.idBeneficiario,
         DateTime.now(),
       );

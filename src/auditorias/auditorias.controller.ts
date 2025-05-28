@@ -5,13 +5,13 @@ import {
   AuditoriaRespuestas,
 } from "./auditorias.interface";
 import { AuditoriasService } from "./auditorias.class";
-import { Tienda } from "../tiendas/tiendas.class";
+import { Tienda } from "../tienda/tienda.service";
 import { LoggerService } from "../logger/logger.service";
 import { CompleteUser } from "../decorators/getCompleteUser.decorator";
 import { Trabajador } from "@prisma/client";
 import { UserRecord } from "firebase-admin/auth";
 import { User } from "../decorators/get-user.decorator";
-import { TrabajadorService } from "../trabajadores/trabajadores.class";
+import { TrabajadorService } from "../trabajador/trabajador.service";
 
 @Controller("auditorias")
 export class AuditoriasController {

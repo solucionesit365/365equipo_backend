@@ -3,7 +3,7 @@ import { Incidencia } from "./incidencias.class";
 import { IncidenciasDatabase } from "./incidencias.mongodb";
 import { IncidenciasController } from "./incidencias.controller";
 import { NotificacionesModule } from "../notificaciones/notificaciones.module";
-import { TrabajadoresModule } from "../trabajadores/trabajadores.module";
+import { TrabajadoresModule } from "../trabajador/trabajador.module";
 
 @Module({
   imports: [NotificacionesModule, TrabajadoresModule],

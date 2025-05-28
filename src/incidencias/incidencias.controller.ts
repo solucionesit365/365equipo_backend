@@ -3,7 +3,7 @@ import { AuthGuard } from "../guards/auth.guard";
 import { Incidencia } from "./incidencias.class";
 import { Incidencias, IncidenciasInvitado } from "./incidencias.interface";
 import { Notificaciones } from "../notificaciones/notificaciones.class";
-import { TrabajadorService } from "../trabajadores/trabajadores.class";
+import { TrabajadorService } from "../trabajador/trabajador.service";
 
 @Controller("incidencias")
 export class IncidenciasController {

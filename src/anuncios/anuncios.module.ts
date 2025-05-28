@@ -3,7 +3,7 @@ import { AnunciosService } from "./anuncios.class";
 import { AnunciosDatabaseService } from "./anuncios.mongodb";
 import { AnunciosController } from "./anuncios.controller";
 import { NotificacionesModule } from "../notificaciones/notificaciones.module";
-import { TrabajadoresModule } from "../trabajadores/trabajadores.module";
+import { TrabajadoresModule } from "../trabajador/trabajador.module";
 
 @Module({
   imports: [NotificacionesModule, forwardRef(() => TrabajadoresModule)],

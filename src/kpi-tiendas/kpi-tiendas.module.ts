@@ -3,7 +3,7 @@ import { KpiTiendasClass } from "./kpi-tiendas.class";
 import { KpiTiendasDatabase } from "./kpi-tiendas.mondodb";
 import { KpiTiendasController } from "./kpi-tiendas.controller";
 import { NotificacionesModule } from "../notificaciones/notificaciones.module";
-import { TrabajadoresModule } from "../trabajadores/trabajadores.module";
+import { TrabajadoresModule } from "../trabajador/trabajador.module";
 
 @Module({
   imports: [NotificacionesModule, forwardRef(() => TrabajadoresModule)],

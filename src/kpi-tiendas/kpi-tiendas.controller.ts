@@ -3,7 +3,7 @@ import { KpiTiendasClass } from "./kpi-tiendas.class";
 import { AuthGuard } from "../guards/auth.guard";
 import { KpiTiendasInterface } from "./kpi-tiendas.interface";
 import { Notificaciones } from "../notificaciones/notificaciones.class";
-import { TrabajadorService } from "../trabajadores/trabajadores.class";
+import { TrabajadorService } from "../trabajador/trabajador.service";
 
 @Controller("kpi-tiendas")
 export class KpiTiendasController {

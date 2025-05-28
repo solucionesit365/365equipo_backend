@@ -1,15 +1,15 @@
 import { Module, forwardRef } from "@nestjs/common";
-import { TrabajadorService } from "./trabajadores.class";
-import { TrabajadorDatabaseService } from "./trabajadores.database";
+import { TrabajadorService } from "./trabajador.service";
+import { TrabajadorDatabaseService } from "./trabajador.database";
 import { PermisosModule } from "../permisos/permisos.module";
 import { EmailModule } from "../email/email.module";
 import { SolicitudVacacionesModule } from "../solicitud-vacaciones/solicitud-vacaciones.module";
-import { TrabajadoresController } from "./trabajadores.controller";
+import { TrabajadoresController } from "./trabajador.controller";
 import { DiaPersonalModule } from "../dia-personal/dia-personal.module";
 import { MBCTokenModule } from "../bussinesCentral/services/mbctoken/mbctoken.service.module";
 import { ParametrosModule } from "../parametros/parametros.module";
-import { TiendasModule } from "../tiendas/tiendas.module";
-import { ITrabajadorDatabaseService } from "./trabajadores.interface";
+import { TiendaModule } from "../tienda/tienda.module";
+import { ITrabajadorDatabaseService } from "./trabajador.interface";
 
 @Module({
   imports: [
@@ -17,7 +17,7 @@ import { ITrabajadorDatabaseService } from "./trabajadores.interface";
     EmailModule,
     MBCTokenModule,
     ParametrosModule,
-    TiendasModule,
+    TiendaModule,
     forwardRef(() => SolicitudVacacionesModule),
     forwardRef(() => DiaPersonalModule),
   ],
@@ -31,4 +31,4 @@ import { ITrabajadorDatabaseService } from "./trabajadores.interface";
   exports: [TrabajadorService],
   controllers: [TrabajadoresController],
 })
-export class TrabajadoresModule {}
+export class TrabajadorModule {}

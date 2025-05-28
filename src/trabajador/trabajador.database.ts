@@ -6,9 +6,9 @@ import pMap from "p-map";
 import {
   CreateTrabajadorRequestDto,
   TrabajadorFormRequest,
-} from "./trabajadores.dto";
+} from "./trabajador.dto";
 import { AxiosBcService } from "../axios/axios-bc.service";
-import { ITrabajadorDatabaseService } from "./trabajadores.interface";
+import { ITrabajadorDatabaseService } from "./trabajador.interface";
 
 export interface TIncludeTrabajador {
   contratos?: boolean;
@@ -649,27 +649,6 @@ export class TrabajadorDatabaseService extends ITrabajadorDatabaseService {
     );
 
     return { updated: modificaciones.length };
-  }
-
-  // Método para actualizar contratos
-  async updateManyContratos(
-    contratosModificaciones: Array<{
-      contratoId: string;
-      horasContrato: number;
-    }>,
-  ) {
-    if (!contratosModificaciones || contratosModificaciones.length === 0) {
-      return [];
-    }
-
-    return await this.prisma.$transaction(
-      contratosModificaciones.map(({ contratoId, horasContrato }) =>
-        this.prisma.contrato2.update({
-          where: { id: contratoId },
-          data: { horasContrato },
-        }),
-      ),
-    );
   }
 
   deleteManyTrabajadores(dnis: { dni: string }[]) {

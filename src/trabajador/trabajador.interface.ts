@@ -3,7 +3,7 @@ import { Prisma, Trabajador } from "@prisma/client";
 import {
   CreateTrabajadorRequestDto,
   TrabajadorFormRequest,
-} from "./trabajadores.dto";
+} from "./trabajador.dto";
 import { DateTime } from "luxon";
 
 // Los tipos se mantienen igual
@@ -94,24 +94,6 @@ export abstract class ITrabajadorDatabaseService {
       nuevoContrato: Prisma.Contrato2CreateInput;
     }[],
   ): Promise<{ updated: number }>;
-
-  abstract updateManyContratos(
-    contratosModificaciones: Array<{
-      contratoId: string;
-      horasContrato: number;
-    }>,
-  ): Promise<
-    {
-      id: string;
-      fechaAlta: Date;
-      horasContrato: number;
-      inicioContrato: Date;
-      finalContrato: Date | null;
-      fechaAntiguedad: Date;
-      fechaBaja: Date | null;
-      idTrabajador: number;
-    }[]
-  >;
 
   abstract deleteManyTrabajadores(
     dnis: { dni: string }[],

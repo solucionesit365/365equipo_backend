@@ -3,7 +3,7 @@ import { AuthGuard } from "../guards/auth.guard";
 import { SolicitudesVacacionesService } from "./solicitud-vacaciones.class";
 import { SolicitudVacaciones } from "./solicitud-vacaciones.interface";
 import { EmailService } from "../email/email.class";
-import { TrabajadorService } from "../trabajadores/trabajadores.class";
+import { TrabajadorService } from "../trabajador/trabajador.service";
 import { Notificaciones } from "../notificaciones/notificaciones.class";
 import { UserRecord } from "firebase-admin/auth";
 import { User } from "../decorators/get-user.decorator";

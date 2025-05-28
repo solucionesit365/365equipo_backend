@@ -3,7 +3,7 @@ import { diaPersonalMongo } from "./dia-personal.mongodb";
 import { DiaPersonal } from "./dia-personal.interface";
 import { ContratoService } from "../contrato/contrato.service";
 import { EmailService } from "../email/email.class";
-import { TrabajadorService } from "../trabajadores/trabajadores.class";
+import { TrabajadorService } from "../trabajador/trabajador.service";
 import { constructEmailContent } from "./emailDiaPersonal";
 import { DateTime } from "luxon";
 @Injectable()
@@ -19,7 +19,7 @@ export class DiaPersonalClass {
   //Nueva solicitud de dia personal
   async nuevaSolicitudDiaPersonal(diaPersonal: DiaPersonal) {
     try {
-      const horasContrato = await this.contratoService.getHorasContratoByIdNew(
+      const horasContrato = await this.contratoService.getHorasContrato(
         diaPersonal.idBeneficiario,
         DateTime.now(),
       );

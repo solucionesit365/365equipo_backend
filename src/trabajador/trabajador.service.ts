@@ -13,14 +13,14 @@ import { DiaPersonalClass } from "../dia-personal/dia-personal.class";
 import {
   TIncludeTrabajador,
   TrabajadorDatabaseService,
-} from "./trabajadores.database";
+} from "./trabajador.database";
 import { UserRecord } from "firebase-admin/auth";
 import { Prisma, Trabajador } from "@prisma/client";
 import {
   CreateTrabajadorRequestDto,
   TrabajadorFormRequest,
-} from "./trabajadores.dto";
-import { ITrabajadorDatabaseService } from "./trabajadores.interface";
+} from "./trabajador.dto";
+import { ITrabajadorDatabaseService } from "./trabajador.interface";
 
 export interface TOmneTrabajador {
   noPerceptor: string;
@@ -119,16 +119,6 @@ export class TrabajadorService {
     }[],
   ) {
     return this.schTrabajadores.actualizarTrabajadoresLote(modificaciones);
-  }
-
-  // Método para actualizar contratos
-  updateManyContratos(
-    contratosModificaciones: Array<{
-      contratoId: string;
-      horasContrato: number;
-    }>,
-  ) {
-    return this.schTrabajadores.updateManyContratos(contratosModificaciones);
   }
 
   createManyTrabajadores(
@@ -510,10 +500,6 @@ export class TrabajadorService {
     }
   }
 
-  // async guardarTrabajadoresOmne() {
-  //   return await this.schTrabajadores.guardarTrabajadoresOmne();
-  // }
-
   async limpiarTrabajadoresConFinalContrato() {
     return await this.schTrabajadores.borrarConFechaBaja();
   }
@@ -661,10 +647,6 @@ export class TrabajadorService {
     return arrayEmails[0].trim();
   }
 
-  async resolverCaptcha(): Promise<boolean> {
-    return true;
-  }
-
   normalizarDNIs() {
     return this.schTrabajadores.normalizarDNIs();
   }
@@ -767,8 +749,6 @@ export class TrabajadorService {
 
   async enviarEmailAuto(automatizaciones: any, user: UserRecord) {
     //Si tiene okTicket
-    console.log(automatizaciones);
-
     if (automatizaciones.okTicket) {
       const emailBody = this.emailInstance.generarEmailTemplate(
         `${automatizaciones.trabajador.nombreApellidos} - ${automatizaciones.trabajador.emails}`,

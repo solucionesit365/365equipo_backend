@@ -1,6 +1,6 @@
 import { Test, TestingModule } from "@nestjs/testing";
-import { TOmneTrabajador, TrabajadorService } from "./trabajadores.class";
-import { ITrabajadorDatabaseService } from "./trabajadores.interface";
+import { TOmneTrabajador, TrabajadorService } from "./trabajador.service";
+import { ITrabajadorDatabaseService } from "./trabajador.interface";
 import { FirebaseService } from "../firebase/firebase.service";
 import { EmailService } from "../email/email.class";
 import { SolicitudesVacacionesService } from "../solicitud-vacaciones/solicitud-vacaciones.class";
@@ -24,7 +24,6 @@ describe("TrabajadorService", () => {
       getTrabajadoresOmne: jest.fn(),
       getAllTrabajadores: jest.fn(),
       actualizarTrabajadoresLote: jest.fn(),
-      updateManyContratos: jest.fn(),
       createManyTrabajadores: jest.fn(),
       deleteManyTrabajadores: jest.fn(),
       getTrabajadorByAppId: jest.fn(),

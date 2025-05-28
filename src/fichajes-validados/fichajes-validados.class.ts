@@ -1,6 +1,6 @@
 import { Injectable, Inject, forwardRef } from "@nestjs/common";
 import { FichajesValidadosDatabase } from "./fichajes-validados.mongodb";
-import { TrabajadorService } from "../trabajadores/trabajadores.class";
+import { TrabajadorService } from "../trabajador/trabajador.service";
 import { WithId } from "mongodb";
 import { DateTime } from "luxon";
 import { FichajeValidadoDto } from "./fichajes-validados.dto";

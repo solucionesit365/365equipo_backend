@@ -3,7 +3,7 @@ import { AuthGuard } from "../guards/auth.guard";
 import { NotasInformativasClass } from "./notas-informativas.class";
 import { NotasInformativas } from "./notas-informativas.interface";
 import { Notificaciones } from "../notificaciones/notificaciones.class";
-import { TrabajadorService } from "../trabajadores/trabajadores.class";
+import { TrabajadorService } from "../trabajador/trabajador.service";
 import { LoggerService } from "../logger/logger.service";
 import { CompleteUser } from "../decorators/getCompleteUser.decorator";
 import { Trabajador } from "@prisma/client";

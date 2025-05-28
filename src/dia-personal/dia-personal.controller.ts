@@ -3,7 +3,7 @@ import { AuthGuard } from "../guards/auth.guard";
 import { DiaPersonalClass } from "./dia-personal.class";
 import { DiaPersonal } from "./dia-personal.interface";
 import { EmailService } from "src/email/email.class";
-import { TrabajadorService } from "../trabajadores/trabajadores.class";
+import { TrabajadorService } from "../trabajador/trabajador.service";
 import { constructEmailContent } from "./emailDiaPersonal";
 
 @Controller("dia-personal")

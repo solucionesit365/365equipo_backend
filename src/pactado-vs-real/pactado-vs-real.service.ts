@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { DateTime } from "luxon";
-import { TrabajadorService } from "../trabajadores/trabajadores.class";
+import { TrabajadorService } from "../trabajador/trabajador.service";
 import { FichajesValidadosService } from "../fichajes-validados/fichajes-validados.class";
 import { UserRecord } from "firebase-admin/auth";
 import { Trabajador, Tienda, Contrato2 } from "@prisma/client";

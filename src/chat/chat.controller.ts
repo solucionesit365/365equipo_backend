@@ -4,7 +4,7 @@ import { ChatService } from "./chat.class";
 import { Chat } from "./chat.interface";
 import { AuthGuard } from "../guards/auth.guard";
 import { Notificaciones } from "../notificaciones/notificaciones.class";
-import { TrabajadorService } from "src/trabajadores/trabajadores.class";
+import { TrabajadorService } from "src/trabajador/trabajador.service";
 
 @Controller("chat")
 export class ChatController {
