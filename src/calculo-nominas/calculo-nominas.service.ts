@@ -298,7 +298,7 @@ export class CalculoNominasService {
         const fechaStr = bloque.fecha;
         const horaInicio = bloque.horaInicio;
         const horaFinal = bloque.horaFinal;
-        const aPagar = bloque.aPagar;
+        const aPagar = bloque.apagar;
         const revision = bloque.revision;
 
         if (!fechaStr || !horaInicio || !horaFinal || !aPagar || !revision)
@@ -536,5 +536,79 @@ export class CalculoNominasService {
     }
 
     return resultadosPDOM;
+  }
+
+  async calcularHCOMPL() {
+    const trabajadores = await this.schTrabajadores.getTrabajadores();
+    const notificaciones =
+      await this.schHorasExtras.getAllNotificacionesHorasExtras();
+
+    // 🎯 Filtrar trabajadores con contrato de menos de 40h
+    const trabajadores40h = trabajadores.filter(
+      (t) => t.contratos[0].horasContrato < 100,
+    );
+
+    // Crear un mapa para lookup rápido por nombre o DNI
+    const trabajadoresMap = new Map(trabajadores40h.map((t) => [t.dni, t]));
+
+    const resultados = new Map<
+      string,
+      {
+        nombre: string;
+        dni: string;
+        idSql: number;
+        totalHorasNotificadas: number;
+      }
+    >();
+
+    for (const noti of notificaciones) {
+      const trabajador = trabajadoresMap.get(noti.dniTrabajador);
+
+      if (!trabajador) continue; // ignorar si no es de contrato de menos de 40h
+
+      const bloquesHoras = noti.horasExtras || [];
+      let total = 0;
+
+      for (const bloque of bloquesHoras) {
+        const fechaStr = bloque.fecha;
+        const horaInicio = bloque.horaInicio;
+        const horaFinal = bloque.horaFinal;
+        const aPagar = bloque.apagar;
+        const revision = bloque.revision;
+
+        if (!fechaStr || !horaInicio || !horaFinal || !aPagar || !revision)
+          continue;
+
+        const inicio = DateTime.fromFormat(
+          `${fechaStr} ${horaInicio}`,
+          "dd/MM/yyyy HH:mm",
+        );
+        const fin = DateTime.fromFormat(
+          `${fechaStr} ${horaFinal}`,
+          "dd/MM/yyyy HH:mm",
+        );
+
+        if (inicio.isValid && fin.isValid && fin > inicio) {
+          const horas = fin.diff(inicio, "hours").hours;
+          total += horas;
+        }
+      }
+
+      if (!resultados.has(trabajador.dni)) {
+        resultados.set(trabajador.dni, {
+          nombre: trabajador.nombreApellidos,
+          dni: trabajador.dni,
+          idSql: trabajador.id,
+          totalHorasNotificadas: total,
+        });
+      } else {
+        const existing = resultados.get(trabajador.dni);
+        if (existing) {
+          existing.totalHorasNotificadas += total;
+        }
+      }
+    }
+
+    return Array.from(resultados.values());
   }
 }

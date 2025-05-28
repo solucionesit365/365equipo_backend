@@ -1,4 +1,4 @@
-import { Controller, Post, UseGuards, Get, Query, Body } from "@nestjs/common";
+import { Controller, UseGuards, Get } from "@nestjs/common";
 import { CalculoNominasService } from "./calculo-nominas.service";
 import { AuthGuard } from "../guards/auth.guard";
 
@@ -6,20 +6,25 @@ import { AuthGuard } from "../guards/auth.guard";
 export class CalculoNominasController {
   constructor(private readonly calculoNominasService: CalculoNominasService) {}
 
-  //   @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard)
   @Get("pdis")
   async getPDISDependientas() {
     return this.calculoNominasService.calcularPDIS();
   }
 
-  //   @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard)
   @Get("pprod")
   async getPProdDependientas() {
     return this.calculoNominasService.calcularPPROD();
   }
-
+  @UseGuards(AuthGuard)
   @Get("pdom")
   async calcularPDOM() {
     return this.calculoNominasService.calcularPDOM();
+  }
+  // @UseGuards(AuthGuard)
+  @Get("hcompl")
+  async calcularHCOMPL() {
+    return this.calculoNominasService.calcularHCOMPL();
   }
 }
