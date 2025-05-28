@@ -1,6 +1,6 @@
 import { Module } from "@nestjs/common";
 import { PactadoVsRealService } from "./pactado-vs-real.service";
-import { TrabajadoresModule } from "../trabajador/trabajador.module";
+import { TrabajadorModule } from "../trabajador/trabajador.module";
 import { FichajesValidadosModule } from "../fichajes-validados/fichajes-validados.module";
 import { PactadoVsRealController } from "./pactado-vs-real.controller";
 import { AusenciasModule } from "../ausencias/ausencias.module";
@@ -8,7 +8,7 @@ import { CuadrantesModule } from "../cuadrantes/cuadrantes.module";
 
 @Module({
   imports: [
-    TrabajadoresModule,
+    TrabajadorModule,
     FichajesValidadosModule,
     AusenciasModule,
     CuadrantesModule,

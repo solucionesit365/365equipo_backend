@@ -1,5 +1,4 @@
-import { Injectable } from "@nestjs/common";
-import { Prisma } from "@prisma/client";
+import { Injectable, InternalServerErrorException } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { Tiendas2 } from "./tienda.dto";
 import { IMongoService } from "../mongo/mongo.interface";
@@ -10,23 +9,31 @@ export class TiendaDatabaseService {
     private readonly prisma: PrismaService,
     private readonly mongoDbService: IMongoService,
   ) {}
+
   async getTiendas() {
-    return await this.prisma.tienda.findMany();
+    try {
+      return await this.prisma.tienda.findMany();
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException(
+        "Error al obtener las tiendas desde la base de datos",
+      );
+    }
   }
 
-  async addTiendasNuevas(nuevas: Prisma.TiendaCreateInput[]) {
-    const resCreate = await this.prisma.tienda.createMany({
-      data: nuevas,
-    });
-
-    return !!resCreate.count;
-  }
-
+  // Mongo
   async geTiendas2() {
-    const db = (await this.mongoDbService.getConexion()).db();
-    const tiendasResponse = db.collection<Tiendas2>("tiendas");
-    const respSolicitudes = await tiendasResponse.find({}).toArray();
+    try {
+      const db = (await this.mongoDbService.getConexion()).db();
+      const tiendasResponse = db.collection<Tiendas2>("tiendas");
+      const respSolicitudes = await tiendasResponse.find({}).toArray();
 
-    return respSolicitudes;
+      return respSolicitudes;
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException(
+        "Error al obtener las tiendas desde MongoDB",
+      );
+    }
   }
 }

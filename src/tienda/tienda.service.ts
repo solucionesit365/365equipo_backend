@@ -1,15 +1,10 @@
-import {
-  Injectable,
-  Inject,
-  forwardRef,
-  InternalServerErrorException,
-} from "@nestjs/common";
+import { Injectable, Inject, forwardRef } from "@nestjs/common";
 import { Trabajador, Tienda as TTienda } from "@prisma/client";
 import { TrabajadorService } from "../trabajador/trabajador.service";
 import { TiendaDatabaseService } from "./tienda.database";
 
 @Injectable()
-export class Tienda {
+export class TiendaService {
   constructor(
     @Inject(forwardRef(() => TrabajadorService))
     private readonly trabajadoresInstance: TrabajadorService,
@@ -17,12 +12,7 @@ export class Tienda {
   ) {}
 
   async getTiendas() {
-    try {
-      return this.ordenarTiendas(await this.schTiendas.getTiendas());
-    } catch (err) {
-      console.log(err);
-      throw new InternalServerErrorException("Error al obtener las tiendas");
-    }
+    return this.ordenarTiendas(await this.schTiendas.getTiendas());
   }
 
   private ordenarTiendas(tiendas: TTienda[]) {
@@ -40,24 +30,6 @@ export class Tienda {
       return nameA.localeCompare(nameB);
     });
   }
-
-  // async getTiendasHit() {
-  //   return await this.schTiendas.getTiendasHit();
-  // }
-
-  // async actualizarTiendas() {
-  //   const arrayTiendasApp = await this.getTiendas();
-  //   // const arrayTiendasHit = await this.getTiendasHit();
-
-  //   const tiendasExistentesIds = arrayTiendasApp.map(
-  //     (tiendaApp) => tiendaApp.idExterno,
-  //   );
-  //   const tiendasNuevas = arrayTiendasHit.filter(
-  //     (tiendaExterno) =>
-  //       !tiendasExistentesIds.includes(tiendaExterno.idExterno),
-  //   );
-  //   return this.schTiendas.addTiendasNuevas(tiendasNuevas);
-  // }
 
   private checkExists(arrayTiendas: any[], buscar: any) {
     for (let i = 0; i < arrayTiendas.length; i += 1) {
@@ -97,12 +69,8 @@ export class Tienda {
     return null;
   }
 
+  // Mongo
   async getTiendas2() {
-    try {
-      return this.ordenarTiendas(await this.schTiendas.geTiendas2());
-    } catch (err) {
-      console.log(err);
-      throw new InternalServerErrorException("Error al obtener las tiendas");
-    }
+    return this.ordenarTiendas(await this.schTiendas.geTiendas2());
   }
 }

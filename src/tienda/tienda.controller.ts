@@ -1,5 +1,5 @@
 import { Controller, Get, Query, UseGuards } from "@nestjs/common";
-import { Tienda } from "./tienda.service";
+import { TiendaService } from "./tienda.service";
 import { AuthGuard } from "../guards/auth.guard";
 import { TrabajadorService } from "../trabajador/trabajador.service";
 import { FirebaseService } from "../firebase/firebase.service";
@@ -8,7 +8,7 @@ import { FirebaseService } from "../firebase/firebase.service";
 export class TiendasController {
   constructor(
     private readonly authInstance: FirebaseService,
-    private readonly tiendasInstance: Tienda,
+    private readonly tiendasInstance: TiendaService,
     private readonly trabajadorInstance: TrabajadorService,
   ) {}
 

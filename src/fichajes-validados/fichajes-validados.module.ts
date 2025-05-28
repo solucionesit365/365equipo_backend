@@ -1,12 +1,12 @@
 import { Module, forwardRef } from "@nestjs/common";
 import { FichajesValidadosService } from "./fichajes-validados.class";
 import { FichajesValidadosDatabase } from "./fichajes-validados.mongodb";
-import { TrabajadoresModule } from "../trabajador/trabajador.module";
+import { TrabajadorModule } from "../trabajador/trabajador.module";
 import { FichajesValidadosController } from "./fichajes-validados.controller";
 import { NotificacionesModule } from "../notificaciones/notificaciones.module";
 
 @Module({
-  imports: [forwardRef(() => TrabajadoresModule), NotificacionesModule],
+  imports: [forwardRef(() => TrabajadorModule), NotificacionesModule],
   providers: [FichajesValidadosService, FichajesValidadosDatabase],
   exports: [FichajesValidadosService],
   controllers: [FichajesValidadosController],

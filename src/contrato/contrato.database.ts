@@ -35,4 +35,25 @@ export class ContratoDatabaseService extends IContratoDatabaseService {
       );
     }
   }
+
+  async getHistoricoContratos(dni: string) {
+    try {
+      const resContratos = await this.prisma.contrato2.findMany({
+        where: {
+          Trabajador: {
+            dni: dni,
+          },
+        },
+      });
+
+      if (resContratos.length === 0) return null;
+
+      return resContratos;
+    } catch (error) {
+      console.error(error);
+      throw new InternalServerErrorException(
+        "Error al obtener el histórico de contratos",
+      );
+    }
+  }
 }

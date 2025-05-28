@@ -15,22 +15,20 @@ import { SchedulerGuard } from "../guards/scheduler.guard";
 import { TrabajadorService } from "../trabajador/trabajador.service";
 import { DateTime } from "luxon";
 import { ObjectId } from "mongodb";
-import { ContratoService } from "../contrato/contrato.service";
 import { User } from "../decorators/get-user.decorator";
 import { UserRecord } from "firebase-admin/auth";
 import { CopiarSemanaCuadranteDto, GetCuadrantesDto } from "./cuadrantes.dto";
-import { Notificaciones } from "../notificaciones/notificaciones.class";
 import { LoggerService } from "../logger/logger.service";
 import { CompleteUser } from "src/decorators/getCompleteUser.decorator";
 import { Trabajador } from "@prisma/client";
+import { IContratoService } from "../contrato/contrato.interface";
 
 @Controller("cuadrantes")
 export class CuadrantesController {
   constructor(
     private readonly cuadrantesInstance: Cuadrantes,
-    private readonly contratoService: ContratoService,
+    private readonly contratoService: IContratoService,
     private readonly trabajadoresInstance: TrabajadorService,
-    private readonly notificacionesInstance: Notificaciones,
     private readonly loggerService: LoggerService,
   ) {}
 

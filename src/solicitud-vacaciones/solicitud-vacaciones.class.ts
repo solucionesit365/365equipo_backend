@@ -5,7 +5,7 @@ import { EmailService } from "../email/email.class";
 import { TrabajadorService } from "../trabajador/trabajador.service";
 import { Cuadrantes } from "../cuadrantes/cuadrantes.class";
 import { DateTime } from "luxon";
-import { ContratoService } from "../contrato/contrato.service";
+import { IContratoService } from "../contrato/contrato.interface";
 
 @Injectable()
 export class SolicitudesVacacionesService {
@@ -14,7 +14,7 @@ export class SolicitudesVacacionesService {
     private readonly email: EmailService,
     @Inject(forwardRef(() => TrabajadorService))
     private readonly trabajadorInstance: TrabajadorService,
-    private readonly contratoService: ContratoService,
+    private readonly contratoService: IContratoService,
     @Inject(forwardRef(() => Cuadrantes))
     private readonly cuadrantesInstance: Cuadrantes,
   ) {}

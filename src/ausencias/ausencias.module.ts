@@ -3,10 +3,10 @@ import { AusenciasService } from "./ausencias.class";
 import { AusenciasDatabase } from "./ausencias.mongodb";
 import { CuadrantesModule } from "../cuadrantes/cuadrantes.module";
 import { AusenciasController } from "./ausencias.controller";
-import { TrabajadoresModule } from "../trabajador/trabajador.module";
+import { TrabajadorModule } from "../trabajador/trabajador.module";
 
 @Module({
-  imports: [CuadrantesModule, forwardRef(() => TrabajadoresModule)],
+  imports: [CuadrantesModule, forwardRef(() => TrabajadorModule)],
   providers: [AusenciasService, AusenciasDatabase],
   exports: [AusenciasService],
   controllers: [AusenciasController],

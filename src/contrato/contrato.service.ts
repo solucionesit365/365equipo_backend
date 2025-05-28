@@ -1,10 +1,15 @@
 import { Injectable } from "@nestjs/common";
 import { DateTime } from "luxon";
-import { IContratoDatabaseService } from "./contrato.interface";
+import {
+  IContratoDatabaseService,
+  IContratoService,
+} from "./contrato.interface";
 
 @Injectable()
-export class ContratoService {
-  constructor(private readonly schContrato: IContratoDatabaseService) {}
+export class ContratoService extends IContratoService {
+  constructor(private readonly schContrato: IContratoDatabaseService) {
+    super();
+  }
 
   // Recuerda: la zona horario es clave (en el servidor y el motor de MySQL).
   async getHorasContrato(idSql: number, conFecha: DateTime) {
@@ -18,5 +23,9 @@ export class ContratoService {
       return (Number(responseHorasContrato.horasContrato) * 40) / 100;
 
     return null;
+  }
+
+  getHistoricoContratos(dni: string) {
+    return this.schContrato.getHistoricoContratos(dni);
   }
 }

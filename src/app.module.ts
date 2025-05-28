@@ -26,8 +26,8 @@ import { PrismaModule } from "./prisma/prisma.module";
 import { SolicitudVacacionesModule } from "./solicitud-vacaciones/solicitud-vacaciones.module";
 import { TarjetaClienteModule } from "./tarjeta-cliente/tarjeta-cliente.module";
 import { TestModule } from "./test/test.module";
-import { TiendasModule } from "./tienda/tienda.module";
-import { TrabajadoresModule } from "./trabajador/trabajador.module";
+import { TiendaModule } from "./tienda/tienda.module";
+import { TrabajadorModule } from "./trabajador/trabajador.module";
 import { VerificacionMfaModule } from "./verificacion-mfa/verificacion-mfa.module";
 import { MongoModule } from "./mongo/mongo.module";
 import { Cultura365Module } from "./cultura365/cultura365.module";
@@ -95,8 +95,8 @@ import { GraphModule } from "./graph/graph.module";
     SolicitudVacacionesModule,
     TarjetaClienteModule,
     TestModule,
-    TiendasModule,
-    TrabajadoresModule,
+    TiendaModule,
+    TrabajadorModule,
     VerificacionMfaModule,
     MongoModule,
     Cultura365Module,

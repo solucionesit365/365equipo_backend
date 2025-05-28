@@ -3,14 +3,13 @@ import * as moment from "moment";
 import { CuadrantesDatabase } from "./cuadrantes.mongodb";
 import { ObjectId, WithId } from "mongodb";
 import { TCuadrante } from "./cuadrantes.interface";
-import { Tienda } from "../tienda/tienda.service";
 import { AusenciaInterface } from "../ausencias/ausencias.interface";
 import { TrabajadorService } from "../trabajador/trabajador.service";
 import { FichajesValidadosService } from "../fichajes-validados/fichajes-validados.class";
 import { DateTime } from "luxon";
-import { ContratoService } from "../contrato/contrato.service";
 import { Trabajador } from "@prisma/client";
 import { CopiarSemanaCuadranteDto } from "./cuadrantes.dto";
+import { IContratoService } from "../contrato/contrato.interface";
 
 moment.locale("custom", {
   week: {
@@ -22,8 +21,7 @@ moment.locale("custom", {
 export class Cuadrantes {
   constructor(
     private readonly schCuadrantes: CuadrantesDatabase,
-    private readonly contratoService: ContratoService,
-    private readonly tiendasInstance: Tienda,
+    private readonly contratoService: IContratoService,
     @Inject(forwardRef(() => TrabajadorService))
     private readonly trabajadoresInstance: TrabajadorService,
     private readonly fichajesValidadosInstance: FichajesValidadosService,
@@ -303,10 +301,7 @@ export class Cuadrantes {
       const usuarioActual =
         await this.trabajadoresInstance.getTrabajadorBySqlId(idSql);
       const horasContratoCurrentUser =
-        await this.contratoService.getHorasContrato(
-          idSql,
-          fechaInicioSemana,
-        );
+        await this.contratoService.getHorasContrato(idSql, fechaInicioSemana);
       (usuarioActual.contratos[0].horasContrato =
         (horasContratoCurrentUser * 100) / 40),
         equipoCompleto.push(usuarioActual);

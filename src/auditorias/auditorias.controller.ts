@@ -5,7 +5,7 @@ import {
   AuditoriaRespuestas,
 } from "./auditorias.interface";
 import { AuditoriasService } from "./auditorias.class";
-import { Tienda } from "../tienda/tienda.service";
+import { TiendaService } from "../tienda/tienda.service";
 import { LoggerService } from "../logger/logger.service";
 import { CompleteUser } from "../decorators/getCompleteUser.decorator";
 import { Trabajador } from "@prisma/client";
@@ -17,7 +17,7 @@ import { TrabajadorService } from "../trabajador/trabajador.service";
 export class AuditoriasController {
   constructor(
     private readonly auditoriaInstance: AuditoriasService,
-    private readonly tiendasInstance: Tienda,
+    private readonly tiendasInstance: TiendaService,
     private readonly loggerService: LoggerService,
     private readonly trabajadores: TrabajadorService,
   ) {}

@@ -1,16 +1,16 @@
 import { Injectable, Inject, forwardRef } from "@nestjs/common";
 import { diaPersonalMongo } from "./dia-personal.mongodb";
 import { DiaPersonal } from "./dia-personal.interface";
-import { ContratoService } from "../contrato/contrato.service";
 import { EmailService } from "../email/email.class";
 import { TrabajadorService } from "../trabajador/trabajador.service";
 import { constructEmailContent } from "./emailDiaPersonal";
 import { DateTime } from "luxon";
+import { IContratoService } from "../contrato/contrato.interface";
 @Injectable()
 export class DiaPersonalClass {
   constructor(
     private readonly schdiaPersonal: diaPersonalMongo,
-    private readonly contratoService: ContratoService,
+    private readonly contratoService: IContratoService,
     @Inject(forwardRef(() => TrabajadorService))
     private readonly trabajadorInstance: TrabajadorService,
     private readonly email: EmailService,

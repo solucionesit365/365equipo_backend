@@ -3,10 +3,10 @@ import { KpiTiendasClass } from "./kpi-tiendas.class";
 import { KpiTiendasDatabase } from "./kpi-tiendas.mondodb";
 import { KpiTiendasController } from "./kpi-tiendas.controller";
 import { NotificacionesModule } from "../notificaciones/notificaciones.module";
-import { TrabajadoresModule } from "../trabajador/trabajador.module";
+import { TrabajadorModule } from "../trabajador/trabajador.module";
 
 @Module({
-  imports: [NotificacionesModule, forwardRef(() => TrabajadoresModule)],
+  imports: [NotificacionesModule, forwardRef(() => TrabajadorModule)],
   providers: [KpiTiendasClass, KpiTiendasDatabase],
   exports: [KpiTiendasClass],
   controllers: [KpiTiendasController],
