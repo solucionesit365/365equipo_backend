@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from "@nestjs/common";
+import { Body, Controller, Get, Post, Query } from "@nestjs/common";
 import { MongoService } from "../mongo/mongo.service";
 import { PowerAutomateService } from "./power-automate.service";
 import { Req, UseInterceptors, UploadedFile } from "@nestjs/common";
@@ -23,6 +23,15 @@ export class PowerAutomateController {
       console.log(err);
       return false;
     }
+  }
+  @Post("saveInfoFormResponder")
+  async save(@Body() req: { email: string; idTarea: string }) {
+    await this.powerAutomateService.saveInPowerAutomateCollection({ ...req });
+  }
+
+  @Get("getInfoForm")
+  async getInfoFormHandler(@Query("idTarea") idTarea: string) {
+    return this.powerAutomateService.getInfoForm(idTarea);
   }
 
   @Post("email")
