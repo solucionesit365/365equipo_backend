@@ -19,5 +19,11 @@ export interface HardWareInterface {
   fechaEntrega: Date;
   licenciaOffice: string;
   estadoPrestamo: string;
+  simOperador: string;
+  simICCID: string;
+  simEstado: string;
+  docStation: string;
+  fechaCreacion: Date;
+  fechaModificacion: [];
   historial: [];
 }
