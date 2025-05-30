@@ -11,22 +11,19 @@ import { VerificacionMFA } from "./verificacionmfa.interface";
 import { VerificacionService } from "./verificacionmfa.class";
 import { AuthGuard } from "../guards/auth.guard";
 import { EmailService } from "src/email/email.class";
-import { FirebaseService } from "../firebase/firebase.service";
+import { IFirebaseService } from "../firebase/firebase.interface";
 
 @Controller("verificacionmfa")
 export class VerificacionmfaController {
   constructor(
     private readonly verificacionInstance: VerificacionService,
-    private readonly authInstance: FirebaseService,
+    private readonly authInstance: IFirebaseService,
     private readonly email: EmailService,
   ) {}
 
   @Post("nuevaVerificacionMFA")
   @UseGuards(AuthGuard)
-  async nuevaVerificacionMFA(
-    @Headers("authorization") authHeader: string,
-    @Body() verificacion: VerificacionMFA,
-  ) {
+  async nuevaVerificacionMFA(@Body() verificacion: VerificacionMFA) {
     try {
       const usuario = await this.authInstance.getUserByUid(verificacion.uid);
       this.email.enviarEmail(

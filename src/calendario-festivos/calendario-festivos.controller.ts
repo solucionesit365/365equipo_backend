@@ -5,13 +5,11 @@ import {
   eventoNavideño,
 } from "./calendario-festivos.interface";
 import { AuthGuard } from "../guards/auth.guard";
-import { FirebaseService } from "../firebase/firebase.service";
 
 @Controller("calendario-festivos")
 export class CalendarioFestivosController {
   constructor(
     private readonly calendarioFestivosInstance: CalendarioFestivoService,
-    private readonly authInstance: FirebaseService,
   ) {}
 
   @UseGuards(AuthGuard)

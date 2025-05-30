@@ -10,13 +10,13 @@ import {
   GetFormacionesDto,
   UpdateFormacionDto,
 } from "./formacion.dto";
-import { PrismaService } from "../prisma/prisma.service";
+import { IPrismaService } from "../prisma/prisma.interface";
 import { EmailService } from "../email/email.class";
 
 @Injectable()
 export class FormacionService {
   constructor(
-    private readonly prisma: PrismaService,
+    private readonly prisma: IPrismaService,
     private readonly emailService: EmailService,
   ) {}
 

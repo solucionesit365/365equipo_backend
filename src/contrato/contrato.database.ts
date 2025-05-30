@@ -1,10 +1,10 @@
-import { PrismaService } from "../prisma/prisma.service";
+import { IPrismaService } from "../prisma/prisma.interface";
 import { IContratoDatabaseService } from "./contrato.interface";
 import { InternalServerErrorException } from "@nestjs/common";
 import { DateTime } from "luxon";
 
 export class ContratoDatabaseService extends IContratoDatabaseService {
-  constructor(private prisma: PrismaService) {
+  constructor(private prisma: IPrismaService) {
     super();
   }
 

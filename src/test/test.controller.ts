@@ -10,14 +10,14 @@ import { FileInterceptor } from "@nestjs/platform-express";
 import { simpleParser } from "mailparser";
 import { LoggerService } from "../logger/logger.service";
 import { AxiosBcService } from "../axios/axios-bc.service";
-import { PrismaService } from "../prisma/prisma.service";
+import { IPrismaService } from "../prisma/prisma.interface";
 
 @Controller("test")
 export class TestController {
   constructor(
     private readonly loggerService: LoggerService,
     private readonly axiosBCService: AxiosBcService,
-    private readonly prisma: PrismaService,
+    private readonly prisma: IPrismaService,
   ) {}
 
   @Post("email")

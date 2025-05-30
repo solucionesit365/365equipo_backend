@@ -3,14 +3,14 @@ import {
   InternalServerErrorException,
   ConflictException,
 } from "@nestjs/common";
-import { PrismaService } from "../prisma/prisma.service";
+import { IPrismaService } from "../prisma/prisma.interface";
 import { CreateVideoDto, UpdateVideoDto } from "./videos.dto";
 import { StorageService } from "../storage/storage.service";
 
 @Injectable()
 export class VideosService {
   constructor(
-    private readonly prismaService: PrismaService,
+    private readonly prismaService: IPrismaService,
     private readonly storageService: StorageService,
   ) {}
 

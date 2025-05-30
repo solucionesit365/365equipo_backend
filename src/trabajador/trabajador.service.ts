@@ -1,11 +1,5 @@
-import {
-  Injectable,
-  Inject,
-  forwardRef,
-  InternalServerErrorException,
-} from "@nestjs/common";
+import { Injectable, InternalServerErrorException } from "@nestjs/common";
 import { EmailService } from "../email/email.class";
-import { FirebaseService } from "../firebase/firebase.service";
 import { DateTime } from "luxon";
 import { TSolicitudVacacionesService } from "../solicitud-vacaciones/solicitud-vacaciones.interface";
 import { TIncludeTrabajador } from "./trabajador.database";
@@ -20,12 +14,12 @@ import {
   TOmneTrabajador,
 } from "./trabajador.interface";
 import { TDiaPersonalService } from "../dia-personal/dia-personal.interface";
+import { IFirebaseService } from "../firebase/firebase.interface";
 
 @Injectable()
 export class TrabajadorService {
   constructor(
-    @Inject(forwardRef(() => FirebaseService))
-    private readonly firebaseService: FirebaseService,
+    private readonly firebaseService: IFirebaseService,
     private readonly emailInstance: EmailService,
     private readonly solicitudesVacaciones: TSolicitudVacacionesService,
     private readonly solicitudesDiaPersonal: TDiaPersonalService,
@@ -570,7 +564,7 @@ export class TrabajadorService {
 
     if (!arrayEmails[0].trim()) throw Error("Email no registrado en la ficha");
 
-    const usuarioCreado = await this.firebaseService.auth.createUser({
+    const usuarioCreado = await this.firebaseService.getAuth().createUser({
       email: arrayEmails[0].trim(),
       emailVerified: false,
       phoneNumber: "+34" + datosUsuario.telefonos,
@@ -581,9 +575,9 @@ export class TrabajadorService {
 
     await this.schTrabajadores.setIdApp(datosUsuario.id, usuarioCreado.uid);
 
-    const link = await this.firebaseService.auth.generateEmailVerificationLink(
-      usuarioCreado.email,
-    );
+    const link = await this.firebaseService
+      .getAuth()
+      .generateEmailVerificationLink(usuarioCreado.email);
     const body = ` Haz click en el siguiente enlace para verificar tu email:<br>
       ${link}
     `;
@@ -673,7 +667,7 @@ export class TrabajadorService {
   }
 
   private async borrarTrabajadorDeGoogle(uid: string) {
-    await this.firebaseService.auth.deleteUser(uid);
+    await this.firebaseService.getAuth().deleteUser(uid);
   }
 
   private async borrarTrabajadorDeSql(idSql: number) {

@@ -7,12 +7,12 @@ import {
 
 import { Reflector } from "@nestjs/core"; // Importa Reflector
 import { UserRecord } from "firebase-admin/auth";
-import { PrismaService } from "../prisma/prisma.service";
+import { IPrismaService } from "../prisma/prisma.interface";
 
 @Injectable()
 export class RoleGuard implements CanActivate {
   constructor(
-    private readonly prisma: PrismaService,
+    private readonly prisma: IPrismaService,
     private reflector: Reflector,
   ) {} // Inyecta Reflector
 

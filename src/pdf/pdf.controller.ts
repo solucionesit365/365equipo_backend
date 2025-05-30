@@ -23,7 +23,7 @@ import {
 import { StorageService } from "../storage/storage.service";
 import { CryptoService } from "../crypto/crypto.class";
 import { Response as ExpressResponse } from "express";
-import { PrismaService } from "../prisma/prisma.service";
+import { IPrismaService } from "../prisma/prisma.interface";
 import { DateTime } from "luxon";
 import { EmailService } from "../email/email.class";
 
@@ -33,7 +33,7 @@ export class PdfController {
     private readonly pdfService: PdfService,
     private readonly storageService: StorageService,
     private readonly cryptoService: CryptoService,
-    private readonly prismaService: PrismaService,
+    private readonly prismaService: IPrismaService,
     private readonly emailService: EmailService,
   ) {}
 

@@ -1,16 +1,12 @@
 import { Controller, Post, Body, UseGuards, Get, Query } from "@nestjs/common";
 import { Notificaciones } from "./notificaciones.class";
 import { AuthGuard } from "../guards/auth.guard";
-import { FirebaseService } from "../firebase/firebase.service";
 import { UserRecord } from "firebase-admin/auth";
 import { User } from "../decorators/get-user.decorator";
 
 @Controller("notificaciones")
 export class NotificacionesController {
-  constructor(
-    private readonly notificacionesInstance: Notificaciones,
-    private readonly authInstance: FirebaseService,
-  ) {}
+  constructor(private readonly notificacionesInstance: Notificaciones) {}
 
   @UseGuards(AuthGuard)
   @Get("inAppNotifications")

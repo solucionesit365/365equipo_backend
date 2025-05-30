@@ -1,22 +1,19 @@
 import { Injectable } from "@nestjs/common";
-import { PrismaService } from "../prisma/prisma.service";
 import {
   AddPermissionDto,
   CreateRoleDto,
   RemovePermissionDto,
 } from "./role.dto";
+import { IPrismaService } from "../prisma/prisma.interface";
 
 @Injectable()
 export class RoleService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: IPrismaService) {}
 
   async createRole(data: CreateRoleDto) {
     return this.prisma.role.create({
       data: {
         name: data.name,
-        // permissions: {
-        //   connect: data.permissionsIds.map((id) => ({ id })),
-        // },
       },
     });
   }

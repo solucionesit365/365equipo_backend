@@ -4,14 +4,14 @@ import {
   Injectable,
   UnauthorizedException,
 } from "@nestjs/common";
-import { FirebaseService } from "../firebase/firebase.service";
-import { PrismaService } from "../prisma/prisma.service";
+import { IPrismaService } from "../prisma/prisma.interface";
+import { IFirebaseService } from "../firebase/firebase.interface";
 
 @Injectable()
 export class AuthGuard implements CanActivate {
   constructor(
-    private readonly firebaseService: FirebaseService,
-    private readonly prismaService: PrismaService,
+    private readonly firebaseService: IFirebaseService,
+    private readonly prismaService: IPrismaService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -28,9 +28,9 @@ export class AuthGuard implements CanActivate {
 
     try {
       const userInfo = await this.firebaseService.verifyToken(tokenLimpio);
-      const usuarioCompleto = await this.firebaseService.auth.getUser(
-        userInfo.uid,
-      );
+      const usuarioCompleto = await this.firebaseService
+        .getAuth()
+        .getUser(userInfo.uid);
       request.sqlUser = await this.prismaService.trabajador.findFirstOrThrow({
         where: {
           idApp: userInfo.uid,

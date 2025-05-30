@@ -4,11 +4,11 @@ import {
   DeleteEmpresaDto,
   UpdateEmpresaDto,
 } from "./empresa.dto";
-import { PrismaService } from "../prisma/prisma.service";
+import { IPrismaService } from "../prisma/prisma.interface";
 
 @Injectable()
 export class EmpresaService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(private readonly prismaService: IPrismaService) {}
 
   async createEmpresa(reqCreateEmpresa: CreateEmpresaDto) {
     try {

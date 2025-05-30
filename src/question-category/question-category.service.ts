@@ -1,5 +1,5 @@
 import { Injectable, InternalServerErrorException } from "@nestjs/common";
-import { PrismaService } from "../prisma/prisma.service";
+import { IPrismaService } from "../prisma/prisma.interface";
 import {
   CreateQuestionCategoryDto,
   UpdateQuestionCategoryDto,
@@ -7,7 +7,7 @@ import {
 
 @Injectable()
 export class QuestionCategoryService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(private readonly prismaService: IPrismaService) {}
 
   async createQuestionCategory(questionCategory: CreateQuestionCategoryDto) {
     try {

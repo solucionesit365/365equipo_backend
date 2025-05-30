@@ -1,5 +1,5 @@
 import { Injectable, InternalServerErrorException } from "@nestjs/common";
-import { PrismaService } from "../prisma/prisma.service";
+import { IPrismaService } from "../prisma/prisma.interface";
 import {
   CreateQuestionnaireDto,
   GetQuestionnairesDto,
@@ -8,7 +8,7 @@ import {
 
 @Injectable()
 export class QuestionnaireService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(private readonly prismaService: IPrismaService) {}
 
   async createQuestionnaire(req: CreateQuestionnaireDto) {
     try {

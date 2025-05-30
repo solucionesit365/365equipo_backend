@@ -1,6 +1,6 @@
 // import { Injectable } from "@nestjs/common";
 // import { Tienda } from "../tiendas/tiendas.class";
-// import { PrismaService } from "../prisma/prisma.service";
+// import { IPrismaService } from "../prisma/prisma.interface";
 // import { TrabajadorService } from "../trabajadores/trabajadores.class";
 // import { DateTime } from "luxon";
 // import * as sql from "mssql";
@@ -43,7 +43,7 @@
 //   constructor(
 //     private readonly tiendasService: Tienda,
 //     private readonly trabajadoresService: TrabajadorService,
-//     private readonly prisma: PrismaService,
+//     private readonly prisma: IPrismaService,
 //   ) {}
 
 //   async recSolucionesClassic(database: string, consultaSQL: string) {

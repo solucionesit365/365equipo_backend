@@ -1,16 +1,16 @@
 import { Injectable } from "@nestjs/common";
 import * as nodemailer from "nodemailer";
-import { FirebaseService } from "../firebase/firebase.service";
 import { join } from "path";
 import * as hbs from "handlebars";
 import * as fs from "fs/promises";
+import { IFirebaseService } from "../firebase/firebase.interface";
 
 @Injectable()
 export class EmailService {
   private transporter: any;
   private readonly templateDir: string;
 
-  constructor(private readonly authInstance: FirebaseService) {
+  constructor(private readonly authInstance: IFirebaseService) {
     this.transporter = nodemailer.createTransport({
       host: "smtp.sendgrid.net",
       port: 587,

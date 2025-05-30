@@ -1,12 +1,9 @@
-import { Injectable, Inject, forwardRef } from "@nestjs/common";
-import { FirebaseService } from "../firebase/firebase.service";
+import { Injectable } from "@nestjs/common";
+import { IFirebaseService } from "../firebase/firebase.interface";
 
 @Injectable()
 export class PermisosService {
-  constructor(
-    @Inject(forwardRef(() => FirebaseService))
-    private readonly firebaseService: FirebaseService,
-  ) {}
+  constructor(private readonly firebaseService: IFirebaseService) {}
 
   /* Eliminar esta función y dejar solo la del AdminGuard */
   pasoPermitidoByClaims(arrayPermisos: any[], cualquieraDe: any[]) {
@@ -35,9 +32,11 @@ export class PermisosService {
     if (this.pasoPermitidoByClaims(claimsGestor?.arrayPermisos, cualquieraDe)) {
       if (payload?.length === 1 && payload[0] === "") payload = [];
 
-      await this.firebaseService.auth.setCustomUserClaims(uidUsuarioDestino, {
-        arrayPermisos: payload,
-      });
+      await this.firebaseService
+        .getAuth()
+        .setCustomUserClaims(uidUsuarioDestino, {
+          arrayPermisos: payload,
+        });
       return true;
     } else throw Error("No tienes permiso para realizar esta acción");
   }

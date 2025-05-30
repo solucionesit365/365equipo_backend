@@ -1,12 +1,12 @@
 import { Injectable, InternalServerErrorException } from "@nestjs/common";
-import { PrismaService } from "../prisma/prisma.service";
+import { IPrismaService } from "../prisma/prisma.interface";
 import { Tiendas2 } from "./tienda.dto";
 import { IMongoService } from "../mongo/mongo.interface";
 
 @Injectable()
 export class TiendaDatabaseService {
   constructor(
-    private readonly prisma: PrismaService,
+    private readonly prisma: IPrismaService,
     private readonly mongoDbService: IMongoService,
   ) {}
 

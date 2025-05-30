@@ -1,13 +1,13 @@
 import { Injectable, InternalServerErrorException } from "@nestjs/common";
-import { PrismaService } from "../prisma/prisma.service";
 import {
   CreatePresentationDto,
   UpdatePresentationDto,
 } from "./presentation.dto";
+import { IPrismaService } from "../prisma/prisma.interface";
 
 @Injectable()
 export class PresentationService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(private readonly prismaService: IPrismaService) {}
 
   async createPresentation(presentation: CreatePresentationDto) {
     try {

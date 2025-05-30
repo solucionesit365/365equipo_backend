@@ -8,7 +8,7 @@ import { PDFDocument, degrees, rgb } from "pdf-lib";
 import { StorageService } from "../storage/storage.service";
 import { CryptoService } from "../crypto/crypto.class";
 import { GeneratePdfDto, GetDocumentosOriginalesDto } from "./pdf.dto";
-import { PrismaService } from "../prisma/prisma.service";
+import { IPrismaService } from "../prisma/prisma.interface";
 import { Readable } from "stream";
 import { DateTime } from "luxon";
 
@@ -17,7 +17,7 @@ export class PdfService {
   constructor(
     private readonly storageService: StorageService,
     private readonly cryptoService: CryptoService,
-    private readonly prismaService: PrismaService,
+    private readonly prismaService: IPrismaService,
   ) {}
 
   async generatePdfFromHtml(htmlContent: string): Promise<Buffer> {

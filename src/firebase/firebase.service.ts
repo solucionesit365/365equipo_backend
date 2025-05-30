@@ -6,14 +6,13 @@ import {
   cert,
   applicationDefault,
 } from "firebase-admin/app";
-import { getStorage, Storage } from "firebase-admin/storage";
+
 import { IFirebaseService } from "./firebase.interface";
 
 @Injectable()
 export class FirebaseService implements IFirebaseService {
-  public auth: Auth = null;
-  public app: App = null;
-  public storage: Storage = null;
+  private auth: Auth = null;
+  private app: App = null;
 
   constructor() {
     if (process.env.FIREBASE_CONFIG) {
@@ -28,7 +27,6 @@ export class FirebaseService implements IFirebaseService {
     }
 
     this.auth = getAuth(this.app);
-    this.storage = getStorage(this.app);
   }
 
   async verifyToken(token: string) {
@@ -37,6 +35,10 @@ export class FirebaseService implements IFirebaseService {
 
   getApp() {
     return this.app;
+  }
+
+  getAuth() {
+    return this.auth;
   }
 
   async getUidByEmail(email: string) {

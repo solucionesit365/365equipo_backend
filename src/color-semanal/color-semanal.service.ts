@@ -1,12 +1,12 @@
 import { Injectable } from "@nestjs/common";
-import { PrismaService } from "../prisma/prisma.service";
 import { Color } from "./color-semanal.dto";
 import { $Enums } from "@prisma/client";
 import { DateTime } from "luxon";
+import { IPrismaService } from "../prisma/prisma.interface";
 
 @Injectable()
 export class ColorSemanalService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: IPrismaService) {}
 
   async saveColorIn(color: Color) {
     return await this.prisma.color.update({

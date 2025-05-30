@@ -1,11 +1,11 @@
 import { Injectable, InternalServerErrorException } from "@nestjs/common";
 import axios from "axios";
 import { randomBytes } from "crypto";
-import { PrismaService } from "../prisma/prisma.service";
+import { IPrismaService } from "../prisma/prisma.interface";
 
 @Injectable()
 export class TwilioService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(private readonly prismaService: IPrismaService) {}
 
   async sendSms(phone: string, message: string) {
     const accountSid = process.env.TWILIO_SID;

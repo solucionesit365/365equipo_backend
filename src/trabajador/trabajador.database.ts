@@ -1,5 +1,5 @@
 import { Injectable, InternalServerErrorException } from "@nestjs/common";
-import { PrismaService } from "../prisma/prisma.service";
+import { IPrismaService } from "../prisma/prisma.interface";
 import { DateTime } from "luxon";
 import { Prisma } from "@prisma/client";
 import pMap from "p-map";
@@ -22,7 +22,7 @@ export interface TIncludeTrabajador {
 @Injectable()
 export class TrabajadorDatabaseService implements ITrabajadorDatabaseService {
   constructor(
-    private prisma: PrismaService,
+    private prisma: IPrismaService,
     private readonly axiosBCService: AxiosBcService,
   ) {}
 
