@@ -1,14 +1,14 @@
 import { Injectable } from "@nestjs/common";
 import { MongoService } from "../mongo/mongo.service";
-import { FirebaseService } from "../firebase/firebase.service";
 import { NotasInformativas } from "./notas-informativas.interface";
 import { ObjectId } from "mongodb";
+import { StorageService } from "../storage/storage.service";
 
 @Injectable()
-export class NotasInformativasDatabes {
+export class NotasInformativasDatabaseService {
   constructor(
     private readonly mongoDbService: MongoService,
-    private readonly firebaseService: FirebaseService,
+    private readonly storageService: StorageService,
   ) {
     this.deleteNotasInformativasCaducidad().catch((err) => {
       console.error("Error setting up TTL index:", err);
@@ -78,7 +78,7 @@ export class NotasInformativasDatabes {
     for (const nota of caducadas) {
       // Eliminar archivos de Firebase Storage
       if (nota.pdfNotainformativa && nota.pdfNotainformativa.length > 0) {
-        await this.firebaseService.borrarArchivo(nota.pdfNotainformativa);
+        await this.storageService.deleteFile(nota.pdfNotainformativa);
       }
 
       // Eliminar la nota informativa de la base de datos

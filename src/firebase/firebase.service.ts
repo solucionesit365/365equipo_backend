@@ -1,5 +1,5 @@
-import { Injectable } from "@nestjs/common";
-import { Auth, getAuth, UserRecord } from "firebase-admin/auth";
+import { Injectable, InternalServerErrorException } from "@nestjs/common";
+import { Auth, getAuth, UpdateRequest, UserRecord } from "firebase-admin/auth";
 import {
   App,
   initializeApp,
@@ -7,9 +7,10 @@ import {
   applicationDefault,
 } from "firebase-admin/app";
 import { getStorage, Storage } from "firebase-admin/storage";
+import { IFirebaseService } from "./firebase.interface";
 
 @Injectable()
-export class FirebaseService {
+export class FirebaseService implements IFirebaseService {
   public auth: Auth = null;
   public app: App = null;
   public storage: Storage = null;
@@ -34,6 +35,10 @@ export class FirebaseService {
     return await this.auth.verifyIdToken(token, true);
   }
 
+  getApp() {
+    return this.app;
+  }
+
   async getUidByEmail(email: string) {
     try {
       const userRecord = await this.auth.getUserByEmail(email);
@@ -43,7 +48,7 @@ export class FirebaseService {
     }
   }
 
-  async generateCustomToken(uid) {
+  async generateCustomToken(uid: string) {
     try {
       const customToken = await this.auth.createCustomToken(uid);
       return customToken;
@@ -67,43 +72,14 @@ export class FirebaseService {
     }
   }
 
-  async borrarArchivo(filePaths: string | string[]) {
+  async updateFirebaseUser(userData: UpdateRequest) {
     try {
-      const bucketName = "silema.appspot.com"; // Solo el nombre del bucket, sin 'gs://'
-      const bucket = this.storage.bucket(bucketName);
-
-      if (!Array.isArray(filePaths)) {
-        filePaths = [filePaths];
-      }
-
-      const deletePromises = filePaths.map(async (filePath) => {
-        // Asegúrate de que 'filePath' no incluya el prefijo completo de la URL.
-        // Debe ser algo como 'videos/archivo.mp4'
-        const relativeFilePath = filePath.replace(
-          /^https:\/\/storage\.googleapis\.com\/[^\/]+\//,
-          "",
-        );
-        const file = bucket.file(relativeFilePath);
-        const [exists] = await file.exists();
-
-        if (exists) {
-          await file.delete();
-          console.log(`Archivo ${relativeFilePath} borrado exitosamente.`);
-        } else {
-          console.log(`El archivo ${relativeFilePath} no existe.`);
-        }
-      });
-
-      await Promise.all(deletePromises);
-      console.log("Todos los archivos han sido procesados.");
+      await this.auth.updateUser("userUID", userData);
     } catch (error) {
-      console.error("Error al borrar los archivos:", error);
+      console.error("Error updating Firebase user:", error);
+      throw new InternalServerErrorException(
+        "No se ha podido actualizar el usuario en Firebase",
+      );
     }
-  }
-
-  test() {
-    this.auth.updateUser("userUID", {
-      email: "ezequielcarissimo@gmail.com",
-    });
   }
 }

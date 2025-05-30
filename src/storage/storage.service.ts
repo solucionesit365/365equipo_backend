@@ -1,20 +1,14 @@
 import { Injectable } from "@nestjs/common";
 import { FirebaseService } from "../firebase/firebase.service";
-import { Storage } from "firebase-admin/storage";
+import { getStorage, Storage } from "firebase-admin/storage";
 import { Readable } from "stream";
-import { CryptoService } from "../crypto/crypto.class";
 
 @Injectable()
 export class StorageService {
   private storage: Storage;
   private readonly bucketName = "gs://silema.appspot.com";
 
-  constructor(
-    private readonly firebaseService: FirebaseService,
-    private readonly cryptoService: CryptoService,
-  ) {
-    this.storage = this.firebaseService.storage;
-  }
+  constructor(private readonly firebaseService: FirebaseService) {}
 
   private getBucket() {
     return this.storage.bucket(this.bucketName);
@@ -61,8 +55,42 @@ export class StorageService {
     }
   }
 
-  async deleteFile(filePath: string): Promise<void> {
-    await this.firebaseService.borrarArchivo(filePath);
+  async deleteFile(filePaths: string | string[]): Promise<void> {
+    const App = this.firebaseService.getApp();
+    const storage = getStorage(App);
+
+    try {
+      // Solo el nombre del bucket, sin 'gs://'
+      const bucketName = "silema.appspot.com";
+      const bucket = storage.bucket(bucketName);
+
+      if (!Array.isArray(filePaths)) {
+        filePaths = [filePaths];
+      }
+
+      const deletePromises = filePaths.map(async (filePath) => {
+        // Asegúrate de que 'filePath' no incluya el prefijo completo de la URL.
+        // Debe ser algo como 'videos/archivo.mp4'
+        const relativeFilePath = filePath.replace(
+          /^https:\/\/storage\.googleapis\.com\/[^\/]+\//,
+          "",
+        );
+        const file = bucket.file(relativeFilePath);
+        const [exists] = await file.exists();
+
+        if (exists) {
+          await file.delete();
+          console.log(`Archivo ${relativeFilePath} borrado exitosamente.`);
+        } else {
+          console.log(`El archivo ${relativeFilePath} no existe.`);
+        }
+      });
+
+      await Promise.all(deletePromises);
+      console.log("Todos los archivos han sido procesados.");
+    } catch (error) {
+      console.error("Error al borrar los archivos:", error);
+    }
   }
 
   async listFiles(prefix?: string): Promise<string[]> {

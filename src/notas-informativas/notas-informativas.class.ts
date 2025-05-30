@@ -1,11 +1,11 @@
 import { Injectable } from "@nestjs/common";
-import { NotasInformativasDatabes } from "./notas-informativas.mongodb";
+import { NotasInformativasDatabaseService } from "./notas-informativas.mongodb";
 import { NotasInformativas } from "./notas-informativas.interface";
 
 @Injectable()
 export class NotasInformativasClass {
   constructor(
-    private readonly schnotasInformativas: NotasInformativasDatabes,
+    private readonly schnotasInformativas: NotasInformativasDatabaseService,
   ) {}
 
   async nuevaNotaInformativa(nota: NotasInformativas) {
