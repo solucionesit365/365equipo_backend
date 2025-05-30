@@ -19,16 +19,16 @@ import {
   UpdateVideoDto,
 } from "./videos.dto";
 import { FileInterceptor } from "@nestjs/platform-express";
-import { StorageService } from "../storage/storage.service";
 import { CryptoService } from "../crypto/crypto.class";
 import { VideosService } from "./videos.service";
 import { AuthGuard } from "../guards/auth.guard";
 import { Response } from "express";
+import { IStorageService } from "src/storage/storage.interface";
 
 @Controller("videos")
 export class VideosController {
   constructor(
-    private readonly storageService: StorageService,
+    private readonly storageService: IStorageService,
     private readonly cryptoService: CryptoService,
     private readonly videoService: VideosService,
   ) {}

@@ -2,15 +2,16 @@ import { Injectable } from "@nestjs/common";
 import { IFirebaseService } from "../firebase/firebase.interface";
 import { getStorage, Storage } from "firebase-admin/storage";
 import { Readable } from "stream";
+import { IStorageService } from "./storage.interface";
 
 @Injectable()
-export class StorageService {
+export class StorageService implements IStorageService {
   private storage: Storage;
   private readonly bucketName = "gs://silema.appspot.com";
 
   constructor(private readonly firebaseService: IFirebaseService) {}
 
-  private getBucket() {
+  protected getBucket() {
     return this.storage.bucket(this.bucketName);
   }
 

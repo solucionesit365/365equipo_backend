@@ -1,6 +1,6 @@
 import { Controller, Post, UseGuards, Body, Get, Query } from "@nestjs/common";
 import { AuthGuard } from "../guards/auth.guard";
-import { NotasInformativasClass } from "./notas-informativas.class";
+import { NotasInformativasService } from "./notas-informativas.class";
 import { NotasInformativas } from "./notas-informativas.interface";
 import { Notificaciones } from "../notificaciones/notificaciones.class";
 import { TrabajadorService } from "../trabajador/trabajador.service";
@@ -13,7 +13,7 @@ import { User } from "../decorators/get-user.decorator";
 @Controller("notas-informativas")
 export class NotasInformativasController {
   constructor(
-    private readonly notasInformativasInstance: NotasInformativasClass,
+    private readonly notasInformativasInstance: NotasInformativasService,
     private readonly trabajadores: TrabajadorService,
     private readonly notificaciones: Notificaciones,
     private readonly loggerService: LoggerService,

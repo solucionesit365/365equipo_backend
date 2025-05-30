@@ -5,13 +5,13 @@ import {
 } from "@nestjs/common";
 import { IPrismaService } from "../prisma/prisma.interface";
 import { CreateVideoDto, UpdateVideoDto } from "./videos.dto";
-import { StorageService } from "../storage/storage.service";
+import { IStorageService } from "../storage/storage.interface";
 
 @Injectable()
 export class VideosService {
   constructor(
     private readonly prismaService: IPrismaService,
-    private readonly storageService: StorageService,
+    private readonly storageService: IStorageService,
   ) {}
 
   async createVideo(

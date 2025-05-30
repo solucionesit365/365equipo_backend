@@ -3,14 +3,14 @@ import { NotasInformativasDatabaseService } from "./notas-informativas.mongodb";
 import { NotasInformativas } from "./notas-informativas.interface";
 
 @Injectable()
-export class NotasInformativasClass {
+export class NotasInformativasService {
   constructor(
-    private readonly schnotasInformativas: NotasInformativasDatabaseService,
+    private readonly schNotasInformativas: NotasInformativasDatabaseService,
   ) {}
 
   async nuevaNotaInformativa(nota: NotasInformativas) {
     const insertNotaInformativa =
-      await this.schnotasInformativas.nuevaNotaInformativa(nota);
+      await this.schNotasInformativas.nuevaNotaInformativa(nota);
     if (insertNotaInformativa) return true;
 
     throw Error("No se ha podido insertar la nota informativa");
@@ -18,20 +18,20 @@ export class NotasInformativasClass {
 
   async getNotasInformativas(idTienda?: number) {
     const arrayNotasInformativas =
-      await this.schnotasInformativas.getNotasInformativas(idTienda);
+      await this.schNotasInformativas.getNotasInformativas(idTienda);
     if (arrayNotasInformativas.length > 0) return arrayNotasInformativas;
     return null;
   }
 
   async getAllNotasInformativas() {
-    return this.schnotasInformativas.getAllNotasInformativas();
+    return this.schNotasInformativas.getAllNotasInformativas();
   }
 
   async getNotasInformativasById(_id: string) {
-    return await this.schnotasInformativas.getNotasInformativasById(_id);
+    return await this.schNotasInformativas.getNotasInformativasById(_id);
   }
 
   async borrarNotasInformativas(notas: NotasInformativas) {
-    return this.schnotasInformativas.borrarNotasInformativas(notas);
+    return this.schNotasInformativas.borrarNotasInformativas(notas);
   }
 }

@@ -2,13 +2,13 @@ import { Injectable } from "@nestjs/common";
 import { MongoService } from "../mongo/mongo.service";
 import { NotasInformativas } from "./notas-informativas.interface";
 import { ObjectId } from "mongodb";
-import { StorageService } from "../storage/storage.service";
+import { IStorageService } from "../storage/storage.interface";
 
 @Injectable()
 export class NotasInformativasDatabaseService {
   constructor(
     private readonly mongoDbService: MongoService,
-    private readonly storageService: StorageService,
+    private readonly storageService: IStorageService,
   ) {
     this.deleteNotasInformativasCaducidad().catch((err) => {
       console.error("Error setting up TTL index:", err);

@@ -5,17 +5,17 @@ import {
 } from "@nestjs/common";
 import * as puppeteer from "puppeteer";
 import { PDFDocument, degrees, rgb } from "pdf-lib";
-import { StorageService } from "../storage/storage.service";
 import { CryptoService } from "../crypto/crypto.class";
 import { GeneratePdfDto, GetDocumentosOriginalesDto } from "./pdf.dto";
 import { IPrismaService } from "../prisma/prisma.interface";
 import { Readable } from "stream";
 import { DateTime } from "luxon";
+import { IStorageService } from "../storage/storage.interface";
 
 @Injectable()
 export class PdfService {
   constructor(
-    private readonly storageService: StorageService,
+    private readonly storageService: IStorageService,
     private readonly cryptoService: CryptoService,
     private readonly prismaService: IPrismaService,
   ) {}

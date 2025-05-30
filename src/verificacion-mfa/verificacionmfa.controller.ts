@@ -1,12 +1,4 @@
-import {
-  Controller,
-  Post,
-  Get,
-  Body,
-  Headers,
-  UseGuards,
-  Query,
-} from "@nestjs/common";
+import { Controller, Post, Get, Body, UseGuards, Query } from "@nestjs/common";
 import { VerificacionMFA } from "./verificacionmfa.interface";
 import { VerificacionService } from "./verificacionmfa.class";
 import { AuthGuard } from "../guards/auth.guard";
