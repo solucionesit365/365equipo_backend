@@ -1,7 +1,9 @@
 import { Controller, Get, Query, Post, Body, UseGuards } from "@nestjs/common";
 import { AuthGuard } from "../guards/auth.guard";
-import { SolicitudesVacacionesService } from "./solicitud-vacaciones.class";
-import { SolicitudVacaciones } from "./solicitud-vacaciones.interface";
+import {
+  SolicitudVacaciones,
+  TSolicitudVacacionesService,
+} from "./solicitud-vacaciones.interface";
 import { EmailService } from "../email/email.class";
 import { TrabajadorService } from "../trabajador/trabajador.service";
 import { Notificaciones } from "../notificaciones/notificaciones.class";
@@ -9,20 +11,20 @@ import { UserRecord } from "firebase-admin/auth";
 import { User } from "../decorators/get-user.decorator";
 import { SchedulerGuard } from "../guards/scheduler.guard";
 import { LoggerService } from "../logger/logger.service";
-import { CompleteUser } from "src/decorators/getCompleteUser.decorator";
+import { CompleteUser } from "../decorators/getCompleteUser.decorator";
 import { Trabajador } from "@prisma/client";
 
 @Controller("solicitud-vacaciones")
 export class SolicitudVacacionesController {
   constructor(
-    private readonly solicitudVacacionesInstance: SolicitudesVacacionesService,
+    private readonly solicitudVacacionesInstance: TSolicitudVacacionesService,
     private readonly email: EmailService,
     private readonly trabajadorInstance: TrabajadorService,
     private readonly notificacionesInstance: Notificaciones,
     private readonly loggerService: LoggerService,
   ) {}
 
-  //Nueva solicitud de vacaciones
+  // Nueva solicitud de vacaciones
   @UseGuards(AuthGuard)
   @Post("nuevaSolicitud")
   async nuevaSolicitudVacaciones(

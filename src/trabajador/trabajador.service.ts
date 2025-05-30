@@ -6,56 +6,20 @@ import {
 } from "@nestjs/common";
 import { EmailService } from "../email/email.class";
 import { FirebaseService } from "../firebase/firebase.service";
-import { PermisosService } from "../permisos/permisos.class";
 import { DateTime } from "luxon";
-import { SolicitudesVacacionesService } from "../solicitud-vacaciones/solicitud-vacaciones.class";
-import { DiaPersonalClass } from "../dia-personal/dia-personal.class";
-import {
-  TIncludeTrabajador,
-  TrabajadorDatabaseService,
-} from "./trabajador.database";
+import { TSolicitudVacacionesService } from "../solicitud-vacaciones/solicitud-vacaciones.interface";
+import { TIncludeTrabajador } from "./trabajador.database";
 import { UserRecord } from "firebase-admin/auth";
 import { Prisma, Trabajador } from "@prisma/client";
 import {
   CreateTrabajadorRequestDto,
   TrabajadorFormRequest,
 } from "./trabajador.dto";
-import { ITrabajadorDatabaseService } from "./trabajador.interface";
-
-export interface TOmneTrabajador {
-  noPerceptor: string;
-  apellidosYNombre: string;
-  nombre: string;
-  email: string;
-  documento: string;
-  viaPublica: string;
-  numero: string;
-  piso: string;
-  poblacion: string;
-  noTelfMovilPersonal: string;
-  nacionalidad: number;
-  codPaisNacionalidad: string;
-  noAfiliacion: string;
-  cp: string;
-  centroTrabajo: string;
-  antiguedadEmpresa: string;
-  altaContrato: string;
-  bajaEmpresa: string;
-  cambioAntiguedad: string;
-  categoria: string;
-  fechaCalculoAntiguedad: string;
-  tipoContrato: string;
-  systemModifiedAt: string;
-  systemCreatedAt: string;
-  horassemana: number;
-  descripcionCentro: string;
-  auxiliaryIndex1: string;
-  auxiliaryIndex2: number;
-  auxiliaryIndex3: string;
-  auxiliaryIndex4: string;
-  empresaID: string;
-  fechaNacimiento: DateTime | null;
-}
+import {
+  ITrabajadorDatabaseService,
+  TOmneTrabajador,
+} from "./trabajador.interface";
+import { TDiaPersonalService } from "../dia-personal/dia-personal.interface";
 
 @Injectable()
 export class TrabajadorService {
@@ -63,10 +27,8 @@ export class TrabajadorService {
     @Inject(forwardRef(() => FirebaseService))
     private readonly firebaseService: FirebaseService,
     private readonly emailInstance: EmailService,
-    @Inject(forwardRef(() => SolicitudesVacacionesService))
-    private readonly solicitudesVacaciones: SolicitudesVacacionesService,
-    @Inject(forwardRef(() => DiaPersonalClass))
-    private readonly solicitudesDiaPersonal: DiaPersonalClass,
+    private readonly solicitudesVacaciones: TSolicitudVacacionesService,
+    private readonly solicitudesDiaPersonal: TDiaPersonalService,
     private readonly schTrabajadores: ITrabajadorDatabaseService,
   ) {}
 
@@ -505,12 +467,7 @@ export class TrabajadorService {
   }
 
   async eliminarTrabajador(idSql: number) {
-    try {
-      return await this.schTrabajadores.deleteTrabajador(idSql);
-    } catch (err) {
-      console.log(err);
-      return new InternalServerErrorException();
-    }
+    return await this.schTrabajadores.deleteTrabajador(idSql);
   }
 
   async getTrabajadorByAppId(uid: string) {
@@ -547,17 +504,10 @@ export class TrabajadorService {
   }
 
   async getTrabajadores() {
-    try {
-      const arrayTrabajadores = await this.schTrabajadores.getTrabajadores();
+    const arrayTrabajadores = await this.schTrabajadores.getTrabajadores();
 
-      if (arrayTrabajadores) return arrayTrabajadores;
-      return [];
-    } catch (err) {
-      console.log(err);
-      throw new InternalServerErrorException(
-        "Error al obtener los trabajadores",
-      );
-    }
+    if (arrayTrabajadores) return arrayTrabajadores;
+    return [];
   }
 
   async getSubordinadosConTienda(idAppResponsable: string) {

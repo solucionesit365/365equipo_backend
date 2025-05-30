@@ -20,7 +20,6 @@ import {
   DeleteTrabajadorDto,
   GetSubordinadosDto,
   GetTrabajadorBySqlIdDto,
-  PermitirRegistroDto,
   RegisterDto,
   TrabajadorFormRequest,
 } from "./trabajador.dto";

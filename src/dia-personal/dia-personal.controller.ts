@@ -1,15 +1,14 @@
 import { Controller, Post, UseGuards, Body, Get, Query } from "@nestjs/common";
 import { AuthGuard } from "../guards/auth.guard";
-import { DiaPersonalClass } from "./dia-personal.class";
-import { DiaPersonal } from "./dia-personal.interface";
-import { EmailService } from "src/email/email.class";
+import { DiaPersonal, TDiaPersonalService } from "./dia-personal.interface";
+import { EmailService } from "../email/email.class";
 import { TrabajadorService } from "../trabajador/trabajador.service";
 import { constructEmailContent } from "./emailDiaPersonal";
 
 @Controller("dia-personal")
 export class DiaPersonalController {
   constructor(
-    private readonly diaPersonalInstance: DiaPersonalClass,
+    private readonly diaPersonalInstance: TDiaPersonalService,
     private readonly trabajadorInstance: TrabajadorService,
     private readonly email: EmailService,
   ) {}
@@ -215,10 +214,6 @@ export class DiaPersonalController {
   @UseGuards(AuthGuard)
   @Post("enviarAlEmail")
   async enviarAlEmail(@Body() data) {
-    try {
-      return await this.diaPersonalInstance.enviarAlEmail(data);
-    } catch (error) {
-      return error;
-    }
+    return await this.diaPersonalInstance.enviarAlEmail(data);
   }
 }

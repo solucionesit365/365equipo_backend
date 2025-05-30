@@ -1,10 +1,11 @@
 import { Test, TestingModule } from "@nestjs/testing";
-import { TOmneTrabajador, TrabajadorService } from "./trabajador.service";
+import { TrabajadorService } from "./trabajador.service";
+import { TOmneTrabajador } from "./trabajador.interface";
 import { ITrabajadorDatabaseService } from "./trabajador.interface";
 import { FirebaseService } from "../firebase/firebase.service";
 import { EmailService } from "../email/email.class";
-import { SolicitudesVacacionesService } from "../solicitud-vacaciones/solicitud-vacaciones.class";
-import { DiaPersonalClass } from "../dia-personal/dia-personal.class";
+import { TSolicitudVacacionesService } from "../solicitud-vacaciones/solicitud-vacaciones.interface";
+import { TDiaPersonalService } from "../dia-personal/dia-personal.interface";
 import { InternalServerErrorException } from "@nestjs/common";
 import { DateTime } from "luxon";
 import { Prisma } from "@prisma/client";
@@ -14,8 +15,8 @@ describe("TrabajadorService", () => {
   let mockTrabajadorDatabase: Partial<ITrabajadorDatabaseService>;
   let mockFirebaseService: Partial<FirebaseService>;
   let mockEmailService: Partial<EmailService>;
-  let mockSolicitudesVacaciones: Partial<SolicitudesVacacionesService>;
-  let mockDiaPersonal: Partial<DiaPersonalClass>;
+  let mockSolicitudesVacaciones: Partial<TSolicitudVacacionesService>;
+  let mockDiaPersonal: Partial<TDiaPersonalService>;
 
   beforeEach(async () => {
     // Crear mocks parciales - solo los métodos que necesitamos
@@ -78,11 +79,11 @@ describe("TrabajadorService", () => {
           useValue: mockEmailService,
         },
         {
-          provide: SolicitudesVacacionesService,
+          provide: TSolicitudVacacionesService,
           useValue: mockSolicitudesVacaciones,
         },
         {
-          provide: DiaPersonalClass,
+          provide: TDiaPersonalService,
           useValue: mockDiaPersonal,
         },
       ],

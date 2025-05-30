@@ -1,51 +1,47 @@
-import { Injectable, Inject, forwardRef } from "@nestjs/common";
-import { diaPersonalMongo } from "./dia-personal.mongodb";
-import { DiaPersonal } from "./dia-personal.interface";
+import { Injectable } from "@nestjs/common";
+import {
+  DiaPersonal,
+  TDiaPersonalDatabaseService,
+  TDiaPersonalService,
+} from "./dia-personal.interface";
 import { EmailService } from "../email/email.class";
 import { TrabajadorService } from "../trabajador/trabajador.service";
 import { constructEmailContent } from "./emailDiaPersonal";
 import { DateTime } from "luxon";
 import { IContratoService } from "../contrato/contrato.interface";
+
 @Injectable()
-export class DiaPersonalClass {
+export class DiaPersonalService implements TDiaPersonalService {
   constructor(
-    private readonly schdiaPersonal: diaPersonalMongo,
+    private readonly schDiaPersonal: TDiaPersonalDatabaseService,
     private readonly contratoService: IContratoService,
-    @Inject(forwardRef(() => TrabajadorService))
     private readonly trabajadorInstance: TrabajadorService,
     private readonly email: EmailService,
   ) {}
 
-  //Nueva solicitud de dia personal
   async nuevaSolicitudDiaPersonal(diaPersonal: DiaPersonal) {
-    try {
-      const horasContrato = await this.contratoService.getHorasContrato(
-        diaPersonal.idBeneficiario,
-        DateTime.now(),
-      );
+    const horasContrato = await this.contratoService.getHorasContrato(
+      diaPersonal.idBeneficiario,
+      DateTime.now(),
+    );
 
-      diaPersonal.horasContrato = horasContrato;
+    diaPersonal.horasContrato = horasContrato;
 
-      const insertSolicitudDiaPersonal =
-        await this.schdiaPersonal.nuevaSolicitudDiaPersonal(diaPersonal);
-      if (insertSolicitudDiaPersonal) return true;
+    const insertSolicitudDiaPersonal =
+      await this.schDiaPersonal.nuevaSolicitudDiaPersonal(diaPersonal);
+    if (insertSolicitudDiaPersonal) return true;
 
-      throw Error(
-        "No se ha podido insertar la nueva solicitud de dia Personal",
-      );
-    } catch (error) {
-      console.log(error);
-    }
+    throw Error("No se ha podido insertar la nueva solicitud de dia Personal");
   }
 
   //Mostrar todas las solicitudes de los dias personales de los trabajadores
   async getSolicitudes(year: number) {
-    return await this.schdiaPersonal.getSolicitudes(year);
+    return await this.schDiaPersonal.getSolicitudes(year);
   }
 
   //Mostrar Solicitudes de los dias personales de el trabajador por idSql
   async getSolicitudesTrabajadorSqlId(idBeneficiario: number, year: number) {
-    return await this.schdiaPersonal.getSolicitudesTrabajadorSqlId(
+    return await this.schDiaPersonal.getSolicitudesTrabajadorSqlId(
       idBeneficiario,
       year,
     );
@@ -53,14 +49,14 @@ export class DiaPersonalClass {
 
   //Mostrar Solicitudes de dia personal por _id
   async getSolicitudesById(_id: string) {
-    return await this.schdiaPersonal.getSolicitudesById(_id);
+    return await this.schDiaPersonal.getSolicitudesById(_id);
   }
 
   async solicitudesSubordinadosDiaPersonal(
     idAppResponsable: string,
     year: number,
   ) {
-    return await this.schdiaPersonal.solicitudesSubordinadosDiaPersonal(
+    return await this.schDiaPersonal.solicitudesSubordinadosDiaPersonal(
       idAppResponsable,
       year,
     );
@@ -68,20 +64,20 @@ export class DiaPersonalClass {
 
   //Borrar solicitud de vacaciones
   async borrarSolicitud(_id: string) {
-    const vacacionesToDelete = await this.schdiaPersonal.getSolicitudesById(
+    const vacacionesToDelete = await this.schDiaPersonal.getSolicitudesById(
       _id,
     );
     if (!vacacionesToDelete) {
       throw new Error("Vacaciones no encontrada");
     }
 
-    await this.schdiaPersonal.borrarSolicitud(_id);
+    await this.schDiaPersonal.borrarSolicitud(_id);
     return true;
   }
 
   //Actualizar estado de el dia Personal
   async updateSolicitudDiaPersonalEstado(diaPersonal: DiaPersonal) {
-    return await this.schdiaPersonal.updateSolicitudDiaPersonalEstado(
+    return await this.schDiaPersonal.updateSolicitudDiaPersonalEstado(
       diaPersonal,
     );
   }
@@ -90,29 +86,27 @@ export class DiaPersonalClass {
     idBeneficiario: number,
     idAppResponsable: string,
   ) {
-    return await this.schdiaPersonal.actualizarIdAppResponsableDiaPersonal(
+    return await this.schDiaPersonal.actualizarIdAppResponsableDiaPersonal(
       idBeneficiario,
       idAppResponsable,
     );
   }
 
   async haySolicitudesParaBeneficiarioDiaPersonal(idBeneficiario: number) {
-    return await this.schdiaPersonal.haySolicitudesParaBeneficiarioDiaPersonal(
+    return await this.schDiaPersonal.haySolicitudesParaBeneficiarioDiaPersonal(
       idBeneficiario,
     );
   }
 
-  async enviarAlEmail(diaPersonal) {
+  async enviarAlEmail(diaPersonal: DiaPersonal) {
+    const trabajador = await this.trabajadorInstance.getTrabajadorBySqlId(
+      Number(diaPersonal.idBeneficiario),
+    );
     try {
-      const solicitudTrabajador =
-        await this.trabajadorInstance.getTrabajadorBySqlId(
-          Number(diaPersonal.idBeneficiario),
-        );
-
       const emailContent = constructEmailContent(diaPersonal);
 
       this.email.enviarEmail(
-        solicitudTrabajador.emails,
+        trabajador.emails,
         emailContent,
         "Confirmación de Solicitud de Dia Personal",
       );

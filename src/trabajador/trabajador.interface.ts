@@ -15,6 +15,41 @@ export interface TrabajadorCompleto
   displayName: string;
 }
 
+export interface TOmneTrabajador {
+  noPerceptor: string;
+  apellidosYNombre: string;
+  nombre: string;
+  email: string;
+  documento: string;
+  viaPublica: string;
+  numero: string;
+  piso: string;
+  poblacion: string;
+  noTelfMovilPersonal: string;
+  nacionalidad: number;
+  codPaisNacionalidad: string;
+  noAfiliacion: string;
+  cp: string;
+  centroTrabajo: string;
+  antiguedadEmpresa: string;
+  altaContrato: string;
+  bajaEmpresa: string;
+  cambioAntiguedad: string;
+  categoria: string;
+  fechaCalculoAntiguedad: string;
+  tipoContrato: string;
+  systemModifiedAt: string;
+  systemCreatedAt: string;
+  horassemana: number;
+  descripcionCentro: string;
+  auxiliaryIndex1: string;
+  auxiliaryIndex2: number;
+  auxiliaryIndex3: string;
+  auxiliaryIndex4: string;
+  empresaID: string;
+  fechaNacimiento: DateTime | null;
+}
+
 type TResultGetTrabajadorBySqlId = Prisma.TrabajadorGetPayload<{
   include: {
     contratos: {

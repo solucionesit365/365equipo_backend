@@ -1,145 +1,213 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, InternalServerErrorException } from "@nestjs/common";
 import { ObjectId } from "mongodb";
-import { DiaPersonal } from "../dia-personal/dia-personal.interface";
+import {
+  DiaPersonal,
+  TDiaPersonalDatabaseService,
+} from "../dia-personal/dia-personal.interface";
 import { MongoService } from "../mongo/mongo.service";
 
 @Injectable()
-export class diaPersonalMongo {
+export class DiaPersonalDatabaseService implements TDiaPersonalDatabaseService {
   constructor(private readonly mongoDbService: MongoService) {}
 
   //Nueva solicitud de dia personal
   async nuevaSolicitudDiaPersonal(diaPersonal: DiaPersonal) {
-    diaPersonal._id = new ObjectId();
-    const db = (await this.mongoDbService.getConexion()).db();
-    const solicitudDiaPersonalCollection =
-      db.collection<DiaPersonal>("diaPersonal");
-    const resInsert = await solicitudDiaPersonalCollection.insertOne(
-      diaPersonal,
-    );
-    if (resInsert.acknowledged) return resInsert.insertedId;
-    throw Error("No se ha podido insertar la nueva solicitud de dia Personal");
+    try {
+      diaPersonal._id = new ObjectId();
+      const db = (await this.mongoDbService.getConexion()).db();
+      const solicitudDiaPersonalCollection =
+        db.collection<DiaPersonal>("diaPersonal");
+      const resInsert = await solicitudDiaPersonalCollection.insertOne(
+        diaPersonal,
+      );
+      if (resInsert.acknowledged) return resInsert.insertedId;
+      throw Error(
+        "No se ha podido insertar la nueva solicitud de dia Personal",
+      );
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException(
+        "Error al procesar la solicitud de día personal",
+      );
+    }
   }
 
   //Mostrar todas las solicitudes de los dias personales de los trabajadores
   async getSolicitudes(year: number) {
-    const db = (await this.mongoDbService.getConexion()).db();
-    const solicitudDiaPersonalCollection =
-      db.collection<DiaPersonal>("diaPersonal");
-    const respSolicitudes = await solicitudDiaPersonalCollection
-      .find({ year })
-      .toArray();
+    try {
+      const db = (await this.mongoDbService.getConexion()).db();
+      const solicitudDiaPersonalCollection =
+        db.collection<DiaPersonal>("diaPersonal");
+      const respSolicitudes = await solicitudDiaPersonalCollection
+        .find({ year })
+        .toArray();
 
-    return respSolicitudes;
+      return respSolicitudes;
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException(
+        "Error al obtener las solicitudes de día personal",
+      );
+    }
   }
 
   //Mostrar Solicitudes de los dias personales de el trabajador por idSql
   async getSolicitudesTrabajadorSqlId(idBeneficiario: number, year: number) {
-    const db = (await this.mongoDbService.getConexion()).db();
-    const solicitudDiaPersonalCollection =
-      db.collection<DiaPersonal>("diaPersonal");
-    // const startDate = DateTime.local(year, 1, 1).toFormat("dd/MM/yyyy");
-    // const endDate = DateTime.local(year + 1, 1, 1).toFormat("dd/MM/yyyy");
+    try {
+      const db = (await this.mongoDbService.getConexion()).db();
+      const solicitudDiaPersonalCollection =
+        db.collection<DiaPersonal>("diaPersonal");
+      // const startDate = DateTime.local(year, 1, 1).toFormat("dd/MM/yyyy");
+      // const endDate = DateTime.local(year + 1, 1, 1).toFormat("dd/MM/yyyy");
 
-    const respSolicitudes = await solicitudDiaPersonalCollection
-      .find({ idBeneficiario, year })
-      .toArray();
+      const respSolicitudes = await solicitudDiaPersonalCollection
+        .find({ idBeneficiario, year })
+        .toArray();
 
-    return respSolicitudes;
+      return respSolicitudes;
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException(
+        "Error al obtener las solicitudes de día personal del trabajador",
+      );
+    }
   }
 
   async getSolicitudesById(_id: string) {
-    const db = (await this.mongoDbService.getConexion()).db();
-    const solicitudDiaPersonalCollection =
-      db.collection<DiaPersonal>("diaPersonal");
+    try {
+      const db = (await this.mongoDbService.getConexion()).db();
+      const solicitudDiaPersonalCollection =
+        db.collection<DiaPersonal>("diaPersonal");
 
-    const respSolicitudes = await solicitudDiaPersonalCollection.findOne({
-      _id: new ObjectId(_id),
-    });
+      const respSolicitudes = await solicitudDiaPersonalCollection.findOne({
+        _id: new ObjectId(_id),
+      });
 
-    return respSolicitudes;
+      return respSolicitudes;
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException(
+        "Error al obtener la solicitud de día personal por ID",
+      );
+    }
   }
 
   async solicitudesSubordinadosDiaPersonal(
     idAppResponsable: string,
     year: number,
   ) {
-    const db = (await this.mongoDbService.getConexion()).db();
-    const solicitudDiaPersonalCollection =
-      db.collection<DiaPersonal>("diaPersonal");
-    const respSolicitudes = await solicitudDiaPersonalCollection
-      .find({ idAppResponsable, year })
-      .toArray();
+    try {
+      const db = (await this.mongoDbService.getConexion()).db();
+      const solicitudDiaPersonalCollection =
+        db.collection<DiaPersonal>("diaPersonal");
+      const respSolicitudes = await solicitudDiaPersonalCollection
+        .find({ idAppResponsable, year })
+        .toArray();
 
-    return respSolicitudes;
+      return respSolicitudes;
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException(
+        "Error al obtener las solicitudes de día personal de los subordinados",
+      );
+    }
   }
 
   //Borrar solicitud de vacaciones
   async borrarSolicitud(_id: string) {
-    const db = (await this.mongoDbService.getConexion()).db();
-    const solicitudDiaPersonalCollection =
-      db.collection<DiaPersonal>("diaPersonal");
+    try {
+      const db = (await this.mongoDbService.getConexion()).db();
+      const solicitudDiaPersonalCollection =
+        db.collection<DiaPersonal>("diaPersonal");
 
-    const resDelete = await solicitudDiaPersonalCollection.deleteOne({
-      _id: new ObjectId(_id),
-    });
-    return resDelete.acknowledged && resDelete.deletedCount > 0;
+      const resDelete = await solicitudDiaPersonalCollection.deleteOne({
+        _id: new ObjectId(_id),
+      });
+      return resDelete.acknowledged && resDelete.deletedCount > 0;
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException(
+        "Error al procesar la solicitud de eliminación de día personal",
+      );
+    }
   }
 
   //Actualizar estado de la solicitud de Vacaciones
   async updateSolicitudDiaPersonalEstado(diaPersonal: DiaPersonal) {
-    const db = (await this.mongoDbService.getConexion()).db();
-    const solicitudDiaPersonalCollection =
-      db.collection<DiaPersonal>("diaPersonal");
+    try {
+      const db = (await this.mongoDbService.getConexion()).db();
+      const solicitudDiaPersonalCollection =
+        db.collection<DiaPersonal>("diaPersonal");
 
-    const respSolicitudes = await solicitudDiaPersonalCollection.updateOne(
-      {
-        _id: new ObjectId(diaPersonal._id),
-      },
-      {
-        $set: {
-          estado: diaPersonal.estado,
-          respuestaSolicitud: diaPersonal.respuestaSolicitud,
+      const respSolicitudes = await solicitudDiaPersonalCollection.updateOne(
+        {
+          _id: new ObjectId(diaPersonal._id),
         },
-      },
-    );
+        {
+          $set: {
+            estado: diaPersonal.estado,
+            respuestaSolicitud: diaPersonal.respuestaSolicitud,
+          },
+        },
+      );
 
-    if (respSolicitudes.acknowledged && respSolicitudes.modifiedCount > 0)
-      return true;
-    throw Error("No se ha podido modificar el estado");
+      if (respSolicitudes.acknowledged && respSolicitudes.modifiedCount > 0)
+        return true;
+      throw Error("No se ha podido modificar el estado");
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException(
+        "Error al actualizar el estado de la solicitud de día personal",
+      );
+    }
   }
 
   async haySolicitudesParaBeneficiarioDiaPersonal(
     idBeneficiario: number,
   ): Promise<boolean> {
-    const db = (await this.mongoDbService.getConexion()).db();
-    const solicitudDiaPersonalCollection =
-      db.collection<DiaPersonal>("diaPersonal");
+    try {
+      const db = (await this.mongoDbService.getConexion()).db();
+      const solicitudDiaPersonalCollection =
+        db.collection<DiaPersonal>("diaPersonal");
 
-    const cuenta = await solicitudDiaPersonalCollection.countDocuments({
-      idBeneficiario,
-    });
+      const cuenta = await solicitudDiaPersonalCollection.countDocuments({
+        idBeneficiario,
+      });
 
-    return cuenta > 0;
+      return cuenta > 0;
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException(
+        "Error al verificar las solicitudes de día personal para el beneficiario",
+      );
+    }
   }
 
   async actualizarIdAppResponsableDiaPersonal(
     idBeneficiario: number,
     idAppResponsable: string,
   ) {
-    const db = (await this.mongoDbService.getConexion()).db();
-    const solicitudDiaPersonalCollection =
-      db.collection<DiaPersonal>("diaPersonal");
+    try {
+      const db = (await this.mongoDbService.getConexion()).db();
+      const solicitudDiaPersonalCollection =
+        db.collection<DiaPersonal>("diaPersonal");
 
-    const resultado = await solicitudDiaPersonalCollection.updateMany(
-      { idBeneficiario },
-      { $set: { idAppResponsable } },
-    );
+      const resultado = await solicitudDiaPersonalCollection.updateMany(
+        { idBeneficiario },
+        { $set: { idAppResponsable } },
+      );
 
-    if (resultado.acknowledged) {
-      return true;
-    } else {
-      throw new Error(
-        "No se pudo actualizar el idAppResponsable para las solicitudes del beneficiario",
+      if (resultado.acknowledged) {
+        return true;
+      } else {
+        throw new Error(
+          "No se pudo actualizar el idAppResponsable para las solicitudes del beneficiario",
+        );
+      }
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException(
+        "Error al actualizar el idAppResponsable de las solicitudes de día personal",
       );
     }
   }

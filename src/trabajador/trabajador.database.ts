@@ -920,38 +920,43 @@ export class TrabajadorDatabaseService implements ITrabajadorDatabaseService {
   }
 
   async getTrabajadores() {
-    // Esta función tenía el todos = false)
-    const trabajadores = await this.prisma.trabajador.findMany({
-      where: {
-        // Filtra para incluir solo trabajadores con al menos un contrato vigente
-        contratos: {
-          some: {
-            fechaBaja: null, // Contrato aún vigente
+    try {
+      // Esta función tenía el todos = false)
+      const trabajadores = await this.prisma.trabajador.findMany({
+        where: {
+          // Filtra para incluir solo trabajadores con al menos un contrato vigente
+          contratos: {
+            some: {
+              fechaBaja: null, // Contrato aún vigente
+            },
           },
         },
-      },
-      include: {
-        contratos: {
-          where: {
-            fechaBaja: null, // Para contratos aún vigentes
+        include: {
+          contratos: {
+            where: {
+              fechaBaja: null, // Para contratos aún vigentes
+            },
+            orderBy: {
+              fechaAlta: "desc", // Ordena por la fecha más reciente
+            },
+            take: 1, // Toma solo el contrato más reciente
           },
-          orderBy: {
-            fechaAlta: "desc", // Ordena por la fecha más reciente
-          },
-          take: 1, // Toma solo el contrato más reciente
+          responsable: true,
+          tienda: true,
+          roles: true,
+          permisos: true,
+          empresa: true,
         },
-        responsable: true,
-        tienda: true,
-        roles: true,
-        permisos: true,
-        empresa: true,
-      },
-      orderBy: {
-        nombreApellidos: "asc",
-      },
-    });
+        orderBy: {
+          nombreApellidos: "asc",
+        },
+      });
 
-    return trabajadores;
+      return trabajadores;
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException("Error al obtener trabajadores");
+    }
   }
 
   async getTrabajadorTokenQR(idTrabajador: number, tokenQR: string) {
@@ -1585,12 +1590,16 @@ export class TrabajadorDatabaseService implements ITrabajadorDatabaseService {
   }
 
   async deleteTrabajador(idSql: number) {
-    // Borrar trabajador
-    return await this.prisma.trabajador.delete({
-      where: {
-        id: idSql,
-      },
-    });
+    try {
+      return await this.prisma.trabajador.delete({
+        where: {
+          id: idSql,
+        },
+      });
+    } catch (err) {
+      console.error(err);
+      throw new InternalServerErrorException("Error al borrar el trabajador: ");
+    }
   }
 
   async borrarConFechaBaja() {

@@ -1,5 +1,8 @@
 import { Injectable, Inject, forwardRef } from "@nestjs/common";
-import { SolicitudVacacionesDatabase } from "./solicitud-vacaciones.mongodb";
+import {
+  TSolicitudVacacionesDatabaseService,
+  TSolicitudVacacionesService,
+} from "./solicitud-vacaciones.interface";
 import { SolicitudVacaciones } from "./solicitud-vacaciones.interface";
 import { EmailService } from "../email/email.class";
 import { TrabajadorService } from "../trabajador/trabajador.service";
@@ -8,11 +11,12 @@ import { DateTime } from "luxon";
 import { IContratoService } from "../contrato/contrato.interface";
 
 @Injectable()
-export class SolicitudesVacacionesService {
+export class SolicitudesVacacionesService
+  implements TSolicitudVacacionesService
+{
   constructor(
-    private readonly schSolicitudVacaciones: SolicitudVacacionesDatabase,
+    private readonly schSolicitudVacaciones: TSolicitudVacacionesDatabaseService,
     private readonly email: EmailService,
-    @Inject(forwardRef(() => TrabajadorService))
     private readonly trabajadorInstance: TrabajadorService,
     private readonly contratoService: IContratoService,
     @Inject(forwardRef(() => Cuadrantes))
@@ -117,7 +121,17 @@ export class SolicitudesVacacionesService {
   }
 
   //Enviar email
-  async enviarAlEmail(vacaciones) {
+  async enviarAlEmail(vacaciones: {
+    idBeneficiario: number;
+    fechaInicio: string;
+    fechaFinal: string;
+    fechaIncorporacion: string;
+    fechaCreacion: string;
+    observaciones: string;
+    totalDias: number;
+    estado: string;
+    nombreApellidos: string;
+  }) {
     const solicitudTrabajador =
       await this.trabajadorInstance.getTrabajadorBySqlId(
         Number(vacaciones.idBeneficiario),
@@ -204,7 +218,12 @@ export class SolicitudesVacacionesService {
     return { ok: true };
   }
 
-  async ponerEnCuadrante(vacaciones) {
+  async ponerEnCuadrante(vacaciones: {
+    fechaInicio: Date;
+    fechaFinal: Date;
+    idBeneficiario: number;
+    nombreApellidos: string;
+  }) {
     if (vacaciones) {
       await this.cuadrantesInstance.addAusenciaToCuadrantes({
         completa: true,

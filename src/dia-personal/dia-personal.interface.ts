@@ -1,4 +1,4 @@
-import { ObjectId } from "mongodb";
+import { ObjectId, WithId } from "mongodb";
 
 export interface DiaPersonal {
   _id?: ObjectId;
@@ -20,4 +20,75 @@ export interface DiaPersonal {
   creadorReal?: string;
   year?: number;
   idAppResponsable: string;
+}
+
+export abstract class TDiaPersonalDatabaseService {
+  abstract nuevaSolicitudDiaPersonal(
+    diaPersonal: DiaPersonal,
+  ): Promise<ObjectId>;
+  abstract getSolicitudes(year: number): Promise<WithId<DiaPersonal>[]>;
+  abstract getSolicitudesTrabajadorSqlId(
+    idBeneficiario: number,
+    year: number,
+  ): Promise<WithId<DiaPersonal>[]>;
+  abstract getSolicitudesById(_id: string): Promise<WithId<DiaPersonal>>;
+  abstract solicitudesSubordinadosDiaPersonal(
+    idAppResponsable: string,
+    year: number,
+  ): Promise<WithId<DiaPersonal>[]>;
+  abstract borrarSolicitud(_id: string): Promise<boolean>;
+  abstract updateSolicitudDiaPersonalEstado(
+    diaPersonal: DiaPersonal,
+  ): Promise<boolean>;
+  abstract haySolicitudesParaBeneficiarioDiaPersonal(
+    idBeneficiario: number,
+  ): Promise<boolean>;
+  abstract actualizarIdAppResponsableDiaPersonal(
+    idBeneficiario: number,
+    idAppResponsable: string,
+  ): Promise<boolean>;
+}
+
+export abstract class TDiaPersonalService {
+  abstract nuevaSolicitudDiaPersonal(
+    diaPersonal: DiaPersonal,
+  ): Promise<boolean>;
+
+  abstract getSolicitudes(year: number): Promise<WithId<DiaPersonal>[]>;
+  abstract getSolicitudesTrabajadorSqlId(
+    idBeneficiario: number,
+    year: number,
+  ): Promise<WithId<DiaPersonal>[]>;
+  abstract getSolicitudesById(_id: string): Promise<WithId<DiaPersonal>>;
+  abstract solicitudesSubordinadosDiaPersonal(
+    idAppResponsable: string,
+    year: number,
+  ): Promise<WithId<DiaPersonal>[]>;
+  abstract borrarSolicitud(_id: string): Promise<boolean>;
+  abstract updateSolicitudDiaPersonalEstado(
+    diaPersonal: DiaPersonal,
+  ): Promise<boolean>;
+  abstract actualizarIdAppResponsableDiaPersonal(
+    idBeneficiario: number,
+    idAppResponsable: string,
+  ): Promise<boolean>;
+
+  abstract haySolicitudesParaBeneficiarioDiaPersonal(
+    idBeneficiario: number,
+  ): Promise<boolean>;
+
+  abstract haySolicitudesParaBeneficiarioDiaPersonal(
+    idBeneficiario: number,
+  ): Promise<boolean>;
+
+  abstract enviarAlEmail(diaPersonal: DiaPersonal): Promise<
+    | {
+        ok: boolean;
+        message?: undefined;
+      }
+    | {
+        ok: boolean;
+        message: any;
+      }
+  >;
 }
