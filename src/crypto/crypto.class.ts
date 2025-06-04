@@ -1,9 +1,10 @@
 import { Injectable } from "@nestjs/common";
 import { createHash } from "crypto";
 import { DateTime } from "luxon";
+import { ICryptoService } from "./crypto.interface";
 
 @Injectable()
-export class CryptoService {
+export class CryptoService implements ICryptoService {
   hashFile512(file: Buffer): string {
     return createHash("sha512").update(file).digest("hex");
   }

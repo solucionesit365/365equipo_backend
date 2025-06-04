@@ -20,19 +20,20 @@ import {
   GetDocumentosOriginalesDto,
   SignDocumentDto,
 } from "./pdf.dto";
-import { CryptoService } from "../crypto/crypto.class";
 import { Response as ExpressResponse } from "express";
 import { IPrismaService } from "../prisma/prisma.interface";
 import { DateTime } from "luxon";
 import { EmailService } from "../email/email.class";
 import { IStorageService } from "../storage/storage.interface";
+import { ICryptoService } from "../crypto/crypto.interface";
+import { IPdfService } from "./pdf.interface";
 
 @Controller("pdf")
 export class PdfController {
   constructor(
-    private readonly pdfService: PdfService,
+    private readonly pdfService: IPdfService,
     private readonly storageService: IStorageService,
-    private readonly cryptoService: CryptoService,
+    private readonly cryptoService: ICryptoService,
     private readonly prismaService: IPrismaService,
     private readonly emailService: EmailService,
   ) {}

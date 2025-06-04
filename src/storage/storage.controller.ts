@@ -10,14 +10,14 @@ import { Response } from "express";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { DownloadFileDto, UploadFileDto } from "./storage.dto";
 import { Express } from "express"; // Importa Express para usar el tipo Multer
-import { CryptoService } from "../crypto/crypto.class";
 import { IStorageService } from "./storage.interface";
+import { ICryptoService } from "../crypto/crypto.interface";
 
 @Controller("storage")
 export class StorageController {
   constructor(
     private readonly storageService: IStorageService,
-    private readonly cryptoService: CryptoService,
+    private readonly cryptoService: ICryptoService,
   ) {}
 
   @Post("uploadFile")

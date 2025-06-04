@@ -8,42 +8,51 @@ import * as express from "express";
 
 Settings.defaultZone = "Europe/Madrid";
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  try {
+    console.log("🚀 Starting bootstrap...");
 
-  app.useGlobalPipes(
-    new ValidationPipe({
-      transform: true,
-    }),
-  );
-  app.enableCors({
-    origin: "*",
-    // origin: [
-    //   "http://localhost:8080",
-    //   "https://silema.web.app",
-    //   "https://365equipo.com",
-    //   "https://club365obrador.web.app",
-    //   "https://silema--test-08eqf71j.web.app",
-    //   "https://tarjeta-cliente.web.app",
-    //   "https://demo.365equipo.com",
-    //   "https://silema--test-271uc5ji.web.app",
-    // ],
-  });
+    const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+      logger: ["error", "warn", "log", "debug", "verbose"],
+    });
 
-  app.useStaticAssets(join(__dirname, "..", "public"));
-  app.setBaseViewsDir(join(__dirname, "..", "views"));
-  app.setViewEngine("hbs");
-  app.use(express.json({ limit: "50mb" }));
-  app.use(express.urlencoded({ limit: "50mb", extended: true }));
+    console.log("✓ App created");
 
-  // Usar variables de entorno o valores por defecto
-  const port = process.env.PORT || 3000;
-  const host = process.env.HOST || "0.0.0.0";
+    app.useGlobalPipes(
+      new ValidationPipe({
+        transform: true,
+      }),
+    );
+    console.log("✓ Global pipes set");
 
-  await app.listen(port, host);
-  console.log(`Application is running on: ${await app.getUrl()}`);
+    app.enableCors({
+      origin: "*",
+    });
+    console.log("✓ CORS enabled");
+
+    app.useStaticAssets(join(__dirname, "..", "public"));
+    app.setBaseViewsDir(join(__dirname, "..", "views"));
+    app.setViewEngine("hbs");
+    console.log("✓ View engine configured");
+
+    app.use(express.json({ limit: "50mb" }));
+    app.use(express.urlencoded({ limit: "50mb", extended: true }));
+    console.log("✓ Body parsers configured");
+
+    const port = process.env.PORT || 3000;
+    const host = process.env.HOST || "0.0.0.0";
+
+    console.log(`📡 Attempting to listen on ${host}:${port}...`);
+
+    await app.listen(port, host);
+
+    console.log(`✅ Application is running on: ${await app.getUrl()}`);
+  } catch (error) {
+    console.error("❌ Error during bootstrap:", error);
+    throw error;
+  }
 }
 
 bootstrap().catch((err) => {
-  console.error("Error starting the application:", err);
+  console.error("❌ Error starting the application:", err);
   process.exit(1);
 });

@@ -18,8 +18,8 @@ import { ITrabajadorDatabaseService } from "./trabajador.interface";
     MBCTokenModule,
     ParametrosModule,
     TiendaModule,
-    forwardRef(() => SolicitudVacacionesModule),
-    forwardRef(() => DiaPersonalModule),
+    SolicitudVacacionesModule,
+    DiaPersonalModule,
   ],
   providers: [
     TrabajadorService,

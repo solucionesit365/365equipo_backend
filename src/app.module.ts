@@ -64,75 +64,96 @@ import { PowerAutomateModule } from "./power-automate/power-automate.module";
 import { AxiosModule } from "./axios/axios.module";
 import { NotificarAmpliacionContratosModule } from "./notificar-ampliacion-contratos/notificar-ampliacion-contratos.module";
 import { GraphModule } from "./graph/graph.module";
+import { TrabajadorDiaPersonalModule } from './trabajador-dia-personal/trabajador-dia-personal.module';
 
 @Module({
   imports: [
+    // 1. Configuración global
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    ContratoModule,
+
+    // 2. Módulos de infraestructura base (sin dependencias entre ellos)
+    PrismaModule,
+    MongoModule,
+    FirebaseModule,
+    AxiosModule,
+
+    // 3. Módulos de servicios compartidos (pueden depender de infraestructura)
+    CryptoModule,
+    EmailModule,
+    StorageModule,
+    TwilioModule,
+    GraphModule,
+    PowerAutomateModule,
+    LoggerModule,
+
+    // 4. Módulos de dominio base
+    EmpresaModule,
+    RoleModule,
+    PermissionModule,
+    PermisosModule,
+
+    // 5. Módulos que dependen de servicios compartidos
+    PdfModule, // Depende de CryptoModule, StorageModule, EmailModule
+    VisionModule,
+
+    // 6. Módulos de negocio
     AdminModule,
+    TrabajadorModule,
+    ClientesModule,
+    ContratoModule,
+    TiendaModule,
+
+    // 7. Módulos de funcionalidades específicas
     AnunciosModule,
     ArchivoDigitalModule,
     AuditoriasModule,
     AusenciasModule,
+    BiometriaModule,
     CalendarioFestivosModule,
-    ClientesModule,
-    CryptoModule,
+    ChatModule,
+    ColorSemanalModule,
     CuadrantesModule,
-    EmailModule,
+    Cultura365Module,
+    DiaPersonalModule,
+    DistribucionMensajesModule,
+    EncargosModule,
     EvaluacionesModule,
     FichajesModule,
     FichajesValidadosModule,
-    FirebaseModule,
+    FormacionModule,
+    HardwareModule,
     IncidenciasModule,
+    KpiTiendasModule,
     MantenimientoModule,
     MigracionesModule,
-    NotificacionesModule,
-    PactadoVsRealModule,
-    PermisosModule,
-    PrismaModule,
-    SolicitudVacacionesModule,
-    TarjetaClienteModule,
-    TestModule,
-    TiendaModule,
-    TrabajadorModule,
-    VerificacionMfaModule,
-    MongoModule,
-    Cultura365Module,
-    MBCTokenModule,
-    RoleModule,
-    PermissionModule,
-    EmpresaModule,
-    KpiTiendasModule,
-    DiaPersonalModule,
-    DistribucionMensajesModule,
-    VideosFormacionModule,
     NotasInformativasModule,
-    BiometriaModule,
-    EncargosModule,
-    ColorSemanalModule,
-    HardwareModule,
-    ChatModule,
+    NotificacionHorasExtrasModule,
+    NotificacionesModule,
+    NotificarAmpliacionContratosModule,
+    PactadoVsRealModule,
+    ParametrosModule,
     PerfilHardwareModule,
-    TwilioModule,
-    PdfModule,
-    StorageModule,
-    GraphModule,
-    VideosModule,
     PresentationModule,
     QuestionModule,
     QuestionCategoryModule,
-    FormacionModule,
     QuestionnaireModule,
-    VisionModule,
-    LoggerModule,
-    NotificacionHorasExtrasModule,
-    ParametrosModule,
-    PowerAutomateModule,
-    AxiosModule,
-    NotificarAmpliacionContratosModule,
+    SolicitudVacacionesModule,
+    TarjetaClienteModule,
+    VerificacionMfaModule,
+    VideosModule,
+    VideosFormacionModule,
+
+    // 8. Módulos de utilidad/testing al final
+    TestModule,
+    MBCTokenModule,
+    TrabajadorDiaPersonalModule,
   ],
   controllers: [AppController, KpiTiendasController],
 })
-export class AppModule {}
+export class AppModule {
+  constructor() {
+    console.log("✓ AppModule constructor completed");
+  }
+}

@@ -4,10 +4,11 @@ import { PdfController } from "./pdf.controller";
 import { CryptoModule } from "../crypto/crypto.module";
 import { StorageModule } from "../storage/storage.module";
 import { EmailModule } from "../email/email.module";
+import { IPdfService } from "./pdf.interface";
 
 @Module({
   imports: [CryptoModule, StorageModule, EmailModule],
-  providers: [PdfService],
+  providers: [{ provide: IPdfService, useClass: PdfService }],
   controllers: [PdfController],
 })
 export class PdfModule {}

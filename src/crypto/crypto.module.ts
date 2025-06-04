@@ -1,8 +1,9 @@
 import { Module } from "@nestjs/common";
 import { CryptoService } from "./crypto.class";
+import { ICryptoService } from "./crypto.interface";
 
 @Module({
-  providers: [CryptoService],
-  exports: [CryptoService],
+  providers: [{ provide: ICryptoService, useClass: CryptoService }],
+  exports: [ICryptoService],
 })
 export class CryptoModule {}
