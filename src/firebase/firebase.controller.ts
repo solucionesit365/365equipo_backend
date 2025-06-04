@@ -6,7 +6,7 @@ import { FirebaseService } from "./firebase.service";
 export class FirebaseController {
   constructor(private readonly firebaseService: FirebaseService) {}
 
-  //@UseGuards(AuthGuard)
+  @UseGuards(AuthGuard)
   @Post("update")
   async updateFirebase(@Body() reqUpdateFirebase: UpdateFirebaseDto) {
     await this.firebaseService.updateFirebaseUser(
