@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Query } from "@nestjs/common";
+import { Body, Controller, Get, Post, Query, UseGuards } from "@nestjs/common";
 import { MongoService } from "../mongo/mongo.service";
 import { PowerAutomateService } from "./power-automate.service";
 import { Req, UseInterceptors, UploadedFile } from "@nestjs/common";
@@ -6,6 +6,7 @@ import { Request } from "express";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { simpleParser } from "mailparser";
 import { EmailService } from "../email/email.class";
+import { SchedulerGuard } from "../guards/scheduler.guard";
 
 @Controller("power-automate")
 export class PowerAutomateController {
@@ -24,11 +25,13 @@ export class PowerAutomateController {
       return false;
     }
   }
+
+  @UseGuards(SchedulerGuard)
   @Post("saveInfoFormResponder")
   async save(@Body() req: { email: string; idTarea: string }) {
     await this.powerAutomateService.saveInPowerAutomateCollection({ ...req });
   }
-
+  @UseGuards(SchedulerGuard)
   @Get("getInfoForm")
   async getInfoFormHandler(@Query("idTarea") idTarea: string) {
     return this.powerAutomateService.getInfoForm(idTarea);
