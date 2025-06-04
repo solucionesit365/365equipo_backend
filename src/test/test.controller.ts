@@ -4,6 +4,7 @@ import {
   Req,
   UseInterceptors,
   UploadedFile,
+  Get,
 } from "@nestjs/common";
 import { Request } from "express";
 import { FileInterceptor } from "@nestjs/platform-express";
@@ -87,6 +88,11 @@ export class TestController {
       console.log(err);
       return;
     }
+  }
+
+  @Get("prueba")
+  lol() {
+    return "Prueba exitosa";
   }
 
   // @Post("experimentoRompible")

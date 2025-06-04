@@ -9,7 +9,9 @@ export class StorageService implements IStorageService {
   private storage: Storage;
   private readonly bucketName = "gs://silema.appspot.com";
 
-  constructor(private readonly firebaseService: IFirebaseService) {}
+  constructor(private readonly firebaseService: IFirebaseService) {
+    this.storage = getStorage(this.firebaseService.getApp());
+  }
 
   protected getBucket() {
     return this.storage.bucket(this.bucketName);
