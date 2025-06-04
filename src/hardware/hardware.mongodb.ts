@@ -67,6 +67,12 @@ export class HardwareDatabase {
           IMEI: hardWare.IMEI,
           IMEI2: hardWare.IMEI2,
           wmicBios: hardWare.wmicBios,
+          simOperador: hardWare.simOperador,
+          simICCID: hardWare.simICCID,
+          simEstado: hardWare.simEstado,
+          docStation: hardWare.docStation,
+          fechaModificacion: hardWare.fechaModificacion,
+          fechaCreacion: hardWare.fechaCreacion,
         },
       },
     );
