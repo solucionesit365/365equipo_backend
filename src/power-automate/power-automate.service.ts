@@ -4,6 +4,7 @@ import * as QRCode from "qrcode";
 
 @Injectable()
 export class PowerAutomateService {
+  powerAutomateService: any;
   constructor(private readonly mongoService: MongoService) {}
 
   getTag(tag: string, body: string) {
@@ -25,6 +26,21 @@ export class PowerAutomateService {
     const db = (await this.mongoService.getConexion()).db();
     const powerAutomateCache = db.collection("power-automate-cache");
     await powerAutomateCache.insertOne(data);
+  }
+  async getInfoForm(idTarea: string): Promise<any> {
+    const db = (await this.mongoService.getConexion()).db();
+    const powerAutomateCache = db.collection("power-automate-cache");
+
+    // Buscar el documento por idTarea
+    const result = await powerAutomateCache.findOne({ idTarea });
+
+    if (!result) {
+      throw new Error(
+        `No se encontró información para la tarea con ID: ${idTarea}`,
+      );
+    }
+
+    return result;
   }
 
   /* Crea un QR con los datos del parámetro parsedData */
