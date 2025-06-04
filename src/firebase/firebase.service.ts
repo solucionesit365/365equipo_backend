@@ -1,5 +1,5 @@
-import { Injectable } from "@nestjs/common";
-import { Auth, getAuth, UserRecord } from "firebase-admin/auth";
+import { Injectable, InternalServerErrorException } from "@nestjs/common";
+import { Auth, getAuth, UpdateRequest, UserRecord } from "firebase-admin/auth";
 import {
   App,
   initializeApp,
@@ -101,9 +101,14 @@ export class FirebaseService {
     }
   }
 
-  test() {
-    this.auth.updateUser("userUID", {
-      email: "ezequielcarissimo@gmail.com",
-    });
+  async updateFirebaseUser(userData: UpdateRequest, userId: string) {
+    try {
+      await this.auth.updateUser(userId, userData);
+    } catch (error) {
+      console.error("Error updating Firebase user:", error);
+      throw new InternalServerErrorException(
+        "No se ha podido actualizar el usuario en Firebase",
+      );
+    }
   }
 }
