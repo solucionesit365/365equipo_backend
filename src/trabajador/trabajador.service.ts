@@ -26,65 +26,12 @@ export class TrabajadorService {
     private readonly schTrabajadores: ITrabajadorDatabaseService,
   ) {}
 
-  async crearTrabajador(reqTrabajador: CreateTrabajadorRequestDto) {
-    return await this.schTrabajadores.crearTrabajador(reqTrabajador);
-  }
-
-  async getTrabajadoresModificadosOmne() {
-    const trabajadoresRaw = await this.schTrabajadores.getTrabajadoresOmne();
-    return this.crearArrayTrabajadores(trabajadoresRaw);
-  }
-
-  private crearArrayTrabajadores(trabajadoresRaw: any): any[] {
-    return trabajadoresRaw.flatMap((empresa: any) => {
-      if (empresa.trabajadores && Array.isArray(empresa.trabajadores)) {
-        return empresa.trabajadores.map((trabajador: any) => {
-          // Convertir documento a string, pasar a mayúsculas y quitar espacios
-          const documentoNormalizado = String(trabajador.documento)
-            .toUpperCase()
-            .replace(/\s+/g, "");
-          return {
-            ...trabajador,
-            documento: documentoNormalizado,
-            empresaID: empresa.empresaID,
-          };
-        });
-      }
-      return [];
-    });
-  }
-
-  getAllTrabajadores(include: TIncludeTrabajador) {
-    return this.schTrabajadores.getAllTrabajadores(include);
-  }
-
   createArrayDNI(trabajadores: any[]): string[] {
     const dniSet = new Set();
     trabajadores.forEach((trabajador) => {
       dniSet.add(trabajador.documento);
     });
     return Array.from(dniSet) as string[];
-  }
-
-  // Update Many con diferentes valores a modificar
-  updateManyTrabajadores(
-    modificaciones: {
-      dni: string;
-      cambios: Omit<Prisma.TrabajadorUpdateInput, "contratos">;
-      nuevoContrato: Prisma.Contrato2CreateInput;
-    }[],
-  ) {
-    return this.schTrabajadores.actualizarTrabajadoresLote(modificaciones);
-  }
-
-  createManyTrabajadores(
-    arrayNuevosTrabajadores: Prisma.TrabajadorCreateInput[],
-  ) {
-    return this.schTrabajadores.createManyTrabajadores(arrayNuevosTrabajadores);
-  }
-
-  deleteManyTrabajadores(dnis: { dni: string }[]) {
-    return this.schTrabajadores.deleteManyTrabajadores(dnis);
   }
 
   // Todo a mayúsculas y quitar espacios en blanco
@@ -456,100 +403,6 @@ export class TrabajadorService {
     }
   }
 
-  async limpiarTrabajadoresConFinalContrato() {
-    return await this.schTrabajadores.borrarConFechaBaja();
-  }
-
-  async eliminarTrabajador(idSql: number) {
-    return await this.schTrabajadores.deleteTrabajador(idSql);
-  }
-
-  async getTrabajadorByAppId(uid: string) {
-    const resUser = await this.schTrabajadores.getTrabajadorByAppId(uid);
-    if (resUser) return resUser;
-    throw new InternalServerErrorException(
-      "No se ha podido obtener la información del usuario",
-    );
-  }
-
-  async getTrabajadoresByTienda(idTienda: number) {
-    const resUser = await this.schTrabajadores.getTrabajadoresByTienda(
-      idTienda,
-    );
-    if (resUser) return resUser;
-    throw Error(
-      `No se ha podido obtener los trabajadores de la tienda ${idTienda} `,
-    );
-  }
-
-  async getTrabajadorBySqlId(id: number) {
-    const resUser = await this.schTrabajadores.getTrabajadorBySqlId(id);
-
-    if (resUser) return resUser;
-
-    throw new InternalServerErrorException(
-      "No se ha podido obtener la información del usuario. id: " + id,
-    );
-  }
-
-  /* Usuarios que no vienen de HIT */
-  async crearUsuarioInterno(trabajador: Prisma.TrabajadorCreateInput) {
-    return await this.schTrabajadores.crearTrabajadorInterno(trabajador);
-  }
-
-  async getTrabajadores() {
-    const arrayTrabajadores = await this.schTrabajadores.getTrabajadores();
-
-    if (arrayTrabajadores) return arrayTrabajadores;
-    return [];
-  }
-
-  async getSubordinadosConTienda(idAppResponsable: string) {
-    return await this.schTrabajadores.getSubordinadosConTienda(
-      idAppResponsable,
-    );
-  }
-
-  async getSubordinadosConTiendaPorId(idResponsable: number) {
-    return await this.schTrabajadores.getSubordinadosConTiendaPorId(
-      idResponsable,
-    );
-  }
-
-  async esCoordinadoraPorId(id: number) {
-    return await this.schTrabajadores.esCoordinadoraPorId(id);
-  }
-
-  async getSubordinadosByIdsql(id: number) {
-    return await this.schTrabajadores.getSubordinadosByIdsql(id);
-  }
-
-  async esCoordinadora(uid: string): Promise<boolean> {
-    return await this.schTrabajadores.esCoordinadora(uid);
-  }
-
-  async getSubordinados(uid: string) {
-    return await this.schTrabajadores.getSubordinados(uid);
-  }
-
-  async getSubordinadosById(id: number, conFecha?: DateTime) {
-    return await this.schTrabajadores.getSubordinadosById(id, conFecha);
-  }
-
-  async getSubordinadosByIdNew(id: number, conFecha?: DateTime) {
-    return await this.schTrabajadores.getSubordinadosByIdNew(id, conFecha);
-  }
-
-  async getTrabajadorTokenQR(idTrabajador: number, tokenQR: string) {
-    const resUser = await this.schTrabajadores.getTrabajadorTokenQR(
-      idTrabajador,
-      tokenQR,
-    );
-
-    if (resUser) return resUser;
-    throw Error("No se ha podido obtener la información del usuario");
-  }
-
   async registrarUsuario(dni: string, password: string) {
     dni = dni.trim().toUpperCase();
     const datosUsuario = await this.schTrabajadores.getTrabajadorByDni(dni);
@@ -668,10 +521,6 @@ export class TrabajadorService {
 
   private async borrarTrabajadorDeGoogle(uid: string) {
     await this.firebaseService.getAuth().deleteUser(uid);
-  }
-
-  private async borrarTrabajadorDeSql(idSql: number) {
-    await this.schTrabajadores.borrarTrabajador(idSql);
   }
 
   public async borrarTrabajador(idSql: number) {

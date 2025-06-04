@@ -5,6 +5,7 @@ import {
   TIncludeTrabajador,
 } from "./trabajador.interface";
 import { Prisma } from "@prisma/client";
+import { DateTime } from "luxon";
 
 @Injectable()
 export class TrabajadorRepository {
@@ -51,5 +52,95 @@ export class TrabajadorRepository {
     }[],
   ) {
     return this.schTrabajadores.actualizarTrabajadoresLote(modificaciones);
+  }
+
+  createManyTrabajadores(
+    arrayNuevosTrabajadores: Prisma.TrabajadorCreateInput[],
+  ) {
+    return this.schTrabajadores.createManyTrabajadores(arrayNuevosTrabajadores);
+  }
+
+  deleteManyTrabajadores(dnis: { dni: string }[]) {
+    return this.schTrabajadores.deleteManyTrabajadores(dnis);
+  }
+
+  limpiarTrabajadoresConFinalContrato() {
+    return this.schTrabajadores.borrarConFechaBaja();
+  }
+
+  eliminarTrabajador(idSql: number) {
+    return this.schTrabajadores.deleteTrabajador(idSql);
+  }
+
+  getTrabajadorByAppId(uid: string) {
+    return this.schTrabajadores.getTrabajadorByAppId(uid);
+  }
+
+  getTrabajadoresByTienda(idTienda: number) {
+    return this.schTrabajadores.getTrabajadoresByTienda(idTienda);
+  }
+
+  getTrabajadorBySqlId(id: number) {
+    return this.schTrabajadores.getTrabajadorBySqlId(id);
+  }
+
+  /* Usuarios que no vienen de HIT */
+  crearUsuarioInterno(trabajador: Prisma.TrabajadorCreateInput) {
+    return this.schTrabajadores.crearTrabajadorInterno(trabajador);
+  }
+
+  async getTrabajadores() {
+    const arrayTrabajadores = await this.schTrabajadores.getTrabajadores();
+
+    if (arrayTrabajadores) return arrayTrabajadores;
+    return [];
+  }
+
+  getSubordinadosConTienda(idAppResponsable: string) {
+    return this.schTrabajadores.getSubordinadosConTienda(idAppResponsable);
+  }
+
+  async getSubordinadosConTiendaPorId(idResponsable: number) {
+    return await this.schTrabajadores.getSubordinadosConTiendaPorId(
+      idResponsable,
+    );
+  }
+
+  async esCoordinadoraPorId(id: number) {
+    return await this.schTrabajadores.esCoordinadoraPorId(id);
+  }
+
+  async getSubordinadosByIdsql(id: number) {
+    return await this.schTrabajadores.getSubordinadosByIdsql(id);
+  }
+
+  async esCoordinadora(uid: string): Promise<boolean> {
+    return await this.schTrabajadores.esCoordinadora(uid);
+  }
+
+  async getSubordinados(uid: string) {
+    return await this.schTrabajadores.getSubordinados(uid);
+  }
+
+  async getSubordinadosById(id: number, conFecha?: DateTime) {
+    return await this.schTrabajadores.getSubordinadosById(id, conFecha);
+  }
+
+  async getSubordinadosByIdNew(id: number, conFecha?: DateTime) {
+    return await this.schTrabajadores.getSubordinadosByIdNew(id, conFecha);
+  }
+
+  async getTrabajadorTokenQR(idTrabajador: number, tokenQR: string) {
+    const resUser = await this.schTrabajadores.getTrabajadorTokenQR(
+      idTrabajador,
+      tokenQR,
+    );
+
+    if (resUser) return resUser;
+    throw Error("No se ha podido obtener la información del usuario");
+  }
+
+  borrarTrabajadorDeSql(idSql: number) {
+    return this.schTrabajadores.borrarTrabajador(idSql);
   }
 }

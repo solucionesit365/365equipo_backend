@@ -856,7 +856,7 @@ export class TrabajadorDatabaseService implements ITrabajadorDatabaseService {
           take: 1, // Toma solo el contrato más reciente
         },
         tienda: true,
-        roles: true,
+        roles: { include: { permissions: true } },
         responsable: true,
       },
     });
