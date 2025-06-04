@@ -1,6 +1,7 @@
-import { Body, Controller, Post } from "@nestjs/common";
+import { Body, Controller, Post, UseGuards } from "@nestjs/common";
 import { UpdateFirebaseDto } from "./firebase.dto";
 import { FirebaseService } from "./firebase.service";
+import { AuthGuard } from "../guards/auth.guard";
 
 @Controller("firebase")
 export class FirebaseController {
