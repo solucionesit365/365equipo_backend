@@ -15,7 +15,7 @@ import {
   TrabajadorDatabaseService,
 } from "./trabajadores.database";
 import { UserRecord } from "firebase-admin/auth";
-import { Prisma, Trabajador } from "@prisma/client";
+import { Permiso, Prisma, Trabajador } from "@prisma/client";
 import {
   CreateTrabajadorRequestDto,
   TrabajadorFormRequest,
@@ -545,7 +545,18 @@ export class TrabajadorService {
 
   async getTrabajadorByAppId(uid: string) {
     const resUser = await this.schTrabajadores.getTrabajadorByAppId(uid);
-    if (resUser) return resUser;
+    if (resUser) {
+      const permisosPorRoles: Permiso[] = [];
+
+      for (let i = 0; i < resUser.roles.length; i++) {
+        permisosPorRoles.push(...resUser.roles[i].permissions);
+      }
+
+      const permisosTotales = [...permisosPorRoles, ...resUser.permisos];
+
+      resUser.permisos = permisosTotales;
+      return resUser;
+    }
     throw new InternalServerErrorException(
       "No se ha podido obtener la información del usuario",
     );
