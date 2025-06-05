@@ -3,12 +3,9 @@ import { IPrismaService } from "../prisma/prisma.interface";
 import { DateTime } from "luxon";
 import { Prisma } from "@prisma/client";
 import pMap from "p-map";
-import {
-  CreateTrabajadorRequestDto,
-  TrabajadorFormRequest,
-} from "./trabajador.dto";
+import { CreateTrabajadorRequestDto } from "./trabajador.dto";
 import { AxiosBcService } from "../axios/axios-bc.service";
-import { ITrabajadorDatabaseService } from "./trabajador.interface";
+import { ITrabajadorRepositoryDatabase } from "./trabajador.interface";
 
 export interface TIncludeTrabajador {
   contratos?: boolean;
@@ -20,7 +17,9 @@ export interface TIncludeTrabajador {
 }
 
 @Injectable()
-export class TrabajadorDatabaseService implements ITrabajadorDatabaseService {
+export class TrabajadorRepositoryDatabase
+  implements ITrabajadorRepositoryDatabase
+{
   constructor(
     private prisma: IPrismaService,
     private readonly axiosBCService: AxiosBcService,
@@ -92,6 +91,23 @@ export class TrabajadorDatabaseService implements ITrabajadorDatabaseService {
     });
 
     return true;
+  }
+
+  async updateTrabajador(
+    idTrabajador: number,
+    payload: Prisma.TrabajadorUpdateInput,
+  ) {
+    try {
+      return await this.prisma.trabajador.update({
+        where: { id: idTrabajador },
+        data: payload,
+      });
+    } catch (error) {
+      console.error("Error al actualizar trabajador:", error);
+      throw new InternalServerErrorException(
+        "No se pudo actualizar el trabajador.",
+      );
+    }
   }
 
   async createManyTrabajadores(arrayNuevosTrabajadores: any[]) {
@@ -379,6 +395,27 @@ export class TrabajadorDatabaseService implements ITrabajadorDatabaseService {
     }
   }
 
+  async getTrabajadorByDni(dni: string) {
+    const trabajador = await this.prisma.trabajador.findUnique({
+      where: {
+        dni: dni,
+      },
+      include: {
+        contratos: {
+          where: {
+            fechaBaja: null, // Para contratos aún vigentes
+          },
+          orderBy: {
+            fechaAlta: "desc", // Ordena por la fecha más reciente
+          },
+          take: 1, // Toma solo el contrato más reciente
+        },
+      },
+    });
+
+    return trabajador;
+  }
+
   async actualizarTrabajadoresLote(
     trabajadoresData: Array<{
       dni: string;
@@ -657,30 +694,6 @@ export class TrabajadorDatabaseService implements ITrabajadorDatabaseService {
     });
   }
 
-  normalizarDNIs() {
-    return this.prisma.$executeRawUnsafe(`
-      UPDATE "Trabajador"
-      SET "dni" = UPPER(
-        REGEXP_REPLACE("dni", '\\s+', '', 'g')
-      );
-    `);
-    //   return this.prisma.$queryRaw`
-    // SELECT UPPER(REGEXP_REPLACE(dni, '\\s+', '', 'g')) AS norm,
-    //        COUNT(*) AS cnt
-    // FROM "Trabajador"
-    // GROUP BY norm
-    // HAVING COUNT(*) > 1;
-    // `;
-  }
-
-  getTrabajadoresPorDNI(dnisArray: string[]) {
-    return this.prisma.trabajador.findMany({
-      where: {
-        dni: { in: dnisArray },
-      },
-    });
-  }
-
   async getAllTrabajadores(include: TIncludeTrabajador): Promise<
     Prisma.TrabajadorGetPayload<{
       include: {
@@ -727,117 +740,6 @@ export class TrabajadorDatabaseService implements ITrabajadorDatabaseService {
     });
 
     return trabajadores;
-  }
-
-  // Función que inserta un trabajador en la base de datos
-  async crearTrabajadorOmne(
-    reqTrabajador: CreateTrabajadorRequestDto,
-  ): Promise<boolean> {
-    // 1. Buscar si ya existe el trabajador por DNI
-    const existingWorker = await this.prisma.trabajador.findUnique({
-      where: { dni: reqTrabajador.dni },
-    });
-
-    // 2. Si existe, hacemos un update; si no, creamos uno nuevo
-    if (existingWorker) {
-      console.log(
-        `[ACTUALIZANDO] Trabajador DNI: ${reqTrabajador.dni} | Nombre: ${reqTrabajador.nombreApellidos}`,
-      );
-      // Actualizamos datos del trabajador
-      const updatedTrabajador = await this.prisma.trabajador.update({
-        where: { dni: reqTrabajador.dni },
-        data: {
-          tienda: reqTrabajador.idTienda
-            ? { connect: { id: reqTrabajador.idTienda } }
-            : {},
-        },
-      });
-
-      // 3. Actualizar o crear el contrato
-      const existingContrato = await this.prisma.contrato2.findFirst({
-        where: { idTrabajador: updatedTrabajador.id },
-      });
-
-      if (existingContrato) {
-        // Hacemos update del contrato
-        await this.prisma.contrato2.update({
-          where: { id: existingContrato.id },
-          data: {
-            fechaAlta: reqTrabajador.contrato.fechaAlta,
-            fechaAntiguedad: reqTrabajador.contrato.fechaAntiguedad,
-            horasContrato: reqTrabajador.contrato.horasContrato,
-            inicioContrato: reqTrabajador.contrato.inicioContrato,
-            fechaBaja: reqTrabajador.contrato.fechaBaja,
-            finalContrato: reqTrabajador.contrato.finalContrato,
-          },
-        });
-      } else {
-        console.log(
-          `[CREANDO] Trabajador DNI: ${reqTrabajador.dni} | Nombre: ${reqTrabajador.nombreApellidos}`,
-        );
-        // Creamos un contrato nuevo
-        await this.prisma.contrato2.create({
-          data: {
-            Trabajador: { connect: { id: updatedTrabajador.id } },
-            fechaAlta: reqTrabajador.contrato.fechaAlta,
-            fechaAntiguedad: reqTrabajador.contrato.fechaAntiguedad,
-            horasContrato: reqTrabajador.contrato.horasContrato,
-            inicioContrato: reqTrabajador.contrato.inicioContrato,
-            fechaBaja: reqTrabajador.contrato.fechaBaja,
-            finalContrato: reqTrabajador.contrato.finalContrato,
-          },
-        });
-      }
-    } else {
-      // Si no existe el trabajador, creamos uno nuevo
-      const newTrabajador = await this.prisma.trabajador.create({
-        data: {
-          dni: reqTrabajador.dni,
-          nombreApellidos: reqTrabajador.nombreApellidos,
-          displayName: reqTrabajador.displayName,
-          emails: reqTrabajador.emails,
-          direccion: reqTrabajador.direccion,
-          llevaEquipo: reqTrabajador.llevaEquipo,
-          tipoTrabajador: reqTrabajador.tipoTrabajador,
-          ciudad: reqTrabajador.ciudad,
-          telefonos: reqTrabajador.telefonos,
-          codigoPostal: reqTrabajador.codigoPostal,
-          cuentaCorriente: reqTrabajador.cuentaCorriente,
-          fechaNacimiento: reqTrabajador.fechaNacimiento,
-          nacionalidad: reqTrabajador.nacionalidad,
-          displayFoto: reqTrabajador.displayFoto,
-          excedencia: reqTrabajador.excedencia,
-          empresa: {
-            connect: { id: reqTrabajador.idEmpresa },
-          },
-          responsable: reqTrabajador.idResponsable
-            ? { connect: { id: reqTrabajador.idResponsable } }
-            : {},
-          nSeguridadSocial: reqTrabajador.nSeguridadSocial,
-          tienda: reqTrabajador.idTienda
-            ? { connect: { id: reqTrabajador.idTienda } }
-            : {},
-          roles: {
-            connect: { id: "b3f04be2-35f5-46d0-842b-5be49014a2ef" }, // Rol dependienta
-          },
-        },
-      });
-
-      // Creamos el contrato asociado al nuevo trabajador
-      await this.prisma.contrato2.create({
-        data: {
-          Trabajador: { connect: { id: newTrabajador.id } },
-          fechaAlta: reqTrabajador.contrato.fechaAlta,
-          fechaAntiguedad: reqTrabajador.contrato.fechaAntiguedad,
-          horasContrato: reqTrabajador.contrato.horasContrato,
-          inicioContrato: reqTrabajador.contrato.inicioContrato,
-          fechaBaja: reqTrabajador.contrato.fechaBaja,
-          finalContrato: reqTrabajador.contrato.finalContrato,
-        },
-      });
-    }
-
-    return true;
   }
 
   async getTrabajadorByAppId(uid: string) {
@@ -892,27 +794,6 @@ export class TrabajadorDatabaseService implements ITrabajadorDatabaseService {
         },
         responsable: true,
         tienda: true,
-      },
-    });
-
-    return trabajador;
-  }
-
-  async getTrabajadorByDni(dni: string) {
-    const trabajador = await this.prisma.trabajador.findUnique({
-      where: {
-        dni: dni,
-      },
-      include: {
-        contratos: {
-          where: {
-            fechaBaja: null, // Para contratos aún vigentes
-          },
-          orderBy: {
-            fechaAlta: "desc", // Ordena por la fecha más reciente
-          },
-          take: 1, // Toma solo el contrato más reciente
-        },
       },
     });
 
@@ -1290,271 +1171,6 @@ export class TrabajadorDatabaseService implements ITrabajadorDatabaseService {
     return await this.getSubordinadosById(id, conFecha);
   }
 
-  isValidDate(value) {
-    return DateTime.fromFormat(value, "DD/MM/YYYY").isValid;
-  }
-
-  isValidUsuario(usuario) {
-    return (
-      this.isValidDate(usuario.inicioContrato) &&
-      this.isValidDate(usuario.antiguedad) &&
-      usuario.dni &&
-      usuario.dni !== "" &&
-      usuario.telefonos &&
-      usuario.telefonos !== ""
-    );
-  }
-
-  async setIdApp(idSql: number, uid: string) {
-    await this.prisma.trabajador.update({
-      where: {
-        id: idSql,
-      },
-      data: {
-        idApp: uid,
-      },
-    });
-  }
-
-  async actualizarUsuarios(usuariosNuevos: any[], modificarEnApp: any[]) {
-    const usuariosNoActualizadosNuevos = [];
-    const usuariosNoActualizadosApp = [];
-
-    // INSERT
-    const usuariosNuevosValidos = usuariosNuevos.filter((usuario) => {
-      const isValid = this.isValidUsuario(usuario) && !usuario.finalContrato;
-      if (!isValid) usuariosNoActualizadosNuevos.push(usuario);
-      return isValid;
-    });
-
-    // UPDATE
-    const modificarEnAppValidos = modificarEnApp.filter((usuario) => {
-      const isValid = this.isValidUsuario(usuario);
-      if (!isValid) usuariosNoActualizadosApp.push(usuario);
-      return isValid;
-    });
-
-    await this.prisma.trabajador.createMany({
-      data: usuariosNuevosValidos.map((usuario) => {
-        return {
-          id: usuario.id,
-          idApp: usuario.idApp,
-          nombreApellidos: usuario.nombreApellidos,
-          displayName: usuario.displayName,
-          emails: usuario.emails,
-          dni: usuario.dni,
-          direccion: usuario.direccion,
-          ciudad: usuario.ciudad,
-          telefonos: usuario.telefonos,
-          fechaNacimiento: DateTime.fromFormat(
-            usuario.fechaNacimiento,
-            "dd/MM/yyyy",
-          ).toJSDate(),
-          nacionalidad: usuario.nacionalidad,
-          nSeguridadSocial: usuario.nSeguridadSocial,
-          codigoPostal: usuario.codigoPostal,
-          cuentaCorriente: usuario.cuentaCorriente,
-          tipoTrabajador: usuario.tipoTrabajador,
-          llevaEquipo: false,
-        };
-      }),
-      skipDuplicates: true,
-    });
-
-    await this.prisma.trabajador.updateMany({
-      where: {
-        id: {
-          in: modificarEnAppValidos.map((usuario) => usuario.id),
-        },
-      },
-      data: modificarEnAppValidos.map((usuario) => {
-        return {
-          nombreApellidos: usuario.nombreApellidos,
-          dni: usuario.dni,
-        };
-      }),
-    });
-
-    return {
-      usuariosNoActualizadosNuevos,
-      usuariosNoActualizadosApp,
-    };
-  }
-
-  async eliminarUsuarios(usuariosAEliminar: any[]) {
-    await this.prisma.trabajador.deleteMany({
-      where: {
-        id: {
-          in: usuariosAEliminar.map((usuario) => usuario.id),
-        },
-      },
-    });
-  }
-
-  async getResponsableTienda(idTienda: number) {
-    const responsable = await this.prisma.trabajador.findFirst({
-      where: {
-        idTienda: idTienda,
-        llevaEquipo: true,
-      },
-    });
-
-    return responsable;
-  }
-
-  async sqlHandleCambios(
-    modificado: TrabajadorFormRequest,
-    original: TrabajadorFormRequest,
-  ) {
-    if (modificado.idResponsable != original.idResponsable) {
-      if (modificado.idTienda != original.idTienda)
-        throw Error(
-          "No es posible cambiar el responsable y la tienda a la vez",
-        );
-    }
-
-    if (original.llevaEquipo && !modificado.llevaEquipo) {
-      // Establecer en este caso el idResponsable a null de los subordinados primero y luego  modificar el llevaEquipo
-      await this.prisma.trabajador.updateMany({
-        where: {
-          responsable: {
-            id: modificado.id,
-          },
-        },
-        data: {
-          idResponsable: null,
-        },
-      });
-    }
-
-    if (modificado.llevaEquipo && modificado.idTienda) {
-      await this.prisma.trabajador.updateMany({
-        where: {
-          idTienda: modificado.idTienda,
-          NOT: {
-            id: modificado.id,
-          },
-        },
-        data: {
-          idResponsable: modificado.id,
-        },
-      });
-    }
-
-    if (modificado.idTienda != original.idTienda) {
-      // Si se cambia la tienda
-      if (modificado.llevaEquipo && original.llevaEquipo) {
-        // Si antes llevaba equipo y ahora también
-        await this.prisma.trabajador.updateMany({
-          where: {
-            responsable: {
-              id: modificado.id,
-            },
-          },
-          data: {
-            idResponsable: null,
-          },
-        });
-        // Falta 'C'
-      }
-    }
-  }
-
-  async guardarCambiosForm(
-    trabajador: TrabajadorFormRequest,
-    original: TrabajadorFormRequest,
-  ) {
-    await this.sqlHandleCambios(trabajador, original);
-
-    const payload: Prisma.TrabajadorUpdateInput = {
-      nombreApellidos: trabajador.nombreApellidos,
-      displayName: trabajador.displayName,
-      emails: trabajador.emails,
-      dni: trabajador.dni,
-      direccion: trabajador.direccion,
-      ciudad: trabajador.ciudad,
-      telefonos: trabajador.telefonos,
-      fechaNacimiento: trabajador.fechaNacimiento,
-      nacionalidad: trabajador.nacionalidad,
-      nSeguridadSocial: trabajador.nSeguridadSocial,
-      codigoPostal: trabajador.codigoPostal,
-      cuentaCorriente: trabajador.cuentaCorriente,
-      responsable: {
-        connect: { id: trabajador.idResponsable },
-      },
-      tienda: {
-        connect: { id: trabajador.idTienda },
-      },
-      llevaEquipo: trabajador.llevaEquipo ? true : false,
-      tokenQR: trabajador.tokenQR,
-      empresa: {
-        connect: { id: trabajador.empresaId },
-      },
-      tipoTrabajador: trabajador.tipoTrabajador,
-      roles: {
-        set: trabajador.arrayRoles.map((rol) => {
-          return {
-            id: rol,
-          };
-        }),
-      },
-    };
-
-    if (!trabajador.idTienda) {
-      delete payload.tienda;
-    }
-    if (!trabajador.idResponsable) {
-      delete payload.responsable;
-    }
-
-    if (trabajador.arrayRoles.length === 0 || trabajador.arrayRoles[0] === "") {
-      delete payload.roles;
-      await this.prisma
-        .$queryRaw`DELETE FROM "_RoleToTrabajador" WHERE "B" = ${trabajador.id}`;
-    }
-
-    await this.prisma.trabajador.update({
-      where: {
-        id: trabajador.id,
-      },
-      data: payload,
-    });
-    return true;
-  }
-
-  async getNivelMenosUno(idSql: number) {
-    const resResponsable = await this.prisma.trabajador.findFirst({
-      where: {
-        id: idSql,
-      },
-      select: {
-        idResponsable: true,
-      },
-    });
-
-    if (!resResponsable.idResponsable) return null;
-
-    const responsable = await this.prisma.trabajador.findUnique({
-      where: {
-        id: resResponsable.idResponsable,
-      },
-    });
-
-    return responsable;
-  }
-
-  async getNivelUno(idSql: number) {
-    return await this.prisma.trabajador.findMany({
-      where: {
-        idResponsable: idSql,
-      },
-    });
-  }
-
-  async getNivelCero(idSql: number) {
-    return await this.getTrabajadorBySqlId(idSql);
-  }
-
   async borrarTrabajador(idSql: number) {
     await this.prisma.trabajador.delete({
       where: {
@@ -1562,31 +1178,6 @@ export class TrabajadorDatabaseService implements ITrabajadorDatabaseService {
       },
     });
     return true;
-  }
-
-  async getCoordinadoras() {
-    return await this.prisma.trabajador.findMany({
-      where: {
-        llevaEquipo: true,
-        idTienda: {
-          not: null,
-        },
-      },
-    });
-  }
-
-  async uploadFoto(displayFoto: string, uid: string) {
-    const resUpdate = await this.prisma.trabajador.update({
-      where: {
-        idApp: uid,
-      },
-      data: {
-        displayFoto: displayFoto,
-      },
-    });
-
-    if (resUpdate) return resUpdate;
-    return null;
   }
 
   async deleteTrabajador(idSql: number) {
@@ -1618,26 +1209,5 @@ export class TrabajadorDatabaseService implements ITrabajadorDatabaseService {
     } catch (error) {
       console.log(error);
     }
-  }
-
-  async findTrabajadorByEmailLike(email: string) {
-    return await this.prisma.trabajador.findMany({
-      where: {
-        emails: {
-          contains: email,
-        },
-      },
-      // include: {
-      //   contratos: {
-      //     where: {
-      //       fechaBaja: null,
-      //     },
-      //     orderBy: {
-      //       fechaAlta: "desc",
-      //     },
-      //     take: 1,
-      //   },
-      // },
-    });
   }
 }

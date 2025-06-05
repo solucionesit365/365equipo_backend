@@ -1,15 +1,18 @@
 import { Injectable } from "@nestjs/common";
 import { CreateTrabajadorRequestDto } from "./trabajador.dto";
 import {
-  ITrabajadorDatabaseService,
+  ITrabajadorRepository,
+  ITrabajadorRepositoryDatabase,
   TIncludeTrabajador,
 } from "./trabajador.interface";
-import { Prisma } from "@prisma/client";
+import { Prisma, Trabajador } from "@prisma/client";
 import { DateTime } from "luxon";
 
 @Injectable()
-export class TrabajadorRepository {
-  constructor(private readonly schTrabajadores: ITrabajadorDatabaseService) {}
+export class TrabajadorRepository implements ITrabajadorRepository {
+  constructor(
+    private readonly schTrabajadores: ITrabajadorRepositoryDatabase,
+  ) {}
 
   crearTrabajador(reqTrabajador: CreateTrabajadorRequestDto) {
     return this.schTrabajadores.crearTrabajador(reqTrabajador);
@@ -20,7 +23,7 @@ export class TrabajadorRepository {
     return this.crearArrayTrabajadores(trabajadoresRaw);
   }
 
-  private crearArrayTrabajadores(trabajadoresRaw: any): any[] {
+  crearArrayTrabajadores(trabajadoresRaw: any): any[] {
     return trabajadoresRaw.flatMap((empresa: any) => {
       if (empresa.trabajadores && Array.isArray(empresa.trabajadores)) {
         return empresa.trabajadores.map((trabajador: any) => {
@@ -89,6 +92,13 @@ export class TrabajadorRepository {
     return this.schTrabajadores.crearTrabajadorInterno(trabajador);
   }
 
+  updateTrabajador(
+    idTrabajador: number,
+    payload: Prisma.TrabajadorUpdateInput,
+  ): Promise<Trabajador> {
+    return this.schTrabajadores.updateTrabajador(idTrabajador, payload);
+  }
+
   async getTrabajadores() {
     const arrayTrabajadores = await this.schTrabajadores.getTrabajadores();
 
@@ -98,6 +108,10 @@ export class TrabajadorRepository {
 
   getSubordinadosConTienda(idAppResponsable: string) {
     return this.schTrabajadores.getSubordinadosConTienda(idAppResponsable);
+  }
+
+  getTrabajadorByDni(dni: string) {
+    return this.schTrabajadores.getTrabajadorByDni(dni);
   }
 
   async getSubordinadosConTiendaPorId(idResponsable: number) {

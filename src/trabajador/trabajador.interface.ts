@@ -1,9 +1,6 @@
 import { UserRecord } from "firebase-admin/auth";
 import { Prisma, Trabajador } from "@prisma/client";
-import {
-  CreateTrabajadorRequestDto,
-  TrabajadorFormRequest,
-} from "./trabajador.dto";
+import { CreateTrabajadorRequestDto } from "./trabajador.dto";
 import { DateTime } from "luxon";
 
 // Los tipos se mantienen igual
@@ -66,7 +63,7 @@ type TResultGetTrabajadorBySqlId = Prisma.TrabajadorGetPayload<{
   };
 }>;
 
-type TResultGetTrabajadorByDni = Prisma.TrabajadorGetPayload<{
+export type TResultGetTrabajadorByDni = Prisma.TrabajadorGetPayload<{
   include: {
     contratos: {
       where: {
@@ -109,7 +106,7 @@ export interface TIncludeTrabajador {
 }
 
 // CLASE ABSTRACTA EN LUGAR DE INTERFAZ
-export abstract class ITrabajadorDatabaseService {
+export abstract class ITrabajadorRepositoryDatabase {
   abstract crearTrabajador(
     reqTrabajador: CreateTrabajadorRequestDto,
   ): Promise<boolean>;
@@ -121,6 +118,8 @@ export abstract class ITrabajadorDatabaseService {
   abstract actualizarTrabajadoresLote(modificaciones: any[]): Promise<any>;
 
   abstract getTrabajadoresOmne(): Promise<any[]>;
+
+  abstract getTrabajadorByDni(dni: string): Promise<TResultGetTrabajadorByDni>;
 
   abstract updateManyTrabajadores(
     modificaciones: {
@@ -134,15 +133,7 @@ export abstract class ITrabajadorDatabaseService {
     dnis: { dni: string }[],
   ): Prisma.PrismaPromise<Prisma.BatchPayload>;
 
-  abstract normalizarDNIs(): Prisma.PrismaPromise<number>;
-
-  abstract getTrabajadoresPorDNI(dnisArray: string[]): Promise<Trabajador[]>;
-
   abstract getAllTrabajadores(include: TIncludeTrabajador): Promise<any[]>;
-
-  abstract crearTrabajadorOmne(
-    reqTrabajador: CreateTrabajadorRequestDto,
-  ): Promise<boolean>;
 
   abstract getTrabajadorByAppId(uid: string): Promise<Trabajador | null>;
 
@@ -154,14 +145,18 @@ export abstract class ITrabajadorDatabaseService {
     id: number,
   ): Promise<TResultGetTrabajadorBySqlId>;
 
-  abstract getTrabajadorByDni(dni: string): Promise<TResultGetTrabajadorByDni>;
-
   abstract getTrabajadores(): Promise<TGetTrabajadores>;
 
   abstract getTrabajadorTokenQR(
     idTrabajador: number,
     tokenQR: string,
   ): Promise<any>;
+
+  abstract updateTrabajador(
+    idTrabajador: number,
+    payload: Prisma.TrabajadorUpdateInput,
+  ): Promise<Trabajador>;
+  abstract getTrabajadorByDni(dni: string): Promise<TResultGetTrabajadorByDni>;
 
   abstract getTrabajadoresByTienda(idTienda: number): Promise<any>;
 
@@ -184,46 +179,85 @@ export abstract class ITrabajadorDatabaseService {
     conFecha?: DateTime,
   ): Promise<any>;
 
-  abstract isValidDate(value: string): boolean;
-
-  abstract isValidUsuario(usuario: any): boolean;
-
-  abstract setIdApp(idSql: number, uid: string): Promise<any>;
-
-  abstract actualizarUsuarios(
-    usuariosNuevos: any[],
-    modificarEnApp: any[],
-  ): Promise<any>;
-
-  abstract eliminarUsuarios(usuariosAEliminar: any[]): Promise<any>;
-
-  abstract getResponsableTienda(idTienda: number): Promise<any>;
-
-  abstract sqlHandleCambios(
-    modificado: TrabajadorFormRequest,
-    original: TrabajadorFormRequest,
-  ): Promise<any>;
-
-  abstract guardarCambiosForm(
-    trabajador: TrabajadorFormRequest,
-    original: TrabajadorFormRequest,
-  ): Promise<any>;
-
-  abstract getNivelMenosUno(idSql: number): Promise<any>;
-
-  abstract getNivelUno(idSql: number): Promise<any>;
-
-  abstract getNivelCero(idSql: number): Promise<any>;
-
   abstract borrarTrabajador(idSql: number): Promise<any>;
-
-  abstract getCoordinadoras(): Promise<any>;
-
-  abstract uploadFoto(displayFoto: string, uid: string): Promise<any>;
 
   abstract deleteTrabajador(idSql: number): Promise<any>;
 
   abstract borrarConFechaBaja(): Promise<any>;
+}
 
-  abstract findTrabajadorByEmailLike(email: string): Promise<any>;
+export abstract class ITrabajadorRepository {
+  abstract crearTrabajador(
+    reqTrabajador: CreateTrabajadorRequestDto,
+  ): Promise<boolean>;
+
+  abstract getTrabajadoresModificadosOmne(): Promise<any[]>;
+
+  abstract crearArrayTrabajadores(trabajadoresRaw: any): any[];
+
+  abstract getAllTrabajadores(include: TIncludeTrabajador): Promise<any[]>;
+
+  abstract updateManyTrabajadores(
+    modificaciones: {
+      dni: string;
+      cambios: Omit<Prisma.TrabajadorUpdateInput, "contratos">;
+      nuevoContrato: Prisma.Contrato2CreateInput;
+    }[],
+  ): Promise<any>;
+
+  abstract createManyTrabajadores(
+    arrayNuevosTrabajadores: Prisma.TrabajadorCreateInput[],
+  ): Promise<any>;
+
+  abstract updateTrabajador(
+    idTrabajador: number,
+    payload: Prisma.TrabajadorUpdateInput,
+  ): Promise<Trabajador>;
+  abstract getTrabajadorByDni(dni: string): Promise<TResultGetTrabajadorByDni>;
+
+  abstract deleteManyTrabajadores(
+    dnis: { dni: string }[],
+  ): Prisma.PrismaPromise<Prisma.BatchPayload>;
+
+  abstract limpiarTrabajadoresConFinalContrato(): Promise<any>;
+
+  abstract eliminarTrabajador(idSql: number): Promise<any>;
+
+  abstract getTrabajadorByAppId(uid: string): Promise<Trabajador | null>;
+
+  abstract getTrabajadoresByTienda(idTienda: number): Promise<any>;
+
+  abstract getTrabajadorBySqlId(
+    id: number,
+  ): Promise<TResultGetTrabajadorBySqlId>;
+
+  /* Usuarios que no vienen de HIT */
+  abstract crearUsuarioInterno(
+    trabajador: Prisma.TrabajadorCreateInput,
+  ): Promise<Trabajador>;
+  abstract getTrabajadores(): Promise<TGetTrabajadores>;
+
+  abstract getSubordinadosConTienda(idAppResponsable: string): Promise<any>;
+
+  abstract getSubordinadosConTiendaPorId(idResponsable: number): Promise<any>;
+
+  abstract esCoordinadoraPorId(id: number): Promise<any>;
+
+  abstract getSubordinadosByIdsql(id: number): Promise<any>;
+
+  abstract esCoordinadora(uid: string): Promise<boolean>;
+
+  abstract getSubordinados(uid: string): Promise<any>;
+
+  abstract getSubordinadosById(id: number, conFecha?: DateTime): Promise<any>;
+
+  abstract getSubordinadosByIdNew(
+    id: number,
+    conFecha?: DateTime,
+  ): Promise<any>;
+
+  abstract getTrabajadorTokenQR(
+    idTrabajador: number,
+    tokenQR: string,
+  ): Promise<any>;
 }

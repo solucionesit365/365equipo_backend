@@ -65,6 +65,7 @@ import { AxiosModule } from "./axios/axios.module";
 import { NotificarAmpliacionContratosModule } from "./notificar-ampliacion-contratos/notificar-ampliacion-contratos.module";
 import { GraphModule } from "./graph/graph.module";
 import { TrabajadorDiaPersonalModule } from './trabajador-dia-personal/trabajador-dia-personal.module';
+import { RegistroModule } from './registro/registro.module';
 
 @Module({
   imports: [
@@ -149,6 +150,7 @@ import { TrabajadorDiaPersonalModule } from './trabajador-dia-personal/trabajado
     TestModule,
     MBCTokenModule,
     TrabajadorDiaPersonalModule,
+    RegistroModule,
   ],
   controllers: [AppController, KpiTiendasController],
 })
