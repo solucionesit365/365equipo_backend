@@ -2,12 +2,14 @@ import { Injectable } from "@nestjs/common";
 import { ITrabajadorRepository } from "../trabajador/trabajador.interface";
 import { DateTime } from "luxon";
 import { IFirebaseService } from "../firebase/firebase.interface";
+import { EmailService } from "../email/email.class";
 
 @Injectable()
 export class RegistroService {
   constructor(
     private readonly trabajadorRepository: ITrabajadorRepository,
     private readonly firebaseService: IFirebaseService,
+    private readonly emailInstance: EmailService,
   ) {}
 
   async registrarUsuario(dni: string, password: string) {

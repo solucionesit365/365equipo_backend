@@ -66,6 +66,7 @@ import { NotificarAmpliacionContratosModule } from "./notificar-ampliacion-contr
 import { GraphModule } from "./graph/graph.module";
 import { TrabajadorDiaPersonalModule } from './trabajador-dia-personal/trabajador-dia-personal.module';
 import { RegistroModule } from './registro/registro.module';
+import { NotificacionModule } from './notificacion/notificacion.module';
 
 @Module({
   imports: [
@@ -151,6 +152,7 @@ import { RegistroModule } from './registro/registro.module';
     MBCTokenModule,
     TrabajadorDiaPersonalModule,
     RegistroModule,
+    NotificacionModule,
   ],
   controllers: [AppController, KpiTiendasController],
 })

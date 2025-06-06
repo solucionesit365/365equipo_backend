@@ -641,7 +641,7 @@ export class TrabajadorRepositoryDatabase
       cambios: Omit<Prisma.TrabajadorUpdateInput, "contratos">;
       nuevoContrato: Prisma.Contrato2CreateInput;
     }[],
-  ) {
+  ): Promise<{ updated: number }> {
     const CHUNK_SIZE = 300;
     const CONCURRENCY = 3;
 
