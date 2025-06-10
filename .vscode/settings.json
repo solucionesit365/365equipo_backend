@@ -20,6 +20,5 @@
   },
   "peacock.color": "#5472e8",
   "files.eol": "\r\n",
-  "postman.settings.dotenv-detection-notification-visibility": false,
-  "qodana.projectId": "MrvXZ"
+  "postman.settings.dotenv-detection-notification-visibility": false
 }
