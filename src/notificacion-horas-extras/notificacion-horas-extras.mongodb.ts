@@ -252,4 +252,12 @@ export class NotificacionHorasExtrasMongoService {
       })
       .toArray();
   }
+  async getNotificacionHorasExtrasById(id: string) {
+    const db = (await this.mongoDbService.getConexion()).db();
+    const notificacionesCollection = db.collection("notificacionesHorasExtras");
+
+    return await notificacionesCollection.findOne({
+      _id: new ObjectId(id),
+    });
+  }
 }

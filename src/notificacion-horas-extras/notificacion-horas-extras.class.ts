@@ -111,4 +111,9 @@ export class NotificacionHorasExtrasClass {
       horasExtras,
     );
   }
+  async getNotificacionHorasExtrasById(id: string) {
+    return await this.shNotificacionhorasExtras.getNotificacionHorasExtrasById(
+      id,
+    );
+  }
 }
