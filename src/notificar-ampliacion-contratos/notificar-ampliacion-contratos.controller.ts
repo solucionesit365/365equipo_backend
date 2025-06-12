@@ -2,10 +2,16 @@ import { Controller, Post, Get, Body, UseGuards, Query } from "@nestjs/common";
 import { NotificarAmpliacionContratosClass } from "./notificar-ampliacion-contratos.class";
 import { TNotificarAmpliacionContratos } from "./notificar-ampliacion-contratos.dto";
 import { AuthGuard } from "../guards/auth.guard";
+import { User } from "../decorators/get-user.decorator";
+import { UserRecord } from "firebase-admin/auth";
+import { Notificaciones } from "../notificaciones/notificaciones.class";
+import { TrabajadorService } from "../trabajadores/trabajadores.class";
 @Controller("notificar-ampliacion-contratos")
 export class NotificarAmpliacionContratosController {
   constructor(
     private readonly shNotificacionhorasExtras: NotificarAmpliacionContratosClass,
+    private readonly notificaciones: Notificaciones,
+    private readonly trabajadores: TrabajadorService,
   ) {}
 
   @UseGuards(AuthGuard)
@@ -196,7 +202,7 @@ export class NotificarAmpliacionContratosController {
 
   @UseGuards(AuthGuard)
   @Post("updateComentarioNotificarAmpliacionContratos")
-  updateComentarioNotificarAmpliacionContratos(
+  async updateComentarioNotificarAmpliacionContratos(
     @Body()
     body: {
       id: string;
@@ -207,15 +213,87 @@ export class NotificarAmpliacionContratosController {
         nombre: string;
       }[];
     },
+    @User() user: UserRecord,
   ) {
-    return this.shNotificacionhorasExtras.updateComentarioNotificarAmpliacionContratos(
-      body.id,
-      body.horaExtraId,
-      body.comentario?.map((c) => ({
-        ...c,
-        fechaRespuesta: new Date(c.fechaRespuesta).toISOString(),
-      })),
+    const result =
+      await this.shNotificacionhorasExtras.updateComentarioNotificarAmpliacionContratos(
+        body.id,
+        body.horaExtraId,
+        body.comentario?.map((c) => ({
+          ...c,
+          fechaRespuesta: new Date(c.fechaRespuesta).toISOString(),
+        })),
+      );
+    const trabajadores = await this.trabajadores.getTrabajadores();
+    const remitente = trabajadores.find((t) => t.idApp === user.uid);
+
+    if (!remitente) {
+      console.warn("Remitente no encontrado");
+      return result;
+    }
+
+    const esRRHH_O_Admin = remitente.roles.some(
+      (r) => r.name === "RRHH_Admin" || r.name === "Administracion",
     );
+
+    let destinatarios: any[] = [];
+
+    if (esRRHH_O_Admin) {
+      const registro =
+        await this.shNotificacionhorasExtras.getNotificacionAmpliacionContratosById(
+          body.id,
+        );
+      const creador = trabajadores.find(
+        (t) => t.id === registro.creadorIdsql && t.idApp !== user.uid,
+      );
+      if (creador) destinatarios.push(creador);
+    } else {
+      destinatarios = trabajadores.filter(
+        (t) =>
+          t.idApp !== user.uid &&
+          (t.idApp === "tQjpDBpj3nOfefgmTSF3EximSFV2" ||
+            t.idApp === "I712aJquPwQNsqiiZ2LvQeyMjPw1"),
+      );
+    }
+
+    for (const d of destinatarios) {
+      if (!d?.idApp) continue;
+
+      const userToken = await this.notificaciones.getFCMToken(d.idApp);
+      if (!userToken?.token) {
+        console.warn("No se encontró FCM token para", d.displayName);
+        continue;
+      }
+
+      const ultimoComentario = body.comentario?.[body.comentario.length - 1];
+      const title = "Nuevo comentario en Ampliación de Contratos";
+      const message = `${remitente.displayName} comentó: "${ultimoComentario?.mensaje}"`;
+      let url = `/resumenHorasExtrasAdmin`;
+      if (esRRHH_O_Admin) {
+        const registro =
+          await this.shNotificacionhorasExtras.getNotificacionAmpliacionContratosById(
+            body.id,
+          );
+        if (d.id === registro.creadorIdsql) {
+          url = `/notificacionhorasextras`;
+        }
+      }
+
+      const response = await this.notificaciones.sendNotificationToDevice(
+        userToken.token,
+        title,
+        message,
+        url,
+      );
+      console.log(
+        "Notificación enviada a",
+        d.displayName,
+        "Respuesta FCM:",
+        response,
+      );
+    }
+
+    return result;
   }
 
   @Post("updateUltimoLeido")

@@ -135,4 +135,9 @@ export class NotificarAmpliacionContratosClass {
       horasExtras,
     );
   }
+  async getNotificacionAmpliacionContratosById(id: string) {
+    return await this.shNotificacionhorasExtras.getNotificacionAmpliacionContratosById(
+      id,
+    );
+  }
 }
