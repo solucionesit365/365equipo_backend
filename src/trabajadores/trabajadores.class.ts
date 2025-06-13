@@ -15,11 +15,12 @@ import {
   TrabajadorDatabaseService,
 } from "./trabajadores.database";
 import { UserRecord } from "firebase-admin/auth";
-import { Prisma, Trabajador } from "@prisma/client";
+import { Permiso, Prisma, Trabajador } from "@prisma/client";
 import {
   CreateTrabajadorRequestDto,
   TrabajadorFormRequest,
 } from "./trabajadores.dto";
+import { RoleService } from "src/role/role.service";
 
 interface TOmneTrabajador {
   noPerceptor: string;
@@ -68,6 +69,7 @@ export class TrabajadorService {
     @Inject(forwardRef(() => DiaPersonalClass))
     private readonly solicitudesDiaPersonal: DiaPersonalClass,
     private readonly schTrabajadores: TrabajadorDatabaseService,
+    private readonly roleService: RoleService,
   ) {}
 
   async crearTrabajador(reqTrabajador: CreateTrabajadorRequestDto) {
@@ -146,20 +148,18 @@ export class TrabajadorService {
     return String(dni).toUpperCase().replace(/\s+/g, "");
   }
 
-  getCambiosDetectados(
+  async getCambiosDetectados(
     trabajadoresApp: Prisma.TrabajadorGetPayload<{
       include: { contratos: true };
     }>[],
     trabajadoresOmne: TOmneTrabajador[],
   ) {
-    // 1) Construyo un Map de App por DNI
     const appMap = new Map<string, (typeof trabajadoresApp)[0]>();
     for (const appTrab of trabajadoresApp) {
       const dniNorm = this.normalizarDNI(appTrab.dni);
       appMap.set(dniNorm, appTrab);
     }
 
-    // 2) Arrays de resultado
     const arrayCambios: {
       dni: string;
       cambios: Partial<Trabajador>;
@@ -174,24 +174,34 @@ export class TrabajadorService {
       };
     }[] = [];
     const arrayCrear: Prisma.TrabajadorCreateInput[] = [];
+    const arrayEliminar: { dni: string }[] = [];
+    const defaultRole = await this.roleService.findRoleByName("Dependienta");
 
-    // 3) Recorro Omne una sola vez
     for (const omneTrab of trabajadoresOmne) {
       const dniNorm = this.normalizarDNI(omneTrab.documento);
+
+      const tieneFechaBaja =
+        omneTrab.bajaEmpresa &&
+        omneTrab.bajaEmpresa !== "0001-01-01" &&
+        omneTrab.bajaEmpresa !== null &&
+        omneTrab.bajaEmpresa !== undefined;
+
+      if (tieneFechaBaja) {
+        arrayEliminar.push({ dni: dniNorm });
+        continue;
+      }
+
       const appTrab = appMap.get(dniNorm);
 
       if (appTrab) {
-        // Comparo campos y acumulo diferencias
         const cambios: Partial<Trabajador> = {};
 
         if (omneTrab.apellidosYNombre !== appTrab.nombreApellidos) {
           cambios.nombreApellidos = omneTrab.apellidosYNombre;
         }
-
         if (Number(omneTrab.noPerceptor) !== appTrab.nPerceptor) {
           cambios.nPerceptor = Number(omneTrab.noPerceptor);
         }
-
         if (omneTrab.email !== appTrab.emails) {
           cambios.emails = omneTrab.email;
         }
@@ -204,11 +214,9 @@ export class TrabajadorService {
         if (omneTrab.poblacion !== appTrab.ciudad) {
           cambios.ciudad = omneTrab.poblacion;
         }
-
         if (omneTrab.nombre !== appTrab.displayName) {
           cambios.displayName = omneTrab.nombre;
         }
-
         if (omneTrab.codPaisNacionalidad !== appTrab.nacionalidad) {
           cambios.nacionalidad = omneTrab.codPaisNacionalidad;
         }
@@ -218,12 +226,10 @@ export class TrabajadorService {
         if (omneTrab.noAfiliacion !== appTrab.nSeguridadSocial) {
           cambios.nSeguridadSocial = omneTrab.noAfiliacion;
         }
-
         if (omneTrab.empresaID !== appTrab.empresaId) {
           cambios.empresaId = omneTrab.empresaID;
         }
 
-        // Fecha: convierto ambas a Date y comparo getTime()
         if (omneTrab.fechaNacimiento) {
           const appDate = appTrab.fechaNacimiento?.getTime() ?? null;
           const omneDate = omneTrab.fechaNacimiento.toJSDate().getTime();
@@ -257,33 +263,15 @@ export class TrabajadorService {
                   omneTrab.altaContrato,
                   "yyyy-MM-dd",
                 ).toJSDate(),
-          fechaBaja:
-            omneTrab.bajaEmpresa === "0001-01-01"
-              ? null
-              : DateTime.fromFormat(
-                  omneTrab.bajaEmpresa,
-                  "yyyy-MM-dd",
-                ).toJSDate(),
-          finalContrato:
-            omneTrab.bajaEmpresa === "0001-01-01"
-              ? null
-              : DateTime.fromFormat(
-                  omneTrab.bajaEmpresa,
-                  "yyyy-MM-dd",
-                ).toJSDate(),
+          fechaBaja: null,
+          finalContrato: null,
           id: omneTrab.empresaID,
         };
 
-        // Si hay algún cambio y hay fecha de alta, lo registro en un solo push
         if (Object.keys(cambios).length > 0 && contrato.fechaAlta !== null) {
-          arrayCambios.push({
-            dni: dniNorm,
-            cambios,
-            contrato,
-          });
+          arrayCambios.push({ dni: dniNorm, cambios, contrato });
         }
       } else {
-        // No existe en App → crear
         const horasContrato = this.conversorHorasContratoAPorcentaje(
           parseFloat(String(omneTrab.horassemana)) || 0,
         );
@@ -301,15 +289,8 @@ export class TrabajadorService {
                 omneTrab.antiguedadEmpresa,
                 "yyyy-MM-dd",
               ).toJSDate();
-        const fechaBaja =
-          omneTrab.bajaEmpresa === "0001-01-01"
-            ? null
-            : DateTime.fromFormat(
-                omneTrab.bajaEmpresa,
-                "yyyy-MM-dd",
-              ).toJSDate();
 
-        if (horasContrato && fechaAlta && fechaAntiguedad && !fechaBaja) {
+        if (horasContrato && fechaAlta && fechaAntiguedad) {
           arrayCrear.push({
             dni: dniNorm,
             nombreApellidos: omneTrab.apellidosYNombre,
@@ -324,37 +305,20 @@ export class TrabajadorService {
             fechaNacimiento: omneTrab.fechaNacimiento?.toJSDate() ?? null,
             llevaEquipo: false,
             tipoTrabajador: "Trabajador",
-            empresa: {
+            roles: {
               connect: {
-                id: omneTrab.empresaID,
+                id: defaultRole.id,
               },
             },
+            empresa: { connect: { id: omneTrab.empresaID } },
             contratos: {
               create: {
                 fechaAlta,
                 fechaAntiguedad,
                 horasContrato,
-                inicioContrato:
-                  omneTrab.altaContrato === "0001-01-01"
-                    ? null
-                    : DateTime.fromFormat(
-                        omneTrab.altaContrato,
-                        "yyyy-MM-dd",
-                      ).toJSDate(),
-                fechaBaja:
-                  omneTrab.bajaEmpresa === "0001-01-01"
-                    ? null
-                    : DateTime.fromFormat(
-                        omneTrab.bajaEmpresa,
-                        "yyyy-MM-dd",
-                      ).toJSDate(),
-                finalContrato:
-                  omneTrab.bajaEmpresa === "0001-01-01"
-                    ? null
-                    : DateTime.fromFormat(
-                        omneTrab.bajaEmpresa,
-                        "yyyy-MM-dd",
-                      ).toJSDate(),
+                inicioContrato: fechaAlta,
+                fechaBaja: null,
+                finalContrato: null,
                 id: omneTrab.empresaID,
               },
             },
@@ -363,19 +327,34 @@ export class TrabajadorService {
       }
     }
 
-    // 4) Detectar eliminaciones en una pasada
-    const omneDnis = new Set(
-      trabajadoresOmne.map((t) => this.normalizarDNI(t.documento)),
+    const omneDnisActivos = new Set(
+      trabajadoresOmne
+        .filter(
+          (t) =>
+            !(
+              t.bajaEmpresa &&
+              t.bajaEmpresa !== "0001-01-01" &&
+              t.bajaEmpresa !== null &&
+              t.bajaEmpresa !== undefined
+            ),
+        )
+        .map((t) => this.normalizarDNI(t.documento)),
     );
-    const arrayEliminar = trabajadoresApp
+
+    const eliminacionesAdicionales = trabajadoresApp
       .map((t) => this.normalizarDNI(t.dni))
-      .filter((dni) => !omneDnis.has(dni))
+      .filter((dni) => !omneDnisActivos.has(dni))
       .map((dni) => ({ dni }));
+
+    const eliminacionesTotales = [
+      ...arrayEliminar,
+      ...eliminacionesAdicionales,
+    ];
 
     return {
       modificar: arrayCambios,
       crear: arrayCrear,
-      eliminar: arrayEliminar,
+      eliminar: eliminacionesTotales,
     };
   }
 
@@ -545,7 +524,18 @@ export class TrabajadorService {
 
   async getTrabajadorByAppId(uid: string) {
     const resUser = await this.schTrabajadores.getTrabajadorByAppId(uid);
-    if (resUser) return resUser;
+    if (resUser) {
+      const permisosPorRoles: Permiso[] = [];
+
+      for (let i = 0; i < resUser.roles.length; i++) {
+        permisosPorRoles.push(...resUser.roles[i].permissions);
+      }
+
+      const permisosTotales = [...permisosPorRoles, ...resUser.permisos];
+
+      resUser.permisos = permisosTotales;
+      return resUser;
+    }
     throw new InternalServerErrorException(
       "No se ha podido obtener la información del usuario",
     );

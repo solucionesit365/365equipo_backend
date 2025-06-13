@@ -224,6 +224,37 @@ export class Cuadrantes {
     return cuadrantes;
   }
 
+  async getCaudrantesEquipo(idTienda: number, fechaBusqueda: DateTime) {
+    const fechaInicioSemana = fechaBusqueda.startOf("week");
+    const fechaFinalSemana = fechaBusqueda.endOf("week");
+    const responsableTienda =
+      await this.trabajadoresInstance.getResponsableTienda(idTienda);
+    const arrayIdSubordinados =
+      await this.trabajadoresInstance.getSubordinadosByIdNew(
+        responsableTienda.id,
+        fechaInicioSemana,
+      );
+
+    // Incluimos al responsable en el array de trabajadores
+    const trabajadoresIds = [
+      responsableTienda.id,
+      ...arrayIdSubordinados.map((t) => t.id),
+    ];
+
+    // Obtenemos los cuadrantes de todos los trabajadores del equipo para esa semana
+    const cuadrantesEquipo: TCuadrante[] = [];
+    for (const idTrabajador of trabajadoresIds) {
+      const cuadrantes = await this.schCuadrantes.getCuadrantesIndividual(
+        idTrabajador,
+        fechaInicioSemana,
+        fechaFinalSemana,
+      );
+      cuadrantesEquipo.push(...cuadrantes);
+    }
+
+    return cuadrantesEquipo;
+  }
+
   async getCuadranteCoordinadora(
     idTrabajador: number,
     arrayIdSubordinados: number[],

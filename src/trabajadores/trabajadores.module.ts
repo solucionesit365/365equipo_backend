@@ -9,6 +9,7 @@ import { DiaPersonalModule } from "../dia-personal/dia-personal.module";
 import { MBCTokenModule } from "../bussinesCentral/services/mbctoken/mbctoken.service.module";
 import { ParametrosModule } from "../parametros/parametros.module";
 import { TiendasModule } from "../tiendas/tiendas.module";
+import { RoleModule } from "../role/role.module";
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { TiendasModule } from "../tiendas/tiendas.module";
     MBCTokenModule,
     ParametrosModule,
     TiendasModule,
+    RoleModule,
     forwardRef(() => SolicitudVacacionesModule),
     forwardRef(() => DiaPersonalModule),
   ],
