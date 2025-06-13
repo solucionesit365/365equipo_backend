@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Body, UseGuards, Query } from "@nestjs/common";
+import { Controller, Post, Get, Body, UseGuards } from "@nestjs/common";
 import { NotificacionHorasExtrasClass } from "./notificacion-horas-extras.class";
 import { TNotificacionHorasExtras } from "./notificacion-horas-extras.dto";
 import { AuthGuard } from "../guards/auth.guard";
@@ -44,21 +44,24 @@ export class NotificacionHorasExtrasController {
       };
     }
   }
+
   @UseGuards(AuthGuard)
   @Get("getNotificacionHorasExtrasByIdSql")
-  getNotificacionHorasExtrasByIdSql(@Query() { idSql }) {
-    try {
-      return this.shNotificacionhorasExtras.getNotificacionHorasExtrasByIdSql(
-        Number(idSql),
+  async getNotificacionHorasExtrasByIdSql(@User() user: UserRecord) {
+    const trabajador = await this.trabajadores.getTrabajadorByAppId(user.uid);
+    const todosTrabajadores = await this.trabajadores.getTrabajadores();
+
+    const tiendasAsignadas = todosTrabajadores
+      .filter((t) => t.idResponsable === trabajador.id && t.idTienda !== null)
+      .map((t) => t.idTienda);
+
+    const notificaciones =
+      await this.shNotificacionhorasExtras.getNotificacionHorasExtrasByIdSql(
+        trabajador.id,
+        tiendasAsignadas,
       );
-    } catch (error) {
-      console.log(error);
-      return {
-        ok: false,
-        message: "Error al obtener notificaciones de horas extras",
-        error: error.message,
-      };
-    }
+
+    return notificaciones;
   }
 
   //Check de revision
