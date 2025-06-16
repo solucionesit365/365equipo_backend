@@ -979,6 +979,7 @@ export class TrabajadorDatabaseService {
         roles: { include: { permissions: true } },
         permisos: true,
         responsable: true,
+        empresa: true,
       },
     });
 
