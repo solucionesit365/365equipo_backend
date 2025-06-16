@@ -6,6 +6,8 @@ import { User } from "../decorators/get-user.decorator";
 import { UserRecord } from "firebase-admin/auth";
 import { Notificaciones } from "../notificaciones/notificaciones.class";
 import { TrabajadorService } from "../trabajadores/trabajadores.class";
+import { DateTime } from "luxon";
+import { SchedulerGuard } from "src/guards/scheduler.guard";
 @Controller("notificar-ampliacion-contratos")
 export class NotificarAmpliacionContratosController {
   constructor(
@@ -233,7 +235,7 @@ export class NotificarAmpliacionContratosController {
     }
 
     const esRRHH_O_Admin = remitente.roles.some(
-      (r) => r.name === "RRHH_Admin" || r.name === "Administracion",
+      (r) => r.name === "RRHH_ADMIN" || r.name === "Administracion",
     );
 
     let destinatarios: any[] = [];
@@ -268,14 +270,14 @@ export class NotificarAmpliacionContratosController {
       const ultimoComentario = body.comentario?.[body.comentario.length - 1];
       const title = "Nuevo comentario en Ampliación de Contratos";
       const message = `${remitente.displayName} comentó: "${ultimoComentario?.mensaje}"`;
-      let url = `/resumenHorasExtrasAdmin`;
+      let url = `/resumenAmpliacionesContratos`;
       if (esRRHH_O_Admin) {
         const registro =
           await this.shNotificacionhorasExtras.getNotificacionAmpliacionContratosById(
             body.id,
           );
         if (d.id === registro.creadorIdsql) {
-          url = `/notificacionhorasextras`;
+          url = `/notificarAmpliacionesContratos`;
         }
       }
 
@@ -332,5 +334,84 @@ export class NotificarAmpliacionContratosController {
       body.dniTrabajador,
       body.horasExtras,
     );
+  }
+
+  @UseGuards(SchedulerGuard)
+  @Post("notificarCaducidadAmpliaciones")
+  async notificarCaducidadAmpliaciones() {
+    const notificaciones =
+      await this.shNotificacionhorasExtras.getAllNotificarAmpliacionContratos();
+    const hoy = DateTime.now().startOf("day");
+
+    // IDs de RRHH_ADMIN (Katy, Ana, Jessi)
+    const rrhhAdminsIds = [
+      "046wOvqPWpQeUQQEkY5SZXQkvJp2", // Katy
+      "I712aJquPwQNsqiiZ2LvQeyMjPw1", // Ana
+      "0vnxV84558dqvlpIyZkygrW9ud62", // Jessi
+    ];
+
+    const trabajadores = await this.trabajadores.getTrabajadores();
+
+    for (const notificacion of notificaciones) {
+      for (const ampliacion of notificacion.ampliacionJornada || []) {
+        // Verifica si la fecha fin ha caducado
+        if (ampliacion.fechaFinAmpliacion) {
+          const fechaFin = DateTime.fromFormat(
+            ampliacion.fechaFinAmpliacion,
+            "dd/MM/yyyy",
+          ).startOf("day");
+
+          const diasAntes = 5;
+          const fechaLimite = hoy.plus({ days: diasAntes });
+
+          if (fechaFin.isValid && fechaFin <= fechaLimite && fechaFin > hoy) {
+            // Buscar supervisora (ajusta el campo según tu modelo)
+            const supervisora = trabajadores.find(
+              (t) =>
+                t.id === notificacion.creadorIdsql &&
+                t.roles?.some((r) => r.name === "Supervisora"),
+            );
+
+            // Buscar RRHH_ADMIN
+            const rrhhAdmins = trabajadores.filter((t) =>
+              rrhhAdminsIds.includes(t.idApp),
+            );
+
+            // Unir destinatarios y eliminar duplicados
+            const destinatarios = [
+              ...(supervisora ? [supervisora] : []),
+              ...rrhhAdmins,
+            ].filter(
+              (v, i, a) => a.findIndex((t) => t.idApp === v.idApp) === i,
+            );
+
+            for (const d of destinatarios) {
+              if (!d?.idApp) continue;
+              const userToken = await this.notificaciones.getFCMToken(d.idApp);
+              if (!userToken?.token) continue;
+
+              // Determinar la URL según el rol
+              let url = "/resumenAmpliacionesContratos";
+              const esRRHH = d.roles?.some((r) => r.name === "RRHH_ADMIN");
+              if (!esRRHH) {
+                url = "/notificarAmpliacionesContratos";
+              }
+
+              const title = "Fin de ampliación/reducción temporal";
+              const message = `La ampliación o reducción temporal para ${
+                notificacion.trabajador || "un trabajador"
+              } esta a punto de caducar.`;
+
+              await this.notificaciones.sendNotificationToDevice(
+                userToken.token,
+                title,
+                message,
+                url,
+              );
+            }
+          }
+        }
+      }
+    }
   }
 }

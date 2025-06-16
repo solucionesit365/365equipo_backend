@@ -174,7 +174,7 @@ export class NotificacionHorasExtrasController {
     }
 
     const esRRHH_O_Admin = remitente.roles.some(
-      (r) => r.name === "RRHH_Admin" || r.name === "Administracion",
+      (r) => r.name === "RRHH_ADMIN" || r.name === "Administracion",
     );
 
     let destinatarios: any[] = [];
