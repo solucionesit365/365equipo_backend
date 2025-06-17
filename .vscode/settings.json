@@ -19,7 +19,4 @@
     "titleBar.inactiveForeground": "#e7e7e799"
   },
   "peacock.color": "#5472e8",
-  "files.eol": "\r\n",
-  "postman.settings.dotenv-detection-notification-visibility": false,
-  "qodana.projectId": "MrvXZ"
-}
+  "files.eol": "\r\n",}
