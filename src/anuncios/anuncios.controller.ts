@@ -175,8 +175,7 @@ export class AnunciosController {
     const asunto = `Candidatura recibida para la oferta: ${oferta}`;
 
     return await this.email.enviarEmail(
-      // "centrodeseleccion@grupohorreols.com",
-      "imariduena@grupohorreols.com",
+      "centrodeseleccion@grupohorreols.com",
       mensaje,
       asunto,
     );
