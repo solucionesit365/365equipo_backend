@@ -462,4 +462,34 @@ export class TrabajadoresController {
   async permitirRegistro(@Body() req: PermitirRegistroDto) {
     return await this.trabajadorInstance.permitirRegistro(req.email);
   }
+
+  @Post("cambiarTiendaEquipo")
+  async cambiarTiendaEquipo(@Body() body: { id: number; tienda: number }) {
+    const trabajador = await this.trabajadorInstance.getTrabajadorBySqlId(
+      body.id,
+    );
+    if (!trabajador) throw new Error("Trabajador no encontrado");
+
+    const original = await this.trabajadorInstance.getTrabajadorBySqlId(
+      trabajador.id,
+    );
+
+    const originalForm: TrabajadorFormRequest = {
+      ...original,
+      arrayRoles: [],
+      arrayPermisos: [],
+    };
+
+    const modificado: TrabajadorFormRequest = {
+      ...originalForm,
+      idTienda: body.tienda,
+    };
+
+    const resultado = await this.trabajadorInstance.guardarCambiosForm(
+      originalForm,
+      modificado,
+    );
+
+    return resultado;
+  }
 }
