@@ -385,4 +385,60 @@ export class FichajesValidadosController {
       return { ok: false, error: err.message };
     }
   }
+
+  // @UseGuards(SchedulerGuard)
+  @Post("NotificarFichajesPendientesSupervisoras")
+  async notificarFichajesPendientesSupervisoras() {
+    const fechaActual = DateTime.now();
+
+    // Obtener todos los trabajadores que son supervisoras y llevan equipo
+    const supervisorasConEquipo = await this.trabajador.getTrabajadores();
+
+    // Filtrar las supervisoras que llevan equipo
+    const usuariosSupervisora = supervisorasConEquipo.filter(
+      (usuario) =>
+        usuario.roles.some((rol) => rol.name === "Supervisora") &&
+        usuario.llevaEquipo,
+    );
+
+    const notificacionesPromises = usuariosSupervisora.map(
+      async (supervisora) => {
+        // Obtener fichajes pendientes de validar de su equipo
+        const fichajesPendientes =
+          await this.fichajesValidadosInstance.getFichajesPagar(
+            supervisora.id,
+            true,
+            fechaActual,
+          );
+        console.log(fichajesPendientes);
+
+        console.log(
+          `Fichajes pendientes para la supervisora ${supervisora.nombreApellidos}: ${fichajesPendientes.length}`,
+        );
+
+        // if (fichajesPendientes.length > 0) {
+        //   const userToken = await this.notificaciones.getFCMToken(
+        //     supervisora.idApp,
+        //   );
+
+        //   if (userToken && userToken.token) {
+        //     try {
+        //       await this.notificaciones.sendNotificationToDevice(
+        //         userToken.token,
+        //         "Fichajes Pendientes",
+        //         `Tienes ${fichajesPendientes.length} fichajes pendientes de validar.`,
+        //         "/fichajes-pendientes", // ruta en tu app
+        //       );
+        //     } catch (error) {
+        //       console.log("Error al enviar notificación:", error);
+        //     }
+        //   }
+        // }
+      },
+    );
+
+    await Promise.all(notificacionesPromises);
+
+    return { ok: true, message: "Notificaciones enviadas correctamente" };
+  }
 }
