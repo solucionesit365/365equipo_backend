@@ -684,6 +684,9 @@ export class TrabajadorService {
     // usuarioGestor: UserRecord, //corregir para que funcione con los permisos
     payload: TrabajadorFormRequest,
   ) {
+    // Asignar automáticamente responsable si cambia la tienda
+    await this.asignarResponsablePorTiendaSiCorresponde(original, payload);
+
     if (payload.idResponsable)
       if (original.idResponsable !== payload.idResponsable) {
         const nuevoResponsable = await this.getTrabajadorBySqlId(
@@ -902,5 +905,25 @@ export class TrabajadorService {
       email.trim().toLowerCase(),
     );
     return trabajador.length > 0;
+  }
+
+  async asignarResponsablePorTiendaSiCorresponde(
+    original: TrabajadorFormRequest,
+    modificado: TrabajadorFormRequest,
+  ): Promise<void> {
+    const cambioDeTienda =
+      original.idTienda !== modificado.idTienda && modificado.idTienda;
+
+    if (cambioDeTienda) {
+      const responsable = await this.getResponsableTienda(modificado.idTienda);
+
+      if (responsable) {
+        modificado.idResponsable = responsable.id;
+      } else {
+        console.warn(
+          `No se encontró responsable para la tienda con ID ${modificado.idTienda}`,
+        );
+      }
+    }
   }
 }
