@@ -463,7 +463,7 @@ export class TrabajadoresController {
     return await this.trabajadorInstance.permitirRegistro(req.email);
   }
 
-  @UseGuards(SchedulerGuard)
+  @UseGuards(AuthGuard)
   @Post("cambiarTiendaEquipo")
   async cambiarTiendaEquipo(@Body() body: { id: number; tienda: number }) {
     const trabajador = await this.trabajadorInstance.getTrabajadorBySqlId(
