@@ -111,4 +111,24 @@ export class FirebaseService {
       );
     }
   }
+  async descargarArchivo(filePath: string): Promise<Buffer> {
+    const bucketName = "silema.appspot.com";
+    const bucket = this.storage.bucket(bucketName);
+    const file = bucket.file(filePath);
+
+    try {
+      const [fileExists] = await file.exists();
+      if (!fileExists) {
+        throw new Error(`El archivo ${filePath} no existe en el bucket.`);
+      }
+
+      const [fileBuffer] = await file.download();
+      return fileBuffer;
+    } catch (error) {
+      console.error("Error al descargar el archivo:", error);
+      throw new InternalServerErrorException(
+        "No se ha podido descargar el archivo",
+      );
+    }
+  }
 }

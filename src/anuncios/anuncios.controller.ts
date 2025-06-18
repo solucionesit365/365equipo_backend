@@ -9,6 +9,8 @@ import { UserRecord } from "firebase-admin/auth";
 import { LoggerService } from "../logger/logger.service";
 import { CompleteUser } from "../decorators/getCompleteUser.decorator";
 import { Trabajador } from "@prisma/client";
+import { EmailService } from "src/email/email.class";
+import { FirebaseService } from "src/firebase/firebase.service";
 
 @Controller("anuncios")
 export class AnunciosController {
@@ -17,6 +19,8 @@ export class AnunciosController {
     private readonly trabajadores: TrabajadorService,
     private readonly anunciosInstance: AnunciosService,
     private readonly loggerService: LoggerService,
+    private readonly email: EmailService,
+    private readonly firebaseService: FirebaseService,
   ) {}
 
   @UseGuards(AuthGuard)
@@ -155,5 +159,40 @@ export class AnunciosController {
       console.log(err);
       return { ok: false, message: err.message };
     }
+  }
+
+  @Post("enviar-candidato")
+  async enviarCandidato(@Body() body: any) {
+    const { nombre, apellidos, tienda, telefono, email, oferta, archivo } =
+      body;
+
+    const mensaje = `
+    <p><strong>Nombre:</strong> ${nombre}</p>
+    <p><strong>Apellidos:</strong> ${apellidos}</p>
+    <p><strong>Tienda:</strong> ${tienda}</p>
+    <p><strong>Teléfono:</strong> ${telefono}</p>
+    <p><strong>Email:</strong> ${email}</p>
+    <p><strong>Oferta:</strong> ${oferta}</p>
+  `;
+
+    const asunto = `Candidatura recibida para la oferta: ${oferta}`;
+
+    let adjuntoBase64 = null;
+
+    if (archivo) {
+      const fileBuffer = await this.firebaseService.descargarArchivo(archivo);
+      adjuntoBase64 = `data:application/pdf;base64,${fileBuffer.toString(
+        "base64",
+      )}`;
+    }
+    const nombreArchivo = archivo ? archivo.split("/").pop() : "cv.pdf";
+
+    return await this.email.enviarEmail(
+      "centrodeseleccion@grupohorreols.com",
+      mensaje,
+      asunto,
+      adjuntoBase64,
+      nombreArchivo,
+    );
   }
 }
