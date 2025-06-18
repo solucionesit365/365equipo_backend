@@ -20,9 +20,13 @@ export class NotificacionHorasExtrasClass {
     return await this.shNotificacionhorasExtras.getAllNotificacionesHorasExtras();
   }
 
-  async getNotificacionHorasExtrasByIdSql(idSql: number) {
+  async getNotificacionHorasExtrasByIdSql(
+    idSql: number,
+    tiendasAsignadas: number[],
+  ) {
     return await this.shNotificacionhorasExtras.getNotificacionHorasExtrasByIdSql(
       idSql,
+      tiendasAsignadas,
     );
   }
 
@@ -109,6 +113,11 @@ export class NotificacionHorasExtrasClass {
     return await this.shNotificacionhorasExtras.buscarCoincidenciasHorasExtras(
       dniTrabajador,
       horasExtras,
+    );
+  }
+  async getNotificacionHorasExtrasById(id: string) {
+    return await this.shNotificacionhorasExtras.getNotificacionHorasExtrasById(
+      id,
     );
   }
 }

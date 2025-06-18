@@ -3,6 +3,7 @@ import { Tienda } from "./tiendas.class";
 import { AuthGuard } from "../guards/auth.guard";
 import { TrabajadorService } from "../trabajadores/trabajadores.class";
 import { FirebaseService } from "../firebase/firebase.service";
+import { GetTiendaByIdDto } from "./tiendas.dto";
 
 @Controller("tiendas")
 export class TiendasController {
@@ -51,5 +52,11 @@ export class TiendasController {
   @Get("tiendas2")
   async getTiendas2() {
     return await this.tiendasInstance.getTiendas2();
+  }
+
+  @UseGuards(AuthGuard)
+  @Get("getTiendaById")
+  getTiendaById(@Query() reqGetTienda: GetTiendaByIdDto) {
+    return this.tiendasInstance.getTiendaByIdExterno(reqGetTienda.id);
   }
 }

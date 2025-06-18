@@ -25,6 +25,10 @@ export class Tienda {
     }
   }
 
+  getTiendaByIdExterno(idTienda: number) {
+    return this.schTiendas.getTiendaById(idTienda);
+  }
+
   private ordenarTiendas(tiendas: TTienda[]) {
     return tiendas.sort((a, b) => {
       const nameA = a.nombre.toLowerCase();

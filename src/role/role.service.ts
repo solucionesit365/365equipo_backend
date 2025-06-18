@@ -69,4 +69,13 @@ export class RoleService {
       },
     });
   }
+
+  async findRoleByName(name: string) {
+    return this.prisma.role.findFirst({
+      where: { name },
+      include: {
+        permissions: true,
+      },
+    });
+  }
 }

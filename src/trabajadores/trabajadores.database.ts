@@ -976,8 +976,10 @@ export class TrabajadorDatabaseService {
           take: 1, // Toma solo el contrato más reciente
         },
         tienda: true,
-        roles: true,
+        roles: { include: { permissions: true } },
+        permisos: true,
         responsable: true,
+        empresa: true,
       },
     });
 
@@ -1520,11 +1522,28 @@ export class TrabajadorDatabaseService {
     modificado: TrabajadorFormRequest,
     original: TrabajadorFormRequest,
   ) {
-    if (modificado.idResponsable != original.idResponsable) {
-      if (modificado.idTienda != original.idTienda)
+    // if (modificado.idResponsable != original.idResponsable) {
+    //   if (modificado.idTienda != original.idTienda)
+    //     throw Error(
+    //       "No es posible cambiar el responsable y la tienda a la vez",
+    //     );
+    // }
+    if (
+      modificado.idResponsable !== original.idResponsable &&
+      modificado.idTienda !== original.idTienda
+    ) {
+      const responsableEsperado = await this.getResponsableTienda(
+        modificado.idTienda,
+      );
+
+      if (
+        !responsableEsperado ||
+        responsableEsperado.id !== modificado.idResponsable
+      ) {
         throw Error(
           "No es posible cambiar el responsable y la tienda a la vez",
         );
+      }
     }
 
     if (original.llevaEquipo && !modificado.llevaEquipo) {

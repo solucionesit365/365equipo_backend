@@ -21,7 +21,7 @@ import { UserRecord } from "firebase-admin/auth";
 import { CopiarSemanaCuadranteDto, GetCuadrantesDto } from "./cuadrantes.dto";
 import { Notificaciones } from "../notificaciones/notificaciones.class";
 import { LoggerService } from "../logger/logger.service";
-import { CompleteUser } from "src/decorators/getCompleteUser.decorator";
+import { CompleteUser } from "../decorators/getCompleteUser.decorator";
 import { Trabajador } from "@prisma/client";
 
 @Controller("cuadrantes")
@@ -38,11 +38,11 @@ export class CuadrantesController {
   @Get()
   async getCuadrantes(
     @Query() req: GetCuadrantesDto,
-    @User() user: UserRecord,
+    @CompleteUser() user: Trabajador,
   ) {
     try {
       const usuarioCompleto =
-        await this.trabajadoresInstance.getTrabajadorByAppId(user.uid);
+        await this.trabajadoresInstance.getTrabajadorByAppId(user.idApp);
 
       const tipoEmpleado = this.cuadrantesInstance.getRole(usuarioCompleto);
       let cuadrantes: TCuadrante[] = [];
@@ -50,6 +50,14 @@ export class CuadrantesController {
       if (tipoEmpleado === "DEPENDIENTA") {
         cuadrantes = await this.cuadrantesInstance.getCuadranteDependienta(
           usuarioCompleto.id,
+          DateTime.fromISO(req.fecha),
+        );
+      }
+
+      if (user.esTienda) {
+        // Si es una tienda, se obtiene el cuadrante de la tienda por su idTienda
+        cuadrantes = await this.cuadrantesInstance.getCaudrantesEquipo(
+          usuarioCompleto.idTienda,
           DateTime.fromISO(req.fecha),
         );
       }
