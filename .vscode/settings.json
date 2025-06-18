@@ -19,4 +19,6 @@
     "titleBar.inactiveForeground": "#e7e7e799"
   },
   "peacock.color": "#5472e8",
-  "files.eol": "\r\n",}
+  "files.eol": "\r\n",
+  "postman.settings.dotenv-detection-notification-visibility": false
+}

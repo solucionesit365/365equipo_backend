@@ -11,6 +11,11 @@ export class TiendaDto {
   direccion: string;
 }
 
+export class GetTiendaByIdDto {
+  @IsNumber()
+  id: number;
+}
+
 export interface Tienda {
   id: number;
   nombre: string;

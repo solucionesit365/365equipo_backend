@@ -66,10 +66,11 @@ export class TrabajadoresController {
       contratos: true,
     })) as Array<Prisma.TrabajadorGetPayload<{ include: { contratos: true } }>>;
 
-    const cambiosDetectados = this.trabajadorInstance.getCambiosDetectados(
-      trabajadoresApp,
-      trabajadoresOmne,
-    );
+    const cambiosDetectados =
+      await this.trabajadorInstance.getCambiosDetectados(
+        trabajadoresApp,
+        trabajadoresOmne,
+      );
 
     const BATCH_SIZE = 50;
 

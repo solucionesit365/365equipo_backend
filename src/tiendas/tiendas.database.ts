@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, InternalServerErrorException } from "@nestjs/common";
 import { Prisma } from "@prisma/client";
 import { PrismaService } from "../prisma/prisma.service";
 import { Tiendas2 } from "./tiendas.dto";
@@ -20,6 +20,19 @@ export class TiendaDatabaseService {
     });
 
     return !!resCreate.count;
+  }
+
+  async getTiendaById(id: number) {
+    try {
+      return this.prisma.tienda.findFirstOrThrow({
+        where: {
+          id,
+        },
+      });
+    } catch (err) {
+      console.log(err);
+      throw new InternalServerErrorException();
+    }
   }
 
   async geTiendas2() {
