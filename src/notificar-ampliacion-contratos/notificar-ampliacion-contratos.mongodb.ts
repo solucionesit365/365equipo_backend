@@ -319,4 +319,14 @@ export class NotificarAmpliacionContratosMongoService {
       })
       .toArray();
   }
+  async getNotificacionAmpliacionContratosById(id: string) {
+    const db = (await this.mongoDbService.getConexion()).db();
+    const notificacionesCollection = db.collection(
+      "notificarAmpliacionContratos",
+    );
+
+    return await notificacionesCollection.findOne({
+      _id: new ObjectId(id),
+    });
+  }
 }

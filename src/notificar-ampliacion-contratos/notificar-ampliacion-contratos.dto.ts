@@ -58,6 +58,10 @@ class TAmpliacionContrato {
   @IsString()
   motivo?: string;
 
+  @IsOptional()
+  @IsString()
+  file?: string;
+
   @IsBoolean()
   ampliacion: boolean;
 

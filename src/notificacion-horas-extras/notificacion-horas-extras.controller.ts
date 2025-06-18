@@ -1,12 +1,18 @@
-import { Controller, Post, Get, Body, UseGuards, Query } from "@nestjs/common";
+import { Controller, Post, Get, Body, UseGuards } from "@nestjs/common";
 import { NotificacionHorasExtrasClass } from "./notificacion-horas-extras.class";
 import { TNotificacionHorasExtras } from "./notificacion-horas-extras.dto";
 import { AuthGuard } from "../guards/auth.guard";
+import { User } from "../decorators/get-user.decorator";
+import { UserRecord } from "firebase-admin/auth";
+import { Notificaciones } from "../notificaciones/notificaciones.class";
+import { TrabajadorService } from "src/trabajadores/trabajadores.class";
 
 @Controller("notificacion-horas-extras")
 export class NotificacionHorasExtrasController {
   constructor(
     private readonly shNotificacionhorasExtras: NotificacionHorasExtrasClass,
+    private readonly notificaciones: Notificaciones,
+    private readonly trabajadores: TrabajadorService,
   ) {}
 
   @UseGuards(AuthGuard)
@@ -38,21 +44,24 @@ export class NotificacionHorasExtrasController {
       };
     }
   }
+
   @UseGuards(AuthGuard)
   @Get("getNotificacionHorasExtrasByIdSql")
-  getNotificacionHorasExtrasByIdSql(@Query() { idSql }) {
-    try {
-      return this.shNotificacionhorasExtras.getNotificacionHorasExtrasByIdSql(
-        Number(idSql),
+  async getNotificacionHorasExtrasByIdSql(@User() user: UserRecord) {
+    const trabajador = await this.trabajadores.getTrabajadorByAppId(user.uid);
+    const todosTrabajadores = await this.trabajadores.getTrabajadores();
+
+    const tiendasAsignadas = todosTrabajadores
+      .filter((t) => t.idResponsable === trabajador.id && t.idTienda !== null)
+      .map((t) => t.idTienda);
+
+    const notificaciones =
+      await this.shNotificacionhorasExtras.getNotificacionHorasExtrasByIdSql(
+        trabajador.id,
+        tiendasAsignadas,
       );
-    } catch (error) {
-      console.log(error);
-      return {
-        ok: false,
-        message: "Error al obtener notificaciones de horas extras",
-        error: error.message,
-      };
-    }
+
+    return notificaciones;
   }
 
   //Check de revision
@@ -132,10 +141,9 @@ export class NotificacionHorasExtrasController {
       body.data,
     );
   }
-
   @UseGuards(AuthGuard)
   @Post("updateNotificacionHorasExtrasComentario")
-  updateNotificacionHorasExtrasComentario(
+  async updateNotificacionHorasExtrasComentario(
     @Body()
     body: {
       id: string;
@@ -146,8 +154,9 @@ export class NotificacionHorasExtrasController {
         nombre: string;
       }[];
     },
+    @User() user: UserRecord,
   ) {
-    return this.shNotificacionhorasExtras.updateComentarioHorasExtras(
+    const result = this.shNotificacionhorasExtras.updateComentarioHorasExtras(
       body.id,
       body.horaExtraId,
       body.comentario?.map((c) => ({
@@ -155,7 +164,81 @@ export class NotificacionHorasExtrasController {
         fechaRespuesta: new Date(c.fechaRespuesta).toISOString(),
       })),
     );
+
+    const trabajadores = await this.trabajadores.getTrabajadores();
+    const remitente = trabajadores.find((t) => t.idApp === user.uid);
+
+    if (!remitente) {
+      console.warn("Remitente no encontrado");
+      return result;
+    }
+
+    const esRRHH_O_Admin = remitente.roles.some(
+      (r) => r.name === "RRHH_ADMIN" || r.name === "Administracion",
+    );
+
+    let destinatarios: any[] = [];
+
+    if (esRRHH_O_Admin) {
+      const registro =
+        await this.shNotificacionhorasExtras.getNotificacionHorasExtrasById(
+          body.id,
+        );
+      const creador = trabajadores.find(
+        (t) => t.id === registro.creadorIdsql && t.idApp !== user.uid,
+      );
+      if (creador) destinatarios.push(creador);
+    } else {
+      destinatarios = trabajadores.filter(
+        (t) =>
+          t.idApp !== user.uid &&
+          (t.idApp === "tQjpDBpj3nOfefgmTSF3EximSFV2" ||
+            t.idApp === "046wOvqPWpQeUQQEkY5SZXQkvJp2" ||
+            t.idApp === "9DK8wj2ahUe6mMcjmui5LloOi5r2"),
+      );
+    }
+
+    for (const d of destinatarios) {
+      if (!d?.idApp) continue;
+
+      const userToken = await this.notificaciones.getFCMToken(d.idApp);
+      if (!userToken?.token) {
+        console.warn("No se encontró FCM token para", d.displayName);
+        continue;
+      }
+
+      const ultimoComentario = body.comentario?.[body.comentario.length - 1];
+      const title = "Nuevo comentario en Horas Extras";
+      const message = `${remitente.displayName} comentó: "${ultimoComentario?.mensaje}"`;
+      let url = `/resumenHorasExtrasAdmin`;
+      if (esRRHH_O_Admin) {
+        const registro =
+          await this.shNotificacionhorasExtras.getNotificacionHorasExtrasById(
+            body.id,
+          );
+        if (d.id === registro.creadorIdsql) {
+          url = `/notificacionhorasextras`;
+        }
+      }
+
+      const response = await this.notificaciones.sendNotificationToDevice(
+        userToken.token,
+        title,
+        message,
+        url,
+      );
+      console.log(
+        "Notificación enviada a",
+        d.displayName,
+        "Respuesta FCM:",
+        response,
+      );
+    }
+
+    return result;
   }
+
+  @UseGuards(AuthGuard)
   @Post("updateUltimoLeido")
   async marcarLeido(
     @Body()
