@@ -238,6 +238,7 @@ export class NotificacionHorasExtrasController {
     return result;
   }
 
+  @UseGuards(AuthGuard)
   @Post("updateUltimoLeido")
   async marcarLeido(
     @Body()
