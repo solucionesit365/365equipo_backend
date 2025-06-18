@@ -29,6 +29,7 @@ export class EmailService {
     mensaje: string,
     asunto: string,
     imagenBase64?: string,
+    nombreArchivo?: string,
   ) {
     if (to && mensaje && asunto) {
       const mailOptions = {
@@ -40,10 +41,17 @@ export class EmailService {
       };
 
       if (imagenBase64) {
+        let filename = "imagen.png";
+        let contentType = "image/png";
+        if (imagenBase64.startsWith("data:application/pdf")) {
+          filename = nombreArchivo || "cv.pdf";
+          contentType = "application/pdf";
+        }
         mailOptions.attachments.push({
-          filename: "imagen.png",
+          filename,
           content: imagenBase64.split("base64,")[1],
           encoding: "base64",
+          contentType,
           cid: "123456",
         });
       }
