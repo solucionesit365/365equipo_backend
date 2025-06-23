@@ -34,8 +34,6 @@ export class PactadoVsRealService {
       uidParaConsultar,
     );
 
-    console.log(subordinados);
-
     const idsSubordinados = subordinados.map((s) => s.id);
 
     // También incluir trabajadores que han fichado en la tienda, aunque no sean subordinados
