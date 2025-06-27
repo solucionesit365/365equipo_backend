@@ -7,8 +7,6 @@ import { SolicitudVacacionesModule } from "../solicitud-vacaciones/solicitud-vac
 import { TrabajadoresController } from "./trabajadores.controller";
 import { DiaPersonalModule } from "../dia-personal/dia-personal.module";
 import { MBCTokenModule } from "../bussinesCentral/services/mbctoken/mbctoken.service.module";
-import { ParametrosModule } from "../parametros/parametros.module";
-import { TiendasModule } from "../tiendas/tiendas.module";
 import { RoleModule } from "../role/role.module";
 
 @Module({
@@ -16,8 +14,6 @@ import { RoleModule } from "../role/role.module";
     PermisosModule,
     EmailModule,
     MBCTokenModule,
-    ParametrosModule,
-    TiendasModule,
     RoleModule,
     forwardRef(() => SolicitudVacacionesModule),
     forwardRef(() => DiaPersonalModule),

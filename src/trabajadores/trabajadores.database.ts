@@ -2,9 +2,7 @@ import { Injectable, InternalServerErrorException } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { DateTime } from "luxon";
 import { Prisma } from "@prisma/client";
-import { ParametrosService } from "../parametros/parametros.service";
-import { Tienda } from "../tiendas/tiendas.class";
-import pMap = require("p-map");
+import pMap from "p-map";
 import {
   CreateTrabajadorRequestDto,
   TrabajadorFormRequest,
@@ -24,8 +22,6 @@ export interface TIncludeTrabajador {
 export class TrabajadorDatabaseService {
   constructor(
     private prisma: PrismaService,
-    private readonly parametrosService: ParametrosService,
-    private readonly tiendaInstance: Tienda,
     private readonly axiosBCService: AxiosBcService,
   ) {}
 

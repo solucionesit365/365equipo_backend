@@ -6,7 +6,6 @@ import {
 } from "@nestjs/common";
 import { EmailService } from "../email/email.class";
 import { FirebaseService } from "../firebase/firebase.service";
-import { PermisosService } from "../permisos/permisos.class";
 import { DateTime } from "luxon";
 import { SolicitudesVacacionesService } from "../solicitud-vacaciones/solicitud-vacaciones.class";
 import { DiaPersonalClass } from "../dia-personal/dia-personal.class";
@@ -60,9 +59,7 @@ interface TOmneTrabajador {
 @Injectable()
 export class TrabajadorService {
   constructor(
-    @Inject(forwardRef(() => FirebaseService))
     private readonly firebaseService: FirebaseService,
-    private readonly permisosInstance: PermisosService,
     private readonly emailInstance: EmailService,
     @Inject(forwardRef(() => SolicitudesVacacionesService))
     private readonly solicitudesVacaciones: SolicitudesVacacionesService,
@@ -542,9 +539,8 @@ export class TrabajadorService {
   }
 
   async getTrabajadoresByTienda(idTienda: number) {
-    const resUser = await this.schTrabajadores.getTrabajadoresByTienda(
-      idTienda,
-    );
+    const resUser =
+      await this.schTrabajadores.getTrabajadoresByTienda(idTienda);
     if (resUser) return resUser;
     throw Error(
       `No se ha podido obtener los trabajadores de la tienda ${idTienda} `,

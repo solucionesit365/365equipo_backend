@@ -14,7 +14,7 @@ import { Roles } from "../decorators/role.decorator";
 import { User } from "../decorators/get-user.decorator";
 import { UserRecord } from "firebase-admin/auth";
 import { Prisma } from "@prisma/client";
-import pMap = require("p-map");
+import pMap from "p-map";
 import {
   CreateTrabajadorRequestDto,
   DeleteTrabajadorDto,
@@ -430,9 +430,8 @@ export class TrabajadoresController {
       }
 
       // Buscar trabajador por código de empleado (ID)
-      const trabajador = await this.trabajadorInstance.getTrabajadorByCodigo(
-        codigoEmpleado,
-      );
+      const trabajador =
+        await this.trabajadorInstance.getTrabajadorByCodigo(codigoEmpleado);
 
       if (!trabajador) {
         return { ok: false, message: "Código de empleado inválido" };

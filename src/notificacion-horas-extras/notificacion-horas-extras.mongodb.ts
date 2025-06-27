@@ -3,6 +3,35 @@ import { MongoService } from "../mongo/mongo.service";
 import { TNotificacionHorasExtras } from "./notificacion-horas-extras.dto";
 import { ObjectId } from "mongodb";
 
+/** Un único item de horasExtras */
+export interface HoraExtra {
+  /** nuestro ID en formato string */
+  _id: string;
+  motivo: string;
+  fecha: string;
+  horaInicio: string;
+  horaFinal: string;
+  tienda: string;
+  revision?: boolean;
+  apagar?: boolean;
+  comentario?: {
+    nombre: string;
+    fechaRespuesta: string;
+    mensaje: string;
+  }[];
+  ultimosLeidos?: Record<string, string>;
+}
+
+/** Documento completo de notificación en Mongo */
+export interface NotificacionHorasExtrasDoc {
+  _id: ObjectId;
+  trabajador: string;
+  creadorIdsql: number;
+  tiendaPrincipal: number;
+  dniTrabajador: string;
+  horasExtras: HoraExtra[];
+}
+
 @Injectable()
 export class NotificacionHorasExtrasMongoService {
   constructor(private readonly mongoDbService: MongoService) {}
@@ -87,7 +116,9 @@ export class NotificacionHorasExtrasMongoService {
   //Eliminar una notificacion de horas extras
   async deleteNotificacionHorasExtras(idHorasExtras: string) {
     const db = (await this.mongoDbService.getConexion()).db();
-    const notificacionesCollection = db.collection("notificacionesHorasExtras");
+    const notificacionesCollection = db.collection<NotificacionHorasExtrasDoc>(
+      "notificacionesHorasExtras",
+    );
 
     // Paso 1: Eliminar solo el objeto del array horasExtras
     const result = await notificacionesCollection.updateOne(
@@ -183,7 +214,9 @@ export class NotificacionHorasExtrasMongoService {
     }[],
   ) {
     const db = (await this.mongoDbService.getConexion()).db();
-    const notificacionesCollection = db.collection("notificacionesHorasExtras");
+    const notificacionesCollection = db.collection<NotificacionHorasExtrasDoc>(
+      "notificacionesHorasExtras",
+    );
 
     return await notificacionesCollection.updateOne(
       { _id: new ObjectId(id), "horasExtras._id": horaExtraId },
