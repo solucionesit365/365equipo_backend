@@ -8,50 +8,56 @@ datasource db {
 }
 
 model Trabajador {
-  id               Int          @id @default(autoincrement())
-  idApp            String?      @unique
-  nombreApellidos  String
-  displayName      String?
-  emails           String
-  workEmail        String?
-  dni              String       @unique
-  direccion        String?
-  ciudad           String?
-  telefonos        String?
-  fechaNacimiento  DateTime?
-  nacionalidad     String?
-  nSeguridadSocial String?
-  codigoPostal     String?
-  cuentaCorriente  String?
-  tipoTrabajador   String
-  idResponsable    Int?
-  idTienda         Int?
-  llevaEquipo      Boolean
-  tokenQR          String?
-  displayFoto      String?
-  excedencia       Boolean      @default(false)
-  dispositivo      String?
-  empresaId        String?
-  nPerceptor       Int? // Nuevo campo
-  esTienda         Boolean      @default(false)
-  contratos        Contrato2[]
-  empresa          Empresa?     @relation(fields: [empresaId], references: [id])
-  responsable      Trabajador?  @relation("Responsable", fields: [idResponsable], references: [id])
-  subordinados     Trabajador[] @relation("Responsable")
-  tienda           Tienda?      @relation(fields: [idTienda], references: [id])
-  permisos         Permiso[]    @relation("PermisoToTrabajador")
-  roles            Role[]       @relation("RoleToTrabajador")
+  id                    Int          @id @default(autoincrement())
+  idApp                 String?      @unique
+  nombreApellidos       String
+  displayName           String?
+  emails                String
+  workEmail             String?
+  dni                   String       @unique
+  direccion             String?
+  ciudad                String?
+  telefonos             String?
+  fechaNacimiento       DateTime?
+  nacionalidad          String?
+  nSeguridadSocial      String?
+  codigoPostal          String?
+  cuentaCorriente       String?
+  tipoTrabajador        String
+  idResponsable         Int?
+  idTienda              Int?
+  llevaEquipo           Boolean
+  turnos                Turno[]
+  tokenQR               String?
+  displayFoto           String?
+  excedencia            Boolean      @default(false)
+  dispositivo           String?
+  empresaId             String?
+  responsableDeLaTienda Tienda?      @relation("TiendaCoordinator")
+  nPerceptor            Int? // Nuevo campo
+  esTienda              Boolean      @default(false)
+  contratos             Contrato2[]
+  empresa               Empresa?     @relation(fields: [empresaId], references: [id])
+  responsable           Trabajador?  @relation("Responsable", fields: [idResponsable], references: [id])
+  subordinados          Trabajador[] @relation("Responsable")
+  tienda                Tienda?      @relation(fields: [idTienda], references: [id])
+  permisos              Permiso[]    @relation("PermisoToTrabajador")
+  roles                 Role[]       @relation("RoleToTrabajador")
 
   // Índice único compuesto
   @@unique([empresaId, nPerceptor])
 }
 
 model Tienda {
-  id           Int          @id @default(autoincrement())
-  nombre       String
-  direccion    String?
-  idExterno    Int?
-  trabajadores Trabajador[]
+  id            Int          @id @default(autoincrement())
+  nombre        String
+  direccion     String?
+  idExterno     Int?
+  trabajadores  Trabajador[]
+  coordinatorId Int?         @unique
+  coordinator   Trabajador?  @relation("TiendaCoordinator", fields: [coordinatorId], references: [id])
+
+  turnos Turno[]
 }
 
 model Equipo {
@@ -210,6 +216,17 @@ model SmsOtp {
   otp   String
   date  DateTime @default(now())
   used  Boolean  @default(false)
+}
+
+model Turno {
+  id           String     @id @default(uuid())
+  inicio       DateTime
+  final        DateTime
+  tiendaId     Int
+  tienda       Tienda     @relation(fields: [tiendaId], references: [id])
+  idTrabajador Int
+  Trabajador   Trabajador @relation(fields: [idTrabajador], references: [id])
+  borrable     Boolean    @default(false)
 }
 
 enum ColorSemanal {

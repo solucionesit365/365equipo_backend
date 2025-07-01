@@ -7,6 +7,8 @@ import {
   Query,
   HttpException,
   HttpStatus,
+  InternalServerErrorException,
+  UnauthorizedException,
 } from "@nestjs/common";
 import { AuthGuard } from "../guards/auth.guard";
 import { Cuadrantes } from "./cuadrantes.class";
@@ -18,7 +20,12 @@ import { ObjectId } from "mongodb";
 import { ContratoService } from "../contrato/contrato.service";
 import { User } from "../decorators/get-user.decorator";
 import { UserRecord } from "firebase-admin/auth";
-import { CopiarSemanaCuadranteDto, GetCuadrantesDto } from "./cuadrantes.dto";
+import {
+  CopiarSemanaCuadranteDto,
+  GetCuadranteIndividual,
+  GetCuadrantesDto,
+  GetCuadranteTiendaSemanal,
+} from "./cuadrantes.dto";
 import { Notificaciones } from "../notificaciones/notificaciones.class";
 import { LoggerService } from "../logger/logger.service";
 import { CompleteUser } from "../decorators/getCompleteUser.decorator";
@@ -114,42 +121,24 @@ export class CuadrantesController {
   @UseGuards(AuthGuard)
   @Get("individual")
   async getCuadrantesIndividual(
-    @Query()
-    {
-      idTrabajador,
-      fecha,
-      uid,
-    }: { fecha: string; idTrabajador: string; uid?: string },
+    @Query() req: GetCuadranteIndividual,
     @User() user: UserRecord,
   ) {
-    try {
-      // Usa el UID de la Coordinadora_A si lo recibe en la petición, sino usa el del usuario actual
-      const uidParaConsultar = uid || user.uid;
-      const usuarioCompleto =
-        await this.trabajadoresInstance.getTrabajadorByAppId(uidParaConsultar);
+    // Usa el UID de la Coordinadora_A si lo recibe en la petición, sino usa el del usuario actual
+    const uidParaConsultar = req.uid || user.uid;
+    const usuarioCompleto =
+      await this.trabajadoresInstance.getTrabajadorByAppId(uidParaConsultar);
 
-      if (!fecha || !idTrabajador) throw Error("Faltan datos");
+    if (!usuarioCompleto.llevaEquipo || !usuarioCompleto.idTienda)
+      throw new UnauthorizedException();
+    const fechaInicio = DateTime.fromISO(req.fecha).startOf("week");
+    const fechaFinal = fechaInicio.endOf("week");
 
-      if (usuarioCompleto.llevaEquipo && usuarioCompleto.idTienda) {
-        const fechaInicio = DateTime.fromJSDate(new Date(fecha)).startOf(
-          "week",
-        );
-        const fechaFinal = fechaInicio.endOf("week");
-
-        return {
-          ok: true,
-          data: await this.cuadrantesInstance.getCuadrantesIndividual(
-            Number(idTrabajador),
-            fechaInicio,
-            fechaFinal,
-          ),
-        };
-      }
-      throw Error("Opción no disponible para este tipo de empled@");
-    } catch (err) {
-      console.log(err);
-      return { ok: false, message: err.message };
-    }
+    return this.cuadrantesInstance.getCuadrantesIndividual(
+      req.idTrabajador,
+      fechaInicio,
+      fechaFinal,
+    );
   }
 
   @UseGuards(AuthGuard)
@@ -190,19 +179,10 @@ export class CuadrantesController {
   //Todas las tiendas 1 semana
   @UseGuards(AuthGuard)
   @Get("getTiendasUnaSemana")
-  async getTiendas1Semana(@Query() { fecha }: { fecha: string }) {
-    try {
-      if (!fecha) throw Error("Faltan datos");
-      return {
-        ok: true,
-        data: await this.cuadrantesInstance.getTiendas1Semana(
-          DateTime.fromJSDate(new Date(fecha)),
-        ),
-      };
-    } catch (err) {
-      console.log(err);
-      return { ok: false, message: err.message };
-    }
+  async getTiendas1Semana(@Query() req: GetCuadranteTiendaSemanal) {
+    return await this.cuadrantesInstance.getTiendas1Semana(
+      DateTime.fromISO(req.fecha),
+    );
   }
 
   @UseGuards(AuthGuard)

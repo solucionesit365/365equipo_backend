@@ -36,6 +36,7 @@ export interface Tiendas2 {
   Latitud: number;
   Longitud: number;
   Tipo: string;
+  coordinatorId: number;
   id: number;
   idExterno: number;
   telefono: number;

@@ -64,6 +64,8 @@ import { PowerAutomateModule } from "./power-automate/power-automate.module";
 import { AxiosModule } from "./axios/axios.module";
 import { NotificarAmpliacionContratosModule } from "./notificar-ampliacion-contratos/notificar-ampliacion-contratos.module";
 import { GraphModule } from "./graph/graph.module";
+import { TurnoModule } from "./turno/turno.module";
+import { CoordinadoraModule } from './coordinadora/coordinadora.module';
 
 @Module({
   imports: [
@@ -132,6 +134,8 @@ import { GraphModule } from "./graph/graph.module";
     PowerAutomateModule,
     AxiosModule,
     NotificarAmpliacionContratosModule,
+    TurnoModule,
+    CoordinadoraModule,
   ],
   controllers: [AppController, KpiTiendasController],
 })
