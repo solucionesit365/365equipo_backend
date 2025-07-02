@@ -42,4 +42,8 @@ export class TurnoService {
 
     return turnosUnicos;
   }
+
+  getTurnosSemanalesDelTrabajador(idTrabajador: number, fecha: DateTime) {
+    return this.turnoRepository.getTurnosPorTrabajador(idTrabajador, fecha);
+  }
 }

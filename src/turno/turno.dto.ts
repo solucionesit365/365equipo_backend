@@ -11,3 +11,13 @@ export class GetTurnosCoordinadora {
   @IsString()
   fecha: string;
 }
+
+export class GetSemanaIndividual {
+  @IsNotEmpty()
+  @Type(() => Number)
+  idTrabajador: number;
+
+  @IsNotEmpty()
+  @IsString()
+  fecha: string;
+}

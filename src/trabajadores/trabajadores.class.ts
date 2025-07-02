@@ -604,8 +604,8 @@ export class TrabajadorService {
     return await this.schTrabajadores.getSubordinados(uid);
   }
 
-  async getSubordinadosById(id: number, conFecha?: DateTime) {
-    return await this.schTrabajadores.getSubordinadosById(id, conFecha);
+  getSubordinadosById(id: number, conFecha?: DateTime) {
+    return this.schTrabajadores.getSubordinadosById(id, conFecha);
   }
 
   async getSubordinadosByIdNew(id: number, conFecha?: DateTime) {

@@ -66,6 +66,7 @@ import { NotificarAmpliacionContratosModule } from "./notificar-ampliacion-contr
 import { GraphModule } from "./graph/graph.module";
 import { TurnoModule } from "./turno/turno.module";
 import { CoordinadoraModule } from './coordinadora/coordinadora.module';
+import { PlantillaTurnoModule } from './plantilla-turno/plantilla-turno.module';
 
 @Module({
   imports: [
@@ -136,6 +137,7 @@ import { CoordinadoraModule } from './coordinadora/coordinadora.module';
     NotificarAmpliacionContratosModule,
     TurnoModule,
     CoordinadoraModule,
+    PlantillaTurnoModule,
   ],
   controllers: [AppController, KpiTiendasController],
 })

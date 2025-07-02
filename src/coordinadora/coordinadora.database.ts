@@ -7,13 +7,14 @@ export class CoordinadoraDatabaseService {
 
   async getCoordinadoraPorTienda(idTienda: number) {
     try {
-      return await this.prismaService.trabajador.findFirst({
+      const coordinadora = await this.prismaService.trabajador.findFirst({
         where: {
-          responsableDeLaTienda: {
+          coordinadoraDeLaTienda: {
             id: idTienda,
           },
         },
       });
+      return coordinadora;
     } catch (error) {
       console.error(error);
       throw new InternalServerErrorException();

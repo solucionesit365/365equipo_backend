@@ -972,6 +972,7 @@ export class TrabajadorDatabaseService {
           take: 1, // Toma solo el contrato más reciente
         },
         tienda: true,
+        coordinadoraDeLaTienda: true,
         roles: { include: { permissions: true } },
         permisos: true,
         responsable: true,
@@ -1290,51 +1291,58 @@ export class TrabajadorDatabaseService {
   }
 
   async getSubordinadosById(id: number, conFecha?: DateTime) {
-    if (!conFecha) {
-      conFecha = DateTime.now();
-    }
+    try {
+      if (!conFecha) {
+        conFecha = DateTime.now();
+      }
 
-    const subordinados = await this.prisma.trabajador.findMany({
-      where: {
-        idResponsable: id,
-        contratos: {
-          some: {
-            AND: [
-              {
-                fechaAlta: {
-                  lte: conFecha.toJSDate(),
+      const subordinados = await this.prisma.trabajador.findMany({
+        where: {
+          idResponsable: id,
+          contratos: {
+            some: {
+              AND: [
+                {
+                  fechaAlta: {
+                    lte: conFecha.toJSDate(),
+                  },
                 },
-              },
-              {
-                OR: [
-                  {
-                    fechaBaja: {
-                      gte: conFecha.toJSDate(),
+                {
+                  OR: [
+                    {
+                      fechaBaja: {
+                        gte: conFecha.toJSDate(),
+                      },
                     },
-                  },
-                  {
-                    fechaBaja: null,
-                  },
-                ],
-              },
-            ],
+                    {
+                      fechaBaja: null,
+                    },
+                  ],
+                },
+              ],
+            },
           },
         },
-      },
-      include: {
-        contratos: {
-          where: {
-            fechaBaja: null,
+        include: {
+          contratos: {
+            where: {
+              fechaBaja: null,
+            },
+            orderBy: {
+              fechaAlta: "desc",
+            },
+            take: 1,
           },
-          orderBy: {
-            fechaAlta: "desc",
-          },
-          take: 1,
         },
-      },
-    });
+      });
 
-    return subordinados;
+      return subordinados;
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException(
+        `Error al obtener subordinados por ID`,
+      );
+    }
   }
 
   async getSubordinadosConTiendaPorId(idResponsable: number) {
