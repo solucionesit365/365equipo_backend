@@ -24,24 +24,28 @@ export class PactadoVsRealController {
   @Get()
   async pactadoVsReal(
     @Query() req: GetPactadoVsRealRequestDto,
+    @Query("uid") uid: string,
     @User() user: UserRecord,
   ) {
     if (!req.fechaInicio)
       return new BadRequestException("fechaInicio es requerida");
+    const uidParaConsultar = uid || user.uid;
 
     const inicio = DateTime.fromJSDate(req.fechaInicio);
     const usuarioCompleto = await this.trabajadorService.getTrabajadorByAppId(
-      user.uid,
+      uidParaConsultar,
     );
+    const idTienda = usuarioCompleto.idTienda;
 
     const data = await this.pactadoRealService.pactadoVsReal(
-      user,
+      uidParaConsultar,
       inicio.startOf("week"),
-      usuarioCompleto.idTienda,
+      idTienda,
     );
 
     return {
       ok: true,
+      idTienda,
       data,
     };
   }
