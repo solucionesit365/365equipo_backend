@@ -1,10 +1,11 @@
 import { Injectable, InternalServerErrorException } from "@nestjs/common";
-import { PrismaService } from "../prisma/prisma.service";
 import { Prisma } from "@prisma/client";
 import { DateTime } from "luxon";
+import { PrismaService } from "../prisma/prisma.service";
+import { ITurnoRepository } from "./turno.repository.interface";
 
 @Injectable()
-export class TurnoDatabaseService {
+export class TurnoRepository implements ITurnoRepository {
   constructor(private readonly prismaService: PrismaService) {}
 
   async createTurno(turno: Prisma.TurnoCreateInput) {
@@ -18,11 +19,10 @@ export class TurnoDatabaseService {
     }
   }
 
-  async getTurnosTrabajador(
-    idTrabajador: number,
-    inicio: DateTime,
-    final: DateTime,
-  ) {
+  async getTurnosPorTrabajador(idTrabajador: number, fecha: DateTime) {
+    const inicio = fecha.startOf("day");
+    const final = fecha.endOf("day");
+
     try {
       return await this.prismaService.turno.findMany({
         where: {
@@ -40,12 +40,11 @@ export class TurnoDatabaseService {
     }
   }
 
-  async getTurnosPorTienda(
-    idTienda: number,
-    inicio: DateTime,
-    final: DateTime,
-  ) {
+  async getTurnosPorTienda(idTienda: number, fecha: DateTime) {
     try {
+      const inicio = fecha.startOf("week");
+      const final = fecha.endOf("week");
+
       return await this.prismaService.turno.findMany({
         where: {
           tiendaId: idTienda,
@@ -61,12 +60,11 @@ export class TurnoDatabaseService {
     }
   }
 
-  async getTurnosPorEquipo(
-    idResponsableEquipo: number,
-    inicio: DateTime,
-    final: DateTime,
-  ) {
+  async getTurnosPorEquipo(idResponsableEquipo: number, fecha: DateTime) {
     try {
+      const inicio = fecha.startOf("week");
+      const final = fecha.endOf("week");
+
       return await this.prismaService.turno.findMany({
         where: {
           Trabajador: {
@@ -76,6 +74,19 @@ export class TurnoDatabaseService {
             gte: inicio.toJSDate(),
             lte: final.toJSDate(),
           },
+        },
+      });
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException();
+    }
+  }
+
+  async deleteTurno(idTurno: string) {
+    try {
+      return await this.prismaService.turno.delete({
+        where: {
+          id: idTurno,
         },
       });
     } catch (error) {

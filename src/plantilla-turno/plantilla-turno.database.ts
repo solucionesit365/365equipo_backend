@@ -37,4 +37,17 @@ export class PlantillaTurnoDatabase {
       throw new InternalServerErrorException();
     }
   }
+
+  async deletePlantilla(idPlantilla: string) {
+    try {
+      return await this.prismaService.plantillaTurno.delete({
+        where: {
+          id: idPlantilla,
+        },
+      });
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException();
+    }
+  }
 }

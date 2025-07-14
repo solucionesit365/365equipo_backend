@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Post, Query } from "@nestjs/common";
 import {
   CreatePlantillasTurnosTienda,
+  DeletePlantillaTurnos,
   GetPlantillasTurnosTienda,
 } from "./plantilla-turno.dto";
 import { PlantillaTurnoRepository } from "./plantilla-turno.repository";
@@ -33,5 +34,12 @@ export class PlantillaTurnoController {
       },
       order: nuevaPlantillaTurno.order,
     });
+  }
+
+  @Post("delete")
+  async delete(@Body() reqPlantilla: DeletePlantillaTurnos) {
+    return this.plantillaTurnoRepository.deletePlantilla(
+      reqPlantilla.idPlantilla,
+    );
   }
 }

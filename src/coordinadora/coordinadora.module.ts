@@ -1,9 +1,19 @@
 import { Module } from "@nestjs/common";
-import { CoordinadoraRepositoryService } from "./coordinadora.repository.service";
-import { CoordinadoraDatabaseService } from "./coordinadora.database";
+import { CoordinadoraRepository } from "./coordinadora.repository";
+import { ICoordinadoraRepository } from "./coordinadora.repository.interface";
+import { GetEquipoCoordinadoraPorTiendaUseCase } from "./use-cases/GetEquipoCoordinadoraPorTienda.use-case";
+import { IGetEquipoCoordinadoraPorTienda } from "./use-cases/GetEquipoCoordinadoraPorTiendaInterface";
+import { GetEquipoCoordinadoraController } from "./controllers/GetEquipoCoordinadoraPorTienda.controller";
 
 @Module({
-  providers: [CoordinadoraRepositoryService, CoordinadoraDatabaseService],
-  exports: [CoordinadoraRepositoryService],
+  controllers: [GetEquipoCoordinadoraController],
+  providers: [
+    { useClass: CoordinadoraRepository, provide: ICoordinadoraRepository },
+    {
+      useClass: GetEquipoCoordinadoraPorTiendaUseCase,
+      provide: IGetEquipoCoordinadoraPorTienda,
+    },
+  ],
+  exports: [ICoordinadoraRepository, IGetEquipoCoordinadoraPorTienda],
 })
 export class CoordinadoraModule {}

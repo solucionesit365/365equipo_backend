@@ -1,18 +1,16 @@
 import { Injectable } from "@nestjs/common";
-import { TurnoRepositoryService } from "./turno.repository.service";
 import { DateTime } from "luxon";
-import { TrabajadorService } from "../trabajadores/trabajadores.class";
-import { CoordinadoraRepositoryService } from "../coordinadora/coordinadora.repository.service";
+import { ICoordinadoraRepository } from "../../coordinadora/coordinadora.repository.interface";
+import { ITurnoRepository } from "../turno.repository.interface";
 
 @Injectable()
-export class TurnoService {
+export class GetTurnosEquipoCoordinadoraUseCase {
   constructor(
-    private readonly turnoRepository: TurnoRepositoryService,
-    private readonly trabajadorService: TrabajadorService,
-    private readonly coordinadoraRepository: CoordinadoraRepositoryService,
+    private readonly coordinadoraRepository: ICoordinadoraRepository,
+    private readonly turnoRepository: ITurnoRepository,
   ) {}
 
-  async getTurnosCoordinadora(idTienda: number, fecha: DateTime) {
+  public async execute(idTienda: number, fecha: DateTime) {
     // Los turnos del equipo de la coordinadora + los turnos de los trabajadores que trabajan en la tienda de la coordinadora + los turnos de la coordinadora, todo esto sin repeticiones de ids de turnos.
     const coordinadora =
       await this.coordinadoraRepository.getCoordinadoraPorTienda(idTienda);
@@ -41,9 +39,5 @@ export class TurnoService {
     );
 
     return turnosUnicos;
-  }
-
-  getTurnosSemanalesDelTrabajador(idTrabajador: number, fecha: DateTime) {
-    return this.turnoRepository.getTurnosPorTrabajador(idTrabajador, fecha);
   }
 }

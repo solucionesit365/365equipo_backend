@@ -17,4 +17,8 @@ export class PlantillaTurnoRepository {
   getPlantillasTurnosTienda(idTienda: number) {
     return this.plantillaTurnoDatabase.getPlantillasTurnosTienda(idTienda);
   }
+
+  deletePlantilla(idPlantilla: string) {
+    return this.plantillaTurnoDatabase.deletePlantilla(idPlantilla);
+  }
 }

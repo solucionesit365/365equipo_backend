@@ -1,7 +1,7 @@
 import { Type } from "class-transformer";
 import { IsNotEmpty, IsNumber, IsString } from "class-validator";
 
-export class GetTurnosCoordinadora {
+export class GetTurnosEquipoCoordinadora {
   @IsNotEmpty()
   @Type(() => Number)
   @IsNumber()
@@ -20,4 +20,10 @@ export class GetSemanaIndividual {
   @IsNotEmpty()
   @IsString()
   fecha: string;
+}
+
+export class DeleteTurnoDto {
+  @IsNotEmpty()
+  @IsString()
+  idTurno: string;
 }

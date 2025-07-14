@@ -67,6 +67,7 @@ import { GraphModule } from "./graph/graph.module";
 import { TurnoModule } from "./turno/turno.module";
 import { CoordinadoraModule } from './coordinadora/coordinadora.module';
 import { PlantillaTurnoModule } from './plantilla-turno/plantilla-turno.module';
+import { MacroModule } from './macro/macro.module';
 
 @Module({
   imports: [
@@ -138,6 +139,7 @@ import { PlantillaTurnoModule } from './plantilla-turno/plantilla-turno.module';
     TurnoModule,
     CoordinadoraModule,
     PlantillaTurnoModule,
+    MacroModule,
   ],
   controllers: [AppController, KpiTiendasController],
 })

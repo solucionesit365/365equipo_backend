@@ -1,14 +1,24 @@
 import { Module } from "@nestjs/common";
-import { TurnoController } from "./turno.controller";
-import { TurnoRepositoryService } from "./turno.repository.service";
-import { TurnoDatabaseService } from "./turno.database";
-import { TurnoService } from "./turno.service";
+import { TurnoRepository } from "./turno.repository";
 import { TrabajadoresModule } from "../trabajadores/trabajadores.module";
 import { CoordinadoraModule } from "../coordinadora/coordinadora.module";
+import { ITurnoRepository } from "./turno.repository.interface";
+import { DeleteTurnoController } from "./controllers/DeleteTurno.controller";
+import { GetTurnosEquipoCoordinadoraController } from "./controllers/GetTurnosEquipoCoordinadora.controller";
+import { GetTurnosSemanalesTrabajadorController } from "./controllers/GetTurnosSemanalesTrabajador.controller";
+import { GetTurnosEquipoCoordinadoraUseCase } from "./use-cases/GetTurnosEquipoCoordinadora.use-case";
 
 @Module({
   imports: [TrabajadoresModule, CoordinadoraModule],
-  controllers: [TurnoController],
-  providers: [TurnoRepositoryService, TurnoDatabaseService, TurnoService],
+  providers: [
+    { provide: ITurnoRepository, useClass: TurnoRepository },
+    GetTurnosEquipoCoordinadoraUseCase,
+  ],
+  controllers: [
+    DeleteTurnoController,
+    GetTurnosEquipoCoordinadoraController,
+    GetTurnosSemanalesTrabajadorController,
+  ],
+  exports: [],
 })
 export class TurnoModule {}

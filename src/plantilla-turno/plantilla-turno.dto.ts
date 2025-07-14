@@ -8,6 +8,12 @@ export class GetPlantillasTurnosTienda {
   idTienda: number;
 }
 
+export class DeletePlantillaTurnos {
+  @IsNotEmpty()
+  @IsString()
+  idPlantilla: string;
+}
+
 export class CreatePlantillasTurnosTienda {
   @IsNotEmpty()
   @IsString()
