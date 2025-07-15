@@ -3,6 +3,9 @@ import { DateTime } from "luxon";
 
 export abstract class ITurnoRepository {
   abstract createTurno(turno: Prisma.TurnoCreateInput): Promise<Turno>;
+  abstract createTurnos(
+    turnos: Prisma.TurnoCreateManyInput[],
+  ): Promise<{ count: number }>;
   abstract getTurnosPorTrabajador(
     idTrabajador: number,
     fecha: DateTime,
@@ -17,4 +20,5 @@ export abstract class ITurnoRepository {
     fecha: DateTime,
   ): Promise<Turno[]>;
   abstract deleteTurno(idTurno: string): Promise<Turno>;
+  abstract updateManyTurnos(turnos: Turno[]): Promise<Turno[]>;
 }

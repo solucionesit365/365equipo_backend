@@ -237,6 +237,48 @@ model PlantillaTurno {
   tienda   Tienda @relation(fields: [tiendaId], references: [id])
 }
 
+// _id
+// 6710cd5d58e0bf8608d981cd
+// idUsuario
+// 5160
+// nombre
+// "Maria Virginia Jimenez Jimenez"
+// dni
+// "Y9198139Q"
+// tipo
+// "DIA_PERSONAL"
+// horasContrato
+// 40
+// tienda
+// "t--103"
+// fechaInicio
+// 2024-09-30T22:00:00.000+00:00
+// fechaFinal
+// 2024-10-01T22:00:00.000+00:00
+// fechaRevision
+// null
+// comentario
+// null
+// completa
+// true
+// horas
+// null
+model AusenciaParcial {
+  id       String @id @default(uuid())
+  tipo TipoAusencia
+  comentario String?
+  horas Int
+  fechaInicio DateTime
+  fechaFinal DateTime
+}
+
+model AusenciaCompleta {
+  id       String @id @default(uuid())
+  tipo TipoAusencia
+  comentario String?
+  fecha DateTime
+}
+
 enum ColorSemanal {
   green
   orange
@@ -264,4 +306,15 @@ enum PasoFormacionType {
 enum QuestionnaireType {
   RANDOM
   SELECTION
+}
+
+enum TipoAusencia {
+   BAJA
+   PERMISO_MATERNIDAD_PATERNIDAD // Esta cambia de nombre!!! antes era PERMISO MATERNIDAD/PATERNIDAD
+   DIA_PERSONAL
+   VACACIONES
+   SANCIÓN
+   ABSENTISMO
+   REM
+   HORAS_JUSTIFICADAS
 }

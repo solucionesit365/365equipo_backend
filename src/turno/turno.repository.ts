@@ -1,5 +1,5 @@
 import { Injectable, InternalServerErrorException } from "@nestjs/common";
-import { Prisma } from "@prisma/client";
+import { Prisma, Turno } from "@prisma/client";
 import { DateTime } from "luxon";
 import { PrismaService } from "../prisma/prisma.service";
 import { ITurnoRepository } from "./turno.repository.interface";
@@ -19,9 +19,24 @@ export class TurnoRepository implements ITurnoRepository {
     }
   }
 
+  async createTurnos(turnos: Prisma.TurnoCreateManyInput[]) {
+    try {
+      return await this.prismaService.turno.createMany({
+        data: turnos,
+      });
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException();
+    }
+  }
+
+  /**
+   *
+   * Retorna los turnos de la semana de "fecha" del trabajador "idTrabajador"
+   */
   async getTurnosPorTrabajador(idTrabajador: number, fecha: DateTime) {
-    const inicio = fecha.startOf("day");
-    const final = fecha.endOf("day");
+    const inicio = fecha.startOf("week");
+    const final = fecha.endOf("week");
 
     try {
       return await this.prismaService.turno.findMany({
@@ -93,5 +108,19 @@ export class TurnoRepository implements ITurnoRepository {
       console.log(error);
       throw new InternalServerErrorException();
     }
+  }
+
+  /**
+   * Actualiza todos los turnos del parámetro según el payload. Sobreescribe todo
+   */
+  async updateManyTurnos(turnos: Turno[]) {
+    const updates = turnos.map((turno) =>
+      // Estos turnos no se ejecutan en paralelo, necesitan el await. Es una lazy evaluation
+      this.prismaService.turno.update({
+        where: { id: turno.id },
+        data: turno,
+      }),
+    );
+    return this.prismaService.$transaction(updates);
   }
 }
