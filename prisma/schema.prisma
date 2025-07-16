@@ -8,12 +8,12 @@ datasource db {
 }
 
 model Trabajador {
-  id                     Int          @id @default(autoincrement())
-  idApp                  String?      @unique
+  id                     Int                @id @default(autoincrement())
+  idApp                  String?            @unique
   nombreApellidos        String
   displayName            String?
   emails                 String
-  dni                    String       @unique
+  dni                    String             @unique
   direccion              String?
   ciudad                 String?
   telefonos              String?
@@ -26,23 +26,25 @@ model Trabajador {
   idResponsable          Int?
   idTienda               Int?
   llevaEquipo            Boolean
+  ausenciasParciales     AusenciaParcial[]
+  ausenciasCompletas     AusenciaCompleta[]
   tokenQR                String?
   displayFoto            String?
-  excedencia             Boolean      @default(false)
+  excedencia             Boolean            @default(false)
   dispositivo            String?
   empresaId              String?
-  esTienda               Boolean      @default(false)
+  esTienda               Boolean            @default(false)
   nPerceptor             Int?
   workEmail              String?
   contratos              Contrato2[]
-  coordinadoraDeLaTienda Tienda?      @relation("TiendaCoordinator")
-  empresa                Empresa?     @relation(fields: [empresaId], references: [id])
-  responsable            Trabajador?  @relation("Responsable", fields: [idResponsable], references: [id])
-  subordinados           Trabajador[] @relation("Responsable")
-  tienda                 Tienda?      @relation(fields: [idTienda], references: [id])
+  coordinadoraDeLaTienda Tienda?            @relation("TiendaCoordinator")
+  empresa                Empresa?           @relation(fields: [empresaId], references: [id])
+  responsable            Trabajador?        @relation("Responsable", fields: [idResponsable], references: [id])
+  subordinados           Trabajador[]       @relation("Responsable")
+  tienda                 Tienda?            @relation(fields: [idTienda], references: [id])
   turnos                 Turno[]
-  permisos               Permiso[]    @relation("PermisoToTrabajador")
-  roles                  Role[]       @relation("RoleToTrabajador")
+  permisos               Permiso[]          @relation("PermisoToTrabajador")
+  roles                  Role[]             @relation("RoleToTrabajador")
 
   @@unique([empresaId, nPerceptor])
 }
@@ -264,19 +266,24 @@ model PlantillaTurno {
 // horas
 // null
 model AusenciaParcial {
-  id       String @id @default(uuid())
-  tipo TipoAusencia
-  comentario String?
-  horas Int
-  fechaInicio DateTime
-  fechaFinal DateTime
+  id           String              @id @default(uuid())
+  tipo         TipoAusenciaParcial
+  comentario   String?
+  fechaInicio  DateTime
+  fechaFinal   DateTime
+  idTrabajador Int
+  trabajador   Trabajador          @relation(fields: [idTrabajador], references: [id])
 }
 
 model AusenciaCompleta {
-  id       String @id @default(uuid())
-  tipo TipoAusencia
-  comentario String?
-  fecha DateTime
+  id            String               @id @default(uuid())
+  tipo          TipoAusenciaCompleta
+  comentario    String?
+  fechaInicio   DateTime
+  fechaFinal    DateTime?
+  fechaRevision DateTime?
+  idTrabajador  Int
+  trabajador    Trabajador           @relation(fields: [idTrabajador], references: [id])
 }
 
 enum ColorSemanal {
@@ -308,13 +315,17 @@ enum QuestionnaireType {
   SELECTION
 }
 
-enum TipoAusencia {
-   BAJA
-   PERMISO_MATERNIDAD_PATERNIDAD // Esta cambia de nombre!!! antes era PERMISO MATERNIDAD/PATERNIDAD
-   DIA_PERSONAL
-   VACACIONES
-   SANCIÓN
-   ABSENTISMO
-   REM
-   HORAS_JUSTIFICADAS
+enum TipoAusenciaParcial {
+  ABSENTISMO
+  HORAS_JUSTIFICADAS
+}
+
+enum TipoAusenciaCompleta {
+  BAJA
+  PERMISO_MATERNIDAD_PATERNIDAD // Esta cambia de nombre!!! antes era PERMISO MATERNIDAD/PATERNIDAD
+  DIA_PERSONAL
+  VACACIONES
+  SANCIÓN
+  ABSENTISMO
+  REM
 }
