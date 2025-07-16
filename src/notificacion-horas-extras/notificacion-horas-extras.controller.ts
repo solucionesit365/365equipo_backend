@@ -17,8 +17,28 @@ export class NotificacionHorasExtrasController {
 
   @UseGuards(AuthGuard)
   @Post("createNotificacionHorasExtras")
-  createNotificacionHorasExtras(@Body() data: TNotificacionHorasExtras) {
+  async createNotificacionHorasExtras(@Body() data: TNotificacionHorasExtras) {
     try {
+      // Validar duplicados antes de guardar
+      const duplicados =
+        await this.shNotificacionhorasExtras.validarDuplicadosHorasExtras(
+          data.dniTrabajador,
+          data.horasExtras.map((hora) => ({
+            tienda: String(hora.tienda),
+            fecha: hora.fecha,
+            horaInicio: hora.horaInicio,
+            horaFinal: hora.horaFinal,
+          })),
+        );
+
+      if (duplicados.length > 0) {
+        return {
+          ok: false,
+          message:
+            "Ya existen registros duplicados. No se guardó la notificación.",
+          duplicados,
+        };
+      }
       return this.shNotificacionhorasExtras.createNotificacionHorasExtras(data);
     } catch (error) {
       console.log(error);

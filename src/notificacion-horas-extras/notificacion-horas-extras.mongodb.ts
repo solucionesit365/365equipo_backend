@@ -236,31 +236,20 @@ export class NotificacionHorasExtrasMongoService {
         $elemMatch: {
           tienda: h.tienda,
           fecha: h.fecha,
-          $or: [
-            {
-              $and: [
-                { horaInicio: { $lte: h.horaInicio } },
-                { horaFinal: { $gte: h.horaInicio } },
-              ],
-            },
-            {
-              $and: [
-                { horaInicio: { $lte: h.horaFinal } },
-                { horaFinal: { $gte: h.horaFinal } },
-              ],
-            },
-          ],
+          horaInicio: h.horaInicio,
+          horaFinal: h.horaFinal,
         },
       },
     }));
 
     return await notificacionesCollection
       .find({
-        dniTrabajador: dniTrabajador,
+        dniTrabajador,
         $or: condiciones,
       })
       .toArray();
   }
+
   async getNotificacionHorasExtrasById(id: string) {
     const db = (await this.mongoDbService.getConexion()).db();
     const notificacionesCollection = db.collection("notificacionesHorasExtras");
