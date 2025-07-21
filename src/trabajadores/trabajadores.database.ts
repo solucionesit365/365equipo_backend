@@ -536,7 +536,7 @@ export class TrabajadorDatabaseService {
 
       return resultados;
     } catch (error) {
-      console.log(error);
+      console.log(error.message);
       throw new InternalServerErrorException();
     }
   }

@@ -1,9 +1,9 @@
-import { Body, Controller, Post, UseGuards, Get } from "@nestjs/common";
+import { Body, Controller, Post, UseGuards, Get, Query } from "@nestjs/common";
 import { AusenciasService } from "./ausencias.class";
 import { AuthGuard } from "../guards/auth.guard";
 import { DateTime } from "luxon";
 import { LoggerService } from "../logger/logger.service";
-import { CrearAusenciaDto } from "./ausencias.dto";
+import { CrearAusenciaDto, GetAusenciasTrabajadorDto } from "./ausencias.dto";
 import { CompleteUser } from "../decorators/getCompleteUser.decorator";
 import { Trabajador } from "@prisma/client";
 import { UserRecord } from "firebase-admin/auth";
@@ -78,9 +78,8 @@ export class AusenciasController {
       }
 
       // Eliminar la ausencia
-      const respAusencias = await this.ausenciasInstance.deleteAusencia(
-        idAusencia,
-      );
+      const respAusencias =
+        await this.ausenciasInstance.deleteAusencia(idAusencia);
 
       if (respAusencias) {
         // Obtener el nombre del usuario autenticado
@@ -127,9 +126,8 @@ export class AusenciasController {
         ausencia.fechaFinal,
         "dd/MM/yyyy",
       ).toJSDate();
-      const respAusencia = await this.ausenciasInstance.updateAusencia(
-        ausencia,
-      );
+      const respAusencia =
+        await this.ausenciasInstance.updateAusencia(ausencia);
       if (respAusencia) {
         // Registrar en el logger
         await this.loggerService.create({
@@ -174,9 +172,8 @@ export class AusenciasController {
           "dd/MM/yyyy",
         ).toJSDate();
 
-      const respAusencia = await this.ausenciasInstance.updateAusenciaResto(
-        ausencia,
-      );
+      const respAusencia =
+        await this.ausenciasInstance.updateAusenciaResto(ausencia);
       if (respAusencia) {
         // Registrar auditoría
         await this.loggerService.create({
@@ -206,5 +203,20 @@ export class AusenciasController {
     } catch (error) {
       console.log(error);
     }
+  }
+
+  @UseGuards(AuthGuard)
+  @Get("getAusenciasTrabajador")
+  getAusenciasTrabajador(
+    @Query() reqAusenciasTrabajador: GetAusenciasTrabajadorDto,
+  ) {
+    const inicio = DateTime.fromISO(reqAusenciasTrabajador.fechaInicio);
+    const final = DateTime.fromISO(reqAusenciasTrabajador.fechaFinal);
+
+    return this.ausenciasInstance.getAusenciasTrabajador(
+      reqAusenciasTrabajador.idTrabajador,
+      inicio,
+      final,
+    );
   }
 }

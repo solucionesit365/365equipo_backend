@@ -1,0 +1,14 @@
+import { Prisma, Trabajador } from "@prisma/client";
+
+export abstract class ITrabajadorRepository {
+  abstract create(
+    newTrabajador: Prisma.TrabajadorCreateInput,
+  ): Promise<Trabajador>;
+  abstract readOne(id: number): Promise<Trabajador>;
+  abstract readAll(): Promise<Trabajador[]>;
+  abstract updateOne(
+    id: number,
+    payload: Prisma.TrabajadorUpdateInput,
+  ): Promise<Trabajador>;
+  abstract deleteOne(id: number): Promise<boolean>;
+}
