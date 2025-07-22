@@ -21,8 +21,11 @@ export class GetEquipoCoordinadoraPorTiendaUseCase
         code: "SIN_COORDINADORA",
       });
 
-    return await this.coordinadoraRepository.getSubordinadosCoordinadora(
-      coordinadora.id,
-    );
+    return [
+      ...(await this.coordinadoraRepository.getSubordinadosCoordinadora(
+        coordinadora.id,
+      )),
+      coordinadora,
+    ];
   }
 }

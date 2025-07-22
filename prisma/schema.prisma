@@ -74,6 +74,7 @@ model Empresa {
   idExterno      Int?
   autogestionada Boolean      @default(false)
   Trabajador     Trabajador[]
+  existsBC       Boolean      @default(false)
 }
 
 model Contrato2 {

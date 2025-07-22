@@ -4,6 +4,23 @@ import { DateTime } from "luxon";
 import { PrismaService } from "../prisma/prisma.service";
 import { ITurnoRepository } from "./turno.repository.interface";
 
+function construirIncludeContrato(fechaJS: Date): Prisma.TrabajadorInclude {
+  return {
+    contratos: {
+      where: {
+        inicioContrato: { lte: fechaJS },
+        OR: [{ fechaBaja: null }, { fechaBaja: { gte: fechaJS } }],
+        // si usas finalContrato
+        // AND: [
+        //   { OR: [{ finalContrato: null }, { finalContrato: { gte: fechaJS } }] },
+        // ],
+      },
+      orderBy: { inicioContrato: "desc" }, // <- literal 'desc' (o Prisma.SortOrder.desc)
+      take: 1,
+    },
+  };
+}
+
 @Injectable()
 export class TurnoRepository implements ITurnoRepository {
   constructor(private readonly prismaService: PrismaService) {}
@@ -39,7 +56,7 @@ export class TurnoRepository implements ITurnoRepository {
     const final = fecha.endOf("week");
 
     try {
-      return await this.prismaService.turno.findMany({
+      const turnos = await this.prismaService.turno.findMany({
         where: {
           idTrabajador,
           inicio: {
@@ -48,7 +65,13 @@ export class TurnoRepository implements ITurnoRepository {
             lte: final.toJSDate(), // 23:59
           },
         },
+        include: {
+          Trabajador: {
+            include: construirIncludeContrato(inicio.toJSDate()),
+          },
+        },
       });
+      return turnos;
     } catch (error) {
       console.log(error);
       throw new InternalServerErrorException();
@@ -57,15 +80,21 @@ export class TurnoRepository implements ITurnoRepository {
 
   async getTurnosPorTienda(idTienda: number, fecha: DateTime) {
     try {
-      const inicio = fecha.startOf("week");
-      const final = fecha.endOf("week");
+      const inicioSemana = fecha.startOf("week").toJSDate();
+      const finSemana = fecha.endOf("week").toJSDate();
+      const fechaJS = fecha.toJSDate();
 
       return await this.prismaService.turno.findMany({
         where: {
           tiendaId: idTienda,
           inicio: {
-            gte: inicio.toJSDate(),
-            lte: final.toJSDate(),
+            gte: inicioSemana,
+            lte: finSemana,
+          },
+        },
+        include: {
+          Trabajador: {
+            include: construirIncludeContrato(fechaJS),
           },
         },
       });
@@ -88,6 +117,11 @@ export class TurnoRepository implements ITurnoRepository {
           inicio: {
             gte: inicio.toJSDate(),
             lte: final.toJSDate(),
+          },
+        },
+        include: {
+          Trabajador: {
+            include: construirIncludeContrato(inicio.toJSDate()),
           },
         },
       });
