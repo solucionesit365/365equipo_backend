@@ -31,8 +31,9 @@ model Trabajador {
   excedencia       Boolean      @default(false)
   dispositivo      String?
   empresaId        String?
-  nPerceptor       Int? // Nuevo campo
   esTienda         Boolean      @default(false)
+  nPerceptor       Int?
+  workEmail        String?
   contratos        Contrato2[]
   empresa          Empresa?     @relation(fields: [empresaId], references: [id])
   responsable      Trabajador?  @relation("Responsable", fields: [idResponsable], references: [id])
@@ -41,7 +42,6 @@ model Trabajador {
   permisos         Permiso[]    @relation("PermisoToTrabajador")
   roles            Role[]       @relation("RoleToTrabajador")
 
-  // Índice único compuesto
   @@unique([empresaId, nPerceptor])
 }
 
@@ -66,6 +66,7 @@ model Empresa {
   idExterno      Int?
   autogestionada Boolean      @default(false)
   Trabajador     Trabajador[]
+  existsBC       Boolean      @default(false)
 }
 
 model Contrato2 {
@@ -103,15 +104,15 @@ model Color {
 model VideoFormacion {
   id           String     @id @default(uuid())
   name         String
-  pathFile     String
-  relativePath String
   date         DateTime   @default(now())
   duration     Int
+  relativePath String
   department   Department
+  pathFile     String
 }
 
 model DocumentoOriginal {
-  id           String             @id @default(uuid()) // Esto es el CSV
+  id           String             @id @default(uuid())
   name         String
   pathFile     String
   relativePath String
@@ -129,16 +130,16 @@ model DocumentoFirmado {
   hash                String
   date                DateTime          @default(now())
   department          Department
-  original            DocumentoOriginal @relation(fields: [documentoOriginalId], references: [id])
   documentoOriginalId String
+  original            DocumentoOriginal @relation(fields: [documentoOriginalId], references: [id])
 }
 
 model Presentacion {
   id         String     @id @default(uuid())
   name       String
   embed      String
-  department Department
   date       DateTime   @default(now())
+  department Department
 }
 
 model Questionnaire {
@@ -147,40 +148,39 @@ model Questionnaire {
   department          Department
   date                DateTime           @default(now())
   type                QuestionnaireType
-  questions           Question[]
-  categoryOfQuestions QuestionCategory[]
   maxErrors           Int                @default(0)
   nQuestions          Int?
+  questions           Question[]
+  categoryOfQuestions QuestionCategory[]
 }
 
 model Question {
   id                    String             @id @default(uuid())
   title                 String
   type                  AnswerType
-  categories            QuestionCategory[]
   correctAnswerOptionId String?
-  options               AnswerOption[]
   correctFreeAnswer     String[]
   date                  DateTime           @default(now())
-
-  Questionnaire   Questionnaire? @relation(fields: [questionnaireId], references: [id])
-  questionnaireId String?
+  questionnaireId       String?
+  options               AnswerOption[]
+  Questionnaire         Questionnaire?     @relation(fields: [questionnaireId], references: [id])
+  categories            QuestionCategory[] @relation("QuestionToQuestionCategory")
 }
 
 model QuestionCategory {
   id              String         @id @default(uuid())
   name            String
-  questions       Question[]
   department      Department
-  Questionnaire   Questionnaire? @relation(fields: [questionnaireId], references: [id])
   questionnaireId String?
+  Questionnaire   Questionnaire? @relation(fields: [questionnaireId], references: [id])
+  questions       Question[]     @relation("QuestionToQuestionCategory")
 }
 
 model AnswerOption {
   id         String   @id @default(uuid())
   title      String
-  Question   Question @relation(fields: [questionId], references: [id])
   questionId String
+  Question   Question @relation(fields: [questionId], references: [id])
 }
 
 model Formacion {
@@ -189,8 +189,8 @@ model Formacion {
   date        DateTime         @default(now())
   department  Department
   description String?
-  pasos       PasosFormacion[] @relation("PasosEnFormacion")
   nPasos      Int
+  pasos       PasosFormacion[] @relation("PasosEnFormacion")
 }
 
 model PasosFormacion {
@@ -198,9 +198,9 @@ model PasosFormacion {
   name          String
   description   String?
   type          PasoFormacionType
+  formacionesId String?
   resourceId    String
   Formaciones   Formacion?        @relation("PasosEnFormacion", fields: [formacionesId], references: [id], onDelete: Cascade)
-  formacionesId String?
 }
 
 model SmsOtp {

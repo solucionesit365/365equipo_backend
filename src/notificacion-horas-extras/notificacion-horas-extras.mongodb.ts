@@ -3,6 +3,16 @@ import { MongoService } from "../mongo/mongo.service";
 import { TNotificacionHorasExtras } from "./notificacion-horas-extras.dto";
 import { ObjectId } from "mongodb";
 
+interface HoraExtra {
+  _id: string; // o ObjectId
+  // ...otros campos
+}
+
+export interface NotificacionHorasExtras {
+  _id: ObjectId;
+  horasExtras: HoraExtra[];
+}
+
 @Injectable()
 export class NotificacionHorasExtrasMongoService {
   constructor(private readonly mongoDbService: MongoService) {}
@@ -87,7 +97,9 @@ export class NotificacionHorasExtrasMongoService {
   //Eliminar una notificacion de horas extras
   async deleteNotificacionHorasExtras(idHorasExtras: string) {
     const db = (await this.mongoDbService.getConexion()).db();
-    const notificacionesCollection = db.collection("notificacionesHorasExtras");
+    const notificacionesCollection = db.collection<NotificacionHorasExtras>(
+      "notificacionesHorasExtras",
+    );
 
     // Paso 1: Eliminar solo el objeto del array horasExtras
     const result = await notificacionesCollection.updateOne(
@@ -183,7 +195,9 @@ export class NotificacionHorasExtrasMongoService {
     }[],
   ) {
     const db = (await this.mongoDbService.getConexion()).db();
-    const notificacionesCollection = db.collection("notificacionesHorasExtras");
+    const notificacionesCollection = db.collection<NotificacionHorasExtras>(
+      "notificacionesHorasExtras",
+    );
 
     return await notificacionesCollection.updateOne(
       { _id: new ObjectId(id), "horasExtras._id": horaExtraId },
