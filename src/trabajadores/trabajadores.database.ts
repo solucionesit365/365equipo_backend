@@ -4,7 +4,7 @@ import { DateTime } from "luxon";
 import { Prisma } from "@prisma/client";
 import { ParametrosService } from "../parametros/parametros.service";
 import { Tienda } from "../tiendas/tiendas.class";
-import pMap = require("p-map");
+import pMap from "p-map";
 import {
   CreateTrabajadorRequestDto,
   TrabajadorFormRequest,
@@ -489,7 +489,11 @@ export class TrabajadorDatabaseService {
   // Función que obtiene los trabajadores desde Business Central
   async getTrabajadoresOmne() {
     try {
-      const empresas = await this.prisma.empresa.findMany({});
+      const empresas = await this.prisma.empresa.findMany({
+        where: {
+          existsBC: true,
+        },
+      });
 
       // Ejecutar las consultas en paralelo para cada empresa
       const resultados = await Promise.all(

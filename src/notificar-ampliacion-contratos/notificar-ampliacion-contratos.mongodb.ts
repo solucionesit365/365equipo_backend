@@ -3,6 +3,23 @@ import { MongoService } from "../mongo/mongo.service";
 import { TNotificarAmpliacionContratos } from "./notificar-ampliacion-contratos.dto";
 import { ObjectId } from "mongodb";
 
+interface Comentario {
+  nombre: string;
+  fechaRespuesta: string; // ISO string
+  mensaje: string;
+}
+
+interface AmpliacionJornadaItem {
+  _id: string; // o ObjectId
+  comentario: Comentario[];
+  // ...otros campos
+}
+
+export interface NotificacionAmpliacionContratos {
+  _id: ObjectId;
+  ampliacionJornada: AmpliacionJornadaItem[];
+}
+
 @Injectable()
 export class NotificarAmpliacionContratosMongoService {
   constructor(private readonly mongoDbService: MongoService) {}
@@ -127,9 +144,10 @@ export class NotificarAmpliacionContratosMongoService {
   //Eliminar una notificacion de horas extras
   async deleteNotificarAmpliacionContratos(idHorasExtras: string) {
     const db = (await this.mongoDbService.getConexion()).db();
-    const notificacionesCollection = db.collection(
-      "notificarAmpliacionContratos",
-    );
+    const notificacionesCollection =
+      db.collection<NotificacionAmpliacionContratos>(
+        "notificarAmpliacionContratos",
+      );
 
     // Paso 1: Eliminar solo el objeto del array horasExtras
     const result = await notificacionesCollection.updateOne(
@@ -235,9 +253,10 @@ export class NotificarAmpliacionContratosMongoService {
     }[],
   ) {
     const db = (await this.mongoDbService.getConexion()).db();
-    const notificacionesCollection = db.collection(
-      "notificarAmpliacionContratos",
-    );
+    const notificacionesCollection =
+      db.collection<NotificacionAmpliacionContratos>(
+        "notificarAmpliacionContratos",
+      );
 
     return await notificacionesCollection.updateOne(
       { _id: new ObjectId(id), "ampliacionJornada._id": horaExtraId },
