@@ -4,11 +4,12 @@ import { TestController } from "./test.controller";
 // import { FichajesValidadosModule } from "../fichajes-validados/fichajes-validados.module";
 // import { TrabajadoresModule } from "../trabajadores/trabajadores.module";
 import { CuadrantesModule } from "../cuadrantes/cuadrantes.module";
+import { EmailModule } from "../email/email.module";
 // import { AusenciasModule } from "src/ausencias/ausencias.module";
 // Cambio pequeño
 @Module({
   // imports: [EmailModule, FichajesValidadosModule, TrabajadoresModule],
-  imports: [CuadrantesModule],
+  imports: [CuadrantesModule, EmailModule],
   controllers: [TestController],
 })
 export class TestModule {}

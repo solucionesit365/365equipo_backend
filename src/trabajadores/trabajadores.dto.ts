@@ -286,6 +286,11 @@ export class GetSubordinadosDto {
   @IsString()
   uid: string;
 }
+export class GetSubordinadosByIdDto {
+  @Type(() => Number)
+  @IsNumber()
+  idResponsable: number;
+}
 
 export class DeleteTrabajadorDto {
   @IsNotEmpty()

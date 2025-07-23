@@ -3,13 +3,32 @@ import { MongoService } from "../mongo/mongo.service";
 import { TNotificacionHorasExtras } from "./notificacion-horas-extras.dto";
 import { ObjectId } from "mongodb";
 
-interface HoraExtra {
-  _id: string; // o ObjectId
-  // ...otros campos
+/** Un único item de horasExtras */
+export interface HoraExtra {
+  /** nuestro ID en formato string */
+  _id: string;
+  motivo: string;
+  fecha: string;
+  horaInicio: string;
+  horaFinal: string;
+  tienda: string;
+  revision?: boolean;
+  apagar?: boolean;
+  comentario?: {
+    nombre: string;
+    fechaRespuesta: string;
+    mensaje: string;
+  }[];
+  ultimosLeidos?: Record<string, string>;
 }
 
-export interface NotificacionHorasExtras {
+/** Documento completo de notificación en Mongo */
+export interface NotificacionHorasExtrasDoc {
   _id: ObjectId;
+  trabajador: string;
+  creadorIdsql: number;
+  tiendaPrincipal: number;
+  dniTrabajador: string;
   horasExtras: HoraExtra[];
 }
 
@@ -97,7 +116,7 @@ export class NotificacionHorasExtrasMongoService {
   //Eliminar una notificacion de horas extras
   async deleteNotificacionHorasExtras(idHorasExtras: string) {
     const db = (await this.mongoDbService.getConexion()).db();
-    const notificacionesCollection = db.collection<NotificacionHorasExtras>(
+    const notificacionesCollection = db.collection<NotificacionHorasExtrasDoc>(
       "notificacionesHorasExtras",
     );
 
@@ -195,7 +214,7 @@ export class NotificacionHorasExtrasMongoService {
     }[],
   ) {
     const db = (await this.mongoDbService.getConexion()).db();
-    const notificacionesCollection = db.collection<NotificacionHorasExtras>(
+    const notificacionesCollection = db.collection<NotificacionHorasExtrasDoc>(
       "notificacionesHorasExtras",
     );
 

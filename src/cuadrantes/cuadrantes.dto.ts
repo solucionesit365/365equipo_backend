@@ -103,3 +103,22 @@ export class GetCuadrantesDto {
   @IsNumber()
   idTienda: number;
 }
+
+export class GetCuadranteIndividual {
+  @IsString()
+  fecha: string;
+
+  @Type(() => Number)
+  @IsNumber()
+  idTrabajador: number;
+
+  @IsOptional()
+  @IsString()
+  uid?: string;
+}
+
+export class GetCuadranteTiendaSemanal {
+  @IsNotEmpty()
+  @IsString()
+  fecha: string;
+}

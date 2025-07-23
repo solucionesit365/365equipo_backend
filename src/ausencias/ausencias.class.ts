@@ -180,6 +180,18 @@ export class AusenciasService {
     return await this.schAusencias.getAusenciasById(idAusencia);
   }
 
+  async getAusenciasTrabajador(
+    idTrabajador: number,
+    inicio: DateTime,
+    final: DateTime,
+  ) {
+    return await this.schAusencias.getAusenciasTrabajador(
+      idTrabajador,
+      inicio,
+      final,
+    );
+  }
+
   async getAusenciasIntervalo(fechaInicio: DateTime, fechaFinal: DateTime) {
     return await this.schAusencias.getAusenciasIntervalo(
       fechaInicio,

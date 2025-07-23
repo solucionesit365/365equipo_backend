@@ -2,8 +2,6 @@ import { Injectable, InternalServerErrorException } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { DateTime } from "luxon";
 import { Prisma } from "@prisma/client";
-import { ParametrosService } from "../parametros/parametros.service";
-import { Tienda } from "../tiendas/tiendas.class";
 import pMap from "p-map";
 import {
   CreateTrabajadorRequestDto,
@@ -24,8 +22,6 @@ export interface TIncludeTrabajador {
 export class TrabajadorDatabaseService {
   constructor(
     private prisma: PrismaService,
-    private readonly parametrosService: ParametrosService,
-    private readonly tiendaInstance: Tienda,
     private readonly axiosBCService: AxiosBcService,
   ) {}
 
@@ -489,11 +485,7 @@ export class TrabajadorDatabaseService {
   // Función que obtiene los trabajadores desde Business Central
   async getTrabajadoresOmne() {
     try {
-      const empresas = await this.prisma.empresa.findMany({
-        where: {
-          existsBC: true,
-        },
-      });
+      const empresas = await this.prisma.empresa.findMany({});
 
       // Ejecutar las consultas en paralelo para cada empresa
       const resultados = await Promise.all(
@@ -544,7 +536,7 @@ export class TrabajadorDatabaseService {
 
       return resultados;
     } catch (error) {
-      console.log(error);
+      console.log(error.message);
       throw new InternalServerErrorException();
     }
   }
@@ -980,6 +972,7 @@ export class TrabajadorDatabaseService {
           take: 1, // Toma solo el contrato más reciente
         },
         tienda: true,
+        coordinadoraDeLaTienda: true,
         roles: { include: { permissions: true } },
         permisos: true,
         responsable: true,
@@ -1298,51 +1291,58 @@ export class TrabajadorDatabaseService {
   }
 
   async getSubordinadosById(id: number, conFecha?: DateTime) {
-    if (!conFecha) {
-      conFecha = DateTime.now();
-    }
+    try {
+      if (!conFecha) {
+        conFecha = DateTime.now();
+      }
 
-    const subordinados = await this.prisma.trabajador.findMany({
-      where: {
-        idResponsable: id,
-        contratos: {
-          some: {
-            AND: [
-              {
-                fechaAlta: {
-                  lte: conFecha.toJSDate(),
+      const subordinados = await this.prisma.trabajador.findMany({
+        where: {
+          idResponsable: id,
+          contratos: {
+            some: {
+              AND: [
+                {
+                  fechaAlta: {
+                    lte: conFecha.toJSDate(),
+                  },
                 },
-              },
-              {
-                OR: [
-                  {
-                    fechaBaja: {
-                      gte: conFecha.toJSDate(),
+                {
+                  OR: [
+                    {
+                      fechaBaja: {
+                        gte: conFecha.toJSDate(),
+                      },
                     },
-                  },
-                  {
-                    fechaBaja: null,
-                  },
-                ],
-              },
-            ],
+                    {
+                      fechaBaja: null,
+                    },
+                  ],
+                },
+              ],
+            },
           },
         },
-      },
-      include: {
-        contratos: {
-          where: {
-            fechaBaja: null,
+        include: {
+          contratos: {
+            where: {
+              fechaBaja: null,
+            },
+            orderBy: {
+              fechaAlta: "desc",
+            },
+            take: 1,
           },
-          orderBy: {
-            fechaAlta: "desc",
-          },
-          take: 1,
         },
-      },
-    });
+      });
 
-    return subordinados;
+      return subordinados;
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException(
+        `Error al obtener subordinados por ID`,
+      );
+    }
   }
 
   async getSubordinadosConTiendaPorId(idResponsable: number) {

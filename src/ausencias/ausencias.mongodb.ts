@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, InternalServerErrorException } from "@nestjs/common";
 import { MongoService } from "../mongo/mongo.service";
 import { AusenciaInterface } from "./ausencias.interface";
 import { ObjectId } from "mongodb";
@@ -161,6 +161,28 @@ export class AusenciasDatabase {
     const ausenciasCollection = db.collection<AusenciaInterface>("ausencias");
 
     return await ausenciasCollection.findOne({ _id: idAusencia });
+  }
+
+  async getAusenciasTrabajador(
+    idTrabajador: number,
+    inicio: DateTime,
+    final: DateTime,
+  ) {
+    try {
+      const db = (await this.mongoDbService.getConexion()).db();
+      const ausenciasCollection = db.collection<AusenciaInterface>("ausencias");
+      const inicioDate = inicio.toJSDate();
+      const finalDate = final.toJSDate();
+      const query = {
+        idUsuario: idTrabajador,
+        fechaInicio: { $gte: inicioDate },
+        fechaFinal: { $lt: finalDate },
+      };
+      return await ausenciasCollection.find(query).toArray();
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException();
+    }
   }
 
   async getAusenciasSincro() {

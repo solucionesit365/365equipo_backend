@@ -1,3 +1,4 @@
+import { Type } from "class-transformer";
 import {
   IsBoolean,
   IsEnum,
@@ -63,4 +64,19 @@ export class CrearAusenciaDto {
 
   @IsEnum(TiposAusencia)
   tipo: TiposAusencia;
+}
+
+export class GetAusenciasTrabajadorDto {
+  @IsNotEmpty()
+  @Type(() => Number)
+  @IsNumber()
+  idTrabajador: number;
+
+  @IsNotEmpty()
+  @IsString()
+  fechaInicio: string;
+
+  @IsNotEmpty()
+  @IsString()
+  fechaFinal: string;
 }
