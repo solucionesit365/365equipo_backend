@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { DateTime } from "luxon";
-import { ICoordinadoraRepository } from "../../coordinadora/coordinadora.repository.interface";
+import { ICoordinadoraRepository } from "../../coordinadora/repository/interfaces/ICoordinadora.repository";
 import { ITurnoRepository } from "../repository/interfaces/turno.repository.interface";
 import { IGetTurnosEquipoCoordinadoraUseCase } from "./interfaces/IGetTurnosEquipoCoordinadora.use-case";
 import { Turno } from "@prisma/client";

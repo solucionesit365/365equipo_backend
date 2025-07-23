@@ -1,6 +1,6 @@
 import { Injectable, PreconditionFailedException } from "@nestjs/common";
-import { IGetEquipoCoordinadoraPorTienda } from "./GetEquipoCoordinadoraPorTiendaInterface";
-import { ICoordinadoraRepository } from "../coordinadora.repository.interface";
+import { IGetEquipoCoordinadoraPorTienda } from "./interfaces/IGetEquipoCoordinadoraPorTienda.use-case";
+import { ICoordinadoraRepository } from "../repository/interfaces/ICoordinadora.repository";
 
 @Injectable()
 export class GetEquipoCoordinadoraPorTiendaUseCase
