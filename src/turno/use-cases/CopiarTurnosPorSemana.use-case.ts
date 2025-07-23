@@ -31,19 +31,21 @@ export class CopiarTurnosPorSemanaUseCase
       tiendaID,
       diaDeSemanaOrigen,
     );
+    const diasDiferencia = diaDeSemanaDestino.diff(diaDeSemanaOrigen, "days").days;
+    
     const turnosDestino = turnosOrigen.map((turnoOrigen) => {
+      // Crear objeto limpio solo con las propiedades necesarias para createMany
       return {
-        ...turnoOrigen,
+        id: require('crypto').randomUUID(),
         inicio: DateTime.fromJSDate(turnoOrigen.inicio)
-          .plus({
-            days: diaDeSemanaDestino.diff(diaDeSemanaOrigen, "days").days,
-          })
+          .plus({ days: diasDiferencia })
           .toJSDate(),
         final: DateTime.fromJSDate(turnoOrigen.final)
-          .plus({
-            days: diaDeSemanaDestino.diff(diaDeSemanaOrigen, "days").days,
-          })
+          .plus({ days: diasDiferencia })
           .toJSDate(),
+        tiendaId: turnoOrigen.tiendaId,
+        idTrabajador: turnoOrigen.idTrabajador,
+        borrable: turnoOrigen.borrable,
       };
     });
     await this.turnoRepository.createTurnos(turnosDestino);
