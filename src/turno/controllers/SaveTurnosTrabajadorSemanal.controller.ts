@@ -3,7 +3,7 @@ import { SaveTurnosTrabajadorSemanalDto } from "../dto/turno.dto";
 import {
   IReqSaveTurnosTrabajadorSemanal,
   ISaveTurnosTrabajadorSemanalUseCase,
-} from "../interface/ISaveTurnosTrabajadorSemanalUseCase";
+} from "../use-cases/interfaces/ISaveTurnosTrabajadorSemanalUseCase";
 import { DateTime } from "luxon";
 
 @Controller("save-turnos-trabajador-semanal")

@@ -1,8 +1,8 @@
 import { Injectable, InternalServerErrorException } from "@nestjs/common";
 import { Prisma, Turno } from "@prisma/client";
 import { DateTime } from "luxon";
-import { PrismaService } from "../prisma/prisma.service";
-import { ITurnoRepository } from "./turno.repository.interface";
+import { PrismaService } from "../../prisma/prisma.service";
+import { ITurnoRepository } from "./interfaces/turno.repository.interface";
 
 function construirIncludeContrato(fechaJS: Date): Prisma.TrabajadorInclude {
   return {

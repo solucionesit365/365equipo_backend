@@ -64,3 +64,18 @@ export class SaveTurnosTrabajadorSemanalDto {
   @Type(() => ObjetoTurnoDto)
   arrayTurnos: ObjetoTurnoDto[];
 }
+
+export class CopiarTurnosPorSemanaDto {
+  @IsNotEmpty()
+  @Type(() => Number)
+  @IsNumber()
+  idTienda: number;
+
+  @IsNotEmpty()
+  @IsString()
+  diaSemanaOrigen: string;
+
+  @IsNotEmpty()
+  @IsString()
+  diaSemanaDestino: string;
+}

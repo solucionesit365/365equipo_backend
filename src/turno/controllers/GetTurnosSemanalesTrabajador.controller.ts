@@ -1,5 +1,5 @@
 import { Controller, Get, Query, UseGuards } from "@nestjs/common";
-import { ITurnoRepository } from "../turno.repository.interface";
+import { ITurnoRepository } from "../repository/interfaces/turno.repository.interface";
 import { AuthGuard } from "src/guards/auth.guard";
 import { GetSemanaIndividual } from "../dto/turno.dto";
 import { DateTime } from "luxon";

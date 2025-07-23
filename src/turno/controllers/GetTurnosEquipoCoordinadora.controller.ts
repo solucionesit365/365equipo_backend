@@ -8,12 +8,12 @@ import {
 import { AuthGuard } from "../../guards/auth.guard";
 import { GetTurnosEquipoCoordinadora } from "../dto/turno.dto";
 import { DateTime } from "luxon";
-import { GetTurnosEquipoCoordinadoraUseCase } from "../use-cases/GetTurnosEquipoCoordinadora.use-case";
+import { IGetTurnosEquipoCoordinadoraUseCase } from "../use-cases/interfaces/IGetTurnosEquipoCoordinadora.use-case";
 
 @Controller("GetTurnosEquipoCoordinadora")
 export class GetTurnosEquipoCoordinadoraController {
   constructor(
-    private readonly getTurnosEquipoCoordinadoraUseCase: GetTurnosEquipoCoordinadoraUseCase,
+    private readonly getTurnosEquipoCoordinadoraUseCase: IGetTurnosEquipoCoordinadoraUseCase,
   ) {}
 
   @UseGuards(AuthGuard)

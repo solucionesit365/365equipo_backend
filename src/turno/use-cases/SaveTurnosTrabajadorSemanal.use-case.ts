@@ -2,9 +2,9 @@ import { Injectable } from "@nestjs/common";
 import {
   IReqSaveTurnosTrabajadorSemanal,
   ISaveTurnosTrabajadorSemanalUseCase,
-} from "../interface/ISaveTurnosTrabajadorSemanalUseCase";
+} from "./interfaces/ISaveTurnosTrabajadorSemanalUseCase";
 import { Turno } from "@prisma/client";
-import { ITurnoRepository } from "../turno.repository.interface";
+import { ITurnoRepository } from "../repository/interfaces/turno.repository.interface";
 
 @Injectable()
 export class SaveTurnosTrabajadorSemanalUseCase

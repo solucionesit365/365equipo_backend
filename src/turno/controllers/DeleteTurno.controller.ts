@@ -1,5 +1,5 @@
 import { Body, Controller, Post, UseGuards } from "@nestjs/common";
-import { ITurnoRepository } from "../turno.repository.interface";
+import { ITurnoRepository } from "../repository/interfaces/turno.repository.interface";
 import { AuthGuard } from "../../guards/auth.guard";
 import { DeleteTurnoDto } from "../dto/turno.dto";
 
