@@ -1,6 +1,6 @@
 import { Controller, Get, Query } from "@nestjs/common";
-import { GetEquipoCoordinadoraPorTiendaDto } from "../dto";
-import { IGetEquipoCoordinadoraPorTienda } from "../use-cases/GetEquipoCoordinadoraPorTiendaInterface";
+import { GetEquipoCoordinadoraPorTiendaDto } from "./dto";
+import { IGetEquipoCoordinadoraPorTienda } from "../use-cases/interfaces/IGetEquipoCoordinadoraPorTienda.use-case";
 
 @Controller("get-equipo-coordinadora-por-tienda")
 export class GetEquipoCoordinadoraController {

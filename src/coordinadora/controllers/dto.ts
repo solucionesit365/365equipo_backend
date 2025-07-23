@@ -6,3 +6,11 @@ export class GetEquipoCoordinadoraPorTiendaDto {
   @IsNumber()
   idTienda: number;
 }
+
+export class CheckPINCoordinadoraDto {
+  @IsNumber()
+  idTienda: number;
+
+  @IsNumber()
+  pin: number;
+}
