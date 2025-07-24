@@ -1,9 +1,43 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
+import { MongoService } from "../mongo/mongo.service";
+import { ObjectId } from "mongodb";
+
+interface ITurnosMongoResuelto {
+  _id: string;
+  idTrabajador: number;
+  idTienda: 85;
+  inicio: string; // ISODate
+  final: string; // ISODate
+  nombre: string;
+  totalHoras: number;
+  enviado: boolean;
+  horasContrato: number;
+  bolsaHorasInicial: number;
+  borrable: boolean;
+}
+
+interface ITurnosMongoBBDD {
+  _id: ObjectId;
+  idTrabajador: number;
+  idTienda: 85;
+  inicio: Date; // ISODate
+  final: Date; // ISODate
+  nombre: string;
+  totalHoras: number;
+  enviado: boolean;
+  horasContrato: number;
+  bolsaHorasInicial: number;
+  borrable: boolean;
+}
 
 @Injectable()
 export class MacroService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly mongoService: MongoService,
+    private readonly createTurnosUseCase: I
+  ) {}
 
   // Coordinadoras reales, porque tiene filtro de t-- y m--
   async corregirCoordinadoras() {
@@ -45,5 +79,32 @@ export class MacroService {
     );
 
     return resultados; // array de tiendas ya actualizadas
+  }
+
+  async migrarTurnos() {
+    // Traer los turnos de Mongo OK
+    // Mapear los turnos y convertirlos al formato de Prisma
+    // Insertar los turnos en Prisma
+
+    const db = (await this.mongoService.getConexion()).db();
+    const unMesAtras = new Date();
+    unMesAtras.setMonth(unMesAtras.getMonth() - 1);
+
+    // Filtrar también donde ausencia es null o undefined
+    const filtro = {
+      inicio: { $gt: unMesAtras },
+      $or: [{ ausencia: null }, { ausencia: { $exists: false } }],
+    };
+
+    const turnos = await db
+      .collection<ITurnosMongoBBDD>("cuadrantes2")
+      .find(filtro)
+      .toArray();
+  
+      const turnosPrisma:  = turnos.map((turnoMongo) => {
+        return {
+          
+        }
+      })
   }
 }

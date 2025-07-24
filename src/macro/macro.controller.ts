@@ -8,4 +8,10 @@ export class MacroController {
   corregirCoordinadoras() {
     return this.macroService.corregirCoordinadoras();
   }
+
+  // De Mongo a Prisma
+  @Post("migrar-turnos")
+  migrarTurnos() {
+    return this.macroService.migrarTurnos();
+  }
 }
