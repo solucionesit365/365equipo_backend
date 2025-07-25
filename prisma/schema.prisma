@@ -217,14 +217,15 @@ model SmsOtp {
 }
 
 model Turno {
-  id           String     @id @default(uuid())
-  inicio       DateTime
-  final        DateTime
-  tiendaId     Int
-  idTrabajador Int
-  borrable     Boolean    @default(false)
-  Trabajador   Trabajador @relation(fields: [idTrabajador], references: [id])
-  tienda       Tienda     @relation(fields: [tiendaId], references: [id])
+  id                String     @id @default(uuid())
+  inicio            DateTime
+  final             DateTime
+  tiendaId          Int
+  idTrabajador      Int
+  borrable          Boolean    @default(false)
+  bolsaHorasInicial Float      @default(0)
+  Trabajador        Trabajador @relation(fields: [idTrabajador], references: [id])
+  tienda            Tienda     @relation(fields: [tiendaId], references: [id])
 }
 
 model PlantillaTurno {

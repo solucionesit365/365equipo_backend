@@ -26,8 +26,6 @@ model Trabajador {
   idResponsable          Int?
   idTienda               Int?
   llevaEquipo            Boolean
-  ausenciasParciales     AusenciaParcial[]
-  ausenciasCompletas     AusenciaCompleta[]
   tokenQR                String?
   displayFoto            String?
   excedencia             Boolean            @default(false)
@@ -36,7 +34,8 @@ model Trabajador {
   esTienda               Boolean            @default(false)
   nPerceptor             Int?
   workEmail              String?
-  contratos              Contrato2[]
+  ausenciasCompletas     AusenciaCompleta[]
+  ausenciasParciales     AusenciaParcial[]
   coordinadoraDeLaTienda Tienda?            @relation("TiendaCoordinator")
   empresa                Empresa?           @relation(fields: [empresaId], references: [id])
   responsable            Trabajador?        @relation("Responsable", fields: [idResponsable], references: [id])
@@ -44,7 +43,6 @@ model Trabajador {
   tienda                 Tienda?            @relation(fields: [idTienda], references: [id])
   turnos                 Turno[]
   permisos               Permiso[]          @relation("PermisoToTrabajador")
-  roles                  Role[]             @relation("RoleToTrabajador")
 
   @@unique([empresaId, nPerceptor])
 }
@@ -73,12 +71,12 @@ model Empresa {
   cif            String
   idExterno      Int?
   autogestionada Boolean      @default(false)
-  Trabajador     Trabajador[]
   existsBC       Boolean      @default(false)
+  Trabajador     Trabajador[]
 }
 
 model Contrato2 {
-  id              String     @id @default(uuid())
+  id              String    @id @default(uuid())
   horasContrato   Float
   inicioContrato  DateTime
   finalContrato   DateTime?
@@ -86,14 +84,13 @@ model Contrato2 {
   fechaAntiguedad DateTime
   fechaBaja       DateTime?
   idTrabajador    Int
-  Trabajador      Trabajador @relation(fields: [idTrabajador], references: [id], onDelete: Cascade)
 }
 
 model Role {
-  id          String       @id @default(uuid())
-  name        String
-  permissions Permiso[]    @relation("PermisoToRole")
-  users       Trabajador[] @relation("RoleToTrabajador")
+  id               String             @id @default(uuid())
+  name             String
+  RoleToTrabajador RoleToTrabajador[]
+  permissions      Permiso[]          @relation("PermisoToRole")
 }
 
 model Permiso {
@@ -220,15 +217,14 @@ model SmsOtp {
 }
 
 model Turno {
-  id                String     @id @default(uuid())
-  inicio            DateTime
-  final             DateTime
-  tiendaId          Int
-  idTrabajador      Int
-  borrable          Boolean    @default(false)
-  bolsaHorasInicial Float
-  Trabajador        Trabajador @relation(fields: [idTrabajador], references: [id])
-  tienda            Tienda     @relation(fields: [tiendaId], references: [id])
+  id           String     @id @default(uuid())
+  inicio       DateTime
+  final        DateTime
+  tiendaId     Int
+  idTrabajador Int
+  borrable     Boolean    @default(false)
+  Trabajador   Trabajador @relation(fields: [idTrabajador], references: [id])
+  tienda       Tienda     @relation(fields: [tiendaId], references: [id])
 }
 
 model PlantillaTurno {
@@ -241,32 +237,6 @@ model PlantillaTurno {
   tienda   Tienda @relation(fields: [tiendaId], references: [id])
 }
 
-// _id
-// 6710cd5d58e0bf8608d981cd
-// idUsuario
-// 5160
-// nombre
-// "Maria Virginia Jimenez Jimenez"
-// dni
-// "Y9198139Q"
-// tipo
-// "DIA_PERSONAL"
-// horasContrato
-// 40
-// tienda
-// "t--103"
-// fechaInicio
-// 2024-09-30T22:00:00.000+00:00
-// fechaFinal
-// 2024-10-01T22:00:00.000+00:00
-// fechaRevision
-// null
-// comentario
-// null
-// completa
-// true
-// horas
-// null
 model AusenciaParcial {
   id           String              @id @default(uuid())
   tipo         TipoAusenciaParcial
@@ -286,6 +256,16 @@ model AusenciaCompleta {
   fechaRevision DateTime?
   idTrabajador  Int
   trabajador    Trabajador           @relation(fields: [idTrabajador], references: [id])
+}
+
+model RoleToTrabajador {
+  A    String
+  B    Int
+  Role Role   @relation(fields: [A], references: [id], onDelete: Cascade)
+
+  @@id([A, B], map: "_RoleToTrabajador_AB_pkey")
+  @@index([B], map: "_RoleToTrabajador_B_index")
+  @@map("_RoleToTrabajador")
 }
 
 enum ColorSemanal {
@@ -324,10 +304,10 @@ enum TipoAusenciaParcial {
 
 enum TipoAusenciaCompleta {
   BAJA
-  PERMISO_MATERNIDAD_PATERNIDAD // Esta cambia de nombre!!! antes era PERMISO MATERNIDAD/PATERNIDAD
+  PERMISO_MATERNIDAD_PATERNIDAD
   DIA_PERSONAL
   VACACIONES
-  SANCIÓN
+  // SANCIÓN
   ABSENTISMO
   REM
 }
