@@ -2,6 +2,8 @@ import { Injectable } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { MongoService } from "../mongo/mongo.service";
 import { ObjectId } from "mongodb";
+import { Prisma } from "@prisma/client";
+import { DateTime } from "luxon";
 
 interface ITurnosMongoResuelto {
   _id: string;
@@ -36,7 +38,6 @@ export class MacroService {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly mongoService: MongoService,
-    private readonly createTurnosUseCase: I
   ) {}
 
   // Coordinadoras reales, porque tiene filtro de t-- y m--
@@ -100,11 +101,21 @@ export class MacroService {
       .collection<ITurnosMongoBBDD>("cuadrantes2")
       .find(filtro)
       .toArray();
-  
-      const turnosPrisma:  = turnos.map((turnoMongo) => {
+
+    const turnosPrisma: Prisma.TurnoCreateManyInput[] = turnos.map(
+      function (turnoMongo) {
         return {
-          
-        }
-      })
+          inicio: DateTime.fromJSDate(turnoMongo.inicio).toJSDate(),
+          final: DateTime.fromJSDate(turnoMongo.inicio).toJSDate(),
+          tiendaId: turnoMongo.idTienda,
+          idTrabajador: turnoMongo.idTrabajador,
+          bolsaHorasInicial: turnoMongo.bolsaHorasInicial,
+        };
+      },
+    );
+
+    await this.prismaService.turno.createMany({
+      data: turnosPrisma,
+    });
   }
 }
