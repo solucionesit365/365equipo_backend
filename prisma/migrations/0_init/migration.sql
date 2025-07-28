@@ -13,6 +13,12 @@ CREATE TYPE "PasoFormacionType" AS ENUM ('VIDEO_FORMATIVO', 'PRESENTACION', 'CUE
 -- CreateEnum
 CREATE TYPE "QuestionnaireType" AS ENUM ('RANDOM', 'SELECTION');
 
+-- CreateEnum
+CREATE TYPE "TipoAusenciaParcial" AS ENUM ('ABSENTISMO', 'HORAS_JUSTIFICADAS');
+
+-- CreateEnum
+CREATE TYPE "TipoAusenciaCompleta" AS ENUM ('BAJA', 'PERMISO_MATERNIDAD_PATERNIDAD', 'DIA_PERSONAL', 'VACACIONES', 'ABSENTISMO', 'REM');
+
 -- CreateTable
 CREATE TABLE "Trabajador" (
     "id" SERIAL NOT NULL,
@@ -51,6 +57,8 @@ CREATE TABLE "Tienda" (
     "nombre" TEXT NOT NULL,
     "direccion" TEXT,
     "idExterno" INTEGER,
+    "coordinatorId" INTEGER,
+    "existsBC" BOOLEAN NOT NULL DEFAULT false,
 
     CONSTRAINT "Tienda_pkey" PRIMARY KEY ("id")
 );
@@ -74,20 +82,6 @@ CREATE TABLE "Empresa" (
     "existsBC" BOOLEAN NOT NULL DEFAULT false,
 
     CONSTRAINT "Empresa_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "Contrato2" (
-    "id" TEXT NOT NULL,
-    "horasContrato" DOUBLE PRECISION NOT NULL,
-    "inicioContrato" TIMESTAMP(3) NOT NULL,
-    "finalContrato" TIMESTAMP(3),
-    "fechaAlta" TIMESTAMP(3) NOT NULL,
-    "fechaAntiguedad" TIMESTAMP(3) NOT NULL,
-    "fechaBaja" TIMESTAMP(3),
-    "idTrabajador" INTEGER NOT NULL,
-
-    CONSTRAINT "Contrato2_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -247,6 +241,70 @@ CREATE TABLE "SmsOtp" (
 );
 
 -- CreateTable
+CREATE TABLE "Turno" (
+    "id" TEXT NOT NULL,
+    "inicio" TIMESTAMP(3) NOT NULL,
+    "final" TIMESTAMP(3) NOT NULL,
+    "tiendaId" INTEGER NOT NULL,
+    "idTrabajador" INTEGER NOT NULL,
+    "borrable" BOOLEAN NOT NULL DEFAULT false,
+    "bolsaHorasInicial" DOUBLE PRECISION NOT NULL DEFAULT 0,
+
+    CONSTRAINT "Turno_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "PlantillaTurno" (
+    "id" TEXT NOT NULL,
+    "nombre" TEXT NOT NULL,
+    "inicio" TEXT NOT NULL,
+    "final" TEXT NOT NULL,
+    "order" INTEGER NOT NULL,
+    "tiendaId" INTEGER NOT NULL,
+
+    CONSTRAINT "PlantillaTurno_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "AusenciaParcial" (
+    "id" TEXT NOT NULL,
+    "tipo" "TipoAusenciaParcial" NOT NULL,
+    "comentario" TEXT,
+    "fechaInicio" TIMESTAMP(3) NOT NULL,
+    "fechaFinal" TIMESTAMP(3) NOT NULL,
+    "idTrabajador" INTEGER NOT NULL,
+
+    CONSTRAINT "AusenciaParcial_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "AusenciaCompleta" (
+    "id" TEXT NOT NULL,
+    "tipo" "TipoAusenciaCompleta" NOT NULL,
+    "comentario" TEXT,
+    "fechaInicio" TIMESTAMP(3) NOT NULL,
+    "fechaFinal" TIMESTAMP(3),
+    "fechaRevision" TIMESTAMP(3),
+    "idTrabajador" INTEGER NOT NULL,
+
+    CONSTRAINT "AusenciaCompleta_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Contrato2" (
+    "id" TEXT NOT NULL,
+    "horasContrato" DOUBLE PRECISION NOT NULL,
+    "inicioContrato" TIMESTAMP(3) NOT NULL,
+    "finalContrato" TIMESTAMP(3),
+    "fechaAlta" TIMESTAMP(3) NOT NULL,
+    "fechaAntiguedad" TIMESTAMP(3) NOT NULL,
+    "fechaBaja" TIMESTAMP(3),
+    "idTrabajador" INTEGER NOT NULL,
+
+    CONSTRAINT "Contrato2_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "_RoleToTrabajador" (
     "A" TEXT NOT NULL,
     "B" INTEGER NOT NULL,
@@ -288,6 +346,9 @@ CREATE UNIQUE INDEX "Trabajador_dni_key" ON "Trabajador"("dni");
 CREATE UNIQUE INDEX "Trabajador_empresaId_nPerceptor_key" ON "Trabajador"("empresaId", "nPerceptor");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "Tienda_coordinatorId_key" ON "Tienda"("coordinatorId");
+
+-- CreateIndex
 CREATE INDEX "_RoleToTrabajador_B_index" ON "_RoleToTrabajador"("B");
 
 -- CreateIndex
@@ -309,7 +370,7 @@ ALTER TABLE "Trabajador" ADD CONSTRAINT "Trabajador_idResponsable_fkey" FOREIGN 
 ALTER TABLE "Trabajador" ADD CONSTRAINT "Trabajador_idTienda_fkey" FOREIGN KEY ("idTienda") REFERENCES "Tienda"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Contrato2" ADD CONSTRAINT "Contrato2_idTrabajador_fkey" FOREIGN KEY ("idTrabajador") REFERENCES "Trabajador"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "Tienda" ADD CONSTRAINT "Tienda_coordinatorId_fkey" FOREIGN KEY ("coordinatorId") REFERENCES "Trabajador"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "DocumentoFirmado" ADD CONSTRAINT "DocumentoFirmado_documentoOriginalId_fkey" FOREIGN KEY ("documentoOriginalId") REFERENCES "DocumentoOriginal"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -325,6 +386,24 @@ ALTER TABLE "AnswerOption" ADD CONSTRAINT "AnswerOption_questionId_fkey" FOREIGN
 
 -- AddForeignKey
 ALTER TABLE "PasosFormacion" ADD CONSTRAINT "PasosFormacion_formacionesId_fkey" FOREIGN KEY ("formacionesId") REFERENCES "Formacion"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Turno" ADD CONSTRAINT "Turno_idTrabajador_fkey" FOREIGN KEY ("idTrabajador") REFERENCES "Trabajador"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Turno" ADD CONSTRAINT "Turno_tiendaId_fkey" FOREIGN KEY ("tiendaId") REFERENCES "Tienda"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "PlantillaTurno" ADD CONSTRAINT "PlantillaTurno_tiendaId_fkey" FOREIGN KEY ("tiendaId") REFERENCES "Tienda"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "AusenciaParcial" ADD CONSTRAINT "AusenciaParcial_idTrabajador_fkey" FOREIGN KEY ("idTrabajador") REFERENCES "Trabajador"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "AusenciaCompleta" ADD CONSTRAINT "AusenciaCompleta_idTrabajador_fkey" FOREIGN KEY ("idTrabajador") REFERENCES "Trabajador"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Contrato2" ADD CONSTRAINT "Contrato2_idTrabajador_fkey" FOREIGN KEY ("idTrabajador") REFERENCES "Trabajador"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "_RoleToTrabajador" ADD CONSTRAINT "_RoleToTrabajador_A_fkey" FOREIGN KEY ("A") REFERENCES "Role"("id") ON DELETE CASCADE ON UPDATE CASCADE;

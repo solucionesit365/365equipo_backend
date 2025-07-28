@@ -1,3 +1,0 @@
--- This migration was partially applied but not completed
--- It should have contained the changes that are now missing
--- We'll apply them in a new migration instead

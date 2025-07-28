@@ -1,2 +1,0 @@
--- AlterTable
-ALTER TABLE "Turno" ADD COLUMN     "bolsaHorasInicial" DOUBLE PRECISION NOT NULL DEFAULT 0;
