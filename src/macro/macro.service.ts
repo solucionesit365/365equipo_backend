@@ -102,20 +102,31 @@ export class MacroService {
       .find(filtro)
       .toArray();
 
-    const turnosPrisma: Prisma.TurnoCreateManyInput[] = turnos.map(
-      function (turnoMongo) {
+    // Obtener IDs de trabajadores existentes en Prisma
+    const trabajadoresExistentes = await this.prismaService.trabajador.findMany(
+      {
+        select: { id: true },
+      },
+    );
+    const idsExistentes = new Set(trabajadoresExistentes.map((t) => t.id));
+
+    const turnosPrisma: Prisma.TurnoCreateManyInput[] = turnos
+      .filter((turnoMongo) => idsExistentes.has(turnoMongo.idTrabajador))
+      .map(function (turnoMongo) {
         return {
           inicio: DateTime.fromJSDate(turnoMongo.inicio).toJSDate(),
           final: DateTime.fromJSDate(turnoMongo.inicio).toJSDate(),
           tiendaId: turnoMongo.idTienda,
           idTrabajador: turnoMongo.idTrabajador,
           bolsaHorasInicial: turnoMongo.bolsaHorasInicial,
+          borrable: turnoMongo.borrable,
         };
-      },
-    );
+      });
 
-    await this.prismaService.turno.createMany({
-      data: turnosPrisma,
-    });
+    if (turnosPrisma.length > 0) {
+      await this.prismaService.turno.createMany({
+        data: turnosPrisma,
+      });
+    }
   }
 }

@@ -36,7 +36,7 @@ model Trabajador {
   workEmail              String?
   ausenciasCompletas     AusenciaCompleta[]
   ausenciasParciales     AusenciaParcial[]
-  Contrato2              Contrato2[]
+  contratos              Contrato2[]
   coordinadoraDeLaTienda Tienda?            @relation("TiendaCoordinator")
   empresa                Empresa?           @relation(fields: [empresaId], references: [id])
   responsable            Trabajador?        @relation("Responsable", fields: [idResponsable], references: [id])
@@ -75,7 +75,7 @@ model Empresa {
   idExterno      Int?
   autogestionada Boolean      @default(false)
   existsBC       Boolean      @default(false)
-  Trabajador     Trabajador[]
+  trabajadores   Trabajador[]
 }
 
 model Role {
@@ -216,7 +216,7 @@ model Turno {
   idTrabajador      Int
   borrable          Boolean    @default(false)
   bolsaHorasInicial Float      @default(0)
-  Trabajador        Trabajador @relation(fields: [idTrabajador], references: [id])
+  trabajador        Trabajador @relation(fields: [idTrabajador], references: [id])
   tienda            Tienda     @relation(fields: [tiendaId], references: [id])
 }
 
@@ -260,7 +260,7 @@ model Contrato2 {
   fechaAntiguedad DateTime
   fechaBaja       DateTime?
   idTrabajador    Int
-  Trabajador      Trabajador @relation(fields: [idTrabajador], references: [id], onDelete: Cascade)
+  trabajador      Trabajador @relation(fields: [idTrabajador], references: [id], onDelete: Cascade)
 }
 
 enum ColorSemanal {

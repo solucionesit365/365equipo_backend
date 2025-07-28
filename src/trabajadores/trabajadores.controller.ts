@@ -85,7 +85,7 @@ export class TrabajadoresController {
             cambios: modificacion.cambios,
             nuevoContrato: {
               ...modificacion.contrato,
-              Trabajador: { connect: { dni: modificacion.dni } },
+              trabajador: { connect: { dni: modificacion.dni } },
             },
           })),
         );

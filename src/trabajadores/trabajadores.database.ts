@@ -76,7 +76,7 @@ export class TrabajadorDatabaseService {
 
     await this.prisma.contrato2.create({
       data: {
-        Trabajador: {
+        trabajador: {
           connect: {
             id: newTrabajador.id,
           },
@@ -248,7 +248,7 @@ export class TrabajadorDatabaseService {
                       await this.prisma.contrato2.create({
                         data: {
                           // Exclude the id field to let Prisma generate a new one
-                          Trabajador: {
+                          trabajador: {
                             connect: { id: existingTrabajador.id },
                           },
                           fechaAlta: contratoData.fechaAlta,
@@ -319,7 +319,7 @@ export class TrabajadorDatabaseService {
                   await this.prisma.contrato2.create({
                     data: {
                       // Do NOT use contratoData.id - let Prisma generate a new UUID
-                      Trabajador: {
+                      trabajador: {
                         connect: { id: newTrabajador.id },
                       },
                       fechaAlta: contratoData.fechaAlta,
@@ -748,7 +748,7 @@ export class TrabajadorDatabaseService {
         // Creamos un contrato nuevo
         await this.prisma.contrato2.create({
           data: {
-            Trabajador: { connect: { id: updatedTrabajador.id } },
+            trabajador: { connect: { id: updatedTrabajador.id } },
             fechaAlta: reqTrabajador.contrato.fechaAlta,
             fechaAntiguedad: reqTrabajador.contrato.fechaAntiguedad,
             horasContrato: reqTrabajador.contrato.horasContrato,
@@ -796,7 +796,7 @@ export class TrabajadorDatabaseService {
       // Creamos el contrato asociado al nuevo trabajador
       await this.prisma.contrato2.create({
         data: {
-          Trabajador: { connect: { id: newTrabajador.id } },
+          trabajador: { connect: { id: newTrabajador.id } },
           fechaAlta: reqTrabajador.contrato.fechaAlta,
           fechaAntiguedad: reqTrabajador.contrato.fechaAntiguedad,
           horasContrato: reqTrabajador.contrato.horasContrato,

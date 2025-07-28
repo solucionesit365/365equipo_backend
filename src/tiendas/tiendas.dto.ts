@@ -40,4 +40,5 @@ export interface Tiendas2 {
   id: number;
   idExterno: number;
   telefono: number;
+  existsBC: boolean;
 }

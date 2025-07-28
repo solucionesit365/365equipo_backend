@@ -66,7 +66,7 @@ export class TurnoRepository implements ITurnoRepository {
           },
         },
         include: {
-          Trabajador: {
+          trabajador: {
             include: construirIncludeContrato(inicio.toJSDate()),
           },
         },
@@ -93,7 +93,7 @@ export class TurnoRepository implements ITurnoRepository {
           },
         },
         include: {
-          Trabajador: {
+          trabajador: {
             include: construirIncludeContrato(fechaJS),
           },
         },
@@ -111,7 +111,7 @@ export class TurnoRepository implements ITurnoRepository {
 
       return await this.prismaService.turno.findMany({
         where: {
-          Trabajador: {
+          trabajador: {
             idResponsable: idResponsableEquipo,
           },
           inicio: {
@@ -120,7 +120,7 @@ export class TurnoRepository implements ITurnoRepository {
           },
         },
         include: {
-          Trabajador: {
+          trabajador: {
             include: construirIncludeContrato(inicio.toJSDate()),
           },
         },
