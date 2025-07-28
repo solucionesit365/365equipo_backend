@@ -252,7 +252,7 @@ model AusenciaCompleta {
 }
 
 model Contrato2 {
-  id              String     @id
+  id              String     @id @default(uuid())
   horasContrato   Float
   inicioContrato  DateTime
   finalContrato   DateTime?
