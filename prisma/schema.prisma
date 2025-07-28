@@ -8,41 +8,43 @@ datasource db {
 }
 
 model Trabajador {
-  id                     Int                @id @default(autoincrement())
-  idApp                  String?            @unique
-  nombreApellidos        String
-  displayName            String?
-  emails                 String
-  dni                    String             @unique
-  direccion              String?
-  ciudad                 String?
-  telefonos              String?
-  fechaNacimiento        DateTime?
-  nacionalidad           String?
-  nSeguridadSocial       String?
-  codigoPostal           String?
-  cuentaCorriente        String?
-  tipoTrabajador         String
-  idResponsable          Int?
-  idTienda               Int?
-  llevaEquipo            Boolean
-  tokenQR                String?
-  displayFoto            String?
-  excedencia             Boolean            @default(false)
-  dispositivo            String?
-  empresaId              String?
-  esTienda               Boolean            @default(false)
-  nPerceptor             Int?
-  workEmail              String?
-  ausenciasCompletas     AusenciaCompleta[]
+  id               Int          @id @default(autoincrement())
+  idApp            String?      @unique
+  nombreApellidos  String
+  displayName      String?
+  emails           String
+  dni              String       @unique
+  direccion        String?
+  ciudad           String?
+  telefonos        String?
+  fechaNacimiento  DateTime?
+  nacionalidad     String?
+  nSeguridadSocial String?
+  codigoPostal     String?
+  cuentaCorriente  String?
+  tipoTrabajador   String
+  idResponsable    Int?
+  idTienda         Int?
+  llevaEquipo      Boolean
+  tokenQR          String?
+  displayFoto      String?
+  excedencia       Boolean      @default(false)
+  dispositivo      String?
+  empresaId        String?
+  esTienda         Boolean      @default(false)
+  nPerceptor       Int?
+  workEmail        String?
+  contratos        Contrato2[]
+  empresa          Empresa?     @relation(fields: [empresaId], references: [id])
+  responsable      Trabajador?  @relation("Responsable", fields: [idResponsable], references: [id])
+  coordinadoraDeLaTienda Tienda?      @relation("TiendaCoordinator")
+  subordinados     Trabajador[] @relation("Responsable")
+  tienda           Tienda?      @relation(fields: [idTienda], references: [id])
+  turnos           Turno[]
+  permisos         Permiso[]    @relation("PermisoToTrabajador")
+  roles            Role[]       @relation("RoleToTrabajador")
   ausenciasParciales     AusenciaParcial[]
-  coordinadoraDeLaTienda Tienda?            @relation("TiendaCoordinator")
-  empresa                Empresa?           @relation(fields: [empresaId], references: [id])
-  responsable            Trabajador?        @relation("Responsable", fields: [idResponsable], references: [id])
-  subordinados           Trabajador[]       @relation("Responsable")
-  tienda                 Tienda?            @relation(fields: [idTienda], references: [id])
-  turnos                 Turno[]
-  permisos               Permiso[]          @relation("PermisoToTrabajador")
+  ausenciasCompletas     AusenciaCompleta[]
 
   @@unique([empresaId, nPerceptor])
 }
@@ -76,7 +78,7 @@ model Empresa {
 }
 
 model Contrato2 {
-  id              String    @id @default(uuid())
+  id              String     @id @default(uuid())
   horasContrato   Float
   inicioContrato  DateTime
   finalContrato   DateTime?
@@ -84,13 +86,14 @@ model Contrato2 {
   fechaAntiguedad DateTime
   fechaBaja       DateTime?
   idTrabajador    Int
+  Trabajador      Trabajador @relation(fields: [idTrabajador], references: [id], onDelete: Cascade)
 }
 
 model Role {
-  id               String             @id @default(uuid())
-  name             String
-  RoleToTrabajador RoleToTrabajador[]
-  permissions      Permiso[]          @relation("PermisoToRole")
+  id          String       @id @default(uuid())
+  name        String
+  permissions Permiso[]    @relation("PermisoToRole")
+  users       Trabajador[] @relation("RoleToTrabajador")
 }
 
 model Permiso {
@@ -224,6 +227,7 @@ model Turno {
   idTrabajador      Int
   borrable          Boolean    @default(false)
   bolsaHorasInicial Float      @default(0)
+
   Trabajador        Trabajador @relation(fields: [idTrabajador], references: [id])
   tienda            Tienda     @relation(fields: [tiendaId], references: [id])
 }
@@ -257,16 +261,6 @@ model AusenciaCompleta {
   fechaRevision DateTime?
   idTrabajador  Int
   trabajador    Trabajador           @relation(fields: [idTrabajador], references: [id])
-}
-
-model RoleToTrabajador {
-  A    String
-  B    Int
-  Role Role   @relation(fields: [A], references: [id], onDelete: Cascade)
-
-  @@id([A, B], map: "_RoleToTrabajador_AB_pkey")
-  @@index([B], map: "_RoleToTrabajador_B_index")
-  @@map("_RoleToTrabajador")
 }
 
 enum ColorSemanal {

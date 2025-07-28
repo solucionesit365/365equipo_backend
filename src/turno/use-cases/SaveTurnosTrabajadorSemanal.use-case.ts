@@ -44,6 +44,7 @@ export class SaveTurnosTrabajadorSemanalUseCase
         borrable: turnoConsolidado.borrable,
         id: turnoConsolidado.id,
         tiendaId: turnoConsolidado.tiendaId,
+        bolsaHorasInicial: 0,
       })),
     );
 
