@@ -6,13 +6,16 @@ import { ObjectId, WithId } from "mongodb";
 import { FichajeDto, ParFichaje } from "./fichajes.interface";
 import { Cuadrantes } from "../cuadrantes/cuadrantes.class";
 import { DateTime } from "luxon";
+import { ITurnoRepository } from "../turno/repository/interfaces/turno.repository.interface";
+import { IGetTurnoDelDiaUseCase } from "../turno/use-cases/interfaces/IGetTurnoDelDia.use-case";
 
 @Injectable()
 export class Fichajes {
   constructor(
     private readonly schFichajes: FichajesDatabase,
     private readonly trabajadoresInstance: TrabajadorService,
-    private readonly cuadrantesInstance: Cuadrantes,
+    private readonly turnoRepository: ITurnoRepository,
+    private readonly getTurnoDelDiaUseCase: IGetTurnoDelDiaUseCase,
   ) {}
 
   async nuevaEntrada(
@@ -343,9 +346,8 @@ export class Fichajes {
       idTrabajador,
       diaEntrada,
     );
-    const trabajador = await this.trabajadoresInstance.getTrabajadorBySqlId(
-      idTrabajador,
-    );
+    const trabajador =
+      await this.trabajadoresInstance.getTrabajadorBySqlId(idTrabajador);
 
     return {
       _id: new ObjectId(),
@@ -365,10 +367,9 @@ export class Fichajes {
     idTrabajador: number,
     diaEntrada: DateTime,
   ) {
-    const cuadrantes = await this.cuadrantesInstance.getCuadrantesIndividual(
+    const cuadrantes = await this.turnoRepository.getTurnosPorTrabajador(
       idTrabajador,
       diaEntrada.startOf("day"),
-      diaEntrada.endOf("day"),
     );
 
     if (cuadrantes.length > 0) {
@@ -460,13 +461,13 @@ export class Fichajes {
           pares.push({
             entrada: fichajesSimples[i],
             salida: dataSalidaEncontrada,
-            cuadrante: await this.cuadrantesInstance.getTurnoDia(
+            cuadrante: await this.getTurnoDelDiaUseCase.execute(
               fichajesSimples[i].idTrabajador,
               DateTime.fromJSDate(fichajesSimples[i].hora),
             ),
           });
         } else {
-          const cuadrante = await this.cuadrantesInstance.getTurnoDia(
+          const cuadrante = await this.getTurnoDelDiaUseCase.execute(
             fichajesSimples[i].idTrabajador,
             DateTime.fromJSDate(fichajesSimples[i].hora),
           );

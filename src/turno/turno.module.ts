@@ -14,6 +14,8 @@ import { CopiarTurnoPorSemanaController } from "./controllers/CopiarTurnosPorSem
 import { ICopiarTurnosPorSemanaUseCase } from "./use-cases/interfaces/ICopiarTurnosPorSemana.use-case";
 import { CopiarTurnosPorSemanaUseCase } from "./use-cases/CopiarTurnosPorSemana.use-case";
 import { IGetTurnosEquipoCoordinadoraUseCase } from "./use-cases/interfaces/IGetTurnosEquipoCoordinadora.use-case";
+import { IGetTurnoDelDiaUseCase } from "./use-cases/interfaces/IGetTurnoDelDia.use-case";
+import { GetTurnoDelDiaUseCase } from "./use-cases/GetTurnoDelDia.use-case";
 
 @Module({
   imports: [TrabajadoresModule, CoordinadoraModule],
@@ -31,6 +33,10 @@ import { IGetTurnosEquipoCoordinadoraUseCase } from "./use-cases/interfaces/IGet
       provide: IGetTurnosEquipoCoordinadoraUseCase,
       useClass: GetTurnosEquipoCoordinadoraUseCase,
     },
+    {
+      provide: IGetTurnoDelDiaUseCase,
+      useClass: GetTurnoDelDiaUseCase,
+    },
   ],
   controllers: [
     DeleteTurnoController,
@@ -39,6 +45,6 @@ import { IGetTurnosEquipoCoordinadoraUseCase } from "./use-cases/interfaces/IGet
     SaveTurnosTrabajadorSemanalController,
     CopiarTurnoPorSemanaController,
   ],
-  exports: [],
+  exports: [IGetTurnoDelDiaUseCase, ITurnoRepository],
 })
 export class TurnoModule {}

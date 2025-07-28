@@ -100,13 +100,6 @@ export class SolicitudesVacacionesService {
         vacacionesToDelete.fechaFinal,
         "d/M/yyyy",
       ).toJSDate();
-
-      // 3.Eliminar las vacaciones de cuadrantesInstance.
-      await this.cuadrantesInstance.removeVacacionesFromCuadrantes(
-        vacacionesToDelete.idBeneficiario,
-        fechaInicioISO,
-        fechaFinalISO,
-      );
     } catch (error) {
       throw new Error(
         `Error al procesar la eliminación de las vacaciones: ${error.message}`,
@@ -206,16 +199,6 @@ export class SolicitudesVacacionesService {
 
   async ponerEnCuadrante(vacaciones) {
     if (vacaciones) {
-      await this.cuadrantesInstance.addAusenciaToCuadrantes({
-        completa: true,
-        enviado: false,
-        comentario: "Vacaciones",
-        fechaInicio: DateTime.fromJSDate(vacaciones.fechaInicio).toJSDate(),
-        fechaFinal: DateTime.fromJSDate(vacaciones.fechaFinal).toJSDate(),
-        idUsuario: vacaciones.idBeneficiario,
-        nombre: vacaciones.nombreApellidos,
-        tipo: "VACACIONES",
-      });
       return { ok: true };
     }
   }
@@ -234,22 +217,6 @@ export class SolicitudesVacacionesService {
         const vacaciones = await this.schSolicitudVacaciones.getSolicitudesById(
           solicitudesVacaciones._id.toString(),
         );
-        await this.cuadrantesInstance.addAusenciaToCuadrantes({
-          completa: true,
-          enviado: false,
-          comentario: "Vacaciones",
-          fechaInicio: DateTime.fromFormat(
-            vacaciones.fechaInicio,
-            "d/M/yyyy",
-          ).toJSDate(),
-          fechaFinal: DateTime.fromFormat(
-            vacaciones.fechaFinal,
-            "d/M/yyyy",
-          ).toJSDate(),
-          idUsuario: vacaciones.idBeneficiario,
-          nombre: vacaciones.nombreApellidos,
-          tipo: "VACACIONES",
-        });
       }
       return true;
     } else

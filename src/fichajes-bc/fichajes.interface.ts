@@ -1,5 +1,6 @@
 import { ObjectId, WithId } from "mongodb";
 import { TCuadrante } from "../cuadrantes/cuadrantes.interface";
+import { Turno } from "@prisma/client";
 
 export interface FichajeDto {
   _id?: ObjectId;
@@ -23,5 +24,5 @@ export interface FichajeDto {
 export interface ParFichaje {
   entrada: WithId<FichajeDto>;
   salida: WithId<FichajeDto>;
-  cuadrante: TCuadrante;
+  cuadrante: Turno;
 }

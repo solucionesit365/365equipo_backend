@@ -157,4 +157,27 @@ export class TurnoRepository implements ITurnoRepository {
     );
     return this.prismaService.$transaction(updates);
   }
+
+  async getTurnoDelDia(
+    idTrabajador: number,
+    inicio: DateTime,
+    final: DateTime,
+  ): Promise<Turno> {
+    try {
+      return await this.prismaService.turno.findFirst({
+        where: {
+          idTrabajador: idTrabajador,
+          inicio: {
+            gte: inicio.toJSDate(),
+          },
+          final: {
+            lt: final.toJSDate(),
+          },
+        },
+      });
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException();
+    }
+  }
 }

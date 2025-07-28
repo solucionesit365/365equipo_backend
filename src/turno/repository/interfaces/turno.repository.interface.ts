@@ -21,4 +21,9 @@ export abstract class ITurnoRepository {
   ): Promise<Turno[]>;
   abstract deleteTurno(idTurno: string): Promise<Turno>;
   abstract updateManyTurnos(turnos: Turno[]): Promise<Turno[]>;
+  abstract getTurnoDelDia(
+    idTrabajador: number,
+    inicio: DateTime,
+    final: DateTime,
+  ): Promise<Turno>;
 }
