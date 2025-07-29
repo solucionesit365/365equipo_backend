@@ -42,7 +42,10 @@ export class TrabajadorRepository implements ITrabajadorRepository {
     }
   }
 
-  async readByPerceptorAndEmpresa(nPerceptor: number, empresaId: string): Promise<Trabajador | null> {
+  async readByPerceptorAndEmpresa(
+    nPerceptor: number,
+    empresaId: string,
+  ): Promise<Trabajador | null> {
     try {
       return await this.prismaService.trabajador.findFirst({
         where: {
@@ -56,9 +59,21 @@ export class TrabajadorRepository implements ITrabajadorRepository {
     }
   }
 
-  async readAll(): Promise<Trabajador[]> {
+  async readAll(filters?: {
+    sonPersonas?: boolean;
+    sonTiendas?: boolean;
+  }): Promise<Trabajador[]> {
     try {
-      return await this.prismaService.trabajador.findMany();
+      let where: Prisma.TrabajadorWhereInput = {};
+
+      if (filters?.sonPersonas) {
+        where.esTienda = false;
+      }
+      if (filters?.sonTiendas) {
+        where.esTienda = true;
+      }
+
+      return await this.prismaService.trabajador.findMany({ where });
     } catch (error) {
       console.log(error);
       throw new InternalServerErrorException();
@@ -91,9 +106,11 @@ export class TrabajadorRepository implements ITrabajadorRepository {
       console.error(`Error eliminando trabajador ID ${id}:`, {
         code: error.code,
         message: error.message,
-        meta: error.meta
+        meta: error.meta,
       });
-      throw new InternalServerErrorException(`Error eliminando trabajador ID ${id}`);
+      throw new InternalServerErrorException(
+        `Error eliminando trabajador ID ${id}`,
+      );
     }
   }
 }

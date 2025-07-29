@@ -9,7 +9,6 @@ import { ICreateTrabajadorUseCase } from "../use-cases/interfaces/ICreateTrabaja
 import { IUpdateTrabajadorUseCase } from "../use-cases/interfaces/IUpdateTrabajador.use-case";
 import { IDeleteTrabajadorUseCase } from "../use-cases/interfaces/IDeleteTrabajador.use-case";
 
-
 // ejemplo de trabajador que viene de omne:
 //                     "noPerceptor": "2290",
 //                     "apellidosYNombre": "COSME FULANITO PEREZ",
@@ -62,7 +61,9 @@ export class SincroTrabajadoresUseCase implements ISincroTrabajadoresUseCase {
     // 3. Buscar trabajadores a modificar, trabajadores a eliminar y trabajadores a crear.
     const empresas = await this.empresaService.getEmpresas(true);
     const trabajadoresOmne = await this.getTrabajadoresOmne(empresas);
-    const trabajadoresApp = await this.trabajadoresRepository.readAll();
+    const trabajadoresApp = await this.trabajadoresRepository.readAll({
+      sonPersonas: true,
+    });
 
     // Mapeo de campos entre Omne y la base de datos
     const mapeosCampos = {
@@ -74,7 +75,7 @@ export class SincroTrabajadoresUseCase implements ISincroTrabajadoresUseCase {
       noAfiliacion: "nSeguridadSocial",
       fechaNacimiento: "fechaNacimiento",
       noPerceptor: "nPerceptor",
-      empresaID: "empresaId"
+      empresaID: "empresaId",
     };
 
     // Campos importantes para detectar cambios (solo datos personales, no del contrato)
@@ -85,7 +86,7 @@ export class SincroTrabajadoresUseCase implements ISincroTrabajadoresUseCase {
       { omne: "documento", app: "dni" },
       { omne: "noTelfMovilPersonal", app: "telefonos" },
       { omne: "noAfiliacion", app: "nSeguridadSocial" },
-      { omne: "fechaNacimiento", app: "fechaNacimiento" }
+      { omne: "fechaNacimiento", app: "fechaNacimiento" },
     ];
 
     // Aplanar todos los trabajadores de Omne en un solo array
@@ -106,9 +107,9 @@ export class SincroTrabajadoresUseCase implements ISincroTrabajadoresUseCase {
         // nPerceptor es alfanumérico o vacío, se ignora
         trabajadoresIgnorados.push({
           ...trabajador,
-          razonIgnorado: trabajador.noPerceptor 
-            ? `nPerceptor alfanumérico: ${trabajador.noPerceptor}` 
-            : 'nPerceptor faltante'
+          razonIgnorado: trabajador.noPerceptor
+            ? `nPerceptor alfanumérico: ${trabajador.noPerceptor}`
+            : "nPerceptor faltante",
         });
       }
     });
@@ -116,7 +117,7 @@ export class SincroTrabajadoresUseCase implements ISincroTrabajadoresUseCase {
     // Crear mapas para búsqueda eficiente
     const trabajadoresOmneMap = new Map();
     const trabajadoresOmneDniMap = new Map(); // Mapa por DNI que puede tener múltiples valores
-    
+
     todosLosTrabajadoresOmne.forEach((t) => {
       // Si tiene noPerceptor (ya validado como numérico), usar la clave compuesta
       if (t.noPerceptor) {
@@ -124,7 +125,7 @@ export class SincroTrabajadoresUseCase implements ISincroTrabajadoresUseCase {
         trabajadoresOmneMap.set(clave, t);
       }
       // Mapear por DNI para búsqueda alternativa - puede haber múltiples trabajadores con el mismo DNI
-      if (t.documento && t.documento.trim() !== '') {
+      if (t.documento && t.documento.trim() !== "") {
         const existingWorkers = trabajadoresOmneDniMap.get(t.documento) || [];
         existingWorkers.push(t);
         trabajadoresOmneDniMap.set(t.documento, existingWorkers);
@@ -133,7 +134,7 @@ export class SincroTrabajadoresUseCase implements ISincroTrabajadoresUseCase {
 
     const trabajadoresAppMap = new Map();
     const trabajadoresAppDniMap = new Map(); // Mapa por DNI que puede tener múltiples valores
-    
+
     trabajadoresApp.forEach((t) => {
       // Si tiene nPerceptor, usar la clave compuesta
       if (t.nPerceptor) {
@@ -141,7 +142,7 @@ export class SincroTrabajadoresUseCase implements ISincroTrabajadoresUseCase {
         trabajadoresAppMap.set(clave, t);
       }
       // Mapear por DNI - puede haber múltiples trabajadores con el mismo DNI
-      if (t.dni && t.dni.trim() !== '') {
+      if (t.dni && t.dni.trim() !== "") {
         const existingWorkers = trabajadoresAppDniMap.get(t.dni) || [];
         existingWorkers.push(t);
         trabajadoresAppDniMap.set(t.dni, existingWorkers);
@@ -164,14 +165,17 @@ export class SincroTrabajadoresUseCase implements ISincroTrabajadoresUseCase {
 
       // Si no se encontró por clave única, buscar por DNI pero SOLO en la misma empresa
       // Esto es importante para trabajadores que pueden estar en múltiples empresas
-      if (trabajadorOmne.documento && trabajadorOmne.documento.trim() !== '') {
-        const trabajadoresPorDni = trabajadoresAppDniMap.get(trabajadorOmne.documento) || [];
-        const trabajadorEnMismaEmpresa = trabajadoresPorDni.find(t => t.empresaId === trabajadorOmne.empresaID);
+      if (trabajadorOmne.documento && trabajadorOmne.documento.trim() !== "") {
+        const trabajadoresPorDni =
+          trabajadoresAppDniMap.get(trabajadorOmne.documento) || [];
+        const trabajadorEnMismaEmpresa = trabajadoresPorDni.find(
+          (t) => t.empresaId === trabajadorOmne.empresaID,
+        );
         if (trabajadorEnMismaEmpresa) {
           return trabajadorEnMismaEmpresa;
         }
       }
-      
+
       return null;
     };
 
@@ -190,7 +194,7 @@ export class SincroTrabajadoresUseCase implements ISincroTrabajadoresUseCase {
           // Si tiene fecha de baja en OMNE, eliminar de la app
           trabajadoresAEliminar.push({
             ...trabajadorApp,
-            razonEliminacion: `Fecha de baja en OMNE: ${trabajadorOmne.bajaEmpresa}`
+            razonEliminacion: `Fecha de baja en OMNE: ${trabajadorOmne.bajaEmpresa}`,
           });
         } else {
           // No tiene fecha de baja, verificar si hay cambios importantes
@@ -201,15 +205,20 @@ export class SincroTrabajadoresUseCase implements ISincroTrabajadoresUseCase {
             // Comparación especial para fechas
             if (valorOmne instanceof DateTime || valorApp instanceof Date) {
               const fechaOmne =
-                valorOmne instanceof DateTime ? valorOmne.toJSDate() : valorOmne;
+                valorOmne instanceof DateTime
+                  ? valorOmne.toJSDate()
+                  : valorOmne;
               const fechaApp =
                 valorApp instanceof Date ? valorApp : new Date(valorApp);
               return fechaOmne?.getTime() !== fechaApp?.getTime();
             }
 
             // Comparación de strings con trim y toLowerCase para evitar falsos positivos
-            if (typeof valorOmne === 'string' && typeof valorApp === 'string') {
-              return valorOmne?.trim().toLowerCase() !== valorApp?.trim().toLowerCase();
+            if (typeof valorOmne === "string" && typeof valorApp === "string") {
+              return (
+                valorOmne?.trim().toLowerCase() !==
+                valorApp?.trim().toLowerCase()
+              );
             }
 
             return valorOmne !== valorApp;
@@ -236,27 +245,41 @@ export class SincroTrabajadoresUseCase implements ISincroTrabajadoresUseCase {
       }
 
       // Si no se encontró por clave única, buscar por DNI en la misma empresa
-      if (!encontradoEnOmne && trabajadorApp.dni && trabajadorApp.dni.trim() !== '') {
-        const trabajadoresOmnePorDni = trabajadoresOmneDniMap.get(trabajadorApp.dni) || [];
-        const trabajadorOmneEnMismaEmpresa = trabajadoresOmnePorDni.find(t => t.empresaID === trabajadorApp.empresaId);
+      if (
+        !encontradoEnOmne &&
+        trabajadorApp.dni &&
+        trabajadorApp.dni.trim() !== ""
+      ) {
+        const trabajadoresOmnePorDni =
+          trabajadoresOmneDniMap.get(trabajadorApp.dni) || [];
+        const trabajadorOmneEnMismaEmpresa = trabajadoresOmnePorDni.find(
+          (t) => t.empresaID === trabajadorApp.empresaId,
+        );
         encontradoEnOmne = !!trabajadorOmneEnMismaEmpresa;
       }
 
       if (!encontradoEnOmne) {
         // Protección de seguridad: verificar una vez más antes de eliminar
         let verificacionFinal = false;
-        
+
         if (trabajadorApp.nPerceptor) {
           const claveVerificacion = `${trabajadorApp.nPerceptor}-${trabajadorApp.empresaId}`;
           verificacionFinal = trabajadoresOmneMap.has(claveVerificacion);
         }
-        
-        if (!verificacionFinal && trabajadorApp.dni && trabajadorApp.dni.trim() !== '') {
-          const trabajadoresOmnePorDni = trabajadoresOmneDniMap.get(trabajadorApp.dni) || [];
-          const trabajadorOmneEnMismaEmpresa = trabajadoresOmnePorDni.find(t => t.empresaID === trabajadorApp.empresaId);
+
+        if (
+          !verificacionFinal &&
+          trabajadorApp.dni &&
+          trabajadorApp.dni.trim() !== ""
+        ) {
+          const trabajadoresOmnePorDni =
+            trabajadoresOmneDniMap.get(trabajadorApp.dni) || [];
+          const trabajadorOmneEnMismaEmpresa = trabajadoresOmnePorDni.find(
+            (t) => t.empresaID === trabajadorApp.empresaId,
+          );
           verificacionFinal = !!trabajadorOmneEnMismaEmpresa;
         }
-        
+
         if (verificacionFinal) {
           // El trabajador SÍ existe en OMNE, verificar si tiene fecha de baja
           let trabajadorEnOmne = null;
@@ -264,19 +287,26 @@ export class SincroTrabajadoresUseCase implements ISincroTrabajadoresUseCase {
             const claveVerificacion = `${trabajadorApp.nPerceptor}-${trabajadorApp.empresaId}`;
             trabajadorEnOmne = trabajadoresOmneMap.get(claveVerificacion);
           }
-          if (!trabajadorEnOmne && trabajadorApp.dni && trabajadorApp.dni.trim() !== '') {
-            const trabajadoresOmnePorDni = trabajadoresOmneDniMap.get(trabajadorApp.dni) || [];
-            const trabajadorOmneEnMismaEmpresa = trabajadoresOmnePorDni.find(t => t.empresaID === trabajadorApp.empresaId);
+          if (
+            !trabajadorEnOmne &&
+            trabajadorApp.dni &&
+            trabajadorApp.dni.trim() !== ""
+          ) {
+            const trabajadoresOmnePorDni =
+              trabajadoresOmneDniMap.get(trabajadorApp.dni) || [];
+            const trabajadorOmneEnMismaEmpresa = trabajadoresOmnePorDni.find(
+              (t) => t.empresaID === trabajadorApp.empresaId,
+            );
             if (trabajadorOmneEnMismaEmpresa) {
               trabajadorEnOmne = trabajadorOmneEnMismaEmpresa;
             }
           }
-          
+
           if (trabajadorEnOmne && trabajadorEnOmne.bajaEmpresa) {
             // Tiene fecha de baja en OMNE, eliminar es correcto
             trabajadoresAEliminar.push({
               ...trabajadorApp,
-              razonEliminacion: `Tiene fecha de baja en OMNE: ${trabajadorEnOmne.bajaEmpresa}`
+              razonEliminacion: `Tiene fecha de baja en OMNE: ${trabajadorEnOmne.bajaEmpresa}`,
             });
           }
           // Si no tiene fecha de baja, no se elimina (protección activada)
@@ -284,7 +314,7 @@ export class SincroTrabajadoresUseCase implements ISincroTrabajadoresUseCase {
           // Realmente no existe en OMNE, eliminar
           trabajadoresAEliminar.push({
             ...trabajadorApp,
-            razonEliminacion: `No encontrado en OMNE`
+            razonEliminacion: `No encontrado en OMNE`,
           });
         }
       }
@@ -293,18 +323,20 @@ export class SincroTrabajadoresUseCase implements ISincroTrabajadoresUseCase {
     // Ejecutar las operaciones de base de datos
     let trabajadoresCreados = [];
     let trabajadoresActualizados = [];
-    let trabajadoresEliminados = { count: 0 };
+    let trabajadoresEliminadosResult = { count: 0 };
+    let trabajadoresEliminadosArray = [];
 
     try {
       // 1. Actualizar trabajadores existentes
       if (trabajadoresAModificar.length > 0) {
-        const trabajadoresParaActualizar = trabajadoresAModificar.map(t => ({
+        const trabajadoresParaActualizar = trabajadoresAModificar.map((t) => ({
           id: t.id,
           nombreApellidos: t.apellidosYNombre,
           displayName: t.nombre,
           emails: t.email,
           dni: t.documento,
-          direccion: `${t.viaPublica} ${t.numero}${t.piso ? ` ${t.piso}` : ''}`.trim(),
+          direccion:
+            `${t.viaPublica} ${t.numero}${t.piso ? ` ${t.piso}` : ""}`.trim(),
           ciudad: t.poblacion,
           telefonos: t.noTelfMovilPersonal,
           fechaNacimiento: t.fechaNacimiento?.toJSDate() || undefined,
@@ -312,34 +344,39 @@ export class SincroTrabajadoresUseCase implements ISincroTrabajadoresUseCase {
           nSeguridadSocial: t.noAfiliacion,
           codigoPostal: t.cp,
         }));
-        
-        trabajadoresActualizados = await this.updateTrabajadorUseCase.execute(trabajadoresParaActualizar);
+
+        trabajadoresActualizados = await this.updateTrabajadorUseCase.execute(
+          trabajadoresParaActualizar,
+        );
       }
 
       // 2. Eliminar trabajadores
       if (trabajadoresAEliminar.length > 0) {
-        const trabajadoresParaEliminar = trabajadoresAEliminar.map(t => ({
+        const trabajadoresParaEliminar = trabajadoresAEliminar.map((t) => ({
           id: t.id,
         }));
-        
-        trabajadoresEliminados = await this.deleteTrabajadorUseCase.execute(trabajadoresParaEliminar);
+
+        trabajadoresEliminadosResult =
+          await this.deleteTrabajadorUseCase.execute(trabajadoresParaEliminar);
+        trabajadoresEliminadosArray = trabajadoresAEliminar; // Guardar los trabajadores eliminados con su info completa
       }
 
       // 3. Crear trabajadores nuevos
       if (trabajadoresACrear.length > 0) {
-        const trabajadoresParaCrear = trabajadoresACrear.map(t => ({
+        const trabajadoresParaCrear = trabajadoresACrear.map((t) => ({
           nombreApellidos: t.apellidosYNombre,
           displayName: t.nombre,
           emails: t.email,
           dni: t.documento,
-          direccion: `${t.viaPublica} ${t.numero}${t.piso ? ` ${t.piso}` : ''}`.trim(),
+          direccion:
+            `${t.viaPublica} ${t.numero}${t.piso ? ` ${t.piso}` : ""}`.trim(),
           ciudad: t.poblacion,
           telefonos: t.noTelfMovilPersonal,
           fechaNacimiento: t.fechaNacimiento?.toJSDate() || undefined,
           nacionalidad: t.codPaisNacionalidad,
           nSeguridadSocial: t.noAfiliacion,
           codigoPostal: t.cp,
-          tipoTrabajador: 'NORMAL', // Ajustar según tu lógica de negocio
+          tipoTrabajador: "NORMAL", // Ajustar según tu lógica de negocio
           empresaId: t.empresaID,
           nPerceptor: t.noPerceptor,
           // Datos del contrato
@@ -347,24 +384,31 @@ export class SincroTrabajadoresUseCase implements ISincroTrabajadoresUseCase {
           inicioContrato: t.altaContrato?.toJSDate() || new Date(),
           finalContrato: t.bajaEmpresa?.toJSDate() || undefined,
           fechaAlta: t.altaContrato?.toJSDate() || new Date(),
-          fechaAntiguedad: t.antiguedadEmpresa?.toJSDate() || t.altaContrato?.toJSDate() || new Date(),
+          fechaAntiguedad:
+            t.antiguedadEmpresa?.toJSDate() ||
+            t.altaContrato?.toJSDate() ||
+            new Date(),
         }));
-        
-        trabajadoresCreados = await this.createTrabajadorUseCase.execute(trabajadoresParaCrear);
+
+        trabajadoresCreados = await this.createTrabajadorUseCase.execute(
+          trabajadoresParaCrear,
+        );
       }
     } catch (error) {
-      console.error('Error al sincronizar trabajadores:', error);
-      throw new InternalServerErrorException('Error al sincronizar trabajadores con la base de datos');
+      console.error("Error al sincronizar trabajadores:", error);
+      throw new InternalServerErrorException(
+        "Error al sincronizar trabajadores con la base de datos",
+      );
     }
 
     return {
       created: trabajadoresCreados.length,
-      deleted: trabajadoresEliminados.count,
+      deleted: trabajadoresEliminadosResult.count,
       updated: trabajadoresActualizados.length,
       ignored: trabajadoresIgnorados.length,
       trabajadoresCreados,
       trabajadoresActualizados,
-      trabajadoresEliminados,
+      trabajadoresEliminados: trabajadoresEliminadosArray,
       trabajadoresIgnorados: trabajadoresIgnorados.slice(0, 10), // Limitar a 10 para no sobrecargar la respuesta
     };
   }

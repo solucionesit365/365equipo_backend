@@ -6,8 +6,14 @@ export abstract class ITrabajadorRepository {
   ): Promise<Trabajador>;
   abstract readOne(id: number): Promise<Trabajador>;
   abstract readByDni(dni: string): Promise<Trabajador | null>;
-  abstract readByPerceptorAndEmpresa(nPerceptor: number, empresaId: string): Promise<Trabajador | null>;
-  abstract readAll(): Promise<Trabajador[]>;
+  abstract readByPerceptorAndEmpresa(
+    nPerceptor: number,
+    empresaId: string,
+  ): Promise<Trabajador | null>;
+  abstract readAll(filters?: {
+    sonPersonas?: boolean;
+    sonTiendas?: boolean;
+  }): Promise<Trabajador[]>;
   abstract updateOne(
     id: number,
     payload: Prisma.TrabajadorUpdateInput,
