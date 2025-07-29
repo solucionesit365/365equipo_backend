@@ -13,10 +13,15 @@ export class DeleteTrabajadorUseCase implements IDeleteTrabajadorUseCase {
     trabajadores: IDeleteTrabajadorDto[],
   ): Promise<{ count: number }> {
     let count = 0;
-
+    
     for (const trabajador of trabajadores) {
-      await this.trabajadorRepository.deleteOne(trabajador.id);
-      count++;
+      try {
+        await this.trabajadorRepository.deleteOne(trabajador.id);
+        count++;
+      } catch (error) {
+        console.error(`Error eliminando trabajador ID ${trabajador.id}:`, error.message);
+        throw error;
+      }
     }
 
     return { count };

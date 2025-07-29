@@ -89,52 +89,109 @@ export class SincroTrabajadoresUseCase implements ISincroTrabajadoresUseCase {
     ];
 
     // Aplanar todos los trabajadores de Omne en un solo array
-    const todosLosTrabajadoresOmne = trabajadoresOmne
+    const todosLosTrabajadoresOmneRaw = trabajadoresOmne
       .filter((empresa) => empresa.trabajadores)
       .flatMap((empresa) => empresa.trabajadores);
 
+    // Separar trabajadores con nPerceptor numérico vs alfanumérico
+    const todosLosTrabajadoresOmne = [];
+    const trabajadoresIgnorados = [];
+
+    todosLosTrabajadoresOmneRaw.forEach((trabajador) => {
+      if (trabajador.noPerceptor && !isNaN(parseInt(trabajador.noPerceptor))) {
+        // nPerceptor es numérico, se puede procesar
+        trabajador.noPerceptor = parseInt(trabajador.noPerceptor);
+        todosLosTrabajadoresOmne.push(trabajador);
+      } else {
+        // nPerceptor es alfanumérico o vacío, se ignora
+        trabajadoresIgnorados.push({
+          ...trabajador,
+          razonIgnorado: trabajador.noPerceptor 
+            ? `nPerceptor alfanumérico: ${trabajador.noPerceptor}` 
+            : 'nPerceptor faltante'
+        });
+      }
+    });
+
     // Crear mapas para búsqueda eficiente
     const trabajadoresOmneMap = new Map();
+    const trabajadoresOmneDniMap = new Map(); // Mapa por DNI que puede tener múltiples valores
+    
     todosLosTrabajadoresOmne.forEach((t) => {
-      // Asegurar que noPerceptor sea string para la clave
-      const clave = `${String(t.noPerceptor)}-${t.empresaID}`;
-      trabajadoresOmneMap.set(clave, t);
+      // Si tiene noPerceptor (ya validado como numérico), usar la clave compuesta
+      if (t.noPerceptor) {
+        const clave = `${t.noPerceptor}-${t.empresaID}`;
+        trabajadoresOmneMap.set(clave, t);
+      }
+      // Mapear por DNI para búsqueda alternativa - puede haber múltiples trabajadores con el mismo DNI
+      if (t.documento && t.documento.trim() !== '') {
+        const existingWorkers = trabajadoresOmneDniMap.get(t.documento) || [];
+        existingWorkers.push(t);
+        trabajadoresOmneDniMap.set(t.documento, existingWorkers);
+      }
     });
 
     const trabajadoresAppMap = new Map();
+    const trabajadoresAppDniMap = new Map(); // Mapa por DNI que puede tener múltiples valores
+    
     trabajadoresApp.forEach((t) => {
-      // Mapear con el mismo formato de clave que Omne usa
-      // nPerceptor en DB corresponde a noPerceptor en Omne
-      // empresaId en DB corresponde a empresaID en Omne
-      const clave = `${String(t.nPerceptor)}-${t.empresaId}`;
-      trabajadoresAppMap.set(clave, t);
+      // Si tiene nPerceptor, usar la clave compuesta
+      if (t.nPerceptor) {
+        const clave = `${String(t.nPerceptor)}-${t.empresaId}`;
+        trabajadoresAppMap.set(clave, t);
+      }
+      // Mapear por DNI - puede haber múltiples trabajadores con el mismo DNI
+      if (t.dni && t.dni.trim() !== '') {
+        const existingWorkers = trabajadoresAppDniMap.get(t.dni) || [];
+        existingWorkers.push(t);
+        trabajadoresAppDniMap.set(t.dni, existingWorkers);
+      }
     });
-
-    // Debug: Mostrar algunas claves de ejemplo
-    console.log('Ejemplo claves Omne:', Array.from(trabajadoresOmneMap.keys()).slice(0, 3));
-    console.log('Ejemplo claves App:', Array.from(trabajadoresAppMap.keys()).slice(0, 3));
 
     // Clasificar trabajadores
     const trabajadoresACrear = [];
     const trabajadoresAModificar = [];
     const trabajadoresAEliminar = [];
 
-    // Buscar trabajadores a crear o modificar
+    // Función helper para buscar trabajador en la App basado en datos de OMNE
+    const buscarTrabajadorApp = (trabajadorOmne) => {
+      // Buscar primero por nPerceptor + empresaId (clave única)
+      if (trabajadorOmne.noPerceptor) {
+        const clave = `${trabajadorOmne.noPerceptor}-${trabajadorOmne.empresaID}`;
+        const encontrado = trabajadoresAppMap.get(clave);
+        if (encontrado) return encontrado;
+      }
+
+      // Si no se encontró por clave única, buscar por DNI pero SOLO en la misma empresa
+      // Esto es importante para trabajadores que pueden estar en múltiples empresas
+      if (trabajadorOmne.documento && trabajadorOmne.documento.trim() !== '') {
+        const trabajadoresPorDni = trabajadoresAppDniMap.get(trabajadorOmne.documento) || [];
+        const trabajadorEnMismaEmpresa = trabajadoresPorDni.find(t => t.empresaId === trabajadorOmne.empresaID);
+        if (trabajadorEnMismaEmpresa) {
+          return trabajadorEnMismaEmpresa;
+        }
+      }
+      
+      return null;
+    };
+
+    // 1. Procesar trabajadores de OMNE: decidir si crear, modificar o eliminar
     todosLosTrabajadoresOmne.forEach((trabajadorOmne) => {
-      // Construir la clave con el formato consistente
-      const clave = `${String(trabajadorOmne.noPerceptor)}-${trabajadorOmne.empresaID}`;
-      const trabajadorApp = trabajadoresAppMap.get(clave);
+      const trabajadorApp = buscarTrabajadorApp(trabajadorOmne);
 
       if (!trabajadorApp) {
-        // No existe en la app, hay que crearlo solo si no tiene fecha de baja
+        // No existe en la app, crear solo si no tiene fecha de baja
         if (!trabajadorOmne.bajaEmpresa) {
           trabajadoresACrear.push(trabajadorOmne);
         }
       } else {
-        // Existe en ambos
+        // Existe en ambos sistemas
         if (trabajadorOmne.bajaEmpresa) {
-          // Si tiene fecha de baja en Omne, hay que eliminarlo de la app
-          trabajadoresAEliminar.push(trabajadorApp);
+          // Si tiene fecha de baja en OMNE, eliminar de la app
+          trabajadoresAEliminar.push({
+            ...trabajadorApp,
+            razonEliminacion: `Fecha de baja en OMNE: ${trabajadorOmne.bajaEmpresa}`
+          });
         } else {
           // No tiene fecha de baja, verificar si hay cambios importantes
           const hayChangios = camposImportantes.some((campo) => {
@@ -168,11 +225,68 @@ export class SincroTrabajadoresUseCase implements ISincroTrabajadoresUseCase {
       }
     });
 
-    // Buscar trabajadores a eliminar (están en la app pero no en Omne)
+    // 2. Buscar trabajadores que están en la App pero no en OMNE (para eliminar)
     trabajadoresApp.forEach((trabajadorApp) => {
-      const clave = `${String(trabajadorApp.nPerceptor)}-${trabajadorApp.empresaId}`;
-      if (!trabajadoresOmneMap.has(clave)) {
-        trabajadoresAEliminar.push(trabajadorApp);
+      let encontradoEnOmne = false;
+
+      // Buscar por nPerceptor + empresaId (clave única)
+      if (trabajadorApp.nPerceptor) {
+        const clave = `${String(trabajadorApp.nPerceptor)}-${trabajadorApp.empresaId}`;
+        encontradoEnOmne = trabajadoresOmneMap.has(clave);
+      }
+
+      // Si no se encontró por clave única, buscar por DNI en la misma empresa
+      if (!encontradoEnOmne && trabajadorApp.dni && trabajadorApp.dni.trim() !== '') {
+        const trabajadoresOmnePorDni = trabajadoresOmneDniMap.get(trabajadorApp.dni) || [];
+        const trabajadorOmneEnMismaEmpresa = trabajadoresOmnePorDni.find(t => t.empresaID === trabajadorApp.empresaId);
+        encontradoEnOmne = !!trabajadorOmneEnMismaEmpresa;
+      }
+
+      if (!encontradoEnOmne) {
+        // Protección de seguridad: verificar una vez más antes de eliminar
+        let verificacionFinal = false;
+        
+        if (trabajadorApp.nPerceptor) {
+          const claveVerificacion = `${trabajadorApp.nPerceptor}-${trabajadorApp.empresaId}`;
+          verificacionFinal = trabajadoresOmneMap.has(claveVerificacion);
+        }
+        
+        if (!verificacionFinal && trabajadorApp.dni && trabajadorApp.dni.trim() !== '') {
+          const trabajadoresOmnePorDni = trabajadoresOmneDniMap.get(trabajadorApp.dni) || [];
+          const trabajadorOmneEnMismaEmpresa = trabajadoresOmnePorDni.find(t => t.empresaID === trabajadorApp.empresaId);
+          verificacionFinal = !!trabajadorOmneEnMismaEmpresa;
+        }
+        
+        if (verificacionFinal) {
+          // El trabajador SÍ existe en OMNE, verificar si tiene fecha de baja
+          let trabajadorEnOmne = null;
+          if (trabajadorApp.nPerceptor) {
+            const claveVerificacion = `${trabajadorApp.nPerceptor}-${trabajadorApp.empresaId}`;
+            trabajadorEnOmne = trabajadoresOmneMap.get(claveVerificacion);
+          }
+          if (!trabajadorEnOmne && trabajadorApp.dni && trabajadorApp.dni.trim() !== '') {
+            const trabajadoresOmnePorDni = trabajadoresOmneDniMap.get(trabajadorApp.dni) || [];
+            const trabajadorOmneEnMismaEmpresa = trabajadoresOmnePorDni.find(t => t.empresaID === trabajadorApp.empresaId);
+            if (trabajadorOmneEnMismaEmpresa) {
+              trabajadorEnOmne = trabajadorOmneEnMismaEmpresa;
+            }
+          }
+          
+          if (trabajadorEnOmne && trabajadorEnOmne.bajaEmpresa) {
+            // Tiene fecha de baja en OMNE, eliminar es correcto
+            trabajadoresAEliminar.push({
+              ...trabajadorApp,
+              razonEliminacion: `Tiene fecha de baja en OMNE: ${trabajadorEnOmne.bajaEmpresa}`
+            });
+          }
+          // Si no tiene fecha de baja, no se elimina (protección activada)
+        } else {
+          // Realmente no existe en OMNE, eliminar
+          trabajadoresAEliminar.push({
+            ...trabajadorApp,
+            razonEliminacion: `No encontrado en OMNE`
+          });
+        }
       }
     });
 
@@ -182,7 +296,7 @@ export class SincroTrabajadoresUseCase implements ISincroTrabajadoresUseCase {
     let trabajadoresEliminados = { count: 0 };
 
     try {
-      // 1. PRIMERO: Actualizar trabajadores existentes
+      // 1. Actualizar trabajadores existentes
       if (trabajadoresAModificar.length > 0) {
         const trabajadoresParaActualizar = trabajadoresAModificar.map(t => ({
           id: t.id,
@@ -202,7 +316,7 @@ export class SincroTrabajadoresUseCase implements ISincroTrabajadoresUseCase {
         trabajadoresActualizados = await this.updateTrabajadorUseCase.execute(trabajadoresParaActualizar);
       }
 
-      // 2. SEGUNDO: Eliminar trabajadores
+      // 2. Eliminar trabajadores
       if (trabajadoresAEliminar.length > 0) {
         const trabajadoresParaEliminar = trabajadoresAEliminar.map(t => ({
           id: t.id,
@@ -211,7 +325,7 @@ export class SincroTrabajadoresUseCase implements ISincroTrabajadoresUseCase {
         trabajadoresEliminados = await this.deleteTrabajadorUseCase.execute(trabajadoresParaEliminar);
       }
 
-      // 3. TERCERO: Crear trabajadores nuevos
+      // 3. Crear trabajadores nuevos
       if (trabajadoresACrear.length > 0) {
         const trabajadoresParaCrear = trabajadoresACrear.map(t => ({
           nombreApellidos: t.apellidosYNombre,
@@ -227,7 +341,7 @@ export class SincroTrabajadoresUseCase implements ISincroTrabajadoresUseCase {
           codigoPostal: t.cp,
           tipoTrabajador: 'NORMAL', // Ajustar según tu lógica de negocio
           empresaId: t.empresaID,
-          nPerceptor: parseInt(t.noPerceptor),
+          nPerceptor: t.noPerceptor,
           // Datos del contrato
           horasContrato: t.horassemana || 40,
           inicioContrato: t.altaContrato?.toJSDate() || new Date(),
@@ -247,9 +361,11 @@ export class SincroTrabajadoresUseCase implements ISincroTrabajadoresUseCase {
       created: trabajadoresCreados.length,
       deleted: trabajadoresEliminados.count,
       updated: trabajadoresActualizados.length,
+      ignored: trabajadoresIgnorados.length,
       trabajadoresCreados,
       trabajadoresActualizados,
       trabajadoresEliminados,
+      trabajadoresIgnorados: trabajadoresIgnorados.slice(0, 10), // Limitar a 10 para no sobrecargar la respuesta
     };
   }
 

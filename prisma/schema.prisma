@@ -13,7 +13,7 @@ model Trabajador {
   nombreApellidos        String
   displayName            String?
   emails                 String
-  dni                    String             @unique
+  dni                    String
   direccion              String?
   ciudad                 String?
   telefonos              String?

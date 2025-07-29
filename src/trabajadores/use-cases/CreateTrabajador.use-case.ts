@@ -16,17 +16,32 @@ export class CreateTrabajadorUseCase implements ICreateTrabajadorUseCase {
 
   async execute(trabajadores: ICreateTrabajadorDto[]): Promise<Trabajador[]> {
     const trabajadoresCreados: Trabajador[] = [];
+    
+    console.log(`=== INICIANDO CREACIÓN DE ${trabajadores.length} TRABAJADORES ===`);
 
     for (const trabajador of trabajadores) {
-      // Verificar si ya existe un trabajador con la misma clave única (nPerceptor + empresaId)
-      const trabajadorExistente = await this.trabajadorRepository.readByPerceptorAndEmpresa(
-        trabajador.nPerceptor, 
-        trabajador.empresaId
-      );
-      
-      if (trabajadorExistente) {
-        console.log(`Trabajador con nPerceptor ${trabajador.nPerceptor} y empresaId ${trabajador.empresaId} ya existe, omitiendo creación`);
-        continue;
+      // Usar la misma lógica que en sincronización para buscar existencia
+      let trabajadorExistente = null;
+
+      // Primero verificar por nPerceptor + empresaId si nPerceptor existe
+      if (trabajador.nPerceptor) {
+        trabajadorExistente = await this.trabajadorRepository.readByPerceptorAndEmpresa(
+          trabajador.nPerceptor, 
+          trabajador.empresaId
+        );
+        if (trabajadorExistente) {
+          console.log(`Trabajador ya existe por nPerceptor+empresa: ${trabajador.nPerceptor}-${trabajador.empresaId}, omitiendo`);
+          continue;
+        }
+      }
+
+      // Si no se encontró y hay DNI válido, verificar por DNI
+      if (trabajador.dni && trabajador.dni.trim() !== '') {
+        trabajadorExistente = await this.trabajadorRepository.readByDni(trabajador.dni);
+        if (trabajadorExistente) {
+          console.log(`Trabajador ya existe por DNI: ${trabajador.dni}, omitiendo`);
+          continue;
+        }
       }
 
       // Si no existe, crear el trabajador

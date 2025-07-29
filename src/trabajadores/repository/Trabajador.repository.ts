@@ -88,8 +88,12 @@ export class TrabajadorRepository implements ITrabajadorRepository {
 
       return !!resDelete;
     } catch (error) {
-      console.log(error);
-      throw new InternalServerErrorException();
+      console.error(`Error eliminando trabajador ID ${id}:`, {
+        code: error.code,
+        message: error.message,
+        meta: error.meta
+      });
+      throw new InternalServerErrorException(`Error eliminando trabajador ID ${id}`);
     }
   }
 }
