@@ -17,10 +17,11 @@ export class SincroTrabajadoresUseCase implements ISincroTrabajadoresUseCase {
   async execute() {
     // 0. Obtener empresas HECHO
     // 1. Obtener trabajadores de omne HECHO
-    // 2. Obtener trabajadores de nuestra BBDD
+    // 2. Obtener trabajadores de nuestra BBDD HECHO
     // 3. Buscar trabajadores a modificar, trabajadores a eliminar y trabajadores a crear.
     const empresas = await this.empresaService.getEmpresas(true);
     const trabajadoresOmne = await this.getTrabajadoresOmne(empresas);
+    const trabajadoresApp = await this.trabajadoresRepository.readAll();
 
     return {
       trabajadoresOmne,
