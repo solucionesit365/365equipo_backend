@@ -96,13 +96,23 @@ export class SincroTrabajadoresUseCase implements ISincroTrabajadoresUseCase {
     // Crear mapas para búsqueda eficiente
     const trabajadoresOmneMap = new Map();
     todosLosTrabajadoresOmne.forEach((t) => {
-      trabajadoresOmneMap.set(`${t.noPerceptor}-${t.empresaID}`, t);
+      // Asegurar que noPerceptor sea string para la clave
+      const clave = `${String(t.noPerceptor)}-${t.empresaID}`;
+      trabajadoresOmneMap.set(clave, t);
     });
 
     const trabajadoresAppMap = new Map();
     trabajadoresApp.forEach((t) => {
-      trabajadoresAppMap.set(`${t.nPerceptor}-${t.empresaId}`, t);
+      // Mapear con el mismo formato de clave que Omne usa
+      // nPerceptor en DB corresponde a noPerceptor en Omne
+      // empresaId en DB corresponde a empresaID en Omne
+      const clave = `${String(t.nPerceptor)}-${t.empresaId}`;
+      trabajadoresAppMap.set(clave, t);
     });
+
+    // Debug: Mostrar algunas claves de ejemplo
+    console.log('Ejemplo claves Omne:', Array.from(trabajadoresOmneMap.keys()).slice(0, 3));
+    console.log('Ejemplo claves App:', Array.from(trabajadoresAppMap.keys()).slice(0, 3));
 
     // Clasificar trabajadores
     const trabajadoresACrear = [];
@@ -111,7 +121,8 @@ export class SincroTrabajadoresUseCase implements ISincroTrabajadoresUseCase {
 
     // Buscar trabajadores a crear o modificar
     todosLosTrabajadoresOmne.forEach((trabajadorOmne) => {
-      const clave = `${trabajadorOmne.noPerceptor}-${trabajadorOmne.empresaID}`;
+      // Construir la clave con el formato consistente
+      const clave = `${String(trabajadorOmne.noPerceptor)}-${trabajadorOmne.empresaID}`;
       const trabajadorApp = trabajadoresAppMap.get(clave);
 
       if (!trabajadorApp) {
@@ -159,7 +170,7 @@ export class SincroTrabajadoresUseCase implements ISincroTrabajadoresUseCase {
 
     // Buscar trabajadores a eliminar (están en la app pero no en Omne)
     trabajadoresApp.forEach((trabajadorApp) => {
-      const clave = `${trabajadorApp.nPerceptor}-${trabajadorApp.empresaId}`;
+      const clave = `${String(trabajadorApp.nPerceptor)}-${trabajadorApp.empresaId}`;
       if (!trabajadoresOmneMap.has(clave)) {
         trabajadoresAEliminar.push(trabajadorApp);
       }
@@ -171,7 +182,36 @@ export class SincroTrabajadoresUseCase implements ISincroTrabajadoresUseCase {
     let trabajadoresEliminados = { count: 0 };
 
     try {
-      // Crear trabajadores nuevos
+      // 1. PRIMERO: Actualizar trabajadores existentes
+      if (trabajadoresAModificar.length > 0) {
+        const trabajadoresParaActualizar = trabajadoresAModificar.map(t => ({
+          id: t.id,
+          nombreApellidos: t.apellidosYNombre,
+          displayName: t.nombre,
+          emails: t.email,
+          dni: t.documento,
+          direccion: `${t.viaPublica} ${t.numero}${t.piso ? ` ${t.piso}` : ''}`.trim(),
+          ciudad: t.poblacion,
+          telefonos: t.noTelfMovilPersonal,
+          fechaNacimiento: t.fechaNacimiento?.toJSDate() || undefined,
+          nacionalidad: t.codPaisNacionalidad,
+          nSeguridadSocial: t.noAfiliacion,
+          codigoPostal: t.cp,
+        }));
+        
+        trabajadoresActualizados = await this.updateTrabajadorUseCase.execute(trabajadoresParaActualizar);
+      }
+
+      // 2. SEGUNDO: Eliminar trabajadores
+      if (trabajadoresAEliminar.length > 0) {
+        const trabajadoresParaEliminar = trabajadoresAEliminar.map(t => ({
+          id: t.id,
+        }));
+        
+        trabajadoresEliminados = await this.deleteTrabajadorUseCase.execute(trabajadoresParaEliminar);
+      }
+
+      // 3. TERCERO: Crear trabajadores nuevos
       if (trabajadoresACrear.length > 0) {
         const trabajadoresParaCrear = trabajadoresACrear.map(t => ({
           nombreApellidos: t.apellidosYNombre,
@@ -198,35 +238,6 @@ export class SincroTrabajadoresUseCase implements ISincroTrabajadoresUseCase {
         
         trabajadoresCreados = await this.createTrabajadorUseCase.execute(trabajadoresParaCrear);
       }
-
-      // Actualizar trabajadores existentes
-      if (trabajadoresAModificar.length > 0) {
-        const trabajadoresParaActualizar = trabajadoresAModificar.map(t => ({
-          id: t.id,
-          nombreApellidos: t.apellidosYNombre,
-          displayName: t.nombre,
-          emails: t.email,
-          dni: t.documento,
-          direccion: `${t.viaPublica} ${t.numero}${t.piso ? ` ${t.piso}` : ''}`.trim(),
-          ciudad: t.poblacion,
-          telefonos: t.noTelfMovilPersonal,
-          fechaNacimiento: t.fechaNacimiento?.toJSDate() || undefined,
-          nacionalidad: t.codPaisNacionalidad,
-          nSeguridadSocial: t.noAfiliacion,
-          codigoPostal: t.cp,
-        }));
-        
-        trabajadoresActualizados = await this.updateTrabajadorUseCase.execute(trabajadoresParaActualizar);
-      }
-
-      // Eliminar trabajadores
-      if (trabajadoresAEliminar.length > 0) {
-        const trabajadoresParaEliminar = trabajadoresAEliminar.map(t => ({
-          id: t.id,
-        }));
-        
-        trabajadoresEliminados = await this.deleteTrabajadorUseCase.execute(trabajadoresParaEliminar);
-      }
     } catch (error) {
       console.error('Error al sincronizar trabajadores:', error);
       throw new InternalServerErrorException('Error al sincronizar trabajadores con la base de datos');
@@ -236,7 +247,6 @@ export class SincroTrabajadoresUseCase implements ISincroTrabajadoresUseCase {
       created: trabajadoresCreados.length,
       deleted: trabajadoresEliminados.count,
       updated: trabajadoresActualizados.length,
-      trabajadoresOmne,
       trabajadoresCreados,
       trabajadoresActualizados,
       trabajadoresEliminados,

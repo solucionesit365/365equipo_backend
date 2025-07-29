@@ -31,6 +31,31 @@ export class TrabajadorRepository implements ITrabajadorRepository {
     }
   }
 
+  async readByDni(dni: string): Promise<Trabajador | null> {
+    try {
+      return await this.prismaService.trabajador.findUnique({
+        where: { dni },
+      });
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException();
+    }
+  }
+
+  async readByPerceptorAndEmpresa(nPerceptor: number, empresaId: string): Promise<Trabajador | null> {
+    try {
+      return await this.prismaService.trabajador.findFirst({
+        where: {
+          nPerceptor: nPerceptor,
+          empresaId: empresaId,
+        },
+      });
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException();
+    }
+  }
+
   async readAll(): Promise<Trabajador[]> {
     try {
       return await this.prismaService.trabajador.findMany();

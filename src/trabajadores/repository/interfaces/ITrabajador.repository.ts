@@ -5,6 +5,8 @@ export abstract class ITrabajadorRepository {
     newTrabajador: Prisma.TrabajadorCreateInput,
   ): Promise<Trabajador>;
   abstract readOne(id: number): Promise<Trabajador>;
+  abstract readByDni(dni: string): Promise<Trabajador | null>;
+  abstract readByPerceptorAndEmpresa(nPerceptor: number, empresaId: string): Promise<Trabajador | null>;
   abstract readAll(): Promise<Trabajador[]>;
   abstract updateOne(
     id: number,

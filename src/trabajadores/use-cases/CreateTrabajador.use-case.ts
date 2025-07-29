@@ -18,7 +18,18 @@ export class CreateTrabajadorUseCase implements ICreateTrabajadorUseCase {
     const trabajadoresCreados: Trabajador[] = [];
 
     for (const trabajador of trabajadores) {
-      // Primero crear el trabajador
+      // Verificar si ya existe un trabajador con la misma clave única (nPerceptor + empresaId)
+      const trabajadorExistente = await this.trabajadorRepository.readByPerceptorAndEmpresa(
+        trabajador.nPerceptor, 
+        trabajador.empresaId
+      );
+      
+      if (trabajadorExistente) {
+        console.log(`Trabajador con nPerceptor ${trabajador.nPerceptor} y empresaId ${trabajador.empresaId} ya existe, omitiendo creación`);
+        continue;
+      }
+
+      // Si no existe, crear el trabajador
       const trabajadorCreado = await this.trabajadorRepository.create({
         nombreApellidos: trabajador.nombreApellidos,
         displayName: trabajador.displayName || trabajador.nombreApellidos,
