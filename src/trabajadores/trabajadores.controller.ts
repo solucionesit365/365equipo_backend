@@ -430,8 +430,9 @@ export class TrabajadoresController {
       }
 
       // Buscar trabajador por código de empleado (ID)
-      const trabajador =
-        await this.trabajadorInstance.getTrabajadorByCodigo(codigoEmpleado);
+      const trabajador = await this.trabajadorInstance.getTrabajadorByCodigo(
+        codigoEmpleado,
+      );
 
       if (!trabajador) {
         return { ok: false, message: "Código de empleado inválido" };
