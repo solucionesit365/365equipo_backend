@@ -188,6 +188,12 @@ export class SincroTrabajadoresUseCase implements ISincroTrabajadoresUseCase {
           tipoTrabajador: 'NORMAL', // Ajustar según tu lógica de negocio
           empresaId: t.empresaID,
           nPerceptor: parseInt(t.noPerceptor),
+          // Datos del contrato
+          horasContrato: t.horassemana || 40,
+          inicioContrato: t.altaContrato?.toJSDate() || new Date(),
+          finalContrato: t.bajaEmpresa?.toJSDate() || undefined,
+          fechaAlta: t.altaContrato?.toJSDate() || new Date(),
+          fechaAntiguedad: t.antiguedadEmpresa?.toJSDate() || t.altaContrato?.toJSDate() || new Date(),
         }));
         
         trabajadoresCreados = await this.createTrabajadorUseCase.execute(trabajadoresParaCrear);

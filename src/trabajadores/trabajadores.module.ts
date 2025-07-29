@@ -20,6 +20,7 @@ import { IUpdateTrabajadorUseCase } from "./use-cases/interfaces/IUpdateTrabajad
 import { UpdateTrabajadorUseCase } from "./use-cases/UpdateTrabajador.use-case";
 import { IDeleteTrabajadorUseCase } from "./use-cases/interfaces/IDeleteTrabajador.use-case";
 import { DeleteTrabajadorUseCase } from "./use-cases/DeleteTrabajador.use-case";
+import { ContratoModule } from "../contrato/contrato.module";
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { DeleteTrabajadorUseCase } from "./use-cases/DeleteTrabajador.use-case";
     MBCTokenModule,
     RoleModule,
     EmpresaModule,
+    forwardRef(() => ContratoModule),
     forwardRef(() => SolicitudVacacionesModule),
     forwardRef(() => DiaPersonalModule),
   ],

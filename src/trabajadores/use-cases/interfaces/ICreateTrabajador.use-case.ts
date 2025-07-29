@@ -15,6 +15,12 @@ export interface ICreateTrabajadorDto {
   tipoTrabajador: string;
   empresaId?: string;
   nPerceptor?: number;
+  // Datos del contrato
+  horasContrato: number;
+  inicioContrato: Date;
+  finalContrato?: Date;
+  fechaAlta: Date;
+  fechaAntiguedad: Date;
 }
 
 export abstract class ICreateTrabajadorUseCase {
