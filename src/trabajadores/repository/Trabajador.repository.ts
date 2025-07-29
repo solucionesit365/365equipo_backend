@@ -33,7 +33,7 @@ export class TrabajadorRepository implements ITrabajadorRepository {
 
   async readByDni(dni: string): Promise<Trabajador | null> {
     try {
-      return await this.prismaService.trabajador.findUnique({
+      return await this.prismaService.trabajador.findFirst({
         where: { dni },
       });
     } catch (error) {

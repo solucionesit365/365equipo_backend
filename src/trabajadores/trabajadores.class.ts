@@ -626,6 +626,9 @@ export class TrabajadorService {
     dni = dni.trim().toUpperCase();
     const datosUsuario = await this.schTrabajadores.getTrabajadorByDni(dni);
 
+    if (!datosUsuario.contratos || datosUsuario.contratos.length === 0)
+      throw Error("Trabajador sin contrato registrado");
+      
     if (!DateTime.fromJSDate(datosUsuario.contratos[0]?.inicioContrato).isValid)
       throw Error("Fecha de inicio de contrato incorrecta");
 

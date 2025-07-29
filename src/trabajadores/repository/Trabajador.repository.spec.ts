@@ -131,18 +131,18 @@ describe('TrabajadorRepository', () => {
         dni: '12345678A',
       };
 
-      mockPrismaService.trabajador.findUnique.mockResolvedValue(expectedTrabajador);
+      mockPrismaService.trabajador.findFirst.mockResolvedValue(expectedTrabajador);
 
       const result = await repository.readByDni('12345678A');
 
-      expect(mockPrismaService.trabajador.findUnique).toHaveBeenCalledWith({
+      expect(mockPrismaService.trabajador.findFirst).toHaveBeenCalledWith({
         where: { dni: '12345678A' },
       });
       expect(result).toBe(expectedTrabajador);
     });
 
     it('debería retornar null cuando no se encuentra trabajador por DNI', async () => {
-      mockPrismaService.trabajador.findUnique.mockResolvedValue(null);
+      mockPrismaService.trabajador.findFirst.mockResolvedValue(null);
 
       const result = await repository.readByDni('99999999Z');
 
@@ -151,7 +151,7 @@ describe('TrabajadorRepository', () => {
 
     it('debería lanzar InternalServerErrorException en caso de error', async () => {
       const consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
-      mockPrismaService.trabajador.findUnique.mockRejectedValue(new Error('DB Error'));
+      mockPrismaService.trabajador.findFirst.mockRejectedValue(new Error('DB Error'));
 
       await expect(repository.readByDni('12345678A')).rejects.toThrow(
         InternalServerErrorException

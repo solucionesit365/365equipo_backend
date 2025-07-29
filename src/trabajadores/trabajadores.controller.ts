@@ -85,9 +85,8 @@ export class TrabajadoresController {
             cambios: modificacion.cambios,
             nuevoContrato: {
               ...modificacion.contrato,
-              trabajador: { connect: { dni: modificacion.dni } },
             },
-          })),
+          })) as any,
         );
       },
       { concurrency: 2 },
