@@ -14,6 +14,12 @@ import { SincroTrabajadoresController } from "./SincroTrabajadores/SincroTrabaja
 import { ITrabajadorRepository } from "./repository/interfaces/ITrabajador.repository";
 import { TrabajadorRepository } from "./repository/Trabajador.repository";
 import { EmpresaModule } from "src/empresa/empresa.module";
+import { ICreateTrabajadorUseCase } from "./use-cases/interfaces/ICreateTrabajador.use-case";
+import { CreateTrabajadorUseCase } from "./use-cases/CreateTrabajador.use-case";
+import { IUpdateTrabajadorUseCase } from "./use-cases/interfaces/IUpdateTrabajador.use-case";
+import { UpdateTrabajadorUseCase } from "./use-cases/UpdateTrabajador.use-case";
+import { IDeleteTrabajadorUseCase } from "./use-cases/interfaces/IDeleteTrabajador.use-case";
+import { DeleteTrabajadorUseCase } from "./use-cases/DeleteTrabajador.use-case";
 
 @Module({
   imports: [
@@ -35,6 +41,18 @@ import { EmpresaModule } from "src/empresa/empresa.module";
     {
       provide: ITrabajadorRepository,
       useClass: TrabajadorRepository,
+    },
+    {
+      provide: ICreateTrabajadorUseCase,
+      useClass: CreateTrabajadorUseCase,
+    },
+    {
+      provide: IUpdateTrabajadorUseCase,
+      useClass: UpdateTrabajadorUseCase,
+    },
+    {
+      provide: IDeleteTrabajadorUseCase,
+      useClass: DeleteTrabajadorUseCase,
     },
   ],
   exports: [TrabajadorService],

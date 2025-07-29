@@ -3,8 +3,11 @@ import { ISincroTrabajadoresUseCase } from "./ISincroTrabajadores.use-case";
 import { ITrabajadorRepository } from "../repository/interfaces/ITrabajador.repository";
 import { AxiosBcService } from "../../axios/axios-bc.service";
 import { EmpresaService } from "../../empresa/empresa.service";
-import { Empresa } from "@prisma/client";
+import { Empresa, Trabajador } from "@prisma/client";
 import { DateTime } from "luxon";
+import { ICreateTrabajadorUseCase } from "../use-cases/interfaces/ICreateTrabajador.use-case";
+import { IUpdateTrabajadorUseCase } from "../use-cases/interfaces/IUpdateTrabajador.use-case";
+import { IDeleteTrabajadorUseCase } from "../use-cases/interfaces/IDeleteTrabajador.use-case";
 
 
 // ejemplo de trabajador que viene de omne:
@@ -47,6 +50,9 @@ export class SincroTrabajadoresUseCase implements ISincroTrabajadoresUseCase {
     private readonly trabajadoresRepository: ITrabajadorRepository,
     private readonly axiosBCService: AxiosBcService,
     private readonly empresaService: EmpresaService, //Migrar empresa service al nuevo formato hexagonal
+    private readonly createTrabajadorUseCase: ICreateTrabajadorUseCase,
+    private readonly updateTrabajadorUseCase: IUpdateTrabajadorUseCase,
+    private readonly deleteTrabajadorUseCase: IDeleteTrabajadorUseCase,
   ) {}
 
   async execute() {
@@ -58,19 +64,28 @@ export class SincroTrabajadoresUseCase implements ISincroTrabajadoresUseCase {
     const trabajadoresOmne = await this.getTrabajadoresOmne(empresas);
     const trabajadoresApp = await this.trabajadoresRepository.readAll();
 
-    // Campos importantes para detectar cambios
+    // Mapeo de campos entre Omne y la base de datos
+    const mapeosCampos = {
+      apellidosYNombre: "nombreApellidos",
+      nombre: "displayName",
+      email: "emails",
+      documento: "dni",
+      noTelfMovilPersonal: "telefonos",
+      noAfiliacion: "nSeguridadSocial",
+      fechaNacimiento: "fechaNacimiento",
+      noPerceptor: "nPerceptor",
+      empresaID: "empresaId"
+    };
+
+    // Campos importantes para detectar cambios (solo datos personales, no del contrato)
     const camposImportantes = [
-      "apellidosYNombre",
-      "nombre",
-      "email",
-      "documento",
-      "noTelfMovilPersonal",
-      "noAfiliacion",
-      "antiguedadEmpresa",
-      "altaContrato",
-      "bajaEmpresa",
-      "horassemana",
-      "fechaNacimiento",
+      { omne: "apellidosYNombre", app: "nombreApellidos" },
+      { omne: "nombre", app: "displayName" },
+      { omne: "email", app: "emails" },
+      { omne: "documento", app: "dni" },
+      { omne: "noTelfMovilPersonal", app: "telefonos" },
+      { omne: "noAfiliacion", app: "nSeguridadSocial" },
+      { omne: "fechaNacimiento", app: "fechaNacimiento" }
     ];
 
     // Aplanar todos los trabajadores de Omne en un solo array
@@ -112,8 +127,8 @@ export class SincroTrabajadoresUseCase implements ISincroTrabajadoresUseCase {
         } else {
           // No tiene fecha de baja, verificar si hay cambios importantes
           const hayChangios = camposImportantes.some((campo) => {
-            const valorOmne = trabajadorOmne[campo];
-            const valorApp = trabajadorApp[campo];
+            const valorOmne = trabajadorOmne[campo.omne];
+            const valorApp = trabajadorApp[campo.app];
 
             // Comparación especial para fechas
             if (valorOmne instanceof DateTime || valorApp instanceof Date) {
@@ -122,6 +137,11 @@ export class SincroTrabajadoresUseCase implements ISincroTrabajadoresUseCase {
               const fechaApp =
                 valorApp instanceof Date ? valorApp : new Date(valorApp);
               return fechaOmne?.getTime() !== fechaApp?.getTime();
+            }
+
+            // Comparación de strings con trim y toLowerCase para evitar falsos positivos
+            if (typeof valorOmne === 'string' && typeof valorApp === 'string') {
+              return valorOmne?.trim().toLowerCase() !== valorApp?.trim().toLowerCase();
             }
 
             return valorOmne !== valorApp;
@@ -145,14 +165,75 @@ export class SincroTrabajadoresUseCase implements ISincroTrabajadoresUseCase {
       }
     });
 
+    // Ejecutar las operaciones de base de datos
+    let trabajadoresCreados = [];
+    let trabajadoresActualizados = [];
+    let trabajadoresEliminados = { count: 0 };
+
+    try {
+      // Crear trabajadores nuevos
+      if (trabajadoresACrear.length > 0) {
+        const trabajadoresParaCrear = trabajadoresACrear.map(t => ({
+          nombreApellidos: t.apellidosYNombre,
+          displayName: t.nombre,
+          emails: t.email,
+          dni: t.documento,
+          direccion: `${t.viaPublica} ${t.numero}${t.piso ? ` ${t.piso}` : ''}`.trim(),
+          ciudad: t.poblacion,
+          telefonos: t.noTelfMovilPersonal,
+          fechaNacimiento: t.fechaNacimiento?.toJSDate() || undefined,
+          nacionalidad: t.codPaisNacionalidad,
+          nSeguridadSocial: t.noAfiliacion,
+          codigoPostal: t.cp,
+          tipoTrabajador: 'NORMAL', // Ajustar según tu lógica de negocio
+          empresaId: t.empresaID,
+          nPerceptor: parseInt(t.noPerceptor),
+        }));
+        
+        trabajadoresCreados = await this.createTrabajadorUseCase.execute(trabajadoresParaCrear);
+      }
+
+      // Actualizar trabajadores existentes
+      if (trabajadoresAModificar.length > 0) {
+        const trabajadoresParaActualizar = trabajadoresAModificar.map(t => ({
+          id: t.id,
+          nombreApellidos: t.apellidosYNombre,
+          displayName: t.nombre,
+          emails: t.email,
+          dni: t.documento,
+          direccion: `${t.viaPublica} ${t.numero}${t.piso ? ` ${t.piso}` : ''}`.trim(),
+          ciudad: t.poblacion,
+          telefonos: t.noTelfMovilPersonal,
+          fechaNacimiento: t.fechaNacimiento?.toJSDate() || undefined,
+          nacionalidad: t.codPaisNacionalidad,
+          nSeguridadSocial: t.noAfiliacion,
+          codigoPostal: t.cp,
+        }));
+        
+        trabajadoresActualizados = await this.updateTrabajadorUseCase.execute(trabajadoresParaActualizar);
+      }
+
+      // Eliminar trabajadores
+      if (trabajadoresAEliminar.length > 0) {
+        const trabajadoresParaEliminar = trabajadoresAEliminar.map(t => ({
+          id: t.id,
+        }));
+        
+        trabajadoresEliminados = await this.deleteTrabajadorUseCase.execute(trabajadoresParaEliminar);
+      }
+    } catch (error) {
+      console.error('Error al sincronizar trabajadores:', error);
+      throw new InternalServerErrorException('Error al sincronizar trabajadores con la base de datos');
+    }
+
     return {
-      created: trabajadoresACrear.length,
-      deleted: trabajadoresAEliminar.length,
-      updated: trabajadoresAModificar.length,
+      created: trabajadoresCreados.length,
+      deleted: trabajadoresEliminados.count,
+      updated: trabajadoresActualizados.length,
       trabajadoresOmne,
-      trabajadoresACrear,
-      trabajadoresAModificar,
-      trabajadoresAEliminar,
+      trabajadoresCreados,
+      trabajadoresActualizados,
+      trabajadoresEliminados,
     };
   }
 
