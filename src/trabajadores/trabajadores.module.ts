@@ -8,9 +8,9 @@ import { TrabajadoresController } from "./trabajadores.controller";
 import { DiaPersonalModule } from "../dia-personal/dia-personal.module";
 import { MBCTokenModule } from "../bussinesCentral/services/mbctoken/mbctoken.service.module";
 import { RoleModule } from "../role/role.module";
-import { ISincroTrabajadoresUseCase } from "./SincroTrabajadores/ISincroTrabajadores.use-case";
-import { SincroTrabajadoresUseCase } from "./SincroTrabajadores/SincroTrabajadores.use-case";
-import { SincroTrabajadoresController } from "./SincroTrabajadores/SincroTrabajadores.controller";
+import { ISincroTrabajadoresUseCase } from "./use-cases/interfaces/ISincroTrabajadores.use-case";
+import { SincroTrabajadoresUseCase } from "./use-cases/SincroTrabajadores.use-case";
+import { SincroTrabajadoresController } from "./controllers/SincroTrabajadores.controller";
 import { ITrabajadorRepository } from "./repository/interfaces/ITrabajador.repository";
 import { TrabajadorRepository } from "./repository/Trabajador.repository";
 import { EmpresaModule } from "src/empresa/empresa.module";
@@ -21,6 +21,7 @@ import { UpdateTrabajadorUseCase } from "./use-cases/UpdateTrabajador.use-case";
 import { IDeleteTrabajadorUseCase } from "./use-cases/interfaces/IDeleteTrabajador.use-case";
 import { DeleteTrabajadorUseCase } from "./use-cases/DeleteTrabajador.use-case";
 import { ContratoModule } from "../contrato/contrato.module";
+import { UpdateTrabajadorController } from "./controllers/UpdateTrabajador.controller";
 
 @Module({
   imports: [
@@ -58,6 +59,6 @@ import { ContratoModule } from "../contrato/contrato.module";
     },
   ],
   exports: [TrabajadorService],
-  controllers: [TrabajadoresController, SincroTrabajadoresController],
+  controllers: [TrabajadoresController, SincroTrabajadoresController, UpdateTrabajadorController],
 })
 export class TrabajadoresModule {}

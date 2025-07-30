@@ -26,4 +26,15 @@ export class UpdateTrabajadorUseCase implements IUpdateTrabajadorUseCase {
 
     return trabajadoresActualizados;
   }
+
+  async executeOne(trabajador: IUpdateTrabajadorDto): Promise<Trabajador> {
+    const { id, ...datosActualizar } = trabajador;
+
+    const trabajadorActualizado = await this.trabajadorRepository.updateOne(
+      id,
+      datosActualizar,
+    );
+
+    return trabajadorActualizado;
+  }
 }

@@ -3,9 +3,9 @@ import { SincroTrabajadoresUseCase } from './SincroTrabajadores.use-case';
 import { ITrabajadorRepository } from '../repository/interfaces/ITrabajador.repository';
 import { AxiosBcService } from '../../axios/axios-bc.service';
 import { EmpresaService } from '../../empresa/empresa.service';
-import { ICreateTrabajadorUseCase } from '../use-cases/interfaces/ICreateTrabajador.use-case';
-import { IUpdateTrabajadorUseCase } from '../use-cases/interfaces/IUpdateTrabajador.use-case';
-import { IDeleteTrabajadorUseCase } from '../use-cases/interfaces/IDeleteTrabajador.use-case';
+import { ICreateTrabajadorUseCase } from './interfaces/ICreateTrabajador.use-case';
+import { IUpdateTrabajadorUseCase } from './interfaces/IUpdateTrabajador.use-case';
+import { IDeleteTrabajadorUseCase } from './interfaces/IDeleteTrabajador.use-case';
 import { InternalServerErrorException } from '@nestjs/common';
 import { DateTime } from 'luxon';
 import 'reflect-metadata';
@@ -46,6 +46,7 @@ describe('SincroTrabajadoresUseCase', () => {
 
     mockUpdateTrabajadorUseCase = {
       execute: jest.fn(),
+      executeOne: jest.fn(),
     };
 
     mockDeleteTrabajadorUseCase = {

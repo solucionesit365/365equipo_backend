@@ -204,4 +204,90 @@ describe('UpdateTrabajadorUseCase', () => {
       expect(mockTrabajadorRepository.updateOne).toHaveBeenCalledTimes(3);
     });
   });
+
+  describe('executeOne', () => {
+    it('debería actualizar un solo trabajador', async () => {
+      const updateDto: IUpdateTrabajadorDto = {
+        id: 1,
+        nombreApellidos: 'Juan Pérez Updated',
+        emails: 'juan.updated@example.com',
+        direccion: 'Nueva Calle 456',
+      };
+
+      const updatedTrabajador = {
+        id: 1,
+        nombreApellidos: 'Juan Pérez Updated',
+        emails: 'juan.updated@example.com',
+        direccion: 'Nueva Calle 456',
+        dni: '12345678A',
+        ciudad: 'Madrid',
+      };
+
+      mockTrabajadorRepository.updateOne.mockResolvedValue(updatedTrabajador as any);
+
+      const result = await useCase.executeOne(updateDto);
+
+      expect(mockTrabajadorRepository.updateOne).toHaveBeenCalledWith(
+        1,
+        {
+          nombreApellidos: 'Juan Pérez Updated',
+          emails: 'juan.updated@example.com',
+          direccion: 'Nueva Calle 456',
+        }
+      );
+
+      expect(result).toEqual(updatedTrabajador);
+    });
+
+    it('debería manejar datos de actualización vacíos', async () => {
+      const updateDto: IUpdateTrabajadorDto = {
+        id: 1,
+      };
+
+      const existingTrabajador = {
+        id: 1,
+        nombreApellidos: 'Juan Pérez',
+        emails: 'juan@example.com',
+      };
+
+      mockTrabajadorRepository.updateOne.mockResolvedValue(existingTrabajador as any);
+
+      const result = await useCase.executeOne(updateDto);
+
+      expect(mockTrabajadorRepository.updateOne).toHaveBeenCalledWith(1, {});
+      expect(result).toEqual(existingTrabajador);
+    });
+
+    it('debería manejar actualización de todos los campos opcionales', async () => {
+      const updateDto: IUpdateTrabajadorDto = {
+        id: 1,
+        nombreApellidos: 'Nuevo Nombre',
+        displayName: 'Nuevo Display',
+        emails: 'nuevo@email.com',
+        dni: '87654321B',
+        direccion: 'Nueva Dirección',
+        ciudad: 'Nueva Ciudad',
+        telefonos: '600111222',
+        fechaNacimiento: new Date('1985-05-15'),
+        nacionalidad: 'Nueva Nacionalidad',
+        nSeguridadSocial: '98765432109',
+        codigoPostal: '28002',
+      };
+
+      const updatedTrabajador = { ...updateDto };
+
+      mockTrabajadorRepository.updateOne.mockResolvedValue(updatedTrabajador as any);
+
+      const result = await useCase.executeOne(updateDto);
+
+      const { id, ...expectedUpdateData } = updateDto;
+
+      expect(mockTrabajadorRepository.updateOne).toHaveBeenCalledWith(
+        id,
+        expectedUpdateData
+      );
+
+      expect(result).toEqual(updatedTrabajador);
+    });
+  });
 });

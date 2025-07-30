@@ -17,4 +17,5 @@ export interface IUpdateTrabajadorDto {
 
 export abstract class IUpdateTrabajadorUseCase {
   abstract execute(trabajadores: IUpdateTrabajadorDto[]): Promise<Trabajador[]>;
+  abstract executeOne(trabajador: IUpdateTrabajadorDto): Promise<Trabajador>;
 }

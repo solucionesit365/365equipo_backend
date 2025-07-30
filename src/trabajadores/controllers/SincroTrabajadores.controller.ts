@@ -1,5 +1,5 @@
 import { Controller, Post } from "@nestjs/common";
-import { ISincroTrabajadoresUseCase } from "./ISincroTrabajadores.use-case";
+import { ISincroTrabajadoresUseCase } from "../use-cases/interfaces/ISincroTrabajadores.use-case";
 
 @Controller("sincro-trabajadores")
 export class SincroTrabajadoresController {
