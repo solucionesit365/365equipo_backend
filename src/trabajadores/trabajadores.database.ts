@@ -139,11 +139,12 @@ export class TrabajadorDatabaseService {
           batch.map(async (trabajador) => {
             try {
               // Check if trabajador already exists with this DNI
-              const existingTrabajador =
-                await this.prisma.trabajador.findFirst({
+              const existingTrabajador = await this.prisma.trabajador.findFirst(
+                {
                   where: { dni: trabajador.dni },
                   include: { contratos: true },
-                });
+                },
+              );
 
               if (existingTrabajador) {
                 // Check if the data has actually changed
@@ -495,7 +496,11 @@ export class TrabajadorDatabaseService {
   // Función que obtiene los trabajadores desde Business Central
   async getTrabajadoresOmne() {
     try {
-      const empresas = await this.prisma.empresa.findMany({});
+      const empresas = await this.prisma.empresa.findMany({
+        where: {
+          existsBC: true,
+        },
+      });
 
       // Ejecutar las consultas en paralelo para cada empresa
       const resultados = await Promise.all(
@@ -591,8 +596,9 @@ export class TrabajadorDatabaseService {
         await this.prisma.$transaction(
           chunk.map(({ dni, cambios, nuevoContrato }) => {
             const trabajadorId = trabajadoresMap.get(dni);
-            if (!trabajadorId) throw new Error(`Trabajador con DNI ${dni} no encontrado`);
-            
+            if (!trabajadorId)
+              throw new Error(`Trabajador con DNI ${dni} no encontrado`);
+
             return this.prisma.trabajador.update({
               where: { id: trabajadorId },
               data: {

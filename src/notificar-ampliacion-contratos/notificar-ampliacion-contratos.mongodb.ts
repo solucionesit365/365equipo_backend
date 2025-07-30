@@ -3,6 +3,23 @@ import { MongoService } from "../mongo/mongo.service";
 import { TNotificarAmpliacionContratos } from "./notificar-ampliacion-contratos.dto";
 import { ObjectId } from "mongodb";
 
+interface Comentario {
+  nombre: string;
+  fechaRespuesta: string; // ISO string
+  mensaje: string;
+}
+
+interface AmpliacionJornadaItem {
+  _id: string; // o ObjectId
+  comentario: Comentario[];
+  // ...otros campos
+}
+
+export interface NotificacionAmpliacionContratos {
+  _id: ObjectId;
+  ampliacionJornada: AmpliacionJornadaItem[];
+}
+
 @Injectable()
 export class NotificarAmpliacionContratosMongoService {
   constructor(private readonly mongoDbService: MongoService) {}

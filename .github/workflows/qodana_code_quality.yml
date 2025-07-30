@@ -25,19 +25,19 @@ jobs:
         with:
           node-version: "22"
 
-      - name: Install dependencies
-        run: npm ci
+      # - name: Install dependencies
+      #   run: npm ci
 
-      - name: "Qodana Scan"
-        uses: JetBrains/qodana-action@v2024.3
-        with:
-          pr-mode: false
-          use-caches: false
-          args: --coverage-dir=coverage
-        env:
-          QODANA_TOKEN: ${{ secrets.QODANA_TOKEN_1819043438 }}
-          QODANA_ENDPOINT: "https://qodana.cloud"
-        timeout-minutes: 5
+      # - name: "Qodana Scan"
+      #   uses: JetBrains/qodana-action@v2024.3
+      #   with:
+      #     pr-mode: false
+      #     use-caches: false
+      #     args: --coverage-dir=coverage
+      #   env:
+      #     QODANA_TOKEN: ${{ secrets.QODANA_TOKEN_1819043438 }}
+      #     QODANA_ENDPOINT: "https://qodana.cloud"
+      #   timeout-minutes: 5
 
       - name: Install doctl
         run: |

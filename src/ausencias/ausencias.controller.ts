@@ -10,6 +10,7 @@ import { UserRecord } from "firebase-admin/auth";
 import { User } from "../decorators/get-user.decorator";
 import { TrabajadorService } from "../trabajadores/trabajadores.class";
 import { ObjectId } from "mongodb";
+import { SchedulerGuard } from "src/guards/scheduler.guard";
 
 @Controller("ausencias")
 export class AusenciasController {
@@ -205,6 +206,7 @@ export class AusenciasController {
     }
   }
 
+
   @UseGuards(AuthGuard)
   @Get("getAusenciasTrabajador")
   getAusenciasTrabajador(
@@ -219,4 +221,13 @@ export class AusenciasController {
       final,
     );
   }
+
+  @UseGuards(SchedulerGuard)
+  @Get("sincronizarAusenciasOmne")
+  async sincronizarAusenciasOmne() {
+    await this.ausenciasInstance.sincronizarAusenciasOmne();
+    return { message: "Sincronización completada correctamente" };
+  }
+
+  
 }
