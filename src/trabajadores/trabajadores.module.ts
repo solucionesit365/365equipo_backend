@@ -22,6 +22,9 @@ import { IDeleteTrabajadorUseCase } from "./use-cases/interfaces/IDeleteTrabajad
 import { DeleteTrabajadorUseCase } from "./use-cases/DeleteTrabajador.use-case";
 import { ContratoModule } from "../contrato/contrato.module";
 import { UpdateTrabajadorController } from "./controllers/UpdateTrabajador.controller";
+import { IUpdateTrabajadorOrganizacionUseCase } from "./use-cases/interfaces/IUpdateTrabajadorOrganizacion.use-case";
+import { UpdateTrabajadorOrganizacionUseCase } from "./use-cases/UpdateTrabajadorOrganizacion.use-case";
+import { UpdateTrabajadorOrganizacionController } from "./controllers/UpdateTrabajadorOrganizacion.controller";
 
 @Module({
   imports: [
@@ -57,8 +60,17 @@ import { UpdateTrabajadorController } from "./controllers/UpdateTrabajador.contr
       provide: IDeleteTrabajadorUseCase,
       useClass: DeleteTrabajadorUseCase,
     },
+    {
+      provide: IUpdateTrabajadorOrganizacionUseCase,
+      useClass: UpdateTrabajadorOrganizacionUseCase,
+    },
   ],
   exports: [TrabajadorService],
-  controllers: [TrabajadoresController, SincroTrabajadoresController, UpdateTrabajadorController],
+  controllers: [
+    TrabajadoresController, 
+    SincroTrabajadoresController, 
+    UpdateTrabajadorController,
+    UpdateTrabajadorOrganizacionController,
+  ],
 })
 export class TrabajadoresModule {}
