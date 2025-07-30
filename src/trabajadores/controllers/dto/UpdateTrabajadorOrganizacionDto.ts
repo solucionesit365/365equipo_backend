@@ -42,4 +42,8 @@ export class UpdateTrabajadorOrganizacionDto {
   @IsOptional()
   @IsString()
   tipoTrabajador?: string;
+
+  @IsOptional()
+  @IsNumber()
+  coordinatorId?: number;
 }

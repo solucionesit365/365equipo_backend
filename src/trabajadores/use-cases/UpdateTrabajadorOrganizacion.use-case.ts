@@ -16,7 +16,7 @@ export class UpdateTrabajadorOrganizacionUseCase implements IUpdateTrabajadorOrg
 
   async execute(trabajadorOrganizacion: IUpdateTrabajadorOrganizacionDto): Promise<Trabajador> {
     console.log("UpdateTrabajadorOrganizacion - Datos recibidos:", trabajadorOrganizacion);
-    const { id, arrayRoles, arrayPermisos, ...datosActualizar } = trabajadorOrganizacion;
+    const { id, arrayRoles, arrayPermisos, coordinatorId, ...datosActualizar } = trabajadorOrganizacion;
     console.log("UpdateTrabajadorOrganizacion - Datos para actualizar:", datosActualizar);
 
     // Preparar las conexiones de roles y permisos
@@ -50,6 +50,43 @@ export class UpdateTrabajadorOrganizacionUseCase implements IUpdateTrabajadorOrg
       };
     }
 
+    // Manejar la relación de coordinadora de tienda
+    if (coordinatorId !== undefined) {
+      console.log("UpdateTrabajadorOrganizacion - Gestionando coordinatorId:", coordinatorId);
+      
+      // Primero, quitar al trabajador como coordinador de cualquier tienda que pudiera tener
+      const tiendaActualmenteCoordinada = await this.prisma.tienda.findFirst({
+        where: { coordinatorId: id },
+      });
+      
+      if (tiendaActualmenteCoordinada) {
+        await this.prisma.tienda.update({
+          where: { id: tiendaActualmenteCoordinada.id },
+          data: { coordinatorId: null },
+        });
+        console.log(`UpdateTrabajadorOrganizacion - Trabajador ${id} removido como coordinador de tienda ${tiendaActualmenteCoordinada.id}`);
+      }
+      
+      // Si se está asignando como coordinador de una nueva tienda
+      if (coordinatorId !== null) {
+        // Quitar el coordinador actual de la tienda de destino (si lo tiene)
+        const tiendaDestino = await this.prisma.tienda.findUnique({
+          where: { id: coordinatorId },
+        });
+        
+        if (tiendaDestino && tiendaDestino.coordinatorId) {
+          console.log(`UpdateTrabajadorOrganizacion - Removiendo coordinador anterior ${tiendaDestino.coordinatorId} de tienda ${coordinatorId}`);
+        }
+        
+        // Asignar este trabajador como coordinador de la tienda
+        await this.prisma.tienda.update({
+          where: { id: coordinatorId },
+          data: { coordinatorId: id },
+        });
+        console.log(`UpdateTrabajadorOrganizacion - Trabajador ${id} asignado como coordinador de tienda ${coordinatorId}`);
+      }
+    }
+
     // Actualizar el trabajador con sus relaciones
     console.log("UpdateTrabajadorOrganizacion - updateData final:", updateData);
     const trabajadorActualizado = await this.prisma.trabajador.update({
@@ -61,6 +98,7 @@ export class UpdateTrabajadorOrganizacionUseCase implements IUpdateTrabajadorOrg
         tienda: true,
         empresa: true,
         responsable: true,
+        coordinadoraDeLaTienda: true,
       },
     });
     console.log("UpdateTrabajadorOrganizacion - Trabajador actualizado:", trabajadorActualizado);

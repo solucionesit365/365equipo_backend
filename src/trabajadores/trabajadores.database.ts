@@ -1091,6 +1091,7 @@ export class TrabajadorDatabaseService {
         },
         responsable: true,
         tienda: true,
+        coordinadoraDeLaTienda: true,
         roles: true,
         permisos: true,
         empresa: true,
