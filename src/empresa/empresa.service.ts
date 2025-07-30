@@ -48,8 +48,9 @@ export class EmpresaService {
     }
   }
 
-  async getEmpresas() {
-    return await this.prismaService.empresa.findMany();
+  async getEmpresas(onlyExistsBC?: boolean) {
+    const where = onlyExistsBC ? { existsBC: true } : {};
+    return await this.prismaService.empresa.findMany({ where });
   }
 
   async deleteEmpresa(reqDeleteEmpresa: DeleteEmpresaDto) {

@@ -64,6 +64,12 @@ import { PowerAutomateModule } from "./power-automate/power-automate.module";
 import { AxiosModule } from "./axios/axios.module";
 import { NotificarAmpliacionContratosModule } from "./notificar-ampliacion-contratos/notificar-ampliacion-contratos.module";
 import { GraphModule } from "./graph/graph.module";
+import { TurnoModule } from "./turno/turno.module";
+import { CoordinadoraModule } from "./coordinadora/coordinadora.module";
+import { PlantillaTurnoModule } from "./plantilla-turno/plantilla-turno.module";
+import { MacroModule } from "./macro/macro.module";
+import { AusenciaModule } from "./ausencia/ausencia.module";
+import { FaqModule } from "./faq/faq.module";
 
 @Module({
   imports: [
@@ -132,6 +138,12 @@ import { GraphModule } from "./graph/graph.module";
     PowerAutomateModule,
     AxiosModule,
     NotificarAmpliacionContratosModule,
+    TurnoModule,
+    CoordinadoraModule,
+    PlantillaTurnoModule,
+    MacroModule,
+    AusenciaModule,
+    FaqModule,
   ],
   controllers: [AppController, KpiTiendasController],
 })

@@ -144,10 +144,9 @@ export class NotificarAmpliacionContratosMongoService {
   //Eliminar una notificacion de horas extras
   async deleteNotificarAmpliacionContratos(idHorasExtras: string) {
     const db = (await this.mongoDbService.getConexion()).db();
-    const notificacionesCollection =
-      db.collection<NotificacionAmpliacionContratos>(
-        "notificarAmpliacionContratos",
-      );
+    const notificacionesCollection = db.collection<unknown>(
+      "notificarAmpliacionContratos",
+    );
 
     // Paso 1: Eliminar solo el objeto del array horasExtras
     const result = await notificacionesCollection.updateOne(
@@ -253,10 +252,9 @@ export class NotificarAmpliacionContratosMongoService {
     }[],
   ) {
     const db = (await this.mongoDbService.getConexion()).db();
-    const notificacionesCollection =
-      db.collection<NotificacionAmpliacionContratos>(
-        "notificarAmpliacionContratos",
-      );
+    const notificacionesCollection = db.collection<unknown>(
+      "notificarAmpliacionContratos",
+    );
 
     return await notificacionesCollection.updateOne(
       { _id: new ObjectId(id), "ampliacionJornada._id": horaExtraId },

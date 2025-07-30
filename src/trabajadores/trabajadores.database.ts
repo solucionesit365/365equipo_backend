@@ -2,14 +2,22 @@ import { Injectable, InternalServerErrorException } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { DateTime } from "luxon";
 import { Prisma } from "@prisma/client";
-import { ParametrosService } from "../parametros/parametros.service";
-import { Tienda } from "../tiendas/tiendas.class";
 import pMap from "p-map";
 import {
   CreateTrabajadorRequestDto,
   TrabajadorFormRequest,
 } from "./trabajadores.dto";
 import { AxiosBcService } from "../axios/axios-bc.service";
+
+export interface ContratoCreateData {
+  fechaAlta?: Date | null;
+  fechaAntiguedad?: Date | null;
+  horasContrato?: number;
+  inicioContrato?: Date | null;
+  fechaBaja?: Date | null;
+  finalContrato?: Date | null;
+  id?: string;
+}
 
 export interface TIncludeTrabajador {
   contratos?: boolean;
@@ -24,8 +32,6 @@ export interface TIncludeTrabajador {
 export class TrabajadorDatabaseService {
   constructor(
     private prisma: PrismaService,
-    private readonly parametrosService: ParametrosService,
-    private readonly tiendaInstance: Tienda,
     private readonly axiosBCService: AxiosBcService,
   ) {}
 
@@ -80,7 +86,7 @@ export class TrabajadorDatabaseService {
 
     await this.prisma.contrato2.create({
       data: {
-        Trabajador: {
+        trabajador: {
           connect: {
             id: newTrabajador.id,
           },
@@ -133,11 +139,12 @@ export class TrabajadorDatabaseService {
           batch.map(async (trabajador) => {
             try {
               // Check if trabajador already exists with this DNI
-              const existingTrabajador =
-                await this.prisma.trabajador.findUnique({
+              const existingTrabajador = await this.prisma.trabajador.findFirst(
+                {
                   where: { dni: trabajador.dni },
                   include: { contratos: true },
-                });
+                },
+              );
 
               if (existingTrabajador) {
                 // Check if the data has actually changed
@@ -216,7 +223,7 @@ export class TrabajadorDatabaseService {
                   // Update existing trabajador only if there are changes
                   if (hasChanges) {
                     await this.prisma.trabajador.update({
-                      where: { dni: trabajador.dni },
+                      where: { id: existingTrabajador.id },
                       data: {
                         nombreApellidos: trabajador.nombreApellidos,
                         emails: trabajador.emails,
@@ -252,7 +259,7 @@ export class TrabajadorDatabaseService {
                       await this.prisma.contrato2.create({
                         data: {
                           // Exclude the id field to let Prisma generate a new one
-                          Trabajador: {
+                          trabajador: {
                             connect: { id: existingTrabajador.id },
                           },
                           fechaAlta: contratoData.fechaAlta,
@@ -323,7 +330,7 @@ export class TrabajadorDatabaseService {
                   await this.prisma.contrato2.create({
                     data: {
                       // Do NOT use contratoData.id - let Prisma generate a new UUID
-                      Trabajador: {
+                      trabajador: {
                         connect: { id: newTrabajador.id },
                       },
                       fechaAlta: contratoData.fechaAlta,
@@ -410,7 +417,7 @@ export class TrabajadorDatabaseService {
         for (const { dni, cambios, nuevoContrato } of chunk) {
           try {
             // 1. Buscar el trabajador
-            const trabajador = await this.prisma.trabajador.findUnique({
+            const trabajador = await this.prisma.trabajador.findFirst({
               where: { dni },
               include: { contratos: true },
             });
@@ -427,7 +434,7 @@ export class TrabajadorDatabaseService {
             // 2. Actualizar el trabajador si hay cambios
             if (cambios && Object.keys(cambios).length > 0) {
               await this.prisma.trabajador.update({
-                where: { dni },
+                where: { id: trabajador.id },
                 data: cambios,
               });
             }
@@ -544,7 +551,7 @@ export class TrabajadorDatabaseService {
 
       return resultados;
     } catch (error) {
-      console.log(error);
+      console.log(error.message);
       throw new InternalServerErrorException();
     }
   }
@@ -559,7 +566,7 @@ export class TrabajadorDatabaseService {
     modificaciones: {
       dni: string;
       cambios: Omit<Prisma.TrabajadorUpdateInput, "contratos">;
-      nuevoContrato: Prisma.Contrato2CreateInput;
+      nuevoContrato: ContratoCreateData;
     }[],
   ) {
     const CHUNK_SIZE = 300;
@@ -575,10 +582,25 @@ export class TrabajadorDatabaseService {
     await pMap(
       chunks,
       async (chunk) => {
+        // Primero obtener todos los IDs
+        const trabajadoresMap = new Map();
+        for (const { dni } of chunk) {
+          const trabajador = await this.prisma.trabajador.findFirst({
+            where: { dni },
+          });
+          if (trabajador) {
+            trabajadoresMap.set(dni, trabajador.id);
+          }
+        }
+
         await this.prisma.$transaction(
-          chunk.map(({ dni, cambios, nuevoContrato }) =>
-            this.prisma.trabajador.update({
-              where: { dni },
+          chunk.map(({ dni, cambios, nuevoContrato }) => {
+            const trabajadorId = trabajadoresMap.get(dni);
+            if (!trabajadorId)
+              throw new Error(`Trabajador con DNI ${dni} no encontrado`);
+
+            return this.prisma.trabajador.update({
+              where: { id: trabajadorId },
               data: {
                 ...cambios,
                 contratos: {
@@ -596,8 +618,8 @@ export class TrabajadorDatabaseService {
                   },
                 },
               },
-            }),
-          ),
+            });
+          }),
         );
       },
       { concurrency: CONCURRENCY },
@@ -712,7 +734,7 @@ export class TrabajadorDatabaseService {
     reqTrabajador: CreateTrabajadorRequestDto,
   ): Promise<boolean> {
     // 1. Buscar si ya existe el trabajador por DNI
-    const existingWorker = await this.prisma.trabajador.findUnique({
+    const existingWorker = await this.prisma.trabajador.findFirst({
       where: { dni: reqTrabajador.dni },
     });
 
@@ -723,7 +745,7 @@ export class TrabajadorDatabaseService {
       );
       // Actualizamos datos del trabajador
       const updatedTrabajador = await this.prisma.trabajador.update({
-        where: { dni: reqTrabajador.dni },
+        where: { id: existingWorker.id },
         data: {
           tienda: reqTrabajador.idTienda
             ? { connect: { id: reqTrabajador.idTienda } }
@@ -756,7 +778,7 @@ export class TrabajadorDatabaseService {
         // Creamos un contrato nuevo
         await this.prisma.contrato2.create({
           data: {
-            Trabajador: { connect: { id: updatedTrabajador.id } },
+            trabajador: { connect: { id: updatedTrabajador.id } },
             fechaAlta: reqTrabajador.contrato.fechaAlta,
             fechaAntiguedad: reqTrabajador.contrato.fechaAntiguedad,
             horasContrato: reqTrabajador.contrato.horasContrato,
@@ -804,7 +826,7 @@ export class TrabajadorDatabaseService {
       // Creamos el contrato asociado al nuevo trabajador
       await this.prisma.contrato2.create({
         data: {
-          Trabajador: { connect: { id: newTrabajador.id } },
+          trabajador: { connect: { id: newTrabajador.id } },
           fechaAlta: reqTrabajador.contrato.fechaAlta,
           fechaAntiguedad: reqTrabajador.contrato.fechaAntiguedad,
           horasContrato: reqTrabajador.contrato.horasContrato,
@@ -980,6 +1002,7 @@ export class TrabajadorDatabaseService {
           take: 1, // Toma solo el contrato más reciente
         },
         tienda: true,
+        coordinadoraDeLaTienda: true,
         roles: { include: { permissions: true } },
         permisos: true,
         responsable: true,
@@ -1025,7 +1048,7 @@ export class TrabajadorDatabaseService {
   }
 
   async getTrabajadorByDni(dni: string) {
-    const trabajador = await this.prisma.trabajador.findUnique({
+    const trabajador = await this.prisma.trabajador.findFirst({
       where: {
         dni: dni,
       },
@@ -1068,6 +1091,7 @@ export class TrabajadorDatabaseService {
         },
         responsable: true,
         tienda: true,
+        coordinadoraDeLaTienda: true,
         roles: true,
         permisos: true,
         empresa: true,
@@ -1298,51 +1322,58 @@ export class TrabajadorDatabaseService {
   }
 
   async getSubordinadosById(id: number, conFecha?: DateTime) {
-    if (!conFecha) {
-      conFecha = DateTime.now();
-    }
+    try {
+      if (!conFecha) {
+        conFecha = DateTime.now();
+      }
 
-    const subordinados = await this.prisma.trabajador.findMany({
-      where: {
-        idResponsable: id,
-        contratos: {
-          some: {
-            AND: [
-              {
-                fechaAlta: {
-                  lte: conFecha.toJSDate(),
+      const subordinados = await this.prisma.trabajador.findMany({
+        where: {
+          idResponsable: id,
+          contratos: {
+            some: {
+              AND: [
+                {
+                  fechaAlta: {
+                    lte: conFecha.toJSDate(),
+                  },
                 },
-              },
-              {
-                OR: [
-                  {
-                    fechaBaja: {
-                      gte: conFecha.toJSDate(),
+                {
+                  OR: [
+                    {
+                      fechaBaja: {
+                        gte: conFecha.toJSDate(),
+                      },
                     },
-                  },
-                  {
-                    fechaBaja: null,
-                  },
-                ],
-              },
-            ],
+                    {
+                      fechaBaja: null,
+                    },
+                  ],
+                },
+              ],
+            },
           },
         },
-      },
-      include: {
-        contratos: {
-          where: {
-            fechaBaja: null,
+        include: {
+          contratos: {
+            where: {
+              fechaBaja: null,
+            },
+            orderBy: {
+              fechaAlta: "desc",
+            },
+            take: 1,
           },
-          orderBy: {
-            fechaAlta: "desc",
-          },
-          take: 1,
         },
-      },
-    });
+      });
 
-    return subordinados;
+      return subordinados;
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException(
+        `Error al obtener subordinados por ID`,
+      );
+    }
   }
 
   async getSubordinadosConTiendaPorId(idResponsable: number) {

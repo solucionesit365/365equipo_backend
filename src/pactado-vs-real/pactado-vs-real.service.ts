@@ -8,7 +8,7 @@ import { FichajeValidadoDto } from "../fichajes-validados/fichajes-validados.dto
 import { AusenciasService } from "../ausencias/ausencias.class";
 import { AusenciaInterface } from "../ausencias/ausencias.interface";
 import { PactadoVsRealDto } from "./pactado-vs-real.dto";
-import { Cuadrantes } from "../cuadrantes/cuadrantes.class";
+import { ITurnoRepository } from "../turno/repository/interfaces/turno.repository.interface";
 
 type TrabajadorExtendido = Trabajador & {
   tienda?: Tienda | null; // Relación con Tienda
@@ -23,7 +23,7 @@ export class PactadoVsRealService {
     private readonly trabajadoresInstance: TrabajadorService,
     private readonly fichajesValidadosService: FichajesValidadosService,
     private readonly ausenciasService: AusenciasService,
-    private readonly cuadranteService: Cuadrantes,
+    private readonly turnoRepository: ITurnoRepository,
   ) {}
   async pactadoVsReal(
     trabajadorRequest: UserRecord,
@@ -95,7 +95,7 @@ export class PactadoVsRealService {
   ) {
     for (let i = 0; i < pactadoReal.length; i += 1) {
       pactadoReal[i]["cuadrante"] =
-        await this.cuadranteService.getCuadranteSemanaTrabajador(
+        await this.turnoRepository.getTurnosPorTrabajador(
           pactadoReal[i].idTrabajador,
           fechaEntreSemana,
         );

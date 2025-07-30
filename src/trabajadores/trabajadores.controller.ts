@@ -18,6 +18,7 @@ import pMap from "p-map";
 import {
   CreateTrabajadorRequestDto,
   DeleteTrabajadorDto,
+  GetSubordinadosByIdDto,
   GetSubordinadosDto,
   GetTrabajadorBySqlIdDto,
   PermitirRegistroDto,
@@ -84,9 +85,8 @@ export class TrabajadoresController {
             cambios: modificacion.cambios,
             nuevoContrato: {
               ...modificacion.contrato,
-              Trabajador: { connect: { dni: modificacion.dni } },
             },
-          })),
+          })) as any,
         );
       },
       { concurrency: 2 },
@@ -190,6 +190,12 @@ export class TrabajadoresController {
     const resUser = await this.trabajadorInstance.getSubordinados(req.uid);
 
     return { ok: true, data: resUser };
+  }
+
+  @UseGuards(AuthGuard)
+  @Get("getSubordinadosById")
+  async getSubordinadoById(@Query() req: GetSubordinadosByIdDto) {
+    return this.trabajadorInstance.getSubordinadosById(req.idResponsable);
   }
 
   @UseGuards(AuthGuard)

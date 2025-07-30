@@ -5,6 +5,7 @@ import { FichajesValidadosModule } from "../fichajes-validados/fichajes-validado
 import { PactadoVsRealController } from "./pactado-vs-real.controller";
 import { AusenciasModule } from "../ausencias/ausencias.module";
 import { CuadrantesModule } from "../cuadrantes/cuadrantes.module";
+import { TurnoModule } from "../turno/turno.module";
 
 @Module({
   imports: [
@@ -12,6 +13,7 @@ import { CuadrantesModule } from "../cuadrantes/cuadrantes.module";
     FichajesValidadosModule,
     AusenciasModule,
     CuadrantesModule,
+    TurnoModule,
   ],
   providers: [PactadoVsRealService],
   exports: [PactadoVsRealService],

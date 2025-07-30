@@ -6,7 +6,6 @@ import {
 } from "@nestjs/common";
 import { EmailService } from "../email/email.class";
 import { FirebaseService } from "../firebase/firebase.service";
-import { PermisosService } from "../permisos/permisos.class";
 import { DateTime } from "luxon";
 import { SolicitudesVacacionesService } from "../solicitud-vacaciones/solicitud-vacaciones.class";
 import { DiaPersonalClass } from "../dia-personal/dia-personal.class";
@@ -60,9 +59,7 @@ interface TOmneTrabajador {
 @Injectable()
 export class TrabajadorService {
   constructor(
-    @Inject(forwardRef(() => FirebaseService))
     private readonly firebaseService: FirebaseService,
-    private readonly permisosInstance: PermisosService,
     private readonly emailInstance: EmailService,
     @Inject(forwardRef(() => SolicitudesVacacionesService))
     private readonly solicitudesVacaciones: SolicitudesVacacionesService,
@@ -542,9 +539,8 @@ export class TrabajadorService {
   }
 
   async getTrabajadoresByTienda(idTienda: number) {
-    const resUser = await this.schTrabajadores.getTrabajadoresByTienda(
-      idTienda,
-    );
+    const resUser =
+      await this.schTrabajadores.getTrabajadoresByTienda(idTienda);
     if (resUser) return resUser;
     throw Error(
       `No se ha podido obtener los trabajadores de la tienda ${idTienda} `,
@@ -608,8 +604,8 @@ export class TrabajadorService {
     return await this.schTrabajadores.getSubordinados(uid);
   }
 
-  async getSubordinadosById(id: number, conFecha?: DateTime) {
-    return await this.schTrabajadores.getSubordinadosById(id, conFecha);
+  getSubordinadosById(id: number, conFecha?: DateTime) {
+    return this.schTrabajadores.getSubordinadosById(id, conFecha);
   }
 
   async getSubordinadosByIdNew(id: number, conFecha?: DateTime) {
@@ -630,6 +626,9 @@ export class TrabajadorService {
     dni = dni.trim().toUpperCase();
     const datosUsuario = await this.schTrabajadores.getTrabajadorByDni(dni);
 
+    if (!datosUsuario.contratos || datosUsuario.contratos.length === 0)
+      throw Error("Trabajador sin contrato registrado");
+      
     if (!DateTime.fromJSDate(datosUsuario.contratos[0]?.inicioContrato).isValid)
       throw Error("Fecha de inicio de contrato incorrecta");
 

@@ -11,6 +11,7 @@ import { simpleParser } from "mailparser";
 import { LoggerService } from "../logger/logger.service";
 import { AxiosBcService } from "../axios/axios-bc.service";
 import { PrismaService } from "../prisma/prisma.service";
+import { EmailService } from "../email/email.class";
 
 @Controller("test")
 export class TestController {
@@ -18,7 +19,18 @@ export class TestController {
     private readonly loggerService: LoggerService,
     private readonly axiosBCService: AxiosBcService,
     private readonly prisma: PrismaService,
+    private readonly emailService: EmailService,
   ) {}
+
+  @Post("test")
+  test() {
+    this.emailService.enviarEmail(
+      "ezequielcarissimo@grupohorreols.com",
+      "Prueba sendgrid",
+      "Prueba para SAI con Cristian",
+    );
+    return 1;
+  }
 
   @Post("email")
   @UseInterceptors(FileInterceptor("email")) // Capturamos el archivo `email` si existe

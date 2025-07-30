@@ -1,3 +1,4 @@
+import { Type } from "class-transformer";
 import { IsNumber, IsString } from "class-validator";
 
 export class TiendaDto {
@@ -12,6 +13,7 @@ export class TiendaDto {
 }
 
 export class GetTiendaByIdDto {
+  @Type(() => Number)
   @IsNumber()
   id: number;
 }
@@ -34,7 +36,9 @@ export interface Tiendas2 {
   Latitud: number;
   Longitud: number;
   Tipo: string;
+  coordinatorId: number;
   id: number;
   idExterno: number;
   telefono: number;
+  existsBC: boolean;
 }

@@ -6,6 +6,7 @@ import { CuadrantesModule } from "../cuadrantes/cuadrantes.module";
 import { FichajesController } from "./fichajes.controller";
 import { MBCTokenModule } from "src/bussinesCentral/services/mbctoken/mbctoken.service.module";
 import { NotificacionesModule } from "../notificaciones/notificaciones.module";
+import { TurnoModule } from "src/turno/turno.module";
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { NotificacionesModule } from "../notificaciones/notificaciones.module";
     CuadrantesModule,
     MBCTokenModule,
     NotificacionesModule,
+    TurnoModule,
   ],
   providers: [Fichajes, FichajesDatabase],
   exports: [Fichajes],
