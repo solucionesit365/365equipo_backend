@@ -26,18 +26,17 @@ export class PactadoVsRealService {
     private readonly turnoRepository: ITurnoRepository,
   ) {}
   async pactadoVsReal(
-    trabajadorRequest: UserRecord,
+    uidParaConsultar: string,
     fechaInicio: DateTime,
     idTienda: number,
   ) {
     const subordinados = await this.trabajadoresInstance.getSubordinados(
-      trabajadorRequest.uid,
+      uidParaConsultar,
     );
 
     const idsSubordinados = subordinados.map((s) => s.id);
 
-    // Buscar gente que tiene fichajes validados en esta tienda (pueden venir de otras tiendas)
-    // Hay que añadirlos a la lista de idsSubordinados.
+    // También incluir trabajadores que han fichado en la tienda, aunque no sean subordinados
     const fichajesValidadosTienda =
       await this.fichajesValidadosService.getFichajesValidadosTiendaRango(
         idTienda,
@@ -45,45 +44,54 @@ export class PactadoVsRealService {
         fechaInicio.endOf("week"),
       );
 
-    // Añadir los subordinados que no estén en la lista de subordinados.
-    for (let i = 0; i < fichajesValidadosTienda.length; i += 1) {
-      const posibleExterno = fichajesValidadosTienda[i];
-      if (!idsSubordinados.find((s) => s === posibleExterno.idTrabajador)) {
-        idsSubordinados.push(posibleExterno.idTrabajador);
+    for (const posibleExterno of fichajesValidadosTienda) {
+      const trabajador = await this.trabajadoresInstance.getTrabajadorBySqlId(
+        posibleExterno.idTrabajador,
+      );
+
+      // SOLO si trabaja en esta tienda
+      if (
+        trabajador.idTienda === idTienda &&
+        !idsSubordinados.includes(trabajador.id)
+      ) {
+        idsSubordinados.push(trabajador.id);
       }
     }
 
+    // Aquí sacamos todos los trabajadores únicos
     const trabajadoresTienda: TrabajadorExtendido[] = [];
-
-    for (let i = 0; i < idsSubordinados.length; i += 1) {
+    for (const id of idsSubordinados) {
       const trabajador = await this.trabajadoresInstance.getTrabajadorBySqlId(
-        idsSubordinados[i],
+        id,
       );
       trabajadoresTienda.push(trabajador);
     }
 
     const pactadoReal: PactadoVsRealDto[] = [];
-    console.log(trabajadoresTienda);
 
-    for (let i = 0; i < trabajadoresTienda.length; i += 1) {
-      pactadoReal.push({
-        nombre: trabajadoresTienda[i].nombreApellidos,
-        idTrabajador: trabajadoresTienda[i].id,
-        contrato: (trabajadoresTienda[i].contratos[0].horasContrato * 40) / 100,
+    for (const trabajador of trabajadoresTienda) {
+      const resumen: PactadoVsRealDto = {
+        nombre: trabajador.nombreApellidos,
+        idTrabajador: trabajador.id,
+        contrato: (trabajador.contratos[0].horasContrato * 40) / 100,
         arrayValidados: [],
-      });
+      };
 
-      for (let j = 0; j < 7; j += 1) {
+      for (let j = 0; j < 7; j++) {
         const fecha = fechaInicio.plus({ days: j });
-        const fichajesValidadosDia =
+
+        const fichajes =
           await this.fichajesValidadosService.getFichajesValidadosTrabajadorTiendaRango(
-            trabajadoresTienda[i].id,
+            trabajador.id,
             idTienda,
             fecha.startOf("day"),
             fecha.endOf("day"),
           );
-        pactadoReal[i].arrayValidados.push(fichajesValidadosDia);
+
+        resumen.arrayValidados.push(fichajes);
       }
+
+      pactadoReal.push(resumen);
     }
 
     return await this.adjuntarContratos(pactadoReal, fechaInicio);
