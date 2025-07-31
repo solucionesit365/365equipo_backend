@@ -50,6 +50,7 @@ export class TurnoRepository implements ITurnoRepository {
   /**
    *
    * Retorna los turnos de la semana de "fecha" del trabajador "idTrabajador"
+   * Incluye arraySemanalHoras para compatibilidad con el antiguo sistema de cuadrantes
    */
   async getTurnosPorTrabajador(idTrabajador: number, fecha: DateTime) {
     const inicio = fecha.startOf("week");
@@ -71,6 +72,15 @@ export class TurnoRepository implements ITurnoRepository {
           },
         },
       });
+      
+      // Construir arraySemanalHoras para compatibilidad
+      const arraySemanalHoras = this.construirArraySemanalHoras(turnos, inicio);
+      
+      // Si hay turnos, agregar el arraySemanalHoras al primer elemento
+      if (turnos.length > 0) {
+        (turnos as any)[0].arraySemanalHoras = arraySemanalHoras;
+      }
+      
       return turnos;
     } catch (error) {
       console.log(error);
@@ -179,5 +189,36 @@ export class TurnoRepository implements ITurnoRepository {
       console.log(error);
       throw new InternalServerErrorException();
     }
+  }
+
+  /**
+   * Construye el array semanal de horas a partir de los turnos
+   * Para mantener compatibilidad con el antiguo sistema de cuadrantes
+   */
+  private construirArraySemanalHoras(turnos: Turno[], inicioSemana: DateTime) {
+    // Inicializar array con 7 días (lunes a domingo)
+    const arraySemanalHoras = Array(7).fill(null).map(() => ({
+      horaEntrada: null,
+      horaSalida: null,
+      idPlan: null,
+      idTienda: null,
+    }));
+
+    // Mapear turnos a días de la semana
+    turnos.forEach((turno) => {
+      const fechaTurno = DateTime.fromJSDate(turno.inicio);
+      const diaSemana = (fechaTurno.weekday - 1) % 7; // 0 = lunes, 6 = domingo
+      
+      if (diaSemana >= 0 && diaSemana < 7) {
+        arraySemanalHoras[diaSemana] = {
+          horaEntrada: DateTime.fromJSDate(turno.inicio).toFormat('HH:mm'),
+          horaSalida: DateTime.fromJSDate(turno.final).toFormat('HH:mm'),
+          idPlan: turno.id, // Usamos el ID del turno como idPlan
+          idTienda: turno.tiendaId,
+        };
+      }
+    });
+
+    return arraySemanalHoras;
   }
 }
