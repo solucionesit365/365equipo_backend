@@ -115,7 +115,7 @@ export class MacroService {
       .map(function (turnoMongo) {
         return {
           inicio: DateTime.fromJSDate(turnoMongo.inicio).toJSDate(),
-          final: DateTime.fromJSDate(turnoMongo.inicio).toJSDate(),
+          final: DateTime.fromJSDate(turnoMongo.final).toJSDate(),
           tiendaId: turnoMongo.idTienda,
           idTrabajador: turnoMongo.idTrabajador,
           bolsaHorasInicial: turnoMongo.bolsaHorasInicial,
