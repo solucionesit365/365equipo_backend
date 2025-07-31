@@ -20,6 +20,7 @@ import { GetAllTurnosController } from "./controllers/GetAllTurnos.controller";
 import { GetTurnosUnaSemanaController } from "./controllers/GetTurnosUnaSemana.controller";
 import { GetTurnosTodasSemanasController } from "./controllers/GetTurnosTodasSemanas.controller";
 import { GetTurnosSupersController } from "./controllers/GetTurnosSupers.controller";
+import { GetTurnoSemanaTrabajadorController } from "./controllers/GetTurnoSemanaTrabajador.controller";
 
 @Module({
   imports: [TrabajadoresModule, CoordinadoraModule],
@@ -52,6 +53,7 @@ import { GetTurnosSupersController } from "./controllers/GetTurnosSupers.control
     GetTurnosUnaSemanaController,
     GetTurnosTodasSemanasController,
     GetTurnosSupersController,
+    GetTurnoSemanaTrabajadorController,
   ],
   exports: [IGetTurnoDelDiaUseCase, ITurnoRepository],
 })
