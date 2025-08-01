@@ -54,8 +54,7 @@ export class AdminController {
         isImpersonation: true,
       });
       
-      // Registrar la acción de impersonación
-      console.log(`Admin ${currentUser.email} está accediendo como ${targetEmail}`);
+      // Acceso de admin completado
       
       return {
         ok: true,
