@@ -38,3 +38,4 @@ lerna-debug.log*
 secrets.*
 *.env
 **/.claude/settings.local.json
+firebase-admin-key.json

@@ -20,9 +20,20 @@ export class FirebaseService {
       this.app = initializeApp({
         credential: cert(firebaseConfig),
       });
-    } else {
+    } else if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+      // Si hay una ruta a un archivo de credenciales, usarlo
       this.app = initializeApp({
         credential: applicationDefault(),
+        projectId: 'silema',
+      });
+    } else {
+      // En desarrollo, intentar usar las credenciales de gcloud
+      // pero con configuración adicional para evitar el error de metadata
+      this.app = initializeApp({
+        credential: applicationDefault(),
+        projectId: 'silema',
+        databaseURL: `https://silema.firebaseio.com`,
+        storageBucket: 'silema.appspot.com',
       });
     }
 
@@ -43,12 +54,13 @@ export class FirebaseService {
     }
   }
 
-  async generateCustomToken(uid) {
+  async generateCustomToken(uid: string, additionalClaims?: object) {
     try {
-      const customToken = await this.auth.createCustomToken(uid);
+      const customToken = await this.auth.createCustomToken(uid, additionalClaims);
       return customToken;
     } catch (error) {
       console.error("Error generating custom token:", error);
+      throw error;
     }
   }
 
@@ -108,6 +120,17 @@ export class FirebaseService {
       console.error("Error updating Firebase user:", error);
       throw new InternalServerErrorException(
         "No se ha podido actualizar el usuario en Firebase",
+      );
+    }
+  }
+
+  async setCustomUserClaims(uid: string, customClaims: object) {
+    try {
+      await this.auth.setCustomUserClaims(uid, customClaims);
+    } catch (error) {
+      console.error("Error setting custom claims:", error);
+      throw new InternalServerErrorException(
+        "No se ha podido establecer los claims personalizados",
       );
     }
   }
