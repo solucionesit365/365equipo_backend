@@ -70,6 +70,8 @@ import { PlantillaTurnoModule } from "./plantilla-turno/plantilla-turno.module";
 import { MacroModule } from "./macro/macro.module";
 import { AusenciaModule } from "./ausencia/ausencia.module";
 import { FaqModule } from "./faq/faq.module";
+import { SupervisorTiendaModule } from "./supervisor-tienda/supervisor-tienda.module";
+import { SubordinadoModule } from './subordinado/subordinado.module';
 
 @Module({
   imports: [
@@ -144,6 +146,8 @@ import { FaqModule } from "./faq/faq.module";
     MacroModule,
     AusenciaModule,
     FaqModule,
+    SupervisorTiendaModule,
+    SubordinadoModule,
   ],
   controllers: [AppController, KpiTiendasController],
 })

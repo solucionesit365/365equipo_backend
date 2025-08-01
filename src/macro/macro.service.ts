@@ -40,46 +40,119 @@ export class MacroService {
     private readonly mongoService: MongoService,
   ) {}
 
-  // Coordinadoras reales, porque tiene filtro de t-- y m--
+  // Corregir coordinadoras basándose en trabajadores dependientas
   async corregirCoordinadoras() {
-    const coordinadoras = await this.prismaService.trabajador.findMany({
+    console.log('🔧 Iniciando corrección de coordinadoras...');
+    
+    // 1. Buscar todos los trabajadores dependientas (que NO llevan equipo y están en tiendas t-- o m--)
+    const dependientas = await this.prismaService.trabajador.findMany({
       where: {
-        llevaEquipo: true,
+        llevaEquipo: false, // NO llevan equipo (son dependientas)
         idTienda: { not: null },
-        OR: [
-          {
-            tienda: {
+        tienda: {
+          OR: [
+            {
               nombre: {
                 contains: "t--",
-                mode: "insensitive", // no distingue mayúsculas/minúsculas
-              },
-            },
-          },
-          {
-            tienda: {
-              nombre: {
-                contains: "m--",
                 mode: "insensitive",
               },
             },
-          },
-        ],
+            {
+              nombre: {
+                contains: "m--", 
+                mode: "insensitive",
+              },
+            },
+          ],
+        },
+      },
+      include: {
+        tienda: true,
       },
     });
 
+    console.log(`📊 Encontradas ${dependientas.length} dependientas en tiendas t-- o m--`);
+
+    if (dependientas.length === 0) {
+      console.log('⚠️ No se encontraron dependientas. Finalizando proceso.');
+      return [];
+    }
+
+    // 2. Agrupar por tienda y buscar las coordinadoras de cada tienda
+    const tiendasConDependientas = new Map<number, { idTienda: number; nombreTienda: string }>();
+    
+    dependientas.forEach(dependienta => {
+      if (dependienta.idTienda && dependienta.tienda) {
+        tiendasConDependientas.set(dependienta.idTienda, {
+          idTienda: dependienta.idTienda,
+          nombreTienda: dependienta.tienda.nombre,
+        });
+      }
+    });
+
+    console.log(`🏪 Tiendas identificadas: ${tiendasConDependientas.size}`);
+
+    // 3. Para cada tienda, buscar la coordinadora (trabajador que SÍ lleva equipo en esa tienda)
+    const coordinadorasArray: { idCoordinadora: number; idTienda: number }[] = [];
+    
+    for (const { idTienda, nombreTienda } of tiendasConDependientas.values()) {
+      const coordinadora = await this.prismaService.trabajador.findFirst({
+        where: {
+          idTienda: idTienda,
+          llevaEquipo: true, // SÍ lleva equipo (es coordinadora)
+        },
+      });
+
+      if (coordinadora) {
+        coordinadorasArray.push({
+          idCoordinadora: coordinadora.id,
+          idTienda: idTienda,
+        });
+        console.log(`👩‍💼 Coordinadora encontrada: ${coordinadora.nombreApellidos} para tienda ${nombreTienda} (ID: ${idTienda})`);
+      } else {
+        console.log(`⚠️ No se encontró coordinadora para tienda ${nombreTienda} (ID: ${idTienda})`);
+      }
+    }
+
+    console.log(`🎯 Total coordinadoras a actualizar: ${coordinadorasArray.length}`);
+
+    // 4. Actualizar el campo coordinadoraDeLaTienda para cada coordinadora
     const resultados = await Promise.all(
-      coordinadoras.map(({ id, idTienda }) =>
-        this.prismaService.tienda.update({
-          where: { id: idTienda! },
-          data: {
-            // Conecta la relación 'coordinator' al Trabajador.id
-            coordinator: { connect: { id } },
-          },
-        }),
-      ),
+      coordinadorasArray.map(async ({ idCoordinadora, idTienda }) => {
+        try {
+          // Actualizar el trabajador para asignar coordinadoraDeLaTienda
+          const trabajadorActualizado = await this.prismaService.trabajador.update({
+            where: { id: idCoordinadora },
+            data: {
+              coordinadoraDeLaTienda: { connect: { id: idTienda } },
+            },
+            include: {
+              coordinadoraDeLaTienda: true,
+            },
+          });
+
+          console.log(`✅ Actualizada coordinadora ${trabajadorActualizado.nombreApellidos} para tienda ID: ${idTienda}`);
+          return trabajadorActualizado;
+        } catch (error) {
+          console.error(`❌ Error actualizando coordinadora ID: ${idCoordinadora} para tienda ID: ${idTienda}`, error);
+          return null;
+        }
+      })
     );
 
-    return resultados; // array de tiendas ya actualizadas
+    const exitosos = resultados.filter(Boolean);
+    const fallidos = resultados.length - exitosos.length;
+
+    console.log(`🎉 Proceso completado:`);
+    console.log(`   ✅ Coordinadoras actualizadas exitosamente: ${exitosos.length}`);
+    console.log(`   ❌ Fallos: ${fallidos}`);
+
+    return {
+      totalProcesadas: coordinadorasArray.length,
+      exitosas: exitosos.length,
+      fallidas: fallidos,
+      coordinadoras: exitosos,
+    };
   }
 
   async migrarTurnos() {
