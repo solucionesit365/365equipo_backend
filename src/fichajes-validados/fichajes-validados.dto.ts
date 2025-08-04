@@ -19,17 +19,12 @@ class TCuadranteMinDto {
   @IsDate()
   final: Date;
 
-  @IsString()
-  nombre: string;
-
-  @IsNumber()
-  idTienda: number;
-
   @IsNumber()
   idTrabajador: number;
 
-  @IsNumber()
-  totalHoras: number;
+  @IsOptional()
+  @IsString()
+  dni?: string;
 }
 
 class IdFichajes {
@@ -64,6 +59,9 @@ class HorasPagar {
 
   @IsString()
   estadoValidado: string;
+
+  @IsOptional()
+  marcaTemporal?: any;
 }
 
 export class FichajeValidadoDto {
@@ -134,6 +132,30 @@ export class FichajeValidadoDto {
 
   @IsBoolean()
   enviado: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  salidaAutomatica?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  validado?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  aprendiz?: boolean;
+
+  @IsOptional()
+  @IsNumber()
+  horasfichajeMostrar?: number;
+
+  @IsOptional()
+  @IsString()
+  creacion?: string;
+
+  @IsOptional()
+  @IsNumber()
+  antiguedadDias?: number;
 }
 
 export class GetSemanasFichajesPagarRequestDto {
