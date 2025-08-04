@@ -103,7 +103,7 @@ export class Tienda {
 
   async getTiendas2() {
     try {
-      return this.ordenarTiendas(await this.schTiendas.geTiendas2());
+      return this.ordenarTiendas(await this.schTiendas.geTiendas2() as any);
     } catch (err) {
       console.log(err);
       throw new InternalServerErrorException("Error al obtener las tiendas");
