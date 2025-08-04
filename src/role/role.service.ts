@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, InternalServerErrorException } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import {
   AddPermissionDto,
@@ -77,5 +77,41 @@ export class RoleService {
         permissions: true,
       },
     });
+  }
+
+  async getUserRoles(idTrabajador: number) {
+    try {
+      const roles = await this.prisma.trabajador.findUnique({
+        where: {
+          id: idTrabajador,
+        },
+        include: {
+          roles: true,
+        },
+      });
+      return roles;
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException();
+    }
+  }
+
+  async hasRole(idTrabajador: number, checkRole: string) {
+    try {
+      const trabajador = await this.getUserRoles(idTrabajador);
+
+      if (
+        trabajador &&
+        trabajador.roles.some(
+          (role) => role.id === checkRole || role.name === checkRole,
+        )
+      )
+        return true;
+
+      return false;
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException();
+    }
   }
 }

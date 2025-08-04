@@ -29,7 +29,7 @@ export class Tienda {
     return this.schTiendas.getTiendaById(idTienda);
   }
 
-  private ordenarTiendas(tiendas: TTienda[]) {
+  private ordenarTiendas(tiendas: TTienda[]): TTienda[] {
     return tiendas.sort((a, b) => {
       const nameA = a.nombre.toLowerCase();
       const nameB = b.nombre.toLowerCase();

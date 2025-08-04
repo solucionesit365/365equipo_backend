@@ -34,6 +34,7 @@ model Trabajador {
   esTienda               Boolean            @default(false)
   nPerceptor             Int?
   workEmail              String?
+  supervisa              Tienda[]           @relation("TiendaSupervisor")
   ausenciasCompletas     AusenciaCompleta[]
   ausenciasParciales     AusenciaParcial[]
   contratos              Contrato2[]
@@ -55,9 +56,11 @@ model Tienda {
   direccion       String?
   idExterno       Int?
   coordinatorId   Int?             @unique
+  supervisorId    Int?             @unique
   existsBC        Boolean          @default(false)
   plantillasTurno PlantillaTurno[]
   coordinator     Trabajador?      @relation("TiendaCoordinator", fields: [coordinatorId], references: [id])
+  supervisor      Trabajador?      @relation("TiendaSupervisor", fields: [supervisorId], references: [id])
   trabajadores    Trabajador[]
   turnos          Turno[]
 }
