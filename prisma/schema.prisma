@@ -40,9 +40,9 @@ model Trabajador {
   contratos              Contrato2[]
   coordinadoraDeLaTienda Tienda?            @relation("TiendaCoordinator")
   empresa                Empresa?           @relation(fields: [empresaId], references: [id])
-  responsable            Trabajador?        @relation("Responsable", fields: [idResponsable], references: [id])
+  responsable            Trabajador?        @relation("Responsable", fields: [idResponsable], references: [id], onDelete: SetNull)
   subordinados           Trabajador[]       @relation("Responsable")
-  tienda                 Tienda?            @relation(fields: [idTienda], references: [id])
+  tienda                 Tienda?            @relation(fields: [idTienda], references: [id], onDelete: SetNull)
   turnos                 Turno[]
   permisos               Permiso[]          @relation("PermisoToTrabajador")
   roles                  Role[]             @relation("RoleToTrabajador")
@@ -59,8 +59,8 @@ model Tienda {
   supervisorId    Int?             @unique
   existsBC        Boolean          @default(false)
   plantillasTurno PlantillaTurno[]
-  coordinator     Trabajador?      @relation("TiendaCoordinator", fields: [coordinatorId], references: [id])
-  supervisor      Trabajador?      @relation("TiendaSupervisor", fields: [supervisorId], references: [id])
+  coordinator     Trabajador?      @relation("TiendaCoordinator", fields: [coordinatorId], references: [id], onDelete: SetNull)
+  supervisor      Trabajador?      @relation("TiendaSupervisor", fields: [supervisorId], references: [id], onDelete: SetNull)
   trabajadores    Trabajador[]
   turnos          Turno[]
 }
@@ -219,7 +219,7 @@ model Turno {
   idTrabajador      Int
   borrable          Boolean    @default(false)
   bolsaHorasInicial Float      @default(0)
-  trabajador        Trabajador @relation(fields: [idTrabajador], references: [id])
+  trabajador        Trabajador @relation(fields: [idTrabajador], references: [id], onDelete: Cascade)
   tienda            Tienda     @relation(fields: [tiendaId], references: [id])
 }
 
@@ -240,7 +240,7 @@ model AusenciaParcial {
   fechaInicio  DateTime
   fechaFinal   DateTime
   idTrabajador Int
-  trabajador   Trabajador          @relation(fields: [idTrabajador], references: [id])
+  trabajador   Trabajador          @relation(fields: [idTrabajador], references: [id], onDelete: Cascade)
 }
 
 model AusenciaCompleta {
@@ -251,7 +251,7 @@ model AusenciaCompleta {
   fechaFinal    DateTime?
   fechaRevision DateTime?
   idTrabajador  Int
-  trabajador    Trabajador           @relation(fields: [idTrabajador], references: [id])
+  trabajador    Trabajador           @relation(fields: [idTrabajador], references: [id], onDelete: Cascade)
 }
 
 model Contrato2 {
