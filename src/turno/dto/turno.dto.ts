@@ -7,6 +7,7 @@ import {
   IsString,
   ValidateNested,
 } from "class-validator";
+import { IsDifferentThan } from "../../validation/customValidators";
 
 export class GetTurnosEquipoCoordinadora {
   @IsNotEmpty()
@@ -43,6 +44,9 @@ export class ObjetoTurnoDto {
   inicioISO: string;
 
   @IsString()
+  @IsDifferentThan("inicioISO", {
+    message: "El horario de inicio y final del turno no pueden ser iguales",
+  })
   finalISO: string;
 
   @IsNumber()
