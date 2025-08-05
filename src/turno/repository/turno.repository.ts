@@ -76,12 +76,24 @@ export class TurnoRepository implements ITurnoRepository {
       // Construir arraySemanalHoras para compatibilidad
       const arraySemanalHoras = this.construirArraySemanalHoras(turnos, inicio);
       
+      // Añadir totalHoras a cada turno
+      const turnosConHoras = turnos.map(turno => {
+        const inicioDateTime = DateTime.fromJSDate(turno.inicio);
+        const finalDateTime = DateTime.fromJSDate(turno.final);
+        const totalHoras = finalDateTime.diff(inicioDateTime, 'hours').hours;
+        
+        return {
+          ...turno,
+          totalHoras: Math.max(0, totalHoras), // Asegurar que no sea negativo
+        };
+      });
+      
       // Si hay turnos, agregar el arraySemanalHoras al primer elemento
-      if (turnos.length > 0) {
-        (turnos as any)[0].arraySemanalHoras = arraySemanalHoras;
+      if (turnosConHoras.length > 0) {
+        (turnosConHoras as any)[0].arraySemanalHoras = arraySemanalHoras;
       }
       
-      return turnos;
+      return turnosConHoras;
     } catch (error) {
       console.log(error);
       throw new InternalServerErrorException();

@@ -299,16 +299,18 @@ export class FichajesValidadosDatabase {
     const fichajesCollection =
       db.collection<FichajeValidadoDto>("fichajesValidados2");
 
-    return await fichajesCollection
+    const result = await fichajesCollection
       .find({
         idTrabajador: idTrabajador,
         idTienda: idTienda,
         $and: [
-          { fichajeEntrada: { $gte: fechaInicioUTC.toJSDate() } },
-          { fichajeSalida: { $lte: fechaFinalUTC.toJSDate() } },
+          { fichajeEntrada: { $lte: fechaFinalUTC.toJSDate() } },
+          { fichajeSalida: { $gte: fechaInicioUTC.toJSDate() } },
         ],
       })
       .toArray();
+
+    return result;
   }
 
   //Para el informe de kathy
