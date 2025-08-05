@@ -1,3 +1,4 @@
+import { ParFichaje } from "@prisma/client";
 import { DateTime } from "luxon";
 
 export abstract class IParFichajeRepository {
@@ -5,5 +6,5 @@ export abstract class IParFichajeRepository {
     trabajadorIds: number[],
     fechaInicio: DateTime,
     fechaFin: DateTime,
-  ): Promise<any>;
+  ): Promise<ParFichaje[]>;
 }

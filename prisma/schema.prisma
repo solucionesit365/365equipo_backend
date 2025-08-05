@@ -56,7 +56,7 @@ model ParFichaje {
   entrada      DateTime
   salida       DateTime
   idTurno      String     @unique
-  turno        Turno      @relation(fields: [idTurno], references: [id])
+  turno        Turno      @relation(fields: [idTurno], references: [id], onDelete: Restrict)
   trabajador   Trabajador @relation(fields: [trabajadorId], references: [id])
   tienda       Tienda     @relation(fields: [tiendaId], references: [id])
   timestamp    DateTime
