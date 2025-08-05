@@ -46,8 +46,23 @@ model Trabajador {
   turnos                 Turno[]
   permisos               Permiso[]          @relation("PermisoToTrabajador")
   roles                  Role[]             @relation("RoleToTrabajador")
+  ParFichaje             ParFichaje[]
 
   @@unique([empresaId, nPerceptor])
+}
+
+model ParFichaje {
+  id           String     @id @default(uuid())
+  entrada      DateTime
+  salida       DateTime
+  idTurno      String     @unique
+  turno        Turno      @relation(fields: [idTurno], references: [id])
+  trabajador   Trabajador @relation(fields: [trabajadorId], references: [id])
+  tienda       Tienda     @relation(fields: [tiendaId], references: [id])
+  timestamp    DateTime
+  turnoId      String
+  trabajadorId Int
+  tiendaId     Int
 }
 
 model Tienda {
@@ -63,6 +78,7 @@ model Tienda {
   supervisor      Trabajador?      @relation("TiendaSupervisor", fields: [supervisorId], references: [id], onDelete: SetNull)
   trabajadores    Trabajador[]
   turnos          Turno[]
+  ParFichaje      ParFichaje[]
 }
 
 model Equipo {
@@ -212,15 +228,16 @@ model SmsOtp {
 }
 
 model Turno {
-  id                String     @id @default(uuid())
+  id                String      @id @default(uuid())
   inicio            DateTime
   final             DateTime
   tiendaId          Int
   idTrabajador      Int
-  borrable          Boolean    @default(false)
-  bolsaHorasInicial Float      @default(0)
-  trabajador        Trabajador @relation(fields: [idTrabajador], references: [id], onDelete: Cascade)
-  tienda            Tienda     @relation(fields: [tiendaId], references: [id])
+  borrable          Boolean     @default(false)
+  bolsaHorasInicial Float       @default(0)
+  trabajador        Trabajador  @relation(fields: [idTrabajador], references: [id], onDelete: Cascade)
+  tienda            Tienda      @relation(fields: [tiendaId], references: [id])
+  parFichaje        ParFichaje?
 }
 
 model PlantillaTurno {

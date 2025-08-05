@@ -72,6 +72,7 @@ import { AusenciaModule } from "./ausencia/ausencia.module";
 import { FaqModule } from "./faq/faq.module";
 import { SupervisorTiendaModule } from "./supervisor-tienda/supervisor-tienda.module";
 import { SubordinadoModule } from './subordinado/subordinado.module';
+import { ParFichajeModule } from './par-fichaje/par-fichaje.module';
 
 @Module({
   imports: [
@@ -148,6 +149,7 @@ import { SubordinadoModule } from './subordinado/subordinado.module';
     FaqModule,
     SupervisorTiendaModule,
     SubordinadoModule,
+    ParFichajeModule,
   ],
   controllers: [AppController, KpiTiendasController],
 })

@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException } from "@nestjs/common";
+import { Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
 import { Prisma, Turno } from "@prisma/client";
 import { DateTime } from "luxon";
 import { PrismaService } from "../../prisma/prisma.service";
@@ -72,27 +72,27 @@ export class TurnoRepository implements ITurnoRepository {
           },
         },
       });
-      
+
       // Construir arraySemanalHoras para compatibilidad
       const arraySemanalHoras = this.construirArraySemanalHoras(turnos, inicio);
-      
+
       // Añadir totalHoras a cada turno
-      const turnosConHoras = turnos.map(turno => {
+      const turnosConHoras = turnos.map((turno) => {
         const inicioDateTime = DateTime.fromJSDate(turno.inicio);
         const finalDateTime = DateTime.fromJSDate(turno.final);
-        const totalHoras = finalDateTime.diff(inicioDateTime, 'hours').hours;
-        
+        const totalHoras = finalDateTime.diff(inicioDateTime, "hours").hours;
+
         return {
           ...turno,
           totalHoras: Math.max(0, totalHoras), // Asegurar que no sea negativo
         };
       });
-      
+
       // Si hay turnos, agregar el arraySemanalHoras al primer elemento
       if (turnosConHoras.length > 0) {
         (turnosConHoras as any)[0].arraySemanalHoras = arraySemanalHoras;
       }
-      
+
       return turnosConHoras;
     } catch (error) {
       console.log(error);
@@ -203,28 +203,88 @@ export class TurnoRepository implements ITurnoRepository {
     }
   }
 
+  // Nuevo método inteligente.
+  async getTurnoRelacionado(
+    idTrabajador: number,
+    inicio: DateTime,
+    final: DateTime,
+  ): Promise<Turno> {
+    try {
+      // 1) Buscar todos los turnos que overlapeen con el intervalo [inicio, final]:
+      //    turno.inicio <= final  AND  turno.final >= inicio
+      const candidatos = await this.prismaService.turno.findMany({
+        where: {
+          idTrabajador,
+          AND: [
+            { inicio: { lte: final.toJSDate() } },
+            { final: { gte: inicio.toJSDate() } },
+          ],
+        },
+      });
+
+      if (candidatos.length === 0) {
+        // No hay ningún turno que concuerde siquiera parcialmente
+        throw new NotFoundException("No se encontró ningún turno relacionado");
+      }
+      if (candidatos.length === 1) {
+        // Solo uno → lo devolvemos
+        return candidatos[0];
+      }
+
+      // 2) Si hay varios, elegir el que *más* se acerque a los registros de inicio/fin.
+      let mejor = candidatos[0];
+      let mejorScore =
+        Math.abs(candidatos[0].inicio.getTime() - inicio.toJSDate().getTime()) +
+        Math.abs(candidatos[0].final.getTime() - final.toJSDate().getTime());
+
+      for (const turno of candidatos.slice(1)) {
+        const diffInicio = Math.abs(
+          turno.inicio.getTime() - inicio.toJSDate().getTime(),
+        );
+        const diffFinal = Math.abs(
+          turno.final.getTime() - final.toJSDate().getTime(),
+        );
+        const score = diffInicio + diffFinal;
+
+        if (score < mejorScore) {
+          mejor = turno;
+          mejorScore = score;
+        }
+      }
+
+      return mejor;
+    } catch (error) {
+      // Atrapar errores del ORM u otros
+      console.error("Error al buscar turno relacionado:", error);
+      if (error instanceof NotFoundException) throw error;
+      throw new InternalServerErrorException();
+    }
+  }
+
   /**
    * Construye el array semanal de horas a partir de los turnos
    * Para mantener compatibilidad con el antiguo sistema de cuadrantes
    */
   private construirArraySemanalHoras(turnos: Turno[], inicioSemana: DateTime) {
     // Inicializar array con 7 días (lunes a domingo)
-    const arraySemanalHoras = Array(7).fill(null).map(() => ({
-      horaEntrada: null,
-      horaSalida: null,
-      idPlan: null,
-      idTienda: null,
-    }));
+    const arraySemanalHoras = Array(7)
+      .fill(null)
+      .map(() => ({
+        horaEntrada: null,
+        horaSalida: null,
+        idPlan: null,
+        idTienda: null,
+      }));
 
     // Mapear turnos a días de la semana
     turnos.forEach((turno) => {
       const fechaTurno = DateTime.fromJSDate(turno.inicio);
       const diaSemana = (fechaTurno.weekday - 1) % 7; // 0 = lunes, 6 = domingo
-      
+
       if (diaSemana >= 0 && diaSemana < 7) {
         arraySemanalHoras[diaSemana] = {
-          horaEntrada: DateTime.fromJSDate(turno.inicio).toFormat('HH:mm'),
-          horaSalida: DateTime.fromJSDate(turno.final).toFormat('HH:mm'),
+          horaEntrada: DateTime.fromJSDate(turno.inicio).toFormat("HH:mm"),
+          horaSalida: DateTime.fromJSDate(turno.final).toFormat("HH:mm"),
           idPlan: turno.id, // Usamos el ID del turno como idPlan
           idTienda: turno.tiendaId,
         };
