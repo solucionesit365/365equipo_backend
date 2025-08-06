@@ -224,7 +224,7 @@ export class AusenciasController {
     );
   }
 
-  // @UseGuards(SchedulerGuard)
+  @UseGuards(SchedulerGuard)
   @Get("sincronizarAusenciasOmne")
   async sincronizarAusenciasOmne() {
     await this.ausenciasInstance.sincronizarAusenciasOmne();
