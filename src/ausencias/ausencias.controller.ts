@@ -79,8 +79,9 @@ export class AusenciasController {
       }
 
       // Eliminar la ausencia
-      const respAusencias =
-        await this.ausenciasInstance.deleteAusencia(idAusencia);
+      const respAusencias = await this.ausenciasInstance.deleteAusencia(
+        idAusencia,
+      );
 
       if (respAusencias) {
         // Obtener el nombre del usuario autenticado
@@ -127,8 +128,9 @@ export class AusenciasController {
         ausencia.fechaFinal,
         "dd/MM/yyyy",
       ).toJSDate();
-      const respAusencia =
-        await this.ausenciasInstance.updateAusencia(ausencia);
+      const respAusencia = await this.ausenciasInstance.updateAusencia(
+        ausencia,
+      );
       if (respAusencia) {
         // Registrar en el logger
         await this.loggerService.create({
@@ -173,8 +175,9 @@ export class AusenciasController {
           "dd/MM/yyyy",
         ).toJSDate();
 
-      const respAusencia =
-        await this.ausenciasInstance.updateAusenciaResto(ausencia);
+      const respAusencia = await this.ausenciasInstance.updateAusenciaResto(
+        ausencia,
+      );
       if (respAusencia) {
         // Registrar auditoría
         await this.loggerService.create({
@@ -206,7 +209,6 @@ export class AusenciasController {
     }
   }
 
-
   @UseGuards(AuthGuard)
   @Get("getAusenciasTrabajador")
   getAusenciasTrabajador(
@@ -222,12 +224,10 @@ export class AusenciasController {
     );
   }
 
-  @UseGuards(SchedulerGuard)
+  // @UseGuards(SchedulerGuard)
   @Get("sincronizarAusenciasOmne")
   async sincronizarAusenciasOmne() {
     await this.ausenciasInstance.sincronizarAusenciasOmne();
     return { message: "Sincronización completada correctamente" };
   }
-
-  
 }
