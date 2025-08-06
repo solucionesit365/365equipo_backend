@@ -16,8 +16,11 @@
     "titleBar.activeBackground": "#5472e8",
     "titleBar.activeForeground": "#e7e7e7",
     "titleBar.inactiveBackground": "#5472e899",
-    "titleBar.inactiveForeground": "#e7e7e799"
+    "titleBar.inactiveForeground": "#e7e7e799",
+    "tab.activeBorder": "#aeeb93", // Color active tab
+    "tab.unfocusedActiveBorder": "#000000" // Color active tab
   },
+
   "peacock.color": "#5472e8",
   "files.eol": "\r\n",
   "postman.settings.dotenv-detection-notification-visibility": false
