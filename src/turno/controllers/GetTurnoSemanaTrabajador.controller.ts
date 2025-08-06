@@ -2,6 +2,7 @@ import { Controller, Get, Query, UseGuards } from "@nestjs/common";
 import { AuthGuard } from "../../guards/auth.guard";
 import { ITurnoRepository } from "../repository/interfaces/turno.repository.interface";
 import { DateTime } from "luxon";
+import { GetTurnoSemanaTrabajadorDto } from "./dto";
 
 @Controller("turnos")
 export class GetTurnoSemanaTrabajadorController {
@@ -9,17 +10,19 @@ export class GetTurnoSemanaTrabajadorController {
 
   @UseGuards(AuthGuard)
   @Get("cuadranteSemanaTrabajador")
-  async getCuadranteSemanaTrabajador(@Query() req: { idTrabajador: number; fecha: string }) {
+  async getCuadranteSemanaTrabajador(
+    @Query() req: GetTurnoSemanaTrabajadorDto,
+  ) {
     try {
       const fecha = DateTime.fromISO(req.fecha);
       const turnos = await this.turnoRepository.getTurnosPorTrabajador(
         req.idTrabajador,
-        fecha
+        fecha,
       );
-      
+
       return {
         ok: true,
-        data: turnos
+        data: turnos,
       };
     } catch (error) {
       console.log(error);
