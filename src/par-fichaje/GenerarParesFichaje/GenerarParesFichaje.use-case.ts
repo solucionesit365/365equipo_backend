@@ -1,16 +1,22 @@
 import { Injectable } from "@nestjs/common";
 import { IGenerarParesFichajeUseCase } from "./IGenerarParesFichaje.use-case";
-import { ParFichaje } from "@prisma/client";
 import { DateTime } from "luxon";
 import { IFichajeRepository } from "../../fichajes-bc/repository/IFichaje.repository";
 import { FichajeDto } from "../../fichajes-bc/fichajes.interface";
 import { ObjectId, WithId } from "mongodb";
 
+// Interfaz para los pares de fichaje generados
+export interface ParFichajeGenerado {
+  entrada: FichajeDto;
+  salida: FichajeDto;
+  cuadrante?: any; // TODO: definir tipo correcto cuando se implemente
+}
+
 @Injectable()
 export class GenerarParesFichajeUseCase implements IGenerarParesFichajeUseCase {
   constructor(private readonly fichajeRepository: IFichajeRepository) {}
 
-  async execute(): Promise<ParFichaje[]> {
+  async execute(): Promise<ParFichajeGenerado[]> {
     // 1. Obtener hoy al inicio del día o más antiguos (máximo 2 días)
     const hoy = DateTime.now().startOf("day");
     const haceDosDias = hoy.minus({ days: 2 });
@@ -20,93 +26,86 @@ export class GenerarParesFichajeUseCase implements IGenerarParesFichajeUseCase {
       haceDosDias,
     );
 
-    // 2. Recorrer en busca de los pares.
+    // 2. Agrupar fichajes por trabajador
+    const fichajesPorTrabajador = this.agruparPorTrabajador(fichajesSimples);
+    
+    // 3. Generar pares para cada trabajador
+    const todosLosPares: ParFichajeGenerado[] = [];
+    
+    for (const [idTrabajador, fichajes] of fichajesPorTrabajador) {
+      const pares = this.crearParesDeFichajes(fichajes);
+      todosLosPares.push(...pares);
+    }
+    
+    return todosLosPares;
   }
 
-  private async obtenerParesTrabajador(fichajesSimples: WithId<FichajeDto>[]) {
-    this.ordenarPorHora(fichajesSimples);
+  private agruparPorTrabajador(fichajes: FichajeDto[]): Map<number, FichajeDto[]> {
+    const grupos = new Map<number, FichajeDto[]>();
+    
+    for (const fichaje of fichajes) {
+      const id = fichaje.idTrabajador || fichaje.idExterno;
+      if (!grupos.has(id)) {
+        grupos.set(id, []);
+      }
+      grupos.get(id)!.push(fichaje);
+    }
+    
+    // Ordenar cada grupo por hora cronológicamente
+    for (const [id, fichajesTrabajador] of grupos) {
+      fichajesTrabajador.sort((a, b) => a.hora.getTime() - b.hora.getTime());
+    }
+    
+    return grupos;
+  }
 
-    const pares: ParFichaje[] = [];
-
-    for (let i = 0; i < fichajesSimples.length; i += 1) {
-      if (fichajesSimples[i].tipo === "ENTRADA") {
-        const dataSalidaEncontrada = await this.buscarSalida(
-          DateTime.fromJSDate(fichajesSimples[i].hora),
-          fichajesSimples,
-        );
-
-        if (dataSalidaEncontrada) {
-          pares.push({
-            entrada: fichajesSimples[i],
-            salida: dataSalidaEncontrada,
-            cuadrante: await this.getTurnoDelDiaUseCase.execute(
-              fichajesSimples[i].idTrabajador,
-              DateTime.fromJSDate(fichajesSimples[i].hora),
-            ),
-          });
-        } else {
-          const cuadrante = await this.getTurnoDelDiaUseCase.execute(
-            fichajesSimples[i].idTrabajador,
-            DateTime.fromJSDate(fichajesSimples[i].hora),
-          );
-
-          if (
-            cuadrante &&
-            cuadrante.final &&
-            DateTime.fromJSDate(cuadrante.final).isValid
-          ) {
-            pares.push({
-              entrada: fichajesSimples[i],
-              salida: {
-                _id: new ObjectId(),
-                hora: DateTime.fromJSDate(cuadrante.final).toJSDate(),
-                idTrabajador: fichajesSimples[i].idTrabajador,
-                tipo: "SALIDA",
-                validado: false,
-                uid: fichajesSimples[i].uid,
-                nombre: fichajesSimples[i].nombre,
-                dni: fichajesSimples[i].dni,
-                enviado: false,
-                idExterno: fichajesSimples[i].idTrabajador,
-                salidaAutomatica: true,
-              },
-              cuadrante: cuadrante,
-            });
+  private crearParesDeFichajes(fichajes: FichajeDto[]): ParFichajeGenerado[] {
+    const pares: ParFichajeGenerado[] = [];
+    let i = 0;
+    
+    while (i < fichajes.length) {
+      const fichajeActual = fichajes[i];
+      
+      // Si encontramos una entrada, buscar su salida correspondiente
+      if (fichajeActual.tipo === "ENTRADA") {
+        let salidaEncontrada: FichajeDto | null = null;
+        let j = i + 1;
+        
+        // Buscar la siguiente salida (puede ser en el mismo día o días posteriores)
+        while (j < fichajes.length) {
+          if (fichajes[j].tipo === "SALIDA") {
+            const horaEntrada = DateTime.fromJSDate(fichajeActual.hora);
+            const horaSalida = DateTime.fromJSDate(fichajes[j].hora);
+            
+            // Verificar que la salida sea posterior a la entrada
+            if (horaSalida > horaEntrada) {
+              // Limitar a un máximo de 24 horas entre entrada y salida
+              const diferencia = horaSalida.diff(horaEntrada, 'hours').hours;
+              if (diferencia <= 24) {
+                salidaEncontrada = fichajes[j];
+                // Marcar la salida como usada removiéndola del array
+                fichajes.splice(j, 1);
+                break;
+              }
+            }
           }
+          j++;
         }
+        
+        // Si encontramos una salida válida, crear el par
+        if (salidaEncontrada) {
+          pares.push({
+            entrada: fichajeActual,
+            salida: salidaEncontrada,
+            // cuadrante se puede agregar más adelante si es necesario
+          });
+        }
+        // Si no hay salida, la entrada queda huérfana (podrías manejar esto más adelante)
       }
+      
+      i++;
     }
+    
     return pares;
-  }
-
-  private ordenarPorHora(arrayFichajes: WithId<FichajeDto>[]) {
-    return arrayFichajes.sort((a, b) => {
-      if (a.hora < b.hora) return -1;
-      if (a.hora > b.hora) return 1;
-      return 0;
-    });
-  }
-
-  /* De momento comprobará la salida en el mismo día. Más adelante se buscará según el cuadrante. */
-  private async buscarSalida(
-    horaEntrada: DateTime,
-    subFichajesSimples: WithId<FichajeDto>[],
-  ) {
-    for (let i = 0; i < subFichajesSimples.length; i += 1) {
-      if (
-        subFichajesSimples[i].tipo === "SALIDA" &&
-        DateTime.fromJSDate(subFichajesSimples[i].hora) > horaEntrada
-      ) {
-        const horaSalida = DateTime.fromJSDate(subFichajesSimples[i].hora);
-        if (
-          horaEntrada.year === horaSalida.year &&
-          horaEntrada.month === horaSalida.month &&
-          horaEntrada.day === horaSalida.day
-        ) {
-          return subFichajesSimples[i];
-        }
-      }
-    }
-    return null;
   }
 }

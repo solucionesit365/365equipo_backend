@@ -22,7 +22,7 @@ export interface FichajeDto {
 }
 
 export interface ParFichaje {
-  entrada: WithId<FichajeDto>;
-  salida: WithId<FichajeDto>;
+  entrada: FichajeDto;
+  salida: FichajeDto;
   cuadrante: Turno;
 }
