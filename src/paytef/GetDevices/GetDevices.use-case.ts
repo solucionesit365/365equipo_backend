@@ -14,8 +14,8 @@ export class GetDevicesUseCase implements IGetDevicesUseCase {
         {
           authentication: {
             company: "4066",
-            username: "5saKcwqu5yrnVTB3FIOD",
-            password: "7rRbStqS4rxAjruhc3S",
+            username: process.env.PAYTEF_USERNAME,
+            password: process.env.PAYTEF_PASSWORD,
           },
         },
       );
