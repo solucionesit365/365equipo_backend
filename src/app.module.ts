@@ -71,7 +71,8 @@ import { MacroModule } from "./macro/macro.module";
 import { AusenciaModule } from "./ausencia/ausencia.module";
 import { FaqModule } from "./faq/faq.module";
 import { SupervisorTiendaModule } from "./supervisor-tienda/supervisor-tienda.module";
-import { SubordinadoModule } from './subordinado/subordinado.module';
+import { SubordinadoModule } from "./subordinado/subordinado.module";
+import { PaytefModule } from "./paytef/paytef.module";
 
 @Module({
   imports: [
@@ -148,6 +149,7 @@ import { SubordinadoModule } from './subordinado/subordinado.module';
     FaqModule,
     SupervisorTiendaModule,
     SubordinadoModule,
+    PaytefModule,
   ],
   controllers: [AppController, KpiTiendasController],
 })
