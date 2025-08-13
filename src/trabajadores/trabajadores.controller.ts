@@ -28,6 +28,7 @@ import {
 
 import { RoleGuard } from "../guards/role.guard";
 import { LoggerService } from "src/logger/logger.service";
+import { MbctokenService } from "src/bussinesCentral/services/mbctoken/mbctoken.service";
 
 // Función auxiliar para dividir arrays en chunks pequeños
 function chunkArray<T>(arr: T[], size: number): T[][] {
@@ -41,6 +42,7 @@ export class TrabajadoresController {
   constructor(
     private readonly trabajadorInstance: TrabajadorService,
     private readonly loggerService: LoggerService,
+    private readonly mbcTokenService: MbctokenService,
   ) {}
 
   @UseGuards(AuthGuard)
@@ -436,8 +438,9 @@ export class TrabajadoresController {
       }
 
       // Buscar trabajador por código de empleado (ID)
-      const trabajador =
-        await this.trabajadorInstance.getTrabajadorByCodigo(codigoEmpleado);
+      const trabajador = await this.trabajadorInstance.getTrabajadorByCodigo(
+        codigoEmpleado,
+      );
 
       if (!trabajador) {
         return { ok: false, message: "Código de empleado inválido" };
@@ -498,5 +501,15 @@ export class TrabajadoresController {
     );
 
     return resultado;
+  }
+
+  @Get("token")
+  async getToken() {
+    const token = await this.mbcTokenService.getToken(
+      process.env.MBC_TOKEN_APPHITBC,
+      process.env.MBC_TOKEN_APPHITBC_CLIENT_SECRET,
+    );
+    console.log("Token generado:", token);
+    return { token };
   }
 }
