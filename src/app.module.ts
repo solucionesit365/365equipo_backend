@@ -73,6 +73,8 @@ import { FaqModule } from "./faq/faq.module";
 import { SupervisorTiendaModule } from "./supervisor-tienda/supervisor-tienda.module";
 import { SubordinadoModule } from "./subordinado/subordinado.module";
 import { PaytefModule } from "./paytef/paytef.module";
+import { PushNotificationModule } from './push-notification/push-notification.module';
+import { NotificationDeviceModule } from './notification-device/notification-device.module';
 
 @Module({
   imports: [
@@ -150,6 +152,8 @@ import { PaytefModule } from "./paytef/paytef.module";
     SupervisorTiendaModule,
     SubordinadoModule,
     PaytefModule,
+    PushNotificationModule,
+    NotificationDeviceModule,
   ],
   controllers: [AppController, KpiTiendasController],
 })
