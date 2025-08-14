@@ -71,7 +71,10 @@ import { MacroModule } from "./macro/macro.module";
 import { AusenciaModule } from "./ausencia/ausencia.module";
 import { FaqModule } from "./faq/faq.module";
 import { SupervisorTiendaModule } from "./supervisor-tienda/supervisor-tienda.module";
-import { SubordinadoModule } from './subordinado/subordinado.module';
+import { SubordinadoModule } from "./subordinado/subordinado.module";
+import { ApiVentaModule } from "./API/api-venta/api-venta.module";
+import { ApiEmpresaOrgModule } from "./API/api-empresa-org/api-empresa-org.module";
+import { ApiIncidenciaModule } from "./API/api-incidencia/api-incidencia.module";
 
 @Module({
   imports: [
@@ -148,6 +151,9 @@ import { SubordinadoModule } from './subordinado/subordinado.module';
     FaqModule,
     SupervisorTiendaModule,
     SubordinadoModule,
+    ApiVentaModule,
+    ApiEmpresaOrgModule,
+    ApiIncidenciaModule,
   ],
   controllers: [AppController, KpiTiendasController],
 })
