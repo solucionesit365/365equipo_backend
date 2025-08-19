@@ -270,7 +270,6 @@ export class CalculoNominasService {
       });
     }
 
-    console.log("Resultados PDIS:", resultadosPDIS);
     return resultadosPDIS;
   }
 
