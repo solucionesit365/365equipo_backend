@@ -6,7 +6,7 @@ import { AuthGuard } from "../guards/auth.guard";
 export class CalculoNominasController {
   constructor(private readonly calculoNominasService: CalculoNominasService) {}
 
-  @UseGuards(AuthGuard)
+  // @UseGuards(AuthGuard)
   @Get("pdis")
   async getPDISDependientas() {
     return this.calculoNominasService.calcularPDIS();
@@ -26,5 +26,10 @@ export class CalculoNominasController {
   @Get("hcompl")
   async calcularHCOMPL() {
     return this.calculoNominasService.calcularHCOMPL();
+  }
+
+  @Get("all")
+  async getCalculos() {
+    return this.calculoNominasService.calcularTodo();
   }
 }
