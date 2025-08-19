@@ -73,6 +73,7 @@ import { FaqModule } from "./faq/faq.module";
 import { SupervisorTiendaModule } from "./supervisor-tienda/supervisor-tienda.module";
 import { SubordinadoModule } from "./subordinado/subordinado.module";
 import { PaytefModule } from "./paytef/paytef.module";
+import { CalculoNominasModule } from "./calculo-nominas/calculo-nominas.module";
 
 @Module({
   imports: [
@@ -150,6 +151,7 @@ import { PaytefModule } from "./paytef/paytef.module";
     SupervisorTiendaModule,
     SubordinadoModule,
     PaytefModule,
+    CalculoNominasModule,
   ],
   controllers: [AppController, KpiTiendasController],
 })
