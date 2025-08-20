@@ -266,7 +266,7 @@ export class CalculoNominasService {
         idSql: dependienta.id,
         numPerceptor: dependienta.nPerceptor,
         empresa: dependienta.empresa.nombre,
-        pdisp: totalHorasFestivo,
+        pdisp: totalHorasFestivo.toFixed(2),
       });
     }
 
@@ -333,10 +333,14 @@ export class CalculoNominasService {
           idSql: trabajador.id,
           numPerceptor: trabajador.nPerceptor,
           empresa: trabajador.empresa.nombre,
-          totalHorasNotificadas: total,
+          totalHorasNotificadas: parseFloat(total.toFixed(2)),
         });
       } else {
         result.totalHorasNotificadas += total;
+        // Redondear el total acumulado a dos decimales
+        result.totalHorasNotificadas = parseFloat(
+          result.totalHorasNotificadas.toFixed(2),
+        );
       }
     }
 
@@ -439,7 +443,7 @@ export class CalculoNominasService {
   //     return resultadosPDOM;
   //   }
 
-  //   Con entrada y salida
+  //   Con entrada y salida Pluses Domingo
   async calcularPDOM() {
     const trabajadores = await this.schTrabajadores.getTrabajadores();
     const festivos = await this.schCalendario.getfestivos();
@@ -555,6 +559,7 @@ export class CalculoNominasService {
     return resultadosPDOM;
   }
 
+  // HCOMPL
   async calcularHCOMPL() {
     const trabajadores = await this.schTrabajadores.getTrabajadores();
     const notificaciones =
@@ -614,22 +619,160 @@ export class CalculoNominasService {
           idSql: trabajador.id,
           numPerceptor: trabajador.nPerceptor,
           empresa: trabajador.empresa.nombre,
-          totalHorasNotificadas: total,
+          totalHorasNotificadas: parseFloat(total.toFixed(2)),
         });
       } else {
         resultados.get(trabajador.dni)!.totalHorasNotificadas += total;
+
+        // Redondear el total acumulado a dos decimales
+        resultados.get(trabajador.dni)!.totalHorasNotificadas = parseFloat(
+          resultados.get(trabajador.dni)!.totalHorasNotificadas.toFixed(2),
+        );
       }
     }
 
     return Array.from(resultados.values());
   }
+  // PFEST
+  async calcularPFEST() {
+    const trabajadores = await this.schTrabajadores.getTrabajadores();
+    const festivos = await this.schCalendario.getfestivos();
+
+    // 🎯 Filtrar los festivos de categoría "Fiesta"
+    const festivosFiesta = festivos.filter((f) => f.categoria === "Fiesta");
+
+    // 🎯 Filtrar trabajadores con contrato anterior a 01/07/2023
+    const fechaLimite = DateTime.fromISO("2023-07-01"); // Fecha límite: 01/07/2023
+    const trabajadoresConContratoAnterior = trabajadores.filter((t) => {
+      // Verificamos si el trabajador tiene un contrato y que `inicioContrato` sea válido
+      if (
+        t.contratos &&
+        t.contratos.length > 0 &&
+        t.contratos[0]?.inicioContrato
+      ) {
+        const fechaInicioContrato = DateTime.fromJSDate(
+          t.contratos[0].inicioContrato,
+        ).toJSDate(); // Convertir a un objeto `Date`
+
+        // Comparar con la fecha límite usando los operadores de JavaScript
+        return fechaInicioContrato < fechaLimite.toJSDate(); // Compara como Date
+      }
+
+      return false;
+    });
+
+    const resultadosPFEST = [];
+
+    // 🚀 Lanzar fichajes en paralelo
+    const fichajesPorDependienta = await Promise.all(
+      trabajadoresConContratoAnterior.map(async (trabajador) => {
+        // Filtrar los festivos que se apliquen a la tienda del trabajador (si es necesario)
+        const festivosAplicables = festivos.filter(
+          (f: any) =>
+            f.tienda.includes(trabajador.tienda) || f.tienda.includes(-1),
+        );
+
+        // Definir las fechas de inicio y fin de los festivos aplicables
+        const fechaInicio = DateTime.fromFormat(
+          typeof festivosAplicables[0]?.fechaInicio === "string"
+            ? festivosAplicables[0]?.fechaInicio
+            : DateTime.fromJSDate(festivosAplicables[0]?.fechaInicio).toFormat(
+                "dd/MM/yyyy",
+              ),
+          "dd/MM/yyyy",
+        ).startOf("day");
+        const fechaFin = DateTime.fromFormat(
+          typeof festivosAplicables[0]?.fechaFinal === "string"
+            ? festivosAplicables[0]?.fechaFinal
+            : DateTime.fromJSDate(festivosAplicables[0]?.fechaFinal).toFormat(
+                "dd/MM/yyyy",
+              ),
+          "dd/MM/yyyy",
+        ).endOf("day");
+
+        // Obtener los fichajes del trabajador en el rango de fechas
+        const fichajes = await this.schFichajes.getFichajesByUid(
+          trabajador.idApp,
+          fechaInicio.toJSDate(),
+          fechaFin.toJSDate(),
+        );
+        return { trabajador, fichajes };
+      }),
+    );
+
+    // 📅 Procesar los fichajes para calcular las horas trabajadas en festivos de categoría "Fiesta"
+    for (const { trabajador, fichajes } of fichajesPorDependienta) {
+      let totalHorasFestivo = 0;
+
+      // 📌 Calcular las horas trabajadas en los festivos de categoría "Fiesta"
+      for (let i = 0; i < fichajes.length - 1; i++) {
+        const entrada = fichajes[i];
+        const salida = fichajes[i + 1];
+
+        if (entrada.tipo !== "ENTRADA" || salida.tipo !== "SALIDA") continue;
+
+        const horaEntrada = DateTime.fromJSDate(entrada.hora);
+        const horaSalida = DateTime.fromJSDate(salida.hora);
+
+        // Verificar si la fecha del fichaje está dentro de un festivo de categoría "Fiesta"
+        const esFestivo = festivosFiesta.some((festivo) => {
+          // Verificar si las fechas son objetos Date y convertirlas a cadenas "dd/MM/yyyy"
+          const fechaInicioFestivo = DateTime.fromFormat(
+            festivo.fechaInicio instanceof Date
+              ? festivo.fechaInicio.toLocaleDateString("en-GB")
+              : festivo.fechaInicio,
+            "dd/MM/yyyy",
+          );
+          const fechaFinFestivo = DateTime.fromFormat(
+            festivo.fechaFinal instanceof Date
+              ? festivo.fechaFinal.toLocaleDateString("en-GB")
+              : festivo.fechaFinal,
+            "dd/MM/yyyy",
+          );
+
+          // Verificar si la entrada o salida están dentro del rango de las fechas festivas
+          return (
+            (horaEntrada >= fechaInicioFestivo &&
+              horaEntrada <= fechaFinFestivo) ||
+            (horaSalida >= fechaInicioFestivo &&
+              horaSalida <= fechaFinFestivo) ||
+            (horaEntrada < fechaInicioFestivo && horaSalida > fechaFinFestivo) // En caso de que el fichaje cruce el festivo
+          );
+        });
+
+        if (esFestivo) {
+          // Si el fichaje está en un festivo de categoría "Fiesta", sumar las horas trabajadas
+          const horasTrabajadas = horaSalida.diff(horaEntrada, "hours").hours;
+          totalHorasFestivo += horasTrabajadas;
+        }
+
+        i++; // saltar al siguiente par
+      }
+
+      // 📌 Redondear el total de horas trabajadas a entero
+      totalHorasFestivo = Math.floor(totalHorasFestivo); // Convertir a entero
+
+      // Agregar el trabajador con el total de horas trabajadas en festivos
+      resultadosPFEST.push({
+        nombre: trabajador.nombreApellidos,
+        dni: trabajador.dni,
+        idSql: trabajador.id,
+        numPerceptor: trabajador.nPerceptor,
+        empresa: trabajador.empresa.nombre,
+        pfest: totalHorasFestivo, // Aquí se devuelve el total como entero
+      });
+    }
+
+    return resultadosPFEST;
+  }
 
   async calcularTodo() {
-    const [pdis, pprod, pdom, hcompl] = await Promise.all([
+    const [pdis, pprod, pdom, hcompl, pfest] = await Promise.all([
       this.calcularPDIS(),
       this.calcularPPROD(),
       this.calcularPDOM(),
       this.calcularHCOMPL(),
+      this.calcularPFEST(),
     ]);
 
     return {
@@ -637,6 +780,7 @@ export class CalculoNominasService {
       pprod,
       pdom,
       hcompl,
+      pfest,
     };
   }
 }

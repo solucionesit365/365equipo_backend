@@ -27,6 +27,11 @@ export class CalculoNominasController {
   async calcularHCOMPL() {
     return this.calculoNominasService.calcularHCOMPL();
   }
+  @UseGuards(AuthGuard)
+  @Get("pfest")
+  async calcularPFEST() {
+    return this.calculoNominasService.calcularPFEST();
+  }
 
   @Get("all")
   async getCalculos() {
