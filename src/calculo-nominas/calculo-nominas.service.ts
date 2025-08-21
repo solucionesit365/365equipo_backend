@@ -97,76 +97,42 @@ export class CalculoNominasService {
     const trabajadores = await this.schTrabajadores.getTrabajadores();
     const festivos = await this.schCalendario.getfestivos();
 
-    // 🎯 Detectar el periodo de pluses actual
-    // const hoy = DateTime.now();
-    // const festivoPlusActual = festivos.find((f: any) => {
-    //   if (f.categoria !== "General") return false;
-    //   const titulo = (f.titulo || "").toLowerCase();
-    //   const descripcion = (f.descripcion || "").toLowerCase();
-    //   const inicio = DateTime.fromFormat(f.fechaInicio, "dd/MM/yyyy");
-    //   const fin = DateTime.fromFormat(f.fechaFinal, "dd/MM/yyyy");
-
-    //   return (
-    //     (titulo.includes("plus") || descripcion.includes("plus")) &&
-    //     hoy >= inicio.startOf("day") &&
-    //     hoy <= fin.endOf("day")
-    //   );
-    // });
-
-    // if (!festivoPlusActual) {
-    //   throw new Error("No se encontró un periodo de pluses vigente.");
-    // }
-
-    // const fechaInicio = DateTime.fromFormat(
-    //   typeof festivoPlusActual.fechaInicio === "string"
-    //     ? festivoPlusActual.fechaInicio
-    //     : DateTime.fromJSDate(festivoPlusActual.fechaInicio).toFormat(
-    //         "dd/MM/yyyy",
-    //       ),
-    //   "dd/MM/yyyy",
-    // ).startOf("day");
-    // const fechaFin = DateTime.fromFormat(
-    //   typeof festivoPlusActual.fechaFinal === "string"
-    //     ? festivoPlusActual.fechaFinal
-    //     : DateTime.fromJSDate(festivoPlusActual.fechaFinal).toFormat(
-    //         "dd/MM/yyyy",
-    //       ),
-    //   "dd/MM/yyyy",
-    // ).endOf("day");
+    const zona = "Europe/Madrid"; // Zona horaria consistente
+    const hoy = DateTime.now().setZone(zona);
 
     // 🎯 Detectar el periodo de pluses anterior
-    const hoy = DateTime.now();
-
     const plusesPasados = festivos.filter((f: any) => {
       if (f.categoria !== "General") return false;
       const titulo = (f.titulo || "").toLowerCase();
       const descripcion = (f.descripcion || "").toLowerCase();
-      const fin = DateTime.fromFormat(f.fechaFinal, "dd/MM/yyyy");
-
+      const fin = DateTime.fromFormat(f.fechaFinal, "dd/MM/yyyy", {
+        zone: zona,
+      });
       return (
         (titulo.includes("plus") || descripcion.includes("plus")) && fin < hoy
       );
     });
 
-    // Ordenar por fecha final descendente y tomar el más reciente
     const festivoPlusAnterior = plusesPasados.sort((a, b) => {
-      const bFechaFinalStr =
+      const bFechaFinal = DateTime.fromFormat(
         typeof b.fechaFinal === "string"
           ? b.fechaFinal
-          : DateTime.fromJSDate(b.fechaFinal).toFormat("dd/MM/yyyy");
-      const aFechaFinalStr =
+          : DateTime.fromJSDate(b.fechaFinal).toFormat("dd/MM/yyyy"),
+        "dd/MM/yyyy",
+        { zone: zona },
+      );
+      const aFechaFinal = DateTime.fromFormat(
         typeof a.fechaFinal === "string"
           ? a.fechaFinal
-          : DateTime.fromJSDate(a.fechaFinal).toFormat("dd/MM/yyyy");
-      return (
-        DateTime.fromFormat(bFechaFinalStr, "dd/MM/yyyy").toMillis() -
-        DateTime.fromFormat(aFechaFinalStr, "dd/MM/yyyy").toMillis()
+          : DateTime.fromJSDate(a.fechaFinal).toFormat("dd/MM/yyyy"),
+        "dd/MM/yyyy",
+        { zone: zona },
       );
+      return bFechaFinal.toMillis() - aFechaFinal.toMillis();
     })[0];
 
-    if (!festivoPlusAnterior) {
+    if (!festivoPlusAnterior)
       throw new Error("No se encontró un periodo anterior de pluses.");
-    }
 
     const fechaInicio = DateTime.fromFormat(
       typeof festivoPlusAnterior.fechaInicio === "string"
@@ -175,7 +141,9 @@ export class CalculoNominasService {
             "dd/MM/yyyy",
           ),
       "dd/MM/yyyy",
+      { zone: zona },
     ).startOf("day");
+
     const fechaFin = DateTime.fromFormat(
       typeof festivoPlusAnterior.fechaFinal === "string"
         ? festivoPlusAnterior.fechaFinal
@@ -183,12 +151,10 @@ export class CalculoNominasService {
             "dd/MM/yyyy",
           ),
       "dd/MM/yyyy",
+      { zone: zona },
     ).endOf("day");
 
-    console.log(fechaInicio.toJSDate());
-    console.log(fechaFin.toJSDate());
-
-    // 🔎 Filtrar dependientas
+    // 🎯 Filtrar dependientas de empresas específicas
     const dependientas = trabajadores.filter(
       (trabajador) =>
         trabajador.roles?.some(
@@ -200,37 +166,54 @@ export class CalculoNominasService {
     );
 
     const resultadosPDIS = [];
-    // 🕓 Obtener fichajes del periodo de pluses
-    const fichajesPorUid = await Promise.all(
-      dependientas.map((d) =>
-        this.schFichajes
-          .getFichajesByUid(
+
+    // 🕓 Obtener fichajes por dependienta
+    const fichajesPorDependienta = await Promise.all(
+      dependientas.map(async (d) => {
+        let fichajes: any[] = [];
+
+        if (d.idApp && d.idApp !== "NO_TIENE_APP") {
+          // 🔑 Buscar por UID
+          fichajes = await this.schFichajes.getFichajesByUid(
             d.idApp,
             fechaInicio.toJSDate(),
             fechaFin.toJSDate(),
-          )
-          .then((f) => ({ dependienta: d, fichajes: f })),
-      ),
+          );
+        } else {
+          // 🔑 Buscar por idSql (idExterno en los fichajes)
+          fichajes = await this.schFichajes.getFichajes(d.id);
+          // Filtrar por rango de fechas, porque getFichajes no recibe fechas
+          fichajes = fichajes.filter(
+            (f) =>
+              f.hora >= fechaInicio.toJSDate() && f.hora <= fechaFin.toJSDate(),
+          );
+        }
+
+        return { dependienta: d, fichajes };
+      }),
     );
 
-    for (const { dependienta, fichajes } of fichajesPorUid) {
-      const tiendaId = dependienta.tienda;
+    for (const { dependienta, fichajes } of fichajesPorDependienta) {
+      const tiendaId = Number(dependienta.tienda?.id); // 🔑 aseguramos número
 
-      // 🏪 Filtrar festivos aplicables a la tienda o globales
-      const festivosAplicables = festivos.filter(
-        (f: any) =>
-          Array.isArray(f.tienda) &&
-          (f.tienda.includes(tiendaId) || f.tienda.includes(-1)),
-      );
-
-      // 📅 Convertir festivos a rangos
-      const rangosFestivos = festivosAplicables.map((f: any) => ({
-        inicio: DateTime.fromFormat(f.fechaInicio, "dd/MM/yyyy").startOf("day"),
-        fin: DateTime.fromFormat(f.fechaFinal, "dd/MM/yyyy").endOf("day"),
-      }));
+      // 🎯 Festivos aplicables a la tienda de categoría "Fiesta"
+      const rangosFestivos = festivos
+        .filter(
+          (f: any) =>
+            f.categoria === "Fiesta" &&
+            (f.tienda?.some((t: any) => Number(t) === tiendaId) ||
+              f.tienda?.some((t: any) => Number(t) === -1)), // 🔑 aplica a todas las tiendas
+        )
+        .map((f: any) => ({
+          inicio: DateTime.fromFormat(f.fechaInicio, "dd/MM/yyyy", {
+            zone: zona,
+          }).startOf("day"),
+          fin: DateTime.fromFormat(f.fechaFinal, "dd/MM/yyyy", {
+            zone: zona,
+          }).endOf("day"),
+        }));
 
       const fichajesOrdenados = this.schFichajes.ordenarPorHora(fichajes);
-
       let totalHorasFestivo = 0;
 
       for (let i = 0; i < fichajesOrdenados.length - 1; i++) {
@@ -239,20 +222,17 @@ export class CalculoNominasService {
 
         if (entrada.tipo !== "ENTRADA" || salida.tipo !== "SALIDA") continue;
 
-        const fechaEntrada = DateTime.fromJSDate(entrada.hora);
+        const fechaEntrada = DateTime.fromJSDate(entrada.hora).setZone(zona);
 
-        // ✅ Verificar si el fichaje es en un día festivo dentro del periodo de pluses
-        const esFestivoDentroDePluses = rangosFestivos.some(
-          (rango) =>
-            fechaEntrada >= rango.inicio &&
-            fechaEntrada <= rango.fin &&
-            fechaEntrada >= fechaInicio &&
-            fechaEntrada <= fechaFin,
+        const dentroRangoPluses =
+          fechaEntrada >= fechaInicio && fechaEntrada <= fechaFin;
+        const esFestivo = rangosFestivos.some(
+          (rango) => fechaEntrada >= rango.inicio && fechaEntrada <= rango.fin,
         );
 
-        if (esFestivoDentroDePluses) {
-          const horaEntrada = DateTime.fromJSDate(entrada.hora);
-          const horaSalida = DateTime.fromJSDate(salida.hora);
+        if (dentroRangoPluses && esFestivo) {
+          const horaEntrada = DateTime.fromJSDate(entrada.hora).setZone(zona);
+          const horaSalida = DateTime.fromJSDate(salida.hora).setZone(zona);
           const horas = horaSalida.diff(horaEntrada, "hours").hours;
           totalHorasFestivo += horas;
         }
@@ -264,6 +244,8 @@ export class CalculoNominasService {
         nombre: dependienta.nombreApellidos,
         dni: dependienta.dni,
         idSql: dependienta.id,
+        tienda: tiendaId,
+        nombreTienda: dependienta.tienda?.nombre || "No asignada",
         numPerceptor: dependienta.nPerceptor,
         empresa: dependienta.empresa.nombre,
         pdisp: totalHorasFestivo.toFixed(2),
