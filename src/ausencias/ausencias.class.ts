@@ -273,10 +273,33 @@ export class AusenciasService {
           omne.diasIncidencia > 1 ? "s" : ""
         }`;
 
+        const fechaFinalLocal = ausenciaLocal?.fechaFinal
+          ? this.normalizarFecha(ausenciaLocal.fechaFinal)
+          : null;
+
+        const fechaFinalOmne = fechaFinal
+          ? this.normalizarFecha(fechaFinal)
+          : null;
+
+        const fechaRevisionLocal = ausenciaLocal?.fechaRevision
+          ? this.normalizarFecha(ausenciaLocal.fechaRevision)
+          : null;
+
+        const fechaRevisionOmne = fechaRevision
+          ? this.normalizarFecha(fechaRevision)
+          : null;
+
         // Detectamos si el comentario ha cambiado
         const comentarioCambioDetectado = comentarioLocal !== comentarioOmne;
+        const fechaFinalCambioDetectado = fechaFinalLocal !== fechaFinalOmne;
+        const revisionCambioDetectado =
+          fechaRevisionLocal !== fechaRevisionOmne;
 
-        if (comentarioCambioDetectado) {
+        if (
+          comentarioCambioDetectado ||
+          fechaFinalCambioDetectado ||
+          revisionCambioDetectado
+        ) {
           // Si detectamos que el comentario ha cambiado, actualizamos la ausencia
           const ausenciaActualizar = {
             ...ausenciaLocal,
