@@ -3,3 +3,15 @@ export interface ParametrosDTO {
   lastSyncWorkers: Date;
   name: string;
 }
+
+export interface CampañaMedicaDTO {
+  fechaFinalRevision?: Date | null;
+  correoCentroMedico?: string | null;
+  OtroCorreo?: string | null;
+}
+
+export interface ParametroDTO2 {
+  _id?: string;
+  name: string;
+  campañaMedica: CampañaMedicaDTO;
+}
