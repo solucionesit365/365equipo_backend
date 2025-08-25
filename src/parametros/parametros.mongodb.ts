@@ -12,6 +12,14 @@ export class ParametrosDatabase {
     return await parametrosCollection.find({ name: name }).toArray();
   }
 
+  async getParametrosCampaniaMedica() {
+    const db = (await this.mongoDbService.getConexion()).db();
+    const parametrosCollection = db.collection<ParametroDTO2>("parametros");
+    return await parametrosCollection.findOne({
+      name: "configurar_campaña_medica",
+    });
+  }
+
   async updateParametros(name: string, parametros: Partial<ParametrosDTO>) {
     if (parametros?._id) delete parametros._id;
 
@@ -30,9 +38,10 @@ export class ParametrosDatabase {
 
     const db = (await this.mongoDbService.getConexion()).db();
     const parametrosCollection = db.collection<ParametroDTO2>("parametros");
-    const result = await parametrosCollection.updateMany(
+    const result = await parametrosCollection.updateOne(
       { name: name },
       { $set: parametros },
+      { upsert: true },
     );
 
     return result;

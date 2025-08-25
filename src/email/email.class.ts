@@ -363,6 +363,106 @@ export class EmailService {
     }
   }
 
+  generarEmailTemplateRevisionMedica(
+    nombreTrabajador: string,
+    telefono: string,
+    fechaPreferida: string,
+  ): string {
+    return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <style>
+            body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                background-color: #f4f6f9;
+                margin: 0;
+                padding: 0;
+            }
+            .email-container {
+                max-width: 650px;
+                margin: 0 auto;
+                background-color: #ffffff;
+                padding: 25px;
+                border-radius: 10px;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+                border-top: 6px solid #0d6efd;
+            }
+            .email-header {
+                text-align: center;
+                margin-bottom: 20px;
+            }
+            .email-header img {
+                max-width: 180px;
+            }
+            .title {
+                text-align: center;
+                font-size: 22px;
+                font-weight: bold;
+                color: #0d6efd;
+                margin: 15px 0 25px 0;
+            }
+            .email-content {
+                font-size: 16px;
+                line-height: 1.6;
+                color: #333333;
+            }
+            .info-card {
+                background-color: #f9fbfd;
+                padding: 18px;
+                margin-top: 20px;
+                border: 1px solid #e3eaf3;
+                border-radius: 8px;
+            }
+            .info-row {
+                margin-bottom: 12px;
+            }
+            .info-row strong {
+                color: #0d6efd;
+            }
+            .footer {
+                margin-top: 30px;
+                font-size: 13px;
+                color: #555555;
+                text-align: center;
+                border-top: 1px solid #eeeeee;
+                padding-top: 15px;
+            }
+            .footer p {
+                margin: 5px 0;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="email-container">
+            <div class="email-header">
+                <img src="https://365equipo.com/logo365Email.png" alt="365 Obrador Logo">
+            </div>
+            <div class="title">Solicitud de Revisión Médica</div>
+            <div class="email-content">
+                <p>El trabajador <strong>${nombreTrabajador}</strong> ha solicitado una revisión médica.</p>
+                <div class="info-card">
+                    <div class="info-row">
+                        <strong>📞 Teléfono de contacto:</strong> ${telefono}
+                    </div>
+                    <div class="info-row">
+                        <strong>📅 Fecha preferida:</strong> ${fechaPreferida}
+                    </div>
+                </div>
+                <p style="margin-top:20px;">
+                    Por favor, gestionen esta solicitud conforme al protocolo de la campaña de revisiones médicas.
+                </p>
+            </div>
+            <div class="footer">
+                <p>Este correo ha sido generado automáticamente por el sistema de 365 Obrador.</p>
+                <p>Si tiene alguna duda, contacte con el departamento de Prevención</p>
+            </div>
+        </div>
+    </body>
+    </html>
+  `;
+  }
+
   async sendDocumentToEmail(
     pdfBuffer: Buffer,
     toEmail: string,
