@@ -6,7 +6,15 @@ import { User } from "../decorators/get-user.decorator";
 import { UserRecord } from "firebase-admin/auth";
 import { Notificaciones } from "../notificaciones/notificaciones.class";
 import { TrabajadorService } from "src/trabajadores/trabajadores.class";
-
+function tieneDuplicadosInternos(horasExtras: any[]) {
+  const set = new Set();
+  for (const h of horasExtras) {
+    const key = `${h.tienda}|${h.fecha}|${h.horaInicio}|${h.horaFinal}`;
+    if (set.has(key)) return true;
+    set.add(key);
+  }
+  return false;
+}
 @Controller("notificacion-horas-extras")
 export class NotificacionHorasExtrasController {
   constructor(
@@ -19,6 +27,15 @@ export class NotificacionHorasExtrasController {
   @Post("createNotificacionHorasExtras")
   async createNotificacionHorasExtras(@Body() data: TNotificacionHorasExtras) {
     try {
+      // Validar duplicados internos en la solicitud
+      if (tieneDuplicadosInternos(data.horasExtras)) {
+        return {
+          ok: false,
+          message:
+            "La solicitud contiene registros duplicados. No se guardó la notificación.",
+        };
+      }
+
       // Validar duplicados antes de guardar
       const duplicados =
         await this.shNotificacionhorasExtras.validarDuplicadosHorasExtras(
