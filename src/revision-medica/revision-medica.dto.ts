@@ -1,5 +1,7 @@
 export class RevisionMedicaDto {
+  nombreTrabajador: string;
   telefono: string;
-  fechaPreferencia: string;
-  trabajadorId: string;
+  fechaPreferencia: Date;
+  fechaSolicitud: Date;
+  trabajadorId: string | number;
 }

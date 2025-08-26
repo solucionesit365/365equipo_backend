@@ -1,9 +1,11 @@
-import { Controller, Post, Body, UseGuards } from "@nestjs/common";
+import { Controller, Post, Body, UseGuards, Get } from "@nestjs/common";
 import { RevisionMedicaDto } from "./revision-medica.dto";
 import { AuthGuard } from "../guards/auth.guard";
 import { EmailService } from "../email/email.class";
 import { TrabajadorService } from "../trabajadores/trabajadores.class";
 import { ParametrosService } from "src/parametros/parametros.service";
+import { RevisionMedicaDatabase } from "./revision-medica.database";
+import { DateTime } from "luxon";
 
 @Controller("revision-medica")
 export class RevisionMedicaController {
@@ -11,6 +13,7 @@ export class RevisionMedicaController {
     private readonly parametrosDb: ParametrosService,
     private readonly emailService: EmailService,
     private readonly trabajadores: TrabajadorService,
+    private readonly revisionDb: RevisionMedicaDatabase,
   ) {}
 
   @UseGuards(AuthGuard)
@@ -63,7 +66,21 @@ export class RevisionMedicaController {
       html,
       "Solicitud de revisión médica",
     );
+    // ✅ Guardar en Mongo
+    await this.revisionDb.guardarSolicitud({
+      nombreTrabajador: trabajador?.nombreApellidos || "Trabajador",
+      telefono: data.telefono,
+      fechaPreferencia: fechaLegible,
+      fechaSolicitud: DateTime.now().toJSDate(),
+      trabajadorId: Number(data.trabajadorId),
+    });
 
     return { ok: true, message: "Solicitud enviada correctamente." };
+  }
+
+  @UseGuards(AuthGuard)
+  @Get("getSolicitudes")
+  async getSolicitudes() {
+    return this.revisionDb.getSolicitudes();
   }
 }

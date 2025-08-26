@@ -3,10 +3,11 @@ import { RevisionMedicaController } from "./revision-medica.controller";
 import { TrabajadoresModule } from "src/trabajadores/trabajadores.module";
 import { ParametrosModule } from "src/parametros/parametros.module";
 import { EmailModule } from "src/email/email.module";
+import { RevisionMedicaDatabase } from "./revision-medica.database";
 
 @Module({
   imports: [TrabajadoresModule, ParametrosModule, EmailModule],
-  providers: [],
+  providers: [RevisionMedicaDatabase],
   controllers: [RevisionMedicaController],
   exports: [],
 })
