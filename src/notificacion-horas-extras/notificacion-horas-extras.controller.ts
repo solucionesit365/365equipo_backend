@@ -41,7 +41,7 @@ export class NotificacionHorasExtrasController {
         await this.shNotificacionhorasExtras.validarDuplicadosHorasExtras(
           data.dniTrabajador,
           data.horasExtras.map((hora) => ({
-            tienda: String(hora.tienda),
+            tienda: Number(hora.tienda),
             fecha: hora.fecha,
             horaInicio: hora.horaInicio,
             horaFinal: hora.horaFinal,
@@ -301,7 +301,7 @@ export class NotificacionHorasExtrasController {
     body: {
       dniTrabajador: string;
       horasExtras: {
-        tienda: string;
+        tienda: number;
         fecha: string;
         horaInicio: string;
         horaFinal: string;

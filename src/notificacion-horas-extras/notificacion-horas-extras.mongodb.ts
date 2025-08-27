@@ -255,7 +255,7 @@ export class NotificacionHorasExtrasMongoService {
   async buscarCoincidenciasHorasExtras(
     dniTrabajador: string,
     horasExtras: {
-      tienda: string;
+      tienda: number;
       fecha: string;
       horaInicio: string;
       horaFinal: string;
@@ -267,7 +267,7 @@ export class NotificacionHorasExtrasMongoService {
     const condiciones = horasExtras.map((h) => ({
       horasExtras: {
         $elemMatch: {
-          tienda: h.tienda,
+          tienda: Number(h.tienda),
           fecha: h.fecha,
           horaInicio: h.horaInicio,
           horaFinal: h.horaFinal,
