@@ -45,9 +45,10 @@ export class UpdateTrabajadorOrganizacionController {
         },
       });
 
-      const trabajadorActualizado = await this.updateTrabajadorOrganizacionUseCase.execute(
-        updateTrabajadorOrganizacionDto,
-      );
+      const trabajadorActualizado =
+        await this.updateTrabajadorOrganizacionUseCase.execute(
+          updateTrabajadorOrganizacionDto,
+        );
 
       return {
         ok: true,
@@ -56,7 +57,7 @@ export class UpdateTrabajadorOrganizacionController {
       };
     } catch (error) {
       console.error("Error al actualizar organización del trabajador:", error);
-      
+
       await this.loggerService.create({
         action: "Error Actualizar Organización Trabajador",
         name: user.email,
@@ -68,7 +69,8 @@ export class UpdateTrabajadorOrganizacionController {
 
       throw new InternalServerErrorException({
         ok: false,
-        message: "Error interno del servidor al actualizar la organización del trabajador",
+        message:
+          "Error interno del servidor al actualizar la organización del trabajador",
         error: error.message,
       });
     }

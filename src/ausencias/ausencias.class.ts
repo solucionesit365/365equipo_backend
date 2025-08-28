@@ -198,7 +198,7 @@ export class AusenciasService {
       RIESGOEMBA: "REM",
       MENSTRUAC: "BAJA",
       INTERRUMP: "BAJA",
-      "SUSP.EMP.": "BAJA",
+      "SUSP.EMP.": "SANCIÓN",
     };
 
     const ausenciasOmne = await this.schAusencias.getAusenciasBC();
@@ -258,36 +258,107 @@ export class AusenciasService {
         fechaInicio,
       )}-${this.normalizarFecha(fechaFinal)}`;
 
-      if (ausenciasExistentes.has(claveAusencia)) return;
+      // Verificar si la ausencia ya existe en el sistema local usando el Set 'ausenciasExistentes'
+      if (ausenciasExistentes.has(claveAusencia)) {
+        // Si la ausencia ya existe, buscamos la entrada correspondiente en ausenciasLocales
+        const ausenciaLocal = ausenciasLocales.find((a) => {
+          const inicio = this.normalizarFecha(a.fechaInicio);
+          const fin = this.normalizarFecha(a.fechaFinal);
+          return `${a.idUsuario}-${a.tipo}-${inicio}-${fin}` === claveAusencia;
+        });
 
-      // Si la ausencia ya existe, no la insertamos
-      await this.nuevaAusencia(
-        idUsuario,
-        nombre,
-        dni,
-        tipoLocal as TiposAusencia,
-        horasContrato,
-        tienda,
-        fechaInicio,
-        fechaFinal,
-        fechaRevision,
-        `Duración estimada ${omne.diasIncidencia} día${
+        // Comparar el comentario (que refleja los días de la incidencia)
+        const comentarioLocal = ausenciaLocal?.comentario || "";
+        const comentarioOmne = `Duración estimada ${omne.diasIncidencia} día${
           omne.diasIncidencia > 1 ? "s" : ""
-        }`,
-        true,
-        0,
-      );
+        }`;
 
-      console.log(`✅ Ausencia insertada: ${nombre} (${dni})`);
-      console.log(
-        `📌 Ausencia creada: ${nombre} (${dni}) - ${tipoLocal} [Empresa: ${
-          omne.empresaID
-        }] del ${fechaInicio.toISOString().split("T")[0]} al ${
-          fechaFinal
-            ? fechaFinal.toISOString().split("T")[0]
-            : "sin fecha final"
-        } (${omne.diasIncidencia} día${omne.diasIncidencia > 1 ? "s" : ""})`,
-      );
+        const fechaFinalLocal = ausenciaLocal?.fechaFinal
+          ? this.normalizarFecha(ausenciaLocal.fechaFinal)
+          : null;
+
+        const fechaFinalOmne = fechaFinal
+          ? this.normalizarFecha(fechaFinal)
+          : null;
+
+        const fechaRevisionLocal = ausenciaLocal?.fechaRevision
+          ? this.normalizarFecha(ausenciaLocal.fechaRevision)
+          : null;
+
+        const fechaRevisionOmne = fechaRevision
+          ? this.normalizarFecha(fechaRevision)
+          : null;
+
+        // Detectamos si el comentario ha cambiado
+        const comentarioCambioDetectado = comentarioLocal !== comentarioOmne;
+        const fechaFinalCambioDetectado = fechaFinalLocal !== fechaFinalOmne;
+        const revisionCambioDetectado =
+          fechaRevisionLocal !== fechaRevisionOmne;
+
+        if (
+          comentarioCambioDetectado ||
+          fechaFinalCambioDetectado ||
+          revisionCambioDetectado
+        ) {
+          // Si detectamos que el comentario ha cambiado, actualizamos la ausencia
+          const ausenciaActualizar = {
+            ...ausenciaLocal,
+            fechaInicio,
+            fechaFinal,
+            fechaRevision,
+            comentario: comentarioOmne, // Actualizamos el comentario con la duración correcta
+          };
+
+          // Si tiene fecha de revisión, usamos updateAusenciaResto
+          if (fechaRevision) {
+            await this.updateAusenciaResto(ausenciaActualizar); // Actualización con 'fechaRevision'
+          } else {
+            await this.updateAusencia(ausenciaActualizar); // Actualización sin 'fechaRevision'
+          }
+
+          console.log(`✅ Ausencia actualizada: ${nombre} (${dni})`);
+          console.log(
+            `📌 Ausencia actualizada: ${nombre} (${dni}) - ${tipoLocal} [Empresa: ${
+              omne.empresaID
+            }] del ${fechaInicio.toISOString().split("T")[0]} al ${
+              fechaFinal
+                ? fechaFinal.toISOString().split("T")[0]
+                : "sin fecha final"
+            } (${omne.diasIncidencia} día${
+              omne.diasIncidencia > 1 ? "s" : ""
+            })`,
+          );
+        }
+      } else {
+        // Si la ausencia no existe, la insertamos como nueva
+        await this.nuevaAusencia(
+          idUsuario,
+          nombre,
+          dni,
+          tipoLocal as TiposAusencia,
+          horasContrato,
+          tienda,
+          fechaInicio,
+          fechaFinal,
+          fechaRevision,
+          `Duración estimada ${omne.diasIncidencia} día${
+            omne.diasIncidencia > 1 ? "s" : ""
+          }`,
+          true,
+          0,
+        );
+
+        console.log(`✅ Ausencia insertada: ${nombre} (${dni})`);
+        console.log(
+          `📌 Ausencia creada: ${nombre} (${dni}) - ${tipoLocal} [Empresa: ${
+            omne.empresaID
+          }] del ${fechaInicio.toISOString().split("T")[0]} al ${
+            fechaFinal
+              ? fechaFinal.toISOString().split("T")[0]
+              : "sin fecha final"
+          } (${omne.diasIncidencia} día${omne.diasIncidencia > 1 ? "s" : ""})`,
+        );
+      }
     });
 
     // Esperar todas las tareas en paralelo, sin que se interrumpa por errores

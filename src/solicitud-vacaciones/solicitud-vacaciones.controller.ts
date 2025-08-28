@@ -112,7 +112,7 @@ export class SolicitudVacacionesController {
       //enviar notificacion
       //get TokenFCM
       const userToken = await this.notificacionesInstance.getFCMToken(
-        user.idApp,
+        solicitudTrabajador.idApp,
       );
 
       if (userToken) {
@@ -143,7 +143,7 @@ export class SolicitudVacacionesController {
   }
 
   //Mostrar todas las solicitudes de las vacaciones de los trabajadores
-  @UseGuards(AuthGuard)
+  // @UseGuards(AuthGuard)
   @Get("getSolicitudes")
   async getSolicitudes(@Query() { year }) {
     try {
@@ -339,7 +339,6 @@ export class SolicitudVacacionesController {
   @Post("setEstadoSolicitud")
   async updateSolicitudVacacionesEstado(
     @Body() solicitudesVacaciones: SolicitudVacaciones,
-    @User() user: UserRecord,
   ) {
     try {
       if (!solicitudesVacaciones.estado || !solicitudesVacaciones._id)
@@ -369,7 +368,7 @@ export class SolicitudVacacionesController {
           );
 
         const userToken = await this.notificacionesInstance.getFCMToken(
-          user.uid,
+          solicitudTrabajador.idApp,
         );
         // Verificar que el token no sea nulo
         if (userToken && userToken.token) {

@@ -104,7 +104,7 @@ export class NotificacionHorasExtrasClass {
   async validarDuplicadosHorasExtras(
     dniTrabajador: string,
     horasExtras: {
-      tienda: string;
+      tienda: number;
       fecha: string;
       horaInicio: string;
       horaFinal: string;

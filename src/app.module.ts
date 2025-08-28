@@ -1,3 +1,5 @@
+import { InspeccionFichajesController } from "./InspeccionFichajes/inspeccionfichajes.controller";
+import { InspeccionFichajesModule } from "./InspeccionFichajes/inspeccionfichajes.module";
 import { Module } from "@nestjs/common";
 import { AppController } from "./app.controller";
 import { ConfigModule } from "@nestjs/config";
@@ -71,10 +73,14 @@ import { MacroModule } from "./macro/macro.module";
 import { AusenciaModule } from "./ausencia/ausencia.module";
 import { FaqModule } from "./faq/faq.module";
 import { SupervisorTiendaModule } from "./supervisor-tienda/supervisor-tienda.module";
-import { SubordinadoModule } from './subordinado/subordinado.module';
+import { SubordinadoModule } from "./subordinado/subordinado.module";
+import { PaytefModule } from "./paytef/paytef.module";
+import { CalculoNominasModule } from "./calculo-nominas/calculo-nominas.module";
+import { RevisionMedicaModule } from "./revision-medica/revision-medica.module";
 
 @Module({
   imports: [
+    InspeccionFichajesModule,
     ConfigModule.forRoot({
       isGlobal: true,
     }),
@@ -148,7 +154,14 @@ import { SubordinadoModule } from './subordinado/subordinado.module';
     FaqModule,
     SupervisorTiendaModule,
     SubordinadoModule,
+    PaytefModule,
+    CalculoNominasModule,
+    RevisionMedicaModule,
   ],
-  controllers: [AppController, KpiTiendasController],
+  controllers: [
+    InspeccionFichajesController,
+    AppController,
+    KpiTiendasController,
+  ],
 })
 export class AppModule {}
