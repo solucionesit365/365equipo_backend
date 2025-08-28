@@ -539,8 +539,9 @@ export class TrabajadorService {
   }
 
   async getTrabajadoresByTienda(idTienda: number) {
-    const resUser =
-      await this.schTrabajadores.getTrabajadoresByTienda(idTienda);
+    const resUser = await this.schTrabajadores.getTrabajadoresByTienda(
+      idTienda,
+    );
     if (resUser) return resUser;
     throw Error(
       `No se ha podido obtener los trabajadores de la tienda ${idTienda} `,
@@ -628,7 +629,7 @@ export class TrabajadorService {
 
     if (!datosUsuario.contratos || datosUsuario.contratos.length === 0)
       throw Error("Trabajador sin contrato registrado");
-      
+
     if (!DateTime.fromJSDate(datosUsuario.contratos[0]?.inicioContrato).isValid)
       throw Error("Fecha de inicio de contrato incorrecta");
 
