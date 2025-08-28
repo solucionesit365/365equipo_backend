@@ -45,7 +45,7 @@ export class TrabajadoresController {
     private readonly mbcTokenService: MbctokenService,
   ) {}
 
-  @UseGuards(AuthGuard)
+  // @UseGuards(AuthGuard)
   @Get()
   async getTrabajadores() {
     const arrayTrabajadores = await this.trabajadorInstance.getTrabajadores();
@@ -155,7 +155,7 @@ export class TrabajadoresController {
     return await this.trabajadorInstance.getTrabajadorByAppId(user.uid);
   }
 
-  @UseGuards(AuthGuard)
+  // @UseGuards(AuthGuard)
   @Get("getTrabajadoresByTienda")
   async getTrabajadoresByTienda(@Query() { idTienda }) {
     try {

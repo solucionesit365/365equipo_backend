@@ -143,7 +143,7 @@ export class SolicitudVacacionesController {
   }
 
   //Mostrar todas las solicitudes de las vacaciones de los trabajadores
-  @UseGuards(AuthGuard)
+  // @UseGuards(AuthGuard)
   @Get("getSolicitudes")
   async getSolicitudes(@Query() { year }) {
     try {

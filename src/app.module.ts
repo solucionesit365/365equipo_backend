@@ -1,3 +1,5 @@
+import { InspeccionFichajesController } from "./InspeccionFichajes/inspeccionfichajes.controller";
+import { InspeccionFichajesModule } from "./InspeccionFichajes/inspeccionfichajes.module";
 import { Module } from "@nestjs/common";
 import { AppController } from "./app.controller";
 import { ConfigModule } from "@nestjs/config";
@@ -76,6 +78,7 @@ import { PaytefModule } from "./paytef/paytef.module";
 
 @Module({
   imports: [
+    InspeccionFichajesModule,
     ConfigModule.forRoot({
       isGlobal: true,
     }),
@@ -151,6 +154,10 @@ import { PaytefModule } from "./paytef/paytef.module";
     SubordinadoModule,
     PaytefModule,
   ],
-  controllers: [AppController, KpiTiendasController],
+  controllers: [
+    InspeccionFichajesController,
+    AppController,
+    KpiTiendasController,
+  ],
 })
 export class AppModule {}

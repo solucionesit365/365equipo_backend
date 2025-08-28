@@ -1155,6 +1155,7 @@ export class TrabajadorDatabaseService {
           },
           take: 1,
         },
+        roles: true,
       },
     });
 

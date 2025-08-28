@@ -269,11 +269,12 @@ export class FichajesController {
     return await this.fichajesInstance.validarFichajesAntiguos();
   }
 
-  @UseGuards(AuthGuard)
+  // @UseGuards(AuthGuard)
   @Get("fichajesResto")
   async getFichajes(@Query() { idSql }: { idSql: number }) {
     try {
       if (!idSql) throw Error("Faltan parámetros");
+      console.log(idSql);
 
       const fichajes = await this.fichajesInstance.getFichajes(Number(idSql));
 
