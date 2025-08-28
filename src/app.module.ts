@@ -1,3 +1,5 @@
+import { InspeccionFichajesController } from "./InspeccionFichajes/inspeccionfichajes.controller";
+import { InspeccionFichajesModule } from "./InspeccionFichajes/inspeccionfichajes.module";
 import { Module } from "@nestjs/common";
 import { AppController } from "./app.controller";
 import { ConfigModule } from "@nestjs/config";
@@ -78,6 +80,7 @@ import { RevisionMedicaModule } from "./revision-medica/revision-medica.module";
 
 @Module({
   imports: [
+    InspeccionFichajesModule,
     ConfigModule.forRoot({
       isGlobal: true,
     }),
@@ -155,6 +158,10 @@ import { RevisionMedicaModule } from "./revision-medica/revision-medica.module";
     CalculoNominasModule,
     RevisionMedicaModule,
   ],
-  controllers: [AppController, KpiTiendasController],
+  controllers: [
+    InspeccionFichajesController,
+    AppController,
+    KpiTiendasController,
+  ],
 })
 export class AppModule {}

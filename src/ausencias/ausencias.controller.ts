@@ -197,7 +197,7 @@ export class AusenciasController {
       return { ok: false, message: err.message };
     }
   }
-  @UseGuards(AuthGuard)
+  // @UseGuards(AuthGuard)
   @Get("getAusencias")
   async getAusencias() {
     try {
