@@ -14,6 +14,8 @@ export class InspeccionFichajesService {
   }
 
   async createInspeccionFichajes(data: any) {
+    if (data.pin) data.pin = Number(data.pin);
+    if (data.createdAt) data.createdAt = new Date(data.createdAt);
     const db = (await this.mongoDbService.getConexion()).db();
     const inspeccionFichajes = db.collection("inspeccionFichajes");
 
