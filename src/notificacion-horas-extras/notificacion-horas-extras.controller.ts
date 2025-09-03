@@ -137,7 +137,7 @@ export class NotificacionHorasExtrasController {
     data: {
       id: string;
       horaExtraId: string;
-      apagar?: boolean;
+      apagar?: "pendiente" | "aprobado" | "rechazado";
     },
   ) {
     try {
