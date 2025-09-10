@@ -67,8 +67,8 @@ import { UpdateTrabajadorOrganizacionController } from "./controllers/UpdateTrab
   ],
   exports: [TrabajadorService],
   controllers: [
-    TrabajadoresController, 
-    SincroTrabajadoresController, 
+    TrabajadoresController,
+    SincroTrabajadoresController,
     UpdateTrabajadorController,
     UpdateTrabajadorOrganizacionController,
   ],

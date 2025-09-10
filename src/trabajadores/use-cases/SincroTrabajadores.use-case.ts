@@ -302,7 +302,11 @@ export class SincroTrabajadoresUseCase implements ISincroTrabajadoresUseCase {
             }
           }
 
-          if (trabajadorEnOmne && trabajadorEnOmne.bajaEmpresa) {
+          if (
+            trabajadorEnOmne &&
+            trabajadorEnOmne.bajaEmpresa &&
+            DateTime.now() > trabajadorEnOmne.bajaEmpresa
+          ) {
             // Tiene fecha de baja en OMNE, eliminar es correcto
             trabajadoresAEliminar.push({
               ...trabajadorApp,
@@ -343,6 +347,14 @@ export class SincroTrabajadoresUseCase implements ISincroTrabajadoresUseCase {
           nacionalidad: t.codPaisNacionalidad,
           nSeguridadSocial: t.noAfiliacion,
           codigoPostal: t.cp,
+          horasContrato: t.horassemana || 40,
+          inicioContrato: t.altaContrato?.toJSDate() || new Date(),
+          finalContrato: t.bajaEmpresa?.toJSDate() || undefined,
+          fechaAlta: t.altaContrato?.toJSDate() || new Date(),
+          fechaAntiguedad:
+            t.antiguedadEmpresa?.toJSDate() ||
+            t.altaContrato?.toJSDate() ||
+            new Date(),
         }));
 
         trabajadoresActualizados = await this.updateTrabajadorUseCase.execute(

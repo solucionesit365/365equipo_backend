@@ -23,6 +23,6 @@ import { PrismaService } from "../prisma/prisma.service";
     },
   ],
   controllers: [ContratoController],
-  exports: [ContratoService, ICreateContratoUseCase],
+  exports: [ContratoService, ICreateContratoUseCase, IContratoRepository],
 })
 export class ContratoModule {}
