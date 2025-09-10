@@ -75,6 +75,7 @@ import { SubordinadoModule } from "./subordinado/subordinado.module";
 import { PaytefModule } from "./paytef/paytef.module";
 import { PushNotificationModule } from './push-notification/push-notification.module';
 import { NotificationDeviceModule } from './notification-device/notification-device.module';
+import { NotificationModule } from './notification/notification.module';
 
 @Module({
   imports: [
@@ -154,6 +155,7 @@ import { NotificationDeviceModule } from './notification-device/notification-dev
     PaytefModule,
     PushNotificationModule,
     NotificationDeviceModule,
+    NotificationModule,
   ],
   controllers: [AppController, KpiTiendasController],
 })
