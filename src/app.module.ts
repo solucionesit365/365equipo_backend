@@ -77,6 +77,8 @@ import { SubordinadoModule } from "./subordinado/subordinado.module";
 import { PaytefModule } from "./paytef/paytef.module";
 import { CalculoNominasModule } from "./calculo-nominas/calculo-nominas.module";
 import { RevisionMedicaModule } from "./revision-medica/revision-medica.module";
+import { PushNotificationModule } from "./push-notification/push-notification.module";
+import { NotificationDeviceModule } from "./notification-device/notification-device.module";
 
 @Module({
   imports: [
@@ -162,6 +164,8 @@ import { RevisionMedicaModule } from "./revision-medica/revision-medica.module";
     InspeccionFichajesController,
     AppController,
     KpiTiendasController,
+    PushNotificationModule,
+    NotificationDeviceModule,
   ],
 })
 export class AppModule {}
