@@ -5,10 +5,14 @@ import {
 } from "./interfaces/IUpdateTrabajador.use-case";
 import { ITrabajadorRepository } from "../repository/interfaces/ITrabajador.repository";
 import { Trabajador } from "@prisma/client";
+import { LoggerService } from "../../logger/logger.service";
 
 @Injectable()
 export class UpdateTrabajadorUseCase implements IUpdateTrabajadorUseCase {
-  constructor(private readonly trabajadorRepository: ITrabajadorRepository) {}
+  constructor(
+    private readonly trabajadorRepository: ITrabajadorRepository,
+    private readonly loggerService: LoggerService,
+  ) {}
 
   async execute(trabajadores: IUpdateTrabajadorDto[]): Promise<Trabajador[]> {
     const trabajadoresActualizados: Trabajador[] = [];
@@ -22,6 +26,17 @@ export class UpdateTrabajadorUseCase implements IUpdateTrabajadorUseCase {
       );
 
       trabajadoresActualizados.push(trabajadorActualizado);
+
+      //Logger de cada actualización
+      await this.loggerService.create({
+        action: "ACTUALIZACION DE TRABAJADOR DE OMNE A APP",
+        name: "omne_to_app",
+        extraData: {
+          id,
+          cambios: datosActualizar,
+          resultado: trabajadorActualizado,
+        },
+      });
     }
 
     return trabajadoresActualizados;
@@ -34,6 +49,17 @@ export class UpdateTrabajadorUseCase implements IUpdateTrabajadorUseCase {
       id,
       datosActualizar,
     );
+
+    //Logger de cada actualización
+    await this.loggerService.create({
+      action: "ACTUALIZACION DE TRABAJADOR DE OMNE A APP",
+      name: "omne_to_app",
+      extraData: {
+        id,
+        cambios: datosActualizar,
+        resultado: trabajadorActualizado,
+      },
+    });
 
     return trabajadorActualizado;
   }
