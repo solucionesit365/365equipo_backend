@@ -159,13 +159,13 @@ import { NotificationDeviceModule } from "./notification-device/notification-dev
     PaytefModule,
     CalculoNominasModule,
     RevisionMedicaModule,
+    PushNotificationModule,
+    NotificationDeviceModule,
   ],
   controllers: [
     InspeccionFichajesController,
     AppController,
     KpiTiendasController,
-    PushNotificationModule,
-    NotificationDeviceModule,
   ],
 })
 export class AppModule {}
