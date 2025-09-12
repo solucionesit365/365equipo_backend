@@ -28,10 +28,17 @@ export class PushNotificationToUserUseCase
   }
 
   private async sendTo(token: string, notification: NotificationFCM) {
-    await this.firebaseService.sendPushToToken({
-      token,
-      data: { message: notification.message },
-      title: notification.title,
-    });
+    try {
+      await this.firebaseService.sendPushToToken({
+        token,
+        body: notification.body,
+        data: { message: notification.title, link: notification.link },
+        title: notification.title,
+        iconUrl: notification.iconUrl,
+        badgeUrl: notification.iconUrl,
+      });
+    } catch (error) {
+      this.notificationDeviceRepository.deleteOneByToken(token);
+    }
   }
 }

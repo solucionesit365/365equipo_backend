@@ -13,8 +13,10 @@ export class PushNotificationToUserController {
     @Body() reqPushNotification: PushNotificationToUserDto,
   ) {
     await this.pushNotificationToUserUseCase.execute(reqPushNotification.uid, {
-      message: reqPushNotification.message,
+      body: reqPushNotification.message,
       title: reqPushNotification.title,
+      link: reqPushNotification.link,
+      iconUrl: reqPushNotification.iconUrl,
     });
   }
 }

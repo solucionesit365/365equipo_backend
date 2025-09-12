@@ -12,4 +12,12 @@ export class PushNotificationToUserDto {
   @IsNotEmpty()
   @IsString()
   message: string;
+
+  @IsNotEmpty()
+  @IsString()
+  iconUrl: string;
+
+  @IsNotEmpty()
+  @IsString()
+  link: string;
 }

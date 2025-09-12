@@ -4,6 +4,9 @@ import { NotificationDeviceRepository } from "./repository/NotificationDevice.re
 import { IRegisterNotificationDeviceUseCase } from "./RegisterNotificationDevice/IRegisterNotificationDevice.use-case";
 import { RegisterNotificationDeviceUseCase } from "./RegisterNotificationDevice/RegisterNotificationDevice.use-case";
 import { RegisterNotificationDeviceController } from "./RegisterNotificationDevice/RegisterNotificationDevice.controller";
+import { GetUserNotificationDevicesController } from "./GetUserNotificationDevices/GetUserNotificationDevices.controller";
+import { IGetUserNotificationDevicesUseCase } from "./GetUserNotificationDevices/IGetUserNotificationDevices.use-case";
+import { GetUserNotificationDevicesUseCase } from "./GetUserNotificationDevices/GetUserNotificationDevices.use-case";
 
 @Module({
   providers: [
@@ -15,8 +18,15 @@ import { RegisterNotificationDeviceController } from "./RegisterNotificationDevi
       provide: IRegisterNotificationDeviceUseCase,
       useClass: RegisterNotificationDeviceUseCase,
     },
+    {
+      provide: IGetUserNotificationDevicesUseCase,
+      useClass: GetUserNotificationDevicesUseCase,
+    },
   ],
-  controllers: [RegisterNotificationDeviceController],
+  controllers: [
+    RegisterNotificationDeviceController,
+    GetUserNotificationDevicesController,
+  ],
   exports: [INotificationDeviceRepository],
 })
 export class NotificationDeviceModule {}

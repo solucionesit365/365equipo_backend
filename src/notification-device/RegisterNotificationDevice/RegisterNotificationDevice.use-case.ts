@@ -10,7 +10,7 @@ export class RegisterNotificationDeviceUseCase
     private readonly notificationDeviceRepository: INotificationDeviceRepository,
   ) {}
   async execute(uid: string, deviceToken: string): Promise<void> {
-    await this.notificationDeviceRepository.createOne({
+    await this.notificationDeviceRepository.upsertOne(deviceToken, {
       token: deviceToken,
       trabajador: {
         connect: {
