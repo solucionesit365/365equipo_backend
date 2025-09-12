@@ -68,8 +68,7 @@ export class TrabajadorRepository implements ITrabajadorRepository {
 
       if (filters?.sonPersonas) {
         where.esTienda = false;
-      }
-      if (filters?.sonTiendas) {
+      } else if (filters?.sonTiendas) {
         where.esTienda = true;
       }
 

@@ -77,8 +77,10 @@ import { SubordinadoModule } from "./subordinado/subordinado.module";
 import { PaytefModule } from "./paytef/paytef.module";
 import { CalculoNominasModule } from "./calculo-nominas/calculo-nominas.module";
 import { RevisionMedicaModule } from "./revision-medica/revision-medica.module";
-import { PushNotificationModule } from "./push-notification/push-notification.module";
-import { NotificationDeviceModule } from "./notification-device/notification-device.module";
+import { PushNotificationModule } from './push-notification/push-notification.module';
+import { NotificationDeviceModule } from './notification-device/notification-device.module';
+import { NotificationModule } from './notification/notification.module';
+
 
 @Module({
   imports: [
@@ -161,6 +163,7 @@ import { NotificationDeviceModule } from "./notification-device/notification-dev
     RevisionMedicaModule,
     PushNotificationModule,
     NotificationDeviceModule,
+    NotificationModule,
   ],
   controllers: [
     InspeccionFichajesController,
