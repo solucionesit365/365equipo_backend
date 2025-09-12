@@ -24,6 +24,26 @@ export class NotificationDeviceRepository
     }
   }
 
+  async upsertOne(
+    token: string,
+    data: Prisma.NotificationDeviceCreateInput,
+  ): Promise<NotificationDevice> {
+    try {
+      return await this.prismaService.notificationDevice.upsert({
+        where: { token },
+        create: data,
+        update: {
+          // Solo actualizamos lastTime (se actualiza automáticamente por @updatedAt)
+          // y potencialmente el trabajador si cambió
+          trabajador: data.trabajador,
+        },
+      });
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException();
+    }
+  }
+
   async deleteOneById(id: string): Promise<void> {
     try {
       await this.prismaService.notificationDevice.delete({

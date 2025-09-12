@@ -1,6 +1,11 @@
 export interface NotificationFCM {
-  title: string;
-  message: string;
+  title?: string;
+  body?: string;
+  link?: string;
+  data?: Record<string, string>;
+  ttlSeconds?: number;
+  iconUrl?: string;
+  badgeUrl?: string;
 }
 
 export abstract class IPushNotificationToUserUseCase {
