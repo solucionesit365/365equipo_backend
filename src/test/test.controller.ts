@@ -9,7 +9,7 @@ import { Request } from "express";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { simpleParser } from "mailparser";
 import { LoggerService } from "../logger/logger.service";
-import { AxiosBcService } from "../axios/axios-bc.service";
+import { AxiosBcHitService } from "../axios/axios-bc.hit.service";
 import { PrismaService } from "../prisma/prisma.service";
 import { EmailService } from "../email/email.class";
 
@@ -17,7 +17,7 @@ import { EmailService } from "../email/email.class";
 export class TestController {
   constructor(
     private readonly loggerService: LoggerService,
-    private readonly axiosBCService: AxiosBcService,
+    private readonly axiosBCHitService: AxiosBcHitService,
     private readonly prisma: PrismaService,
     private readonly emailService: EmailService,
   ) {}
@@ -89,9 +89,9 @@ export class TestController {
   async apieze() {
     try {
       const empresaID = "84290dc4-6e90-ef11-8a6b-7c1e5236b0db";
-      const data = await this.axiosBCService.getAxios().get(
+      const data = await this.axiosBCHitService.getAxios().get(
         // `Production/api/Miguel/365ObradorAPI/v1.0/companies(${empresaID})/perceptoresQuery`,
-        `Production/api/eze/365ObradorAPI/v1.0/companies(${empresaID})/PerceptorsExtraData`,
+        `Production/api/HitSystems/HitSystems/v2.0/companies(2ff42ca6-da42-f011-be59-7c1e523410d3)/powerBI_Data`,
       );
 
       return data.data;
