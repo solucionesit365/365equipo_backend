@@ -35,6 +35,10 @@ export class AuthGuard implements CanActivate {
         where: {
           idApp: userInfo.uid,
         },
+        include: {
+          roles: true,
+          permisos: true,
+        },
       });
       request.user = usuarioCompleto;
     } catch (err) {
