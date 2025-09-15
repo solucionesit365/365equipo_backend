@@ -8,8 +8,8 @@ datasource db {
 }
 
 model Trabajador {
-  id                     Int                @id @default(autoincrement())
-  idApp                  String?            @unique
+  id                     Int                  @id @default(autoincrement())
+  idApp                  String?              @unique
   nombreApellidos        String
   displayName            String?
   emails                 String
@@ -28,24 +28,25 @@ model Trabajador {
   llevaEquipo            Boolean
   tokenQR                String?
   displayFoto            String?
-  excedencia             Boolean            @default(false)
+  excedencia             Boolean              @default(false)
   dispositivo            String?
   empresaId              String?
-  esTienda               Boolean            @default(false)
+  esTienda               Boolean              @default(false)
   nPerceptor             Int?
   workEmail              String?
-  supervisa              Tienda[]           @relation("TiendaSupervisor")
+  notificationDevices    NotificationDevice[]
+  supervisa              Tienda[]             @relation("TiendaSupervisor")
   ausenciasCompletas     AusenciaCompleta[]
   ausenciasParciales     AusenciaParcial[]
   contratos              Contrato2[]
-  coordinadoraDeLaTienda Tienda?            @relation("TiendaCoordinator")
-  empresa                Empresa?           @relation(fields: [empresaId], references: [id])
-  responsable            Trabajador?        @relation("Responsable", fields: [idResponsable], references: [id], onDelete: SetNull)
-  subordinados           Trabajador[]       @relation("Responsable")
-  tienda                 Tienda?            @relation(fields: [idTienda], references: [id], onDelete: SetNull)
+  coordinadoraDeLaTienda Tienda?              @relation("TiendaCoordinator")
+  empresa                Empresa?             @relation(fields: [empresaId], references: [id])
+  responsable            Trabajador?          @relation("Responsable", fields: [idResponsable], references: [id], onDelete: SetNull)
+  subordinados           Trabajador[]         @relation("Responsable")
+  tienda                 Tienda?              @relation(fields: [idTienda], references: [id], onDelete: SetNull)
   turnos                 Turno[]
-  permisos               Permiso[]          @relation("PermisoToTrabajador")
-  roles                  Role[]             @relation("RoleToTrabajador")
+  permisos               Permiso[]            @relation("PermisoToTrabajador")
+  roles                  Role[]               @relation("RoleToTrabajador")
 
   @@unique([empresaId, nPerceptor])
 }
@@ -264,6 +265,24 @@ model Contrato2 {
   fechaBaja       DateTime?
   idTrabajador    Int
   trabajador      Trabajador @relation(fields: [idTrabajador], references: [id], onDelete: Cascade)
+}
+
+model NotificationDevice {
+  id           String     @id @default(uuid())
+  token        String     @unique
+  registeredAt DateTime   @default(now())
+  lastTime     DateTime   @updatedAt()
+  trabajadorId Int
+  trabajador   Trabajador @relation(fields: [trabajadorId], references: [id])
+}
+
+model Notification {
+  id     String   @id @default(uuid())
+  title  String
+  body   String
+  icon   String?
+  url    String?
+  sentAt DateTime @default(now())
 }
 
 enum ColorSemanal {

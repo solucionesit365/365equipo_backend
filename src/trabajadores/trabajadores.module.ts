@@ -13,7 +13,7 @@ import { SincroTrabajadoresUseCase } from "./use-cases/SincroTrabajadores.use-ca
 import { SincroTrabajadoresController } from "./controllers/SincroTrabajadores.controller";
 import { ITrabajadorRepository } from "./repository/interfaces/ITrabajador.repository";
 import { TrabajadorRepository } from "./repository/Trabajador.repository";
-import { EmpresaModule } from "src/empresa/empresa.module";
+import { EmpresaModule } from "../empresa/empresa.module";
 import { ICreateTrabajadorUseCase } from "./use-cases/interfaces/ICreateTrabajador.use-case";
 import { CreateTrabajadorUseCase } from "./use-cases/CreateTrabajador.use-case";
 import { IUpdateTrabajadorUseCase } from "./use-cases/interfaces/IUpdateTrabajador.use-case";
@@ -25,6 +25,7 @@ import { UpdateTrabajadorController } from "./controllers/UpdateTrabajador.contr
 import { IUpdateTrabajadorOrganizacionUseCase } from "./use-cases/interfaces/IUpdateTrabajadorOrganizacion.use-case";
 import { UpdateTrabajadorOrganizacionUseCase } from "./use-cases/UpdateTrabajadorOrganizacion.use-case";
 import { UpdateTrabajadorOrganizacionController } from "./controllers/UpdateTrabajadorOrganizacion.controller";
+import { GetTrabajadoresController } from "./controllers/GetTrabajadores.controller";
 
 @Module({
   imports: [
@@ -71,6 +72,7 @@ import { UpdateTrabajadorOrganizacionController } from "./controllers/UpdateTrab
     SincroTrabajadoresController,
     UpdateTrabajadorController,
     UpdateTrabajadorOrganizacionController,
+    GetTrabajadoresController,
   ],
 })
 export class TrabajadoresModule {}
