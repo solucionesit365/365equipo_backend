@@ -27,8 +27,6 @@ export class GetDevicesController {
   async getStatus(@CompleteUser() user: any) {
     const res = await this.getDevicesUseCase.execute();
 
-    console.log("user", user);
-
     // Validamos permisos del usuario
     const hasPermiso = user?.roles?.some((r) => r.name === "Super_Admin");
 
