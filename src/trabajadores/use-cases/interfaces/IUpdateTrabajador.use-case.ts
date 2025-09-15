@@ -13,6 +13,11 @@ export interface IUpdateTrabajadorDto {
   nacionalidad?: string;
   nSeguridadSocial?: string;
   codigoPostal?: string;
+  horasContrato?: number;
+  inicioContrato?: Date;
+  finalContrato?: Date;
+  fechaAlta?: Date;
+  fechaAntiguedad?: Date;
 }
 
 export abstract class IUpdateTrabajadorUseCase {

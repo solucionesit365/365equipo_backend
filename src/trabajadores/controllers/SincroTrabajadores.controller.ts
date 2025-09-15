@@ -9,6 +9,7 @@ export class SincroTrabajadoresController {
 
   @Post()
   sincroConOmne() {
+    console.log("Iniciando sincronización de trabajadores con OMNE...");
     return this.sincroTrabajadores.execute();
   }
 }
