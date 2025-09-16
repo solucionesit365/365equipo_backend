@@ -153,7 +153,7 @@ export class GraphService {
       });
 
       this.logger.debug("Room availability fetched successfully.");
-      return response.data;
+      return response.data.value[0].scheduleItems[0].status != "busy";
     } catch (error) {
       const axiosError = error as AxiosError;
       this.logger.error(
