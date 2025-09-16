@@ -153,7 +153,7 @@ export class GraphService {
       });
 
       this.logger.debug("Room availability fetched successfully.");
-      return response.data.value[0].scheduleItems[0].status != "busy";
+      return response.data;
     } catch (error) {
       const axiosError = error as AxiosError;
       this.logger.error(
@@ -329,5 +329,55 @@ export class GraphService {
       }
       throw axiosError;
     }
+  }
+
+  async bookRoom({ roomEmail, startDate, endDate, subject, organizerEmail }) {
+    const token = await this.getAccessToken();
+
+    const event = {
+      subject,
+      start: {
+        dateTime: startDate, // "2025-09-15T10:00:00"
+        timeZone: this.defaultTimeZone,
+      },
+      end: {
+        dateTime: endDate, // "2025-09-15T11:00:00"
+        timeZone: this.defaultTimeZone,
+      },
+      attendees: [
+        {
+          emailAddress: {
+            address: roomEmail,
+            name: "Sala de reuniones",
+          },
+          type: "required",
+        },
+      ],
+      location: {
+        displayName: roomEmail,
+      },
+    };
+
+    const url = `${this.graphBaseUrl}/users/${organizerEmail}/calendar/events`;
+
+    const response = await axios.post(url, event, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    // Buscar estado de la sala
+    const roomAttendee = response.data.attendees.find(
+      (a) => a.emailAddress.address.toLowerCase() === roomEmail.toLowerCase(),
+    );
+
+    return {
+      eventId: response.data.id,
+      subject: response.data.subject,
+      start: response.data.start,
+      end: response.data.end,
+      roomStatus: roomAttendee?.status?.response || "pending",
+    };
   }
 }
