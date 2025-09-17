@@ -30,9 +30,7 @@ export class KpiTiendasClass {
   }
   async borrarKPIsPorSemana(semana: number, año: number) {
     try {
-      // Aquí depende de tu ORM (ej. TypeORM o Prisma).
-      // Ejemplo con TypeORM:
-      const result = await this.repo.delete({ semana, año });
+      const result = await this.kpiTiendasDB.borrarKPIsPorSemana(semana, año);
 
       return result;
     } catch (error) {
