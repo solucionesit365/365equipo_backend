@@ -4,7 +4,11 @@ import { KpiTiendasInterface } from "./kpi-tiendas.interface";
 
 @Injectable()
 export class KpiTiendasClass {
-  constructor(private readonly kpiTiendasDB: KpiTiendasDatabase) {}
+  private readonly repo: any;
+
+  constructor(private readonly kpiTiendasDB: KpiTiendasDatabase) {
+    this.repo = null;
+  }
 
   async nuevoKPI(kpiTienda: KpiTiendasInterface) {
     const insertarKPI = await this.kpiTiendasDB.nuevoKPI(kpiTienda);
@@ -23,5 +27,17 @@ export class KpiTiendasClass {
 
   async borrarKPITienda(kpiTienda: KpiTiendasInterface) {
     return await this.kpiTiendasDB.borrarKPITienda(kpiTienda);
+  }
+  async borrarKPIsPorSemana(semana: number, año: number) {
+    try {
+      // Aquí depende de tu ORM (ej. TypeORM o Prisma).
+      // Ejemplo con TypeORM:
+      const result = await this.repo.delete({ semana, año });
+
+      return result;
+    } catch (error) {
+      console.error("Error al borrar KPIs por semana:", error);
+      throw error;
+    }
   }
 }
