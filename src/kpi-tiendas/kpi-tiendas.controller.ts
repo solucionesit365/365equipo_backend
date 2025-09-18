@@ -123,4 +123,31 @@ export class KpiTiendasController {
       };
     }
   }
+  @UseGuards(AuthGuard)
+  @Post("borrarKpiTiendasSemana")
+  async borrarKpiTiendasSemana(@Body() body: { semana: number; año: number }) {
+    try {
+      const resp = await this.kpiTiendasClass.borrarKPIsPorSemana(
+        body.semana,
+        body.año,
+      );
+
+      if (resp) {
+        return {
+          ok: true,
+          data: resp,
+        };
+      } else {
+        return {
+          ok: false,
+          data: "No se encontraron KPIs para esa semana",
+        };
+      }
+    } catch (error) {
+      return {
+        ok: false,
+        data: error,
+      };
+    }
+  }
 }
