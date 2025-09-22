@@ -331,7 +331,14 @@ export class GraphService {
     }
   }
 
-  async bookRoom({ roomEmail, startDate, endDate, subject, organizerEmail }) {
+  async bookRoom({
+    roomEmail,
+    startDate,
+    endDate,
+    subject,
+    organizerEmail,
+    attendees = [],
+  }) {
     const token = await this.getAccessToken();
 
     const event = {
@@ -345,13 +352,13 @@ export class GraphService {
         timeZone: this.defaultTimeZone,
       },
       attendees: [
-        {
+        ...attendees.map((email) => ({
           emailAddress: {
-            address: roomEmail,
-            name: "Sala de reuniones",
+            address: email,
           },
           type: "required",
-        },
+        })),
+        { emailAddress: { address: roomEmail }, type: "resource" },
       ],
       location: {
         displayName: roomEmail,

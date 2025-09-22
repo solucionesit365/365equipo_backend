@@ -18,4 +18,6 @@ export class BookRoomDto {
   @IsString()
   @IsNotEmpty()
   endDate: string;
+  @IsEmail({}, { each: true })
+  attendees?: string[];
 }
