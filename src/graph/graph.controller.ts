@@ -78,4 +78,9 @@ export class GraphController {
   async bookRoom(@Body() bookRoomDto: BookRoomDto) {
     return this.graphService.bookRoom(bookRoomDto);
   }
+
+  @Get("allUsers")
+  async getAllUsers() {
+    return this.graphService.getAllUsers();
+  }
 }

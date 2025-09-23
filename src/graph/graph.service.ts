@@ -387,4 +387,22 @@ export class GraphService {
       roomStatus: roomAttendee?.status?.response || "pending",
     };
   }
+
+  // GraphService.ts
+  async getAllUsers(): Promise<any[]> {
+    const token = await this.getAccessToken();
+    let url = `${this.graphBaseUrl}/users?$top=100`;
+    let allUsers: any[] = [];
+
+    while (url) {
+      const response = await axios.get(url, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      allUsers = [...allUsers, ...response.data.value];
+      url = response.data["@odata.nextLink"] || null; // si hay más páginas
+    }
+
+    return allUsers;
+  }
 }
