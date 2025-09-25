@@ -362,7 +362,7 @@ export class SincroTrabajadoresUseCase implements ISincroTrabajadoresUseCase {
         );
       }
 
-      // 2. Eliminar trabajadores
+      // 2. Eliminar trabajadores.
       if (trabajadoresAEliminar.length > 0) {
         const trabajadoresParaEliminar = trabajadoresAEliminar.map((t) => ({
           id: t.id,
