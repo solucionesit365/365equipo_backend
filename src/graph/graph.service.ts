@@ -105,6 +105,7 @@ export class GraphService {
       // Convertir fechas a DateTime de Luxon si no lo son ya
       const startDateTime = this.ensureDateTime(startDate, timeZone);
       const endDateTime = this.ensureDateTime(endDate, timeZone);
+      console.log(startDateTime);
 
       // Validar que las fechas sean correctas
       if (!startDateTime.isValid) {
@@ -181,6 +182,7 @@ export class GraphService {
       // Convertir fechas a DateTime de Luxon si no lo son ya
       const startDateTime = this.ensureDateTime(startDate, timeZone);
       const endDateTime = this.ensureDateTime(endDate, timeZone);
+      console.log(startDateTime);
 
       // Validar que las fechas sean correctas
       if (!startDateTime.isValid) {
@@ -243,7 +245,7 @@ export class GraphService {
       return DateTime.fromJSDate(date).setZone(timeZone);
     } else if (typeof date === "string") {
       // Intentar parsear el string como ISO primero
-      let dt = DateTime.fromISO(date, { zone: timeZone });
+      let dt = DateTime.fromISO(date, { setZone: true });
 
       // Si no es válido, intentar otros formatos comunes
       if (!dt.isValid) {
@@ -343,49 +345,46 @@ export class GraphService {
 
     const event = {
       subject,
-      start: {
-        dateTime: startDate, // "2025-09-15T10:00:00"
-        timeZone: this.defaultTimeZone,
-      },
-      end: {
-        dateTime: endDate, // "2025-09-15T11:00:00"
-        timeZone: this.defaultTimeZone,
-      },
+      start: { dateTime: startDate, timeZone: this.defaultTimeZone },
+      end: { dateTime: endDate, timeZone: this.defaultTimeZone },
       attendees: [
         ...attendees.map((email) => ({
-          emailAddress: {
-            address: email,
-          },
+          emailAddress: { address: email },
           type: "required",
         })),
         { emailAddress: { address: roomEmail }, type: "resource" },
       ],
-      location: {
-        displayName: roomEmail,
-      },
+      location: { displayName: roomEmail },
     };
 
     const url = `${this.graphBaseUrl}/users/${organizerEmail}/calendar/events`;
 
-    const response = await axios.post(url, event, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    });
+    try {
+      const response = await axios.post(url, event, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
 
-    // Buscar estado de la sala
-    const roomAttendee = response.data.attendees.find(
-      (a) => a.emailAddress.address.toLowerCase() === roomEmail.toLowerCase(),
-    );
+      const roomAttendee = response.data.attendees.find(
+        (a) => a.emailAddress.address.toLowerCase() === roomEmail.toLowerCase(),
+      );
 
-    return {
-      eventId: response.data.id,
-      subject: response.data.subject,
-      start: response.data.start,
-      end: response.data.end,
-      roomStatus: roomAttendee?.status?.response || "pending",
-    };
+      return {
+        eventId: response.data.id,
+        subject: response.data.subject,
+        start: response.data.start,
+        end: response.data.end,
+        roomStatus: roomAttendee?.status?.response || "pending",
+      };
+    } catch (error) {
+      this.logger.error(
+        "Error creating event in Graph",
+        error.response?.data || error.message,
+      );
+      throw error;
+    }
   }
 
   // GraphService.ts
