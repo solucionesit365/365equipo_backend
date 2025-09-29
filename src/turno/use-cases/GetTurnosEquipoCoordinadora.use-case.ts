@@ -151,9 +151,6 @@ export class GetTurnosEquipoCoordinadoraUseCase
       };
     });
 
-    console.log(ausenciasNormalizadas);
-    console.log(vacacionesNormalizadas);
-
     return [
       ...turnosUnicos,
       ...ausenciasNormalizadas,
