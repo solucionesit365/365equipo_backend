@@ -6,6 +6,7 @@ import { IGetTurnosEquipoCoordinadoraUseCase } from "./interfaces/IGetTurnosEqui
 import { Turno } from "@prisma/client";
 import { AusenciasDatabase } from "src/ausencias/ausencias.mongodb";
 import { PrismaService } from "src/prisma/prisma.service";
+import { SolicitudVacacionesDatabase } from "src/solicitud-vacaciones/solicitud-vacaciones.mongodb";
 
 @Injectable()
 export class GetTurnosEquipoCoordinadoraUseCase
@@ -15,6 +16,7 @@ export class GetTurnosEquipoCoordinadoraUseCase
     private readonly coordinadoraRepository: ICoordinadoraRepository,
     private readonly turnoRepository: ITurnoRepository,
     private readonly ausenciaDatabase: AusenciasDatabase,
+    private readonly vacacionesDartabase: SolicitudVacacionesDatabase,
     private readonly prisma: PrismaService,
   ) {}
 
@@ -74,25 +76,88 @@ export class GetTurnosEquipoCoordinadoraUseCase
       ausenciasFiltradas.map(async (a) => {
         const trabajador = await this.prisma.trabajador.findUnique({
           where: { id: a.idUsuario },
-          select: { nombreApellidos: true },
+          select: {
+            nombreApellidos: true,
+            contratos: { select: { horasContrato: true } },
+          },
         });
+
+        const inicio = DateTime.fromJSDate(new Date(a.fechaInicio))
+          .setZone("Europe/Madrid") // 👈 fuerza la zona
+          .startOf("day")
+          .toJSDate();
+
+        const final = DateTime.fromJSDate(new Date(a.fechaFinal))
+          .setZone("Europe/Madrid")
+          .endOf("day")
+          .toJSDate();
 
         return {
           id: `ausencia-${a._id}`,
           idTrabajador: a.idUsuario,
-          inicio: a.fechaInicio,
-          final: a.fechaFinal,
+          inicio,
+          final,
           tiendaId: idTienda,
           borrable: false,
           bolsaHorasInicial: 0,
           ausencia: { tipo: a.tipo },
           totalHoras: 0,
           nombre: trabajador?.nombreApellidos ?? a.nombre ?? "Sin nombre",
+          horasContrato: trabajador.contratos?.[0]?.horasContrato ?? 0,
         };
       }),
     );
-    console.log(ausenciasNormalizadas);
 
-    return [...turnosUnicos, ...ausenciasNormalizadas];
+    // 7. Vacaciones Mongo por tienda y aprobadas en el intervalo
+    const vacacionesTienda =
+      await this.vacacionesDartabase.getVacacionesByTiendas(
+        tienda?.nombre ?? "",
+      );
+
+    const vacacionesSemana = vacacionesTienda.filter((v) => {
+      const inicio = DateTime.fromFormat(v.fechaInicio, "dd/MM/yyyy");
+      const final = DateTime.fromFormat(v.fechaFinal, "dd/MM/yyyy");
+
+      return (
+        v.estado === "APROBADA" &&
+        inicio <= fechaFinalSemana &&
+        final >= fechaInicioSemana
+      );
+    });
+
+    const vacacionesNormalizadas: Turno[] = vacacionesSemana.map((v) => {
+      const inicio = DateTime.fromFormat(v.fechaInicio, "dd/MM/yyyy")
+        .setZone("Europe/Madrid")
+        .startOf("day")
+        .toJSDate();
+
+      const final = DateTime.fromFormat(v.fechaFinal, "dd/MM/yyyy")
+        .setZone("Europe/Madrid")
+        .endOf("day")
+        .toJSDate();
+
+      return {
+        id: `vacacion-${v._id}`,
+        idTrabajador: v.idBeneficiario,
+        inicio,
+        final,
+        tiendaId: idTienda,
+        borrable: false,
+        bolsaHorasInicial: 0,
+        ausencia: { tipo: "VACACIONES" },
+        totalHoras: 0,
+        nombre: v.nombreApellidos ?? "Sin nombre",
+        horasContrato: v.horasContrato ?? 0, // viene en mongo
+      };
+    });
+
+    console.log(ausenciasNormalizadas);
+    console.log(vacacionesNormalizadas);
+
+    return [
+      ...turnosUnicos,
+      ...ausenciasNormalizadas,
+      ...vacacionesNormalizadas,
+    ];
   }
 }

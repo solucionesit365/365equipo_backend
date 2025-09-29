@@ -17,7 +17,7 @@ import { NotificacionesModule } from "../notificaciones/notificaciones.module";
     NotificacionesModule,
   ],
   providers: [SolicitudesVacacionesService, SolicitudVacacionesDatabase],
-  exports: [SolicitudesVacacionesService],
+  exports: [SolicitudesVacacionesService, SolicitudVacacionesDatabase],
   controllers: [SolicitudVacacionesController],
 })
 export class SolicitudVacacionesModule {}

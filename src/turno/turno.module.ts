@@ -23,9 +23,15 @@ import { GetTurnosSupersController } from "./controllers/GetTurnosSupers.control
 import { GetTurnoSemanaTrabajadorController } from "./controllers/GetTurnoSemanaTrabajador.controller";
 import { AusenciasModule } from "src/ausencias/ausencias.module";
 import { PrismaService } from "src/prisma/prisma.service";
+import { SolicitudVacacionesModule } from "src/solicitud-vacaciones/solicitud-vacaciones.module";
 
 @Module({
-  imports: [TrabajadoresModule, CoordinadoraModule, AusenciasModule],
+  imports: [
+    TrabajadoresModule,
+    CoordinadoraModule,
+    AusenciasModule,
+    SolicitudVacacionesModule,
+  ],
   providers: [
     PrismaService,
     { provide: ITurnoRepository, useClass: TurnoRepository },
