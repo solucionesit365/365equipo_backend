@@ -1,7 +1,16 @@
 import { Response } from "express";
-import { Controller, Post, Get, Query, UseGuards, Res } from "@nestjs/common";
+import {
+  Controller,
+  Post,
+  Get,
+  Query,
+  UseGuards,
+  Res,
+  Body,
+} from "@nestjs/common";
 import { GraphService } from "./graph.service";
 import { SchedulerGuard } from "src/guards/scheduler.guard";
+import { BookRoomDto } from "./graph.dto";
 
 @Controller("graph")
 export class GraphController {
@@ -63,5 +72,15 @@ export class GraphController {
       return `"${value.replace(/"/g, '""')}"`;
     }
     return value;
+  }
+
+  @Post("bookRoom")
+  async bookRoom(@Body() bookRoomDto: BookRoomDto) {
+    return this.graphService.bookRoom(bookRoomDto);
+  }
+
+  @Get("allUsers")
+  async getAllUsers() {
+    return this.graphService.getAllUsers();
   }
 }
