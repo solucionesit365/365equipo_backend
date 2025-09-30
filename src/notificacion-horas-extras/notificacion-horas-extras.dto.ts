@@ -5,6 +5,7 @@ import {
   IsArray,
   IsBoolean,
   IsOptional,
+  IsIn,
 } from "class-validator";
 import { Type } from "class-transformer";
 
@@ -32,13 +33,17 @@ class THoraExtra {
   motivo: string;
 
   @IsString()
+  cubre: string;
+
+  @IsString()
   formacion: string;
 
   @IsString()
   incrementoTrabajo: string;
 
-  @IsBoolean()
-  apagar: boolean;
+  @IsString()
+  @IsIn(["pendiente", "aprobado", "rechazado"])
+  apagar: "pendiente" | "aprobado" | "rechazado";
 
   @IsBoolean()
   revision: boolean;
