@@ -99,7 +99,7 @@ export class NotificacionHorasExtrasMongoService {
   async updateNotificacionHorasExtrasApagar(
     id: string,
     horaExtraId: string,
-    data: { apagar?: boolean },
+    data: { apagar?: "pendiente" | "aprobado" | "rechazado" },
   ) {
     const db = (await this.mongoDbService.getConexion()).db();
     const notificacionesCollection = db.collection("notificacionesHorasExtras");
@@ -186,6 +186,10 @@ export class NotificacionHorasExtrasMongoService {
           "horasExtras.$[elem].fecha": horaExtra.fecha,
           "horasExtras.$[elem].horaInicio": horaExtra.horaInicio,
           "horasExtras.$[elem].horaFinal": horaExtra.horaFinal,
+          "horasExtras.$[elem].tienda": horaExtra.tienda,
+          "horasExtras.$[elem].nombreTiendaSecundaria":
+            horaExtra.nombreTiendaSecundaria,
+          "horasExtras.$[elem].cubre": horaExtra.cubre,
         },
       },
       {

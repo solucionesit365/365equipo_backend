@@ -80,6 +80,9 @@ import { RevisionMedicaModule } from "./revision-medica/revision-medica.module";
 import { PushNotificationModule } from "./push-notification/push-notification.module";
 import { NotificationDeviceModule } from "./notification-device/notification-device.module";
 import { NotificationModule } from "./notification/notification.module";
+import { ApiVentaModule } from "./API/api-venta/api-venta.module";
+import { ApiEmpresaOrgModule } from "./API/api-empresa-org/api-empresa-org.module";
+import { ApiIncidenciaModule } from "./API/api-incidencia/api-incidencia.module";
 
 @Module({
   imports: [
@@ -163,6 +166,9 @@ import { NotificationModule } from "./notification/notification.module";
     PushNotificationModule,
     NotificationDeviceModule,
     NotificationModule,
+    ApiVentaModule,
+    ApiEmpresaOrgModule,
+    ApiIncidenciaModule,
   ],
   controllers: [
     InspeccionFichajesController,

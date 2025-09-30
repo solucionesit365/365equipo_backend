@@ -13,7 +13,7 @@ import { MBCTokenModule } from "../bussinesCentral/services/mbctoken/mbctoken.se
     forwardRef(() => TrabajadoresModule),
   ],
   providers: [AusenciasService, AusenciasDatabase],
-  exports: [AusenciasService],
+  exports: [AusenciasService, AusenciasDatabase],
   controllers: [AusenciasController],
 })
 export class AusenciasModule {}
