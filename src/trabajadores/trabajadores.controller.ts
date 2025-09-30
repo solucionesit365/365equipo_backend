@@ -472,7 +472,6 @@ export class TrabajadoresController {
     return await this.trabajadorInstance.permitirRegistro(req.email);
   }
 
-  @UseGuards(AuthGuard)
   @Post("cambiarTiendaEquipo")
   async cambiarTiendaEquipo(@Body() body: { id: number; tienda: number }) {
     const trabajador = await this.trabajadorInstance.getTrabajadorBySqlId(
@@ -480,19 +479,59 @@ export class TrabajadoresController {
     );
     if (!trabajador) throw new Error("Trabajador no encontrado");
 
-    const original = await this.trabajadorInstance.getTrabajadorBySqlId(
-      trabajador.id,
-    );
+    // ⚡ Si ya está en esa tienda, no hacemos nada
+    if (trabajador.idTienda === body.tienda) {
+      return { ok: true, message: "El trabajador ya pertenece a esta tienda" };
+    }
 
     const originalForm: TrabajadorFormRequest = {
-      ...original,
-      arrayRoles: [],
-      arrayPermisos: [],
+      id: trabajador.id,
+      nombreApellidos: trabajador.nombreApellidos,
+      displayName: trabajador.displayName,
+      fechaNacimiento: trabajador.fechaNacimiento,
+      dni: trabajador.dni,
+      direccion: trabajador.direccion,
+      ciudad: trabajador.ciudad,
+      codigoPostal: trabajador.codigoPostal,
+      nacionalidad: trabajador.nacionalidad,
+      empresaId: trabajador.empresaId,
+      tipoTrabajador: trabajador.tipoTrabajador,
+      idResponsable: trabajador.idResponsable,
+      llevaEquipo: trabajador.llevaEquipo,
+      idTienda: trabajador.idTienda,
+      arrayRoles: Array.isArray((trabajador as any).roles)
+        ? (trabajador as any).roles.map((r: any) => r.id)
+        : [],
+      arrayPermisos: Array.isArray((trabajador as any).permisos)
+        ? (trabajador as any).permisos.map((p: any) => p.id)
+        : [],
+      tokenQR: trabajador.tokenQR,
+      emails: Array.isArray(trabajador.emails)
+        ? trabajador.emails.find((e) => typeof e === "string" && !!e) ?? ""
+        : trabajador.emails ?? "",
+      telefonos: Array.isArray(trabajador.telefonos)
+        ? trabajador.telefonos
+            .filter((t) => typeof t === "string" && !!t)
+            .join(", ")
+        : typeof trabajador.telefonos === "string"
+        ? trabajador.telefonos
+        : "",
+      nSeguridadSocial: trabajador.nSeguridadSocial ?? "",
+      cuentaCorriente: trabajador.cuentaCorriente ?? "",
     };
+
+    const DEPENDIENTA_ROLE_ID = "b3f04be2-35f5-46d0-842b-5be49014a2ef";
+
+    // Si no tiene ningún rol, le asignamos Dependienta
+    const rolesFinales =
+      originalForm.arrayRoles.length === 0
+        ? [DEPENDIENTA_ROLE_ID]
+        : originalForm.arrayRoles;
 
     const modificado: TrabajadorFormRequest = {
       ...originalForm,
       idTienda: body.tienda,
+      arrayRoles: rolesFinales,
     };
 
     const resultado = await this.trabajadorInstance.guardarCambiosForm(
@@ -500,6 +539,7 @@ export class TrabajadoresController {
       modificado,
     );
 
+    console.log("Resultado del cambio de tienda:", resultado);
     return resultado;
   }
 
