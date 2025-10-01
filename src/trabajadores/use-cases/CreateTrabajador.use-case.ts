@@ -81,7 +81,9 @@ export class CreateTrabajadorUseCase implements ICreateTrabajadorUseCase {
 
       // Luego crear el contrato asociado
       const contratoCreado = await this.createContratoUseCase.execute({
-        horasContrato: trabajador.horasContrato,
+        horasContrato: this.convertirHorasSemanalesAPorcentaje(
+          trabajador.horasContrato,
+        ),
         inicioContrato: trabajador.inicioContrato,
         finalContrato: trabajador.finalContrato,
         fechaAlta: trabajador.fechaAlta,
