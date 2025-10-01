@@ -47,4 +47,12 @@ export class KpiTiendasDatabase {
     });
     return respKPIS.acknowledged && respKPIS.deletedCount > 0;
   }
+
+  async borrarKPIsPorSemana(semana: number, año: number) {
+    const db = (await this.mongoDbService.getConexion()).db();
+    const kpiTiendaCollection =
+      db.collection<KpiTiendasInterface>("kpiTiendas");
+    const respKPIS = await kpiTiendaCollection.deleteMany({ semana, año });
+    return respKPIS.acknowledged && respKPIS.deletedCount > 0;
+  }
 }

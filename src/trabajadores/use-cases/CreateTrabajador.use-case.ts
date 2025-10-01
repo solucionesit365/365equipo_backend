@@ -5,6 +5,7 @@ import {
 } from "./interfaces/ICreateTrabajador.use-case";
 import { ITrabajadorRepository } from "../repository/interfaces/ITrabajador.repository";
 import { Trabajador } from "@prisma/client";
+import { LoggerService } from "../../logger/logger.service";
 import { ICreateContratoUseCase } from "../../contrato/use-cases/interfaces/ICreateContrato.use-case";
 
 @Injectable()
@@ -12,6 +13,7 @@ export class CreateTrabajadorUseCase implements ICreateTrabajadorUseCase {
   constructor(
     private readonly trabajadorRepository: ITrabajadorRepository,
     private readonly createContratoUseCase: ICreateContratoUseCase,
+    private readonly loggerService: LoggerService,
   ) {}
 
   async execute(trabajadores: ICreateTrabajadorDto[]): Promise<Trabajador[]> {
@@ -78,10 +80,10 @@ export class CreateTrabajadorUseCase implements ICreateTrabajadorUseCase {
       });
 
       // Luego crear el contrato asociado
-      await this.createContratoUseCase.execute({
+      const contratoCreado = await this.createContratoUseCase.execute({
         horasContrato: this.convertirHorasSemanalesAPorcentaje(
           trabajador.horasContrato,
-        ), // Es un porcentaje
+        ),
         inicioContrato: trabajador.inicioContrato,
         finalContrato: trabajador.finalContrato,
         fechaAlta: trabajador.fechaAlta,
@@ -90,6 +92,22 @@ export class CreateTrabajadorUseCase implements ICreateTrabajadorUseCase {
         idTrabajador: trabajadorCreado.id,
       });
 
+      //logger de creacion
+      await this.loggerService.create({
+        action: "CREACIÓN DE TRABAJADOR DE OMNE A APP",
+        name: trabajadorCreado.nombreApellidos,
+        extraData: {
+          idTrabajador: trabajadorCreado.id,
+          empresaId: trabajador.empresaId,
+          dni: trabajadorCreado.dni,
+          contrato: {
+            id: contratoCreado.id,
+            inicio: contratoCreado.inicioContrato,
+            fin: contratoCreado.finalContrato,
+            horas: contratoCreado.horasContrato,
+          },
+        },
+      });
       trabajadoresCreados.push(trabajadorCreado);
     }
 

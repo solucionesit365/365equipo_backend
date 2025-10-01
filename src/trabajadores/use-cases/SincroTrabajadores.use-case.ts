@@ -240,7 +240,9 @@ export class SincroTrabajadoresUseCase implements ISincroTrabajadoresUseCase {
 
       // Buscar por nPerceptor + empresaId (clave única)
       if (trabajadorApp.nPerceptor) {
-        const clave = `${String(trabajadorApp.nPerceptor)}-${trabajadorApp.empresaId}`;
+        const clave = `${String(trabajadorApp.nPerceptor)}-${
+          trabajadorApp.empresaId
+        }`;
         encontradoEnOmne = trabajadoresOmneMap.has(clave);
       }
 
@@ -339,8 +341,9 @@ export class SincroTrabajadoresUseCase implements ISincroTrabajadoresUseCase {
           displayName: t.nombre,
           emails: t.email,
           dni: t.documento,
-          direccion:
-            `${t.viaPublica} ${t.numero}${t.piso ? ` ${t.piso}` : ""}`.trim(),
+          direccion: `${t.viaPublica} ${t.numero}${
+            t.piso ? ` ${t.piso}` : ""
+          }`.trim(),
           ciudad: t.poblacion,
           telefonos: t.noTelfMovilPersonal,
           fechaNacimiento: t.fechaNacimiento?.toJSDate() || undefined,
@@ -362,7 +365,7 @@ export class SincroTrabajadoresUseCase implements ISincroTrabajadoresUseCase {
         );
       }
 
-      // 2. Eliminar trabajadores
+      // 2. Eliminar trabajadores.
       if (trabajadoresAEliminar.length > 0) {
         const trabajadoresParaEliminar = trabajadoresAEliminar.map((t) => ({
           id: t.id,
@@ -380,8 +383,9 @@ export class SincroTrabajadoresUseCase implements ISincroTrabajadoresUseCase {
           displayName: t.nombre,
           emails: t.email,
           dni: t.documento,
-          direccion:
-            `${t.viaPublica} ${t.numero}${t.piso ? ` ${t.piso}` : ""}`.trim(),
+          direccion: `${t.viaPublica} ${t.numero}${
+            t.piso ? ` ${t.piso}` : ""
+          }`.trim(),
           ciudad: t.poblacion,
           telefonos: t.noTelfMovilPersonal,
           fechaNacimiento: t.fechaNacimiento?.toJSDate() || undefined,

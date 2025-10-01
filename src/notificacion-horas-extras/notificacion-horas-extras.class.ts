@@ -45,7 +45,7 @@ export class NotificacionHorasExtrasClass {
   async updateNotificacionHorasExtrasApagar(
     id: string,
     horaExtraId: string,
-    data: { apagar?: boolean },
+    data: { apagar?: "pendiente" | "aprobado" | "rechazado" },
   ) {
     return await this.shNotificacionhorasExtras.updateNotificacionHorasExtrasApagar(
       id,

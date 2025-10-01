@@ -105,6 +105,7 @@ export class GraphService {
       // Convertir fechas a DateTime de Luxon si no lo son ya
       const startDateTime = this.ensureDateTime(startDate, timeZone);
       const endDateTime = this.ensureDateTime(endDate, timeZone);
+      console.log(startDateTime);
 
       // Validar que las fechas sean correctas
       if (!startDateTime.isValid) {
@@ -181,6 +182,7 @@ export class GraphService {
       // Convertir fechas a DateTime de Luxon si no lo son ya
       const startDateTime = this.ensureDateTime(startDate, timeZone);
       const endDateTime = this.ensureDateTime(endDate, timeZone);
+      console.log(startDateTime);
 
       // Validar que las fechas sean correctas
       if (!startDateTime.isValid) {
@@ -243,7 +245,7 @@ export class GraphService {
       return DateTime.fromJSDate(date).setZone(timeZone);
     } else if (typeof date === "string") {
       // Intentar parsear el string como ISO primero
-      let dt = DateTime.fromISO(date, { zone: timeZone });
+      let dt = DateTime.fromISO(date, { setZone: true });
 
       // Si no es válido, intentar otros formatos comunes
       if (!dt.isValid) {
@@ -329,5 +331,77 @@ export class GraphService {
       }
       throw axiosError;
     }
+  }
+
+  async bookRoom({
+    roomEmail,
+    startDate,
+    endDate,
+    subject,
+    organizerEmail,
+    attendees = [],
+  }) {
+    const token = await this.getAccessToken();
+
+    const event = {
+      subject,
+      start: { dateTime: startDate, timeZone: this.defaultTimeZone },
+      end: { dateTime: endDate, timeZone: this.defaultTimeZone },
+      attendees: [
+        ...attendees.map((email) => ({
+          emailAddress: { address: email },
+          type: "required",
+        })),
+        { emailAddress: { address: roomEmail }, type: "resource" },
+      ],
+      location: { displayName: roomEmail },
+    };
+
+    const url = `${this.graphBaseUrl}/users/${organizerEmail}/calendar/events`;
+
+    try {
+      const response = await axios.post(url, event, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      const roomAttendee = response.data.attendees.find(
+        (a) => a.emailAddress.address.toLowerCase() === roomEmail.toLowerCase(),
+      );
+
+      return {
+        eventId: response.data.id,
+        subject: response.data.subject,
+        start: response.data.start,
+        end: response.data.end,
+        roomStatus: roomAttendee?.status?.response || "pending",
+      };
+    } catch (error) {
+      this.logger.error(
+        "Error creating event in Graph",
+        error.response?.data || error.message,
+      );
+      throw error;
+    }
+  }
+
+  // GraphService.ts
+  async getAllUsers(): Promise<any[]> {
+    const token = await this.getAccessToken();
+    let url = `${this.graphBaseUrl}/users?$top=100`;
+    let allUsers: any[] = [];
+
+    while (url) {
+      const response = await axios.get(url, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      allUsers = [...allUsers, ...response.data.value];
+      url = response.data["@odata.nextLink"] || null; // si hay más páginas
+    }
+
+    return allUsers;
   }
 }
