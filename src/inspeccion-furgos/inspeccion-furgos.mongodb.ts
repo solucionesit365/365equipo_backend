@@ -29,14 +29,14 @@ export class InspeccionFurgosDatabes {
     return await collection.find({ matricula }).toArray();
   }
 
-  async getTransportistas() {
-    const collection = await this.getCollection();
-    const transportistas = await collection
-      .find({ tienda: "transporte" }, { projection: { nombre: 1, _id: 0 } })
-      .toArray();
+  // async getTransportistas() {
+  //   const collection = await this.getCollection();
+  //   const transportistas = await collection
+  //     .find({ tienda: "transporte" }, { projection: { nombre: 1, _id: 0 } })
+  //     .toArray();
 
-    return transportistas.map((t) => t.nombreConductor);
-  }
+  //   return transportistas.map((t) => t.nombreConductor);
+  // }
 
   async borrarInspeccion(_id: string) {
     const collection = await this.getCollection();

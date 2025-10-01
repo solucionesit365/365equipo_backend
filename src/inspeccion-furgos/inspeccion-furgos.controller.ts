@@ -9,8 +9,8 @@ import {
 } from "@nestjs/common";
 import { InspeccionFurgosClass } from "./inspeccion-furgos.class";
 import { AuthGuard } from "../guards/auth.guard";
-import { User } from "../decorators/get-user.decorator";
 import { InspeccionFurgos } from "./inspeccion-furgos.dto";
+import { DateTime } from "luxon";
 
 @Controller("inspecciones-furgos")
 export class InspeccionFurgosController {
@@ -22,7 +22,14 @@ export class InspeccionFurgosController {
     try {
       return {
         ok: true,
-        data: await this.inspeccionesInstance.nuevaInspeccion(inspeccion),
+        data: await this.inspeccionesInstance.nuevaInspeccion({
+          checklist: inspeccion.checklist,
+          estadoUso: inspeccion.estadoUso,
+          fecha: DateTime.fromISO(inspeccion.fecha as string),
+          matricula: inspeccion.matricula,
+          nombreConductor: inspeccion.nombreConductor,
+          observaciones: inspeccion.observaciones || null,
+        }),
       };
     } catch (err) {
       console.error(err);
@@ -61,22 +68,22 @@ export class InspeccionFurgosController {
     }
   }
 
-  @UseGuards(AuthGuard)
-  @Get("transportistas")
-  async getTransportistas() {
-    try {
-      const transportistas =
-        await this.inspeccionesInstance.getTransportistas();
-      return {
-        ok: true,
-        count: transportistas ? transportistas.length : 0,
-        data: transportistas,
-      };
-    } catch (err) {
-      console.error(err);
-      return { ok: false, message: err.message };
-    }
-  }
+  // @UseGuards(AuthGuard)
+  // @Get("transportistas")
+  // async getTransportistas() {
+  //   try {
+  //     const transportistas =
+  //       await this.inspeccionesInstance.getTransportistas();
+  //     return {
+  //       ok: true,
+  //       count: transportistas ? transportistas.length : 0,
+  //       data: transportistas,
+  //     };
+  //   } catch (err) {
+  //     console.error(err);
+  //     return { ok: false, message: err.message };
+  //   }
+  // }
 
   @UseGuards(AuthGuard)
   @Delete(":id")

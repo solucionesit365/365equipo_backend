@@ -28,11 +28,11 @@ export class InspeccionFurgosClass {
     return null;
   }
 
-  async getTransportistas() {
-    const transportistas = await this.schInspeccionesFurgos.getTransportistas();
-    if (transportistas.length > 0) return transportistas;
-    return null;
-  }
+  // async getTransportistas() {
+  //   const transportistas = await this.schInspeccionesFurgos.getTransportistas();
+  //   if (transportistas.length > 0) return transportistas;
+  //   return null;
+  // }
 
   async borrarInspeccion(_id: string) {
     return this.schInspeccionesFurgos.borrarInspeccion(_id);

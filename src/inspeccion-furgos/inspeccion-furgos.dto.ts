@@ -1,12 +1,12 @@
 import { Type } from "class-transformer";
 import {
   IsArray,
-  IsDate,
   IsInt,
   IsOptional,
   IsString,
   ValidateNested,
 } from "class-validator";
+import { DateTime } from "luxon";
 
 export class InspeccionFurgos {
   @IsString()
@@ -18,9 +18,9 @@ export class InspeccionFurgos {
   @IsString()
   estadoUso: string;
 
-  @IsDate()
-  @Type(() => Date)
-  fecha: Date;
+  @IsString()
+  // @Type(() => Date)
+  fecha: string | DateTime;
 
   @ValidateNested({ each: true })
   @Type(() => PreguntasDaños)
