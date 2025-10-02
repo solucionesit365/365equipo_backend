@@ -12,14 +12,15 @@ export class GetTurnosSupersController {
   async getCuadranteSupers(@Query() req: { idTienda: number; fecha: string }) {
     try {
       const fecha = DateTime.fromISO(req.fecha);
+      const idTiendaNum = Number(req.idTienda);
       const turnos = await this.turnoRepository.getTurnosPorTienda(
-        req.idTienda,
-        fecha
+        idTiendaNum,
+        fecha,
       );
-      
+
       return {
         ok: true,
-        data: turnos
+        data: turnos,
       };
     } catch (error) {
       console.log(error);
