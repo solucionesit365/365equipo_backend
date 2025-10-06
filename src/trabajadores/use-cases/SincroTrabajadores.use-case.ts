@@ -8,6 +8,7 @@ import { DateTime } from "luxon";
 import { ICreateTrabajadorUseCase } from "./interfaces/ICreateTrabajador.use-case";
 import { IUpdateTrabajadorUseCase } from "./interfaces/IUpdateTrabajador.use-case";
 import { IDeleteTrabajadorUseCase } from "./interfaces/IDeleteTrabajador.use-case";
+import { IContratoRepository } from "../../contrato/repository/interfaces/IContrato.repository";
 
 // ejemplo de trabajador que viene de omne:
 //                     "noPerceptor": "2290",
@@ -52,6 +53,7 @@ export class SincroTrabajadoresUseCase implements ISincroTrabajadoresUseCase {
     private readonly createTrabajadorUseCase: ICreateTrabajadorUseCase,
     private readonly updateTrabajadorUseCase: IUpdateTrabajadorUseCase,
     private readonly deleteTrabajadorUseCase: IDeleteTrabajadorUseCase,
+    private readonly contratoRepository: IContratoRepository,
   ) {}
 
   async execute() {
@@ -63,6 +65,21 @@ export class SincroTrabajadoresUseCase implements ISincroTrabajadoresUseCase {
     const trabajadoresOmne = await this.getTrabajadoresOmne(empresas);
     const trabajadoresApp = await this.trabajadoresRepository.readAll({
       sonPersonas: true,
+    });
+
+    // Obtener todos los contratos de los trabajadores
+    const contratosPromises = trabajadoresApp.map(async (trabajador) => {
+      const contratos = await this.contratoRepository.findByTrabajadorId(
+        trabajador.id,
+      );
+      return { trabajadorId: trabajador.id, contratos };
+    });
+    const contratosData = await Promise.all(contratosPromises);
+    const contratosMap = new Map();
+    contratosData.forEach(({ trabajadorId, contratos }) => {
+      if (contratos.length > 0) {
+        contratosMap.set(trabajadorId, contratos[0]); // Último contrato
+      }
     });
 
     // Mapeo de campos entre Omne y la base de datos
@@ -197,8 +214,8 @@ export class SincroTrabajadoresUseCase implements ISincroTrabajadoresUseCase {
             razonEliminacion: `Fecha de baja en OMNE: ${trabajadorOmne.bajaEmpresa}`,
           });
         } else {
-          // No tiene fecha de baja, verificar si hay cambios importantes
-          const hayChangios = camposImportantes.some((campo) => {
+          // No tiene fecha de baja, verificar si hay cambios importantes en datos personales
+          const hayChangiosDatosPersonales = camposImportantes.some((campo) => {
             const valorOmne = trabajadorOmne[campo.omne];
             const valorApp = trabajadorApp[campo.app];
 
@@ -224,7 +241,20 @@ export class SincroTrabajadoresUseCase implements ISincroTrabajadoresUseCase {
             return valorOmne !== valorApp;
           });
 
-          if (hayChangios) {
+          // Verificar cambios en las horas de contrato
+          let hayChangiosContrato = false;
+          const contratoActual = contratosMap.get(trabajadorApp.id);
+          if (contratoActual && trabajadorOmne.horassemana !== undefined) {
+            const horasOmnePorcentaje = this.convertirHorasSemanalesAPorcentaje(
+              trabajadorOmne.horassemana,
+            );
+            const horasAppPorcentaje = contratoActual.horasContrato || 0;
+            // Tolerancia de 0.01 para evitar falsos positivos por redondeo
+            hayChangiosContrato =
+              Math.abs(horasOmnePorcentaje - horasAppPorcentaje) > 0.01;
+          }
+
+          if (hayChangiosDatosPersonales || hayChangiosContrato) {
             trabajadoresAModificar.push({
               ...trabajadorOmne,
               id: trabajadorApp.id, // Mantener el ID del registro existente
@@ -552,5 +582,11 @@ export class SincroTrabajadoresUseCase implements ISincroTrabajadoresUseCase {
       console.log(error.message);
       throw new InternalServerErrorException();
     }
+  }
+
+  private convertirHorasSemanalesAPorcentaje(horas: number) {
+    const jornadaCompleta = 40; // Definir la jornada completa como 40 horas semanales
+    if (horas >= jornadaCompleta) return 100;
+    return Math.round((horas / jornadaCompleta) * 100);
   }
 }
