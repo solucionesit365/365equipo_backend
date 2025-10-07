@@ -83,7 +83,8 @@ import { NotificationModule } from "./notification/notification.module";
 import { ApiVentaModule } from "./API/api-venta/api-venta.module";
 import { ApiEmpresaOrgModule } from "./API/api-empresa-org/api-empresa-org.module";
 import { ApiIncidenciaModule } from "./API/api-incidencia/api-incidencia.module";
-import { InspeccionFurgosModule } from './inspeccion-furgos/inspeccion-furgos.module';
+import { InspeccionFurgosModule } from "./inspeccion-furgos/inspeccion-furgos.module";
+import { FurgonetasController } from './furgonetas/furgonetas.controller';
 
 @Module({
   imports: [
@@ -176,6 +177,7 @@ import { InspeccionFurgosModule } from './inspeccion-furgos/inspeccion-furgos.mo
     InspeccionFichajesController,
     AppController,
     KpiTiendasController,
+    FurgonetasController,
   ],
 })
 export class AppModule {}

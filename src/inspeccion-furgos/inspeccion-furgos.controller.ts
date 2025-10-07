@@ -9,7 +9,7 @@ import {
 } from "@nestjs/common";
 import { InspeccionFurgosClass } from "./inspeccion-furgos.class";
 import { AuthGuard } from "../guards/auth.guard";
-import { InspeccionFurgos } from "./inspeccion-furgos.dto";
+import { FurgonetaDto, InspeccionFurgos } from "./inspeccion-furgos.dto";
 import { DateTime } from "luxon";
 
 @Controller("inspecciones-furgos")
@@ -92,6 +92,33 @@ export class InspeccionFurgosController {
       return {
         ok: true,
         data: await this.inspeccionesInstance.borrarInspeccion(id),
+      };
+    } catch (err) {
+      console.error(err);
+      return { ok: false, message: err.message };
+    }
+  }
+  @UseGuards(AuthGuard)
+  @Post("crear-furgoneta")
+  async crearFurgoneta(@Body() matricula: FurgonetaDto) {
+    try {
+      const resultado = await this.inspeccionesInstance.crearFurgoneta(
+        matricula,
+      );
+      return { ok: true, data: resultado };
+    } catch (err) {
+      console.error(err);
+      return { ok: false, message: err.message };
+    }
+  }
+
+  @UseGuards(AuthGuard)
+  @Get("allFurgonetas")
+  async getAllFurgonetas() {
+    try {
+      return {
+        ok: true,
+        data: await this.inspeccionesInstance.getAllFurgonetas(),
       };
     } catch (err) {
       console.error(err);
