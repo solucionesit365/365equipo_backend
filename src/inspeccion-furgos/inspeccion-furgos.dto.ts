@@ -12,8 +12,8 @@ export class InspeccionFurgos {
   @IsString()
   nombreConductor: string;
 
-  // @IsString()
-  // matricula: string;
+  @IsString()
+  matricula: string;
 
   @IsString()
   estadoUso: string;
@@ -31,10 +31,10 @@ export class InspeccionFurgos {
   observaciones: string;
 }
 
-export class FurgonetaDto {
-  @IsString()
-  matricula: string;
-}
+// export class FurgonetaDto {
+//   @IsString()
+//   matricula: string;
+// }
 
 export class PreguntasDaños {
   @IsString()
