@@ -103,10 +103,18 @@ export class Tienda {
 
   async getTiendas2() {
     try {
-      return this.ordenarTiendas(await this.schTiendas.geTiendas2() as any);
+      return this.ordenarTiendas((await this.schTiendas.geTiendas2()) as any);
     } catch (err) {
       console.log(err);
       throw new InternalServerErrorException("Error al obtener las tiendas");
+    }
+  }
+  async addTiendas2(nuevas: any[]) {
+    try {
+      return this.schTiendas.addTiendas2(nuevas);
+    } catch (err) {
+      console.log(err);
+      throw new InternalServerErrorException("Error al añadir las tiendas");
     }
   }
 }

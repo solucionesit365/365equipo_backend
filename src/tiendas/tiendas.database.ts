@@ -42,4 +42,11 @@ export class TiendaDatabaseService {
 
     return respSolicitudes;
   }
+
+  async addTiendas2(nuevas: Tiendas2[]) {
+    const db = (await this.mongoDbService.getConexion()).db();
+    const tiendasResponse = db.collection<Tiendas2>("tiendas");
+    const respSolicitudes = await tiendasResponse.insertMany(nuevas);
+    return !!respSolicitudes.insertedCount;
+  }
 }
