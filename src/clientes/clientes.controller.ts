@@ -175,4 +175,22 @@ export class ClientesController {
       return { ok: false, message: err.message };
     }
   }
+  @Post("borrarClientes")
+  async borrarClientes() {
+    try {
+      const response = await this.clientesInstance.deleteAllClientes();
+      console.log(response);
+      return {
+        ok: true,
+        data: `Se han borrado los clientes.`,
+      };
+    } catch (error) {
+      console.log(error);
+      return {
+        ok: false,
+        message: "No se pudieron borrar los clientes",
+        error: error.message,
+      };
+    }
+  }
 }
