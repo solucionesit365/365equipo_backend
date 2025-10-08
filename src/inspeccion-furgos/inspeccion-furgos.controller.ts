@@ -11,26 +11,41 @@ import { InspeccionFurgosClass } from "./inspeccion-furgos.class";
 import { AuthGuard } from "../guards/auth.guard";
 import { InspeccionFurgos } from "./inspeccion-furgos.dto";
 import { DateTime } from "luxon";
+import { EmailService } from "../email/email.class";
 
 @Controller("inspecciones-furgos")
 export class InspeccionFurgosController {
-  constructor(private readonly inspeccionesInstance: InspeccionFurgosClass) {}
+  constructor(
+    private readonly inspeccionesInstance: InspeccionFurgosClass,
+    private readonly emailService: EmailService,
+  ) {}
 
   @UseGuards(AuthGuard)
   @Post("nueva")
   async nuevaInspeccion(@Body() inspeccion: InspeccionFurgos) {
     try {
-      return {
-        ok: true,
-        data: await this.inspeccionesInstance.nuevaInspeccion({
-          checklist: inspeccion.checklist,
-          estadoUso: inspeccion.estadoUso,
-          fecha: DateTime.fromISO(inspeccion.fecha as string),
-          matricula: inspeccion.matricula,
-          nombreConductor: inspeccion.nombreConductor,
-          observaciones: inspeccion.observaciones || null,
-        }),
-      };
+      const data = await this.inspeccionesInstance.nuevaInspeccion({
+        checklist: inspeccion.checklist,
+        estadoUso: inspeccion.estadoUso,
+        fecha: DateTime.fromISO(inspeccion.fecha as string),
+        matricula: inspeccion.matricula,
+        nombreConductor: inspeccion.nombreConductor,
+        observaciones: inspeccion.observaciones || null,
+      });
+
+      const hayDanos = inspeccion.checklist?.some(
+        (item) => item.status === "DAÑOS",
+      );
+
+      if (hayDanos) {
+        await this.emailService.enviarEmail(
+          "maragarcia@grupohorreols.com",
+          `<p>Se ha registrado una nueva inspección con <b>DAÑOS</b> para la furgoneta <b>${inspeccion.matricula}</b> por ${inspeccion.nombreConductor}.</p>`,
+          "Nueva inspección con daños registrada",
+        );
+      }
+
+      return { ok: true, data };
     } catch (err) {
       console.error(err);
       return { ok: false, message: err.message };
