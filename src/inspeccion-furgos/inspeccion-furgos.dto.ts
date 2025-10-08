@@ -19,6 +19,9 @@ export class InspeccionFurgos {
   estadoUso: string;
 
   @IsString()
+  km: string;
+
+  @IsString()
   // @Type(() => Date)
   fecha: string | DateTime;
 
@@ -31,10 +34,26 @@ export class InspeccionFurgos {
   observaciones: string;
 }
 
-// export class FurgonetaDto {
-//   @IsString()
-//   matricula: string;
-// }
+export class FurgonetaDto {
+  @IsString()
+  propietario: string;
+
+  @IsString()
+  marca: string;
+
+  @IsString()
+  modelo: string;
+
+  @IsString()
+  matricula: string;
+
+  @IsString()
+  fechaMatriculacion: string;
+
+  @IsOptional()
+  @IsString()
+  conductor: string;
+}
 
 export class PreguntasDaños {
   @IsString()

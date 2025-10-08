@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { MongoService } from "../mongo/mongo.service";
 import { ObjectId } from "mongodb";
-import { InspeccionFurgos } from "./inspeccion-furgos.dto";
+import { FurgonetaDto, InspeccionFurgos } from "./inspeccion-furgos.dto";
 
 @Injectable()
 export class InspeccionFurgosDatabes {
@@ -12,10 +12,10 @@ export class InspeccionFurgosDatabes {
     return db.collection<InspeccionFurgos>("inspeccionesFurgos");
   }
 
-  // private async getCollection2() {
-  //   const db = (await this.mongoDbService.getConexion()).db();
-  //   return db.collection<FurgonetaDto>("furgonetas");
-  // }
+  private async getCollection2() {
+    const db = (await this.mongoDbService.getConexion()).db();
+    return db.collection<FurgonetaDto>("furgonetas");
+  }
 
   async nuevaInspeccion(inspeccion: InspeccionFurgos) {
     const collection = await this.getCollection();
@@ -49,25 +49,30 @@ export class InspeccionFurgosDatabes {
     if (resDelete.deletedCount > 0) return true;
     throw new Error("No se ha podido borrar la inspección de furgo");
   }
+  async crearFurgoneta(furgoneta: FurgonetaDto) {
+    const collection = await this.getCollection2();
 
-  // async crearFurgoneta(matricula: string) {
-  //   const collection = await this.getCollection2();
+    const existe = await collection.findOne({ matricula: furgoneta.matricula });
+    if (existe) {
+      throw new Error("Ya existe una furgoneta con esa matrícula");
+    }
 
-  //   const existe = await collection.findOne({ matricula });
-  //   if (existe) {
-  //     throw new Error("Ya existe una furgoneta con esa matrícula");
-  //   }
+    const resInsert = await collection.insertOne({
+      propietario: furgoneta.propietario?.trim() || "",
+      marca: furgoneta.marca?.trim() || "",
+      modelo: furgoneta.modelo?.trim() || "",
+      matricula: furgoneta.matricula.toUpperCase(),
+      fechaMatriculacion: furgoneta.fechaMatriculacion || "",
+      conductor: furgoneta.conductor?.trim() || "",
+    });
 
-  //   const resInsert = await collection.insertOne({
-  //     matricula,
-  //   });
+    if (resInsert.acknowledged) return resInsert.insertedId;
 
-  //   if (resInsert.acknowledged) return resInsert.insertedId;
-  //   throw new Error("No se ha podido crear la furgoneta");
-  // }
+    throw new Error("No se ha podido crear la furgoneta");
+  }
 
-  // async getAllFurgonetas() {
-  //   const collection = await this.getCollection2();
-  //   return await collection.find({}).toArray();
-  // }
+  async getAllFurgonetas() {
+    const collection = await this.getCollection2();
+    return await collection.find({}).toArray();
+  }
 }

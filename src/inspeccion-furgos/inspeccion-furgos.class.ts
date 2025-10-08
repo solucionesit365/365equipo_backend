@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { InspeccionFurgosDatabes } from "./inspeccion-furgos.mongodb";
-import { InspeccionFurgos } from "./inspeccion-furgos.dto";
+import { FurgonetaDto, InspeccionFurgos } from "./inspeccion-furgos.dto";
 
 @Injectable()
 export class InspeccionFurgosClass {
@@ -39,16 +39,21 @@ export class InspeccionFurgosClass {
     return this.schInspeccionesFurgos.borrarInspeccion(_id);
   }
 
-  // async crearFurgoneta(furgoneta: FurgonetaDto) {
-  //   const insertFurgoneta = await this.schInspeccionesFurgos.crearFurgoneta(
-  //     furgoneta.matricula,
-  //   );
-  //   if (insertFurgoneta) return true;
+  async crearFurgoneta(furgoneta: FurgonetaDto) {
+    const insertFurgoneta = await this.schInspeccionesFurgos.crearFurgoneta({
+      propietario: furgoneta.propietario,
+      marca: furgoneta.marca,
+      modelo: furgoneta.modelo,
+      matricula: furgoneta.matricula,
+      fechaMatriculacion: furgoneta.fechaMatriculacion,
+      conductor: furgoneta.conductor,
+    });
 
-  //   throw new Error("No se ha podido insertar la inspección de furgo");
-  // }
+    if (insertFurgoneta) return true;
+    throw new Error("No se ha podido crear la furgoneta");
+  }
 
-  // async getAllFurgonetas() {
-  //   return this.schInspeccionesFurgos.getAllFurgonetas();
-  // }
+  async getAllFurgonetas() {
+    return this.schInspeccionesFurgos.getAllFurgonetas();
+  }
 }

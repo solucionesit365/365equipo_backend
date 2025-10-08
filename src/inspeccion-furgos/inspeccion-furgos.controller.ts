@@ -9,7 +9,7 @@ import {
 } from "@nestjs/common";
 import { InspeccionFurgosClass } from "./inspeccion-furgos.class";
 import { AuthGuard } from "../guards/auth.guard";
-import { InspeccionFurgos } from "./inspeccion-furgos.dto";
+import { FurgonetaDto, InspeccionFurgos } from "./inspeccion-furgos.dto";
 import { DateTime } from "luxon";
 import { EmailService } from "../email/email.class";
 
@@ -27,6 +27,7 @@ export class InspeccionFurgosController {
       const data = await this.inspeccionesInstance.nuevaInspeccion({
         checklist: inspeccion.checklist,
         estadoUso: inspeccion.estadoUso,
+        km: inspeccion.km,
         fecha: DateTime.fromISO(inspeccion.fecha as string),
         matricula: inspeccion.matricula,
         nombreConductor: inspeccion.nombreConductor,
@@ -112,31 +113,34 @@ export class InspeccionFurgosController {
   //   }
   // }
 
-  // @UseGuards(AuthGuard)
-  // @Post("crear-furgoneta")
-  // async crearFurgoneta(@Body() matricula: FurgonetaDto) {
-  //   try {
-  //     const resultado = await this.inspeccionesInstance.crearFurgoneta(
-  //       matricula,
-  //     );
-  //     return { ok: true, data: resultado };
-  //   } catch (err) {
-  //     console.error(err);
-  //     return { ok: false, message: err.message };
-  //   }
-  // }
+  @UseGuards(AuthGuard)
+  @Post("crear-furgoneta")
+  async crearFurgoneta(@Body() furgoneta: FurgonetaDto) {
+    console.log("Crear furgoneta");
+    console.log(furgoneta);
 
-  // @UseGuards(AuthGuard)
-  // @Get("allFurgonetas")
-  // async getAllFurgonetas() {
-  //   try {
-  //     return {
-  //       ok: true,
-  //       data: await this.inspeccionesInstance.getAllFurgonetas(),
-  //     };
-  //   } catch (err) {
-  //     console.error(err);
-  //     return { ok: false, message: err.message };
-  //   }
-  // }
+    try {
+      const resultado = await this.inspeccionesInstance.crearFurgoneta(
+        furgoneta,
+      );
+      return { ok: true, data: resultado };
+    } catch (err) {
+      console.error(err);
+      return { ok: false, message: err.message };
+    }
+  }
+
+  @UseGuards(AuthGuard)
+  @Get("allFurgonetas")
+  async getAllFurgonetas() {
+    try {
+      return {
+        ok: true,
+        data: await this.inspeccionesInstance.getAllFurgonetas(),
+      };
+    } catch (err) {
+      console.error(err);
+      return { ok: false, message: err.message };
+    }
+  }
 }
