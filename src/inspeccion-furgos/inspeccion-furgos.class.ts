@@ -4,6 +4,8 @@ import { FurgonetaDto, InspeccionFurgos } from "./inspeccion-furgos.dto";
 
 @Injectable()
 export class InspeccionFurgosClass {
+  prisma: any;
+  furgonetaModel: any;
   constructor(
     private readonly schInspeccionesFurgos: InspeccionFurgosDatabes,
   ) {}
@@ -55,5 +57,23 @@ export class InspeccionFurgosClass {
 
   async getAllFurgonetas() {
     return this.schInspeccionesFurgos.getAllFurgonetas();
+  }
+
+  async actualizarFurgoneta(id: string, furgoneta: FurgonetaDto) {
+    try {
+      const updated = await this.schInspeccionesFurgos.actualizarFurgoneta(
+        id,
+        furgoneta,
+      );
+
+      if (!updated) {
+        throw new Error("Furgoneta no encontrada o no actualizada");
+      }
+
+      return updated;
+    } catch (err) {
+      console.error("Error en actualizarFurgoneta:", err);
+      throw err;
+    }
   }
 }

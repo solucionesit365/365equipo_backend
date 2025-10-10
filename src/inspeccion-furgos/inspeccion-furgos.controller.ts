@@ -6,6 +6,7 @@ import {
   Get,
   Delete,
   Param,
+  Put,
 } from "@nestjs/common";
 import { InspeccionFurgosClass } from "./inspeccion-furgos.class";
 import { AuthGuard } from "../guards/auth.guard";
@@ -140,6 +141,28 @@ export class InspeccionFurgosController {
       };
     } catch (err) {
       console.error(err);
+      return { ok: false, message: err.message };
+    }
+  }
+
+  @UseGuards(AuthGuard)
+  @Put("actualizar-furgoneta/:id")
+  async actualizarFurgoneta(
+    @Param("id") id: string,
+    @Body() furgoneta: FurgonetaDto,
+  ) {
+    try {
+      const resultado = await this.inspeccionesInstance.actualizarFurgoneta(
+        id,
+        furgoneta,
+      );
+      return {
+        ok: true,
+        message: "Furgoneta actualizada correctamente",
+        data: resultado,
+      };
+    } catch (err) {
+      console.error("Error actualizando furgoneta:", err);
       return { ok: false, message: err.message };
     }
   }

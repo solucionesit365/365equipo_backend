@@ -18,8 +18,9 @@ export class InspeccionFurgos {
   @IsString()
   estadoUso: string;
 
-  @IsString()
-  km: string;
+  @IsOptional()
+  @IsInt()
+  km: number | null;
 
   @IsString()
   // @Type(() => Date)

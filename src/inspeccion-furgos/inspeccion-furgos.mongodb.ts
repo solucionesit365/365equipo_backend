@@ -75,4 +75,29 @@ export class InspeccionFurgosDatabes {
     const collection = await this.getCollection2();
     return await collection.find({}).toArray();
   }
+
+  async actualizarFurgoneta(id: string, furgoneta: FurgonetaDto) {
+    const collection = await this.getCollection2();
+
+    const resUpdate = await collection.findOneAndUpdate(
+      { _id: new ObjectId(id) },
+      {
+        $set: {
+          propietario: furgoneta.propietario?.trim() || "",
+          marca: furgoneta.marca?.trim() || "",
+          modelo: furgoneta.modelo?.trim() || "",
+          matricula: furgoneta.matricula?.toUpperCase() || "",
+          fechaMatriculacion: furgoneta.fechaMatriculacion || "",
+          conductor: furgoneta.conductor?.trim() || "",
+        },
+      },
+      { returnDocument: "after" }, // 👈 devuelve el documento actualizado
+    );
+
+    if (!resUpdate.value) {
+      throw new Error("No se ha podido actualizar la furgoneta o no existe");
+    }
+
+    return resUpdate.value;
+  }
 }
