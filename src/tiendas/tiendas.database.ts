@@ -42,4 +42,19 @@ export class TiendaDatabaseService {
 
     return respSolicitudes;
   }
+
+  async addTiendas2(nuevas: Tiendas2[]) {
+    try {
+      const db = (await this.mongoDbService.getConexion()).db();
+      const tiendasCollection = db.collection<Tiendas2>("tiendas");
+      const result = await tiendasCollection.insertMany(nuevas);
+      console.log("Insert result:", result);
+      return !!result.insertedCount;
+    } catch (err) {
+      console.error("Error al insertar tiendas en MongoDB:", err);
+      throw new InternalServerErrorException(
+        "Error al insertar tiendas en MongoDB",
+      );
+    }
+  }
 }

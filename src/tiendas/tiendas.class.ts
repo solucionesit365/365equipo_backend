@@ -7,6 +7,7 @@ import {
 import { Trabajador, Tienda as TTienda } from "@prisma/client";
 import { TrabajadorService } from "../trabajadores/trabajadores.class";
 import { TiendaDatabaseService } from "./tiendas.database";
+import { Tiendas2 } from "./tiendas.dto";
 
 @Injectable()
 export class Tienda {
@@ -103,10 +104,24 @@ export class Tienda {
 
   async getTiendas2() {
     try {
-      return this.ordenarTiendas(await this.schTiendas.geTiendas2() as any);
+      return this.ordenarTiendas((await this.schTiendas.geTiendas2()) as any);
     } catch (err) {
       console.log(err);
       throw new InternalServerErrorException("Error al obtener las tiendas");
+    }
+  }
+
+  async addTiendas2(nuevas: Tiendas2[]) {
+    try {
+      const result = await this.schTiendas.addTiendas2(nuevas);
+      if (!result)
+        throw new InternalServerErrorException("No se insertaron tiendas");
+      return true;
+    } catch (err) {
+      console.error("Error al agregar tiendas a MongoDB:", err);
+      throw new InternalServerErrorException(
+        "Error al agregar tiendas a MongoDB",
+      );
     }
   }
 }
