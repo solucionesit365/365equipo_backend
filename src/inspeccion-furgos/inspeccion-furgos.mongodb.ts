@@ -7,30 +7,30 @@ import { FurgonetaDto, InspeccionFurgos } from "./inspeccion-furgos.dto";
 export class InspeccionFurgosDatabes {
   constructor(private readonly mongoDbService: MongoService) {}
 
-  private async getCollection() {
+  private async getCollectionInspecciones() {
     const db = (await this.mongoDbService.getConexion()).db();
     return db.collection<InspeccionFurgos>("inspeccionesFurgos");
   }
 
-  private async getCollection2() {
+  private async getCollectionFurgonetas() {
     const db = (await this.mongoDbService.getConexion()).db();
     return db.collection<FurgonetaDto>("furgonetas");
   }
 
   async nuevaInspeccion(inspeccion: InspeccionFurgos) {
-    const collection = await this.getCollection();
+    const collection = await this.getCollectionInspecciones();
     const resInsert = await collection.insertOne(inspeccion);
     if (resInsert.acknowledged) return resInsert.insertedId;
     throw new Error("No se ha podido insertar la inspección de furgo");
   }
 
   async getAllInspecciones() {
-    const collection = await this.getCollection();
-    return await collection.find({}).toArray();
+    const collection = await this.getCollectionInspecciones();
+    return await collection.find({}).sort({ fecha: -1 }).toArray();
   }
 
   async getInspeccionesByMatricula(matricula: string) {
-    const collection = await this.getCollection();
+    const collection = await this.getCollectionInspecciones();
     return await collection.find({ matricula }).toArray();
   }
 
@@ -44,13 +44,13 @@ export class InspeccionFurgosDatabes {
   // }
 
   async borrarInspeccion(_id: string) {
-    const collection = await this.getCollection();
+    const collection = await this.getCollectionInspecciones();
     const resDelete = await collection.deleteOne({ _id: new ObjectId(_id) });
     if (resDelete.deletedCount > 0) return true;
     throw new Error("No se ha podido borrar la inspección de furgo");
   }
   async crearFurgoneta(furgoneta: FurgonetaDto) {
-    const collection = await this.getCollection2();
+    const collection = await this.getCollectionFurgonetas();
 
     const existe = await collection.findOne({ matricula: furgoneta.matricula });
     if (existe) {
@@ -72,12 +72,12 @@ export class InspeccionFurgosDatabes {
   }
 
   async getAllFurgonetas() {
-    const collection = await this.getCollection2();
+    const collection = await this.getCollectionFurgonetas();
     return await collection.find({}).toArray();
   }
 
   async actualizarFurgoneta(id: string, furgoneta: FurgonetaDto) {
-    const collection = await this.getCollection2();
+    const collection = await this.getCollectionFurgonetas();
 
     const resUpdate = await collection.findOneAndUpdate(
       { _id: new ObjectId(id) },
