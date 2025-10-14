@@ -31,6 +31,7 @@ export class Tienda {
   }
 
   private ordenarTiendas(tiendas: TTienda[]): TTienda[] {
+    // console.log(tiendas);
     return tiendas.sort((a, b) => {
       const nameA = a.nombre.toLowerCase();
       const nameB = b.nombre.toLowerCase();
@@ -41,7 +42,6 @@ export class Tienda {
       if (nameA.startsWith("m--") && !nameB.startsWith("m--")) return -1;
       if (!nameA.startsWith("m--") && nameB.startsWith("m--")) return 1;
 
-      // Si no empiezan con 't--' ni 'm--', se ordenan alfabéticamente
       return nameA.localeCompare(nameB);
     });
   }
@@ -111,17 +111,22 @@ export class Tienda {
     }
   }
 
-  async addTiendas2(nuevas: Tiendas2[]) {
+  async addTiendas2(nuevas: Tiendas2) {
     try {
       const result = await this.schTiendas.addTiendas2(nuevas);
-      if (!result)
-        throw new InternalServerErrorException("No se insertaron tiendas");
-      return true;
+      if (!result) return true;
     } catch (err) {
-      console.error("Error al agregar tiendas a MongoDB:", err);
-      throw new InternalServerErrorException(
-        "Error al agregar tiendas a MongoDB",
-      );
+      console.error("Error al agregar tiendas a MongoDB:", err.message);
+    }
+  }
+
+  async editTienda(tienda: Tiendas2) {
+    try {
+      const result = await this.schTiendas.editTienda(tienda);
+      return result;
+    } catch (err) {
+      console.error("Error al editar tienda en MongoDB:", err.message);
+      return false;
     }
   }
 }

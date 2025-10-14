@@ -63,8 +63,9 @@ export class TiendasController {
 
   @UseGuards(AuthGuard)
   @Post("addTiendas2")
-  async addTiendas2(@Body() tiendas: Tiendas2[]) {
+  async addTiendas2(@Body() tiendas: Tiendas2) {
     try {
+      console.log("Recibido en controlador:", tiendas);
       const ok = await this.tiendasInstance.addTiendas2(tiendas);
       return {
         ok,
