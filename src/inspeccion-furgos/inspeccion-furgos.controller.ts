@@ -41,7 +41,7 @@ export class InspeccionFurgosController {
 
       if (hayDanos) {
         await this.emailService.enviarEmail(
-          "maragarcia@grupohorreols.com",
+          "jaafaralanti@grupohorreols.com",
           `<p>Se ha registrado una nueva inspección con <b>DAÑOS</b> para la furgoneta <b>${inspeccion.matricula}</b> por ${inspeccion.nombreConductor}.</p>`,
           "Nueva inspección con daños registrada",
         );
