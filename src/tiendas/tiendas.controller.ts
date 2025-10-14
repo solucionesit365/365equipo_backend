@@ -78,4 +78,19 @@ export class TiendasController {
       return { ok: false, message: err.message };
     }
   }
+
+  @UseGuards(AuthGuard)
+  @Post("editTienda")
+  async editTienda(@Body() tiendas: Tiendas2) {
+    try {
+      const ok = await this.tiendasInstance.editTienda(tiendas);
+      return {
+        ok,
+        message: ok ? "Tienda editada correctamente" : "No se editó la tienda",
+      };
+    } catch (err) {
+      console.error("Error al editar tienda:", err);
+      return { ok: false, message: err.message };
+    }
+  }
 }
