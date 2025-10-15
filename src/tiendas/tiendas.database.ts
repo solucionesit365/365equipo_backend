@@ -70,4 +70,17 @@ export class TiendaDatabaseService {
       return false;
     }
   }
+
+  async deleteTienda(id: number) {
+    try {
+      const db = (await this.mongoDbService.getConexion()).db();
+      const tiendasCollection = db.collection<Tiendas2>("tiendas");
+      const result = await tiendasCollection.deleteOne({ id });
+      console.log("Delete result:", result);
+      return result.deletedCount > 0;
+    } catch (err) {
+      console.error("Error al eliminar tienda en MongoDB:", err);
+      return false;
+    }
+  }
 }

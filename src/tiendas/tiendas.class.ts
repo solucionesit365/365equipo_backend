@@ -129,4 +129,14 @@ export class Tienda {
       return false;
     }
   }
+
+  async deleteTienda(id: number) {
+    try {
+      const result = await this.schTiendas.deleteTienda(id);
+      return result;
+    } catch (err) {
+      console.error("Error al eliminar tienda en MongoDB:", err.message);
+      return false;
+    }
+  }
 }

@@ -93,4 +93,21 @@ export class TiendasController {
       return { ok: false, message: err.message };
     }
   }
+
+  @UseGuards(AuthGuard)
+  @Post("deleteTienda")
+  async deleteTienda(@Body("id") id: number) {
+    try {
+      const ok = await this.tiendasInstance.deleteTienda(id);
+      return {
+        ok,
+        message: ok
+          ? "Tienda eliminada correctamente"
+          : "No se eliminó la tienda",
+      };
+    } catch (err) {
+      console.error("Error al eliminar tienda:", err);
+      return { ok: false, message: err.message };
+    }
+  }
 }

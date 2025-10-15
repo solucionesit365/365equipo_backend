@@ -33,6 +33,7 @@ export class SolicitudesVacacionesService {
         await this.schSolicitudVacaciones.nuevaSolicitudVacaciones(
           solicitudVacaciones,
         );
+      console.log(insertSolicitudVacaciones);
       if (insertSolicitudVacaciones) return true;
 
       throw Error("No se ha podido insertar la nueva solicitud de vacaciones");
