@@ -13,5 +13,6 @@ import { PushNotificationToUserController } from "./PushNotificationToUser/PushN
     },
   ],
   controllers: [PushNotificationToUserController],
+  exports: [IPushNotificationToUserUseCase],
 })
 export class PushNotificationModule {}
