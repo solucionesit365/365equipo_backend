@@ -1,0 +1,847 @@
+================================================================================
+           AUDITORÍA COMPLETA DE ENDPOINTS - 365equipo
+================================================================================
+
+Fecha de análisis: 2025-10-13
+Backend: /Users/eze/GitHub/365equipo_backend
+Frontend: /Users/eze/GitHub/365equipo_v2
+
+================================================================================
+                              RESUMEN EJECUTIVO
+================================================================================
+
+Total de endpoints en backend:          397
+Endpoints EN USO desde frontend:        39 (9.8%)
+Endpoints NO USADOS:                    335 (84.4%)
+Endpoints con SchedulerGuard:           23 (5.8%)
+Rutas únicas encontradas en frontend:   161
+
+HALLAZGOS IMPORTANTES:
+- 84.4% de los endpoints NO están siendo utilizados por el frontend
+- 56 endpoints sin guards (potencial riesgo de seguridad)
+- Solo el 9.8% de los endpoints son llamados activamente desde el frontend
+- Los controladores con más endpoints no usados son: trabajadores (20),
+  incidencias (14), auditorias (13)
+
+================================================================================
+              SECCIÓN 1: ENDPOINTS EN USO (39 endpoints)
+================================================================================
+
+Estos endpoints SÍ están siendo llamados desde el frontend:
+
+1. [GET] /
+   Guards: ninguno
+   Controlador: src/app.controller.ts
+
+2. [GET] /anuncios
+   Guards: AuthGuard
+   Controlador: src/anuncios/anuncios.controller.ts
+
+3. [GET] /cuadrantes
+   Guards: AuthGuard
+   Controlador: src/cuadrantes/cuadrantes.controller.ts
+
+4. [POST] /evaluaciones/addILUO
+   Guards: AuthGuard
+   Controlador: src/evaluaciones/evaluaciones.controller.ts
+
+5. [POST] /evaluaciones/addPlantilla
+   Guards: AuthGuard
+   Controlador: src/evaluaciones/evaluaciones.controller.ts
+
+6. [POST] /fichajes-validados/actualizarValidados
+   Guards: AuthGuard
+   Controlador: src/fichajes-validados/fichajes-validados.controller.ts
+
+7. [POST] /fichajes-validados/addFichajeValidado
+   Guards: AuthGuard
+   Controlador: src/fichajes-validados/fichajes-validados.controller.ts
+
+8. [GET] /fichajes-validados/getFichajesPagar
+   Guards: AuthGuard
+   Controlador: src/fichajes-validados/fichajes-validados.controller.ts
+
+9. [GET] /fichajes-validados/getFichajesValidados
+   Guards: AuthGuard
+   Controlador: src/fichajes-validados/fichajes-validados.controller.ts
+
+10. [GET] /fichajes-validados/getTiendaDia
+    Guards: AuthGuard
+    Controlador: src/fichajes-validados/fichajes-validados.controller.ts
+
+11. [GET] /fichajes-validados/getTiendaRango
+    Guards: AuthGuard
+    Controlador: src/fichajes-validados/fichajes-validados.controller.ts
+
+12. [POST] /fichajes/updateFichaje
+    Guards: AuthGuard
+    Controlador: src/fichajes-bc/fichajes.controller.ts
+
+13. [POST] /graph
+    Guards: SchedulerGuard
+    Controlador: src/graph/graph.controller.ts
+
+14. [GET] /graph/allUsers
+    Guards: ninguno
+    Controlador: src/graph/graph.controller.ts
+
+15. [POST] /graph/bookRoom
+    Guards: ninguno
+    Controlador: src/graph/graph.controller.ts
+
+16. [POST] /incidencias/updateIncidenciaMensajes
+    Guards: AuthGuard
+    Controlador: src/incidencias/incidencias.controller.ts
+
+17. [GET] /logger
+    Guards: AuthGuard, RoleGuard
+    Controlador: src/logger/logger.controller.ts
+
+18. [POST] /notificacion-horas-extras/deleteNotificacionHorasExtras
+    Guards: AuthGuard
+    Controlador: src/notificacion-horas-extras/notificacion-horas-extras.controller.ts
+
+19. [POST] /notificacion-horas-extras/updateNotificacionHorasExtras
+    Guards: AuthGuard
+    Controlador: src/notificacion-horas-extras/notificacion-horas-extras.controller.ts
+
+20. [POST] /notificacion-horas-extras/updateNotificacionHorasExtrasApagar
+    Guards: AuthGuard
+    Controlador: src/notificacion-horas-extras/notificacion-horas-extras.controller.ts
+
+21. [POST] /notificacion-horas-extras/updateNotificacionHorasExtrasComentario
+    Guards: AuthGuard
+    Controlador: src/notificacion-horas-extras/notificacion-horas-extras.controller.ts
+
+22. [POST] /notificacion-horas-extras/updateNotificacionHorasExtrasRevision
+    Guards: AuthGuard
+    Controlador: src/notificacion-horas-extras/notificacion-horas-extras.controller.ts
+
+23. [POST] /notificacion-horas-extras/updateUltimoLeido
+    Guards: AuthGuard
+    Controlador: src/notificacion-horas-extras/notificacion-horas-extras.controller.ts
+
+24. [POST] /notificar-ampliacion-contratos/deleteNotificarAmpliacionContratos
+    Guards: AuthGuard
+    Controlador: src/notificar-ampliacion-contratos/notificar-ampliacion-contratos.controller.ts
+
+25. [POST] /notificar-ampliacion-contratos/updateComentarioNotificarAmpliacionContratos
+    Guards: AuthGuard
+    Controlador: src/notificar-ampliacion-contratos/notificar-ampliacion-contratos.controller.ts
+
+26. [POST] /notificar-ampliacion-contratos/updateNotificarAmpliacionContratos
+    Guards: AuthGuard
+    Controlador: src/notificar-ampliacion-contratos/notificar-ampliacion-contratos.controller.ts
+
+27. [POST] /notificar-ampliacion-contratos/updateNotificarAmpliacionContratosAmpliacion
+    Guards: AuthGuard
+    Controlador: src/notificar-ampliacion-contratos/notificar-ampliacion-contratos.controller.ts
+
+28. [POST] /notificar-ampliacion-contratos/updateNotificarAmpliacionContratosEscritoEnviado
+    Guards: AuthGuard
+    Controlador: src/notificar-ampliacion-contratos/notificar-ampliacion-contratos.controller.ts
+
+29. [POST] /notificar-ampliacion-contratos/updateNotificarAmpliacionContratosFirmaGuardado
+    Guards: AuthGuard
+    Controlador: src/notificar-ampliacion-contratos/notificar-ampliacion-contratos.controller.ts
+
+30. [POST] /notificar-ampliacion-contratos/updateNotificarAmpliacionContratosVueltaJornada
+    Guards: AuthGuard
+    Controlador: src/notificar-ampliacion-contratos/notificar-ampliacion-contratos.controller.ts
+
+31. [POST] /notificar-ampliacion-contratos/updateUltimoLeido
+    Guards: ninguno
+    Controlador: src/notificar-ampliacion-contratos/notificar-ampliacion-contratos.controller.ts
+
+32. [GET] /pactado-vs-real
+    Guards: AuthGuard
+    Controlador: src/pactado-vs-real/pactado-vs-real.controller.ts
+
+33. [GET] /pactado-vs-real/informePactadoVsReal
+    Guards: AuthGuard
+    Controlador: src/pactado-vs-real/pactado-vs-real.controller.ts
+
+34. [GET] /trabajadores
+    Guards: AuthGuard
+    Controlador: src/trabajadores/trabajadores.controller.ts
+
+35. [GET] /trabajadores/getTrabajadoresByTienda
+    Guards: AuthGuard
+    Controlador: src/trabajadores/trabajadores.controller.ts
+
+36. [POST] /trabajadores/restaurar
+    Guards: AuthGuard
+    Controlador: src/trabajadores/trabajadores.controller.ts
+
+37. [GET] /turnos/cuadranteSemanaTrabajador
+    Guards: AuthGuard
+    Controlador: src/turno/controllers/GetTurnoSemanaTrabajador.controller.ts
+
+38. [GET] /turnos/getCuadranteSupers
+    Guards: AuthGuard
+    Controlador: src/turno/controllers/GetTurnosSupers.controller.ts
+
+39. [POST] /verificacionmfa/deleteVerificacionMFA
+    Guards: AuthGuard
+    Controlador: src/verificacion-mfa/verificacionmfa.controller.ts
+
+
+================================================================================
+           SECCIÓN 2: ENDPOINTS NO USADOS (335 endpoints)
+================================================================================
+
+Estos endpoints NO están siendo llamados desde el frontend:
+
+--------------------------------------------------------------------------------
+Admin (3 endpoints no usados)
+--------------------------------------------------------------------------------
+1. [POST] /admin/impersonate - Guards: ninguno
+2. [POST] /admin/setAdminRole - Guards: FirebaseAuthGuard
+3. [POST] /admin/signInWithCustomToken - Guards: ninguno
+
+--------------------------------------------------------------------------------
+Anuncios (4 endpoints no usados)
+--------------------------------------------------------------------------------
+4. [POST] /anuncios/addAnuncio - Guards: AuthGuard
+5. [POST] /anuncios/deleteAnuncio - Guards: AuthGuard
+6. [POST] /anuncios/enviar-candidato - Guards: ninguno
+7. [POST] /anuncios/updateAnuncio - Guards: AuthGuard
+
+--------------------------------------------------------------------------------
+Archivo Digital (7 endpoints no usados)
+--------------------------------------------------------------------------------
+8. [POST] /archivo-digital/deleteArchivo - Guards: AuthGuard
+9. [GET] /archivo-digital/getArchivos - Guards: AuthGuard
+10. [GET] /archivo-digital/getArchivosByCreacion - Guards: AuthGuard
+11. [GET] /archivo-digital/getArchivosByPropietario - Guards: AuthGuard
+12. [GET] /archivo-digital/getArchivosByPropietarioAndTipo - Guards: AuthGuard
+13. [GET] /archivo-digital/getArchivosByTipo - Guards: AuthGuard
+14. [POST] /archivo-digital/nuevoArchivo - Guards: AuthGuard
+
+--------------------------------------------------------------------------------
+Auditorías (13 endpoints no usados)
+--------------------------------------------------------------------------------
+15. [POST] /auditorias/deleteAuditoria - Guards: AuthGuard
+16. [GET] /auditorias/getAuditorias - Guards: AuthGuard
+17. [GET] /auditorias/getAuditoriasHabilitado - Guards: AuthGuard
+18. [GET] /auditorias/getAuditoriasTienda - Guards: AuthGuard
+19. [GET] /auditorias/getAuditoriasTiendas - Guards: AuthGuard
+20. [GET] /auditorias/getRespuestaAuditorias - Guards: AuthGuard
+21. [POST] /auditorias/nuevaAuditoria - Guards: AuthGuard
+22. [POST] /auditorias/respuestasAuditorias - Guards: AuthGuard
+23. [GET] /auditorias/tiendasAuditoria - Guards: AuthGuard
+24. [POST] /auditorias/updateAuditoria - Guards: AuthGuard
+25. [POST] /auditorias/updateAuditoriaRespuestas - Guards: AuthGuard
+26. [POST] /auditorias/updateDeshabilitarAuditoria - Guards: AuthGuard
+27. [POST] /auditorias/updateHabilitarAuditoria - Guards: AuthGuard
+
+--------------------------------------------------------------------------------
+Ausencias (6 endpoints no usados)
+--------------------------------------------------------------------------------
+28. [POST] /ausencias/deleteAusencia - Guards: AuthGuard
+29. [GET] /ausencias/getAusencias - Guards: AuthGuard
+30. [GET] /ausencias/getAusenciasTrabajador - Guards: AuthGuard
+31. [POST] /ausencias/nueva - Guards: AuthGuard
+32. [POST] /ausencias/updateAusencia - Guards: AuthGuard
+33. [POST] /ausencias/updateAusenciaResto - Guards: AuthGuard
+
+--------------------------------------------------------------------------------
+Biometría (2 endpoints no usados)
+--------------------------------------------------------------------------------
+34. [POST] /biometria/register - Guards: AuthGuard
+35. [POST] /biometria/register-options - Guards: AuthGuard
+
+--------------------------------------------------------------------------------
+Cálculo Nóminas (6 endpoints no usados)
+--------------------------------------------------------------------------------
+36. [GET] /calculo-nominas/all - Guards: ninguno
+37. [GET] /calculo-nominas/hcompl - Guards: AuthGuard
+38. [GET] /calculo-nominas/pdis - Guards: AuthGuard
+39. [GET] /calculo-nominas/pdom - Guards: AuthGuard
+40. [GET] /calculo-nominas/pfest - Guards: AuthGuard
+41. [GET] /calculo-nominas/pprod - Guards: AuthGuard
+
+--------------------------------------------------------------------------------
+Calendario Festivos (9 endpoints no usados)
+--------------------------------------------------------------------------------
+42. [POST] /calendario-festivos/deleteFestivo - Guards: AuthGuard
+43. [GET] /calendario-festivos/getEventos - Guards: AuthGuard
+44. [GET] /calendario-festivos/getEventosByAsistirOrNo - Guards: AuthGuard
+45. [GET] /calendario-festivos/getFestivos - Guards: AuthGuard
+46. [GET] /calendario-festivos/getFestivosByTienda - Guards: AuthGuard
+47. [POST] /calendario-festivos/guardarRespuesta - Guards: AuthGuard
+48. [POST] /calendario-festivos/nuevoFestivo - Guards: AuthGuard
+49. [POST] /calendario-festivos/updateFestivo - Guards: AuthGuard
+50. [GET] /calendario-festivos/verificarRespuesta - Guards: AuthGuard
+
+--------------------------------------------------------------------------------
+Chat (3 endpoints no usados)
+--------------------------------------------------------------------------------
+51. [GET] /chat/history/:contactId - Guards: AuthGuard
+52. [POST] /chat/markAsRead - Guards: AuthGuard
+53. [POST] /chat/send - Guards: AuthGuard
+
+--------------------------------------------------------------------------------
+Clientes (7 endpoints no usados)
+--------------------------------------------------------------------------------
+54. [POST] /check-pin-coordinadora - Guards: ninguno
+55. [POST] /clientes/clientsForm - Guards: ninguno
+56. [GET] /clientes/confirmarEmail - Guards: ninguno
+57. [GET] /clientes/getClientesRegistrados - Guards: ninguno
+58. [GET] /clientes/test - Guards: ninguno
+59. [GET] /clientes/updateAll - Guards: ninguno
+60. [GET] /clientes/validarFlayer - Guards: ninguno
+
+--------------------------------------------------------------------------------
+Color Semanal (2 endpoints no usados)
+--------------------------------------------------------------------------------
+61. [GET] /color-semanal/getColors - Guards: AuthGuard
+62. [POST] /color-semanal/saveColorIn - Guards: AuthGuard, RoleGuard | Roles: COLOR_ADMIN
+
+--------------------------------------------------------------------------------
+Contrato (2 endpoints no usados)
+--------------------------------------------------------------------------------
+63. [GET] /contrato/getContratoByDni - Guards: AuthGuard, RoleGuard | Roles: RRHH_ADMIN
+64. [GET] /contrato/getHistoricoContratos - Guards: AuthGuard
+
+--------------------------------------------------------------------------------
+Cuadrantes (10 endpoints no usados)
+--------------------------------------------------------------------------------
+65. [POST] /copiar-turnos-por-semana - Guards: ninguno
+66. [POST] /cuadrantes/borrarTurno - Guards: AuthGuard
+67. [POST] /cuadrantes/copiarSemanaCuadrante - Guards: AuthGuard
+68. [GET] /cuadrantes/cuadranteSemanaTrabajador - Guards: AuthGuard
+69. [GET] /cuadrantes/getCuadranteSupers - Guards: AuthGuard
+70. [GET] /cuadrantes/getNewId - Guards: AuthGuard
+71. [GET] /cuadrantes/getTiendasUnaSemana - Guards: AuthGuard
+72. [GET] /cuadrantes/getTiendaTodasSemanas - Guards: AuthGuard
+73. [GET] /cuadrantes/getTodos - Guards: AuthGuard
+74. [GET] /cuadrantes/individual - Guards: AuthGuard
+75. [POST] /cuadrantes/saveCuadrante - Guards: AuthGuard
+
+--------------------------------------------------------------------------------
+Cultura365 (6 endpoints no usados)
+--------------------------------------------------------------------------------
+76. [POST] /cultura365/contadorViews - Guards: AuthGuard
+77. [POST] /cultura365/deleteVideo - Guards: AuthGuard
+78. [GET] /cultura365/getVideos - Guards: AuthGuard
+79. [POST] /cultura365/nuevoVideo - Guards: AuthGuard
+80. [POST] /cultura365/updateVideo - Guards: AuthGuard
+81. [GET] /cultura365/views - Guards: AuthGuard
+
+--------------------------------------------------------------------------------
+Día Personal (8 endpoints no usados)
+--------------------------------------------------------------------------------
+82. [POST] /delete - Guards: AuthGuard
+83. [POST] /dia-personal/borrarSolicitud - Guards: AuthGuard
+84. [POST] /dia-personal/enviarAlEmail - Guards: AuthGuard
+85. [GET] /dia-personal/getSolicitudes - Guards: AuthGuard
+86. [POST] /dia-personal/nuevaSolicitudDiaPersonal - Guards: AuthGuard
+87. [POST] /dia-personal/setEstadoSolicitud - Guards: AuthGuard
+88. [GET] /dia-personal/solicitudesSubordinadosDiaPersonal - Guards: AuthGuard
+89. [GET] /dia-personal/solicitudesTrabajador - Guards: AuthGuard
+
+--------------------------------------------------------------------------------
+Distribución Mensajes (5 endpoints no usados)
+--------------------------------------------------------------------------------
+90. [POST] /distribucion-mensajes/deleteMessage - Guards: AuthGuard
+91. [GET] /distribucion-mensajes/getAllMensajes - Guards: AuthGuard
+92. [GET] /distribucion-mensajes/getOneMessage - Guards: AuthGuard
+93. [POST] /distribucion-mensajes/nuevoMensaje - Guards: AuthGuard
+94. [POST] /distribucion-mensajes/updateOneMensaje - Guards: AuthGuard
+
+--------------------------------------------------------------------------------
+Empresa (5 endpoints no usados)
+--------------------------------------------------------------------------------
+95. [GET] /employees/getEmployees - Guards: ninguno
+96. [POST] /empresa/create - Guards: AuthGuard
+97. [POST] /empresa/delete - Guards: AuthGuard
+98. [GET] /empresa/get - Guards: AuthGuard
+99. [POST] /empresa/update - Guards: AuthGuard
+
+--------------------------------------------------------------------------------
+Encargos (4 endpoints no usados)
+--------------------------------------------------------------------------------
+100. [GET] /encargos/getAllEncargos - Guards: AuthGuard
+101. [GET] /encargos/getEncargos - Guards: AuthGuard
+102. [POST] /encargos/newEncargo - Guards: AuthGuard
+103. [POST] /encargos/updateEncargo - Guards: AuthGuard
+
+--------------------------------------------------------------------------------
+Evaluaciones (12 endpoints no usados)
+--------------------------------------------------------------------------------
+104. [POST] /evaluaciones/addEvaluacion - Guards: AuthGuard
+105. [POST] /evaluaciones/addILUORespuestas - Guards: AuthGuard
+106. [POST] /evaluaciones/deletePlantillaAdmin - Guards: AuthGuard
+107. [GET] /evaluaciones/getEvaluacionAdminRespondidas - Guards: AuthGuard
+108. [GET] /evaluaciones/getEvaluaciones - Guards: AuthGuard
+109. [GET] /evaluaciones/getEvaluados - Guards: AuthGuard
+110. [GET] /evaluaciones/getEvaluadosAdminTiendas - Guards: AuthGuard
+111. [GET] /evaluaciones/getILUORespuestas - Guards: AuthGuard
+112. [GET] /evaluaciones/getPlantillas - Guards: AuthGuard
+113. [GET] /evaluaciones/getPlantillasAdmin - Guards: AuthGuard
+114. [GET] /evaluaciones/getPlantillasILUO - Guards: AuthGuard
+115. [POST] /evaluaciones/updateFirmaEvaluado - Guards: AuthGuard
+
+--------------------------------------------------------------------------------
+FAQ (2 endpoints no usados)
+--------------------------------------------------------------------------------
+116. [GET] /faq - Guards: AuthGuard
+117. [POST] /faq/nueva-pregunta - Guards: AuthGuard
+
+--------------------------------------------------------------------------------
+Fichajes Validados (5 endpoints no usados)
+--------------------------------------------------------------------------------
+118. [GET] /fichajes-validados/getAllFichajesPagar - Guards: AuthGuard
+119. [GET] /fichajes-validados/getAllFichajesValidados - Guards: AuthGuard
+120. [GET] /fichajes-validados/getAllIdResponsableFichajesPagar - Guards: AuthGuard
+121. [GET] /fichajes-validados/getResumen - Guards: AuthGuard
+122. [GET] /fichajes-validados/getSemanasFichajesPagar - Guards: AuthGuard
+
+--------------------------------------------------------------------------------
+Fichajes (13 endpoints no usados)
+--------------------------------------------------------------------------------
+123. [POST] /fichajes/entrada - Guards: AuthGuard
+124. [GET] /fichajes/estado - Guards: AuthGuard
+125. [GET] /fichajes/fichajesByIdSql - Guards: AuthGuard
+126. [GET] /fichajes/fichajesResto - Guards: AuthGuard
+127. [POST] /fichajes/finalDescanso - Guards: AuthGuard
+128. [GET] /fichajes/getNominas - Guards: ninguno
+129. [POST] /fichajes/hayFichajesPendientes - Guards: AuthGuard
+130. [GET] /fichajes/historialFichajesDelDia - Guards: AuthGuard
+131. [POST] /fichajes/inicioDescanso - Guards: AuthGuard
+132. [GET] /fichajes/misFichajes - Guards: AuthGuard
+133. [POST] /fichajes/salida - Guards: AuthGuard
+134. [GET] /fichajes/sinValidar - Guards: AuthGuard
+135. [GET] /fichajes/tiempoDescansoTotalDia - Guards: AuthGuard
+
+--------------------------------------------------------------------------------
+Firebase (1 endpoint no usado)
+--------------------------------------------------------------------------------
+136. [POST] /firebase/update - Guards: AuthGuard
+
+--------------------------------------------------------------------------------
+Formación (7 endpoints no usados)
+--------------------------------------------------------------------------------
+137. [GET] /formacion - Guards: AuthGuard
+138. [POST] /formacion/compartir/grupo - Guards: AuthGuard
+139. [POST] /formacion/compartir/manual - Guards: AuthGuard
+140. [POST] /formacion/create - Guards: AuthGuard
+141. [POST] /formacion/delete - Guards: AuthGuard
+142. [GET] /formacion/id - Guards: AuthGuard
+143. [POST] /formacion/update - Guards: AuthGuard
+
+--------------------------------------------------------------------------------
+Devices (2 endpoints no usados)
+--------------------------------------------------------------------------------
+144. [GET] /get-all-devices - Guards: AuthGuard
+145. [GET] /get-all-devices/getStatus - Guards: AuthGuard
+
+--------------------------------------------------------------------------------
+Varios Endpoints Get (8 endpoints no usados)
+--------------------------------------------------------------------------------
+146. [GET] /get-ausencias - Guards: ninguno
+147. [GET] /get-equipo-coordinadora-por-tienda - Guards: ninguno
+148. [GET] /get-tiendas - Guards: AuthGuard, RoleGuard | Roles: RRHH_ADMIN
+149. [GET] /get-tiendas-del-supervisor - Guards: AuthGuard
+150. [GET] /get-trabajadores - Guards: AuthGuard, RoleGuard | Roles: SUPER_ADMIN, RRHH_ADMIN
+151. [GET] /get-turnos-semanales-trabajador - Guards: AuthGuard
+152. [GET] /get-user-notification-devices - Guards: ninguno
+153. [GET] /GetTurnosEquipoCoordinadora - Guards: AuthGuard
+
+--------------------------------------------------------------------------------
+Graph (2 endpoints no usados)
+--------------------------------------------------------------------------------
+154. [GET] /graph/checkDisponibilidadRoom - Guards: ninguno
+155. [GET] /graph/rooms - Guards: ninguno
+
+--------------------------------------------------------------------------------
+Hardware (5 endpoints no usados)
+--------------------------------------------------------------------------------
+156. [GET] /hardware/getHardware - Guards: AuthGuard
+157. [POST] /hardware/newFromHardwareTool - Guards: HardwareToolGuard
+158. [POST] /hardware/newHardware - Guards: AuthGuard
+159. [POST] /hardware/updateHardware - Guards: AuthGuard
+160. [POST] /hardware/updateHardwareAll - Guards: AuthGuard
+
+--------------------------------------------------------------------------------
+Incidencias (14 endpoints no usados)
+--------------------------------------------------------------------------------
+161. [POST] /incidencias/deleteIncidencia - Guards: AuthGuard
+162. [GET] /incidencias/getIncidencias - Guards: AuthGuard
+163. [GET] /incidencias/getIncidenciasByCategoria - Guards: AuthGuard
+164. [GET] /incidencias/getIncidenciasByCategoriaRrhh - Guards: AuthGuard
+165. [GET] /incidencias/getIncidenciasByPrioridad - Guards: AuthGuard
+166. [GET] /incidencias/getIncidenciasByPrioridadRrhh - Guards: AuthGuard
+167. [GET] /incidencias/getIncidenciasByUid - Guards: AuthGuard
+168. [GET] /incidencias/getIncidenciasEstado - Guards: AuthGuard
+169. [GET] /incidencias/getIncidenciasEstadoRrhh - Guards: AuthGuard
+170. [GET] /incidencias/getIncidenciasRrhh - Guards: AuthGuard
+171. [POST] /incidencias/nuevaIncidencia - Guards: AuthGuard
+172. [POST] /incidencias/nuevaIncidenciaInvitado - Guards: ninguno
+173. [POST] /incidencias/updateIncidenciaDestinatario - Guards: AuthGuard
+174. [POST] /incidencias/updateIncidenciaEstado - Guards: AuthGuard
+
+--------------------------------------------------------------------------------
+Inspección Fichajes (4 endpoints no usados)
+--------------------------------------------------------------------------------
+175. [POST] /inspeccionFichajes/createInspeccionFichajes - Guards: AuthGuard
+176. [GET] /inspeccionFichajes/getInspeccionFichajes - Guards: AuthGuard
+177. [POST] /inspeccionFichajes/updateInspeccionFichajes - Guards: ninguno
+178. [GET] /inspeccionFichajes/validarPin - Guards: ninguno
+
+--------------------------------------------------------------------------------
+KPI Tiendas (5 endpoints no usados)
+--------------------------------------------------------------------------------
+179. [POST] /kpi-tiendas/borrarKpiTienda - Guards: AuthGuard
+180. [POST] /kpi-tiendas/borrarKpiTiendasSemana - Guards: AuthGuard
+181. [GET] /kpi-tiendas/getAllKPIs - Guards: AuthGuard
+182. [GET] /kpi-tiendas/getKPIS - Guards: AuthGuard
+183. [POST] /kpi-tiendas/nuevoKpiTienda - Guards: AuthGuard
+
+--------------------------------------------------------------------------------
+Mantenimiento (2 endpoints no usados)
+--------------------------------------------------------------------------------
+184. [POST] /mantenimiento/activarMantenimiento - Guards: ninguno
+185. [POST] /mantenimiento/getEstado - Guards: ninguno
+
+--------------------------------------------------------------------------------
+Migraciones (4 endpoints no usados)
+--------------------------------------------------------------------------------
+186. [POST] /migraciones/contratos - Guards: ninguno
+187. [POST] /migraciones/tiendas - Guards: ninguno
+188. [POST] /migraciones/trabajadores - Guards: ninguno
+189. [POST] /migraciones/trabajadores:update - Guards: ninguno
+
+--------------------------------------------------------------------------------
+Notas Informativas (4 endpoints no usados)
+--------------------------------------------------------------------------------
+190. [POST] /notas-informativas/borrarNotasInformativas - Guards: AuthGuard
+191. [GET] /notas-informativas/getAllNotasInformativas - Guards: AuthGuard
+192. [GET] /notas-informativas/getNotasInformativas - Guards: AuthGuard
+193. [POST] /notas-informativas/nuevaNotaInformativa - Guards: AuthGuard
+
+--------------------------------------------------------------------------------
+Notificación Horas Extras (4 endpoints no usados)
+--------------------------------------------------------------------------------
+194. [POST] /notificacion-horas-extras/createNotificacionHorasExtras - Guards: AuthGuard
+195. [GET] /notificacion-horas-extras/getAllNotificacionesHorasExtras - Guards: AuthGuard
+196. [GET] /notificacion-horas-extras/getNotificacionHorasExtrasByIdSql - Guards: AuthGuard
+197. [POST] /notificacion-horas-extras/validarNotificacionesHorasExtrasDuplicadas - Guards: AuthGuard
+
+--------------------------------------------------------------------------------
+Notificaciones (8 endpoints no usados)
+--------------------------------------------------------------------------------
+198. [GET] /notificaciones/getAllInAppNotifications - Guards: AuthGuard
+199. [GET] /notificaciones/inAppNotifications - Guards: AuthGuard
+200. [GET] /notificaciones/inAppNotificationsPendientes - Guards: AuthGuard
+201. [POST] /notificaciones/marcarComoLeida - Guards: AuthGuard
+202. [POST] /notificaciones/marcarComoNoLeida - Guards: AuthGuard
+203. [POST] /notificaciones/saveTokenFCM - Guards: AuthGuard
+204. [GET] /notificaciones/testNotification - Guards: AuthGuard
+205. [GET] /notificaciones/testNotificationTopic - Guards: AuthGuard
+
+--------------------------------------------------------------------------------
+Notificar Ampliación Contratos (4 endpoints no usados)
+--------------------------------------------------------------------------------
+206. [POST] /notificar-ampliacion-contratos/createNotificarAmpliacionContratos - Guards: AuthGuard
+207. [GET] /notificar-ampliacion-contratos/getAllNotificarAmpliacionContratos - Guards: AuthGuard
+208. [GET] /notificar-ampliacion-contratos/getNotificarAmpliacionContratosByIdSql - Guards: AuthGuard
+209. [POST] /notificar-ampliacion-contratos/validarNotificarAmpliacionContratos - Guards: AuthGuard
+
+--------------------------------------------------------------------------------
+Parámetros (3 endpoints no usados)
+--------------------------------------------------------------------------------
+210. [GET] /parametros/campaniaMedica - Guards: ninguno
+211. [POST] /parametros/campaniaMedica - Guards: ninguno
+212. [GET] /parametros/getParametros - Guards: ninguno
+
+--------------------------------------------------------------------------------
+PDF (6 endpoints no usados)
+--------------------------------------------------------------------------------
+213. [POST] /pdf/delete - Guards: AuthGuard
+214. [GET] /pdf/documentoOriginal - Guards: ninguno
+215. [GET] /pdf/firmados - Guards: AuthGuard
+216. [POST] /pdf/generar - Guards: AuthGuard
+217. [GET] /pdf/originales - Guards: AuthGuard
+218. [POST] /pdf/sign - Guards: AuthGuard
+
+--------------------------------------------------------------------------------
+Perfil Hardware (3 endpoints no usados)
+--------------------------------------------------------------------------------
+219. [POST] /perfil-hardware/deletePerfil - Guards: AuthGuard
+220. [GET] /perfil-hardware/getPerfiles - Guards: AuthGuard
+221. [POST] /perfil-hardware/newPerfilHardware - Guards: AuthGuard
+
+--------------------------------------------------------------------------------
+Permisos (3 endpoints no usados)
+--------------------------------------------------------------------------------
+222. [GET] /permisos/customClaims - Guards: AuthGuard
+223. [GET] /permisos/listaCompleta - Guards: AuthGuard
+224. [POST] /permisos/setCustomClaims - Guards: AuthGuard
+
+--------------------------------------------------------------------------------
+Permission (2 endpoints no usados)
+--------------------------------------------------------------------------------
+225. [GET] /permission/all - Guards: AuthGuard
+226. [POST] /permission/create - Guards: AuthGuard
+
+--------------------------------------------------------------------------------
+Plantilla Turno (3 endpoints no usados)
+--------------------------------------------------------------------------------
+227. [GET] /plantilla-turno - Guards: ninguno
+228. [POST] /plantilla-turno/create - Guards: ninguno
+229. [POST] /plantilla-turno/delete - Guards: ninguno
+
+--------------------------------------------------------------------------------
+Power Automate (2 endpoints no usados)
+--------------------------------------------------------------------------------
+230. [POST] /power-automate/email - Guards: ninguno
+231. [POST] /power-automate/test - Guards: ninguno
+
+--------------------------------------------------------------------------------
+Presentation (5 endpoints no usados)
+--------------------------------------------------------------------------------
+232. [GET] /presentation - Guards: AuthGuard
+233. [POST] /presentation/create - Guards: AuthGuard
+234. [POST] /presentation/delete - Guards: AuthGuard
+235. [GET] /presentation/presentation - Guards: AuthGuard
+236. [POST] /presentation/update - Guards: AuthGuard
+
+--------------------------------------------------------------------------------
+Push Notification (1 endpoint no usado)
+--------------------------------------------------------------------------------
+237. [POST] /push-notification-to-user - Guards: ninguno
+
+--------------------------------------------------------------------------------
+Question (9 endpoints no usados)
+--------------------------------------------------------------------------------
+238. [GET] /question - Guards: AuthGuard
+239. [GET] /question-category - Guards: AuthGuard
+240. [POST] /question-category/create - Guards: AuthGuard
+241. [POST] /question-category/update - Guards: AuthGuard
+242. [POST] /question/create - Guards: AuthGuard
+243. [POST] /question/delete - Guards: AuthGuard
+244. [GET] /question/id - Guards: AuthGuard
+245. [GET] /question/options - Guards: AuthGuard
+246. [POST] /question/update - Guards: AuthGuard
+
+--------------------------------------------------------------------------------
+Questionnaire (5 endpoints no usados)
+--------------------------------------------------------------------------------
+247. [GET] /questionnaire - Guards: AuthGuard
+248. [POST] /questionnaire/create - Guards: AuthGuard
+249. [POST] /questionnaire/delete - Guards: AuthGuard
+250. [GET] /questionnaire/id - Guards: AuthGuard
+251. [POST] /questionnaire/update - Guards: AuthGuard
+
+--------------------------------------------------------------------------------
+Register (1 endpoint no usado)
+--------------------------------------------------------------------------------
+252. [POST] /register-notification-device - Guards: ninguno
+
+--------------------------------------------------------------------------------
+Revisión Médica (2 endpoints no usados)
+--------------------------------------------------------------------------------
+253. [GET] /revision-medica/getSolicitudes - Guards: AuthGuard
+254. [POST] /revision-medica/solicitar - Guards: AuthGuard
+
+--------------------------------------------------------------------------------
+Role (6 endpoints no usados)
+--------------------------------------------------------------------------------
+255. [POST] /role/addPermission - Guards: AuthGuard
+256. [GET] /role/all - Guards: AuthGuard
+257. [POST] /role/create - Guards: AuthGuard
+258. [GET] /role/getRoleId - Guards: AuthGuard
+259. [POST] /role/removePermission - Guards: AuthGuard
+260. [POST] /role/update - Guards: ninguno
+
+--------------------------------------------------------------------------------
+Save/Sincro (2 endpoints no usados)
+--------------------------------------------------------------------------------
+261. [POST] /save-turnos-trabajador-semanal - Guards: ninguno
+262. [POST] /sincro-trabajadores - Guards: ninguno
+
+--------------------------------------------------------------------------------
+Solicitud Vacaciones (12 endpoints no usados)
+--------------------------------------------------------------------------------
+263. [POST] /solicitud-vacaciones/borrarSolicitud - Guards: AuthGuard
+264. [POST] /solicitud-vacaciones/enviarAlCuadrante - Guards: AuthGuard
+265. [POST] /solicitud-vacaciones/enviarAlEmail - Guards: AuthGuard
+266. [GET] /solicitud-vacaciones/getSolicitudes - Guards: AuthGuard
+267. [GET] /solicitud-vacaciones/getVacacionesByEstado - Guards: AuthGuard
+268. [GET] /solicitud-vacaciones/getVacacionesByTiendas - Guards: AuthGuard
+269. [POST] /solicitud-vacaciones/nuevaSolicitud - Guards: AuthGuard
+270. [GET] /solicitud-vacaciones/resumen - Guards: AuthGuard
+271. [GET] /solicitud-vacaciones/sendToHit - Guards: AuthGuard
+272. [POST] /solicitud-vacaciones/setEstadoSolicitud - Guards: AuthGuard
+273. [GET] /solicitud-vacaciones/solicitudesSubordinados - Guards: AuthGuard
+274. [GET] /solicitud-vacaciones/solicitudesTrabajador - Guards: AuthGuard
+
+--------------------------------------------------------------------------------
+Storage (3 endpoints no usados)
+--------------------------------------------------------------------------------
+275. [POST] /storage/downloadFile - Guards: ninguno
+276. [POST] /storage/downloadVideo - Guards: ninguno
+277. [POST] /storage/uploadFile - Guards: ninguno
+
+--------------------------------------------------------------------------------
+Subordinado (1 endpoint no usado)
+--------------------------------------------------------------------------------
+278. [POST] /subordinado/update-responsable-de-la-tienda - Guards: ninguno
+
+--------------------------------------------------------------------------------
+Test (4 endpoints no usados)
+--------------------------------------------------------------------------------
+279. [POST] /test/apieze - Guards: ninguno
+280. [POST] /test/email - Guards: ninguno
+281. [POST] /test/experimentoRompible - Guards: ninguno
+282. [POST] /test/test - Guards: ninguno
+
+--------------------------------------------------------------------------------
+Tiendas (5 endpoints no usados)
+--------------------------------------------------------------------------------
+283. [GET] /tiendas - Guards: AuthGuard
+284. [GET] /tiendas/actualizarTiendas - Guards: AuthGuard
+285. [GET] /tiendas/getTiendaById - Guards: AuthGuard
+286. [GET] /tiendas/responsable - Guards: AuthGuard
+287. [GET] /tiendas/tiendas2 - Guards: AuthGuard
+
+--------------------------------------------------------------------------------
+Trabajadores (20 endpoints no usados)
+--------------------------------------------------------------------------------
+288. [POST] /trabajadores/actualizar - Guards: AuthGuard, RoleGuard | Roles: Super_Admin, RRHH_ADMIN
+289. [POST] /trabajadores/actualizar-organizacion - Guards: AuthGuard, RoleGuard | Roles: Super_Admin, RRHH_ADMIN
+290. [GET] /trabajadores/actualizarTrabajadores - Guards: AuthGuard
+291. [GET] /trabajadores/arbolById - Guards: AuthGuard
+292. [POST] /trabajadores/cambiarTiendaEquipo - Guards: ninguno
+293. [POST] /trabajadores/crear - Guards: AuthGuard
+294. [POST] /trabajadores/eliminar - Guards: AuthGuard, RoleGuard | Roles: Super_Admin, RRHH_ADMIN
+295. [GET] /trabajadores/getAllCoordis - Guards: AuthGuard
+296. [GET] /trabajadores/getMyOwnWorker - Guards: AuthGuard
+297. [GET] /trabajadores/getSubordinados - Guards: AuthGuard
+298. [GET] /trabajadores/getSubordinadosById - Guards: AuthGuard
+299. [GET] /trabajadores/getSubordinadosByIdsql - Guards: AuthGuard
+300. [GET] /trabajadores/getTrabajadorByAppId - Guards: AuthGuard
+301. [GET] /trabajadores/getTrabajadorBySqlId - Guards: AuthGuard
+302. [POST] /trabajadores/guardarCambios - Guards: AuthGuard
+303. [GET] /trabajadores/listadoSanidad - Guards: AuthGuard | Roles: Super_Admin
+304. [POST] /trabajadores/postAutomatizaciones - Guards: AuthGuard
+305. [POST] /trabajadores/registro - Guards: ninguno
+306. [GET] /trabajadores/token - Guards: ninguno
+307. [POST] /trabajadores/uploadFoto - Guards: AuthGuard
+308. [POST] /trabajadores/validarCodigo - Guards: AuthGuard
+309. [GET] /trabajadores/validarQR - Guards: ninguno
+
+--------------------------------------------------------------------------------
+Turnos (3 endpoints no usados)
+--------------------------------------------------------------------------------
+310. [GET] /turnos/getTiendasUnaSemana - Guards: AuthGuard
+311. [GET] /turnos/getTiendaTodasSemanas - Guards: AuthGuard
+312. [GET] /turnos/getTodos - Guards: AuthGuard
+
+--------------------------------------------------------------------------------
+Twilio (3 endpoints no usados)
+--------------------------------------------------------------------------------
+313. [POST] /twilio/send-otp - Guards: AuthGuard
+314. [POST] /twilio/sms - Guards: AuthGuard
+315. [POST] /twilio/verify-otp - Guards: AuthGuard
+
+--------------------------------------------------------------------------------
+Ventas (1 endpoint no usado)
+--------------------------------------------------------------------------------
+316. [GET] /ventas-una-tienda - Guards: ninguno
+
+--------------------------------------------------------------------------------
+Verificación MFA (2 endpoints no usados)
+--------------------------------------------------------------------------------
+317. [GET] /verificacionmfa/getVerificacionMFA - Guards: AuthGuard
+318. [POST] /verificacionmfa/nuevaVerificacionMFA - Guards: ninguno
+
+--------------------------------------------------------------------------------
+Videos (6 endpoints no usados)
+--------------------------------------------------------------------------------
+319. [GET] /videos - Guards: AuthGuard
+320. [POST] /videos/delete - Guards: AuthGuard
+321. [GET] /videos/downloadVideo - Guards: AuthGuard
+322. [GET] /videos/infoVideo - Guards: AuthGuard
+323. [POST] /videos/update - Guards: AuthGuard
+324. [POST] /videos/upload - Guards: AuthGuard
+
+--------------------------------------------------------------------------------
+Videos Formación (10 endpoints no usados)
+--------------------------------------------------------------------------------
+325. [POST] /videos-formacion/contadorViews - Guards: AuthGuard
+326. [POST] /videos-formacion/deleteVideoFormacion - Guards: AuthGuard
+327. [GET] /videos-formacion/getVideosFormacion - Guards: AuthGuard
+328. [GET] /videos-formacion/getVideosFormacionVistos - Guards: AuthGuard
+329. [POST] /videos-formacion/nuevoVideoFormacion - Guards: AuthGuard
+330. [POST] /videos-formacion/nuevoVistoVideoFormacion - Guards: AuthGuard
+331. [POST] /videos-formacion/updateVideoFormacion - Guards: AuthGuard
+332. [GET] /videos-formacion/verificarVideoVisto - Guards: AuthGuard
+333. [GET] /videos-formacion/videosPorCategoria - Guards: AuthGuard
+334. [GET] /videos-formacion/views - Guards: AuthGuard
+
+--------------------------------------------------------------------------------
+Vision (1 endpoint no usado)
+--------------------------------------------------------------------------------
+335. [POST] /vision/scan - Guards: AuthGuard
+
+
+================================================================================
+                              RECOMENDACIONES
+================================================================================
+
+SEGURIDAD CRÍTICA
+--------------------------------------------------------------------------------
+56 endpoints sin guards representan un riesgo de seguridad. Recomendaciones:
+
+- Revisar cada endpoint sin guard para determinar si realmente debe ser público
+- Considerar añadir AuthGuard a endpoints sensibles
+- Los endpoints de /test, /migraciones deben estar protegidos o eliminados en
+  producción
+
+Endpoints críticos sin protección:
+- /admin/impersonate
+- /admin/signInWithCustomToken
+- /storage/* (upload/download sin autenticación)
+- /test/* (todos los endpoints de test)
+- /migraciones/* (migraciones sin protección)
+- /trabajadores/registro
+- /trabajadores/token
+- /trabajadores/validarQR
+
+
+LIMPIEZA DE CÓDIGO
+--------------------------------------------------------------------------------
+Con 335 endpoints no usados (84.4%):
+
+- Considerar eliminar endpoints obsoletos para reducir superficie de ataque
+- Mantener código más limpio y mantenible
+- Si algunos endpoints son para uso futuro, documentarlos claramente
+
+
+CONTROLADORES PRIORITARIOS PARA REVISIÓN
+--------------------------------------------------------------------------------
+1. trabajadores - 20 endpoints no usados
+2. incidencias - 14 endpoints no usados
+3. auditorias - 13 endpoints no usados
+4. fichajes - 13 endpoints no usados
+5. evaluaciones - 12 endpoints no usados
+6. solicitud-vacaciones - 12 endpoints no usados
+7. videos-formacion - 10 endpoints no usados
+8. cuadrantes - 10 endpoints no usados
+
+
+ENDPOINTS DE TEST/DESARROLLO
+--------------------------------------------------------------------------------
+Los siguientes endpoints deberían eliminarse en producción:
+- /test/apieze
+- /test/email
+- /test/experimentoRompible
+- /test/test
+
+
+================================================================================
+Generado automáticamente el 2025-10-13
+================================================================================
