@@ -418,4 +418,7 @@ export class ClientesService {
   async caducarFlayer(codigo: string) {
     return await this.schSolicitudesCliente.caducarFlayer(codigo);
   }
+  async deleteAllClientes() {
+    return await this.schSolicitudesCliente.deleteAllClientes();
+  }
 }

@@ -101,4 +101,16 @@ export class SolicitudNuevoClienteBbdd {
       },
     );
   }
+  async deleteAllClientes() {
+    const db = (await this.mongoDbService.getConexion()).db();
+    const solicitudesClienteCollection = db.collection<SolicitudCliente>(
+      "solicitudRegistroCliente",
+    );
+    const solicitudesClienteCollection2 =
+      db.collection<CodigoFlayers>("codigosFlayers");
+
+    await solicitudesClienteCollection.deleteMany({});
+    await solicitudesClienteCollection2.deleteMany({});
+    return { message: "Colecciones eliminadas correctamente" };
+  }
 }

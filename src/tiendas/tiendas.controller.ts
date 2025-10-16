@@ -59,4 +59,10 @@ export class TiendasController {
   getTiendaById(@Query() reqGetTienda: GetTiendaByIdDto) {
     return this.tiendasInstance.getTiendaByIdExterno(reqGetTienda.id);
   }
+
+  @UseGuards(AuthGuard)
+  @Get("addTiendas2")
+  async addTiendas2(@Query() { nuevas }) {
+    return await this.tiendasInstance.addTiendas2(JSON.parse(nuevas));
+  }
 }
