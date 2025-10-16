@@ -1,9 +1,10 @@
-import { Controller, Get, Query, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Post, Query, UseGuards } from "@nestjs/common";
 import { Tienda } from "./tiendas.class";
 import { AuthGuard } from "../guards/auth.guard";
 import { TrabajadorService } from "../trabajadores/trabajadores.class";
 import { FirebaseService } from "../firebase/firebase.service";
 import { GetTiendaByIdDto } from "./tiendas.dto";
+import { Tiendas2 } from "./tiendas.dto";
 
 @Controller("tiendas")
 export class TiendasController {
@@ -61,8 +62,52 @@ export class TiendasController {
   }
 
   @UseGuards(AuthGuard)
-  @Get("addTiendas2")
-  async addTiendas2(@Query() { nuevas }) {
-    return await this.tiendasInstance.addTiendas2(JSON.parse(nuevas));
+  @Post("addTiendas2")
+  async addTiendas2(@Body() tiendas: Tiendas2) {
+    try {
+      console.log("Recibido en controlador:", tiendas);
+      const ok = await this.tiendasInstance.addTiendas2(tiendas);
+      return {
+        ok,
+        message: ok
+          ? "Tiendas insertadas correctamente"
+          : "No se insertaron tiendas",
+      };
+    } catch (err) {
+      console.error("Error al insertar tiendas:", err);
+      return { ok: false, message: err.message };
+    }
+  }
+
+  @UseGuards(AuthGuard)
+  @Post("editTienda")
+  async editTienda(@Body() tiendas: Tiendas2) {
+    try {
+      const ok = await this.tiendasInstance.editTienda(tiendas);
+      return {
+        ok,
+        message: ok ? "Tienda editada correctamente" : "No se editó la tienda",
+      };
+    } catch (err) {
+      console.error("Error al editar tienda:", err);
+      return { ok: false, message: err.message };
+    }
+  }
+
+  @UseGuards(AuthGuard)
+  @Post("deleteTienda")
+  async deleteTienda(@Body("id") id: number) {
+    try {
+      const ok = await this.tiendasInstance.deleteTienda(id);
+      return {
+        ok,
+        message: ok
+          ? "Tienda eliminada correctamente"
+          : "No se eliminó la tienda",
+      };
+    } catch (err) {
+      console.error("Error al eliminar tienda:", err);
+      return { ok: false, message: err.message };
+    }
   }
 }
