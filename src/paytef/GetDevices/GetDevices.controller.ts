@@ -1,18 +1,19 @@
 import { Controller, Get, UseGuards } from "@nestjs/common";
 import { IGetDevicesUseCase } from "./IGetDevices.use-case";
 import { AuthGuard } from "src/guards/auth.guard";
-import { Notificaciones } from "src/notificaciones/notificaciones.class";
 import { disconnectedDevicesStore } from "../disconnected-devices.store";
 import { computeEffectiveStatus } from "../device-status.utils";
 import { CompleteUser } from "src/decorators/getCompleteUser.decorator";
-import { TrabajadorService } from "src/trabajadores/trabajadores.class";
 import { SchedulerGuard } from "src/guards/scheduler.guard";
+import { Trabajador } from "@prisma/client";
+import { IPushNotificationToUserUseCase } from "src/push-notification/PushNotificationToUser/IPushNotificationToUser.use-case";
+import { TrabajadorService } from "src/trabajadores/trabajadores.class";
 
 @Controller("get-all-devices")
 export class GetDevicesController {
   constructor(
     private readonly getDevicesUseCase: IGetDevicesUseCase,
-    private readonly notificaciones: Notificaciones,
+    private readonly notificaciones: IPushNotificationToUserUseCase,
     private readonly trabajadores: TrabajadorService,
   ) {}
 
@@ -28,13 +29,12 @@ export class GetDevicesController {
     const res = await this.getDevicesUseCase.execute();
 
     // Validamos permisos del usuario
-    const hasPermiso = user?.roles?.some((r) => r.name === "Super_Admin");
+    const hasPermiso =
+      user?.permisos?.some((p: any) => p.name === "notificacionMonitoreo") &&
+      user?.roles?.some((r: any) => r.name === "Super_Admin");
 
     if (hasPermiso) {
-      const userToken = await this.notificaciones.getFCMToken(user.idApp);
-      if (userToken) {
-        await this.processNotificationsForUser(user, userToken.token);
-      }
+      await this.processNotificationsForUser(user);
     }
 
     return res.branches;
@@ -54,26 +54,23 @@ export class GetDevicesController {
         user?.permisos?.some(
           (permiso: { name: string }) =>
             permiso.name === "notificacionMonitoreo",
-        ) ||
+        ) &&
         user?.roles?.some(
           (rol: { name: string }) => rol.name === "Super_Admin",
         );
 
       if (!hasPermiso) continue;
 
-      const userToken = await this.notificaciones.getFCMToken(user.idApp);
-      if (userToken) {
-        // aquí llamamos a la lógica que ya tienes para notificar
-        await this.processNotificationsForUser(user, userToken.token);
-      }
+      await this.processNotificationsForUser(user);
     }
 
     return { ok: true };
   }
 
   //  lógica de notificación de datafonos
-  private async processNotificationsForUser(user: any, token: string) {
+  private async processNotificationsForUser(user: Trabajador) {
     const res = await this.getDevicesUseCase.execute();
+    const MONITOR_LINK = "https://monitorizar.365equipo.com/monitorizacion";
 
     for (const branch of res.branches) {
       for (const device of branch.devices) {
@@ -90,14 +87,14 @@ export class GetDevicesController {
         const prev = disconnectedDevicesStore.get(deviceId);
         const now = new Date();
 
+        //Detectar Desconexión
         if (effectiveStatus === "Desconectado") {
           if (!prev || prev.status !== "Desconectado") {
-            await this.notificaciones.sendNotificationToDevice(
-              token,
-              "Datafono desconectado",
-              `${branch.name} - ${device.serialNumber} desconectado`,
-              "/monitorizacion",
-            );
+            await this.notificaciones.execute(user.idApp, {
+              body: `${branch.name} - ${device.serialNumber} está desconectado`,
+              title: "Datafono desconectado",
+              link: MONITOR_LINK,
+            });
             disconnectedDevicesStore.set(deviceId, {
               status: "Desconectado",
               lastNotified: now,
@@ -106,12 +103,11 @@ export class GetDevicesController {
             prev.lastNotified &&
             (now.getTime() - prev.lastNotified.getTime()) / 3600000 >= 1
           ) {
-            await this.notificaciones.sendNotificationToDevice(
-              token,
-              "El Datafono sigue desconectado",
-              `${branch.name} - ${device.serialNumber} continúa desconectado`,
-              "/monitorizacion",
-            );
+            await this.notificaciones.execute(user.idApp, {
+              body: `${branch.name} - ${device.serialNumber} sigue desconectado`,
+              title: "El Datafono sigue desconectado",
+              link: MONITOR_LINK,
+            });
             disconnectedDevicesStore.set(deviceId, {
               status: "Desconectado",
               lastNotified: now,
@@ -119,19 +115,20 @@ export class GetDevicesController {
           }
         }
 
+        //Detectar Reconexión
         if (
           effectiveStatus === "Conectado" &&
           prev?.status === "Desconectado"
         ) {
-          await this.notificaciones.sendNotificationToDevice(
-            token,
-            "Datafono reconectado",
-            `${branch.name} - ${device.serialNumber} se ha reconectado`,
-            "/monitorizacion",
-          );
+          await this.notificaciones.execute(user.idApp, {
+            body: `${branch.name} - ${device.serialNumber} se ha reconectado`,
+            title: "Datafono reconectado",
+            link: MONITOR_LINK,
+          });
           disconnectedDevicesStore.set(deviceId, { status: "Conectado" });
         }
 
+        // Actualiza cualquier otro estado
         if (
           effectiveStatus !== "Desconectado" &&
           effectiveStatus !== "Conectado"

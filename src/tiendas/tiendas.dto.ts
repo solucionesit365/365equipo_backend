@@ -28,7 +28,7 @@ export interface Tienda {
 
 export interface Tiendas2 {
   direccion: string;
-  CodigoPostal: number;
+  CodigoPostal: string;
   Poblacion: string;
   Provincia: string;
   CódMunicipio: number;

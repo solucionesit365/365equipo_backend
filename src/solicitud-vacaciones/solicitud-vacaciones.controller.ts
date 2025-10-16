@@ -30,10 +30,12 @@ export class SolicitudVacacionesController {
     @CompleteUser() user: Trabajador,
   ) {
     try {
+      console.log(solicitudesVacaciones.idBeneficiario);
       const solicitudTrabajador =
         await this.trabajadorInstance.getTrabajadorBySqlId(
           Number(solicitudesVacaciones.idBeneficiario),
         );
+      console.log(solicitudTrabajador);
       this.email.enviarEmail(
         solicitudTrabajador.emails,
         `<!DOCTYPE html>

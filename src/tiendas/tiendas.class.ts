@@ -7,6 +7,7 @@ import {
 import { Trabajador, Tienda as TTienda } from "@prisma/client";
 import { TrabajadorService } from "../trabajadores/trabajadores.class";
 import { TiendaDatabaseService } from "./tiendas.database";
+import { Tiendas2 } from "./tiendas.dto";
 
 @Injectable()
 export class Tienda {
@@ -30,6 +31,7 @@ export class Tienda {
   }
 
   private ordenarTiendas(tiendas: TTienda[]): TTienda[] {
+    // console.log(tiendas);
     return tiendas.sort((a, b) => {
       const nameA = a.nombre.toLowerCase();
       const nameB = b.nombre.toLowerCase();
@@ -40,7 +42,6 @@ export class Tienda {
       if (nameA.startsWith("m--") && !nameB.startsWith("m--")) return -1;
       if (!nameA.startsWith("m--") && nameB.startsWith("m--")) return 1;
 
-      // Si no empiezan con 't--' ni 'm--', se ordenan alfabéticamente
       return nameA.localeCompare(nameB);
     });
   }
@@ -103,10 +104,39 @@ export class Tienda {
 
   async getTiendas2() {
     try {
-      return this.ordenarTiendas(await this.schTiendas.geTiendas2() as any);
+      return this.ordenarTiendas((await this.schTiendas.geTiendas2()) as any);
     } catch (err) {
       console.log(err);
       throw new InternalServerErrorException("Error al obtener las tiendas");
+    }
+  }
+
+  async addTiendas2(nuevas: Tiendas2) {
+    try {
+      const result = await this.schTiendas.addTiendas2(nuevas);
+      if (!result) return true;
+    } catch (err) {
+      console.error("Error al agregar tiendas a MongoDB:", err.message);
+    }
+  }
+
+  async editTienda(tienda: Tiendas2) {
+    try {
+      const result = await this.schTiendas.editTienda(tienda);
+      return result;
+    } catch (err) {
+      console.error("Error al editar tienda en MongoDB:", err.message);
+      return false;
+    }
+  }
+
+  async deleteTienda(id: number) {
+    try {
+      const result = await this.schTiendas.deleteTienda(id);
+      return result;
+    } catch (err) {
+      console.error("Error al eliminar tienda en MongoDB:", err.message);
+      return false;
     }
   }
 }

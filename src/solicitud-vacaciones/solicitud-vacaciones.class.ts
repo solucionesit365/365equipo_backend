@@ -22,8 +22,19 @@ export class SolicitudesVacacionesService {
   //Nueva solicitud de vacaciones
   async nuevaSolicitudVacaciones(solicitudVacaciones: SolicitudVacaciones) {
     try {
+      const idBeneficiario =
+        typeof solicitudVacaciones.idBeneficiario === "object" &&
+        solicitudVacaciones.idBeneficiario !== null &&
+        (solicitudVacaciones.idBeneficiario as { id?: any } | null)?.id !==
+          undefined
+          ? (solicitudVacaciones.idBeneficiario as { id: any }).id
+          : solicitudVacaciones.idBeneficiario;
+
+      // Asignar el idBeneficiario correctamente
+      solicitudVacaciones.idBeneficiario = idBeneficiario;
+
       const horasContrato = await this.contratoService.getHorasContratoByIdNew(
-        solicitudVacaciones.idBeneficiario,
+        idBeneficiario,
         DateTime.now(),
       );
 
@@ -33,6 +44,7 @@ export class SolicitudesVacacionesService {
         await this.schSolicitudVacaciones.nuevaSolicitudVacaciones(
           solicitudVacaciones,
         );
+      console.log(insertSolicitudVacaciones);
       if (insertSolicitudVacaciones) return true;
 
       throw Error("No se ha podido insertar la nueva solicitud de vacaciones");
