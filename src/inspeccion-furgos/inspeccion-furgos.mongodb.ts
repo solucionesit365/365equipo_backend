@@ -94,10 +94,10 @@ export class InspeccionFurgosDatabes {
       { returnDocument: "after" }, // 👈 devuelve el documento actualizado
     );
 
-    if (!resUpdate.value) {
+    if (!resUpdate._id) {
       throw new Error("No se ha podido actualizar la furgoneta o no existe");
     }
 
-    return resUpdate.value;
+    return resUpdate;
   }
 }
