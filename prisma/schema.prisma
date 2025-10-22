@@ -273,7 +273,7 @@ model NotificationDevice {
   registeredAt DateTime   @default(now())
   lastTime     DateTime   @updatedAt()
   trabajadorId Int
-  trabajador   Trabajador @relation(fields: [trabajadorId], references: [id])
+  trabajador   Trabajador @relation(fields: [trabajadorId], references: [id], onDelete: Cascade)
 }
 
 model Notification {
