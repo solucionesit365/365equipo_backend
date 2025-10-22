@@ -136,6 +136,9 @@ export class SincroTrabajadoresUseCase implements ISincroTrabajadoresUseCase {
     const trabajadoresOmneDniMap = new Map(); // Mapa por DNI que puede tener múltiples valores
 
     todosLosTrabajadoresOmne.forEach((t) => {
+      if (t.documento == "46386462Q") {
+        console.log("Trabajador OMNE especial:", t);
+      }
       // Si tiene noPerceptor (ya validado como numérico), usar la clave compuesta
       if (t.noPerceptor) {
         const clave = `${t.noPerceptor}-${t.empresaID}`;
