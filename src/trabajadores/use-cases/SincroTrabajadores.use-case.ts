@@ -51,6 +51,16 @@ interface TrabajadoresOMNEResponse {
   value: TrabajadorOMNE[];
 }
 
+interface PerceptorExtraData {
+  noPerceptor: string;
+  fechaNacimiento?: string;
+}
+
+interface PerceptorsExtraDataResponse {
+  "@odata.context": string;
+  value: PerceptorExtraData[];
+}
+
 // ejemplo de trabajador que viene de omne:
 //                     "noPerceptor": "2290",
 //                     "apellidosYNombre": "COSME FULANITO PEREZ",
@@ -108,20 +118,26 @@ export class SincroTrabajadoresUseCase implements ISincroTrabajadoresUseCase {
       sonPersonas: true,
     });
 
-    // Obtener todos los contratos de los trabajadores
-    const contratosPromises = trabajadoresApp.map(async (trabajador) => {
-      const contratos = await this.contratoRepository.findByTrabajadorId(
-        trabajador.id,
-      );
-      return { trabajadorId: trabajador.id, contratos };
-    });
-    const contratosData = await Promise.all(contratosPromises);
+    // Obtener todos los contratos de los trabajadores en lotes para evitar saturar la base de datos
     const contratosMap = new Map();
-    contratosData.forEach(({ trabajadorId, contratos }) => {
-      if (contratos.length > 0) {
-        contratosMap.set(trabajadorId, contratos[0]); // Último contrato
-      }
-    });
+    const BATCH_SIZE = 10; // Procesar 10 trabajadores a la vez
+
+    for (let i = 0; i < trabajadoresApp.length; i += BATCH_SIZE) {
+      const batch = trabajadoresApp.slice(i, i + BATCH_SIZE);
+      const contratosPromises = batch.map(async (trabajador) => {
+        const contratos = await this.contratoRepository.findByTrabajadorId(
+          trabajador.id,
+        );
+        return { trabajadorId: trabajador.id, contratos };
+      });
+
+      const contratosData = await Promise.all(contratosPromises);
+      contratosData.forEach(({ trabajadorId, contratos }) => {
+        if (contratos.length > 0) {
+          contratosMap.set(trabajadorId, contratos[0]); // Último contrato
+        }
+      });
+    }
 
     // Mapeo de campos entre Omne y la base de datos
     const mapeosCampos = {
@@ -177,9 +193,6 @@ export class SincroTrabajadoresUseCase implements ISincroTrabajadoresUseCase {
     const trabajadoresOmneDniMap = new Map(); // Mapa por DNI que puede tener múltiples valores
 
     todosLosTrabajadoresOmne.forEach((t) => {
-      if (t.documento == "46386462Q") {
-        console.log("Trabajador OMNE especial:", t);
-      }
       // Si tiene noPerceptor (ya validado como numérico), usar la clave compuesta
       if (t.noPerceptor) {
         const clave = `${t.noPerceptor}-${t.empresaID}`;
@@ -245,18 +258,41 @@ export class SincroTrabajadoresUseCase implements ISincroTrabajadoresUseCase {
       const trabajadorApp = buscarTrabajadorApp(trabajadorOmne);
 
       if (!trabajadorApp) {
-        // No existe en la app, crear solo si no tiene fecha de baja
-        if (!trabajadorOmne.bajaEmpresa) {
+        // No existe en la app, crear solo si tiene contrato activo (fechaFinalizacion es null o está en el futuro)
+        const contratoActivo = !trabajadorOmne.fechaFinalizacion ||
+          (trabajadorOmne.fechaFinalizacion && DateTime.now() < trabajadorOmne.fechaFinalizacion);
+
+        if (contratoActivo && !trabajadorOmne.bajaEmpresa) {
           trabajadoresACrear.push(trabajadorOmne);
         }
       } else {
         // Existe en ambos sistemas
-        if (trabajadorOmne.bajaEmpresa) {
-          // Si tiene fecha de baja en OMNE, eliminar de la app
-          trabajadoresAEliminar.push({
-            ...trabajadorApp,
-            razonEliminacion: `Fecha de baja en OMNE: ${trabajadorOmne.bajaEmpresa}`,
+        // Verificar si tiene contrato activo (fechaFinalizacion es null o está en el futuro)
+        const contratoActivo = !trabajadorOmne.fechaFinalizacion ||
+          (trabajadorOmne.fechaFinalizacion && DateTime.now() < trabajadorOmne.fechaFinalizacion);
+
+        if (!contratoActivo || trabajadorOmne.bajaEmpresa) {
+          // El contrato ha terminado en esta empresa
+          // Verificar si tiene contratos activos en otras empresas antes de eliminar
+          const tieneContratosEnOtrasEmpresas = todosLosTrabajadoresOmne.some((t) => {
+            // Mismo DNI pero diferente empresa o diferente nPerceptor
+            const esMismaPersona = t.documento === trabajadorOmne.documento;
+            const esDiferenteEmpresa = t.empresaID !== trabajadorOmne.empresaID;
+            const tieneContratoActivo = !t.fechaFinalizacion ||
+              (t.fechaFinalizacion && DateTime.now() < t.fechaFinalizacion);
+
+            return esMismaPersona && esDiferenteEmpresa && tieneContratoActivo;
           });
+
+          if (!tieneContratosEnOtrasEmpresas) {
+            // No tiene contratos activos en ninguna empresa, marcar para eliminar
+            trabajadoresAEliminar.push({
+              ...trabajadorApp,
+              razonEliminacion: trabajadorOmne.fechaFinalizacion
+                ? `Contrato finalizado el ${trabajadorOmne.fechaFinalizacion}`
+                : `Fecha de baja en OMNE: ${trabajadorOmne.bajaEmpresa}`,
+            });
+          }
         } else {
           // No tiene fecha de baja, verificar si hay cambios importantes en datos personales
           const hayChangiosDatosPersonales = camposImportantes.some((campo) => {
@@ -335,63 +371,26 @@ export class SincroTrabajadoresUseCase implements ISincroTrabajadoresUseCase {
       }
 
       if (!encontradoEnOmne) {
-        // Protección de seguridad: verificar una vez más antes de eliminar
-        let verificacionFinal = false;
+        // No encontrado en OMNE en esta empresa
+        // Verificar si el trabajador (por DNI) existe en otras empresas con contrato activo
+        if (trabajadorApp.dni && trabajadorApp.dni.trim() !== "") {
+          const tieneContratosEnOtrasEmpresas = todosLosTrabajadoresOmne.some((t) => {
+            const esMismaPersona = t.documento === trabajadorApp.dni;
+            const tieneContratoActivo = !t.fechaFinalizacion ||
+              (t.fechaFinalizacion && DateTime.now() < t.fechaFinalizacion);
 
-        if (trabajadorApp.nPerceptor) {
-          const claveVerificacion = `${trabajadorApp.nPerceptor}-${trabajadorApp.empresaId}`;
-          verificacionFinal = trabajadoresOmneMap.has(claveVerificacion);
-        }
+            return esMismaPersona && tieneContratoActivo;
+          });
 
-        if (
-          !verificacionFinal &&
-          trabajadorApp.dni &&
-          trabajadorApp.dni.trim() !== ""
-        ) {
-          const trabajadoresOmnePorDni =
-            trabajadoresOmneDniMap.get(trabajadorApp.dni) || [];
-          const trabajadorOmneEnMismaEmpresa = trabajadoresOmnePorDni.find(
-            (t) => t.empresaID === trabajadorApp.empresaId,
-          );
-          verificacionFinal = !!trabajadorOmneEnMismaEmpresa;
-        }
-
-        if (verificacionFinal) {
-          // El trabajador SÍ existe en OMNE, verificar si tiene fecha de baja
-          let trabajadorEnOmne = null;
-          if (trabajadorApp.nPerceptor) {
-            const claveVerificacion = `${trabajadorApp.nPerceptor}-${trabajadorApp.empresaId}`;
-            trabajadorEnOmne = trabajadoresOmneMap.get(claveVerificacion);
-          }
-          if (
-            !trabajadorEnOmne &&
-            trabajadorApp.dni &&
-            trabajadorApp.dni.trim() !== ""
-          ) {
-            const trabajadoresOmnePorDni =
-              trabajadoresOmneDniMap.get(trabajadorApp.dni) || [];
-            const trabajadorOmneEnMismaEmpresa = trabajadoresOmnePorDni.find(
-              (t) => t.empresaID === trabajadorApp.empresaId,
-            );
-            if (trabajadorOmneEnMismaEmpresa) {
-              trabajadorEnOmne = trabajadorOmneEnMismaEmpresa;
-            }
-          }
-
-          if (
-            trabajadorEnOmne &&
-            trabajadorEnOmne.bajaEmpresa &&
-            DateTime.now() > trabajadorEnOmne.bajaEmpresa
-          ) {
-            // Tiene fecha de baja en OMNE, eliminar es correcto
+          if (!tieneContratosEnOtrasEmpresas) {
+            // No tiene contratos activos en ninguna empresa, eliminar
             trabajadoresAEliminar.push({
               ...trabajadorApp,
-              razonEliminacion: `Tiene fecha de baja en OMNE: ${trabajadorEnOmne.bajaEmpresa}`,
+              razonEliminacion: `No encontrado en OMNE o sin contratos activos`,
             });
           }
-          // Si no tiene fecha de baja, no se elimina (protección activada)
         } else {
-          // Realmente no existe en OMNE, eliminar
+          // No tiene DNI, eliminar directamente
           trabajadoresAEliminar.push({
             ...trabajadorApp,
             razonEliminacion: `No encontrado en OMNE`,
@@ -425,8 +424,8 @@ export class SincroTrabajadoresUseCase implements ISincroTrabajadoresUseCase {
           nSeguridadSocial: t.noAfiliacion,
           codigoPostal: t.cp,
           horasContrato: t.horassemana || 40,
-          inicioContrato: t.altaContrato?.toJSDate() || new Date(),
-          finalContrato: t.bajaEmpresa?.toJSDate() || undefined,
+          inicioContrato: t.fechaInicio?.toJSDate() || t.altaContrato?.toJSDate() || new Date(),
+          finalContrato: t.fechaFinalizacion?.toJSDate() || t.bajaEmpresa?.toJSDate() || undefined,
           fechaAlta: t.altaContrato?.toJSDate() || new Date(),
           fechaAntiguedad:
             t.antiguedadEmpresa?.toJSDate() ||
@@ -471,8 +470,8 @@ export class SincroTrabajadoresUseCase implements ISincroTrabajadoresUseCase {
           nPerceptor: t.noPerceptor,
           // Datos del contrato
           horasContrato: t.horassemana || 40,
-          inicioContrato: t.altaContrato?.toJSDate() || new Date(),
-          finalContrato: t.bajaEmpresa?.toJSDate() || undefined,
+          inicioContrato: t.fechaInicio?.toJSDate() || t.altaContrato?.toJSDate() || new Date(),
+          finalContrato: t.fechaFinalizacion?.toJSDate() || t.bajaEmpresa?.toJSDate() || undefined,
           fechaAlta: t.altaContrato?.toJSDate() || new Date(),
           fechaAntiguedad:
             t.antiguedadEmpresa?.toJSDate() ||
@@ -516,7 +515,7 @@ export class SincroTrabajadoresUseCase implements ISincroTrabajadoresUseCase {
 
           const responseFechaNacimiento = await this.axiosBCService
             .getAxios()
-            .get(
+            .get<PerceptorsExtraDataResponse>(
               `Production/api/eze/365ObradorAPI/v1.0/companies(${empresaID})/PerceptorsExtraData`,
             );
 
@@ -526,12 +525,21 @@ export class SincroTrabajadoresUseCase implements ISincroTrabajadoresUseCase {
             const clave = `${trabajador.noPerceptor}-${empresaID}`;
             const trabajadorExistente = trabajadoresMap.get(clave);
 
-            if (
-              !trabajadorExistente ||
-              DateTime.fromISO(trabajador.systemModifiedAt) >
-                DateTime.fromISO(trabajadorExistente.systemModifiedAt)
-            ) {
+            // Seleccionar el contrato con fechaInicio más reciente
+            if (!trabajadorExistente) {
               trabajadoresMap.set(clave, trabajador);
+            } else {
+              const fechaInicioActual = trabajador.fechaInicio && trabajador.fechaInicio !== "0001-01-01"
+                ? DateTime.fromFormat(trabajador.fechaInicio, "yyyy-MM-dd")
+                : null;
+              const fechaInicioExistente = trabajadorExistente.fechaInicio && trabajadorExistente.fechaInicio !== "0001-01-01"
+                ? DateTime.fromFormat(trabajadorExistente.fechaInicio, "yyyy-MM-dd")
+                : null;
+
+              // Si el actual tiene fechaInicio y es más reciente, reemplazar
+              if (fechaInicioActual && (!fechaInicioExistente || fechaInicioActual > fechaInicioExistente)) {
+                trabajadoresMap.set(clave, trabajador);
+              }
             }
           });
 
@@ -591,6 +599,21 @@ export class SincroTrabajadoresUseCase implements ISincroTrabajadoresUseCase {
                   trabajador.fechaNacimiento != "0001-01-01"
                     ? DateTime.fromFormat(
                         trabajador.fechaNacimiento,
+                        "yyyy-MM-dd",
+                      )
+                    : null;
+              }
+              if (trabajador.fechaInicio) {
+                trabajador.fechaInicio =
+                  trabajador.fechaInicio != "0001-01-01"
+                    ? DateTime.fromFormat(trabajador.fechaInicio, "yyyy-MM-dd")
+                    : null;
+              }
+              if (trabajador.fechaFinalizacion) {
+                trabajador.fechaFinalizacion =
+                  trabajador.fechaFinalizacion != "0001-01-01"
+                    ? DateTime.fromFormat(
+                        trabajador.fechaFinalizacion,
                         "yyyy-MM-dd",
                       )
                     : null;
