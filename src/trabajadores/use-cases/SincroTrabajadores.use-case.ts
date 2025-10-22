@@ -10,6 +10,47 @@ import { IUpdateTrabajadorUseCase } from "./interfaces/IUpdateTrabajador.use-cas
 import { IDeleteTrabajadorUseCase } from "./interfaces/IDeleteTrabajador.use-case";
 import { IContratoRepository } from "../../contrato/repository/interfaces/IContrato.repository";
 
+// Interfaces para el response de trabajadoresOMNEQuery
+interface TrabajadorOMNE {
+  noPerceptor: string;
+  apellidosYNombre: string;
+  nombre: string;
+  email: string;
+  documento: string;
+  viaPublica: string;
+  numero: string;
+  piso: string;
+  poblacion: string;
+  noTelfMovilPersonal: string;
+  nacionalidad: number;
+  codPaisNacionalidad: string;
+  noAfiliacion: string;
+  cp: string;
+  centroTrabajo: string;
+  antiguedadEmpresa: string;
+  altaContrato: string;
+  bajaEmpresa: string;
+  cambioAntiguedad: string;
+  categoria: string;
+  fechaCalculoAntiguedad: string;
+  tipoContrato: string;
+  systemModifiedAt: string;
+  systemCreatedAt: string;
+  fechaInicio?: string;
+  fechaFinalizacion?: string;
+  horassemana: number;
+  descripcionCentro: string;
+  auxiliaryIndex1: string;
+  auxiliaryIndex2: number;
+  auxiliaryIndex3: string;
+  auxiliaryIndex4: string;
+}
+
+interface TrabajadoresOMNEResponse {
+  "@odata.context": string;
+  value: TrabajadorOMNE[];
+}
+
 // ejemplo de trabajador que viene de omne:
 //                     "noPerceptor": "2290",
 //                     "apellidosYNombre": "COSME FULANITO PEREZ",
@@ -469,8 +510,8 @@ export class SincroTrabajadoresUseCase implements ISincroTrabajadoresUseCase {
         empresas.map(async ({ id: empresaID, nombre }) => {
           const response = await this.axiosBCService
             .getAxios()
-            .get(
-              `Production/api/Miguel/365ObradorAPI/v1.0/companies(${empresaID})/perceptoresQuery`,
+            .get<TrabajadoresOMNEResponse>(
+              `Production/api/Ezequiel/TrabajadoresAPI/v1.0/companies(${empresaID})/trabajadoresOMNEQuery`,
             );
 
           const responseFechaNacimiento = await this.axiosBCService
