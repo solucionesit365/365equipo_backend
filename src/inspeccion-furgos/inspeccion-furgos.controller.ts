@@ -84,19 +84,22 @@ export class InspeccionFurgosController {
       return { ok: false, message: err.message };
     }
   }
+
   @UseGuards(AuthGuard)
-  @Delete(":id")
-  async borrarInspeccion(@Param("id") id: string) {
+  @Delete("borrar-inspeccion/:id")
+  async borrarInspeccionById(@Param("id") id: string) {
     try {
+      const result = await this.inspeccionesInstance.borrarInspeccion(id);
       return {
         ok: true,
-        data: await this.inspeccionesInstance.borrarInspeccion(id),
+        message: "Inspección borrada correctamente",
       };
     } catch (err) {
-      console.error(err);
+      console.error("Error borrando inspección:", err);
       return { ok: false, message: err.message };
     }
   }
+
   // @UseGuards(AuthGuard)
   // @Get("transportistas")
   // async getTransportistas() {
@@ -121,9 +124,8 @@ export class InspeccionFurgosController {
     console.log(furgoneta);
 
     try {
-      const resultado = await this.inspeccionesInstance.crearFurgoneta(
-        furgoneta,
-      );
+      const resultado =
+        await this.inspeccionesInstance.crearFurgoneta(furgoneta);
       return { ok: true, data: resultado };
     } catch (err) {
       console.error(err);
