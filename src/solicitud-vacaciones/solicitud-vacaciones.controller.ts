@@ -1,4 +1,12 @@
-import { Controller, Get, Query, Post, Body, UseGuards } from "@nestjs/common";
+import {
+  Controller,
+  Get,
+  Query,
+  Post,
+  Body,
+  UseGuards,
+  InternalServerErrorException,
+} from "@nestjs/common";
 import { AuthGuard } from "../guards/auth.guard";
 import { SolicitudesVacacionesService } from "./solicitud-vacaciones.class";
 import { SolicitudVacaciones } from "./solicitud-vacaciones.interface";
@@ -30,12 +38,21 @@ export class SolicitudVacacionesController {
     @CompleteUser() user: Trabajador,
   ) {
     try {
-      console.log(solicitudesVacaciones.idBeneficiario);
+      const idBeneficiario =
+        typeof solicitudesVacaciones.idBeneficiario === "object" &&
+        solicitudesVacaciones.idBeneficiario !== null &&
+        (solicitudesVacaciones.idBeneficiario as { id?: any })?.id !== undefined
+          ? (solicitudesVacaciones.idBeneficiario as { id: any }).id
+          : solicitudesVacaciones.idBeneficiario;
+
+      if (!idBeneficiario) {
+        throw new InternalServerErrorException("idBeneficiario no definido");
+      }
       const solicitudTrabajador =
         await this.trabajadorInstance.getTrabajadorBySqlId(
-          Number(solicitudesVacaciones.idBeneficiario),
+          Number(idBeneficiario),
         );
-      console.log(solicitudTrabajador);
+
       this.email.enviarEmail(
         solicitudTrabajador.emails,
         `<!DOCTYPE html>

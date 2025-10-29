@@ -43,12 +43,18 @@ export class InspeccionFurgosDatabes {
   //   return transportistas.map((t) => t.nombreConductor);
   // }
 
-  async borrarInspeccion(_id: string) {
+  async borrarInspeccion(id: string) {
     const collection = await this.getCollectionInspecciones();
-    const resDelete = await collection.deleteOne({ _id: new ObjectId(_id) });
+
+    if (!id) throw new Error("Falta el identificador de la inspección (_id)");
+
+    const resDelete = await collection.deleteOne({ _id: new ObjectId(id) });
+
     if (resDelete.deletedCount > 0) return true;
+
     throw new Error("No se ha podido borrar la inspección de furgo");
   }
+
   async crearFurgoneta(furgoneta: FurgonetaDto) {
     const collection = await this.getCollectionFurgonetas();
 
@@ -91,7 +97,7 @@ export class InspeccionFurgosDatabes {
           conductor: furgoneta.conductor?.trim() || "",
         },
       },
-      { returnDocument: "after" }, // 👈 devuelve el documento actualizado
+      { returnDocument: "after" },
     );
 
     if (!resUpdate._id) {

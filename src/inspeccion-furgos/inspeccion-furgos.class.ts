@@ -11,9 +11,8 @@ export class InspeccionFurgosClass {
   ) {}
 
   async nuevaInspeccion(inspeccion: InspeccionFurgos) {
-    const insertInspeccion = await this.schInspeccionesFurgos.nuevaInspeccion(
-      inspeccion,
-    );
+    const insertInspeccion =
+      await this.schInspeccionesFurgos.nuevaInspeccion(inspeccion);
     console.log("Insert inspeccion", insertInspeccion);
     if (insertInspeccion) return true;
 
@@ -37,8 +36,8 @@ export class InspeccionFurgosClass {
   //   return null;
   // }
 
-  async borrarInspeccion(_id: string) {
-    return this.schInspeccionesFurgos.borrarInspeccion(_id);
+  async borrarInspeccion(id: string) {
+    return this.schInspeccionesFurgos.borrarInspeccion(id);
   }
 
   async crearFurgoneta(furgoneta: FurgonetaDto) {
