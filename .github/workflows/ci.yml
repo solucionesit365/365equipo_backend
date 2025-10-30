@@ -63,10 +63,15 @@ jobs:
       # Subir cobertura para SonarCloud (opcional pero recomendado)
       - name: Upload coverage to SonarCloud
         if: always()
+        continue-on-error: true  # ⚠️ No bloquea el merge si falla
         uses: SonarSource/sonarcloud-github-action@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.projectKey=solucionesit365_365equipo_backend
+            -Dsonar.organization=solucionesit365-1
 
       # Comentario en PR con resultados (opcional)
       - name: Comment PR with results
