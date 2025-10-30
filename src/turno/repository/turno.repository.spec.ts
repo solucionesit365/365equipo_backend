@@ -162,7 +162,19 @@ describe('TurnoRepository', () => {
           },
         },
       });
-      expect(result).toBe(expectedTurnos);
+      expect(result).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            id: '1',
+            idTrabajador,
+            trabajador: expect.objectContaining({
+              id: idTrabajador,
+            }),
+            arraySemanalHoras: expect.any(Array),
+            totalHoras: expect.any(Number),
+          }),
+        ])
+      );
     });
 
     it('debería lanzar InternalServerErrorException en caso de error', async () => {

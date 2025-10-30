@@ -4,11 +4,17 @@ import { ICoordinadoraRepository } from '../../coordinadora/repository/interface
 import { ITurnoRepository } from '../repository/interfaces/turno.repository.interface';
 import { DateTime } from 'luxon';
 import 'reflect-metadata';
+import { AusenciasDatabase } from '../../ausencias/ausencias.mongodb';
+import { SolicitudVacacionesDatabase } from '../../solicitud-vacaciones/solicitud-vacaciones.mongodb';
+import { PrismaService } from '../../prisma/prisma.service';
 
 describe('GetTurnosEquipoCoordinadoraUseCase', () => {
   let useCase: GetTurnosEquipoCoordinadoraUseCase;
   let mockCoordinadoraRepository: jest.Mocked<ICoordinadoraRepository>;
   let mockTurnoRepository: jest.Mocked<ITurnoRepository>;
+  let mockAusenciasDatabase: jest.Mocked<AusenciasDatabase>;
+  let mockSolicitudVacacionesDatabase: jest.Mocked<SolicitudVacacionesDatabase>;
+  let mockPrismaService: any;
 
   beforeEach(async () => {
     mockCoordinadoraRepository = {
@@ -27,6 +33,26 @@ describe('GetTurnosEquipoCoordinadoraUseCase', () => {
       getTurnoDelDia: jest.fn(),
     };
 
+    mockAusenciasDatabase = {
+      getAusenciasIntervalo: jest.fn().mockResolvedValue([]),
+    } as any;
+
+    mockSolicitudVacacionesDatabase = {
+      getVacacionesByTiendas: jest.fn().mockResolvedValue([]),
+    } as any;
+
+    mockPrismaService = {
+      tienda: {
+        findUnique: jest.fn().mockResolvedValue({ id: 1, nombre: 'Tienda Test' }),
+      },
+      trabajador: {
+        findUnique: jest.fn().mockResolvedValue({
+          nombreApellidos: 'Test Worker',
+          contratos: [{ horasContrato: 40 }]
+        }),
+      },
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         GetTurnosEquipoCoordinadoraUseCase,
@@ -37,6 +63,18 @@ describe('GetTurnosEquipoCoordinadoraUseCase', () => {
         {
           provide: ITurnoRepository,
           useValue: mockTurnoRepository,
+        },
+        {
+          provide: AusenciasDatabase,
+          useValue: mockAusenciasDatabase,
+        },
+        {
+          provide: SolicitudVacacionesDatabase,
+          useValue: mockSolicitudVacacionesDatabase,
+        },
+        {
+          provide: PrismaService,
+          useValue: mockPrismaService,
         },
       ],
     }).compile();

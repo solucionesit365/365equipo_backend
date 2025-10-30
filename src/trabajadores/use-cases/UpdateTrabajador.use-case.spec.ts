@@ -1,12 +1,14 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UpdateTrabajadorUseCase } from './UpdateTrabajador.use-case';
 import { ITrabajadorRepository } from '../repository/interfaces/ITrabajador.repository';
+import { IContratoRepository } from '../../contrato/repository/interfaces/IContrato.repository';
 import { IUpdateTrabajadorDto } from './interfaces/IUpdateTrabajador.use-case';
 import 'reflect-metadata';
 
 describe('UpdateTrabajadorUseCase', () => {
   let useCase: UpdateTrabajadorUseCase;
   let mockTrabajadorRepository: jest.Mocked<ITrabajadorRepository>;
+  let mockContratoRepository: jest.Mocked<IContratoRepository>;
 
   beforeEach(async () => {
     mockTrabajadorRepository = {
@@ -19,12 +21,26 @@ describe('UpdateTrabajadorUseCase', () => {
       deleteOne: jest.fn(),
     };
 
+    mockContratoRepository = {
+      create: jest.fn(),
+      readOne: jest.fn(),
+      readAll: jest.fn(),
+      update: jest.fn(),
+      updateOne: jest.fn(),
+      deleteOne: jest.fn(),
+      findByTrabajadorId: jest.fn().mockResolvedValue([{ id: 1, horasContrato: 40 }]),
+    } as any;
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         UpdateTrabajadorUseCase,
         {
           provide: ITrabajadorRepository,
           useValue: mockTrabajadorRepository,
+        },
+        {
+          provide: IContratoRepository,
+          useValue: mockContratoRepository,
         },
       ],
     }).compile();

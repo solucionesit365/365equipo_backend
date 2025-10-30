@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { SincroTrabajadoresUseCase } from './SincroTrabajadores.use-case';
 import { ITrabajadorRepository } from '../repository/interfaces/ITrabajador.repository';
+import { IContratoRepository } from '../../contrato/repository/interfaces/IContrato.repository';
 import { AxiosBcService } from '../../axios/axios-bc.service';
 import { EmpresaService } from '../../empresa/empresa.service';
 import { ICreateTrabajadorUseCase } from './interfaces/ICreateTrabajador.use-case';
@@ -13,6 +14,7 @@ import 'reflect-metadata';
 describe('SincroTrabajadoresUseCase', () => {
   let useCase: SincroTrabajadoresUseCase;
   let mockTrabajadorRepository: jest.Mocked<ITrabajadorRepository>;
+  let mockContratoRepository: jest.Mocked<IContratoRepository>;
   let mockAxiosBcService: jest.Mocked<AxiosBcService>;
   let mockEmpresaService: jest.Mocked<EmpresaService>;
   let mockCreateTrabajadorUseCase: jest.Mocked<ICreateTrabajadorUseCase>;
@@ -53,6 +55,16 @@ describe('SincroTrabajadoresUseCase', () => {
       execute: jest.fn(),
     };
 
+    mockContratoRepository = {
+      create: jest.fn(),
+      readOne: jest.fn(),
+      readAll: jest.fn(),
+      update: jest.fn(),
+      updateOne: jest.fn(),
+      deleteOne: jest.fn(),
+      findByTrabajadorId: jest.fn().mockResolvedValue([{ id: 1, horasContrato: 40 }]),
+    } as any;
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         SincroTrabajadoresUseCase,
@@ -79,6 +91,10 @@ describe('SincroTrabajadoresUseCase', () => {
         {
           provide: IDeleteTrabajadorUseCase,
           useValue: mockDeleteTrabajadorUseCase,
+        },
+        {
+          provide: IContratoRepository,
+          useValue: mockContratoRepository,
         },
       ],
     }).compile();

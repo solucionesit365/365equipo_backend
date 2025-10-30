@@ -15,7 +15,7 @@ export class GetTiendasDelSupervisor implements IGetTiendasDelSupervisor {
 
   async execute(idSupervisor: number): Promise<TTienda[]> {
     try {
-      if (this.roleService.hasRole(idSupervisor, "Super_Admin"))
+      if (await this.roleService.hasRole(idSupervisor, "Super_Admin"))
         return await this.tiendaService.getTiendas();
 
       // Obtener listado de trabajadores subordinados suyos.

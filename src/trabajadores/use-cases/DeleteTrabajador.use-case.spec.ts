@@ -1,12 +1,14 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { DeleteTrabajadorUseCase } from './DeleteTrabajador.use-case';
 import { ITrabajadorRepository } from '../repository/interfaces/ITrabajador.repository';
+import { LoggerService } from '../../logger/logger.service';
 import { IDeleteTrabajadorDto } from './interfaces/IDeleteTrabajador.use-case';
 import 'reflect-metadata';
 
 describe('DeleteTrabajadorUseCase', () => {
   let useCase: DeleteTrabajadorUseCase;
   let mockTrabajadorRepository: jest.Mocked<ITrabajadorRepository>;
+  let mockLoggerService: jest.Mocked<LoggerService>;
 
   beforeEach(async () => {
     mockTrabajadorRepository = {
@@ -19,12 +21,25 @@ describe('DeleteTrabajadorUseCase', () => {
       deleteOne: jest.fn(),
     };
 
+    mockLoggerService = {
+      log: jest.fn(),
+      error: jest.fn(),
+      warn: jest.fn(),
+      debug: jest.fn(),
+      verbose: jest.fn(),
+      create: jest.fn(),
+    } as any;
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         DeleteTrabajadorUseCase,
         {
           provide: ITrabajadorRepository,
           useValue: mockTrabajadorRepository,
+        },
+        {
+          provide: LoggerService,
+          useValue: mockLoggerService,
         },
       ],
     }).compile();

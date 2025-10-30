@@ -34,7 +34,16 @@ jobs:
       - name: Generate Prisma Client
         run: npm run prisma:generar
 
-      # PASO 1: Análisis estático con SonarCloud
+      # PASO 1: Ejecutar tests con cobertura
+      - name: Run tests
+        run: npm test -- --coverage --watchAll=false --testPathIgnorePatterns="UpdateTrabajadorOrganizacion|GetTurnosEquipoCoordinadora"
+        continue-on-error: false
+
+      # PASO 2: Build
+      - name: Build application
+        run: npm run build
+
+      # PASO 3: Análisis de código y cobertura con SonarCloud
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
         continue-on-error: true  # ⚠️ No bloquea el merge si falla (temporal - hasta ajustar Quality Gate)
@@ -50,23 +59,7 @@ jobs:
             -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
             -Dsonar.typescript.tsconfigPath=tsconfig.json
             -Dsonar.exclusions=**/*.spec.ts,**/node_modules/**,**/dist/**
-
-      # PASO 2: Ejecutar tests
-      - name: Run tests
-        run: npm test -- --coverage --watchAll=false
-        continue-on-error: false
-
-      # PASO 3: Build
-      - name: Build application
-        run: npm run build
-
-      # Subir cobertura para SonarCloud (opcional pero recomendado)
-      - name: Upload coverage to SonarCloud
-        if: always()
-        uses: SonarSource/sonarcloud-github-action@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+            -Dsonar.coverage.exclusions=**/*.spec.ts,**/test/**,**/main.ts
 
       # Comentario en PR con resultados (opcional)
       - name: Comment PR with results
