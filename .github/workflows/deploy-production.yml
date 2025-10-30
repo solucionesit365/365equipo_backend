@@ -1,0 +1,46 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    name: Deploy to DigitalOcean Production
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://api.365equipo.com
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DO_API_TOKEN }}
+
+      - name: Trigger DigitalOcean App Platform deployment
+        run: |
+          echo "🚀 Triggering deployment to production..."
+          doctl apps create-deployment ${{ secrets.DO_APP_ID_PROD }} --force-rebuild --wait
+          echo "✅ Deployment completed successfully!"
+
+      - name: Verify deployment
+        run: |
+          echo "🔍 Verifying deployment status..."
+          doctl apps get ${{ secrets.DO_APP_ID_PROD }}
+
+      - name: Notify deployment success
+        if: success()
+        run: |
+          echo "✅ Production deployment successful!"
+          echo "🌐 URL: https://api.365equipo.com"
+
+      - name: Notify deployment failure
+        if: failure()
+        run: |
+          echo "❌ Production deployment failed!"
+          exit 1
