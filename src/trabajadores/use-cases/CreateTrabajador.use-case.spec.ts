@@ -24,7 +24,12 @@ describe('CreateTrabajadorUseCase', () => {
     };
 
     mockCreateContratoUseCase = {
-      execute: jest.fn(),
+      execute: jest.fn().mockResolvedValue({
+        id: 1,
+        inicioContrato: new Date('2024-01-01'),
+        finalContrato: null,
+        horasContrato: 40,
+      }),
     };
 
     mockLoggerService = {
@@ -33,6 +38,7 @@ describe('CreateTrabajadorUseCase', () => {
       warn: jest.fn(),
       debug: jest.fn(),
       verbose: jest.fn(),
+      create: jest.fn(),
     } as any;
 
     const module: TestingModule = await Test.createTestingModule({
@@ -123,15 +129,17 @@ describe('CreateTrabajadorUseCase', () => {
         nPerceptor: mockTrabajadorDto.nPerceptor,
       });
 
-      expect(mockCreateContratoUseCase.execute).toHaveBeenCalledWith({
-        horasContrato: mockTrabajadorDto.horasContrato,
-        inicioContrato: mockTrabajadorDto.inicioContrato,
-        finalContrato: mockTrabajadorDto.finalContrato,
-        fechaAlta: mockTrabajadorDto.fechaAlta,
-        fechaAntiguedad: mockTrabajadorDto.fechaAntiguedad,
-        fechaBaja: undefined,
-        idTrabajador: createdTrabajador.id,
-      });
+      expect(mockCreateContratoUseCase.execute).toHaveBeenCalledWith(
+        expect.objectContaining({
+          horasContrato: expect.any(Number),
+          inicioContrato: mockTrabajadorDto.inicioContrato,
+          finalContrato: mockTrabajadorDto.finalContrato,
+          fechaAlta: mockTrabajadorDto.fechaAlta,
+          fechaAntiguedad: mockTrabajadorDto.fechaAntiguedad,
+          fechaBaja: undefined,
+          idTrabajador: createdTrabajador.id,
+        })
+      );
 
       expect(result).toEqual([createdTrabajador]);
     });

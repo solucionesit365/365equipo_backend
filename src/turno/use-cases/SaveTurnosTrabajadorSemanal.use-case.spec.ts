@@ -131,7 +131,7 @@ describe('SaveTurnosTrabajadorSemanalUseCase', () => {
 
       await useCase.execute(idTrabajador, inicioSemana, arrayTurnos);
 
-      expect(mockTurnoRepository.updateManyTurnos).toHaveBeenCalledWith([]);
+      expect(mockTurnoRepository.updateManyTurnos).not.toHaveBeenCalled();
       expect(mockTurnoRepository.createTurnos).toHaveBeenCalledWith(
         expect.arrayContaining([
           expect.objectContaining({
@@ -160,7 +160,7 @@ describe('SaveTurnosTrabajadorSemanalUseCase', () => {
 
       await useCase.execute(idTrabajador, inicioSemana, arrayTurnos);
 
-      expect(mockTurnoRepository.createTurnos).toHaveBeenCalledWith([]);
+      expect(mockTurnoRepository.createTurnos).not.toHaveBeenCalled();
       expect(mockTurnoRepository.updateManyTurnos).toHaveBeenCalledWith(
         expect.arrayContaining([
           expect.objectContaining({
@@ -179,8 +179,8 @@ describe('SaveTurnosTrabajadorSemanalUseCase', () => {
 
       await useCase.execute(idTrabajador, inicioSemana, []);
 
-      expect(mockTurnoRepository.updateManyTurnos).toHaveBeenCalledWith([]);
-      expect(mockTurnoRepository.createTurnos).toHaveBeenCalledWith([]);
+      expect(mockTurnoRepository.updateManyTurnos).not.toHaveBeenCalled();
+      expect(mockTurnoRepository.createTurnos).not.toHaveBeenCalled();
     });
   });
 });
