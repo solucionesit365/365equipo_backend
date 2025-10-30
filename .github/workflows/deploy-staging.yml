@@ -1,0 +1,41 @@
+name: Deploy to Staging
+
+on:
+  push:
+    branches:
+      - develop
+      - test
+
+jobs:
+  deploy:
+    name: Deploy to DigitalOcean Staging
+    runs-on: ubuntu-latest
+    environment:
+      name: staging
+      url: https://backend-test-6yw3e.ondigitalocean.app
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DO_API_TOKEN }}
+
+      - name: Trigger DigitalOcean App Platform deployment (Staging)
+        run: |
+          echo "🚀 Triggering deployment to staging..."
+          doctl apps create-deployment ${{ secrets.DO_APP_ID_STAGING }} --force-rebuild --wait
+          echo "✅ Staging deployment completed!"
+
+      - name: Verify deployment
+        run: |
+          echo "🔍 Verifying deployment status..."
+          doctl apps get ${{ secrets.DO_APP_ID_STAGING }}
+
+      - name: Notify deployment success
+        if: success()
+        run: |
+          echo "✅ Staging deployment successful!"
+          echo "🌐 URL: https://backend-test-6yw3e.ondigitalocean.app"
