@@ -3,12 +3,14 @@ import { CreateTrabajadorUseCase } from './CreateTrabajador.use-case';
 import { ITrabajadorRepository } from '../repository/interfaces/ITrabajador.repository';
 import { ICreateContratoUseCase } from '../../contrato/use-cases/interfaces/ICreateContrato.use-case';
 import { ICreateTrabajadorDto } from './interfaces/ICreateTrabajador.use-case';
+import { LoggerService } from '../../logger/logger.service';
 import 'reflect-metadata';
 
 describe('CreateTrabajadorUseCase', () => {
   let useCase: CreateTrabajadorUseCase;
   let mockTrabajadorRepository: jest.Mocked<ITrabajadorRepository>;
   let mockCreateContratoUseCase: jest.Mocked<ICreateContratoUseCase>;
+  let mockLoggerService: jest.Mocked<LoggerService>;
 
   beforeEach(async () => {
     mockTrabajadorRepository = {
@@ -25,6 +27,14 @@ describe('CreateTrabajadorUseCase', () => {
       execute: jest.fn(),
     };
 
+    mockLoggerService = {
+      log: jest.fn(),
+      error: jest.fn(),
+      warn: jest.fn(),
+      debug: jest.fn(),
+      verbose: jest.fn(),
+    } as any;
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         CreateTrabajadorUseCase,
@@ -35,6 +45,10 @@ describe('CreateTrabajadorUseCase', () => {
         {
           provide: ICreateContratoUseCase,
           useValue: mockCreateContratoUseCase,
+        },
+        {
+          provide: LoggerService,
+          useValue: mockLoggerService,
         },
       ],
     }).compile();

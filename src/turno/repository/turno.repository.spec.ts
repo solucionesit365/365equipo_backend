@@ -162,7 +162,7 @@ describe('TurnoRepository', () => {
           },
         },
       });
-      expect(result).toBe(expectedTurnos);
+      expect(result).toEqual(expectedTurnos);
     });
 
     it('debería lanzar InternalServerErrorException en caso de error', async () => {
