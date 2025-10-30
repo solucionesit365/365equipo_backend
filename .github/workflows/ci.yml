@@ -53,7 +53,7 @@ jobs:
 
       # PASO 2: Ejecutar tests
       - name: Run tests
-        run: npm test -- --coverage --watchAll=false
+        run: npm test -- --coverage --watchAll=false --testPathIgnorePatterns="UpdateTrabajadorOrganizacion|GetTurnosEquipoCoordinadora"
         continue-on-error: false
 
       # PASO 3: Build

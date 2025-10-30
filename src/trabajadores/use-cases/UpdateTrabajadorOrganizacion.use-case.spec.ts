@@ -3,11 +3,14 @@ import { UpdateTrabajadorOrganizacionUseCase } from "./UpdateTrabajadorOrganizac
 import { ITrabajadorRepository } from "../repository/interfaces/ITrabajador.repository";
 import { PrismaService } from "../../prisma/prisma.service";
 import { IUpdateTrabajadorOrganizacionDto } from "./interfaces/IUpdateTrabajadorOrganizacion.use-case";
+import { TrabajadorService } from "../trabajadores.class";
+import { SolicitudesVacacionesService } from "../../solicitud-vacaciones/solicitud-vacaciones.class";
+import { DiaPersonalClass } from "../../dia-personal/dia-personal.class";
 
 describe("UpdateTrabajadorOrganizacionUseCase", () => {
   let useCase: UpdateTrabajadorOrganizacionUseCase;
   let trabajadorRepository: jest.Mocked<ITrabajadorRepository>;
-  let prismaService: jest.Mocked<PrismaService>;
+  let prismaService: any;
 
   const mockTrabajador = {
     id: 1,
@@ -53,8 +56,35 @@ describe("UpdateTrabajadorOrganizacionUseCase", () => {
           provide: PrismaService,
           useValue: {
             trabajador: {
+              findUnique: jest.fn().mockResolvedValue(mockTrabajador),
               update: jest.fn().mockResolvedValue(mockTrabajador),
             },
+            tienda: {
+              findFirst: jest.fn().mockResolvedValue(null),
+              findUnique: jest.fn().mockResolvedValue(null),
+              update: jest.fn().mockResolvedValue({}),
+            },
+          },
+        },
+        {
+          provide: TrabajadorService,
+          useValue: {
+            asignarResponsablePorTiendaSiCorresponde: jest.fn().mockResolvedValue(undefined),
+            getTrabajadorBySqlId: jest.fn().mockResolvedValue({ idApp: "mock-app-id" }),
+          },
+        },
+        {
+          provide: SolicitudesVacacionesService,
+          useValue: {
+            haySolicitudesParaBeneficiario: jest.fn().mockResolvedValue(false),
+            actualizarIdAppResponsable: jest.fn().mockResolvedValue(undefined),
+          },
+        },
+        {
+          provide: DiaPersonalClass,
+          useValue: {
+            haySolicitudesParaBeneficiarioDiaPersonal: jest.fn().mockResolvedValue(false),
+            actualizarIdAppResponsableDiaPersonal: jest.fn().mockResolvedValue(undefined),
           },
         },
       ],
@@ -84,7 +114,9 @@ describe("UpdateTrabajadorOrganizacionUseCase", () => {
     const result = await useCase.execute(updateDto);
 
     expect(result).toEqual(mockTrabajador);
-    expect(prismaService.trabajador.update).toHaveBeenCalledWith({
+
+    // Verify the first call to update
+    expect(prismaService.trabajador.update).toHaveBeenNthCalledWith(1, {
       where: { id: 1 },
       data: {
         idResponsable: 2,
@@ -101,6 +133,15 @@ describe("UpdateTrabajadorOrganizacionUseCase", () => {
         tienda: true,
         empresa: true,
         responsable: true,
+        coordinadoraDeLaTienda: true,
+      },
+    });
+
+    // Verify the second call to update (when idResponsable changes)
+    expect(prismaService.trabajador.update).toHaveBeenNthCalledWith(2, {
+      where: { id: 1 },
+      data: {
+        idResponsable: 2,
       },
     });
   });
@@ -129,6 +170,7 @@ describe("UpdateTrabajadorOrganizacionUseCase", () => {
         tienda: true,
         empresa: true,
         responsable: true,
+        coordinadoraDeLaTienda: true,
       },
     });
   });
@@ -155,6 +197,7 @@ describe("UpdateTrabajadorOrganizacionUseCase", () => {
         tienda: true,
         empresa: true,
         responsable: true,
+        coordinadoraDeLaTienda: true,
       },
     });
   });
