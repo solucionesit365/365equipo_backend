@@ -8,11 +8,11 @@
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "start": "node dist/main",
+    "start": "node dist/src/main",
     "start:dev": "cross-env NODE_ENV=development nest start --watch",
     "dev": "cross-env NODE_ENV=development nest start --watch",
     "start:debug": "nest start --debug 9229 --watch",
-    "start:prod": "node dist/main",
+    "start:prod": "node dist/src/main",
     "setup:gcloud": "node scripts/setup-gcloud.js",
     "setup:gcloud:bash": "bash scripts/setup-gcloud.sh",
     "setup:firebase": "node scripts/download-service-account.js",
