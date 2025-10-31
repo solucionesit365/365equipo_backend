@@ -5,11 +5,11 @@ on:
     branches:
       - master
       - develop  # ✅ CI se ejecuta en PRs a develop
-  push:
-    branches:
-      - develop
-      # - feature/*
-      # - hotfix/*
+  # push:
+  #   branches:
+  #     - develop
+  #     # - feature/*
+  #     # - hotfix/*
 
 jobs:
   quality-and-tests:
