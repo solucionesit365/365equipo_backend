@@ -57,7 +57,7 @@ model Tienda {
   direccion       String?
   idExterno       Int?
   coordinatorId   Int?             @unique
-  supervisorId    Int?             @unique
+  supervisorId    Int?
   existsBC        Boolean          @default(false)
   plantillasTurno PlantillaTurno[]
   coordinator     Trabajador?      @relation("TiendaCoordinator", fields: [coordinatorId], references: [id], onDelete: SetNull)
