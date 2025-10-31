@@ -5,6 +5,7 @@ import { TrabajadorService } from "../trabajadores/trabajadores.class";
 import { FirebaseService } from "../firebase/firebase.service";
 import { GetTiendaByIdDto } from "./tiendas.dto";
 import { Tiendas2 } from "./tiendas.dto";
+import { IGetTiendasAteneaUseCase } from "./GetTiendasAtenea/IGetTiendasAtenea.use-case";
 
 @Controller("tiendas")
 export class TiendasController {
@@ -12,6 +13,7 @@ export class TiendasController {
     private readonly authInstance: FirebaseService,
     private readonly tiendasInstance: Tienda,
     private readonly trabajadorInstance: TrabajadorService,
+    private readonly getTiendasAteneaUseCase: IGetTiendasAteneaUseCase,
   ) {}
 
   @UseGuards(AuthGuard)
@@ -52,7 +54,7 @@ export class TiendasController {
   @UseGuards(AuthGuard)
   @Get("tiendas2")
   async getTiendas2() {
-    return await this.tiendasInstance.getTiendas2();
+    return await this.getTiendasAteneaUseCase.execute();
   }
 
   @UseGuards(AuthGuard)
