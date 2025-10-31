@@ -16,13 +16,17 @@ export class SupervisorTiendaRespository
     idSupervisora: number,
   ): Promise<void> {
     try {
-      await this.prismaService.trabajador.update({
-        where: { id: idSupervisora },
-        data: {
-          supervisa: {
-            set: tiendasIds.map((idTienda) => ({ id: idTienda })),
-          },
-        },
+      // First, remove this supervisor from all stores they currently supervise
+      await this.prismaService.tienda.updateMany({
+        where: { supervisorId: idSupervisora },
+        data: { supervisorId: null },
+      });
+
+      // Then, assign the new stores to this supervisor
+      // This also removes those stores from any other supervisor they might have
+      await this.prismaService.tienda.updateMany({
+        where: { id: { in: tiendasIds } },
+        data: { supervisorId: idSupervisora },
       });
     } catch (error) {
       console.log(error);
