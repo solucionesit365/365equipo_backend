@@ -1,8 +1,9 @@
 import { Controller, Get, UseGuards } from "@nestjs/common";
 import { IGetTiendasUseCase } from "./IGetTiendas.use-case";
-import { AuthGuard } from "src/guards/auth.guard";
+import { AuthGuard } from "../../guards/auth.guard";
 import { RoleGuard } from "../../guards/role.guard";
 import { Roles } from "../../decorators/role.decorator";
+import { SchedulerGuard } from "../../guards/scheduler.guard";
 
 @Controller("get-tiendas")
 export class GetTiendasController {
@@ -12,6 +13,12 @@ export class GetTiendasController {
   @UseGuards(AuthGuard, RoleGuard)
   @Get()
   handle() {
+    return this.getTiendasUseCase.execute();
+  }
+
+  @UseGuards(SchedulerGuard)
+  @Get()
+  handleForAtenea() {
     return this.getTiendasUseCase.execute();
   }
 }
