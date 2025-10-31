@@ -1,9 +1,9 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { GetTiendasAteneaUseCase } from './GetTiendasAtenea.use-case';
-import { ITiendaAteneaRepository } from '../repository/ITiendaAtenea.repository';
-import { Tiendas2 } from '../tiendas.dto';
+import { Test, TestingModule } from "@nestjs/testing";
+import { GetTiendasAteneaUseCase } from "./GetTiendasAtenea.use-case";
+import { ITiendaAteneaRepository } from "../repository/ITiendaAtenea.repository";
+import { Tiendas2 } from "../tiendas.dto";
 
-describe('GetTiendasAteneaUseCase', () => {
+describe("GetTiendasAteneaUseCase", () => {
   let useCase: GetTiendasAteneaUseCase;
   let repository: jest.Mocked<ITiendaAteneaRepository>;
 
@@ -25,39 +25,39 @@ describe('GetTiendasAteneaUseCase', () => {
     repository = mockRepository as any;
   });
 
-  describe('execute', () => {
-    it('debe retornar todas las tiendas de Atenea', async () => {
+  describe("execute", () => {
+    it("debe retornar todas las tiendas de Atenea", async () => {
       const mockTiendas: Tiendas2[] = [
         {
-          direccion: 'Calle Principal 123',
-          postalCode: '28001',
-          city: 'Madrid',
-          province: 'Madrid',
+          address: "Calle Principal 123",
+          postalCode: "28001",
+          city: "Madrid",
+          province: "Madrid",
           municipalityCode: 28079,
-          nombre: 'Tienda Centro',
+          name: "Tienda Centro",
           latitude: 40.4168,
           longitude: -3.7038,
-          Tipo: 'TIENDA',
+          type: "TIENDA",
           coordinatorId: 1,
           id: 1,
           idExterno: 101,
-          telefono: 912345678,
+          phone: 912345678,
           existsBC: true,
         },
         {
-          direccion: 'Avenida Norte 456',
-          postalCode: '28050',
-          city: 'Madrid',
-          province: 'Madrid',
+          address: "Avenida Norte 456",
+          postalCode: "28050",
+          city: "Madrid",
+          province: "Madrid",
           municipalityCode: 28079,
-          nombre: 'Tienda Norte',
-          latitude: 40.4500,
-          longitude: -3.7000,
-          Tipo: 'TIENDA',
+          name: "Tienda Norte",
+          latitude: 40.45,
+          longitude: -3.7,
+          type: "TIENDA",
           coordinatorId: 2,
           id: 2,
           idExterno: 102,
-          telefono: 912345679,
+          phone: 912345679,
           existsBC: false,
         },
       ];
@@ -70,7 +70,7 @@ describe('GetTiendasAteneaUseCase', () => {
       expect(repository.getTiendasAtenea).toHaveBeenCalled();
     });
 
-    it('debe retornar array vacío si no hay tiendas', async () => {
+    it("debe retornar array vacío si no hay tiendas", async () => {
       repository.getTiendasAtenea.mockResolvedValue([]);
 
       const result = await useCase.execute();
@@ -79,28 +79,30 @@ describe('GetTiendasAteneaUseCase', () => {
       expect(repository.getTiendasAtenea).toHaveBeenCalled();
     });
 
-    it('debe manejar errores del repositorio', async () => {
-      repository.getTiendasAtenea.mockRejectedValue(new Error('Database error'));
+    it("debe manejar errores del repositorio", async () => {
+      repository.getTiendasAtenea.mockRejectedValue(
+        new Error("Database error"),
+      );
 
-      await expect(useCase.execute()).rejects.toThrow('Database error');
+      await expect(useCase.execute()).rejects.toThrow("Database error");
     });
 
-    it('debe retornar tiendas con información completa de MongoDB', async () => {
+    it("debe retornar tiendas con información completa de MongoDB", async () => {
       const mockTiendasCompletas: Tiendas2[] = [
         {
-          direccion: 'Calle Test 789',
-          postalCode: '08001',
-          city: 'Barcelona',
-          province: 'Barcelona',
+          address: "Calle Test 789",
+          postalCode: "08001",
+          city: "Barcelona",
+          province: "Barcelona",
           municipalityCode: 8019,
-          nombre: 'Tienda Barcelona',
+          name: "Tienda Barcelona",
           latitude: 41.3851,
           longitude: 2.1734,
-          Tipo: 'TIENDA',
+          type: "TIENDA",
           coordinatorId: 3,
           id: 3,
           idExterno: 103,
-          telefono: 934567890,
+          phone: 934567890,
           existsBC: true,
         },
       ];
@@ -110,12 +112,12 @@ describe('GetTiendasAteneaUseCase', () => {
       const result = await useCase.execute();
 
       expect(result).toHaveLength(1);
-      expect(result[0]).toHaveProperty('postalCode');
-      expect(result[0]).toHaveProperty('city');
-      expect(result[0]).toHaveProperty('province');
-      expect(result[0]).toHaveProperty('latitude');
-      expect(result[0]).toHaveProperty('longitude');
-      expect(result[0]).toHaveProperty('Tipo');
+      expect(result[0]).toHaveProperty("postalCode");
+      expect(result[0]).toHaveProperty("city");
+      expect(result[0]).toHaveProperty("province");
+      expect(result[0]).toHaveProperty("latitude");
+      expect(result[0]).toHaveProperty("longitude");
+      expect(result[0]).toHaveProperty("type");
       expect(repository.getTiendasAtenea).toHaveBeenCalled();
     });
   });
