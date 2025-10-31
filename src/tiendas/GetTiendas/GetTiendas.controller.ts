@@ -17,7 +17,7 @@ export class GetTiendasController {
   }
 
   @UseGuards(SchedulerGuard)
-  @Get()
+  @Get("for-atenea")
   handleForAtenea() {
     return this.getTiendasUseCase.execute();
   }
