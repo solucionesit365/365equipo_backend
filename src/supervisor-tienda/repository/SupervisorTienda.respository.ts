@@ -20,7 +20,7 @@ export class SupervisorTiendaRespository
         where: { id: idSupervisora },
         data: {
           supervisa: {
-            connect: tiendasIds.map((idTienda) => ({ id: idTienda })),
+            set: tiendasIds.map((idTienda) => ({ id: idTienda })),
           },
         },
       });
