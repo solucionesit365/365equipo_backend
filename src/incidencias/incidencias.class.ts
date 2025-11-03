@@ -11,7 +11,7 @@ export class Incidencia {
   async nuevaIncidencia(incidencia: Incidencias) {
     const insertIncidencia =
       await this.schIncidencias.nuevaIncidencia(incidencia);
-    if (insertIncidencia) {
+    if (incidencia.destinatario == "tecnicos") {
       axios.post(
         "https://default1a80919e07cb47fa91148a866d19a9.b8.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/4caf9a2a73f34a249b1651fc94477822/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=pfov2rPYEzeqmzUsGyjlE016vv79fomNYJ_l4rq2to0",
         {
@@ -24,6 +24,9 @@ export class Incidencia {
       );
       return true;
     }
+    if (insertIncidencia) {
+      return true;
+    }
     throw Error("No se ha podido insertar la incidencia");
   }
 
@@ -31,7 +34,7 @@ export class Incidencia {
   async nuevaIncidenciaInvitado(incidencia: IncidenciasInvitado) {
     const insertIncidencia =
       await this.schIncidencias.nuevaIncidenciaInvitado(incidencia);
-    if (insertIncidencia) {
+    if (incidencia.destinatario == "tecnicos") {
       axios.post(
         "https://default1a80919e07cb47fa91148a866d19a9.b8.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/4caf9a2a73f34a249b1651fc94477822/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=pfov2rPYEzeqmzUsGyjlE016vv79fomNYJ_l4rq2to0",
         {
@@ -42,6 +45,9 @@ export class Incidencia {
           tienda: "Invitado",
         },
       );
+      return true;
+    }
+    if (insertIncidencia) {
       return true;
     }
     throw Error("No se ha podido insertar la incidencia");
