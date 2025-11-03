@@ -10,7 +10,7 @@ export class UpdateSupervisoraTiendaController {
   ) {}
 
   @Post()
-  //   @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard)
   async updateSupervisoraTienda(@Body() req: UpdateSupervisoraTiendaDto) {
     return await this.updateSupervisoraTiendaUseCase.execute(
       req.tiendasIds,

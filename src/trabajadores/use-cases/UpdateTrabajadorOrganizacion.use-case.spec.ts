@@ -69,8 +69,12 @@ describe("UpdateTrabajadorOrganizacionUseCase", () => {
         {
           provide: TrabajadorService,
           useValue: {
-            asignarResponsablePorTiendaSiCorresponde: jest.fn().mockResolvedValue(undefined),
-            getTrabajadorBySqlId: jest.fn().mockResolvedValue({ idApp: "mock-app-id" }),
+            asignarResponsablePorTiendaSiCorresponde: jest
+              .fn()
+              .mockResolvedValue(undefined),
+            getTrabajadorBySqlId: jest
+              .fn()
+              .mockResolvedValue({ idApp: "mock-app-id" }),
           },
         },
         {
@@ -83,14 +87,20 @@ describe("UpdateTrabajadorOrganizacionUseCase", () => {
         {
           provide: DiaPersonalClass,
           useValue: {
-            haySolicitudesParaBeneficiarioDiaPersonal: jest.fn().mockResolvedValue(false),
-            actualizarIdAppResponsableDiaPersonal: jest.fn().mockResolvedValue(undefined),
+            haySolicitudesParaBeneficiarioDiaPersonal: jest
+              .fn()
+              .mockResolvedValue(false),
+            actualizarIdAppResponsableDiaPersonal: jest
+              .fn()
+              .mockResolvedValue(undefined),
           },
         },
       ],
     }).compile();
 
-    useCase = module.get<UpdateTrabajadorOrganizacionUseCase>(UpdateTrabajadorOrganizacionUseCase);
+    useCase = module.get<UpdateTrabajadorOrganizacionUseCase>(
+      UpdateTrabajadorOrganizacionUseCase,
+    );
     trabajadorRepository = module.get(ITrabajadorRepository);
     prismaService = module.get(PrismaService);
   });
@@ -134,6 +144,7 @@ describe("UpdateTrabajadorOrganizacionUseCase", () => {
         empresa: true,
         responsable: true,
         coordinadoraDeLaTienda: true,
+        supervisa: true,
       },
     });
 
@@ -171,6 +182,7 @@ describe("UpdateTrabajadorOrganizacionUseCase", () => {
         empresa: true,
         responsable: true,
         coordinadoraDeLaTienda: true,
+        supervisa: true,
       },
     });
   });
@@ -198,6 +210,7 @@ describe("UpdateTrabajadorOrganizacionUseCase", () => {
         empresa: true,
         responsable: true,
         coordinadoraDeLaTienda: true,
+        supervisa: true,
       },
     });
   });

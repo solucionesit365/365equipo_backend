@@ -29,8 +29,14 @@ export class UpdateTrabajadorOrganizacionUseCase
       "UpdateTrabajadorOrganizacion - Datos recibidos:",
       trabajadorOrganizacion,
     );
-    const { id, arrayRoles, arrayPermisos, coordinatorId, ...datosActualizar } =
-      trabajadorOrganizacion;
+    const {
+      id,
+      arrayRoles,
+      arrayPermisos,
+      coordinatorId,
+      supervisorId,
+      ...datosActualizar
+    } = trabajadorOrganizacion;
 
     // 👉 Obtenemos snapshot del trabajador original ANTES de actualizar
     const original = await this.prisma.trabajador.findUnique({
@@ -118,6 +124,52 @@ export class UpdateTrabajadorOrganizacionUseCase
       }
     }
 
+    if (supervisorId !== undefined) {
+      console.log(
+        "UpdateTrabajadorOrganizacion - Gestionando supervisorId (tiendas supervisadas):",
+        supervisorId,
+      );
+
+      // El frontend envía supervisorId como array de IDs de tiendas
+      if (Array.isArray(supervisorId)) {
+        // 1️⃣ Eliminar al trabajador como supervisor de tiendas que ya no están en el array
+        await this.prisma.tienda.updateMany({
+          where: {
+            supervisorId: id,
+            id: { notIn: supervisorId },
+          },
+          data: { supervisorId: null },
+        });
+
+        // 2️⃣ Asignar el trabajador como supervisor en las nuevas tiendas seleccionadas
+        for (const idTienda of supervisorId) {
+          await this.prisma.tienda.update({
+            where: { id: idTienda },
+            data: { supervisorId: id },
+          });
+          console.log(
+            `UpdateTrabajadorOrganizacion - Trabajador ${id} asignado como supervisor de tienda ${idTienda}`,
+          );
+        }
+
+        // 3️⃣ También actualizar el campo relacional supervisa[] en el trabajador
+        updateData.supervisa = {
+          set: supervisorId.map((idTienda) => ({ id: idTienda })),
+        };
+      } else if (supervisorId === null) {
+        // Si se pasa null, eliminar cualquier supervisión existente
+        await this.prisma.tienda.updateMany({
+          where: { supervisorId: id },
+          data: { supervisorId: null },
+        });
+
+        updateData.supervisa = { set: [] };
+        console.log(
+          `UpdateTrabajadorOrganizacion - Trabajador ${id} removido como supervisor de todas las tiendas`,
+        );
+      }
+    }
+
     // Actualizar el trabajador con sus relaciones
     console.log("UpdateTrabajadorOrganizacion - updateData final:", updateData);
     const trabajadorActualizado = await this.prisma.trabajador.update({
@@ -130,6 +182,7 @@ export class UpdateTrabajadorOrganizacionUseCase
         empresa: true,
         responsable: true,
         coordinadoraDeLaTienda: true,
+        supervisa: true,
       },
     });
     // LÓGICA anterior en guardarCambiosForms lo necesita recursos humanos---
@@ -159,6 +212,7 @@ export class UpdateTrabajadorOrganizacionUseCase
           empresa: true,
           responsable: true,
           coordinadoraDeLaTienda: true,
+          supervisa: true,
         },
       });
 
