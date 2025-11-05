@@ -10,6 +10,9 @@ import { GetTurnosEquipoCoordinadoraUseCase } from "./use-cases/GetTurnosEquipoC
 import { SaveTurnosTrabajadorSemanalController } from "./controllers/SaveTurnosTrabajadorSemanal.controller";
 import { ISaveTurnosTrabajadorSemanalUseCase } from "./use-cases/interfaces/ISaveTurnosTrabajadorSemanalUseCase";
 import { SaveTurnosTrabajadorSemanalUseCase } from "./use-cases/SaveTurnosTrabajadorSemanal.use-case";
+import { SaveTurnoTrabajadorIndividualController } from "./controllers/SaveTurnoTrabajadorIndividual.controller";
+import { ISaveTurnoTrabajadorIndividualUseCase } from "./use-cases/interfaces/ISaveTurnoTrabajadorIndividualUseCase";
+import { SaveTurnoTrabajadorIndividualUseCase } from "./use-cases/SaveTurnoTrabajadorIndividual.use-case";
 import { CopiarTurnoPorSemanaController } from "./controllers/CopiarTurnosPorSemana.controller";
 import { ICopiarTurnosPorSemanaUseCase } from "./use-cases/interfaces/ICopiarTurnosPorSemana.use-case";
 import { CopiarTurnosPorSemanaUseCase } from "./use-cases/CopiarTurnosPorSemana.use-case";
@@ -40,6 +43,10 @@ import { SolicitudVacacionesModule } from "src/solicitud-vacaciones/solicitud-va
       useClass: SaveTurnosTrabajadorSemanalUseCase,
     },
     {
+      provide: ISaveTurnoTrabajadorIndividualUseCase,
+      useClass: SaveTurnoTrabajadorIndividualUseCase,
+    },
+    {
       provide: ICopiarTurnosPorSemanaUseCase,
       useClass: CopiarTurnosPorSemanaUseCase,
     },
@@ -57,6 +64,7 @@ import { SolicitudVacacionesModule } from "src/solicitud-vacaciones/solicitud-va
     GetTurnosEquipoCoordinadoraController,
     GetTurnosSemanalesTrabajadorController,
     SaveTurnosTrabajadorSemanalController,
+    SaveTurnoTrabajadorIndividualController,
     CopiarTurnoPorSemanaController,
     GetAllTurnosController,
     GetTurnosUnaSemanaController,
