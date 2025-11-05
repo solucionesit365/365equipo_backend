@@ -1,10 +1,15 @@
 import { Injectable, InternalServerErrorException } from "@nestjs/common";
-import { ITiendaAteneaRepository } from "./ITiendaAtenea.repository";
+import {
+  ICreateTiendaMongo,
+  ITiendaMongoRepository,
+} from "./ITiendaAtenea.repository";
 import { Tiendas2 } from "../tiendas.dto";
 import { MongoService } from "../../mongo/mongo.service";
+import { InsertOneResult, ObjectId } from "mongodb";
+import { IUpdateTiendaMongo } from "../UpdateTiendaMongo/IUpdateTiendaMongo.use-case";
 
 @Injectable()
-export class TiendaAteneaRepository implements ITiendaAteneaRepository {
+export class TiendaAteneaRepository implements ITiendaMongoRepository {
   constructor(private readonly mongoService: MongoService) {}
 
   async getTiendasAtenea(): Promise<Tiendas2[]> {
@@ -13,6 +18,32 @@ export class TiendaAteneaRepository implements ITiendaAteneaRepository {
       const tiendasCollection = db.collection<Tiendas2>("tiendas");
       const tiendas = await tiendasCollection.find({}).toArray();
       return tiendas;
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException();
+    }
+  }
+
+  async createTienda(
+    payload: ICreateTiendaMongo,
+  ): Promise<InsertOneResult<ICreateTiendaMongo>> {
+    try {
+      const db = (await this.mongoService.getConexion()).db();
+      const tiendasCollection = db.collection<ICreateTiendaMongo>("tiendas");
+      return await tiendasCollection.insertOne(payload);
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException();
+    }
+  }
+
+  async update(id: ObjectId, payload: IUpdateTiendaMongo): Promise<void> {
+    try {
+      const db = (await this.mongoService.getConexion()).db();
+      const tiendasCollection = db.collection<ICreateTiendaMongo>("tiendas");
+      await tiendasCollection.updateOne(id, {
+        $set: payload,
+      });
     } catch (error) {
       console.log(error);
       throw new InternalServerErrorException();

@@ -9,10 +9,14 @@ import { IGetTiendasUseCase } from "./GetTiendas/IGetTiendas.use-case";
 import { GetTiendasUseCase } from "./GetTiendas/GetTiendas.use-case";
 import { GetTiendasController } from "./GetTiendas/GetTiendas.controller";
 import { TiendaAteneaRepository } from "./repository/TiendaAtenea.repository";
-import { ITiendaAteneaRepository } from "./repository/ITiendaAtenea.repository";
+import { ITiendaMongoRepository } from "./repository/ITiendaAtenea.repository";
 import { IGetTiendasAteneaUseCase } from "./GetTiendasAtenea/IGetTiendasAtenea.use-case";
 import { GetTiendasAteneaUseCase } from "./GetTiendasAtenea/GetTiendasAtenea.use-case";
 import { GetTiendasAteneaController } from "./GetTiendasAtenea/GetTiendasAtenea.controller";
+import { CreateTiendaMongoUseCase } from "./CreateTiendaMongo/CreateTiendaMongo.use-case";
+import { ICreateTiendaMongoUseCase } from "./CreateTiendaMongo/ICreateTiendaMongo.use-case";
+import { UpdateTiendaMongoUseCase } from "./UpdateTiendaMongo/UpdateTiendaMongo.use-case";
+import { IUpdateTiendaMongoUseCase } from "./UpdateTiendaMongo/IUpdateTiendaMongo.use-case";
 
 @Module({
   imports: [forwardRef(() => TrabajadoresModule)],
@@ -29,14 +33,26 @@ import { GetTiendasAteneaController } from "./GetTiendasAtenea/GetTiendasAtenea.
     },
     {
       useClass: TiendaAteneaRepository,
-      provide: ITiendaAteneaRepository,
+      provide: ITiendaMongoRepository,
     },
     {
       useClass: GetTiendasAteneaUseCase,
       provide: IGetTiendasAteneaUseCase,
     },
+    {
+      useClass: CreateTiendaMongoUseCase,
+      provide: ICreateTiendaMongoUseCase,
+    },
+    {
+      useClass: UpdateTiendaMongoUseCase,
+      provide: IUpdateTiendaMongoUseCase,
+    },
   ],
   exports: [Tienda],
-  controllers: [TiendasController, GetTiendasController, GetTiendasAteneaController],
+  controllers: [
+    TiendasController,
+    GetTiendasController,
+    GetTiendasAteneaController,
+  ],
 })
 export class TiendasModule {}
