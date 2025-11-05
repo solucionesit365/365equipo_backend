@@ -1,11 +1,11 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { GetTiendasAteneaUseCase } from "./GetTiendasAtenea.use-case";
-import { ITiendaAteneaRepository } from "../repository/ITiendaAtenea.repository";
+import { ITiendaMongoRepository } from "../repository/ITiendaAtenea.repository";
 import { Tiendas2 } from "../tiendas.dto";
 
 describe("GetTiendasAteneaUseCase", () => {
   let useCase: GetTiendasAteneaUseCase;
-  let repository: jest.Mocked<ITiendaAteneaRepository>;
+  let repository: jest.Mocked<ITiendaMongoRepository>;
 
   beforeEach(async () => {
     const mockRepository = {
