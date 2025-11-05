@@ -17,6 +17,11 @@ import { CreateTiendaMongoUseCase } from "./CreateTiendaMongo/CreateTiendaMongo.
 import { ICreateTiendaMongoUseCase } from "./CreateTiendaMongo/ICreateTiendaMongo.use-case";
 import { UpdateTiendaMongoUseCase } from "./UpdateTiendaMongo/UpdateTiendaMongo.use-case";
 import { IUpdateTiendaMongoUseCase } from "./UpdateTiendaMongo/IUpdateTiendaMongo.use-case";
+import { UpdateTiendaMongoController } from "./UpdateTiendaMongo/UpdateTiendaMongo.controller";
+import { CreateTiendaMongoController } from "./CreateTiendaMongo/CreateTiendaMongo.controller";
+import { DeleteTiendaMongoUseCase } from "./DeleteTiendaMongo/DeleteTiendaMongo.use-case";
+import { IDeleteTiendaMongoUseCase } from "./DeleteTiendaMongo/IDeleteTiendaMongo.use-case";
+import { DeleteTiendaMongoController } from "./DeleteTiendaMongo/DeleteTiendaMongo.controller";
 
 @Module({
   imports: [forwardRef(() => TrabajadoresModule)],
@@ -47,12 +52,19 @@ import { IUpdateTiendaMongoUseCase } from "./UpdateTiendaMongo/IUpdateTiendaMong
       useClass: UpdateTiendaMongoUseCase,
       provide: IUpdateTiendaMongoUseCase,
     },
+    {
+      useClass: DeleteTiendaMongoUseCase,
+      provide: IDeleteTiendaMongoUseCase,
+    },
   ],
   exports: [Tienda],
   controllers: [
     TiendasController,
     GetTiendasController,
     GetTiendasAteneaController,
+    UpdateTiendaMongoController,
+    CreateTiendaMongoController,
+    DeleteTiendaMongoController,
   ],
 })
 export class TiendasModule {}

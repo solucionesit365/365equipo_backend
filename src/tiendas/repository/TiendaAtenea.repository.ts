@@ -5,7 +5,7 @@ import {
 } from "./ITiendaAtenea.repository";
 import { Tiendas2 } from "../tiendas.dto";
 import { MongoService } from "../../mongo/mongo.service";
-import { InsertOneResult, ObjectId } from "mongodb";
+import { DeleteResult, InsertOneResult, ObjectId } from "mongodb";
 import { IUpdateTiendaMongo } from "../UpdateTiendaMongo/IUpdateTiendaMongo.use-case";
 
 @Injectable()
@@ -41,9 +41,20 @@ export class TiendaAteneaRepository implements ITiendaMongoRepository {
     try {
       const db = (await this.mongoService.getConexion()).db();
       const tiendasCollection = db.collection<ICreateTiendaMongo>("tiendas");
-      await tiendasCollection.updateOne(id, {
+      await tiendasCollection.updateOne({ _id: id }, {
         $set: payload,
       });
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException();
+    }
+  }
+
+  async delete(id: ObjectId): Promise<DeleteResult> {
+    try {
+      const db = (await this.mongoService.getConexion()).db();
+      const tiendasCollection = db.collection<ICreateTiendaMongo>("tiendas");
+      return await tiendasCollection.deleteOne({ _id: id });
     } catch (error) {
       console.log(error);
       throw new InternalServerErrorException();

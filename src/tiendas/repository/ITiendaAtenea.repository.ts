@@ -1,4 +1,4 @@
-import { InsertOneResult, ObjectId } from "mongodb";
+import { DeleteResult, InsertOneResult, ObjectId } from "mongodb";
 import { Tiendas2 } from "../tiendas.dto";
 import { IUpdateTiendaMongo } from "../UpdateTiendaMongo/IUpdateTiendaMongo.use-case";
 
@@ -40,4 +40,5 @@ export abstract class ITiendaMongoRepository {
     payload: ICreateTiendaMongo,
   ): Promise<InsertOneResult<ICreateTiendaMongo>>;
   abstract update(id: ObjectId, payload: IUpdateTiendaMongo): Promise<void>;
+  abstract delete(id: ObjectId): Promise<DeleteResult>;
 }
