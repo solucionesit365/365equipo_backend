@@ -83,3 +83,16 @@ export class CopiarTurnosPorSemanaDto {
   @IsString()
   diaSemanaDestino: string;
 }
+
+export class SaveTurnoTrabajadorIndividualDto {
+  @IsNumber()
+  idTrabajador: number;
+
+  @IsString()
+  dia: string; // ISO Date format (YYYY-MM-DD)
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ObjetoTurnoDto)
+  turnos: ObjetoTurnoDto[];
+}
