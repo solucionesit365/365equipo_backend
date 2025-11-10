@@ -48,6 +48,7 @@ export class InspeccionFurgosClass {
       matricula: furgoneta.matricula,
       fechaMatriculacion: furgoneta.fechaMatriculacion,
       conductor: furgoneta.conductor,
+      estado: furgoneta.estado,
     });
 
     if (insertFurgoneta) return true;

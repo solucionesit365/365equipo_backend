@@ -19,6 +19,11 @@ export class ParametrosController {
     return campania || {};
   }
 
+  @Get("correosFurgos")
+  async getCorreosFurgos() {
+    return await this.parametrosService.getParametrosCorreosFurgos();
+  }
+
   @Post("campaniaMedica")
   async updateCampaniaMedica(
     @Body()
@@ -40,5 +45,17 @@ export class ParametrosController {
         },
       },
     );
+  }
+
+  @Post("correosFurgos")
+  async updateCorreosFurgos(
+    @Body()
+    data: {
+      mails: string[];
+    },
+  ) {
+    return this.parametrosService.updateCorreosFurgos("correos_furgos", {
+      mails: data.mails,
+    });
   }
 }

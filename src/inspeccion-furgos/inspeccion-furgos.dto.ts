@@ -1,6 +1,7 @@
 import { Type } from "class-transformer";
 import {
   IsArray,
+  IsBoolean,
   IsInt,
   IsOptional,
   IsString,
@@ -54,6 +55,9 @@ export class FurgonetaDto {
   @IsOptional()
   @IsString()
   conductor: string;
+
+  @IsBoolean()
+  estado: boolean;
 }
 
 export class PreguntasDaños {

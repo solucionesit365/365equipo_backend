@@ -48,106 +48,106 @@ export class SolicitudVacacionesController {
       if (!idBeneficiario) {
         throw new InternalServerErrorException("idBeneficiario no definido");
       }
-      const solicitudTrabajador =
-        await this.trabajadorInstance.getTrabajadorBySqlId(
-          Number(idBeneficiario),
-        );
+      // const solicitudTrabajador =
+      //   await this.trabajadorInstance.getTrabajadorBySqlId(
+      //     Number(idBeneficiario),
+      //   );
 
-      this.email.enviarEmail(
-        solicitudTrabajador.emails,
-        `<!DOCTYPE html>
-      <html>
-      <head>
-        <style>
-          body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            color: #4a4a4a;
-            margin: 0;
-            padding: 20px;
-            background-color: #f4f4f4;
-          }
-          h2 {
-            color: #0047ab;
-          }
-          table {
-            border-collapse: collapse;
-            width: 100%;
-            margin-top: 20px;
-            border: 1px solid #000000;
-          }
-          th {
-            background-color: #0047ab;
-            color: #ffffff;
-            padding: 10px;
-            text-align: center;
-          }
-          td {
-            background-color: #ffffff;
-            color: #000000;
-            padding: 10px;
-            text-align: center;
-            border-bottom: 1px solid #dddddd;
+      // this.email.enviarEmail(
+      //   solicitudTrabajador.emails,
+      //   `<!DOCTYPE html>
+      // <html>
+      // <head>
+      //   <style>
+      //     body {
+      //       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      //       color: #4a4a4a;
+      //       margin: 0;
+      //       padding: 20px;
+      //       background-color: #f4f4f4;
+      //     }
+      //     h2 {
+      //       color: #0047ab;
+      //     }
+      //     table {
+      //       border-collapse: collapse;
+      //       width: 100%;
+      //       margin-top: 20px;
+      //       border: 1px solid #000000;
+      //     }
+      //     th {
+      //       background-color: #0047ab;
+      //       color: #ffffff;
+      //       padding: 10px;
+      //       text-align: center;
+      //     }
+      //     td {
+      //       background-color: #ffffff;
+      //       color: #000000;
+      //       padding: 10px;
+      //       text-align: center;
+      //       border-bottom: 1px solid #dddddd;
             
-          }
-          .highlight {
-            background-color: #e7f4ff;
-          }
-          th, td {
-            border: 1px solid #000000;
-          }
-          p{
-            color: #000000;
-          }
-        </style>
-      </head>
-      <body>
-        <h2>Solicitud de Vacaciones</h2>
-        <p>Tu solicitud ha sido enviada con estos datos:</p>
-        <table>
-          <thead>
-            <tr>
-              <th>Fecha Inicio</th>
-              <th>Fecha Final</th>
-              <th>Fecha Incorporación</th>
-              <th>Observación</th>
-              <th>Total de días</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr class="highlight">
-              <td>${solicitudesVacaciones.fechaInicio}</td>
-              <td>${solicitudesVacaciones.fechaFinal}</td>
-              <td>${solicitudesVacaciones.fechaIncorporacion}</td>
-              <td>${solicitudesVacaciones.observaciones}</td>
-              <td>${solicitudesVacaciones.totalDias}</td>
-            </tr>
-          </tbody>
-        </table>
-      </body>
-      </html>`,
-        "Confirmación de Solicitud de Vacaciones",
-      );
+      //     }
+      //     .highlight {
+      //       background-color: #e7f4ff;
+      //     }
+      //     th, td {
+      //       border: 1px solid #000000;
+      //     }
+      //     p{
+      //       color: #000000;
+      //     }
+      //   </style>
+      // </head>
+      // <body>
+      //   <h2>Solicitud de Vacaciones</h2>
+      //   <p>Tu solicitud ha sido enviada con estos datos:</p>
+      //   <table>
+      //     <thead>
+      //       <tr>
+      //         <th>Fecha Inicio</th>
+      //         <th>Fecha Final</th>
+      //         <th>Fecha Incorporación</th>
+      //         <th>Observación</th>
+      //         <th>Total de días</th>
+      //       </tr>
+      //     </thead>
+      //     <tbody>
+      //       <tr class="highlight">
+      //         <td>${solicitudesVacaciones.fechaInicio}</td>
+      //         <td>${solicitudesVacaciones.fechaFinal}</td>
+      //         <td>${solicitudesVacaciones.fechaIncorporacion}</td>
+      //         <td>${solicitudesVacaciones.observaciones}</td>
+      //         <td>${solicitudesVacaciones.totalDias}</td>
+      //       </tr>
+      //     </tbody>
+      //   </table>
+      // </body>
+      // </html>`,
+      //   "Confirmación de Solicitud de Vacaciones",
+      // );
 
-      //enviar notificacion
-      //get TokenFCM
-      const userToken = await this.notificacionesInstance.getFCMToken(
-        solicitudTrabajador.idApp,
-      );
+      // //enviar notificacion
+      // //get TokenFCM
+      // const userToken = await this.notificacionesInstance.getFCMToken(
+      //   solicitudTrabajador.idApp,
+      // );
 
-      if (userToken) {
-        //enviar notificacion
-        await this.notificacionesInstance.sendNotificationToDevice(
-          userToken.token,
-          "Solicitud de vacaciones",
-          "Se ha creado una solicitud de vacaciones a tu nombre.",
-          "/mis-vacaciones",
-        );
-      }
+      // if (userToken) {
+      //   //enviar notificacion
+      //   await this.notificacionesInstance.sendNotificationToDevice(
+      //     userToken.token,
+      //     "Solicitud de vacaciones",
+      //     "Se ha creado una solicitud de vacaciones a tu nombre.",
+      //     "/mis-vacaciones",
+      //   );
+      // }
 
-      this.loggerService.create({
-        action: "Nueva solicitud de vacaciones",
-        name: `Creado por ${user.nombreApellidos} para ${solicitudTrabajador.nombreApellidos}`,
-      });
+      // this.loggerService.create({
+      //   action: "Nueva solicitud de vacaciones",
+      //   name: `Creado por ${user.nombreApellidos} para ${solicitudTrabajador.nombreApellidos}`,
+      // });
 
       return {
         ok: true,
