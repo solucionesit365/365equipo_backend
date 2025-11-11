@@ -12,23 +12,23 @@ export class AusenciasDatabase {
   constructor(
     private readonly mongoDbService: MongoService,
     private readonly mbctokenService: MbctokenService,
-    private prisma: PrismaService,
+    private readonly prisma: PrismaService,
   ) {}
 
   async nuevaAusencia(ausencia: AusenciaInterface) {
-    const db = (await this.mongoDbService.getConexion()).db();
-    const ausenciasCollection = db.collection<AusenciaInterface>("ausencias");
+    const ausenciasCollection =
+      await this.mongoDbService.getCollection<AusenciaInterface>("ausencias");
 
     const resInsert = await ausenciasCollection.insertOne(ausencia);
 
     if (resInsert.acknowledged) return resInsert.insertedId;
 
-    throw Error("No se ha podido crear la nueva ausencia");
+    throw new Error("No se ha podido crear la nueva ausencia");
   }
 
   async deleteAusencia(idAusencia: string) {
-    const db = (await this.mongoDbService.getConexion()).db();
-    const ausenciasCollection = db.collection<AusenciaInterface>("ausencias");
+    const ausenciasCollection =
+      await this.mongoDbService.getCollection<AusenciaInterface>("ausencias");
 
     const resDelete = await ausenciasCollection.deleteOne({
       _id: new ObjectId(idAusencia),
@@ -233,10 +233,6 @@ export class AusenciasDatabase {
       if (!token) {
         throw new Error("No se pudo obtener el token de MBC");
       }
-
-      // const ayer = new Date();
-      // ayer.setDate(ayer.getDate() - 1);
-      // const fechaFiltro = ayer.toISOString().split("T")[0];
 
       const resultados = await Promise.all(
         empresas.map(async ({ id: empresaID, nombre }) => {

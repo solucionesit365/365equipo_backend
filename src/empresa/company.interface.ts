@@ -1,5 +1,7 @@
+import { ObjectId } from "mongodb";
+
 export abstract class CompanyInterface {
-  id: string;
+  id: ObjectId;
   idExterno?: number;
   nombre: string;
   cif: string;
@@ -11,7 +13,7 @@ export abstract class CompanyCreate {
   idExterno?: number;
   nombre: string;
   cif: string;
-  autogestionada?: boolean;
+  autogestionadaa?: boolean;
   existsBC?: boolean;
 }
 
@@ -21,4 +23,8 @@ export abstract class CompanyUpdate {
   cif?: string;
   autogestionada?: boolean;
   existsBC?: boolean;
+}
+
+export abstract class CompanyDelete {
+  id: ObjectId;
 }

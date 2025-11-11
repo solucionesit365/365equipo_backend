@@ -6,7 +6,7 @@ import {
   IsString,
 } from "class-validator";
 
-export class CreateEmpresaDto {
+export class CreateCompanyDto {
   @IsString()
   nombre: string;
 
@@ -26,7 +26,7 @@ export class CreateEmpresaDto {
   existsBC?: boolean;
 }
 
-export class UpdateEmpresaDto {
+export class UpdateCompanyDto {
   @IsString() // selection of the comapny to update
   id: string;
 
@@ -51,7 +51,7 @@ export class UpdateEmpresaDto {
   existsBC?: boolean;
 }
 
-export class DeleteEmpresaDto {
+export class DeleteCompanyDto {
   @IsNotEmpty()
   @IsString()
   id: string;

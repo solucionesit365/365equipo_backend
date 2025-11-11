@@ -1,66 +1,30 @@
-import { Injectable, InternalServerErrorException } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import {
-  CreateEmpresaDto,
-  DeleteEmpresaDto,
-  UpdateEmpresaDto,
+  CreateCompanyDto,
+  DeleteCompanyDto,
+  UpdateCompanyDto,
 } from "./empresa.dto";
-import { PrismaService } from "../prisma/prisma.service";
-import { MongoService } from "../mongo/mongo.service";
-import { CompanyCreate } from "./company.interface";
+import { CompanyInterface } from "./company.interface";
+import { WithId } from "mongodb";
+import { ICompanyRepository } from "./ICompany.repository";
 
 @Injectable()
 export class CompanyService {
-  constructor(
-    private readonly prismaService: PrismaService,
-    private readonly mongoService: MongoService,
-  ) {}
+  constructor(private readonly companyRepository: ICompanyRepository) {}
 
-  async createCompany(reqCreateEmpresa: CreateEmpresaDto) {
-    try {
-      const companyCollection =
-        await this.mongoService.getCollection<CompanyCreate>("company");
-      return await companyCollection.insertOne(reqCreateEmpresa);
-    } catch (err) {
-      console.log(err);
-      throw new InternalServerErrorException();
-    }
+  createCompany(reqCreateCompany: CreateCompanyDto) {
+    return this.companyRepository.createCompany(reqCreateCompany);
   }
 
-  async updateEmpresa(reqUpdateEmpresa: UpdateEmpresaDto) {
-    try {
-      const companyCollection =
-        await this.mongoService.getCollection<CompanyCreate>("company");
-
-      const empresa = await companyCollection.updateOne(
-        {
-          id: reqUpdateEmpresa.id,
-        },
-        {
-          $set: {
-            ...reqUpdateEmpresa,
-          },
-        },
-      );
-      return empresa;
-    } catch (err) {
-      console.log(err);
-      throw new InternalServerErrorException();
-    }
+  updateCompany(reqUpdateCompany: UpdateCompanyDto) {
+    return this.companyRepository.updateCompany(reqUpdateCompany);
   }
 
-  async getEmpresas(onlyExistsBC?: boolean) {
-    const where = onlyExistsBC ? { existsBC: true } : {};
-    return await this.prismaService.empresa.findMany({ where });
+  getCompanies(onlyExistsBC?: boolean): Promise<WithId<CompanyInterface>[]> {
+    return this.companyRepository.getCompanies(onlyExistsBC);
   }
 
-  async deleteEmpresa(reqDeleteEmpresa: DeleteEmpresaDto) {
-    try {
-      await this.prismaService.empresa.delete({
-        where: { id: reqDeleteEmpresa.id },
-      });
-    } catch (err) {
-      console.log(err);
-      throw new InternalServerErrorException();
-    }
+  async deleteCompany(reqDeleteCompany: DeleteCompanyDto): Promise<void> {
+    return await this.companyRepository.deleteCompany(reqDeleteCompany);
   }
 }

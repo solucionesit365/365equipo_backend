@@ -1,37 +1,37 @@
 import { Body, Controller, Get, Post, UseGuards } from "@nestjs/common";
-import { EmpresaService } from "./empresa.service";
+import { CompanyService } from "./empresa.service";
 import {
-  CreateEmpresaDto,
-  DeleteEmpresaDto,
-  UpdateEmpresaDto,
+  CreateCompanyDto,
+  DeleteCompanyDto,
+  UpdateCompanyDto,
 } from "./empresa.dto";
 import { AuthGuard } from "../guards/auth.guard";
 
 @Controller("empresa")
-export class EmpresaController {
-  constructor(private readonly empresaService: EmpresaService) {}
+export class CompanyController {
+  constructor(private readonly empresaService: CompanyService) {}
 
   @UseGuards(AuthGuard)
   @Post("create")
-  async createEmpresa(@Body() reqCreateEmpresa: CreateEmpresaDto) {
-    return await this.empresaService.createEmpresa(reqCreateEmpresa);
+  async createCompany(@Body() reqCreateCompany: CreateCompanyDto) {
+    return await this.empresaService.createCompany(reqCreateCompany);
   }
 
   @UseGuards(AuthGuard)
   @Post("update")
-  async updateEmpresa(@Body() reqUpdateEmpresa: UpdateEmpresaDto) {
-    return await this.empresaService.updateEmpresa(reqUpdateEmpresa);
+  async updateCompany(@Body() reqUpdateCompany: UpdateCompanyDto) {
+    return await this.empresaService.updateCompany(reqUpdateCompany);
   }
 
   @UseGuards(AuthGuard)
   @Get("get")
-  async getEmpresas() {
-    return await this.empresaService.getEmpresas();
+  async getCompanys() {
+    return await this.empresaService.getCompanies();
   }
 
   @UseGuards(AuthGuard)
   @Post("delete")
-  async deleteEmpresa(@Body() reqDeleteEmpresa: DeleteEmpresaDto) {
-    return await this.empresaService.deleteEmpresa(reqDeleteEmpresa);
+  async deleteCompany(@Body() reqDeleteCompany: DeleteCompanyDto) {
+    return await this.empresaService.deleteCompany(reqDeleteCompany);
   }
 }
