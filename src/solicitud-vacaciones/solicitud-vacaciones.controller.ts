@@ -233,59 +233,122 @@ export class SolicitudVacacionesController {
 
   //Mostrar solicitudes de vacaciones de los subordinados
   @UseGuards(AuthGuard)
+  // @Get("solicitudesSubordinados")
+  // async solicitudesSubordinados(@Query() { idAppResponsable, year }) {
+  //   try {
+  //     if (!idAppResponsable) throw Error("Faltan datos");
+
+  //     const solicitudesEmpleadosDirectos =
+  //       await this.solicitudVacacionesInstance.getsolicitudesSubordinados(
+  //         idAppResponsable,
+  //         Number(year),
+  //       );
+  //     const empleadosTipoCoordi =
+  //       await this.trabajadorInstance.getSubordinadosConTienda(
+  //         idAppResponsable,
+  //       );
+  //     const soyCoordinadora: boolean =
+  //       await this.trabajadorInstance.esCoordinadora(idAppResponsable);
+  //     const addArray = [];
+
+  //     if (empleadosTipoCoordi.length > 0) {
+  //       for (let i = 0; i < empleadosTipoCoordi.length; i++) {
+  //         if (empleadosTipoCoordi[i].llevaEquipo) {
+  //           // Caso coordinadora
+  //           const solicitudesSubordinadosCoordinadora =
+  //             await this.solicitudVacacionesInstance.getsolicitudesSubordinados(
+  //               empleadosTipoCoordi[i].idApp,
+  //               Number(year),
+  //             );
+
+  //           if (solicitudesSubordinadosCoordinadora.length > 0) {
+  //             for (
+  //               let j = 0;
+  //               j < solicitudesSubordinadosCoordinadora.length;
+  //               j++
+  //             ) {
+  //               solicitudesSubordinadosCoordinadora[j]["validador"] =
+  //                 idAppResponsable;
+  //             }
+  //             addArray.push(...solicitudesSubordinadosCoordinadora);
+  //           }
+  //         }
+  //       }
+  //     }
+
+  //     if (soyCoordinadora) {
+  //       for (let i = 0; i < addArray.length; i++) {
+  //         addArray[i]["validador"] = idAppResponsable;
+  //       }
+
+  //       for (let i = 0; i < solicitudesEmpleadosDirectos.length; i++) {
+  //         solicitudesEmpleadosDirectos[i]["validador"] = idAppResponsable;
+  //       }
+  //     }
+
+  //     if (solicitudesEmpleadosDirectos.length > 0) {
+  //       solicitudesEmpleadosDirectos.push(...addArray);
+  //       return { ok: true, data: solicitudesEmpleadosDirectos };
+  //     } else if (addArray.length > 0) {
+  //       return { ok: true, data: addArray };
+  //     } else return { ok: true, data: [] };
+  //   } catch (err) {
+  //     console.log(err);
+  //     return { ok: false, message: err.message };
+  //   }
+  // }
+  @UseGuards(AuthGuard)
   @Get("solicitudesSubordinados")
   async solicitudesSubordinados(@Query() { idAppResponsable, year }) {
     try {
       if (!idAppResponsable) throw Error("Faltan datos");
 
+      //  Consultar si la persona logueada es coordinadora (A o B)
+      const soyCoordinadora =
+        await this.trabajadorInstance.esCoordinadora(idAppResponsable);
+
+      // Si la persona logueada es la coordinadora B, obtenemos el idAppResponsable de la A
+      const idAppResponsableFinal = soyCoordinadora
+        ? idAppResponsable
+        : await this.trabajadorInstance.esCoordinadora(idAppResponsable);
+
+      // Obtener solicitudes de vacaciones de los subordinados
       const solicitudesEmpleadosDirectos =
         await this.solicitudVacacionesInstance.getsolicitudesSubordinados(
-          idAppResponsable,
+          idAppResponsableFinal,
           Number(year),
         );
+
+      // Obtener subordinados de la coordinadora (A o B)
       const empleadosTipoCoordi =
         await this.trabajadorInstance.getSubordinadosConTienda(
-          idAppResponsable,
+          idAppResponsableFinal,
         );
-      const soyCoordinadora: boolean =
-        await this.trabajadorInstance.esCoordinadora(idAppResponsable);
+
       const addArray = [];
 
+      //  Obtener solicitudes de subordinados adicionales (si los hay)
       if (empleadosTipoCoordi.length > 0) {
         for (let i = 0; i < empleadosTipoCoordi.length; i++) {
           if (empleadosTipoCoordi[i].llevaEquipo) {
-            // Caso coordinadora
+            // Caso coordinadora A (si hay subordinados de otra coordinadora)
             const solicitudesSubordinadosCoordinadora =
               await this.solicitudVacacionesInstance.getsolicitudesSubordinados(
-                empleadosTipoCoordi[i].idApp,
+                empleadosTipoCoordi[i].idApp, // id del subordinado
                 Number(year),
               );
 
             if (solicitudesSubordinadosCoordinadora.length > 0) {
-              for (
-                let j = 0;
-                j < solicitudesSubordinadosCoordinadora.length;
-                j++
-              ) {
-                solicitudesSubordinadosCoordinadora[j]["validador"] =
-                  idAppResponsable;
-              }
+              solicitudesSubordinadosCoordinadora.forEach((solicitud: any) => {
+                solicitud.validador = idAppResponsableFinal;
+              });
               addArray.push(...solicitudesSubordinadosCoordinadora);
             }
           }
         }
       }
 
-      if (soyCoordinadora) {
-        for (let i = 0; i < addArray.length; i++) {
-          addArray[i]["validador"] = idAppResponsable;
-        }
-
-        for (let i = 0; i < solicitudesEmpleadosDirectos.length; i++) {
-          solicitudesEmpleadosDirectos[i]["validador"] = idAppResponsable;
-        }
-      }
-
+      //  Combinar solicitudes de subordinados directos y los subordinados adicionales
       if (solicitudesEmpleadosDirectos.length > 0) {
         solicitudesEmpleadosDirectos.push(...addArray);
         return { ok: true, data: solicitudesEmpleadosDirectos };

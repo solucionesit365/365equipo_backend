@@ -34,16 +34,17 @@ model Trabajador {
   esTienda               Boolean              @default(false)
   nPerceptor             Int?
   workEmail              String?
-  notificationDevices    NotificationDevice[]
-  supervisa              Tienda[]             @relation("TiendaSupervisor")
+  isPermanent            Boolean              @default(false)
   ausenciasCompletas     AusenciaCompleta[]
   ausenciasParciales     AusenciaParcial[]
   contratos              Contrato2[]
+  notificationDevices    NotificationDevice[]
   coordinadoraDeLaTienda Tienda?              @relation("TiendaCoordinator")
+  supervisa              Tienda[]             @relation("TiendaSupervisor")
   empresa                Empresa?             @relation(fields: [empresaId], references: [id])
-  responsable            Trabajador?          @relation("Responsable", fields: [idResponsable], references: [id], onDelete: SetNull)
+  responsable            Trabajador?          @relation("Responsable", fields: [idResponsable], references: [id])
   subordinados           Trabajador[]         @relation("Responsable")
-  tienda                 Tienda?              @relation(fields: [idTienda], references: [id], onDelete: SetNull)
+  tienda                 Tienda?              @relation(fields: [idTienda], references: [id])
   turnos                 Turno[]
   permisos               Permiso[]            @relation("PermisoToTrabajador")
   roles                  Role[]               @relation("RoleToTrabajador")
@@ -58,11 +59,11 @@ model Tienda {
   direccion          String?
   idExterno          Int?
   coordinatorId      Int?                 @unique
-  supervisorId       Int?                 @unique
   existsBC           Boolean              @default(false)
+  supervisorId       Int?
   plantillasTurno    PlantillaTurno[]
-  coordinator        Trabajador?          @relation("TiendaCoordinator", fields: [coordinatorId], references: [id], onDelete: SetNull)
-  supervisor         Trabajador?          @relation("TiendaSupervisor", fields: [supervisorId], references: [id], onDelete: SetNull)
+  coordinator        Trabajador?          @relation("TiendaCoordinator", fields: [coordinatorId], references: [id])
+  supervisor         Trabajador?          @relation("TiendaSupervisor", fields: [supervisorId], references: [id])
   trabajadores       Trabajador[]
   turnos             Turno[]
   TiendaCoordinadora TiendaCoordinadora[]
@@ -284,7 +285,7 @@ model NotificationDevice {
   id           String     @id @default(uuid())
   token        String     @unique
   registeredAt DateTime   @default(now())
-  lastTime     DateTime   @updatedAt()
+  lastTime     DateTime   @updatedAt
   trabajadorId Int
   trabajador   Trabajador @relation(fields: [trabajadorId], references: [id], onDelete: Cascade)
 }

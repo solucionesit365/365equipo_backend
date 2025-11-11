@@ -1214,38 +1214,109 @@ export class TrabajadorDatabaseService {
     return trabajadoresConLlevaEquipo;
   }
 
-  async esCoordinadora(uid: string) {
-    // Ahora no tiene en cuenta el campo "llevaEquipo"
+  // async esCoordinadora(uid: string) {
+  //   // Ahora no tiene en cuenta el campo "llevaEquipo"
 
+  //   const trabajador = await this.prisma.trabajador.findUnique({
+  //     where: {
+  //       idApp: uid,
+  //     },
+  //     // Incluye información relacionada
+  //     include: {
+  //       responsable: {
+  //         select: {
+  //           id: true,
+  //         },
+  //       },
+  //       subordinados: {
+  //         select: {
+  //           id: true,
+  //         },
+  //       },
+  //     },
+  //   });
+
+  //   // Verifica si el trabajador existe y si tiene subordinados
+  //   if (
+  //     trabajador &&
+  //     trabajador.subordinados &&
+  //     trabajador.subordinados.length > 0
+  //   ) {
+  //     return true;
+  //   }
+  //   return false;
+  // }
+
+  async esCoordinadora(uid: string) {
+    // Buscar al trabajador (coordinadora A o B)
     const trabajador = await this.prisma.trabajador.findUnique({
       where: {
         idApp: uid,
       },
-      // Incluye información relacionada
       include: {
-        responsable: {
-          select: {
-            id: true,
-          },
+        contratos: {
+          where: { fechaBaja: null },
+          orderBy: { fechaAlta: "desc" },
+          take: 1,
         },
-        subordinados: {
-          select: {
-            id: true,
-          },
-        },
+        subordinados: true, // Ensure subordinados is included in the query
       },
     });
 
-    // Verifica si el trabajador existe y si tiene subordinados
+    if (!trabajador) return false;
+
+    // Verificar si la persona logueada es la coordinadora B
+    const tiendaDeCoordinadoraB =
+      await this.prisma.tiendaCoordinadora.findFirst({
+        where: { trabajadorId: trabajador.id },
+        include: {
+          tienda: {
+            include: {
+              coordinator: {
+                include: {
+                  contratos: {
+                    where: { fechaBaja: null },
+                    orderBy: { fechaAlta: "desc" },
+                    take: 1,
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+
+    // Si B pertenece a una tienda, usamos la A de esa tienda como base
+    const trabajadorBase =
+      tiendaDeCoordinadoraB?.tienda?.coordinator || trabajador;
+    console.log(trabajadorBase);
+
+    // Si la persona tiene subordinados directos o es responsable de otros, es coordinadora
     if (
       trabajador &&
       trabajador.subordinados &&
       trabajador.subordinados.length > 0
     ) {
-      return true;
+      if (trabajador.subordinados && trabajador.subordinados.length > 0) {
+        return true; // Coordinadora con subordinados directos
+      }
+
+      // Verificar si es una coordinadora adicional (responsable de otros)
+      if (tiendaDeCoordinadoraB && trabajadorBase.id !== trabajador.id) {
+        return true; // Es coordinadora adicional (B) que tiene subordinados indirectos (A)
+      }
+
+      return false;
     }
+
+    // Si la coordinadora es B, obtenemos el `uidAppResponsable` de A
+    if (tiendaDeCoordinadoraB) {
+      return trabajadorBase.idApp; // Retorna el idAppResponsable de la A (coordinadora)
+    }
+
     return false;
   }
+
   async esCoordinadoraPorId(id: number) {
     // Ahora no tiene en cuenta el campo "llevaEquipo"
 
@@ -1398,7 +1469,6 @@ export class TrabajadorDatabaseService {
   // }
 
   async getSubordinados(idApp: string) {
-    console.time(`[getSubordinados] ${idApp}`);
     // 1️⃣ Buscar al trabajador (coordinadora principal o adicional)
     const trabajador = await this.prisma.trabajador.findUnique({
       where: { idApp },
@@ -1488,7 +1558,7 @@ export class TrabajadorDatabaseService {
     if (!todosSubordinados.some((sub) => sub.id === trabajadorBase.id)) {
       todosSubordinados.push(trabajadorBase);
     }
-    console.timeEnd(`[getSubordinados] ${idApp}`);
+
     return todosSubordinados;
   }
 
@@ -1587,25 +1657,119 @@ export class TrabajadorDatabaseService {
     return trabajadoresConLlevaEquipo;
   }
 
+  // async getSubordinadosByIdsql(id: number) {
+  //   const subordinados = await this.prisma.trabajador.findMany({
+  //     where: {
+  //       idResponsable: id,
+  //     },
+  //     include: {
+  //       contratos: {
+  //         where: {
+  //           fechaBaja: null, // Para contratos aún vigentes
+  //         },
+  //         orderBy: {
+  //           fechaAlta: "desc", // Ordena por la fecha más reciente
+  //         },
+  //         take: 1, // Toma solo el contrato más reciente
+  //       },
+  //     },
+  //   });
+
+  //   return subordinados;
+  // }
+
   async getSubordinadosByIdsql(id: number) {
-    const subordinados = await this.prisma.trabajador.findMany({
-      where: {
-        idResponsable: id,
-      },
+    // Buscar al trabajador (coordinadora principal o adicional)
+    const trabajador = await this.prisma.trabajador.findUnique({
+      where: { id: id },
       include: {
         contratos: {
-          where: {
-            fechaBaja: null, // Para contratos aún vigentes
-          },
-          orderBy: {
-            fechaAlta: "desc", // Ordena por la fecha más reciente
-          },
-          take: 1, // Toma solo el contrato más reciente
+          where: { fechaBaja: null },
+          orderBy: { fechaAlta: "desc" },
+          take: 1, // Solo tomar el contrato más reciente
         },
       },
     });
 
-    return subordinados;
+    if (!trabajador) return [];
+
+    // 🔹  Si es coordinadora B, obtener la A de la tienda correspondiente
+    const tiendaDeCoordinadoraB =
+      await this.prisma.tiendaCoordinadora.findFirst({
+        where: { trabajadorId: trabajador.id },
+        include: {
+          tienda: {
+            include: {
+              coordinator: {
+                include: {
+                  contratos: {
+                    where: { fechaBaja: null },
+                    orderBy: { fechaAlta: "desc" },
+                    take: 1, // Solo el contrato más reciente
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+
+    // Si B pertenece a una tienda, usamos la A de esa tienda como base
+    const trabajadorBase =
+      tiendaDeCoordinadoraB?.tienda?.coordinator || trabajador;
+
+    //  Obtener los subordinados directos del responsable (por idResponsable)
+    const subordinados = await this.prisma.trabajador.findMany({
+      where: { idResponsable: trabajadorBase.id },
+      include: {
+        contratos: {
+          where: { fechaBaja: null },
+          orderBy: { fechaAlta: "desc" },
+          take: 1, // Solo el contrato más reciente
+        },
+      },
+    });
+
+    //  Obtener los subordinados de otras coordinadoras (si existen)
+    const idsTiendasValidas = Array.from(
+      new Set(
+        subordinados
+          .map((sub) => sub.idTienda)
+          .filter((id): id is number => id !== null && id !== undefined),
+      ),
+    );
+
+    //  Obtener subordinados de las coordinadoras adicionales (A o B)
+    const subordinadosExtra = await this.prisma.trabajador.findMany({
+      where: {
+        idTienda: {
+          in: idsTiendasValidas,
+        },
+        OR: [
+          { coordinadoraDeLaTienda: { id: trabajadorBase.id } },
+          {
+            coordinacionesExtra: { some: { trabajadorId: trabajadorBase.id } },
+          },
+        ],
+      },
+      include: {
+        contratos: {
+          where: { fechaBaja: null },
+          orderBy: { fechaAlta: "desc" },
+          take: 1, // Solo el contrato más reciente
+        },
+      },
+    });
+
+    //  Combina los subordinados directos con los subordinados adicionales
+    const todosSubordinados = [...subordinados, ...subordinadosExtra];
+
+    // Asegúrate de que el trabajador principal (A o B) también aparezca en la lista (si no está)
+    if (!todosSubordinados.some((sub) => sub.id === trabajadorBase.id)) {
+      todosSubordinados.push(trabajadorBase);
+    }
+
+    return todosSubordinados;
   }
 
   async getSubordinadosByIdNew(id: number, conFecha?: DateTime) {
