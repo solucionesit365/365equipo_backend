@@ -216,7 +216,7 @@ describe('TrabajadorRepository', () => {
       const result = await repository.readAll();
 
       expect(mockPrismaService.trabajador.findMany).toHaveBeenCalledWith({
-        where: {},
+        where: { isPermanent: false },
       });
       expect(result).toBe(expectedTrabajadores);
     });
@@ -232,7 +232,7 @@ describe('TrabajadorRepository', () => {
       const result = await repository.readAll({ sonPersonas: true });
 
       expect(mockPrismaService.trabajador.findMany).toHaveBeenCalledWith({
-        where: { esTienda: false },
+        where: { esTienda: false, isPermanent: false },
       });
       expect(result).toBe(expectedPersonas);
     });
@@ -247,7 +247,7 @@ describe('TrabajadorRepository', () => {
       const result = await repository.readAll({ sonTiendas: true });
 
       expect(mockPrismaService.trabajador.findMany).toHaveBeenCalledWith({
-        where: { esTienda: true },
+        where: { esTienda: true, isPermanent: false },
       });
       expect(result).toBe(expectedTiendas);
     });

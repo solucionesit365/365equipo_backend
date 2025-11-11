@@ -66,7 +66,7 @@ model Tienda {
   supervisor         Trabajador?          @relation("TiendaSupervisor", fields: [supervisorId], references: [id])
   trabajadores       Trabajador[]
   turnos             Turno[]
-  TiendaCoordinadora TiendaCoordinadora[]
+  tiendaCoordinadora TiendaCoordinadora[]
 }
 
 model TiendaCoordinadora {
