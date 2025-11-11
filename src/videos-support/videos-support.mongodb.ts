@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { MongoService } from "src/mongo/mongo.service";
-import { CreateVideoSupportDto } from "./videos-support.dto";
+import { CreateVideoSupport, CreateVideoSupportDto } from "./videos-support.dto";
 
 @Injectable()
 export class VideosSupportDatabases {
@@ -8,12 +8,16 @@ export class VideosSupportDatabases {
 
   private async getCollectionVideos() {
     const db = (await this.mongoDbService.getConexion()).db();
-    return db.collection<CreateVideoSupportDto>("videosSupport");
+    return db.collection<CreateVideoSupport>("videosSupport");
   }
 
   async newVideoSupport(inspeccion: CreateVideoSupportDto) {
     const collection = await this.getCollectionVideos();
-    const resInsert = await collection.insertOne(inspeccion);
+    const resInsert = await collection.insertOne(new CreateVideoSupport(
+      inspeccion.title,
+      inspeccion.url,
+      inspeccion.embededUrl(),
+    ));
     if (resInsert.acknowledged) return resInsert.insertedId;
     throw new Error("No se ha podido insertar el video de soporte");
   }
