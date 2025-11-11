@@ -14,9 +14,8 @@ export class SolicitudVacacionesDatabase {
     const solicitudVacacionesCollection = db.collection<SolicitudVacaciones>(
       "solicitudVacaciones",
     );
-    const resInsert = await solicitudVacacionesCollection.insertOne(
-      solicitudVacaciones,
-    );
+    const resInsert =
+      await solicitudVacacionesCollection.insertOne(solicitudVacaciones);
     if (resInsert.acknowledged) return resInsert.insertedId;
     throw Error("No se ha podido insertar la nueva solicitud de vacaciones");
   }
@@ -67,8 +66,12 @@ export class SolicitudVacacionesDatabase {
     const solicitudVacacionesCollection = db.collection<SolicitudVacaciones>(
       "solicitudVacaciones",
     );
+    // Busca por idAppResponsable O idAppResponsableB para capturar ambas coordinadoras
     const respSolicitudes = await solicitudVacacionesCollection
-      .find({ idAppResponsable, year })
+      .find({
+        $or: [{ idAppResponsable }, { idAppResponsableB: idAppResponsable }],
+        year,
+      })
       .toArray();
 
     return respSolicitudes;

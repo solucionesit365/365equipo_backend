@@ -599,7 +599,13 @@ export class TrabajadorService {
   async esCoordinadora(uid: string): Promise<boolean> {
     return Boolean(await this.schTrabajadores.esCoordinadora(uid));
   }
-
+  async esCoordinadora2(uid: string): Promise<{
+    isCoordinadora: boolean;
+    baseIdApp?: string;
+    idAppResponsableB?: string;
+  }> {
+    return await this.schTrabajadores.esCoordinadora(uid);
+  }
   async getSubordinados(uid: string) {
     return await this.schTrabajadores.getSubordinados(uid);
   }

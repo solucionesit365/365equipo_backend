@@ -1214,40 +1214,11 @@ export class TrabajadorDatabaseService {
     return trabajadoresConLlevaEquipo;
   }
 
-  // async esCoordinadora(uid: string) {
-  //   // Ahora no tiene en cuenta el campo "llevaEquipo"
-
-  //   const trabajador = await this.prisma.trabajador.findUnique({
-  //     where: {
-  //       idApp: uid,
-  //     },
-  //     // Incluye información relacionada
-  //     include: {
-  //       responsable: {
-  //         select: {
-  //           id: true,
-  //         },
-  //       },
-  //       subordinados: {
-  //         select: {
-  //           id: true,
-  //         },
-  //       },
-  //     },
-  //   });
-
-  //   // Verifica si el trabajador existe y si tiene subordinados
-  //   if (
-  //     trabajador &&
-  //     trabajador.subordinados &&
-  //     trabajador.subordinados.length > 0
-  //   ) {
-  //     return true;
-  //   }
-  //   return false;
-  // }
-
-  async esCoordinadora(uid: string) {
+  async esCoordinadora(uid: string): Promise<{
+    isCoordinadora: boolean;
+    baseIdApp?: string;
+    idAppResponsableB?: string;
+  }> {
     // Buscar al trabajador (coordinadora A o B)
     const trabajador = await this.prisma.trabajador.findUnique({
       where: {
@@ -1259,11 +1230,11 @@ export class TrabajadorDatabaseService {
           orderBy: { fechaAlta: "desc" },
           take: 1,
         },
-        subordinados: true, // Ensure subordinados is included in the query
+        subordinados: true,
       },
     });
 
-    if (!trabajador) return false;
+    if (!trabajador) return { isCoordinadora: false };
 
     // Verificar si la persona logueada es la coordinadora B
     const tiendaDeCoordinadoraB =
@@ -1289,32 +1260,30 @@ export class TrabajadorDatabaseService {
     // Si B pertenece a una tienda, usamos la A de esa tienda como base
     const trabajadorBase =
       tiendaDeCoordinadoraB?.tienda?.coordinator || trabajador;
-    console.log(trabajadorBase);
 
-    // Si la persona tiene subordinados directos o es responsable de otros, es coordinadora
+    // Si la persona tiene subordinados directos, es coordinadora (A)
     if (
       trabajador &&
       trabajador.subordinados &&
       trabajador.subordinados.length > 0
     ) {
-      if (trabajador.subordinados && trabajador.subordinados.length > 0) {
-        return true; // Coordinadora con subordinados directos
-      }
-
-      // Verificar si es una coordinadora adicional (responsable de otros)
-      if (tiendaDeCoordinadoraB && trabajadorBase.id !== trabajador.id) {
-        return true; // Es coordinadora adicional (B) que tiene subordinados indirectos (A)
-      }
-
-      return false;
+      return {
+        isCoordinadora: true,
+        baseIdApp: trabajador.idApp,
+        idAppResponsableB: trabajador.idApp, // Es la A
+      };
     }
 
-    // Si la coordinadora es B, obtenemos el `uidAppResponsable` de A
-    if (tiendaDeCoordinadoraB) {
-      return trabajadorBase.idApp; // Retorna el idAppResponsable de la A (coordinadora)
+    // Si es una coordinadora adicional (B) con una A
+    if (tiendaDeCoordinadoraB && trabajadorBase.id !== trabajador.id) {
+      return {
+        isCoordinadora: true,
+        baseIdApp: trabajadorBase.idApp, // La A
+        idAppResponsableB: trabajador.idApp, // La B (quien hace la petición)
+      };
     }
 
-    return false;
+    return { isCoordinadora: false };
   }
 
   async esCoordinadoraPorId(id: number) {

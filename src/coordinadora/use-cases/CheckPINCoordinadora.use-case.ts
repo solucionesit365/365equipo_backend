@@ -6,7 +6,12 @@ import { ICheckPINCoordinadoraUseCase } from "./interfaces/ICheckPINCoordinadora
 export class CheckPINCoordinadoraUseCase
   implements ICheckPINCoordinadoraUseCase
 {
-  private lastCoordinadora: { uid: string; idSql: number } | null = null;
+  private lastCoordinadora: {
+    uid: string;
+    idSql: number;
+    uid2: string;
+    idSql2: number;
+  } | null = null;
   constructor(
     private readonly coordinadoraRepository: ICoordinadoraRepository,
   ) {}
@@ -67,10 +72,12 @@ export class CheckPINCoordinadoraUseCase
       return false;
     }
 
-    // ✅ Guardamos la coordinadora validada en memoria temporalmente
+    // Guardar primero la que valida (B) y luego la coordinadora principal (A) en uid2/idSql2
     this.lastCoordinadora = {
       uid: coordinadora.idApp,
       idSql: coordinadora.id,
+      uid2: coordinadoraData.principal.idApp,
+      idSql2: coordinadoraData.principal.id,
     };
 
     return true;

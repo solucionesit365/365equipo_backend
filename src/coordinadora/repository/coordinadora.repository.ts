@@ -29,7 +29,7 @@ export class CoordinadoraRepository implements ICoordinadoraRepository {
         where: { id: idTienda },
         include: {
           coordinator: true, // Coordinadora principal
-          TiendaCoordinadora: {
+          tiendaCoordinadora: {
             include: {
               coordinadora: true, // Coordinadoras adicionales
             },
@@ -44,7 +44,7 @@ export class CoordinadoraRepository implements ICoordinadoraRepository {
       // Devolvemos el arreglo de todas las coordinadoras (principal + adicionales)
       return {
         principal: coordinadoras.coordinator,
-        adicionales: coordinadoras.TiendaCoordinadora.map(
+        adicionales: coordinadoras.tiendaCoordinadora.map(
           (c) => c.coordinadora,
         ),
       };
