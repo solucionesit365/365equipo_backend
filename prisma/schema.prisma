@@ -47,23 +47,36 @@ model Trabajador {
   turnos                 Turno[]
   permisos               Permiso[]            @relation("PermisoToTrabajador")
   roles                  Role[]               @relation("RoleToTrabajador")
+  coordinacionesExtra    TiendaCoordinadora[]
 
   @@unique([empresaId, nPerceptor])
 }
 
 model Tienda {
-  id              Int              @id @default(autoincrement())
-  nombre          String
-  direccion       String?
-  idExterno       Int?
-  coordinatorId   Int?             @unique
-  supervisorId    Int?             @unique
-  existsBC        Boolean          @default(false)
-  plantillasTurno PlantillaTurno[]
-  coordinator     Trabajador?      @relation("TiendaCoordinator", fields: [coordinatorId], references: [id], onDelete: SetNull)
-  supervisor      Trabajador?      @relation("TiendaSupervisor", fields: [supervisorId], references: [id], onDelete: SetNull)
-  trabajadores    Trabajador[]
-  turnos          Turno[]
+  id                 Int                  @id @default(autoincrement())
+  nombre             String
+  direccion          String?
+  idExterno          Int?
+  coordinatorId      Int?                 @unique
+  supervisorId       Int?                 @unique
+  existsBC           Boolean              @default(false)
+  plantillasTurno    PlantillaTurno[]
+  coordinator        Trabajador?          @relation("TiendaCoordinator", fields: [coordinatorId], references: [id], onDelete: SetNull)
+  supervisor         Trabajador?          @relation("TiendaSupervisor", fields: [supervisorId], references: [id], onDelete: SetNull)
+  trabajadores       Trabajador[]
+  turnos             Turno[]
+  TiendaCoordinadora TiendaCoordinadora[]
+}
+
+model TiendaCoordinadora {
+  id           Int        @id @default(autoincrement())
+  tienda       Tienda     @relation(fields: [tiendaId], references: [id])
+  tiendaId     Int
+  coordinadora Trabajador @relation(fields: [trabajadorId], references: [id])
+  trabajadorId Int
+  createdAt    DateTime   @default(now())
+
+  @@unique([tiendaId, trabajadorId]) // Evita duplicados
 }
 
 model Equipo {
