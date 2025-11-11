@@ -68,6 +68,7 @@ describe("TiendasController", () => {
     esTienda: false,
     nPerceptor: null,
     workEmail: null,
+    isPermanent: false,
   };
 
   beforeEach(async () => {
