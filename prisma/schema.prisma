@@ -80,12 +80,6 @@ model TiendaCoordinadora {
   @@unique([tiendaId, trabajadorId]) // Evita duplicados
 }
 
-model Equipo {
-  id        Int    @id @default(autoincrement())
-  nombre    String
-  idExterno Int?
-}
-
 model Empresa {
   id             String       @id @default(uuid())
   nombre         String

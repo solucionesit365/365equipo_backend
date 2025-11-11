@@ -1,4 +1,10 @@
-import { IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
+import {
+  IsBoolean,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from "class-validator";
 
 export class CreateEmpresaDto {
   @IsString()
@@ -10,21 +16,39 @@ export class CreateEmpresaDto {
   @IsOptional()
   @IsNumber()
   idExterno: number;
+
+  @IsOptional()
+  @IsBoolean()
+  autogestionada?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  existsBC?: boolean;
 }
 
 export class UpdateEmpresaDto {
-  @IsString()
+  @IsString() // selection of the comapny to update
   id: string;
-
-  @IsString()
-  nombre: string;
-
-  @IsString()
-  cif: string;
 
   @IsOptional()
   @IsNumber()
   idExterno: number;
+
+  @IsOptional()
+  @IsString()
+  nombre: string;
+
+  @IsOptional()
+  @IsString()
+  cif: string;
+
+  @IsOptional()
+  @IsBoolean()
+  autogestionada?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  existsBC?: boolean;
 }
 
 export class DeleteEmpresaDto {

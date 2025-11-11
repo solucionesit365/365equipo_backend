@@ -5,24 +5,21 @@ import {
   UpdateEmpresaDto,
 } from "./empresa.dto";
 import { PrismaService } from "../prisma/prisma.service";
+import { MongoService } from "../mongo/mongo.service";
+import { CompanyCreate } from "./company.interface";
 
 @Injectable()
-export class EmpresaService {
-  constructor(private readonly prismaService: PrismaService) {}
+export class CompanyService {
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly mongoService: MongoService,
+  ) {}
 
-  async createEmpresa(reqCreateEmpresa: CreateEmpresaDto) {
+  async createCompany(reqCreateEmpresa: CreateEmpresaDto) {
     try {
-      const empresa = await this.prismaService.empresa.create({
-        data: {
-          nombre: reqCreateEmpresa.nombre,
-          cif: reqCreateEmpresa.cif,
-          // idExterno: reqCreateEmpresa.idExterno
-          //   ? reqCreateEmpresa.idExterno
-          //   : null,
-          autogestionada: true,
-        },
-      });
-      return empresa;
+      const companyCollection =
+        await this.mongoService.getCollection<CompanyCreate>("company");
+      return await companyCollection.insertOne(reqCreateEmpresa);
     } catch (err) {
       console.log(err);
       throw new InternalServerErrorException();
@@ -31,16 +28,19 @@ export class EmpresaService {
 
   async updateEmpresa(reqUpdateEmpresa: UpdateEmpresaDto) {
     try {
-      const empresa = await this.prismaService.empresa.update({
-        where: { id: reqUpdateEmpresa.id },
-        data: {
-          nombre: reqUpdateEmpresa.nombre,
-          cif: reqUpdateEmpresa.cif,
-          idExterno: reqUpdateEmpresa.idExterno
-            ? reqUpdateEmpresa.idExterno
-            : null,
+      const companyCollection =
+        await this.mongoService.getCollection<CompanyCreate>("company");
+
+      const empresa = await companyCollection.updateOne(
+        {
+          id: reqUpdateEmpresa.id,
         },
-      });
+        {
+          $set: {
+            ...reqUpdateEmpresa,
+          },
+        },
+      );
       return empresa;
     } catch (err) {
       console.log(err);
