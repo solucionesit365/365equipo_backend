@@ -463,6 +463,110 @@ export class EmailService {
   `;
   }
 
+  generarEmailTemplateInspeccionDanada(
+    matriculaFurgoneta: string,
+    nombreConductor: string,
+    checklist: { status: string; item: string; detail: string }[],
+    observaciones?: string,
+  ): string {
+    const detailsItems = checklist
+      .filter((item) => item.status === "DAÑOS")
+      .map((item) => `<li><strong>${item.item}:</strong> ${item.detail}</li>`)
+      .join("");
+
+    return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <style>
+            body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                background-color: #f4f6f9;
+                margin: 0;
+                padding: 0;
+            }
+            .email-container {
+                max-width: 650px;
+                margin: 0 auto;
+                background-color: #ffffff;
+                padding: 25px;
+                border-radius: 10px;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+                border-top: 6px solid #e66c5a;
+            }
+            .email-header {
+                text-align: center;
+                margin-bottom: 20px;
+            }
+            .email-header img {
+                max-width: 180px;
+            }
+            .title {
+                text-align: center;
+                font-size: 22px;
+                font-weight: bold;
+                color: #e66c5a;
+                margin: 15px 0 25px 0;
+            }
+            .email-content {
+                font-size: 16px;
+                line-height: 1.6;
+                color: #333333;
+            }
+            .info-card {
+                background-color: #f9fbfd;
+                padding: 18px;
+                margin-top: 20px;
+                border: 1px solid #e3eaf3;
+                border-radius: 8px;
+            }
+            .info-row {
+                margin-bottom: 12px;
+            }
+            .info-row strong {
+                color: #e66c5a;
+            }
+            .footer {
+                margin-top: 30px;
+                font-size: 13px;
+                color: #555555;
+                text-align: center;
+                border-top: 1px solid #eeeeee;
+                padding-top: 15px;
+            }
+            .footer p {
+                margin: 5px 0;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="email-container">
+            <div class="title">Nueva Inspección con Daños Registrada</div>
+            <div class="email-content">
+                <p>Se ha registrado una nueva inspección con <strong>DAÑOS</strong> para la furgoneta <strong>${matriculaFurgoneta}</strong> por el conductor <strong>${nombreConductor}</strong>.</p>
+                <div class="info-card">
+                    <div class="info-row">
+                        <strong>🛠️ Daños detectados:</strong> 
+                          <ul>
+                          ${detailsItems}
+                          </ul>
+                    </div>
+                    ${observaciones ? `<div class="info-row"><strong>📝 Observaciones:</strong> ${observaciones}</div>` : ""}
+                </div>
+                <p style="margin-top:20px;">
+                    Por favor, revisen esta inspección y tomen las medidas necesarias conforme al protocolo de gestión de daños.
+                </p>
+            </div>
+            <div class="footer">
+                <p>Este correo ha sido generado automáticamente por el sistema de 365 Obrador.</p>
+                <p>Si tiene alguna duda, contacte con el departamento de Mantenimiento o Gestión de Flotas.</p>
+            </div>
+        </div>
+    </body>
+    </html>
+  `;
+  }
+
   async sendDocumentToEmail(
     pdfBuffer: Buffer,
     toEmail: string,

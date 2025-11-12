@@ -26,7 +26,7 @@ export class ParametrosDatabase {
 
   async getParametrosCorreosFurgos() {
     const db = (await this.mongoDbService.getConexion()).db();
-    const parametrosCollection = db.collection<ParametroDTO2>("parametros");
+    const parametrosCollection = db.collection<CorreosFurgosDTO>("parametros");
     return await parametrosCollection.findOne({
       name: "correos_furgos",
     });

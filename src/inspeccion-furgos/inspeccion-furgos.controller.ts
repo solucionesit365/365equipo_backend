@@ -13,14 +13,13 @@ import { AuthGuard } from "../guards/auth.guard";
 import { FurgonetaDto, InspeccionFurgos } from "./inspeccion-furgos.dto";
 import { DateTime } from "luxon";
 import { EmailService } from "../email/email.class";
-import { CorreosFurgosDTO } from "src/parametros/parametros.dto";
-
+import { ParametrosService } from "../parametros/parametros.service";
 @Controller("inspecciones-furgos")
 export class InspeccionFurgosController {
-  [x: string]: any;
   constructor(
     private readonly inspeccionesInstance: InspeccionFurgosClass,
     private readonly emailService: EmailService,
+    private readonly parametrosService: ParametrosService,
   ) {}
 
   @UseGuards(AuthGuard)
@@ -43,18 +42,23 @@ export class InspeccionFurgosController {
 
       if (hayDanos) {
         const correosFurgos =
-          await this.parametrosDb.getParametrosCorreosFurgos();
+          await this.parametrosService.getParametrosCorreosFurgos();
 
-        const destinatarios = correosFurgos?.mails?.join(",") || "";
-
-        await this.emailService.enviarEmail(
-          destinatarios,
-          `Inspección de furgoneta con daños - ${inspeccion.matricula}`,
-          `<p>Se ha registrado una nueva inspección con <b>DAÑOS</b> para la furgoneta <b>${inspeccion.matricula}</b> por ${inspeccion.nombreConductor}.</p>`,
-          "Nueva inspección con daños registrada",
+        const html = this.emailService.generarEmailTemplateInspeccionDanada(
+          inspeccion.matricula,
+          inspeccion.nombreConductor,
+          inspeccion.checklist,
+          inspeccion.observaciones,
         );
-      }
 
+        for (const correo of correosFurgos.mails) {
+          await this.emailService.enviarEmail(
+            correo,
+            html,
+            "Nueva inspección con daños registrada",
+          );
+        }
+      }
       return { ok: true, data };
     } catch (err) {
       console.error(err);
@@ -176,22 +180,4 @@ export class InspeccionFurgosController {
       return { ok: false, message: err.message };
     }
   }
-
-
-//   @UseGuards(AuthGuard)
-//   @Delete("borrar-furgoneta/:id")
-//   async borrarFurgoneta(@Param("id") id: string) {
-//     try {
-//       const resultado = await this.inspeccionesInstance.borrarFurgoneta(id);
-//       return {
-//         ok: true,
-//         message: "Furgoneta borrada correctamente",
-//         data: resultado,
-//       };
-//     } catch (err) {
-//       console.error("Error borrando la furgoneta", err);
-//       return { ok: false, message: err.message };
-//     }
-//   }
-// }
 }
