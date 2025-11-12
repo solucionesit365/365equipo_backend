@@ -7,6 +7,7 @@ export interface IUpdateTrabajadorOrganizacionDto {
   idResponsable?: number;
   idTienda?: number;
   coordinatorId?: number;
+  supervisorId?: number[];
   llevaEquipo?: boolean;
   empresaId?: string;
   tipoTrabajador?: string;

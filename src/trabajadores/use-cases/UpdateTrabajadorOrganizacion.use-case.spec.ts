@@ -144,6 +144,7 @@ describe("UpdateTrabajadorOrganizacionUseCase", () => {
         empresa: true,
         responsable: true,
         coordinadoraDeLaTienda: true,
+        supervisa: true,
         coordinacionesExtra: true,
       },
     });
@@ -182,6 +183,7 @@ describe("UpdateTrabajadorOrganizacionUseCase", () => {
         empresa: true,
         responsable: true,
         coordinadoraDeLaTienda: true,
+        supervisa: true,
         coordinacionesExtra: true,
       },
     });
@@ -210,6 +212,7 @@ describe("UpdateTrabajadorOrganizacionUseCase", () => {
         empresa: true,
         responsable: true,
         coordinadoraDeLaTienda: true,
+        supervisa: true,
         coordinacionesExtra: true,
       },
     });

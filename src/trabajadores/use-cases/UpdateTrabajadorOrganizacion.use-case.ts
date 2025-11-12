@@ -34,6 +34,7 @@ export class UpdateTrabajadorOrganizacionUseCase
       arrayRoles,
       arrayPermisos,
       coordinatorId,
+      supervisorId,
       idTienda,
       coordinacionesExtra,
       ...datosActualizar
@@ -125,6 +126,49 @@ export class UpdateTrabajadorOrganizacionUseCase
       }
     }
 
+    if (supervisorId !== undefined) {
+      console.log(
+        "UpdateTrabajadorOrganizacion - Gestionando supervisorId (tiendas supervisadas):",
+        supervisorId,
+      );
+
+      // El frontend envía supervisorId como array de IDs de tiendas
+      if (Array.isArray(supervisorId)) {
+        // 1️⃣ Eliminar al trabajador como supervisor de tiendas que ya no están en el array
+        await this.prisma.tienda.updateMany({
+          where: {
+            supervisorId: id,
+            id: { notIn: supervisorId },
+          },
+          data: { supervisorId: null },
+        });
+
+        // 2️⃣ Asignar el trabajador como supervisor en las nuevas tiendas seleccionadas
+        for (const idTienda of supervisorId) {
+          await this.prisma.tienda.update({
+            where: { id: idTienda },
+            data: { supervisorId: id },
+          });
+          console.log(
+            `UpdateTrabajadorOrganizacion - Trabajador ${id} asignado como supervisor de tienda ${idTienda}`,
+          );
+        }
+
+        // 3️⃣ También actualizar el campo relacional supervisa[] en el trabajador
+        updateData.supervisa = {
+          set: supervisorId.map((idTienda) => ({ id: idTienda })),
+        };
+      } else if (supervisorId === null) {
+        // Si se pasa null, eliminar cualquier supervisión existente
+        await this.prisma.tienda.updateMany({
+          where: { supervisorId: id },
+          data: { supervisorId: null },
+        });
+
+        updateData.supervisa = { set: [] };
+        console.log(
+          `UpdateTrabajadorOrganizacion - Trabajador ${id} removido como supervisor de todas las tiendas`,
+        );
     // **Lógica para la Coordinadora B**
     if (coordinacionesExtra && coordinacionesExtra.length > 0) {
       for (const tiendaId of coordinacionesExtra) {
@@ -166,6 +210,7 @@ export class UpdateTrabajadorOrganizacionUseCase
         empresa: true,
         responsable: true,
         coordinadoraDeLaTienda: true,
+        supervisa: true,
         coordinacionesExtra: true,
       },
     });
@@ -196,6 +241,7 @@ export class UpdateTrabajadorOrganizacionUseCase
           empresa: true,
           responsable: true,
           coordinadoraDeLaTienda: true,
+          supervisa: true,
           coordinacionesExtra: true,
         },
       });

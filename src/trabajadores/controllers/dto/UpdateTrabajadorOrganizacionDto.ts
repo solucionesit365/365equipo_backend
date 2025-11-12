@@ -46,4 +46,9 @@ export class UpdateTrabajadorOrganizacionDto {
   @IsOptional()
   @IsNumber()
   coordinatorId?: number;
+
+  @IsOptional()
+  @IsArray()
+  @IsNumber({}, { each: true })
+  supervisorId?: number[];
 }
