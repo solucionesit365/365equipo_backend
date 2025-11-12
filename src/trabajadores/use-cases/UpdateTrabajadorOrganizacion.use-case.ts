@@ -35,6 +35,8 @@ export class UpdateTrabajadorOrganizacionUseCase
       arrayPermisos,
       coordinatorId,
       supervisorId,
+      idTienda,
+      coordinacionesExtra,
       ...datosActualizar
     } = trabajadorOrganizacion;
 
@@ -167,6 +169,32 @@ export class UpdateTrabajadorOrganizacionUseCase
         console.log(
           `UpdateTrabajadorOrganizacion - Trabajador ${id} removido como supervisor de todas las tiendas`,
         );
+    // **Lógica para la Coordinadora B**
+    if (coordinacionesExtra && coordinacionesExtra.length > 0) {
+      for (const tiendaId of coordinacionesExtra) {
+        // Validar existencia de tienda
+        const tiendaExtra = await this.prisma.tienda.findUnique({
+          where: { id: tiendaId },
+        });
+        if (!tiendaExtra) {
+          console.log(`Tienda adicional con id ${tiendaId} no encontrada`);
+          continue; // Si no existe la tienda, la omitimos y seguimos con la siguiente
+        }
+
+        // Crear la relación TiendaCoordinadora para Coordinadora B
+        try {
+          await this.prisma.tiendaCoordinadora.create({
+            data: {
+              tiendaId,
+              trabajadorId: id,
+            },
+          });
+          console.log(
+            `Relación TiendaCoordinadora B creada para trabajador ${id} y tienda ${tiendaId}`,
+          );
+        } catch (err) {
+          console.error("Error al crear relación TiendaCoordinadora B:", err);
+        }
       }
     }
 
@@ -183,6 +211,7 @@ export class UpdateTrabajadorOrganizacionUseCase
         responsable: true,
         coordinadoraDeLaTienda: true,
         supervisa: true,
+        coordinacionesExtra: true,
       },
     });
     // LÓGICA anterior en guardarCambiosForms lo necesita recursos humanos---
@@ -213,6 +242,7 @@ export class UpdateTrabajadorOrganizacionUseCase
           responsable: true,
           coordinadoraDeLaTienda: true,
           supervisa: true,
+          coordinacionesExtra: true,
         },
       });
 
@@ -224,11 +254,7 @@ export class UpdateTrabajadorOrganizacionUseCase
           trabajadorOrganizacion.idResponsable,
         );
 
-      console.log(nuevoResponsable);
-
       const nuevoIdAppResponsable = nuevoResponsable.idApp;
-
-      console.log(nuevoIdAppResponsable);
 
       const solicitudesExisten =
         await this.solicitudesVacaciones.haySolicitudesParaBeneficiario(

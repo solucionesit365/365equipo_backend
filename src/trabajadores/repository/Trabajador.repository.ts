@@ -71,6 +71,7 @@ export class TrabajadorRepository implements ITrabajadorRepository {
       } else if (filters?.sonTiendas) {
         where.esTienda = true;
       }
+      where.isPermanent = false;
 
       return await this.prismaService.trabajador.findMany({ where });
     } catch (error) {

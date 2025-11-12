@@ -27,18 +27,18 @@ export interface Tienda {
 [];
 
 export interface Tiendas2 {
-  direccion: string;
-  CodigoPostal: string;
-  Poblacion: string;
-  Provincia: string;
-  CódMunicipio: number;
-  nombre: string;
-  Latitud: number;
-  Longitud: number;
-  Tipo: string;
+  address: string;
+  postalCode: string;
+  city: string;
+  province: string;
+  municipalityCode: number;
+  name: string;
+  latitude: number;
+  longitude: number;
+  type: string;
   coordinatorId: number;
   id: number;
   idExterno: number;
-  telefono: number;
+  phone: number;
   existsBC: boolean;
 }

@@ -1,16 +1,19 @@
 /* eslint-disable prettier/prettier */
-import { Body, Controller, Get, Post } from "@nestjs/common";
+import { Body, Controller, Get, Post, UseGuards } from "@nestjs/common";
 import { ParametrosService } from "./parametros.service";
+import { AuthGuard } from "src/guards/auth.guard";
 
 @Controller("parametros")
 export class ParametrosController {
   constructor(public readonly parametrosService: ParametrosService) {}
 
+  @UseGuards(AuthGuard)
   @Get("getParametros")
   async getParametros(name: string): Promise<any> {
     return this.parametrosService.getParametros(name);
   }
 
+  @UseGuards(AuthGuard)
   @Get("campaniaMedica")
   async getCampaniaMedica() {
     const [campania] = await this.parametrosService.getParametros(
@@ -19,6 +22,13 @@ export class ParametrosController {
     return campania || {};
   }
 
+  @UseGuards(AuthGuard)
+  @Get("correosFurgos")
+  async getCorreosFurgos() {
+    return await this.parametrosService.getParametrosCorreosFurgos();
+  }
+
+  @UseGuards(AuthGuard)
   @Post("campaniaMedica")
   async updateCampaniaMedica(
     @Body()
@@ -40,5 +50,18 @@ export class ParametrosController {
         },
       },
     );
+  }
+
+  @UseGuards(AuthGuard)
+  @Post("correosFurgos")
+  async updateCorreosFurgos(
+    @Body()
+    data: {
+      mails: string[];
+    },
+  ) {
+    return this.parametrosService.updateCorreosFurgos("correos_furgos", {
+      mails: data.mails,
+    });
   }
 }

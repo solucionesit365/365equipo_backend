@@ -11,6 +11,7 @@ export interface IUpdateTrabajadorOrganizacionDto {
   llevaEquipo?: boolean;
   empresaId?: string;
   tipoTrabajador?: string;
+  coordinacionesExtra?: number[];
 }
 
 export abstract class IUpdateTrabajadorOrganizacionUseCase {

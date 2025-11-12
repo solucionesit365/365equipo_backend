@@ -7,16 +7,47 @@ import { Trabajador } from "@prisma/client";
 export class CoordinadoraRepository implements ICoordinadoraRepository {
   constructor(private readonly prismaService: PrismaService) {}
 
+  // async getCoordinadoraPorTienda(idTienda: number) {
+  //   try {
+  //     const coordinadora = await this.prismaService.trabajador.findFirst({
+  //       where: {
+  //         coordinadoraDeLaTienda: {
+  //           id: idTienda,
+  //         },
+  //       },
+  //     });
+  //     return coordinadora;
+  //   } catch (error) {
+  //     console.error(error);
+  //     throw new InternalServerErrorException();
+  //   }
+  // }
   async getCoordinadoraPorTienda(idTienda: number) {
     try {
-      const coordinadora = await this.prismaService.trabajador.findFirst({
-        where: {
-          coordinadoraDeLaTienda: {
-            id: idTienda,
+      // Obtener coordinadora principal y coordinadoras adicionales
+      const coordinadoras = await this.prismaService.tienda.findUnique({
+        where: { id: idTienda },
+        include: {
+          coordinator: true, // Coordinadora principal
+          tiendaCoordinadora: {
+            include: {
+              coordinadora: true, // Coordinadoras adicionales
+            },
           },
         },
       });
-      return coordinadora;
+
+      if (!coordinadoras) {
+        throw new InternalServerErrorException("Tienda no encontrada");
+      }
+
+      // Devolvemos el arreglo de todas las coordinadoras (principal + adicionales)
+      return {
+        principal: coordinadoras.coordinator,
+        adicionales: coordinadoras.tiendaCoordinadora.map(
+          (c) => c.coordinadora,
+        ),
+      };
     } catch (error) {
       console.error(error);
       throw new InternalServerErrorException();

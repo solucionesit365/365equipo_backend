@@ -48,106 +48,106 @@ export class SolicitudVacacionesController {
       if (!idBeneficiario) {
         throw new InternalServerErrorException("idBeneficiario no definido");
       }
-      const solicitudTrabajador =
-        await this.trabajadorInstance.getTrabajadorBySqlId(
-          Number(idBeneficiario),
-        );
+      // const solicitudTrabajador =
+      //   await this.trabajadorInstance.getTrabajadorBySqlId(
+      //     Number(idBeneficiario),
+      //   );
 
-      this.email.enviarEmail(
-        solicitudTrabajador.emails,
-        `<!DOCTYPE html>
-      <html>
-      <head>
-        <style>
-          body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            color: #4a4a4a;
-            margin: 0;
-            padding: 20px;
-            background-color: #f4f4f4;
-          }
-          h2 {
-            color: #0047ab;
-          }
-          table {
-            border-collapse: collapse;
-            width: 100%;
-            margin-top: 20px;
-            border: 1px solid #000000;
-          }
-          th {
-            background-color: #0047ab;
-            color: #ffffff;
-            padding: 10px;
-            text-align: center;
-          }
-          td {
-            background-color: #ffffff;
-            color: #000000;
-            padding: 10px;
-            text-align: center;
-            border-bottom: 1px solid #dddddd;
+      // this.email.enviarEmail(
+      //   solicitudTrabajador.emails,
+      //   `<!DOCTYPE html>
+      // <html>
+      // <head>
+      //   <style>
+      //     body {
+      //       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      //       color: #4a4a4a;
+      //       margin: 0;
+      //       padding: 20px;
+      //       background-color: #f4f4f4;
+      //     }
+      //     h2 {
+      //       color: #0047ab;
+      //     }
+      //     table {
+      //       border-collapse: collapse;
+      //       width: 100%;
+      //       margin-top: 20px;
+      //       border: 1px solid #000000;
+      //     }
+      //     th {
+      //       background-color: #0047ab;
+      //       color: #ffffff;
+      //       padding: 10px;
+      //       text-align: center;
+      //     }
+      //     td {
+      //       background-color: #ffffff;
+      //       color: #000000;
+      //       padding: 10px;
+      //       text-align: center;
+      //       border-bottom: 1px solid #dddddd;
             
-          }
-          .highlight {
-            background-color: #e7f4ff;
-          }
-          th, td {
-            border: 1px solid #000000;
-          }
-          p{
-            color: #000000;
-          }
-        </style>
-      </head>
-      <body>
-        <h2>Solicitud de Vacaciones</h2>
-        <p>Tu solicitud ha sido enviada con estos datos:</p>
-        <table>
-          <thead>
-            <tr>
-              <th>Fecha Inicio</th>
-              <th>Fecha Final</th>
-              <th>Fecha Incorporación</th>
-              <th>Observación</th>
-              <th>Total de días</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr class="highlight">
-              <td>${solicitudesVacaciones.fechaInicio}</td>
-              <td>${solicitudesVacaciones.fechaFinal}</td>
-              <td>${solicitudesVacaciones.fechaIncorporacion}</td>
-              <td>${solicitudesVacaciones.observaciones}</td>
-              <td>${solicitudesVacaciones.totalDias}</td>
-            </tr>
-          </tbody>
-        </table>
-      </body>
-      </html>`,
-        "Confirmación de Solicitud de Vacaciones",
-      );
+      //     }
+      //     .highlight {
+      //       background-color: #e7f4ff;
+      //     }
+      //     th, td {
+      //       border: 1px solid #000000;
+      //     }
+      //     p{
+      //       color: #000000;
+      //     }
+      //   </style>
+      // </head>
+      // <body>
+      //   <h2>Solicitud de Vacaciones</h2>
+      //   <p>Tu solicitud ha sido enviada con estos datos:</p>
+      //   <table>
+      //     <thead>
+      //       <tr>
+      //         <th>Fecha Inicio</th>
+      //         <th>Fecha Final</th>
+      //         <th>Fecha Incorporación</th>
+      //         <th>Observación</th>
+      //         <th>Total de días</th>
+      //       </tr>
+      //     </thead>
+      //     <tbody>
+      //       <tr class="highlight">
+      //         <td>${solicitudesVacaciones.fechaInicio}</td>
+      //         <td>${solicitudesVacaciones.fechaFinal}</td>
+      //         <td>${solicitudesVacaciones.fechaIncorporacion}</td>
+      //         <td>${solicitudesVacaciones.observaciones}</td>
+      //         <td>${solicitudesVacaciones.totalDias}</td>
+      //       </tr>
+      //     </tbody>
+      //   </table>
+      // </body>
+      // </html>`,
+      //   "Confirmación de Solicitud de Vacaciones",
+      // );
 
-      //enviar notificacion
-      //get TokenFCM
-      const userToken = await this.notificacionesInstance.getFCMToken(
-        solicitudTrabajador.idApp,
-      );
+      // //enviar notificacion
+      // //get TokenFCM
+      // const userToken = await this.notificacionesInstance.getFCMToken(
+      //   solicitudTrabajador.idApp,
+      // );
 
-      if (userToken) {
-        //enviar notificacion
-        await this.notificacionesInstance.sendNotificationToDevice(
-          userToken.token,
-          "Solicitud de vacaciones",
-          "Se ha creado una solicitud de vacaciones a tu nombre.",
-          "/mis-vacaciones",
-        );
-      }
+      // if (userToken) {
+      //   //enviar notificacion
+      //   await this.notificacionesInstance.sendNotificationToDevice(
+      //     userToken.token,
+      //     "Solicitud de vacaciones",
+      //     "Se ha creado una solicitud de vacaciones a tu nombre.",
+      //     "/mis-vacaciones",
+      //   );
+      // }
 
-      this.loggerService.create({
-        action: "Nueva solicitud de vacaciones",
-        name: `Creado por ${user.nombreApellidos} para ${solicitudTrabajador.nombreApellidos}`,
-      });
+      // this.loggerService.create({
+      //   action: "Nueva solicitud de vacaciones",
+      //   name: `Creado por ${user.nombreApellidos} para ${solicitudTrabajador.nombreApellidos}`,
+      // });
 
       return {
         ok: true,
@@ -233,65 +233,137 @@ export class SolicitudVacacionesController {
 
   //Mostrar solicitudes de vacaciones de los subordinados
   @UseGuards(AuthGuard)
+  // @Get("solicitudesSubordinados")
+  // async solicitudesSubordinados(@Query() { idAppResponsable, year }) {
+  //   try {
+  //     if (!idAppResponsable) throw Error("Faltan datos");
+
+  //     const solicitudesEmpleadosDirectos =
+  //       await this.solicitudVacacionesInstance.getsolicitudesSubordinados(
+  //         idAppResponsable,
+  //         Number(year),
+  //       );
+  //     const empleadosTipoCoordi =
+  //       await this.trabajadorInstance.getSubordinadosConTienda(
+  //         idAppResponsable,
+  //       );
+  //     const soyCoordinadora: boolean =
+  //       await this.trabajadorInstance.esCoordinadora(idAppResponsable);
+  //     const addArray = [];
+
+  //     if (empleadosTipoCoordi.length > 0) {
+  //       for (let i = 0; i < empleadosTipoCoordi.length; i++) {
+  //         if (empleadosTipoCoordi[i].llevaEquipo) {
+  //           // Caso coordinadora
+  //           const solicitudesSubordinadosCoordinadora =
+  //             await this.solicitudVacacionesInstance.getsolicitudesSubordinados(
+  //               empleadosTipoCoordi[i].idApp,
+  //               Number(year),
+  //             );
+
+  //           if (solicitudesSubordinadosCoordinadora.length > 0) {
+  //             for (
+  //               let j = 0;
+  //               j < solicitudesSubordinadosCoordinadora.length;
+  //               j++
+  //             ) {
+  //               solicitudesSubordinadosCoordinadora[j]["validador"] =
+  //                 idAppResponsable;
+  //             }
+  //             addArray.push(...solicitudesSubordinadosCoordinadora);
+  //           }
+  //         }
+  //       }
+  //     }
+
+  //     if (soyCoordinadora) {
+  //       for (let i = 0; i < addArray.length; i++) {
+  //         addArray[i]["validador"] = idAppResponsable;
+  //       }
+
+  //       for (let i = 0; i < solicitudesEmpleadosDirectos.length; i++) {
+  //         solicitudesEmpleadosDirectos[i]["validador"] = idAppResponsable;
+  //       }
+  //     }
+
+  //     if (solicitudesEmpleadosDirectos.length > 0) {
+  //       solicitudesEmpleadosDirectos.push(...addArray);
+  //       return { ok: true, data: solicitudesEmpleadosDirectos };
+  //     } else if (addArray.length > 0) {
+  //       return { ok: true, data: addArray };
+  //     } else return { ok: true, data: [] };
+  //   } catch (err) {
+  //     console.log(err);
+  //     return { ok: false, message: err.message };
+  //   }
+  // }
+  @UseGuards(AuthGuard)
   @Get("solicitudesSubordinados")
   async solicitudesSubordinados(@Query() { idAppResponsable, year }) {
     try {
       if (!idAppResponsable) throw Error("Faltan datos");
 
+      // Consultar si la persona logueada es coordinadora (A o B)
+      const coord =
+        await this.trabajadorInstance.esCoordinadora2(idAppResponsable);
+
+      // Determinar el ID final a usar (baseIdApp es la A, idAppResponsable es quien hace petición)
+      const idAppResponsableFinal = coord.isCoordinadora
+        ? coord.baseIdApp || idAppResponsable // Si es coordinadora, usar baseIdApp (la A)
+        : idAppResponsable; // Si no es coordinadora, usar el propio ID
+
+      // Obtener solicitudes de vacaciones de los subordinados
       const solicitudesEmpleadosDirectos =
         await this.solicitudVacacionesInstance.getsolicitudesSubordinados(
-          idAppResponsable,
+          idAppResponsableFinal,
           Number(year),
         );
+
+      // Obtener subordinados de la coordinadora (A o B)
       const empleadosTipoCoordi =
         await this.trabajadorInstance.getSubordinadosConTienda(
-          idAppResponsable,
+          idAppResponsableFinal,
         );
-      const soyCoordinadora: boolean =
-        await this.trabajadorInstance.esCoordinadora(idAppResponsable);
+
       const addArray = [];
 
+      // Obtener solicitudes de subordinados adicionales (si los hay)
       if (empleadosTipoCoordi.length > 0) {
         for (let i = 0; i < empleadosTipoCoordi.length; i++) {
           if (empleadosTipoCoordi[i].llevaEquipo) {
-            // Caso coordinadora
+            // Obtener solicitudes de subordinados
             const solicitudesSubordinadosCoordinadora =
               await this.solicitudVacacionesInstance.getsolicitudesSubordinados(
                 empleadosTipoCoordi[i].idApp,
                 Number(year),
               );
 
-            if (solicitudesSubordinadosCoordinadora.length > 0) {
-              for (
-                let j = 0;
-                j < solicitudesSubordinadosCoordinadora.length;
-                j++
-              ) {
-                solicitudesSubordinadosCoordinadora[j]["validador"] =
-                  idAppResponsable;
-              }
-              addArray.push(...solicitudesSubordinadosCoordinadora);
+            // Filtrar solicitudes que tengan idAppResponsableB o coincidan con idAppResponsableFinal
+            const solicitudesFiltradas =
+              solicitudesSubordinadosCoordinadora.filter(
+                (solicitud) =>
+                  solicitud.idAppResponsableB === idAppResponsableFinal ||
+                  solicitud.idAppResponsableB === coord.idAppResponsableB ||
+                  solicitud.idAppResponsable === idAppResponsableFinal,
+              );
+
+            if (solicitudesFiltradas.length > 0) {
+              solicitudesFiltradas.forEach((solicitud: any) => {
+                solicitud.validador = idAppResponsableFinal;
+              });
+              addArray.push(...solicitudesFiltradas);
             }
           }
         }
       }
 
-      if (soyCoordinadora) {
-        for (let i = 0; i < addArray.length; i++) {
-          addArray[i]["validador"] = idAppResponsable;
-        }
+      // Combinar solicitudes
+      const allSolicitudes = [...solicitudesEmpleadosDirectos, ...addArray];
 
-        for (let i = 0; i < solicitudesEmpleadosDirectos.length; i++) {
-          solicitudesEmpleadosDirectos[i]["validador"] = idAppResponsable;
-        }
-      }
-
-      if (solicitudesEmpleadosDirectos.length > 0) {
-        solicitudesEmpleadosDirectos.push(...addArray);
-        return { ok: true, data: solicitudesEmpleadosDirectos };
-      } else if (addArray.length > 0) {
-        return { ok: true, data: addArray };
-      } else return { ok: true, data: [] };
+      return {
+        ok: true,
+        data: allSolicitudes.length > 0 ? allSolicitudes : [],
+      };
     } catch (err) {
       console.log(err);
       return { ok: false, message: err.message };

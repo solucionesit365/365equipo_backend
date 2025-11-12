@@ -13,12 +13,13 @@ import { AuthGuard } from "../guards/auth.guard";
 import { FurgonetaDto, InspeccionFurgos } from "./inspeccion-furgos.dto";
 import { DateTime } from "luxon";
 import { EmailService } from "../email/email.class";
-
+import { ParametrosService } from "../parametros/parametros.service";
 @Controller("inspecciones-furgos")
 export class InspeccionFurgosController {
   constructor(
     private readonly inspeccionesInstance: InspeccionFurgosClass,
     private readonly emailService: EmailService,
+    private readonly parametrosService: ParametrosService,
   ) {}
 
   @UseGuards(AuthGuard)
@@ -40,13 +41,24 @@ export class InspeccionFurgosController {
       );
 
       if (hayDanos) {
-        await this.emailService.enviarEmail(
-          "jaafaralanti@grupohorreols.com",
-          `<p>Se ha registrado una nueva inspección con <b>DAÑOS</b> para la furgoneta <b>${inspeccion.matricula}</b> por ${inspeccion.nombreConductor}.</p>`,
-          "Nueva inspección con daños registrada",
-        );
-      }
+        const correosFurgos =
+          await this.parametrosService.getParametrosCorreosFurgos();
 
+        const html = this.emailService.generarEmailTemplateInspeccionDanada(
+          inspeccion.matricula,
+          inspeccion.nombreConductor,
+          inspeccion.checklist,
+          inspeccion.observaciones,
+        );
+
+        for (const correo of correosFurgos.mails) {
+          await this.emailService.enviarEmail(
+            correo,
+            html,
+            "Nueva inspección con daños registrada",
+          );
+        }
+      }
       return { ok: true, data };
     } catch (err) {
       console.error(err);

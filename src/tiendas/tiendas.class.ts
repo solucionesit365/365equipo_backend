@@ -8,6 +8,7 @@ import { Trabajador, Tienda as TTienda } from "@prisma/client";
 import { TrabajadorService } from "../trabajadores/trabajadores.class";
 import { TiendaDatabaseService } from "./tiendas.database";
 import { Tiendas2 } from "./tiendas.dto";
+import { IGetTiendasAteneaUseCase } from "./GetTiendasAtenea/IGetTiendasAtenea.use-case";
 
 @Injectable()
 export class Tienda {
@@ -15,6 +16,7 @@ export class Tienda {
     @Inject(forwardRef(() => TrabajadorService))
     private readonly trabajadoresInstance: TrabajadorService,
     private readonly schTiendas: TiendaDatabaseService,
+    private readonly getTiendasAteneaUseCase: IGetTiendasAteneaUseCase,
   ) {}
 
   async getTiendas() {
@@ -35,6 +37,21 @@ export class Tienda {
     return tiendas.sort((a, b) => {
       const nameA = a.nombre.toLowerCase();
       const nameB = b.nombre.toLowerCase();
+
+      if (nameA.startsWith("t--") && !nameB.startsWith("t--")) return -1;
+      if (!nameA.startsWith("t--") && nameB.startsWith("t--")) return 1;
+
+      if (nameA.startsWith("m--") && !nameB.startsWith("m--")) return -1;
+      if (!nameA.startsWith("m--") && nameB.startsWith("m--")) return 1;
+
+      return nameA.localeCompare(nameB);
+    });
+  }
+
+  private ordenarTiendas2(tiendas: Tiendas2[]): Tiendas2[] {
+    return tiendas.sort((a, b) => {
+      const nameA = a.name.toLowerCase();
+      const nameB = b.name.toLowerCase();
 
       if (nameA.startsWith("t--") && !nameB.startsWith("t--")) return -1;
       if (!nameA.startsWith("t--") && nameB.startsWith("t--")) return 1;
@@ -104,7 +121,7 @@ export class Tienda {
 
   async getTiendas2() {
     try {
-      return this.ordenarTiendas((await this.schTiendas.geTiendas2()) as any);
+      return this.ordenarTiendas2(await this.getTiendasAteneaUseCase.execute());
     } catch (err) {
       console.log(err);
       throw new InternalServerErrorException("Error al obtener las tiendas");

@@ -539,9 +539,8 @@ export class TrabajadorService {
   }
 
   async getTrabajadoresByTienda(idTienda: number) {
-    const resUser = await this.schTrabajadores.getTrabajadoresByTienda(
-      idTienda,
-    );
+    const resUser =
+      await this.schTrabajadores.getTrabajadoresByTienda(idTienda);
     if (resUser) return resUser;
     throw Error(
       `No se ha podido obtener los trabajadores de la tienda ${idTienda} `,
@@ -598,9 +597,15 @@ export class TrabajadorService {
   }
 
   async esCoordinadora(uid: string): Promise<boolean> {
+    return Boolean(await this.schTrabajadores.esCoordinadora(uid));
+  }
+  async esCoordinadora2(uid: string): Promise<{
+    isCoordinadora: boolean;
+    baseIdApp?: string;
+    idAppResponsableB?: string;
+  }> {
     return await this.schTrabajadores.esCoordinadora(uid);
   }
-
   async getSubordinados(uid: string) {
     return await this.schTrabajadores.getSubordinados(uid);
   }

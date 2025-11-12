@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from "@nestjs/common";
+import { Body, Controller, Get, Post } from "@nestjs/common";
 import { ICheckPINCoordinadoraUseCase } from "../use-cases/interfaces/ICheckPINCoordinadora.use.case";
 import { CheckPINCoordinadoraDto } from "./dto";
 
@@ -14,5 +14,10 @@ export class CheckPINCoordinadoraController {
       reqCheckPIN.idTienda,
       reqCheckPIN.pin,
     );
+  }
+
+  @Get("detalle")
+  getLastValidatedCoordinadora() {
+    return this.checkPINCoordinadoraUseCase["lastCoordinadora"] ?? null;
   }
 }

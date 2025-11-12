@@ -10,6 +10,11 @@ export interface CampañaMedicaDTO {
   OtroCorreo?: string | null;
 }
 
+export interface CorreosFurgosDTO {
+  _id: string;
+  mails?: string[];
+}
+
 export interface ParametroDTO2 {
   _id?: string;
   name: string;
