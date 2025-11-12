@@ -29,8 +29,15 @@ export class UpdateTrabajadorOrganizacionUseCase
       "UpdateTrabajadorOrganizacion - Datos recibidos:",
       trabajadorOrganizacion,
     );
-    const { id, arrayRoles, arrayPermisos, coordinatorId, ...datosActualizar } =
-      trabajadorOrganizacion;
+    const {
+      id,
+      arrayRoles,
+      arrayPermisos,
+      coordinatorId,
+      idTienda,
+      coordinacionesExtra,
+      ...datosActualizar
+    } = trabajadorOrganizacion;
 
     // 👉 Obtenemos snapshot del trabajador original ANTES de actualizar
     const original = await this.prisma.trabajador.findUnique({
@@ -118,6 +125,35 @@ export class UpdateTrabajadorOrganizacionUseCase
       }
     }
 
+    // **Lógica para la Coordinadora B**
+    if (coordinacionesExtra && coordinacionesExtra.length > 0) {
+      for (const tiendaId of coordinacionesExtra) {
+        // Validar existencia de tienda
+        const tiendaExtra = await this.prisma.tienda.findUnique({
+          where: { id: tiendaId },
+        });
+        if (!tiendaExtra) {
+          console.log(`Tienda adicional con id ${tiendaId} no encontrada`);
+          continue; // Si no existe la tienda, la omitimos y seguimos con la siguiente
+        }
+
+        // Crear la relación TiendaCoordinadora para Coordinadora B
+        try {
+          await this.prisma.tiendaCoordinadora.create({
+            data: {
+              tiendaId,
+              trabajadorId: id,
+            },
+          });
+          console.log(
+            `Relación TiendaCoordinadora B creada para trabajador ${id} y tienda ${tiendaId}`,
+          );
+        } catch (err) {
+          console.error("Error al crear relación TiendaCoordinadora B:", err);
+        }
+      }
+    }
+
     // Actualizar el trabajador con sus relaciones
     console.log("UpdateTrabajadorOrganizacion - updateData final:", updateData);
     const trabajadorActualizado = await this.prisma.trabajador.update({
@@ -130,6 +166,7 @@ export class UpdateTrabajadorOrganizacionUseCase
         empresa: true,
         responsable: true,
         coordinadoraDeLaTienda: true,
+        coordinacionesExtra: true,
       },
     });
     // LÓGICA anterior en guardarCambiosForms lo necesita recursos humanos---
@@ -159,6 +196,7 @@ export class UpdateTrabajadorOrganizacionUseCase
           empresa: true,
           responsable: true,
           coordinadoraDeLaTienda: true,
+          coordinacionesExtra: true,
         },
       });
 
@@ -170,11 +208,7 @@ export class UpdateTrabajadorOrganizacionUseCase
           trabajadorOrganizacion.idResponsable,
         );
 
-      console.log(nuevoResponsable);
-
       const nuevoIdAppResponsable = nuevoResponsable.idApp;
-
-      console.log(nuevoIdAppResponsable);
 
       const solicitudesExisten =
         await this.solicitudesVacaciones.haySolicitudesParaBeneficiario(

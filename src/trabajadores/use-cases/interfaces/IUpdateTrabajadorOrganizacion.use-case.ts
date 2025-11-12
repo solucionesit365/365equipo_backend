@@ -10,8 +10,11 @@ export interface IUpdateTrabajadorOrganizacionDto {
   llevaEquipo?: boolean;
   empresaId?: string;
   tipoTrabajador?: string;
+  coordinacionesExtra?: number[];
 }
 
 export abstract class IUpdateTrabajadorOrganizacionUseCase {
-  abstract execute(trabajador: IUpdateTrabajadorOrganizacionDto): Promise<Trabajador>;
+  abstract execute(
+    trabajador: IUpdateTrabajadorOrganizacionDto,
+  ): Promise<Trabajador>;
 }
