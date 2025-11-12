@@ -10,27 +10,12 @@ export class VideosSupportController {
   @UseGuards(AuthGuard)
   @Post("new-video")
   async newVideoSupport(@Body() video: CreateVideoSupportDto) {
-    console.log(video);
-    try {
-      const resultado = await this.videosInstance.newVideoSupport(video);
-      return { ok: true, data: resultado };
-    } catch (err) {
-      console.error(err);
-      return { ok: false, message: err.message };
-    }
+    return await this.videosInstance.newVideoSupport(video);
   }
 
   @UseGuards(AuthGuard)
   @Get("all-videos")
   async getAllVideosSupport() {
-    try {
-      return {
-        ok: true,
-        data: await this.videosInstance.getAllVideosSupport(),
-      };
-    } catch (err) {
-      console.error(err);
-      return { ok: false, message: err.message };
-    }
+    return await this.videosInstance.getAllVideosSupport();
   }
 }

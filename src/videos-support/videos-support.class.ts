@@ -9,11 +9,7 @@ export class VideosSupportClass {
   constructor(private readonly schVideosSupport: VideosSupportDatabases) {}
 
   async newVideoSupport(video: CreateVideoSupportDto) {
-    const insertVideo = await this.schVideosSupport.newVideoSupport(video);
-    console.log("Insert video", insertVideo);
-    if (insertVideo) return true;
-
-    throw new Error("No se ha podido insertar la inspección de furgo");
+    return await this.schVideosSupport.newVideoSupport(video);
   }
 
   async getAllVideosSupport() {
