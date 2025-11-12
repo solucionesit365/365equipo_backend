@@ -15,6 +15,7 @@ import { User } from "../decorators/get-user.decorator";
 import { UserRecord } from "firebase-admin/auth";
 import { Prisma } from "@prisma/client";
 import pMap from "p-map";
+import * as QRCode from "qrcode";
 import {
   CreateTrabajadorRequestDto,
   DeleteTrabajadorDto,
@@ -182,6 +183,34 @@ export class TrabajadoresController {
       return { ok: true, data: resUser };
     } catch (err) {
       console.log(err);
+      return { ok: false, message: err.message };
+    }
+  }
+
+  @UseGuards(AuthGuard)
+  @Post("generarQR")
+  async generarQR(@Body() { id, tokenQR }: { id: number; tokenQR: string }) {
+    try {
+      if (!id || !tokenQR) {
+        throw new Error("Faltan parámetros requeridos: id y tokenQR");
+      }
+
+      const qrValue = `id=${id}=tokenQR=${tokenQR}`;
+
+      // Generar el QR como Data URL con las mismas opciones que qrious
+      const qrImage = await QRCode.toDataURL(qrValue, {
+        errorCorrectionLevel: "H",
+        margin: 2,
+        width: 300,
+        color: {
+          dark: "#000000CC", // backgroundAlpha: 0.8 (CC = 204 en hex = ~0.8 * 255)
+          light: "#FFFFFFCC", // foregroundAlpha: 0.8
+        },
+      });
+
+      return { ok: true, qrImage };
+    } catch (err) {
+      console.error("Error al generar QR:", err);
       return { ok: false, message: err.message };
     }
   }
