@@ -70,6 +70,7 @@ export class InspeccionFurgosDatabes {
       matricula: furgoneta.matricula.toUpperCase(),
       fechaMatriculacion: furgoneta.fechaMatriculacion || "",
       conductor: furgoneta.conductor?.trim() || "",
+      estado: furgoneta.estado || true,
     });
 
     if (resInsert.acknowledged) return resInsert.insertedId;
@@ -95,10 +96,13 @@ export class InspeccionFurgosDatabes {
           matricula: furgoneta.matricula?.toUpperCase() || "",
           fechaMatriculacion: furgoneta.fechaMatriculacion || "",
           conductor: furgoneta.conductor?.trim() || "",
+          estado: furgoneta.estado,
         },
       },
+
       { returnDocument: "after" },
     );
+    console.log(resUpdate);
 
     if (!resUpdate._id) {
       throw new Error("No se ha podido actualizar la furgoneta o no existe");
