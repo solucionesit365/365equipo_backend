@@ -15,13 +15,15 @@ export class UpdateResponsableDeLaTiendaController {
 
   @Post("update-responsable-de-la-tienda")
   @UseGuards(FirebaseAuthGuard)
-  async updateResponsableDeLaTienda(@Body() dto: UpdateResponsableDeLaTiendaDto) {
+  async updateResponsableDeLaTienda(
+    @Body() dto: UpdateResponsableDeLaTiendaDto,
+  ) {
     try {
       const result = await this.updateResponsableUseCase.execute(
         dto.idTienda,
         dto.idCoordinadora,
       );
-      
+
       return {
         ok: true,
         data: result,
@@ -30,7 +32,31 @@ export class UpdateResponsableDeLaTiendaController {
       console.error("Error actualizando responsables:", error);
       return {
         ok: false,
-        message: error.message || "Error al actualizar responsables de la tienda",
+        message:
+          error.message || "Error al actualizar responsables de la tienda",
+      };
+    }
+  }
+
+  @Post("add-tienda-coordinadora")
+  @UseGuards(FirebaseAuthGuard)
+  async addTiendaCoordinadora(
+    @Body() dto: { tiendaId: number; trabajadorId: number },
+  ) {
+    try {
+      const result = await this.updateResponsableUseCase.addTiendaCoordinadora(
+        dto.tiendaId,
+        dto.trabajadorId,
+      );
+      return {
+        ok: true,
+        data: result,
+      };
+    } catch (error) {
+      console.error("Error agregando tienda-coordinadora:", error);
+      return {
+        ok: false,
+        message: error.message || "Error al agregar tienda-coordinadora",
       };
     }
   }
