@@ -40,7 +40,7 @@ describe('Incidencia', () => {
   describe('nuevaIncidencia', () => {
     it('debe crear una incidencia correctamente', async () => {
       const mockIncidencia = {
-        destinatario: 'rrhh@example.com',
+        destinatario: 'tecnicos',
         descripcion: 'Problema con el sistema',
         prioridad: 'Alta',
         nombre: 'Juan Pérez',

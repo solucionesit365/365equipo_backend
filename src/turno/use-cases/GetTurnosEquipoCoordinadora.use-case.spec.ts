@@ -91,10 +91,14 @@ describe('GetTurnosEquipoCoordinadoraUseCase', () => {
       const idTienda = 1;
       const fecha = DateTime.fromISO('2024-01-01');
 
-      const coordinadora = {
-        id: 10,
-        idTienda: 1,
-        nombre: 'Coordinadora Test',
+      const coordinadoraData = {
+        principal: {
+          id: 10,
+          idTienda: 1,
+          nombre: 'Coordinadora Test',
+          idApp: 'app-10',
+        },
+        adicionales: [],
       };
 
       const turnosEquipo = [
@@ -111,7 +115,7 @@ describe('GetTurnosEquipoCoordinadoraUseCase', () => {
         { id: 'turno-4', inicio: new Date(), final: new Date(), tiendaId: 1, idTrabajador: 10, borrable: true },
       ];
 
-      mockCoordinadoraRepository.getCoordinadoraPorTienda.mockResolvedValue(coordinadora as any);
+      mockCoordinadoraRepository.getCoordinadoraPorTienda.mockResolvedValue(coordinadoraData as any);
       mockTurnoRepository.getTurnosPorEquipo.mockResolvedValue(turnosEquipo as any);
       mockTurnoRepository.getTurnosPorTienda.mockResolvedValue(turnosTienda as any);
       mockTurnoRepository.getTurnosPorTrabajador.mockResolvedValue(turnosCoordinadora as any);
@@ -119,9 +123,9 @@ describe('GetTurnosEquipoCoordinadoraUseCase', () => {
       const result = await useCase.execute(idTienda, fecha);
 
       expect(mockCoordinadoraRepository.getCoordinadoraPorTienda).toHaveBeenCalledWith(idTienda);
-      expect(mockTurnoRepository.getTurnosPorEquipo).toHaveBeenCalledWith(coordinadora.id, fecha);
-      expect(mockTurnoRepository.getTurnosPorTienda).toHaveBeenCalledWith(coordinadora.idTienda, fecha);
-      expect(mockTurnoRepository.getTurnosPorTrabajador).toHaveBeenCalledWith(coordinadora.id, fecha);
+      expect(mockTurnoRepository.getTurnosPorEquipo).toHaveBeenCalledWith(coordinadoraData.principal.id, fecha);
+      expect(mockTurnoRepository.getTurnosPorTienda).toHaveBeenCalledWith(coordinadoraData.principal.id, fecha);
+      expect(mockTurnoRepository.getTurnosPorTrabajador).toHaveBeenCalledWith(coordinadoraData.principal.id, fecha);
 
       expect(result).toHaveLength(4); // Debe tener 4 turnos únicos
       expect(result.map(t => t.id)).toEqual(expect.arrayContaining(['turno-1', 'turno-2', 'turno-3', 'turno-4']));
@@ -131,13 +135,17 @@ describe('GetTurnosEquipoCoordinadoraUseCase', () => {
       const idTienda = 1;
       const fecha = DateTime.fromISO('2024-01-01');
 
-      const coordinadora = {
-        id: 10,
-        idTienda: 1,
-        nombre: 'Coordinadora Test',
+      const coordinadoraData = {
+        principal: {
+          id: 10,
+          idTienda: 1,
+          nombre: 'Coordinadora Test',
+          idApp: 'app-10',
+        },
+        adicionales: [],
       };
 
-      mockCoordinadoraRepository.getCoordinadoraPorTienda.mockResolvedValue(coordinadora as any);
+      mockCoordinadoraRepository.getCoordinadoraPorTienda.mockResolvedValue(coordinadoraData as any);
       mockTurnoRepository.getTurnosPorEquipo.mockResolvedValue([]);
       mockTurnoRepository.getTurnosPorTienda.mockResolvedValue([]);
       mockTurnoRepository.getTurnosPorTrabajador.mockResolvedValue([]);
@@ -151,15 +159,19 @@ describe('GetTurnosEquipoCoordinadoraUseCase', () => {
       const idTienda = 1;
       const fecha = DateTime.fromISO('2024-01-01');
 
-      const coordinadora = {
-        id: 10,
-        idTienda: 1,
-        nombre: 'Coordinadora Test',
+      const coordinadoraData = {
+        principal: {
+          id: 10,
+          idTienda: 1,
+          nombre: 'Coordinadora Test',
+          idApp: 'app-10',
+        },
+        adicionales: [],
       };
 
       const sameTurno = { id: 'turno-1', inicio: new Date(), final: new Date(), tiendaId: 1, idTrabajador: 1, borrable: true };
 
-      mockCoordinadoraRepository.getCoordinadoraPorTienda.mockResolvedValue(coordinadora as any);
+      mockCoordinadoraRepository.getCoordinadoraPorTienda.mockResolvedValue(coordinadoraData as any);
       mockTurnoRepository.getTurnosPorEquipo.mockResolvedValue([sameTurno] as any);
       mockTurnoRepository.getTurnosPorTienda.mockResolvedValue([sameTurno] as any);
       mockTurnoRepository.getTurnosPorTrabajador.mockResolvedValue([sameTurno] as any);

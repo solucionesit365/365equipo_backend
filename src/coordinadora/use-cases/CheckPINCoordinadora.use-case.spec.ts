@@ -28,13 +28,17 @@ describe('CheckPINCoordinadoraUseCase', () => {
 
   describe('execute', () => {
     it('debe retornar true si el PIN coincide con el ID de la coordinadora', async () => {
-      const mockCoordinadora = {
-        id: 1234,
-        nombreApellidos: 'María García',
-        idTienda: 5,
+      const mockCoordinadoraData = {
+        principal: {
+          id: 1234,
+          nombreApellidos: 'María García',
+          idTienda: 5,
+          idApp: 'app-1234',
+        },
+        adicionales: [],
       };
 
-      repository.getCoordinadoraPorTienda.mockResolvedValue(mockCoordinadora as any);
+      repository.getCoordinadoraPorTienda.mockResolvedValue(mockCoordinadoraData as any);
 
       const result = await useCase.execute(5, 1234);
 
@@ -43,13 +47,17 @@ describe('CheckPINCoordinadoraUseCase', () => {
     });
 
     it('debe retornar false si el PIN no coincide', async () => {
-      const mockCoordinadora = {
-        id: 1234,
-        nombreApellidos: 'María García',
-        idTienda: 5,
+      const mockCoordinadoraData = {
+        principal: {
+          id: 1234,
+          nombreApellidos: 'María García',
+          idTienda: 5,
+          idApp: 'app-1234',
+        },
+        adicionales: [],
       };
 
-      repository.getCoordinadoraPorTienda.mockResolvedValue(mockCoordinadora as any);
+      repository.getCoordinadoraPorTienda.mockResolvedValue(mockCoordinadoraData as any);
 
       const result = await useCase.execute(5, 9999);
 
