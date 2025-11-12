@@ -1,0 +1,118 @@
+name: Check PR is Up-to-Date
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - develop
+
+jobs:
+  check-updated:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Fetch base branch
+        run: |
+          git fetch origin ${{ github.event.pull_request.base.ref }}
+
+      - name: Check if branch is up-to-date
+        id: check
+        run: |
+          BASE_SHA=$(git rev-parse origin/${{ github.event.pull_request.base.ref }})
+          HEAD_SHA=$(git rev-parse HEAD)
+
+          echo "Base branch SHA: $BASE_SHA"
+          echo "PR branch SHA: $HEAD_SHA"
+
+          # Verificar si la base está en el historial del PR
+          if git merge-base --is-ancestor $BASE_SHA $HEAD_SHA; then
+            echo "✅ La rama está actualizada con ${{ github.event.pull_request.base.ref }}"
+            echo "up_to_date=true" >> $GITHUB_OUTPUT
+          else
+            echo "❌ La rama NO está actualizada con ${{ github.event.pull_request.base.ref }}"
+            COMMITS_BEHIND=$(git rev-list --count $HEAD_SHA..$BASE_SHA)
+            echo "commits_behind=$COMMITS_BEHIND" >> $GITHUB_OUTPUT
+            echo "up_to_date=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Comment and close PR if outdated
+        if: steps.check.outputs.up_to_date == 'false'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const commitsBehind = '${{ steps.check.outputs.commits_behind }}';
+            const comment = `## ⚠️ PR Cerrado Automáticamente - Rama Desactualizada
+
+            Este Pull Request ha sido cerrado automáticamente porque la rama **no está actualizada** con \`${{ github.event.pull_request.base.ref }}\`.
+
+            📊 **Estado actual:**
+            - Tu rama está **${commitsBehind} commit(s)** por detrás de \`${{ github.event.pull_request.base.ref }}\`
+
+            📝 **Para reabrir este PR, sigue estos pasos:**
+
+            \`\`\`bash
+            # 1. Asegúrate de estar en tu rama
+            git checkout ${{ github.event.pull_request.head.ref }}
+
+            # 2. Actualiza develop localmente
+            git fetch origin develop
+
+            # 3. Merge o rebase con develop (elige uno)
+            # Opción A - Merge (recomendado):
+            git merge origin/develop
+
+            # Opción B - Rebase (mantiene historial lineal):
+            git rebase origin/develop
+
+            # 4. Resuelve conflictos si los hay
+
+            # 5. Push de los cambios
+            git push origin ${{ github.event.pull_request.head.ref }} --force-with-lease
+
+            # 6. Reabre este PR o crea uno nuevo
+            \`\`\`
+
+            ℹ️ Esta política asegura que todos los PRs incluyan los últimos cambios de \`develop\` antes de ser revisados.`;
+
+            // Comentar en el PR
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: comment
+            });
+
+            // Cerrar el PR
+            await github.rest.pulls.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+              state: 'closed'
+            });
+
+            console.log(`PR #${context.issue.number} cerrado por estar desactualizado`);
+
+      - name: Comment success if up-to-date
+        if: steps.check.outputs.up_to_date == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const comment = `## ✅ Rama Actualizada
+
+            Esta rama está correctamente actualizada con \`${{ github.event.pull_request.base.ref }}\`. ¡Buen trabajo! 🎉`;
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: comment
+            });
