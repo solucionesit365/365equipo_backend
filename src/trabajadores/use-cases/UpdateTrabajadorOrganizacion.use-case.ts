@@ -169,6 +169,9 @@ export class UpdateTrabajadorOrganizacionUseCase
         console.log(
           `UpdateTrabajadorOrganizacion - Trabajador ${id} removido como supervisor de todas las tiendas`,
         );
+      }
+    }
+
     // **Lógica para la Coordinadora B**
     if (coordinacionesExtra && coordinacionesExtra.length > 0) {
       for (const tiendaId of coordinacionesExtra) {
