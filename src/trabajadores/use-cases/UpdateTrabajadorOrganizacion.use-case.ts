@@ -66,6 +66,10 @@ export class UpdateTrabajadorOrganizacionUseCase
       ...datosActualizar,
     };
 
+    if (idTienda !== undefined) {
+      updateData.idTienda = idTienda;
+    }
+
     // Agregar conexiones de roles si se proporcionan
     if (rolesConnect !== undefined) {
       updateData.roles = {
