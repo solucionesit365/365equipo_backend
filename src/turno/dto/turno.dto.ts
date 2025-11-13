@@ -4,6 +4,7 @@ import {
   IsBoolean,
   IsNotEmpty,
   IsNumber,
+  IsOptional,
   IsString,
   ValidateNested,
 } from "class-validator";
@@ -52,8 +53,9 @@ export class ObjetoTurnoDto {
   @IsNumber()
   tiendaId: number;
 
+  @IsOptional()
   @IsBoolean()
-  borrable: boolean;
+  borrable?: boolean;
 }
 
 export class SaveTurnosTrabajadorSemanalDto {
