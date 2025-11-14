@@ -130,6 +130,7 @@ describe("UpdateTrabajadorOrganizacionUseCase", () => {
       where: { id: 1 },
       data: {
         idResponsable: 2,
+        idTienda: 1,
         llevaEquipo: true,
         empresaId: "1",
         tipoTrabajador: "Supervisor",
