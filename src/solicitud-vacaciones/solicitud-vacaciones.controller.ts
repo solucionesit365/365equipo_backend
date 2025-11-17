@@ -19,6 +19,7 @@ import { SchedulerGuard } from "../guards/scheduler.guard";
 import { LoggerService } from "../logger/logger.service";
 import { CompleteUser } from "src/decorators/getCompleteUser.decorator";
 import { Trabajador } from "@prisma/client";
+import { log } from "console";
 
 @Controller("solicitud-vacaciones")
 export class SolicitudVacacionesController {
@@ -232,7 +233,7 @@ export class SolicitudVacacionesController {
   }
 
   //Mostrar solicitudes de vacaciones de los subordinados
-  @UseGuards(AuthGuard)
+  // @UseGuards(AuthGuard)
   // @Get("solicitudesSubordinados")
   // async solicitudesSubordinados(@Query() { idAppResponsable, year }) {
   //   try {
@@ -297,73 +298,87 @@ export class SolicitudVacacionesController {
   //     return { ok: false, message: err.message };
   //   }
   // }
+
   @UseGuards(AuthGuard)
   @Get("solicitudesSubordinados")
   async solicitudesSubordinados(@Query() { idAppResponsable, year }) {
     try {
       if (!idAppResponsable) throw Error("Faltan datos");
 
-      // Consultar si la persona logueada es coordinadora (A o B)
+      // Detectar si es Coordinadora B y obtener la A "base"
       const coord =
         await this.trabajadorInstance.esCoordinadora2(idAppResponsable);
 
-      // Determinar el ID final a usar (baseIdApp es la A, idAppResponsable es quien hace petición)
       const idAppResponsableFinal = coord.isCoordinadora
-        ? coord.baseIdApp || idAppResponsable // Si es coordinadora, usar baseIdApp (la A)
-        : idAppResponsable; // Si no es coordinadora, usar el propio ID
+        ? coord.baseIdApp || idAppResponsable
+        : idAppResponsable;
 
-      // Obtener solicitudes de vacaciones de los subordinados
-      const solicitudesEmpleadosDirectos =
-        await this.solicitudVacacionesInstance.getsolicitudesSubordinados(
-          idAppResponsableFinal,
-          Number(year),
-        );
+      const año = Number(year);
 
-      // Obtener subordinados de la coordinadora (A o B)
+      // 1) Obtener subordinados directos ACTUALES
       const empleadosTipoCoordi =
         await this.trabajadorInstance.getSubordinadosConTienda(
           idAppResponsableFinal,
         );
 
-      const addArray = [];
+      // 2) Crear Set con IDs de subordinados directos
+      const idsEmpleadosDirectos = new Set(
+        empleadosTipoCoordi.map((emp) => emp.id),
+      );
 
-      // Obtener solicitudes de subordinados adicionales (si los hay)
-      if (empleadosTipoCoordi.length > 0) {
-        for (let i = 0; i < empleadosTipoCoordi.length; i++) {
-          if (empleadosTipoCoordi[i].llevaEquipo) {
-            // Obtener solicitudes de subordinados
-            const solicitudesSubordinadosCoordinadora =
-              await this.solicitudVacacionesInstance.getsolicitudesSubordinados(
-                empleadosTipoCoordi[i].idApp,
-                Number(year),
-              );
+      const allSolicitudes = [];
 
-            // Filtrar solicitudes que tengan idAppResponsableB o coincidan con idAppResponsableFinal
-            const solicitudesFiltradas =
-              solicitudesSubordinadosCoordinadora.filter(
-                (solicitud) =>
-                  solicitud.idAppResponsableB === idAppResponsableFinal ||
-                  solicitud.idAppResponsableB === coord.idAppResponsableB ||
-                  solicitud.idAppResponsable === idAppResponsableFinal,
-              );
+      // 3) NIVEL 1: Solicitudes de subordinados directos
+      const todasLasSolicitudesDirectas =
+        await this.solicitudVacacionesInstance.getsolicitudesSubordinados(
+          idAppResponsableFinal,
+          año,
+        );
 
-            if (solicitudesFiltradas.length > 0) {
-              solicitudesFiltradas.forEach((solicitud: any) => {
-                solicitud.validador = idAppResponsableFinal;
-              });
-              addArray.push(...solicitudesFiltradas);
-            }
-          }
+      // Filtrar solo solicitudes de subordinados directos ACTUALES
+      const solicitudesEmpleadosDirectos = todasLasSolicitudesDirectas.filter(
+        (s: any) => idsEmpleadosDirectos.has(s.idBeneficiario),
+      );
+
+      solicitudesEmpleadosDirectos.forEach((s: any) => {
+        s.validador = idAppResponsableFinal;
+      });
+
+      allSolicitudes.push(...solicitudesEmpleadosDirectos);
+
+      // 4) NIVEL 2: Por cada subordinado directo, obtener sus subordinados
+      for (let empleado of empleadosTipoCoordi) {
+        if (empleado.llevaEquipo) {
+          // Obtener subordinados directos de este empleado
+          const subordinadosDelEmpleado =
+            await this.trabajadorInstance.getSubordinados(empleado.idApp);
+
+          // Crear Set con los IDs de sub-subordinados
+          const idsSubordinadosDirectos = new Set(
+            subordinadosDelEmpleado.map((sub) => sub.id),
+          );
+
+          // Obtener todas las solicitudes donde el empleado es validador
+          const todasLasSolicitudesSubordinados =
+            await this.solicitudVacacionesInstance.getsolicitudesSubordinados(
+              empleado.idApp,
+              año,
+            );
+
+          // Filtrar solo solicitudes de sub-subordinados ACTUALES
+          const solicitudesFiltradas = todasLasSolicitudesSubordinados.filter(
+            (s: any) => idsSubordinadosDirectos.has(s.idBeneficiario),
+          );
+
+          solicitudesFiltradas.forEach((s: any) => {
+            s.validador = idAppResponsableFinal;
+          });
+
+          allSolicitudes.push(...solicitudesFiltradas);
         }
       }
 
-      // Combinar solicitudes
-      const allSolicitudes = [...solicitudesEmpleadosDirectos, ...addArray];
-
-      return {
-        ok: true,
-        data: allSolicitudes.length > 0 ? allSolicitudes : [],
-      };
+      return { ok: true, data: allSolicitudes };
     } catch (err) {
       console.log(err);
       return { ok: false, message: err.message };
