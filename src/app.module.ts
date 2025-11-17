@@ -58,7 +58,6 @@ import { QuestionModule } from "./question/question.module";
 import { QuestionCategoryModule } from "./question-category/question-category.module";
 import { FormacionModule } from "./formacion/formacion.module";
 import { QuestionnaireModule } from "./questionnaire/questionnaire.module";
-import { VisionModule } from "./vision/vision.module";
 import { LoggerModule } from "./logger/logger.module";
 import { NotificacionHorasExtrasModule } from "./notificacion-horas-extras/notificacion-horas-extras.module";
 import { ParametrosModule } from "./parametros/parametros.module";
@@ -85,7 +84,7 @@ import { ApiEmpresaOrgModule } from "./API/api-empresa-org/api-empresa-org.modul
 import { ApiIncidenciaModule } from "./API/api-incidencia/api-incidencia.module";
 import { InspeccionFurgosModule } from "./inspeccion-furgos/inspeccion-furgos.module";
 import { InspeccionFurgosController } from "./inspeccion-furgos/inspeccion-furgos.controller";
-import {VideosSupportModule} from "./videos-support/videos-support.module";
+import { VideosSupportModule } from "./videos-support/videos-support.module";
 @Module({
   imports: [
     InspeccionFichajesModule,
@@ -147,7 +146,6 @@ import {VideosSupportModule} from "./videos-support/videos-support.module";
     QuestionCategoryModule,
     FormacionModule,
     QuestionnaireModule,
-    VisionModule,
     LoggerModule,
     NotificacionHorasExtrasModule,
     ParametrosModule,
@@ -172,7 +170,7 @@ import {VideosSupportModule} from "./videos-support/videos-support.module";
     ApiEmpresaOrgModule,
     ApiIncidenciaModule,
     InspeccionFurgosModule,
-    VideosSupportModule
+    VideosSupportModule,
   ],
   controllers: [
     InspeccionFichajesController,
