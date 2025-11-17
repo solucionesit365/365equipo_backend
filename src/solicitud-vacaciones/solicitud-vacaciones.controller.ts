@@ -19,7 +19,6 @@ import { SchedulerGuard } from "../guards/scheduler.guard";
 import { LoggerService } from "../logger/logger.service";
 import { CompleteUser } from "src/decorators/getCompleteUser.decorator";
 import { Trabajador } from "@prisma/client";
-import { log } from "console";
 
 @Controller("solicitud-vacaciones")
 export class SolicitudVacacionesController {
