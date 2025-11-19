@@ -375,6 +375,21 @@ export class TrabajadoresController {
   }
 
   @UseGuards(AuthGuard)
+  @Post("getTrabajadoresByIds")
+  async getTrabajadoresByIds(@Body() { ids }: { ids: number[] }) {
+    try {
+      if (!ids || !Array.isArray(ids)) throw Error("Faltan datos o formato incorrecto");
+
+      const trabajadores = await this.trabajadorInstance.getTrabajadoresByIds(ids);
+
+      return { ok: true, data: trabajadores };
+    } catch (err) {
+      console.log(err);
+      return { ok: false, message: err.message };
+    }
+  }
+
+  @UseGuards(AuthGuard)
   @Post("uploadFoto")
   async uploadFoto(@Body() { displayFoto, uid }) {
     try {
