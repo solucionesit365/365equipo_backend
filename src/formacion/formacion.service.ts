@@ -133,7 +133,7 @@ export class FormacionService {
 
   async getFormacionById(req: { id: string }) {
     try {
-      return await this.prisma.formacion.findUnique({
+      const formacion = await this.prisma.formacion.findUnique({
         where: {
           id: req.id,
         },
@@ -141,7 +141,16 @@ export class FormacionService {
           pasos: true,
         },
       });
+
+      if (!formacion) {
+        throw new NotFoundException(`Formación con id ${req.id} no encontrada`);
+      }
+
+      return formacion;
     } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
       throw new InternalServerErrorException("Error al obtener la formación");
     }
   }
