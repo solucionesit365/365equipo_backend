@@ -16,7 +16,7 @@ export class StorageService {
     this.storage = this.firebaseService.storage;
   }
 
-  private getBucket() {
+  getBucket() {
     return this.storage.bucket(this.bucketName);
   }
 

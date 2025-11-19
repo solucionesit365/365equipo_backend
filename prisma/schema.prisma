@@ -8,8 +8,8 @@ datasource db {
 }
 
 model Trabajador {
-  id                     Int                  @id @default(autoincrement())
-  idApp                  String?              @unique
+  id                     Int                   @id @default(autoincrement())
+  idApp                  String?               @unique
   nombreApellidos        String
   displayName            String?
   emails                 String
@@ -28,27 +28,28 @@ model Trabajador {
   llevaEquipo            Boolean
   tokenQR                String?
   displayFoto            String?
-  excedencia             Boolean              @default(false)
+  excedencia             Boolean               @default(false)
   dispositivo            String?
   empresaId              String?
-  esTienda               Boolean              @default(false)
+  esTienda               Boolean               @default(false)
   nPerceptor             Int?
   workEmail              String?
-  isPermanent            Boolean              @default(false)
+  isPermanent            Boolean               @default(false)
   ausenciasCompletas     AusenciaCompleta[]
   ausenciasParciales     AusenciaParcial[]
   contratos              Contrato2[]
   notificationDevices    NotificationDevice[]
-  coordinadoraDeLaTienda Tienda?              @relation("TiendaCoordinator")
-  supervisa              Tienda[]             @relation("TiendaSupervisor")
-  empresa                Empresa?             @relation(fields: [empresaId], references: [id])
-  responsable            Trabajador?          @relation("Responsable", fields: [idResponsable], references: [id])
-  subordinados           Trabajador[]         @relation("Responsable")
-  tienda                 Tienda?              @relation(fields: [idTienda], references: [id])
+  coordinadoraDeLaTienda Tienda?               @relation("TiendaCoordinator")
+  supervisa              Tienda[]              @relation("TiendaSupervisor")
+  empresa                Empresa?              @relation(fields: [empresaId], references: [id])
+  responsable            Trabajador?           @relation("Responsable", fields: [idResponsable], references: [id])
+  subordinados           Trabajador[]          @relation("Responsable")
+  tienda                 Tienda?               @relation(fields: [idTienda], references: [id])
   turnos                 Turno[]
-  permisos               Permiso[]            @relation("PermisoToTrabajador")
-  roles                  Role[]               @relation("RoleToTrabajador")
+  permisos               Permiso[]             @relation("PermisoToTrabajador")
+  roles                  Role[]                @relation("RoleToTrabajador")
   coordinacionesExtra    TiendaCoordinadora[]
+  formacionesCompletadas FormacionCompletada[]
 
   @@unique([empresaId, nPerceptor])
 }
@@ -199,13 +200,14 @@ model AnswerOption {
 }
 
 model Formacion {
-  id          String           @id @default(uuid())
-  name        String
-  date        DateTime         @default(now())
-  department  Department
-  description String?
-  nPasos      Int
-  pasos       PasosFormacion[] @relation("PasosEnFormacion")
+  id                     String                @id @default(uuid())
+  name                   String
+  date                   DateTime              @default(now())
+  department             Department
+  description            String?
+  nPasos                 Int
+  pasos                  PasosFormacion[]      @relation("PasosEnFormacion")
+  formacionesCompletadas FormacionCompletada[]
 }
 
 model PasosFormacion {
@@ -216,6 +218,17 @@ model PasosFormacion {
   formacionesId String?
   resourceId    String
   Formaciones   Formacion?        @relation("PasosEnFormacion", fields: [formacionesId], references: [id], onDelete: Cascade)
+}
+
+model FormacionCompletada {
+  id           String     @id @default(uuid())
+  trabajadorId Int
+  formacionId  String
+  completedAt  DateTime   @default(now())
+  trabajador   Trabajador @relation(fields: [trabajadorId], references: [id])
+  formacion    Formacion  @relation(fields: [formacionId], references: [id])
+
+  @@unique([trabajadorId, formacionId])
 }
 
 model SmsOtp {

@@ -288,4 +288,100 @@ export class FormacionService {
       );
     }
   }
+
+  async completarFormacion(req: { trabajadorId: number; formacionId: string }) {
+    try {
+      const { trabajadorId, formacionId } = req;
+
+      // Verificar que la formación existe
+      const formacion = await this.prisma.formacion.findUnique({
+        where: { id: formacionId },
+      });
+
+      if (!formacion) {
+        throw new NotFoundException(
+          `Formación con id ${formacionId} no encontrada`,
+        );
+      }
+
+      // Crear o actualizar el registro de completitud
+      const formacionCompletada =
+        await this.prisma.formacionCompletada.upsert({
+          where: {
+            trabajadorId_formacionId: {
+              trabajadorId,
+              formacionId,
+            },
+          },
+          update: {
+            completedAt: new Date(),
+          },
+          create: {
+            trabajadorId,
+            formacionId,
+          },
+        });
+
+      return {
+        ok: true,
+        message: "Formación completada exitosamente",
+        data: formacionCompletada,
+      };
+    } catch (error) {
+      console.error("Error al completar formación:", error);
+      throw new InternalServerErrorException("Error al completar la formación");
+    }
+  }
+
+  async getFormacionesCompletadas() {
+    try {
+      const formacionesCompletadas =
+        await this.prisma.formacionCompletada.findMany({
+          include: {
+            formacion: true,
+            trabajador: {
+              select: {
+                id: true,
+                nombreApellidos: true,
+                displayName: true,
+                emails: true,
+              },
+            },
+          },
+          orderBy: {
+            completedAt: "desc",
+          },
+        });
+
+      // Agrupar por formación
+      const agrupadasPorFormacion = formacionesCompletadas.reduce(
+        (acc, item) => {
+          if (!acc[item.formacionId]) {
+            acc[item.formacionId] = {
+              formacion: item.formacion,
+              completados: [],
+            };
+          }
+          acc[item.formacionId].completados.push({
+            trabajadorId: item.trabajadorId,
+            trabajadorNombre: item.trabajador.nombreApellidos || item.trabajador.displayName,
+            trabajadorEmail: item.trabajador.emails,
+            completedAt: item.completedAt,
+          });
+          return acc;
+        },
+        {} as Record<string, any>,
+      );
+
+      return {
+        ok: true,
+        data: Object.values(agrupadasPorFormacion),
+      };
+    } catch (error) {
+      console.error("Error al obtener formaciones completadas:", error);
+      throw new InternalServerErrorException(
+        "Error al obtener las formaciones completadas",
+      );
+    }
+  }
 }
