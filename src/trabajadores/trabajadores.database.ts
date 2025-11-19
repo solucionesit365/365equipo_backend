@@ -1749,6 +1749,23 @@ export class TrabajadorDatabaseService {
     return await this.getSubordinadosById(id, conFecha);
   }
 
+  async getTrabajadoresByIds(ids: number[]) {
+    return await this.prisma.trabajador.findMany({
+      where: {
+        id: {
+          in: ids,
+        },
+      },
+      include: {
+        contratos: {
+          where: { fechaBaja: null },
+          orderBy: { fechaAlta: "desc" },
+          take: 1, // Solo el contrato más reciente
+        },
+      },
+    });
+  }
+
   isValidDate(value) {
     return DateTime.fromFormat(value, "DD/MM/YYYY").isValid;
   }
