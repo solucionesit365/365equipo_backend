@@ -57,4 +57,18 @@ export class FormacionController {
   async compartirFormacionManual(@Body() req: CompartirFormacionManualDto) {
     return await this.formacionService.compartirFormacionManual(req);
   }
+
+  @UseGuards(AuthGuard)
+  @Post("completar")
+  async completarFormacion(
+    @Body() req: { trabajadorId: number; formacionId: string },
+  ) {
+    return await this.formacionService.completarFormacion(req);
+  }
+
+  @UseGuards(AuthGuard)
+  @Get("completadas")
+  async getFormacionesCompletadas() {
+    return await this.formacionService.getFormacionesCompletadas();
+  }
 }

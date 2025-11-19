@@ -596,6 +596,10 @@ export class TrabajadorService {
     return await this.schTrabajadores.getSubordinadosByIdsql(id);
   }
 
+  async getTrabajadoresByIds(ids: number[]) {
+    return await this.schTrabajadores.getTrabajadoresByIds(ids);
+  }
+
   async esCoordinadora(uid: string): Promise<boolean> {
     return Boolean(await this.schTrabajadores.esCoordinadora(uid));
   }

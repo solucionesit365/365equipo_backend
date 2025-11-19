@@ -244,9 +244,18 @@ export class FichajesController {
         uidParaConsultar,
       );
 
+      // Obtener el trabajador completo para acceder a su idTienda
+      const coordinador =
+        await this.trabajadoresInstance.getTrabajadorByAppId(
+          uidParaConsultar,
+        );
+
       return {
         ok: true,
-        data: await this.fichajesInstance.getParesSinValidar(arraySubordinados),
+        data: await this.fichajesInstance.getParesSinValidar(
+          arraySubordinados,
+          coordinador?.idTienda,
+        ),
       };
     } catch (err) {
       console.log(err);

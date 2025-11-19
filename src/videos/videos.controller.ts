@@ -92,31 +92,69 @@ export class VideosController {
     @Headers("range") range?: string,
   ) {
     try {
-      const videoBuffer = await this.videoService.getVideoBuffer(id);
-      const videoSize = videoBuffer.length;
+      // Obtener metadata del video
+      const videoMetadata = await this.videoService.getVideoMetadata(id);
+
+      // Obtener el archivo de Firebase Storage
+      const bucket = this.storageService.getBucket();
+      const file = bucket.file(videoMetadata.relativePath);
+      const [metadata] = await file.getMetadata();
+      const videoSize =
+        typeof metadata.size === "string"
+          ? parseInt(metadata.size, 10)
+          : metadata.size;
+
+      // Configurar headers comunes
+      res.setHeader("Content-Type", "video/mp4");
+      res.setHeader("Accept-Ranges", "bytes");
+      // Caché de 1 hora para mejorar rendimiento
+      res.setHeader("Cache-Control", "public, max-age=3600");
 
       // Si hay un header de range, el cliente está pidiendo solo una parte del video
       if (range) {
         const parts = range.replace(/bytes=/, "").split("-");
         const start = parseInt(parts[0], 10);
-        const end = parts[1] ? parseInt(parts[1], 10) : videoSize - 1;
+        let end = parts[1] ? parseInt(parts[1], 10) : videoSize - 1;
+
+        // Limitar el chunk size a 5MB para respuestas más rápidas
+        const MAX_CHUNK_SIZE = 5 * 1024 * 1024; // 5MB
+        if (end - start + 1 > MAX_CHUNK_SIZE) {
+          end = start + MAX_CHUNK_SIZE - 1;
+        }
+
         const chunkSize = end - start + 1;
-        const videoChunk = videoBuffer.subarray(start, end + 1);
 
         // Headers específicos para respuesta parcial
         res.setHeader("Content-Range", `bytes ${start}-${end}/${videoSize}`);
-        res.setHeader("Accept-Ranges", "bytes");
         res.setHeader("Content-Length", chunkSize);
-        res.setHeader("Content-Type", "video/mp4");
         res.status(206); // Partial Content
-        res.send(videoChunk);
+
+        // Crear stream con rango usando soporte nativo de Firebase
+        const rangeStream = file.createReadStream({ start, end: end + 1 });
+
+        rangeStream.on("error", (error) => {
+          console.error("Error streaming video range:", error);
+          if (!res.headersSent) {
+            res.status(500).json({ message: "Error al transmitir el video" });
+          }
+        });
+
+        rangeStream.pipe(res);
       } else {
-        // Enviar video completo
-        res.setHeader("Content-Type", "video/mp4");
+        // Enviar video completo usando streaming
         res.setHeader("Content-Length", videoSize);
-        res.setHeader("Accept-Ranges", "bytes");
-        res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
-        res.send(videoBuffer);
+        res.status(200);
+
+        const videoStream = file.createReadStream();
+
+        videoStream.on("error", (error) => {
+          console.error("Error streaming video:", error);
+          if (!res.headersSent) {
+            res.status(500).json({ message: "Error al transmitir el video" });
+          }
+        });
+
+        videoStream.pipe(res);
       }
     } catch (error) {
       console.error("Error downloading video:", error);
@@ -124,7 +162,9 @@ export class VideosController {
       if (error instanceof NotFoundException) {
         res.status(404).json({ message: "Video no encontrado" });
       } else {
-        res.status(500).json({ message: "Error al descargar el video" });
+        if (!res.headersSent) {
+          res.status(500).json({ message: "Error al descargar el video" });
+        }
       }
     }
   }

@@ -402,9 +402,13 @@ export class Fichajes {
 
   async getParesSinValidar(
     arraySubordinados: Trabajador[],
+    idTienda?: number,
   ): Promise<ParFichaje[]> {
     const paresSinValidar: ParFichaje[] = [];
+    const idsSubordinados = new Set(arraySubordinados.map((s) => s.id));
+    const trabajadoresProcesados = new Set<number>();
 
+    // Procesar subordinados directos
     for (const subordinado of arraySubordinados) {
       const susFichajes = await this.getFichajesByIdSql(subordinado.id, false);
       const susFichajesPlus: WithId<FichajeDto>[] = susFichajes.map(
@@ -417,6 +421,59 @@ export class Fichajes {
       this.ordenarPorHora(susFichajesPlus);
       const resPares = await this.obtenerParesTrabajador(susFichajesPlus);
       paresSinValidar.push(...resPares);
+      trabajadoresProcesados.add(subordinado.id);
+    }
+
+    // Si se proporciona idTienda, buscar trabajadores externos que hayan trabajado en la tienda
+    if (idTienda) {
+      // Obtener turnos de la tienda de las últimas 3 semanas (período relevante para validación)
+      // Como getTurnosPorTienda solo busca por semana, necesitamos buscar semana por semana
+      const fechaLimite = DateTime.now().minus({ weeks: 3 }).startOf("week");
+      const fechaActual = DateTime.now();
+      const todosTurnos = [];
+
+      // Iterar por cada semana desde hace 3 semanas hasta ahora
+      let fechaSemana = fechaLimite;
+      while (fechaSemana <= fechaActual) {
+        const turnosSemana = await this.turnoRepository.getTurnosPorTienda(
+          idTienda,
+          fechaSemana,
+        );
+        todosTurnos.push(...turnosSemana);
+        fechaSemana = fechaSemana.plus({ weeks: 1 });
+      }
+
+      // Extraer IDs únicos de trabajadores que tienen turnos pero no son subordinados
+      const idsTrabajadoresExternos = [
+        ...new Set(
+          todosTurnos
+            .map((turno) => turno.idTrabajador)
+            .filter(
+              (id) =>
+                !idsSubordinados.has(id) && !trabajadoresProcesados.has(id),
+            ),
+        ),
+      ];
+
+      // Procesar fichajes de trabajadores externos
+      for (const idTrabajador of idsTrabajadoresExternos) {
+        const fichajesExterno = await this.getFichajesByIdSql(
+          idTrabajador,
+          false,
+        );
+        const fichajesExternoPlus: WithId<FichajeDto>[] = fichajesExterno.map(
+          (fichaje) => ({
+            ...fichaje,
+            idTrabajador: idTrabajador,
+          }),
+        );
+
+        this.ordenarPorHora(fichajesExternoPlus);
+        const paresExterno =
+          await this.obtenerParesTrabajador(fichajesExternoPlus);
+        paresSinValidar.push(...paresExterno);
+        trabajadoresProcesados.add(idTrabajador);
+      }
     }
 
     return paresSinValidar;
