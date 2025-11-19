@@ -46,10 +46,12 @@ model Trabajador {
   subordinados           Trabajador[]          @relation("Responsable")
   tienda                 Tienda?               @relation(fields: [idTienda], references: [id])
   turnos                 Turno[]
-  permisos               Permiso[]             @relation("PermisoToTrabajador")
-  roles                  Role[]                @relation("RoleToTrabajador")
-  coordinacionesExtra    TiendaCoordinadora[]
-  formacionesCompletadas FormacionCompletada[]
+  permisos                 Permiso[]               @relation("PermisoToTrabajador")
+  roles                    Role[]                  @relation("RoleToTrabajador")
+  coordinacionesExtra      TiendaCoordinadora[]
+  formacionesCompletadas   FormacionCompletada[]
+  invitacionesEnviadas     FormacionInvitado[]     @relation("FormacionInvitadoPor")
+  invitacionesVinculadas   FormacionInvitado[]     @relation("FormacionInvitadoVinculado")
 
   @@unique([empresaId, nPerceptor])
 }
@@ -208,6 +210,7 @@ model Formacion {
   nPasos                 Int
   pasos                  PasosFormacion[]      @relation("PasosEnFormacion")
   formacionesCompletadas FormacionCompletada[]
+  invitados              FormacionInvitado[]
 }
 
 model PasosFormacion {
@@ -218,6 +221,33 @@ model PasosFormacion {
   formacionesId String?
   resourceId    String
   Formaciones   Formacion?        @relation("PasosEnFormacion", fields: [formacionesId], references: [id], onDelete: Cascade)
+}
+
+model FormacionInvitado {
+  id                String                        @id @default(uuid())
+  token             String                        @unique @default(uuid())
+  formacionId       String
+  nombreCompleto    String
+  email             String
+  dni               String
+  telefono          String?
+  invitadoPorId     Int
+  trabajadorId      Int?
+  createdAt         DateTime                      @default(now())
+  formacion         Formacion                     @relation(fields: [formacionId], references: [id])
+  invitadoPor       Trabajador                    @relation("FormacionInvitadoPor", fields: [invitadoPorId], references: [id])
+  trabajadorVinculo Trabajador?                   @relation("FormacionInvitadoVinculado", fields: [trabajadorId], references: [id])
+  completadas       FormacionCompletadaInvitado[]
+
+  @@index([token])
+  @@index([email])
+}
+
+model FormacionCompletadaInvitado {
+  id          String            @id @default(uuid())
+  invitadoId  String
+  completedAt DateTime          @default(now())
+  invitado    FormacionInvitado @relation(fields: [invitadoId], references: [id], onDelete: Cascade)
 }
 
 model FormacionCompletada {
