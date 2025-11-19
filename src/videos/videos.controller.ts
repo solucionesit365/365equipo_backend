@@ -23,6 +23,7 @@ import { StorageService } from "../storage/storage.service";
 import { CryptoService } from "../crypto/crypto.class";
 import { VideosService } from "./videos.service";
 import { AuthGuard } from "../guards/auth.guard";
+import { VideoStreamAuthGuard } from "../guards/video-stream-auth.guard";
 import { Response } from "express";
 
 @Controller("videos")
@@ -83,7 +84,7 @@ export class VideosController {
     return await this.videoService.getInfoVideo(req.id);
   }
 
-  @UseGuards(AuthGuard)
+  @UseGuards(VideoStreamAuthGuard)
   @Get("downloadVideo")
   async downloadVideo(
     @Query("id") id: string,

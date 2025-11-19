@@ -3,7 +3,12 @@ import {
   ExecutionContext,
   InternalServerErrorException,
 } from "@nestjs/common";
-import { Trabajador } from "@prisma/client";
+import { Prisma, Trabajador } from "@prisma/client";
+
+export interface ICompleteUser
+  extends Prisma.TrabajadorGetPayload<{
+    include: { roles: true; permisos: true };
+  }> {}
 
 export const CompleteUser = createParamDecorator(
   (data: unknown, ctx: ExecutionContext): Trabajador => {
@@ -13,6 +18,8 @@ export const CompleteUser = createParamDecorator(
       throw new InternalServerErrorException("No se pudo obtener el usuario");
     }
 
-    return request.sqlUser as Trabajador;
+    return request.sqlUser as Prisma.TrabajadorGetPayload<{
+      include: { roles: true; permisos: true };
+    }>;
   },
 );
