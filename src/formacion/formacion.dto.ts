@@ -163,3 +163,37 @@ export class UpdateFormacionDto {
   @IsOptional()
   nPasos?: number;
 }
+
+export class CompartirFormacionInvitadoDto {
+  @IsNotEmpty()
+  @IsString()
+  formacionId: string;
+
+  @IsNotEmpty()
+  @IsString()
+  nombreCompleto: string;
+
+  @IsNotEmpty()
+  @IsString()
+  email: string;
+
+  @IsNotEmpty()
+  @IsString()
+  dni: string;
+
+  @IsOptional()
+  @IsString()
+  telefono?: string;
+}
+
+export class GetFormacionInvitadoDto {
+  @IsNotEmpty()
+  @IsString()
+  token: string;
+}
+
+export class CompletarFormacionInvitadoDto {
+  @IsNotEmpty()
+  @IsString()
+  token: string;
+}

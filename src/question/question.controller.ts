@@ -52,7 +52,6 @@ export class QuestionController {
     return await this.questionService.deleteQuestion(req.id);
   }
 
-  @UseGuards(AuthGuard)
   @Get("options")
   async getQuestionOptions(@Query() req: GetOptionsDto) {
     return await this.questionService.getQuestionOptions(req.id);

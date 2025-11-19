@@ -13,13 +13,11 @@ export class TwilioController {
     return await this.twilioService.sendSms("+34678456123", "Hola, soy un SMS");
   }
 
-  @UseGuards(AuthGuard)
   @Post("send-otp")
   async sendOtp(@Body() req: SendOTPDto) {
     return await this.twilioService.sendOtp(req.phone);
   }
 
-  @UseGuards(AuthGuard)
   @Post("verify-otp")
   async verifyOtp(@Body() req: VerifyOTPDto) {
     return await this.twilioService.verifyOtp(req.phone, req.code);

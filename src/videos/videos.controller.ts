@@ -78,13 +78,11 @@ export class VideosController {
     return await this.videoService.updateVideoData(req);
   }
 
-  @UseGuards(AuthGuard)
   @Get("infoVideo")
   async getVideoInfo(@Query() req: GetInfoVideoDto) {
     return await this.videoService.getInfoVideo(req.id);
   }
 
-  @UseGuards(VideoStreamAuthGuard)
   @Get("downloadVideo")
   async downloadVideo(
     @Query("id") id: string,

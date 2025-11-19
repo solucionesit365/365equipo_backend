@@ -18,7 +18,6 @@ export class PresentationController {
     return await this.presentacionService.getPresentations();
   }
 
-  @UseGuards(AuthGuard)
   @Get("presentation")
   async getPresentation(@Query() req: GetPresentationDto) {
     return await this.presentacionService.getPresentation(req.id);
