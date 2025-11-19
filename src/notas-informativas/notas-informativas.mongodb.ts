@@ -63,6 +63,22 @@ export class NotasInformativasDatabes {
     throw Error("No se ha podido borrar la(s) notas informativas");
   }
 
+  async updateNotes(_id: string, notas: Partial<NotasInformativas>) {
+    const db = (await this.mongoDbService.getConexion()).db();
+    const notasCollection = db.collection("notasInformativas");
+
+    const resUpdate = await notasCollection.updateOne(
+      { _id: new ObjectId(_id) },
+      { $set: notas },
+    );
+
+    if (resUpdate.modifiedCount === 0) {
+      throw new Error("No se pudo actualizar la nota o no se encontró");
+    }
+
+    return true;
+  }
+
   //Eliminacion automatica de las notas informativas por su caducidad y eliminar el storage
   private async deleteNotasInformativasCaducidad() {
     const db = (await this.mongoDbService.getConexion()).db();

@@ -9,4 +9,5 @@ export interface NotasInformativas {
   tiendas: number;
   fechaCreacion: Date;
   creador: string;
+  seen: boolean;
 }
