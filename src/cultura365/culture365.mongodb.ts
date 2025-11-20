@@ -1,15 +1,15 @@
 import { Injectable } from "@nestjs/common";
 import { ObjectId } from "mongodb";
-import { cultura365Interface } from "./cultura365.interface";
+import { culture365Interface } from "./culture365.interface";
 import { MongoService } from "../mongo/mongo.service";
 
 @Injectable()
-export class cultura365Mongo {
+export class culture365Mongo {
   constructor(private readonly mongoDbService: MongoService) {}
 
-  async nuevoVideo(video: cultura365Interface) {
+  async newVideo(video: culture365Interface) {
     const db = (await this.mongoDbService.getConexion()).db();
-    const videosCollect = db.collection<cultura365Interface>("videosCultura");
+    const videosCollect = db.collection<culture365Interface>("videosCulture");
 
     const resInsert = await videosCollect.insertOne(video);
 
@@ -20,15 +20,15 @@ export class cultura365Mongo {
 
   async getVideos() {
     const db = (await this.mongoDbService.getConexion()).db();
-    const videosCollect = db.collection<cultura365Interface>("videosCultura");
+    const videosCollect = db.collection<culture365Interface>("videosCulture");
     const response = await videosCollect.find({}).toArray();
 
     return response;
   }
 
-  async updatevideo(video: cultura365Interface) {
+  async updatevideo(video: culture365Interface) {
     const db = (await this.mongoDbService.getConexion()).db();
-    const videosCollect = db.collection<cultura365Interface>("videosCultura");
+    const videosCollect = db.collection<culture365Interface>("videosCulture");
 
     const resUpdate = await videosCollect.updateOne(
       {
@@ -36,8 +36,8 @@ export class cultura365Mongo {
       },
       {
         $set: {
-          titulo: video.titulo,
-          descripcion: video.descripcion,
+          title: video.title,
+          description: video.description,
           urlVideo: video.urlVideo,
         },
       },
@@ -48,7 +48,7 @@ export class cultura365Mongo {
 
   async deleteVideo(_id: string) {
     const db = (await this.mongoDbService.getConexion()).db();
-    const videosCollect = db.collection<cultura365Interface>("videosCultura");
+    const videosCollect = db.collection<culture365Interface>("videosCulture");
 
     const resDelete = await videosCollect.deleteOne({
       _id: new ObjectId(_id),
@@ -57,9 +57,9 @@ export class cultura365Mongo {
     return resDelete.acknowledged && resDelete.deletedCount > 0;
   }
 
-  async incrementarContadorViews(videoId: string) {
+  async increaseViewCounter(videoId: string) {
     const db = (await this.mongoDbService.getConexion()).db();
-    const videosCollect = db.collection<cultura365Interface>("videosCultura");
+    const videosCollect = db.collection<culture365Interface>("videosCulture");
 
     const resUpdate = await videosCollect.updateOne(
       { _id: new ObjectId(videoId) },
@@ -73,14 +73,14 @@ export class cultura365Mongo {
 
   async views() {
     const db = (await this.mongoDbService.getConexion()).db();
-    const videosCollect = db.collection<cultura365Interface>("videosCultura");
+    const videosCollect = db.collection<culture365Interface>("videosCulture");
 
-    const vistasPorVideo = await videosCollect
+    const viewsByVideo = await videosCollect
       .aggregate([
-        { $project: { _id: 1, views: 1, titulo: 1 } }, // Selecciona los campos _id, views y titulo
+        { $project: { _id: 1, views: 1, title: 1 } }, // Selecciona los campos _id, views y titulo
       ])
       .toArray();
 
-    return vistasPorVideo;
+    return viewsByVideo;
   }
 }
