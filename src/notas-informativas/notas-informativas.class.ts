@@ -34,4 +34,14 @@ export class NotasInformativasClass {
   async borrarNotasInformativas(notas: NotasInformativas) {
     return this.schnotasInformativas.borrarNotasInformativas(notas);
   }
+
+  async updateNotes(_id: string, notas: NotasInformativas) {
+    const updated = await this.schnotasInformativas.updateNotes(_id, notas);
+
+    if (!updated) {
+      throw new Error("No se ha podido actualizar la nota informativa");
+    }
+
+    return updated;
+  }
 }

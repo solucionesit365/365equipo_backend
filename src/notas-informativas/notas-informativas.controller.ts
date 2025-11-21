@@ -1,4 +1,13 @@
-import { Controller, Post, UseGuards, Body, Get, Query } from "@nestjs/common";
+import {
+  Controller,
+  Post,
+  UseGuards,
+  Body,
+  Get,
+  Query,
+  Put,
+  Param,
+} from "@nestjs/common";
 import { AuthGuard } from "../guards/auth.guard";
 import { NotasInformativasClass } from "./notas-informativas.class";
 import { NotasInformativas } from "./notas-informativas.interface";
@@ -152,6 +161,26 @@ export class NotasInformativasController {
       }
     } catch (err) {
       console.log(err);
+      return { ok: false, message: err.message };
+    }
+  }
+
+  @UseGuards(AuthGuard)
+  @Post("update-note/:id")
+  async updateNotes(@Param("id") id: string, @Body() notas: NotasInformativas) {
+    try {
+      const result = await this.notasInformativasInstance.updateNotes(
+        id,
+        notas,
+      );
+
+      return {
+        ok: true,
+        message: "Nota actualizada correctamente",
+        data: result,
+      };
+    } catch (err) {
+      console.error("Error actualizando notas:", err);
       return { ok: false, message: err.message };
     }
   }
