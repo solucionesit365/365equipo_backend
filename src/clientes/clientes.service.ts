@@ -5,6 +5,7 @@ import { SolicitudCliente } from "./clientes.interface";
 import { ObjectId } from "mongodb";
 import { EmailService } from "../email/email.class";
 import { TarjetaClienteService } from "../tarjeta-cliente/tarjeta-cliente.class";
+import { MailchimpService } from "../mailchimp/mailchimp.service";
 import * as jwt from "jsonwebtoken";
 import { GoogleAuth } from "google-auth-library";
 
@@ -14,6 +15,7 @@ export class ClientesService {
     private readonly schSolicitudesCliente: SolicitudNuevoClienteBbdd,
     private readonly emailInstance: EmailService,
     private readonly tarjetaClienteInstance: TarjetaClienteService,
+    private readonly mailchimpService: MailchimpService,
   ) {}
   async handleForm(
     nuevoCliente: boolean,
@@ -86,12 +88,41 @@ export class ClientesService {
         </html>
 
       `;
-      // URL para el template https://365equipo.com/clientes/confirmarEmail?idSolicitud=${solicitud._id}
+      // Template URL: https://365equipo.com/clientes/confirmarEmail?idSolicitud=${solicitud._id}
       await this.emailInstance.enviarEmail(
         solicitud.email,
         emailBody,
         "Confirmació de registre el 365",
       );
+
+      // Subscribe to Mailchimp if newsletter was accepted
+      if (newsletter) {
+        const tags = ["Nuevo Cliente", "Club 365"];
+
+        const result = await this.mailchimpService.subscribeContact(
+          email,
+          nombre,
+          apellidos,
+          telefono,
+          codigoPostal,
+          tags,
+        );
+
+        if (result.success) {
+          console.log(
+            `✅ Contact ${email} successfully subscribed to Mailchimp`,
+          );
+        } else {
+          console.error(
+            `❌ Error subscribing ${email} to Mailchimp: ${result.error}`,
+          );
+        }
+      } else {
+        console.log(
+          `ℹ️  User ${email} did not accept newsletter, not subscribing to Mailchimp`,
+        );
+      }
+
       return true;
     } else {
       const solicitud: SolicitudCliente = {
@@ -100,7 +131,7 @@ export class ClientesService {
         fechaRegistro: new Date(),
         newsletter,
       };
-      await this.schSolicitudesCliente.nuevaSolicitud(solicitud); //Guarda en Mongo
+      await this.schSolicitudesCliente.nuevaSolicitud(solicitud); // Save to Mongo
       const codFlayer = `QR_INVITACION_${uuidv4()}`;
       const data = {
         _id: new ObjectId().toString(),
@@ -110,8 +141,36 @@ export class ClientesService {
         codigo: codFlayer,
         newsletter: true,
       };
-      await this.schSolicitudesCliente.nuevoCodigoFlayer(data); //Guarda el codigo flayer en mongo aea
-      await this.tarjetaClienteInstance.sendQRInvitation(codFlayer, email); //genera y envía QR al correo
+      await this.schSolicitudesCliente.nuevoCodigoFlayer(data); // Save flayer code to mongo
+      await this.tarjetaClienteInstance.sendQRInvitation(codFlayer, email); // Generate and send QR to email
+
+      // Subscribe to Mailchimp if newsletter was accepted
+      if (newsletter) {
+        const tags = ["Newsletter", "Flayer Digital"];
+
+        const result = await this.mailchimpService.subscribeContact(
+          email,
+          nombre,
+          apellidos,
+          telefono,
+          codigoPostal,
+          tags,
+        );
+
+        if (result.success) {
+          console.log(
+            `✅ Contact ${email} successfully subscribed to Mailchimp (Newsletter)`,
+          );
+        } else {
+          console.error(
+            `❌ Error subscribing ${email} to Mailchimp: ${result.error}`,
+          );
+        }
+      } else {
+        console.log(
+          `ℹ️  User ${email} did not accept newsletter, not subscribing to Mailchimp`,
+        );
+      }
     }
   }
 
