@@ -338,5 +338,362 @@ describe('Fichajes - getParesSinValidar con trabajadores externos', () => {
       expect(result).toHaveLength(1);
       expect(mockFichajesDatabase.getFichajesByIdSql).toHaveBeenCalledWith(999, false);
     });
+
+    it('debería ejecutar consultas de fichajes en paralelo para múltiples subordinados', async () => {
+      const subordinados = [subordinado1, subordinado2];
+      const callOrder: number[] = [];
+
+      // Simular delay para verificar paralelismo
+      mockFichajesDatabase.getFichajesByIdSql.mockImplementation(async (id: number) => {
+        callOrder.push(id);
+        // Simular una pequeña operación async
+        await new Promise((resolve) => setImmediate(resolve));
+        if (id === 1) return [fichajeEntrada, fichajeSalida] as any;
+        return [] as any;
+      });
+
+      mockGetTurnoDelDiaUseCase.execute.mockResolvedValue(turnoSubordinado as any);
+
+      await fichajesService.getParesSinValidar(subordinados);
+
+      // Ambas llamadas deben haberse iniciado
+      expect(mockFichajesDatabase.getFichajesByIdSql).toHaveBeenCalledTimes(2);
+      expect(callOrder).toContain(1);
+      expect(callOrder).toContain(2);
+    });
+
+    it('debería ejecutar consultas de turnos por semana en paralelo', async () => {
+      const subordinados = [subordinado1];
+      const idTienda = 4014;
+      let turnoCallCount = 0;
+
+      mockFichajesDatabase.getFichajesByIdSql.mockResolvedValue([] as any);
+
+      mockTurnoRepository.getTurnosPorTienda.mockImplementation(async () => {
+        turnoCallCount++;
+        await new Promise((resolve) => setImmediate(resolve));
+        return [] as any;
+      });
+
+      await fichajesService.getParesSinValidar(subordinados, idTienda);
+
+      // Debe haber llamado a getTurnosPorTienda 4 veces (4 semanas)
+      expect(turnoCallCount).toBe(4);
+      expect(mockTurnoRepository.getTurnosPorTienda).toHaveBeenCalledTimes(4);
+    });
+
+    it('debería retornar array vacío cuando no hay subordinados', async () => {
+      const result = await fichajesService.getParesSinValidar([]);
+
+      expect(result).toEqual([]);
+      expect(mockFichajesDatabase.getFichajesByIdSql).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('obtenerParesTrabajador', () => {
+    const fichajeEntrada1 = {
+      _id: new ObjectId(),
+      hora: new Date('2025-11-10T08:00:00'),
+      uid: 'uid-1',
+      tipo: 'ENTRADA' as const,
+      validado: false,
+      idExterno: 1,
+      idTrabajador: 1,
+      enviado: true,
+      nombre: 'Trabajador 1',
+      dni: '11111111A',
+    };
+
+    const fichajeSalida1 = {
+      _id: new ObjectId(),
+      hora: new Date('2025-11-10T17:00:00'),
+      uid: 'uid-1',
+      tipo: 'SALIDA' as const,
+      validado: false,
+      idExterno: 1,
+      idTrabajador: 1,
+      enviado: true,
+      nombre: 'Trabajador 1',
+      dni: '11111111A',
+    };
+
+    const fichajeEntrada2 = {
+      _id: new ObjectId(),
+      hora: new Date('2025-11-11T09:00:00'),
+      uid: 'uid-1',
+      tipo: 'ENTRADA' as const,
+      validado: false,
+      idExterno: 1,
+      idTrabajador: 1,
+      enviado: true,
+      nombre: 'Trabajador 1',
+      dni: '11111111A',
+    };
+
+    const fichajeSalida2 = {
+      _id: new ObjectId(),
+      hora: new Date('2025-11-11T18:00:00'),
+      uid: 'uid-1',
+      tipo: 'SALIDA' as const,
+      validado: false,
+      idExterno: 1,
+      idTrabajador: 1,
+      enviado: true,
+      nombre: 'Trabajador 1',
+      dni: '11111111A',
+    };
+
+    const turno1: Turno = {
+      id: 'turno-1',
+      inicio: new Date('2025-11-10T08:00:00'),
+      final: new Date('2025-11-10T17:00:00'),
+      tiendaId: 4014,
+      idTrabajador: 1,
+      borrable: true,
+      bolsaHorasInicial: 0,
+    };
+
+    const turno2: Turno = {
+      id: 'turno-2',
+      inicio: new Date('2025-11-11T09:00:00'),
+      final: new Date('2025-11-11T18:00:00'),
+      tiendaId: 4014,
+      idTrabajador: 1,
+      borrable: true,
+      bolsaHorasInicial: 0,
+    };
+
+    it('debería retornar array vacío cuando no hay fichajes', async () => {
+      const result = await fichajesService.obtenerParesTrabajador([]);
+
+      expect(result).toEqual([]);
+      expect(mockGetTurnoDelDiaUseCase.execute).not.toHaveBeenCalled();
+    });
+
+    it('debería retornar array vacío cuando solo hay salidas', async () => {
+      const result = await fichajesService.obtenerParesTrabajador([fichajeSalida1] as any);
+
+      expect(result).toEqual([]);
+      expect(mockGetTurnoDelDiaUseCase.execute).not.toHaveBeenCalled();
+    });
+
+    it('debería crear par con entrada y salida del mismo día', async () => {
+      mockGetTurnoDelDiaUseCase.execute.mockResolvedValue(turno1 as any);
+
+      const result = await fichajesService.obtenerParesTrabajador([
+        fichajeEntrada1,
+        fichajeSalida1,
+      ] as any);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].entrada).toEqual(fichajeEntrada1);
+      expect(result[0].salida).toEqual(fichajeSalida1);
+      expect(result[0].cuadrante).toEqual(turno1);
+    });
+
+    it('debería pre-cargar todos los turnos en paralelo', async () => {
+      const executeCalls: DateTime[] = [];
+
+      mockGetTurnoDelDiaUseCase.execute.mockImplementation(async (id, fecha) => {
+        executeCalls.push(fecha);
+        await new Promise((resolve) => setImmediate(resolve));
+        return fecha.toISODate() === '2025-11-10' ? turno1 : turno2;
+      });
+
+      await fichajesService.obtenerParesTrabajador([
+        fichajeEntrada1,
+        fichajeSalida1,
+        fichajeEntrada2,
+        fichajeSalida2,
+      ] as any);
+
+      // Debe haber llamado execute 2 veces (una por cada entrada)
+      expect(mockGetTurnoDelDiaUseCase.execute).toHaveBeenCalledTimes(2);
+      expect(executeCalls).toHaveLength(2);
+    });
+
+    it('debería crear salida automática cuando no hay salida pero hay cuadrante', async () => {
+      mockGetTurnoDelDiaUseCase.execute.mockResolvedValue(turno1 as any);
+
+      const result = await fichajesService.obtenerParesTrabajador([fichajeEntrada1] as any);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].entrada).toEqual(fichajeEntrada1);
+      expect(result[0].salida.salidaAutomatica).toBe(true);
+      expect(result[0].salida.hora).toEqual(turno1.final);
+    });
+
+    it('no debería crear par cuando no hay salida ni cuadrante', async () => {
+      mockGetTurnoDelDiaUseCase.execute.mockResolvedValue(null as any);
+
+      const result = await fichajesService.obtenerParesTrabajador([fichajeEntrada1] as any);
+
+      expect(result).toHaveLength(0);
+    });
+
+    it('debería manejar múltiples entradas del mismo día correctamente', async () => {
+      const fichajeEntrada1Mañana = {
+        ...fichajeEntrada1,
+        _id: new ObjectId(),
+        hora: new Date('2025-11-10T08:00:00'),
+      };
+      const fichajeSalida1Mañana = {
+        ...fichajeSalida1,
+        _id: new ObjectId(),
+        hora: new Date('2025-11-10T12:00:00'),
+      };
+      const fichajeEntrada1Tarde = {
+        ...fichajeEntrada1,
+        _id: new ObjectId(),
+        hora: new Date('2025-11-10T14:00:00'),
+      };
+      const fichajeSalida1Tarde = {
+        ...fichajeSalida1,
+        _id: new ObjectId(),
+        hora: new Date('2025-11-10T18:00:00'),
+      };
+
+      mockGetTurnoDelDiaUseCase.execute.mockResolvedValue(turno1 as any);
+
+      const result = await fichajesService.obtenerParesTrabajador([
+        fichajeEntrada1Mañana,
+        fichajeSalida1Mañana,
+        fichajeEntrada1Tarde,
+        fichajeSalida1Tarde,
+      ] as any);
+
+      // Debe crear 2 pares (mañana y tarde)
+      expect(result).toHaveLength(2);
+    });
+
+    it('debería ordenar fichajes por hora antes de procesarlos', async () => {
+      mockGetTurnoDelDiaUseCase.execute.mockResolvedValue(turno1 as any);
+
+      // Pasar fichajes desordenados
+      const result = await fichajesService.obtenerParesTrabajador([
+        fichajeSalida1,
+        fichajeEntrada1,
+      ] as any);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].entrada.hora.getTime()).toBeLessThan(result[0].salida.hora.getTime());
+    });
+  });
+
+  describe('buscarSalidaSync (via obtenerParesTrabajador)', () => {
+    const fichajeEntrada = {
+      _id: new ObjectId(),
+      hora: new Date('2025-11-10T08:00:00'),
+      uid: 'uid-1',
+      tipo: 'ENTRADA' as const,
+      validado: false,
+      idExterno: 1,
+      idTrabajador: 1,
+      enviado: true,
+      nombre: 'Trabajador 1',
+      dni: '11111111A',
+    };
+
+    const turno: Turno = {
+      id: 'turno-1',
+      inicio: new Date('2025-11-10T08:00:00'),
+      final: new Date('2025-11-10T17:00:00'),
+      tiendaId: 4014,
+      idTrabajador: 1,
+      borrable: true,
+      bolsaHorasInicial: 0,
+    };
+
+    it('no debería emparejar salida de día diferente', async () => {
+      const fichajeSalidaOtroDia = {
+        _id: new ObjectId(),
+        hora: new Date('2025-11-11T17:00:00'), // Día siguiente
+        uid: 'uid-1',
+        tipo: 'SALIDA' as const,
+        validado: false,
+        idExterno: 1,
+        idTrabajador: 1,
+        enviado: true,
+        nombre: 'Trabajador 1',
+        dni: '11111111A',
+      };
+
+      mockGetTurnoDelDiaUseCase.execute.mockResolvedValue(turno as any);
+
+      const result = await fichajesService.obtenerParesTrabajador([
+        fichajeEntrada,
+        fichajeSalidaOtroDia,
+      ] as any);
+
+      // Debe usar salida automática del cuadrante, no la salida del otro día
+      expect(result).toHaveLength(1);
+      expect(result[0].salida.salidaAutomatica).toBe(true);
+    });
+
+    it('no debería emparejar salida anterior a la entrada', async () => {
+      const fichajeSalidaAnterior = {
+        _id: new ObjectId(),
+        hora: new Date('2025-11-10T06:00:00'), // Antes de la entrada
+        uid: 'uid-1',
+        tipo: 'SALIDA' as const,
+        validado: false,
+        idExterno: 1,
+        idTrabajador: 1,
+        enviado: true,
+        nombre: 'Trabajador 1',
+        dni: '11111111A',
+      };
+
+      mockGetTurnoDelDiaUseCase.execute.mockResolvedValue(turno as any);
+
+      const result = await fichajesService.obtenerParesTrabajador([
+        fichajeSalidaAnterior,
+        fichajeEntrada,
+      ] as any);
+
+      // Debe usar salida automática
+      expect(result).toHaveLength(1);
+      expect(result[0].salida.salidaAutomatica).toBe(true);
+    });
+
+    it('debería encontrar la primera salida válida del mismo día', async () => {
+      const fichajeSalida1 = {
+        _id: new ObjectId(),
+        hora: new Date('2025-11-10T12:00:00'),
+        uid: 'uid-1',
+        tipo: 'SALIDA' as const,
+        validado: false,
+        idExterno: 1,
+        idTrabajador: 1,
+        enviado: true,
+        nombre: 'Trabajador 1',
+        dni: '11111111A',
+      };
+
+      const fichajeSalida2 = {
+        _id: new ObjectId(),
+        hora: new Date('2025-11-10T17:00:00'),
+        uid: 'uid-1',
+        tipo: 'SALIDA' as const,
+        validado: false,
+        idExterno: 1,
+        idTrabajador: 1,
+        enviado: true,
+        nombre: 'Trabajador 1',
+        dni: '11111111A',
+      };
+
+      mockGetTurnoDelDiaUseCase.execute.mockResolvedValue(turno as any);
+
+      const result = await fichajesService.obtenerParesTrabajador([
+        fichajeEntrada,
+        fichajeSalida1,
+        fichajeSalida2,
+      ] as any);
+
+      expect(result).toHaveLength(1);
+      // Debe emparejar con la primera salida (12:00)
+      expect(result[0].salida.hora).toEqual(fichajeSalida1.hora);
+    });
   });
 });

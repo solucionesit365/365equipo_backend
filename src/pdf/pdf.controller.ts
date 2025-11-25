@@ -150,7 +150,6 @@ export class PdfController {
     }
   }
 
-  @UseGuards(AuthGuard)
   @Post("sign")
   async signDocument(@Body() req: SignDocumentDto) {
     try {

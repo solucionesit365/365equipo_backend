@@ -23,7 +23,7 @@ export class StorageService {
     }
   }
 
-  private getBucket() {
+  getBucket() {
     return this.storage.bucket(this.bucketName);
   }
 

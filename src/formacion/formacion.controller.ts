@@ -1,13 +1,16 @@
-import { Body, Controller, Get, Post, Query, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Post, Query, Req, UseGuards } from "@nestjs/common";
 import { FormacionService } from "./formacion.service";
 import { AuthGuard } from "../guards/auth.guard";
 import {
   CompartirFormacionDto,
+  CompartirFormacionInvitadoDto,
   CompartirFormacionManualDto,
+  CompletarFormacionInvitadoDto,
   CreateFormacionDto,
   DeleteFormacionDto,
   GetFormacionByIdDto,
   GetFormacionesDto,
+  GetFormacionInvitadoDto,
   UpdateFormacionDto,
 } from "./formacion.dto";
 
@@ -56,5 +59,42 @@ export class FormacionController {
   @Post("compartir/manual")
   async compartirFormacionManual(@Body() req: CompartirFormacionManualDto) {
     return await this.formacionService.compartirFormacionManual(req);
+  }
+
+  @UseGuards(AuthGuard)
+  @Post("completar")
+  async completarFormacion(
+    @Body() req: { trabajadorId: number; formacionId: string },
+  ) {
+    return await this.formacionService.completarFormacion(req);
+  }
+
+  @UseGuards(AuthGuard)
+  @Get("completadas")
+  async getFormacionesCompletadas() {
+    return await this.formacionService.getFormacionesCompletadas();
+  }
+
+  // Endpoints para invitados (sin autenticación)
+  @UseGuards(AuthGuard)
+  @Post("compartir/invitado")
+  async compartirFormacionInvitado(
+    @Body() body: CompartirFormacionInvitadoDto,
+    @Req() req: any,
+  ) {
+    return await this.formacionService.compartirFormacionInvitado(
+      body,
+      req.sqlUser.id,
+    );
+  }
+
+  @Get("invitado")
+  async getFormacionInvitado(@Query() req: GetFormacionInvitadoDto) {
+    return await this.formacionService.getFormacionInvitado(req);
+  }
+
+  @Post("completar/invitado")
+  async completarFormacionInvitado(@Body() req: CompletarFormacionInvitadoDto) {
+    return await this.formacionService.completarFormacionInvitado(req);
   }
 }

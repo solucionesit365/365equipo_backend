@@ -121,4 +121,21 @@ export class VideosService {
       throw new InternalServerErrorException("Error getting video");
     }
   }
+
+  async getVideoMetadata(id: string) {
+    try {
+      const video = await this.prismaService.videoFormacion.findUnique({
+        where: { id },
+      });
+
+      if (!video) throw new ConflictException("El vídeo no existe");
+      return {
+        relativePath: video.relativePath,
+        name: video.name,
+      };
+    } catch (error) {
+      console.error("Error getting video metadata", error);
+      throw new InternalServerErrorException("Error getting video metadata");
+    }
+  }
 }

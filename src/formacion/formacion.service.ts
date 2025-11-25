@@ -6,8 +6,11 @@ import {
 import {
   CompartirFormacionDto,
   CompartirFormacionManualDto,
+  CompartirFormacionInvitadoDto,
+  CompletarFormacionInvitadoDto,
   CreateFormacionDto,
   GetFormacionesDto,
+  GetFormacionInvitadoDto,
   UpdateFormacionDto,
 } from "./formacion.dto";
 import { PrismaService } from "../prisma/prisma.service";
@@ -286,6 +289,312 @@ export class FormacionService {
       throw new InternalServerErrorException(
         "Error al actualizar la formación",
       );
+    }
+  }
+
+  async completarFormacion(req: { trabajadorId: number; formacionId: string }) {
+    try {
+      const { trabajadorId, formacionId } = req;
+
+      // Verificar que la formación existe
+      const formacion = await this.prisma.formacion.findUnique({
+        where: { id: formacionId },
+      });
+
+      if (!formacion) {
+        throw new NotFoundException(
+          `Formación con id ${formacionId} no encontrada`,
+        );
+      }
+
+      // Crear o actualizar el registro de completitud
+      const formacionCompletada =
+        await this.prisma.formacionCompletada.upsert({
+          where: {
+            trabajadorId_formacionId: {
+              trabajadorId,
+              formacionId,
+            },
+          },
+          update: {
+            completedAt: new Date(),
+          },
+          create: {
+            trabajadorId,
+            formacionId,
+          },
+        });
+
+      return {
+        ok: true,
+        message: "Formación completada exitosamente",
+        data: formacionCompletada,
+      };
+    } catch (error) {
+      console.error("Error al completar formación:", error);
+      throw new InternalServerErrorException("Error al completar la formación");
+    }
+  }
+
+  async getFormacionesCompletadas() {
+    try {
+      // Obtener formaciones completadas por trabajadores registrados
+      const formacionesCompletadas =
+        await this.prisma.formacionCompletada.findMany({
+          include: {
+            formacion: true,
+            trabajador: {
+              select: {
+                id: true,
+                nombreApellidos: true,
+                displayName: true,
+                emails: true,
+              },
+            },
+          },
+          orderBy: {
+            completedAt: "desc",
+          },
+        });
+
+      // Obtener formaciones completadas por invitados
+      const formacionesCompletadasInvitados =
+        await this.prisma.formacionCompletadaInvitado.findMany({
+          include: {
+            invitado: {
+              include: {
+                formacion: true,
+              },
+            },
+          },
+          orderBy: {
+            completedAt: "desc",
+          },
+        });
+
+      // Agrupar por formación combinando ambos tipos
+      const agrupadasPorFormacion: Record<string, any> = {};
+
+      // Procesar completados por trabajadores registrados
+      formacionesCompletadas.forEach((item) => {
+        if (!agrupadasPorFormacion[item.formacionId]) {
+          agrupadasPorFormacion[item.formacionId] = {
+            formacion: item.formacion,
+            completados: [],
+          };
+        }
+        agrupadasPorFormacion[item.formacionId].completados.push({
+          tipo: "trabajador",
+          trabajadorId: item.trabajadorId,
+          trabajadorNombre:
+            item.trabajador.nombreApellidos || item.trabajador.displayName,
+          trabajadorEmail: item.trabajador.emails,
+          completedAt: item.completedAt,
+        });
+      });
+
+      // Procesar completados por invitados
+      formacionesCompletadasInvitados.forEach((item) => {
+        const formacionId = item.invitado.formacionId;
+        if (!agrupadasPorFormacion[formacionId]) {
+          agrupadasPorFormacion[formacionId] = {
+            formacion: item.invitado.formacion,
+            completados: [],
+          };
+        }
+        agrupadasPorFormacion[formacionId].completados.push({
+          tipo: "invitado",
+          invitadoId: item.invitadoId,
+          trabajadorNombre: item.invitado.nombreCompleto,
+          trabajadorEmail: item.invitado.email,
+          completedAt: item.completedAt,
+        });
+      });
+
+      return {
+        ok: true,
+        data: Object.values(agrupadasPorFormacion),
+      };
+    } catch (error) {
+      console.error("Error al obtener formaciones completadas:", error);
+      throw new InternalServerErrorException(
+        "Error al obtener las formaciones completadas",
+      );
+    }
+  }
+
+  async compartirFormacionInvitado(
+    data: CompartirFormacionInvitadoDto,
+    invitadoPorId: number,
+  ) {
+    try {
+      const { formacionId, nombreCompleto, email, dni, telefono } = data;
+
+      // Verificar que la formación existe
+      const formacion = await this.getFormacionById({ id: formacionId });
+      if (!formacion) {
+        throw new NotFoundException("Formación no encontrada");
+      }
+
+      // Crear el invitado con token único
+      const invitado = await this.prisma.formacionInvitado.create({
+        data: {
+          formacionId,
+          nombreCompleto,
+          email,
+          dni,
+          telefono,
+          invitadoPorId,
+        },
+      });
+
+      // Generar URL con token
+      const baseURL = process.env.FRONTEND_URL || "https://365equipo.com";
+      const invitadoUrl = `${baseURL}/realizarFormacion/invitado/${invitado.token}`;
+
+      // Enviar email con el enlace
+      const mensaje = this.generarMensajeFormacionInvitado(nombreCompleto, formacion, invitadoUrl);
+      const emailHtml = this.emailService.generarEmailTemplate(nombreCompleto, mensaje);
+
+      await this.emailService.enviarEmail(
+        email,
+        emailHtml,
+        `📚 Nueva formación asignada: ${formacion.name}`,
+      );
+
+      return {
+        ok: true,
+        mensaje: "Invitación enviada correctamente",
+        token: invitado.token,
+        url: invitadoUrl,
+      };
+    } catch (error) {
+      console.error("Error al compartir formación con invitado:", error);
+      throw new InternalServerErrorException("Error al compartir la formación");
+    }
+  }
+
+  private generarMensajeFormacionInvitado(
+    nombreTrabajador: string,
+    formacion: any,
+    url: string,
+  ): string {
+    return `
+      <div style="padding: 20px; background-color: #f7f9fc; border-radius: 8px; margin: 20px 0;">
+        <h2 style="color: #2c3e50; margin-bottom: 20px;">Nueva formación asignada</h2>
+
+        <p style="font-size: 16px; color: #34495e; line-height: 1.6;">
+          Estimado/a <strong>${nombreTrabajador}</strong>,
+        </p>
+
+        <p style="font-size: 16px; color: #34495e; line-height: 1.6;">
+          Se te ha asignado una nueva formación que requiere tu atención:
+        </p>
+
+        <div style="background-color: #ffffff; padding: 20px; border-radius: 6px; margin: 20px 0; border-left: 4px solid #3498db;">
+          <h3 style="color: #2c3e50; margin: 0 0 10px 0;">${formacion.name}</h3>
+          <p style="color: #7f8c8d; margin: 0;">
+            Esta formación es importante para tu desarrollo profesional y debe ser completada
+            lo antes posible.
+          </p>
+        </div>
+
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${url}"
+             style="display: inline-block;
+                    background-color: #3498db;
+                    color: #ffffff;
+                    padding: 14px 28px;
+                    text-decoration: none;
+                    border-radius: 6px;
+                    font-weight: bold;
+                    font-size: 16px;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            Comenzar Formación
+          </a>
+        </div>
+
+        <div style="background-color: #ffffff;
+                    padding: 15px;
+                    border-radius: 6px;
+                    margin-top: 20px;
+                    border: 1px solid #e1e8ed;">
+          <p style="color: #7f8c8d; margin: 0; font-size: 14px;">
+            <strong>Nota importante:</strong> Este enlace es personal e intransferible.
+            Úsalo para acceder a tu formación.
+          </p>
+        </div>
+      </div>
+    `;
+  }
+
+  async getFormacionInvitado(data: GetFormacionInvitadoDto) {
+    try {
+      const invitado = await this.prisma.formacionInvitado.findUnique({
+        where: { token: data.token },
+        include: {
+          formacion: {
+            include: {
+              pasos: true,
+            },
+          },
+          completadas: true,
+        },
+      });
+
+      if (!invitado) {
+        throw new NotFoundException("Invitación no encontrada o token inválido");
+      }
+
+      return {
+        ok: true,
+        invitado: {
+          nombreCompleto: invitado.nombreCompleto,
+          email: invitado.email,
+          formacion: invitado.formacion,
+          yaCompletada: invitado.completadas.length > 0,
+        },
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      console.error("Error al obtener formación de invitado:", error);
+      throw new InternalServerErrorException("Error al obtener la formación");
+    }
+  }
+
+  async completarFormacionInvitado(data: CompletarFormacionInvitadoDto) {
+    try {
+      const invitado = await this.prisma.formacionInvitado.findUnique({
+        where: { token: data.token },
+        include: {
+          formacion: true,
+        },
+      });
+
+      if (!invitado) {
+        throw new NotFoundException("Invitación no encontrada o token inválido");
+      }
+
+      // Crear registro de completitud
+      const completada = await this.prisma.formacionCompletadaInvitado.create({
+        data: {
+          invitadoId: invitado.id,
+        },
+      });
+
+      return {
+        ok: true,
+        mensaje: "Formación completada exitosamente",
+        data: completada,
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      console.error("Error al completar formación de invitado:", error);
+      throw new InternalServerErrorException("Error al completar la formación");
     }
   }
 }
