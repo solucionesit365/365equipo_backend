@@ -308,22 +308,21 @@ export class FormacionService {
       }
 
       // Crear o actualizar el registro de completitud
-      const formacionCompletada =
-        await this.prisma.formacionCompletada.upsert({
-          where: {
-            trabajadorId_formacionId: {
-              trabajadorId,
-              formacionId,
-            },
-          },
-          update: {
-            completedAt: new Date(),
-          },
-          create: {
+      const formacionCompletada = await this.prisma.formacionCompletada.upsert({
+        where: {
+          trabajadorId_formacionId: {
             trabajadorId,
             formacionId,
           },
-        });
+        },
+        update: {
+          completedAt: new Date(),
+        },
+        create: {
+          trabajadorId,
+          formacionId,
+        },
+      });
 
       return {
         ok: true,
@@ -342,7 +341,11 @@ export class FormacionService {
       const formacionesCompletadas =
         await this.prisma.formacionCompletada.findMany({
           include: {
-            formacion: true,
+            formacion: {
+              include: {
+                pasos: true, // Incluir los pasos de la formación
+              },
+            },
             trabajador: {
               select: {
                 id: true,
@@ -363,7 +366,11 @@ export class FormacionService {
           include: {
             invitado: {
               include: {
-                formacion: true,
+                formacion: {
+                  include: {
+                    pasos: true, // Incluir los pasos de la formación
+                  },
+                },
               },
             },
           },
@@ -411,9 +418,47 @@ export class FormacionService {
         });
       });
 
+      // Obtener los cuestionarios con sus preguntas para cada formación
+      const formacionesConPreguntas = await Promise.all(
+        Object.values(agrupadasPorFormacion).map(async (item: any) => {
+          // Obtener los IDs de los cuestionarios de los pasos tipo CUESTIONARIO
+          const cuestionarioIds = item.formacion.pasos
+            .filter((paso: any) => paso.type === "CUESTIONARIO")
+            .map((paso: any) => paso.resourceId);
+
+          // Si hay cuestionarios, obtener las preguntas
+          let cuestionarios = [];
+          if (cuestionarioIds.length > 0) {
+            cuestionarios = await this.prisma.questionnaire.findMany({
+              where: {
+                id: {
+                  in: cuestionarioIds,
+                },
+              },
+              include: {
+                questions: {
+                  include: {
+                    options: true, // Incluir las opciones de respuesta
+                  },
+                },
+              },
+            });
+          }
+
+          // Añadir los cuestionarios a la formación
+          return {
+            ...item,
+            formacion: {
+              ...item.formacion,
+              cuestionarios, // Añadir los cuestionarios con sus preguntas
+            },
+          };
+        }),
+      );
+
       return {
         ok: true,
-        data: Object.values(agrupadasPorFormacion),
+        data: formacionesConPreguntas,
       };
     } catch (error) {
       console.error("Error al obtener formaciones completadas:", error);
@@ -453,8 +498,15 @@ export class FormacionService {
       const invitadoUrl = `${baseURL}/realizarFormacion/invitado/${invitado.token}`;
 
       // Enviar email con el enlace
-      const mensaje = this.generarMensajeFormacionInvitado(nombreCompleto, formacion, invitadoUrl);
-      const emailHtml = this.emailService.generarEmailTemplate(nombreCompleto, mensaje);
+      const mensaje = this.generarMensajeFormacionInvitado(
+        nombreCompleto,
+        formacion,
+        invitadoUrl,
+      );
+      const emailHtml = this.emailService.generarEmailTemplate(
+        nombreCompleto,
+        mensaje,
+      );
 
       await this.emailService.enviarEmail(
         email,
@@ -543,7 +595,9 @@ export class FormacionService {
       });
 
       if (!invitado) {
-        throw new NotFoundException("Invitación no encontrada o token inválido");
+        throw new NotFoundException(
+          "Invitación no encontrada o token inválido",
+        );
       }
 
       return {
@@ -574,7 +628,9 @@ export class FormacionService {
       });
 
       if (!invitado) {
-        throw new NotFoundException("Invitación no encontrada o token inválido");
+        throw new NotFoundException(
+          "Invitación no encontrada o token inválido",
+        );
       }
 
       // Crear registro de completitud

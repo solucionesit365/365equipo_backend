@@ -247,6 +247,7 @@ model FormacionCompletadaInvitado {
   id          String            @id @default(uuid())
   invitadoId  String
   completedAt DateTime          @default(now())
+  respuestas  Json?
   invitado    FormacionInvitado @relation(fields: [invitadoId], references: [id], onDelete: Cascade)
 }
 
@@ -255,6 +256,7 @@ model FormacionCompletada {
   trabajadorId Int
   formacionId  String
   completedAt  DateTime   @default(now())
+  respuestas   Json?
   trabajador   Trabajador @relation(fields: [trabajadorId], references: [id])
   formacion    Formacion  @relation(fields: [formacionId], references: [id])
 
