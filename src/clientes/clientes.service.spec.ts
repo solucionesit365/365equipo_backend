@@ -1,14 +1,16 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { ClientesService } from './clientes.service';
-import { SolicitudNuevoClienteBbdd } from './clientes.mongodb';
-import { EmailService } from '../email/email.class';
-import { TarjetaClienteService } from '../tarjeta-cliente/tarjeta-cliente.class';
+import { Test, TestingModule } from "@nestjs/testing";
+import { ClientesService } from "./clientes.service";
+import { SolicitudNuevoClienteBbdd } from "./clientes.mongodb";
+import { EmailService } from "../email/email.class";
+import { TarjetaClienteService } from "../tarjeta-cliente/tarjeta-cliente.class";
+import { MailchimpService } from "../mailchimp/mailchimp.service";
 
-describe('ClientesService', () => {
+describe("ClientesService", () => {
   let service: ClientesService;
   let mockDatabase: any;
   let mockEmailService: any;
   let mockTarjetaClienteService: any;
+  let mockMailchimpService: any;
 
   beforeEach(async () => {
     mockDatabase = {
@@ -31,6 +33,10 @@ describe('ClientesService', () => {
       sendQRInvitation: jest.fn(),
     };
 
+    mockMailchimpService = {
+      subscribeContact: jest.fn().mockResolvedValue({ success: true }),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ClientesService,
@@ -46,54 +52,98 @@ describe('ClientesService', () => {
           provide: TarjetaClienteService,
           useValue: mockTarjetaClienteService,
         },
+        {
+          provide: MailchimpService,
+          useValue: mockMailchimpService,
+        },
       ],
     }).compile();
 
     service = module.get<ClientesService>(ClientesService);
   });
 
-  it('should be defined', () => {
+  it("should be defined", () => {
     expect(service).toBeDefined();
   });
 
-  describe('handleForm', () => {
-    it('debe crear solicitud de nuevo cliente y enviar email', async () => {
-      mockDatabase.nuevaSolicitud.mockResolvedValue({ insertedId: '123' });
-      mockEmailService.enviarEmail.mockResolvedValue({ accepted: ['test@example.com'] });
+  describe("handleForm", () => {
+    it("debe crear solicitud de nuevo cliente y enviar email", async () => {
+      mockDatabase.nuevaSolicitud.mockResolvedValue({ insertedId: "123" });
+      mockEmailService.enviarEmail.mockResolvedValue({
+        accepted: ["test@example.com"],
+      });
 
       const result = await service.handleForm(
         true,
         true,
-        'test@example.com',
-        'Juan',
-        'Pérez',
-        '600000000',
-        '28001',
+        "test@example.com",
+        "Juan",
+        "Pérez",
+        "600000000",
+        "28001",
       );
 
       expect(result).toBe(true);
       expect(mockDatabase.nuevaSolicitud).toHaveBeenCalled();
       expect(mockEmailService.enviarEmail).toHaveBeenCalled();
+      expect(mockMailchimpService.subscribeContact).toHaveBeenCalledWith(
+        "test@example.com",
+        "Juan",
+        "Pérez",
+        "600000000",
+        "28001",
+        ["Nuevo Cliente", "Club 365"],
+      );
     });
 
-    it('debe crear solicitud sin ser nuevo cliente y enviar QR invitación', async () => {
-      mockDatabase.nuevaSolicitud.mockResolvedValue({ insertedId: '123' });
-      mockDatabase.nuevoCodigoFlayer.mockResolvedValue({ insertedId: '456' });
+    it("debe crear solicitud sin ser nuevo cliente y enviar QR invitación", async () => {
+      mockDatabase.nuevaSolicitud.mockResolvedValue({ insertedId: "123" });
+      mockDatabase.nuevoCodigoFlayer.mockResolvedValue({ insertedId: "456" });
       mockTarjetaClienteService.sendQRInvitation.mockResolvedValue(undefined);
 
-      await service.handleForm(false, true, 'test@example.com');
+      await service.handleForm(false, true, "test@example.com");
 
       expect(mockDatabase.nuevaSolicitud).toHaveBeenCalled();
       expect(mockDatabase.nuevoCodigoFlayer).toHaveBeenCalled();
       expect(mockTarjetaClienteService.sendQRInvitation).toHaveBeenCalled();
+      expect(mockMailchimpService.subscribeContact).toHaveBeenCalledWith(
+        "test@example.com",
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        ["Newsletter", "Flayer Digital"],
+      );
+    });
+
+    it("no debe suscribir a Mailchimp si newsletter es false", async () => {
+      mockDatabase.nuevaSolicitud.mockResolvedValue({ insertedId: "123" });
+      mockEmailService.enviarEmail.mockResolvedValue({
+        accepted: ["test@example.com"],
+      });
+
+      const result = await service.handleForm(
+        true,
+        false,
+        "test@example.com",
+        "Juan",
+        "Pérez",
+        "600000000",
+        "28001",
+      );
+
+      expect(result).toBe(true);
+      expect(mockDatabase.nuevaSolicitud).toHaveBeenCalled();
+      expect(mockEmailService.enviarEmail).toHaveBeenCalled();
+      expect(mockMailchimpService.subscribeContact).not.toHaveBeenCalled();
     });
   });
 
-  describe('enviarStringIdentificacion', () => {
-    it('debe enviar email con código QR', async () => {
-      const idExterna = 'QRCLIENT123';
-      const toEmail = 'cliente@example.com';
-      const walletUrl = 'https://pay.google.com/wallet/add';
+  describe("enviarStringIdentificacion", () => {
+    it("debe enviar email con código QR", async () => {
+      const idExterna = "QRCLIENT123";
+      const toEmail = "cliente@example.com";
+      const walletUrl = "https://pay.google.com/wallet/add";
 
       mockTarjetaClienteService.sendQrCodeEmail.mockResolvedValue(undefined);
 
@@ -107,11 +157,11 @@ describe('ClientesService', () => {
     });
   });
 
-  describe('getAllFlayers', () => {
-    it('debe retornar todos los flayers', async () => {
+  describe("getAllFlayers", () => {
+    it("debe retornar todos los flayers", async () => {
       const mockFlayers = [
-        { _id: '1', codigo: 'FLAYER1' },
-        { _id: '2', codigo: 'FLAYER2' },
+        { _id: "1", codigo: "FLAYER1" },
+        { _id: "2", codigo: "FLAYER2" },
       ];
 
       mockDatabase.getAllFlayers.mockResolvedValue(mockFlayers);
@@ -121,9 +171,9 @@ describe('ClientesService', () => {
       expect(result).toEqual(mockFlayers);
     });
 
-    it('debe manejar error y retornar undefined', async () => {
-      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
-      mockDatabase.getAllFlayers.mockRejectedValue(new Error('DB Error'));
+    it("debe manejar error y retornar undefined", async () => {
+      const consoleSpy = jest.spyOn(console, "log").mockImplementation();
+      mockDatabase.getAllFlayers.mockRejectedValue(new Error("DB Error"));
 
       const result = await service.getAllFlayers();
 
@@ -132,9 +182,9 @@ describe('ClientesService', () => {
     });
   });
 
-  describe('validarFlayer', () => {
-    it('debe validar un flayer por código', async () => {
-      const codigo = 'FLAYER123';
+  describe("validarFlayer", () => {
+    it("debe validar un flayer por código", async () => {
+      const codigo = "FLAYER123";
 
       mockDatabase.validarFlayer.mockResolvedValue({ modifiedCount: 1 });
 
@@ -145,9 +195,9 @@ describe('ClientesService', () => {
     });
   });
 
-  describe('caducarFlayer', () => {
-    it('debe caducar un flayer por código', async () => {
-      const codigo = 'FLAYER123';
+  describe("caducarFlayer", () => {
+    it("debe caducar un flayer por código", async () => {
+      const codigo = "FLAYER123";
 
       mockDatabase.caducarFlayer.mockResolvedValue({ modifiedCount: 1 });
 
@@ -158,8 +208,8 @@ describe('ClientesService', () => {
     });
   });
 
-  describe('deleteAllClientes', () => {
-    it('debe eliminar todos los clientes', async () => {
+  describe("deleteAllClientes", () => {
+    it("debe eliminar todos los clientes", async () => {
       mockDatabase.deleteAllClientes.mockResolvedValue({ deletedCount: 10 });
 
       const result = await service.deleteAllClientes();
