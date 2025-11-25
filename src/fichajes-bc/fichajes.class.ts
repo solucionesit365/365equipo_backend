@@ -408,40 +408,51 @@ export class Fichajes {
     const idsSubordinados = new Set(arraySubordinados.map((s) => s.id));
     const trabajadoresProcesados = new Set<number>();
 
-    // Procesar subordinados directos
-    for (const subordinado of arraySubordinados) {
-      const susFichajes = await this.getFichajesByIdSql(subordinado.id, false);
-      const susFichajesPlus: WithId<FichajeDto>[] = susFichajes.map(
-        (fichaje) => ({
-          ...fichaje,
+    // Procesar subordinados directos EN PARALELO
+    const fichajesSubordinadosPromises = arraySubordinados.map(
+      async (subordinado) => {
+        const susFichajes = await this.getFichajesByIdSql(subordinado.id, false);
+        return {
           idTrabajador: subordinado.id,
-        }),
-      );
+          fichajes: susFichajes.map((fichaje) => ({
+            ...fichaje,
+            idTrabajador: subordinado.id,
+          })),
+        };
+      },
+    );
 
-      this.ordenarPorHora(susFichajesPlus);
-      const resPares = await this.obtenerParesTrabajador(susFichajesPlus);
-      paresSinValidar.push(...resPares);
-      trabajadoresProcesados.add(subordinado.id);
-    }
+    const fichajesSubordinados = await Promise.all(fichajesSubordinadosPromises);
+
+    // Procesar pares de cada subordinado EN PARALELO
+    const paresSubordinadosPromises = fichajesSubordinados.map(
+      async ({ idTrabajador, fichajes }) => {
+        this.ordenarPorHora(fichajes);
+        trabajadoresProcesados.add(idTrabajador);
+        return this.obtenerParesTrabajador(fichajes);
+      },
+    );
+
+    const paresSubordinados = await Promise.all(paresSubordinadosPromises);
+    paresSubordinados.forEach((pares) => paresSinValidar.push(...pares));
 
     // Si se proporciona idTienda, buscar trabajadores externos que hayan trabajado en la tienda
     if (idTienda) {
-      // Obtener turnos de la tienda de las últimas 3 semanas (período relevante para validación)
-      // Como getTurnosPorTienda solo busca por semana, necesitamos buscar semana por semana
+      // Obtener turnos de la tienda de las últimas 3 semanas EN PARALELO
       const fechaLimite = DateTime.now().minus({ weeks: 3 }).startOf("week");
       const fechaActual = DateTime.now();
-      const todosTurnos = [];
+      const semanasPromises: Promise<any[]>[] = [];
 
-      // Iterar por cada semana desde hace 3 semanas hasta ahora
       let fechaSemana = fechaLimite;
       while (fechaSemana <= fechaActual) {
-        const turnosSemana = await this.turnoRepository.getTurnosPorTienda(
-          idTienda,
-          fechaSemana,
+        semanasPromises.push(
+          this.turnoRepository.getTurnosPorTienda(idTienda, fechaSemana),
         );
-        todosTurnos.push(...turnosSemana);
         fechaSemana = fechaSemana.plus({ weeks: 1 });
       }
+
+      const turnosPorSemana = await Promise.all(semanasPromises);
+      const todosTurnos = turnosPorSemana.flat();
 
       // Extraer IDs únicos de trabajadores que tienen turnos pero no son subordinados
       const idsTrabajadoresExternos = [
@@ -455,25 +466,33 @@ export class Fichajes {
         ),
       ];
 
-      // Procesar fichajes de trabajadores externos
-      for (const idTrabajador of idsTrabajadoresExternos) {
-        const fichajesExterno = await this.getFichajesByIdSql(
-          idTrabajador,
-          false,
-        );
-        const fichajesExternoPlus: WithId<FichajeDto>[] = fichajesExterno.map(
-          (fichaje) => ({
-            ...fichaje,
-            idTrabajador: idTrabajador,
-          }),
-        );
+      // Obtener fichajes de trabajadores externos EN PARALELO
+      const fichajesExternosPromises = idsTrabajadoresExternos.map(
+        async (idTrabajador) => {
+          const fichajes = await this.getFichajesByIdSql(idTrabajador, false);
+          return {
+            idTrabajador,
+            fichajes: fichajes.map((fichaje) => ({
+              ...fichaje,
+              idTrabajador,
+            })),
+          };
+        },
+      );
 
-        this.ordenarPorHora(fichajesExternoPlus);
-        const paresExterno =
-          await this.obtenerParesTrabajador(fichajesExternoPlus);
-        paresSinValidar.push(...paresExterno);
-        trabajadoresProcesados.add(idTrabajador);
-      }
+      const fichajesExternos = await Promise.all(fichajesExternosPromises);
+
+      // Procesar pares de trabajadores externos EN PARALELO
+      const paresExternosPromises = fichajesExternos.map(
+        async ({ idTrabajador, fichajes }) => {
+          this.ordenarPorHora(fichajes);
+          trabajadoresProcesados.add(idTrabajador);
+          return this.obtenerParesTrabajador(fichajes);
+        },
+      );
+
+      const paresExternos = await Promise.all(paresExternosPromises);
+      paresExternos.forEach((pares) => paresSinValidar.push(...pares));
     }
 
     return paresSinValidar;
@@ -507,55 +526,95 @@ export class Fichajes {
 
     const pares: ParFichaje[] = [];
 
-    for (let i = 0; i < fichajesSimples.length; i += 1) {
-      if (fichajesSimples[i].tipo === "ENTRADA") {
-        const dataSalidaEncontrada = await this.buscarSalida(
-          DateTime.fromJSDate(fichajesSimples[i].hora),
-          fichajesSimples,
-        );
+    // Filtrar solo las entradas para pre-cargar turnos
+    const entradas = fichajesSimples.filter((f) => f.tipo === "ENTRADA");
 
-        if (dataSalidaEncontrada) {
-          pares.push({
-            entrada: fichajesSimples[i],
-            salida: dataSalidaEncontrada,
-            cuadrante: await this.getTurnoDelDiaUseCase.execute(
-              fichajesSimples[i].idTrabajador,
-              DateTime.fromJSDate(fichajesSimples[i].hora),
-            ),
-          });
-        } else {
-          const cuadrante = await this.getTurnoDelDiaUseCase.execute(
-            fichajesSimples[i].idTrabajador,
-            DateTime.fromJSDate(fichajesSimples[i].hora),
-          );
+    if (entradas.length === 0) {
+      return pares;
+    }
 
-          if (
-            cuadrante &&
-            cuadrante.final &&
-            DateTime.fromJSDate(cuadrante.final).isValid
-          ) {
-            pares.push({
-              entrada: fichajesSimples[i],
-              salida: {
-                _id: new ObjectId(),
-                hora: DateTime.fromJSDate(cuadrante.final).toJSDate(),
-                idTrabajador: fichajesSimples[i].idTrabajador,
-                tipo: "SALIDA",
-                validado: false,
-                uid: fichajesSimples[i].uid,
-                nombre: fichajesSimples[i].nombre,
-                dni: fichajesSimples[i].dni,
-                enviado: false,
-                idExterno: fichajesSimples[i].idTrabajador,
-                salidaAutomatica: true,
-              },
-              cuadrante: cuadrante,
-            });
-          }
-        }
+    // Pre-cargar todos los turnos necesarios EN PARALELO
+    const turnosPromises = entradas.map((entrada) =>
+      this.getTurnoDelDiaUseCase.execute(
+        entrada.idTrabajador,
+        DateTime.fromJSDate(entrada.hora),
+      ),
+    );
+    const turnos = await Promise.all(turnosPromises);
+
+    // Crear un mapa de turnos por fecha+idTrabajador para acceso rápido
+    const turnosMap = new Map<string, any>();
+    entradas.forEach((entrada, index) => {
+      const fecha = DateTime.fromJSDate(entrada.hora);
+      const key = `${entrada.idTrabajador}-${fecha.toISODate()}`;
+      turnosMap.set(key, turnos[index]);
+    });
+
+    // Procesar entradas usando los turnos pre-cargados
+    for (const entrada of entradas) {
+      const horaEntrada = DateTime.fromJSDate(entrada.hora);
+      const key = `${entrada.idTrabajador}-${horaEntrada.toISODate()}`;
+      const cuadrante = turnosMap.get(key);
+
+      const dataSalidaEncontrada = this.buscarSalidaSync(
+        horaEntrada,
+        fichajesSimples,
+      );
+
+      if (dataSalidaEncontrada) {
+        pares.push({
+          entrada,
+          salida: dataSalidaEncontrada,
+          cuadrante,
+        });
+      } else if (
+        cuadrante &&
+        cuadrante.final &&
+        DateTime.fromJSDate(cuadrante.final).isValid
+      ) {
+        pares.push({
+          entrada,
+          salida: {
+            _id: new ObjectId(),
+            hora: DateTime.fromJSDate(cuadrante.final).toJSDate(),
+            idTrabajador: entrada.idTrabajador,
+            tipo: "SALIDA",
+            validado: false,
+            uid: entrada.uid,
+            nombre: entrada.nombre,
+            dni: entrada.dni,
+            enviado: false,
+            idExterno: entrada.idTrabajador,
+            salidaAutomatica: true,
+          },
+          cuadrante,
+        });
       }
     }
     return pares;
+  }
+
+  // Versión síncrona de buscarSalida (no necesita ser async)
+  private buscarSalidaSync(
+    horaEntrada: DateTime,
+    subFichajesSimples: WithId<FichajeDto>[],
+  ) {
+    for (let i = 0; i < subFichajesSimples.length; i += 1) {
+      if (
+        subFichajesSimples[i].tipo === "SALIDA" &&
+        DateTime.fromJSDate(subFichajesSimples[i].hora) > horaEntrada
+      ) {
+        const horaSalida = DateTime.fromJSDate(subFichajesSimples[i].hora);
+        if (
+          horaEntrada.year === horaSalida.year &&
+          horaEntrada.month === horaSalida.month &&
+          horaEntrada.day === horaSalida.day
+        ) {
+          return subFichajesSimples[i];
+        }
+      }
+    }
+    return null;
   }
 
   async hayFichajesPendientes(ids: number[], fecha: DateTime) {

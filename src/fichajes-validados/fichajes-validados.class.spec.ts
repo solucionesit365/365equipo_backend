@@ -377,4 +377,204 @@ describe("FichajesValidadosService", () => {
       expect(result).toEqual(mockFichajes);
     });
   });
+
+  describe("insertFichajesValidadosRectificados", () => {
+    it("debe insertar fichajes validados rectificados", async () => {
+      const mockData: FichajeValidadoDto[] = [
+        { idTrabajador: 1, fichajeEntrada: new Date() } as FichajeValidadoDto,
+        { idTrabajador: 2, fichajeEntrada: new Date() } as FichajeValidadoDto,
+      ];
+
+      fichajesValidadosDatabase.insertFichajesValidadosRectificados.mockResolvedValue({
+        insertedCount: 2,
+      } as any);
+
+      const result = await service.insertFichajesValidadosRectificados(mockData);
+
+      expect(
+        fichajesValidadosDatabase.insertFichajesValidadosRectificados,
+      ).toHaveBeenCalledWith(mockData);
+      expect(result).toEqual({ insertedCount: 2 });
+    });
+  });
+
+  describe("getAllIdResponsable", () => {
+    it("debe obtener todos los fichajes por id de responsable", async () => {
+      const mockFichajes = [{ id: "1", idResponsable: 1 }];
+
+      fichajesValidadosDatabase.getAllIdResponsableFichajesPagar.mockResolvedValue(
+        mockFichajes,
+      );
+
+      const result = await service.getAllIdResponsable(1);
+
+      expect(
+        fichajesValidadosDatabase.getAllIdResponsableFichajesPagar,
+      ).toHaveBeenCalledWith(1);
+      expect(result).toEqual(mockFichajes);
+    });
+  });
+
+  describe("getSemanasFichajesPagar", () => {
+    it("debe obtener fichajes a pagar de una semana", async () => {
+      const fechaEntreSemana = DateTime.fromISO("2024-01-03");
+      const mockFichajes = [{ id: "1", semana: 1 }];
+
+      fichajesValidadosDatabase.getSemanasFichajesPagar.mockResolvedValue(
+        mockFichajes,
+      );
+
+      const result = await service.getSemanasFichajesPagar(fechaEntreSemana);
+
+      expect(fichajesValidadosDatabase.getSemanasFichajesPagar).toHaveBeenCalledWith(
+        fechaEntreSemana.startOf("week"),
+        fechaEntreSemana.endOf("week"),
+      );
+      expect(result).toEqual(mockFichajes);
+    });
+  });
+
+  describe("getParaCuadrante", () => {
+    it("debe obtener fichajes para cuadrante", async () => {
+      const fechaInicio = DateTime.fromISO("2024-01-01");
+      const fechaFinal = DateTime.fromISO("2024-01-07");
+      const idTrabajador = 1;
+      const mockFichajes = [{ id: "1" }];
+
+      fichajesValidadosDatabase.getParaCuadrante.mockResolvedValue(mockFichajes);
+
+      const result = await service.getParaCuadrante(
+        fechaInicio,
+        fechaFinal,
+        idTrabajador,
+      );
+
+      expect(fichajesValidadosDatabase.getParaCuadrante).toHaveBeenCalledWith(
+        fechaInicio,
+        fechaFinal,
+        idTrabajador,
+      );
+      expect(result).toEqual(mockFichajes);
+    });
+  });
+
+  describe("getParaCuadranteNew", () => {
+    it("debe obtener fichajes para cuadrante nuevo", async () => {
+      const lunes = DateTime.fromISO("2024-01-01");
+      const domingo = DateTime.fromISO("2024-01-07");
+      const idTrabajador = 1;
+      const mockFichajes = [{ id: "1" }];
+
+      fichajesValidadosDatabase.getParaCuadranteNew.mockResolvedValue(mockFichajes);
+
+      const result = await service.getParaCuadranteNew(lunes, domingo, idTrabajador);
+
+      expect(fichajesValidadosDatabase.getParaCuadranteNew).toHaveBeenCalledWith(
+        lunes,
+        domingo,
+        idTrabajador,
+      );
+      expect(result).toEqual(mockFichajes);
+    });
+  });
+
+  describe("formatoConsultaSQL", () => {
+    it("debe formatear la consulta SQL correctamente", () => {
+      const mockFichaje: FichajeValidadoDto = {
+        idTrabajador: 1,
+        cuadrante: {
+          inicio: new Date("2024-01-15T08:00:00"),
+          final: new Date("2024-01-15T17:00:00"),
+        },
+      } as any;
+
+      const result = service.formatoConsultaSQL(mockFichaje);
+
+      expect(result).toContain("DELETE FROM");
+      expect(result).toContain("INSERT INTO");
+      expect(result).toContain("idEmpleado = 1");
+    });
+  });
+
+  describe("addToSubordinados", () => {
+    it("debe añadir fichaje validado al subordinado correcto", () => {
+      const subordinados = [
+        {
+          id: 1,
+          idApp: "uid-1",
+          nombreApellidos: "Trabajador 1",
+          idTienda: 1,
+          antiguedad: "2020-01-01",
+          inicioContrato: "2020-01-01",
+          horasContrato: 40,
+          fichajeValidado: [null, null, null, null, null, null, null],
+        },
+        {
+          id: 2,
+          idApp: "uid-2",
+          nombreApellidos: "Trabajador 2",
+          idTienda: 1,
+          antiguedad: "2021-01-01",
+          inicioContrato: "2021-01-01",
+          horasContrato: 40,
+          fichajeValidado: [null, null, null, null, null, null, null],
+        },
+      ];
+
+      const fichajeValidado = {
+        _id: "fichaje-1",
+        idTrabajador: 1,
+        cuadrante: { inicio: new Date() },
+      } as any;
+
+      service.addToSubordinados(subordinados as any, fichajeValidado, 0);
+
+      expect(subordinados[0].fichajeValidado[0]).toEqual(fichajeValidado);
+      expect(subordinados[1].fichajeValidado[0]).toBeNull();
+    });
+
+    it("no debe modificar subordinados si no coincide el id", () => {
+      const subordinados = [
+        {
+          id: 1,
+          idApp: "uid-1",
+          nombreApellidos: "Trabajador 1",
+          idTienda: 1,
+          antiguedad: "2020-01-01",
+          inicioContrato: "2020-01-01",
+          horasContrato: 40,
+          fichajeValidado: [null, null, null, null, null, null, null],
+        },
+      ];
+
+      const fichajeValidado = {
+        _id: "fichaje-1",
+        idTrabajador: 999, // ID que no existe
+        cuadrante: { inicio: new Date() },
+      } as any;
+
+      service.addToSubordinados(subordinados as any, fichajeValidado, 0);
+
+      expect(subordinados[0].fichajeValidado[0]).toBeNull();
+    });
+  });
+
+  describe("getNumeroSemana casos adicionales", () => {
+    it("debe retornar 6 para domingo", () => {
+      const domingo = new Date("2024-01-07"); // Domingo
+
+      const result = service.getNumeroSemana(domingo);
+
+      expect(result).toBe(6);
+    });
+
+    it("debe retornar valores entre 0 y 6 para cualquier día", () => {
+      for (let i = 1; i <= 7; i++) {
+        const fecha = new Date(`2024-01-0${i}`);
+        const result = service.getNumeroSemana(fecha);
+        expect(result).toBeGreaterThanOrEqual(0);
+        expect(result).toBeLessThanOrEqual(6);
+      }
+    });
+  });
 });
