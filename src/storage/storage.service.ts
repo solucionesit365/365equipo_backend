@@ -7,13 +7,20 @@ import { CryptoService } from "../crypto/crypto.class";
 @Injectable()
 export class StorageService {
   private storage: Storage;
-  private readonly bucketName = "gs://silema.appspot.com";
+  // private readonly bucketName = "gs://silema.appspot.com";
+  private bucketName: string;
 
   constructor(
     private readonly firebaseService: FirebaseService,
     private readonly cryptoService: CryptoService,
   ) {
     this.storage = this.firebaseService.storage;
+    // Definir el bucket en función del entorno
+    if (process.env.ENTORNO === "test") {
+      this.bucketName = "storage_test_backend";
+    } else {
+      this.bucketName = "silema.appspot.com";
+    }
   }
 
   getBucket() {
