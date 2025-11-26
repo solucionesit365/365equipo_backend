@@ -168,20 +168,6 @@ export class NotasInformativasController {
   @UseGuards(AuthGuard)
   @Post("update-note/:id")
   async updateNotes(@Param("id") id: string, @Body() notas: NotasInformativas) {
-    try {
-      const result = await this.notasInformativasInstance.updateNotes(
-        id,
-        notas,
-      );
-
-      return {
-        ok: true,
-        message: "Nota actualizada correctamente",
-        data: result,
-      };
-    } catch (err) {
-      console.error("Error actualizando notas:", err);
-      return { ok: false, message: err.message };
-    }
+    return await this.notasInformativasInstance.updateNotes(id, notas);
   }
 }

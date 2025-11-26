@@ -36,12 +36,17 @@ export class NotasInformativasClass {
   }
 
   async updateNotes(_id: string, notas: NotasInformativas) {
-    const updated = await this.schnotasInformativas.updateNotes(_id, notas);
+    try {
+      const updated = await this.schnotasInformativas.updateNotes(_id, notas);
 
-    if (!updated) {
-      throw new Error("No se ha podido actualizar la nota informativa");
+      if (!updated) {
+        throw new Error("No se ha podido actualizar la nota informativa");
+      }
+
+      return updated;
+    } catch (error) {
+      console.error("Error al actualizar la nota informativa:", error);
+      throw error;
     }
-
-    return updated;
   }
 }
