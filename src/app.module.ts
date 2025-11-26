@@ -32,7 +32,7 @@ import { TiendasModule } from "./tiendas/tiendas.module";
 import { TrabajadoresModule } from "./trabajadores/trabajadores.module";
 import { VerificacionMfaModule } from "./verificacion-mfa/verificacion-mfa.module";
 import { MongoModule } from "./mongo/mongo.module";
-import { Cultura365Module } from "./cultura365/cultura365.module";
+import { Culture365Module } from "./cultura365/culture365.module";
 import { MBCTokenModule } from "./bussinesCentral/services/mbctoken/mbctoken.service.module";
 import { RoleModule } from "./role/role.module";
 import { PermissionModule } from "./permission/permission.module";
@@ -85,6 +85,7 @@ import { ApiIncidenciaModule } from "./API/api-incidencia/api-incidencia.module"
 import { InspeccionFurgosModule } from "./inspeccion-furgos/inspeccion-furgos.module";
 import { InspeccionFurgosController } from "./inspeccion-furgos/inspeccion-furgos.controller";
 import { VideosSupportModule } from "./videos-support/videos-support.module";
+import { MailchimpModule } from "./mailchimp/mailchimp.module";
 @Module({
   imports: [
     InspeccionFichajesModule,
@@ -120,7 +121,7 @@ import { VideosSupportModule } from "./videos-support/videos-support.module";
     TrabajadoresModule,
     VerificacionMfaModule,
     MongoModule,
-    Cultura365Module,
+    Culture365Module,
     MBCTokenModule,
     RoleModule,
     PermissionModule,
@@ -171,6 +172,7 @@ import { VideosSupportModule } from "./videos-support/videos-support.module";
     ApiIncidenciaModule,
     InspeccionFurgosModule,
     VideosSupportModule,
+    MailchimpModule,
   ],
   controllers: [
     InspeccionFichajesController,

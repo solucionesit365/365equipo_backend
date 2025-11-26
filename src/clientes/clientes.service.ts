@@ -5,6 +5,7 @@ import { SolicitudCliente } from "./clientes.interface";
 import { ObjectId } from "mongodb";
 import { EmailService } from "../email/email.class";
 import { TarjetaClienteService } from "../tarjeta-cliente/tarjeta-cliente.class";
+import { MailchimpService } from "../mailchimp/mailchimp.service";
 import * as jwt from "jsonwebtoken";
 import { GoogleAuth } from "google-auth-library";
 
@@ -14,6 +15,7 @@ export class ClientesService {
     private readonly schSolicitudesCliente: SolicitudNuevoClienteBbdd,
     private readonly emailInstance: EmailService,
     private readonly tarjetaClienteInstance: TarjetaClienteService,
+    private readonly mailchimpService: MailchimpService,
   ) {}
   async handleForm(
     nuevoCliente: boolean,
@@ -25,18 +27,141 @@ export class ClientesService {
     codigoPostal?: string,
   ) {
     if (nuevoCliente) {
-      const solicitud: SolicitudCliente = {
-        _id: new ObjectId().toString(),
-        email: email,
-        fechaRegistro: new Date(),
+      return await this.handleNuevoCliente(
+        email,
+        newsletter,
         nombre,
         apellidos,
         telefono,
-        newsletter,
         codigoPostal,
-      };
-      await this.schSolicitudesCliente.nuevaSolicitud(solicitud);
-      const emailBody = `
+      );
+    }
+
+    await this.handleFlayerInvitation(
+      email,
+      newsletter,
+      nombre,
+      apellidos,
+      telefono,
+      codigoPostal,
+    );
+  }
+
+  private async handleNuevoCliente(
+    email: string,
+    newsletter: boolean,
+    nombre?: string,
+    apellidos?: string,
+    telefono?: string,
+    codigoPostal?: string,
+  ) {
+    const solicitud: SolicitudCliente = {
+      _id: new ObjectId().toString(),
+      email: email,
+      fechaRegistro: new Date(),
+      nombre,
+      apellidos,
+      telefono,
+      newsletter,
+      codigoPostal,
+    };
+    await this.schSolicitudesCliente.nuevaSolicitud(solicitud);
+
+    const emailBody = this.buildConfirmationEmailBody(solicitud._id);
+    await this.emailInstance.enviarEmail(
+      solicitud.email,
+      emailBody,
+      "Confirmació de registre el 365",
+    );
+
+    await this.handleMailchimpSubscription(
+      email,
+      newsletter,
+      ["Nuevo Cliente", "Club 365"],
+      nombre,
+      apellidos,
+      telefono,
+      codigoPostal,
+    );
+
+    return true;
+  }
+
+  private async handleFlayerInvitation(
+    email: string,
+    newsletter: boolean,
+    nombre?: string,
+    apellidos?: string,
+    telefono?: string,
+    codigoPostal?: string,
+  ) {
+    const solicitud: SolicitudCliente = {
+      _id: new ObjectId().toString(),
+      email: email,
+      fechaRegistro: new Date(),
+      newsletter,
+    };
+    await this.schSolicitudesCliente.nuevaSolicitud(solicitud);
+
+    const codFlayer = `QR_INVITACION_${uuidv4()}`;
+    const data = {
+      _id: new ObjectId().toString(),
+      email: email,
+      fechaRegistro: new Date(),
+      caducado: false,
+      codigo: codFlayer,
+      newsletter: true,
+    };
+    await this.schSolicitudesCliente.nuevoCodigoFlayer(data);
+    await this.tarjetaClienteInstance.sendQRInvitation(codFlayer, email);
+
+    await this.handleMailchimpSubscription(
+      email,
+      newsletter,
+      ["Newsletter", "Flayer Digital"],
+      nombre,
+      apellidos,
+      telefono,
+      codigoPostal,
+    );
+  }
+
+  private async handleMailchimpSubscription(
+    email: string,
+    newsletter: boolean,
+    tags: string[],
+    nombre?: string,
+    apellidos?: string,
+    telefono?: string,
+    codigoPostal?: string,
+  ) {
+    if (!newsletter) {
+      console.log(
+        `ℹ️  User ${email} did not accept newsletter, not subscribing to Mailchimp`,
+      );
+      return;
+    }
+
+    const result = await this.mailchimpService.subscribeContact(
+      email,
+      nombre,
+      apellidos,
+      telefono,
+      codigoPostal,
+      tags,
+    );
+
+    if (result.success) {
+      console.log(`✅ Contact ${email} successfully subscribed to Mailchimp`);
+    } else {
+      console.error(
+        `❌ Error subscribing ${email} to Mailchimp: ${result.error}`,
+      );
+    }
+  }
+
+  private buildConfirmationEmailBody(solicitudId: string): string {
+    return `
       <!DOCTYPE html>
         <html>
         <head>
@@ -79,40 +204,12 @@ export class ClientesService {
                 </div>
                 <div class="email-content">
                     <p>Ja gairebé ets part del #club365🎉 Fes clic a l'enllaç per a confirmar el teu registre.</p>
-                    <a href="https://365equipo.cloud/clientes/confirmarEmail?idSolicitud=${solicitud._id}" class="confirmation-button">Confirmar correu electrònic</a>
+                    <a href="https://365equipo.cloud/clientes/confirmarEmail?idSolicitud=${solicitudId}" class="confirmation-button">Confirmar correu electrònic</a>
                 </div>
             </div>
         </body>
         </html>
-
-      `;
-      // URL para el template https://365equipo.com/clientes/confirmarEmail?idSolicitud=${solicitud._id}
-      await this.emailInstance.enviarEmail(
-        solicitud.email,
-        emailBody,
-        "Confirmació de registre el 365",
-      );
-      return true;
-    } else {
-      const solicitud: SolicitudCliente = {
-        _id: new ObjectId().toString(),
-        email: email,
-        fechaRegistro: new Date(),
-        newsletter,
-      };
-      await this.schSolicitudesCliente.nuevaSolicitud(solicitud); //Guarda en Mongo
-      const codFlayer = `QR_INVITACION_${uuidv4()}`;
-      const data = {
-        _id: new ObjectId().toString(),
-        email: email,
-        fechaRegistro: new Date(),
-        caducado: false,
-        codigo: codFlayer,
-        newsletter: true,
-      };
-      await this.schSolicitudesCliente.nuevoCodigoFlayer(data); //Guarda el codigo flayer en mongo aea
-      await this.tarjetaClienteInstance.sendQRInvitation(codFlayer, email); //genera y envía QR al correo
-    }
+    `;
   }
 
   // async crearCliente(
