@@ -408,6 +408,33 @@ export class Fichajes {
     const idsSubordinados = new Set(arraySubordinados.map((s) => s.id));
     const trabajadoresProcesados = new Set<number>();
 
+    // Si hay idTienda, obtener todos los turnos de la tienda para filtrar
+    let turnosTiendaMap: Map<string, boolean> | null = null;
+    if (idTienda) {
+      const fechaLimite = DateTime.now().minus({ weeks: 3 }).startOf("week");
+      const fechaActual = DateTime.now();
+      const semanasPromises: Promise<any[]>[] = [];
+
+      let fechaSemana = fechaLimite;
+      while (fechaSemana <= fechaActual) {
+        semanasPromises.push(
+          this.turnoRepository.getTurnosPorTienda(idTienda, fechaSemana),
+        );
+        fechaSemana = fechaSemana.plus({ weeks: 1 });
+      }
+
+      const turnosPorSemana = await Promise.all(semanasPromises);
+      const todosTurnos = turnosPorSemana.flat();
+
+      // Crear un mapa de trabajador+fecha para verificar si trabajó en la tienda ese día
+      turnosTiendaMap = new Map<string, boolean>();
+      todosTurnos.forEach((turno) => {
+        const fecha = DateTime.fromJSDate(turno.inicio).toISODate();
+        const key = `${turno.idTrabajador}-${fecha}`;
+        turnosTiendaMap.set(key, true);
+      });
+    }
+
     // Procesar subordinados directos EN PARALELO
     const fichajesSubordinadosPromises = arraySubordinados.map(
       async (subordinado) => {
@@ -434,40 +461,39 @@ export class Fichajes {
     );
 
     const paresSubordinados = await Promise.all(paresSubordinadosPromises);
-    paresSubordinados.forEach((pares) => paresSinValidar.push(...pares));
+
+    // Si hay idTienda, filtrar los pares para incluir solo los que tienen cuadrante en esa tienda
+    if (turnosTiendaMap) {
+      paresSubordinados.forEach((pares) => {
+        pares.forEach((par) => {
+          const fechaFichaje = DateTime.fromJSDate(par.entrada.hora).toISODate();
+          const key = `${par.entrada.idTrabajador}-${fechaFichaje}`;
+          // Solo incluir si tiene turno en la tienda ese día
+          if (turnosTiendaMap.has(key)) {
+            paresSinValidar.push(par);
+          }
+        });
+      });
+    } else {
+      paresSubordinados.forEach((pares) => paresSinValidar.push(...pares));
+    }
 
     // Si se proporciona idTienda, buscar trabajadores externos que hayan trabajado en la tienda
-    if (idTienda) {
-      // Obtener turnos de la tienda de las últimas 3 semanas EN PARALELO
-      const fechaLimite = DateTime.now().minus({ weeks: 3 }).startOf("week");
-      const fechaActual = DateTime.now();
-      const semanasPromises: Promise<any[]>[] = [];
-
-      let fechaSemana = fechaLimite;
-      while (fechaSemana <= fechaActual) {
-        semanasPromises.push(
-          this.turnoRepository.getTurnosPorTienda(idTienda, fechaSemana),
-        );
-        fechaSemana = fechaSemana.plus({ weeks: 1 });
-      }
-
-      const turnosPorSemana = await Promise.all(semanasPromises);
-      const todosTurnos = turnosPorSemana.flat();
-
+    if (idTienda && turnosTiendaMap) {
       // Extraer IDs únicos de trabajadores que tienen turnos pero no son subordinados
-      const idsTrabajadoresExternos = [
-        ...new Set(
-          todosTurnos
-            .map((turno) => turno.idTrabajador)
-            .filter(
-              (id) =>
-                !idsSubordinados.has(id) && !trabajadoresProcesados.has(id),
-            ),
-        ),
-      ];
+      const idsTrabajadoresExternos = new Set<number>();
+      turnosTiendaMap.forEach((_, key) => {
+        const idTrabajador = parseInt(key.split("-")[0], 10);
+        if (
+          !idsSubordinados.has(idTrabajador) &&
+          !trabajadoresProcesados.has(idTrabajador)
+        ) {
+          idsTrabajadoresExternos.add(idTrabajador);
+        }
+      });
 
       // Obtener fichajes de trabajadores externos EN PARALELO
-      const fichajesExternosPromises = idsTrabajadoresExternos.map(
+      const fichajesExternosPromises = [...idsTrabajadoresExternos].map(
         async (idTrabajador) => {
           const fichajes = await this.getFichajesByIdSql(idTrabajador, false);
           return {
@@ -492,7 +518,17 @@ export class Fichajes {
       );
 
       const paresExternos = await Promise.all(paresExternosPromises);
-      paresExternos.forEach((pares) => paresSinValidar.push(...pares));
+
+      // Filtrar pares externos para incluir solo los que tienen turno en la tienda ese día
+      paresExternos.forEach((pares) => {
+        pares.forEach((par) => {
+          const fechaFichaje = DateTime.fromJSDate(par.entrada.hora).toISODate();
+          const key = `${par.entrada.idTrabajador}-${fechaFichaje}`;
+          if (turnosTiendaMap.has(key)) {
+            paresSinValidar.push(par);
+          }
+        });
+      });
     }
 
     return paresSinValidar;
