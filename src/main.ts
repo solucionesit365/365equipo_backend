@@ -12,7 +12,7 @@ var apm = require('elastic-apm-node').start({
 
   secretToken: '',
 
-  serverUrl: 'http://158.158.16.178:5601',
+  serverUrl: 'http://158.158.16.178:8200',
 
   environment: process.env.NODE_ENV || 'development',
 })
