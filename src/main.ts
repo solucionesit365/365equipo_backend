@@ -7,6 +7,16 @@ import { Settings } from "luxon";
 import * as express from "express";
 
 Settings.defaultZone = "Europe/Madrid";
+var apm = require('elastic-apm-node').start({
+  serviceName: process.env.ELASTIC_APM_SERVICE_NAME || 'api-365equipo',
+
+  secretToken: '',
+
+  serverUrl: 'http://158.158.16.178:8200',
+
+  environment: process.env.NODE_ENV || 'development',
+})
+
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
